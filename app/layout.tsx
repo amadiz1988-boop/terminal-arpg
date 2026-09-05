@@ -13,18 +13,18 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://terminal-arpg-alpha.jolly-vole-8384.chatgpt.site'),
-  title: 'Terminal ARPG · Alpha 0.1',
-  description: '配置 Build 與刷圖策略，觀看角色在戰鬥終端中自動探索、擊殺與收集戰利品。',
+  metadataBase: new URL('https://terminal-arpg-alpha.amadiz1988.chatgpt.site'),
+  title: 'Terminal ARPG · Alpha 0.2',
+  description: '設定地圖 Tier 與持續條件，自動刷圖、消耗地圖、替換裝備並切換技能。',
   openGraph: {
-    title: 'Terminal ARPG · Alpha 0.1',
-    description: 'BUILD. RUN. LOOT. REPEAT.',
+    title: 'Terminal ARPG · Alpha 0.2',
+    description: '刷圖、掉寶、換裝、換技能，持續成長。',
     images: ['/og.png'],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Terminal ARPG · Alpha 0.1',
-    description: 'BUILD. RUN. LOOT. REPEAT.',
+    title: 'Terminal ARPG · Alpha 0.2',
+    description: '刷圖、掉寶、換裝、換技能，持續成長。',
     images: ['/og.png'],
   },
 };

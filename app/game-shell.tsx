@@ -1,134 +1,210 @@
 'use client';
+/* oxlint-disable react/react-compiler, react-hooks/exhaustive-deps */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { Activity, ChevronsUp, CircleDot, Coins, Crosshair, Flame, Gauge, Play, RotateCcw, Shield, Skull, Sparkles, Swords, TimerReset } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Activity, Box, ChevronsUp, CircleDot, Crosshair, Flame, Infinity as InfinityIcon, Map, Pause, Play, Shield, Swords, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
+import { POLICIES as policies, SKILLS as skills } from '@/game/content/skills';
+import { CAMPAIGN } from '@/game/content/campaign';
+import type { Item, Policy, RunMode as Mode, SkillId } from '@/game/core/types';
+import { createStarterWeapon, evaluateItem, formatAffixes, refineItem, salvageValue } from '@/game/items/items';
+import { resolveStats } from '@/game/modifiers/resolve-stats';
+import { completeCampaignOperation } from '@/game/progression/campaign';
+import { getRunStopReason, progressPerTick, simulateMapCompletion } from '@/game/simulation/map';
 
-type Policy = 'full-clear' | 'boss-rush' | 'currency';
-type BuildId = 'ember' | 'arc' | 'warden';
-type LogKind = 'SYS' | 'AI' | 'MOVE' | 'SCAN' | 'CAST' | 'CRIT' | 'KILL' | 'DROP' | 'BOSS' | 'EXIT';
-type LogLine = { id: number; time: string; kind: LogKind; message: string };
-
-const builds = {
-  ember: { name: '餘燼獵手', skill: '穿焰矢', damage: 1380, attackSpeed: 2.8, crit: 36, move: 128, accent: '#ff8a47', description: '暴擊與單體傷害平衡', icon: Flame },
-  arc: { name: '雷鏈術士', skill: '裂空電弧', damage: 1020, attackSpeed: 3.6, crit: 29, move: 146, accent: '#7dd3fc', description: '高速清除密集怪群', icon: Sparkles },
-  warden: { name: '玄鐵守衛', skill: '震地重擊', damage: 1690, attackSpeed: 2.1, crit: 21, move: 112, accent: '#c4b5fd', description: '穩定生存與強力重擊', icon: Shield },
-} as const;
-
-const policyInfo: Record<Policy, { name: string; target: string; detail: string }> = {
-  'full-clear': { name: '全圖掃蕩', target: '目標探索率', detail: '追求擊殺與完整探索' },
-  'boss-rush': { name: '首領突襲', target: '找到首領', detail: '發現首領後立即交戰' },
-  currency: { name: '通貨獵人', target: '事件完成', detail: '優先清除高價值怪群' },
-};
-
-const initialLogs: LogLine[] = [
-  { id: 1, time: '00:00.000', kind: 'SYS', message: '戰鬥模擬器已就緒' },
-  { id: 2, time: '00:00.012', kind: 'AI', message: '等待執行刷圖策略...' },
-];
-
-function nowLabel(startedAt: number) {
-  const elapsed = Math.max(0, Date.now() - startedAt);
-  return `00:${Math.floor(elapsed / 1000).toString().padStart(2, '0')}.${(elapsed % 1000).toString().padStart(3, '0')}`;
-}
-
-function createEvent(step: number, build: (typeof builds)[BuildId], policy: Policy): Omit<LogLine, 'id' | 'time'> {
-  const cycle: Array<Omit<LogLine, 'id' | 'time'>> = [
-    { kind: 'MOVE', message: `前往區域 ${String.fromCharCode(65 + Math.floor(step / 4))}-${(step % 7) + 1}` },
-    { kind: 'SCAN', message: `發現 ${5 + (step % 8)} 個敵對目標` },
-    { kind: 'CAST', message: `${build.skill} 命中怪群，連鎖判定完成` },
-    { kind: step % 3 === 0 ? 'CRIT' : 'KILL', message: step % 3 === 0 ? `${Math.round(build.damage * 2.34).toLocaleString()} 暴擊傷害` : `怪群清除，用時 ${(0.7 + (step % 5) * 0.13).toFixed(2)} 秒` },
-    { kind: 'DROP', message: step % 2 === 0 ? `拾取：餘燼碎片 ×${2 + (step % 4)}` : '拾取：稀有裝備' },
-  ];
-  if (step === 17) return { kind: 'BOSS', message: policy === 'boss-rush' ? '偵測到深淵監守者，切換首領配置' : '發現首領區域，加入路徑佇列' };
-  if (step === 22) return { kind: 'BOSS', message: `深淵監守者承受 ${Math.round(build.damage * 5.8).toLocaleString()} 傷害` };
-  return cycle[step % cycle.length];
-}
+type Log = { id: number; kind: string; text: string };
+const skillIcons = { ember: Flame, arc: Zap, quake: Shield } as const;
 
 export function GameShell() {
-  const [buildId, setBuildId] = useState<BuildId>('ember');
+  const [saveLoaded, setSaveLoaded] = useState(false);
+  const [skillId, setSkillId] = useState<SkillId>('ember');
   const [policy, setPolicy] = useState<Policy>('full-clear');
-  const [target, setTarget] = useState(90);
+  const [mode, setMode] = useState<Mode>('count');
+  const [goal, setGoal] = useState(5);
+  const [tier, setTier] = useState(1);
+  const [maps, setMaps] = useState([0, 0, 0, 0, 0, 0]);
+  const [campaignStep, setCampaignStep] = useState(0);
+  const [acquiredSkills, setAcquiredSkills] = useState<SkillId[]>(['ember']);
+  const [selectedUnlock, setSelectedUnlock] = useState<SkillId>('arc');
   const [running, setRunning] = useState(false);
-  const [finished, setFinished] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [kills, setKills] = useState(0);
-  const [loot, setLoot] = useState(0);
-  const [boss, setBoss] = useState<'未發現' | '已發現' | '已擊殺'>('未發現');
-  const [logs, setLogs] = useState<LogLine[]>(initialLogs);
-  const startedAt = useRef(Date.now());
-  const terminalRef = useRef<HTMLDivElement>(null);
-  const build = builds[buildId];
-  const effectiveDps = useMemo(() => Math.round(build.damage * build.attackSpeed * (1 + (build.crit / 100) * 1.5)), [build]);
+  const [runs, setRuns] = useState(0);
+  const [totalKills, setTotalKills] = useState(0);
+  const [currency, setCurrency] = useState(0);
+  const [xp, setXp] = useState(0);
+  const [items, setItems] = useState<Item[]>([createStarterWeapon()]);
+  const [equipped, setEquipped] = useState<{ weapon?: string; armor?: string }>({ weapon: 'starter-weapon' });
+  const [materials, setMaterials] = useState({ scrap: 0, essence: 0, core: 0 });
+  const [salvageMode, setSalvageMode] = useState<'off'|'common'|'smart'>('common');
+  const [logs, setLogs] = useState<Log[]>([{ id: 1, kind: 'SYS', text: '自動刷圖核心已就緒，請設定循環條件。' }]);
+  const sessionStart = useRef(0);
+  const runStart = useRef(0);
+  const logRef = useRef<HTMLDivElement>(null);
+  const seedRef = useRef(824);
+  const skill = skills[skillId];
+  const weapon = items.find((item) => item.id === equipped.weapon);
+  const armor = items.find((item) => item.id === equipped.armor);
+  const resolved = resolveStats({ skill, weapon, armor });
+  const dps = resolved.dps;
+  const evaluatedItems = items.map((item) => ({ item, evaluation: evaluateItem(item, { skill, weapon, armor }) })).sort((a, b) => Math.max(b.evaluation.dpsDelta, b.evaluation.survivalDelta) - Math.max(a.evaluation.dpsDelta, a.evaluation.survivalDelta));
+  const level = 1 + Math.floor(xp / 100);
+  const inCampaign = campaignStep < CAMPAIGN.length;
+  const operation = CAMPAIGN[campaignStep];
+  const blueprintSkill = campaignStep > 2 ? skills[selectedUnlock] : skills.ember;
+
+  const pushLog = (kind: string, text: string) => setLogs((value) => [...value.slice(-70), { id: Date.now() + Math.random(), kind, text }]);
+
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem('terminal-arpg-save');
+      if (raw) {
+        const save = JSON.parse(raw);
+        if (save.schemaVersion === 1) {
+          setSkillId(save.skillId); setPolicy(save.policy); setMode(save.mode); setGoal(save.goal); setTier(save.tier);
+          setMaps(save.maps); setCampaignStep(save.campaignStep); setAcquiredSkills(save.acquiredSkills);
+          setSelectedUnlock(save.selectedUnlock); setCurrency(save.currency); setXp(save.xp); setItems(save.items);
+          setEquipped(save.equipped); setMaterials(save.materials); setTotalKills(save.totalKills); setSalvageMode(save.salvageMode ?? 'common');
+        }
+      }
+    } catch { /* Corrupt local saves fall back to the versioned starter state. */ }
+    setSaveLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (!saveLoaded || running) return;
+    window.localStorage.setItem('terminal-arpg-save', JSON.stringify({ schemaVersion: 1, skillId, policy, mode, goal, tier, maps, campaignStep, acquiredSkills, selectedUnlock, currency, xp, items, equipped, materials, totalKills, salvageMode }));
+  }, [saveLoaded, running, skillId, policy, mode, goal, tier, maps, campaignStep, acquiredSkills, selectedUnlock, currency, xp, items, equipped, materials, totalKills, salvageMode]);
+
+  const finishMap = () => {
+    const completed = runs + 1;
+    if (inCampaign && operation) {
+      const reward = completeCampaignOperation(campaignStep, selectedUnlock);
+      if (reward.item) setItems((value) => [reward.item!, ...value]);
+      if (reward.unlockSkill) setAcquiredSkills((value) => value.includes(reward.unlockSkill!) ? value : [...value, reward.unlockSkill!]);
+      if (reward.materials) setMaterials((value) => ({ scrap: value.scrap + reward.materials!.scrap, essence: value.essence + reward.materials!.essence, core: value.core + reward.materials!.core }));
+      if (reward.maps) setMaps(reward.maps);
+      setRuns(1); setXp((value) => value + reward.xp); setCurrency((value) => value + reward.currency);
+      setRunning(false); setProgress(100); setCampaignStep((value) => value + 1);
+      pushLog('QUEST', `${operation.title} 完成 · ${operation.reward}${reward.item ? ` · ${reward.item.name}` : ''}`);
+      return;
+    }
+    seedRef.current += 1;
+    const result = simulateMapCompletion(seedRef.current, tier, policy, { skill, weapon, armor });
+    const newCurrency = result.currency;
+    const mapDropTier = result.mapDropTier;
+    const drop = result.item;
+    const dropEvaluation = evaluateItem(drop, { skill, weapon, armor });
+    const shouldSalvage = salvageMode === 'common' ? drop.rarity === 'COMMON' : salvageMode === 'smart' ? dropEvaluation.classification === 'salvage' && drop.rarity !== 'LEGENDARY' : false;
+    setRuns(completed); setCurrency((v) => v + newCurrency); setXp((v) => v + result.xp);
+    if (shouldSalvage) {
+      const gained = salvageValue(drop);
+      setMaterials((value) => ({ scrap: value.scrap + gained.scrap, essence: value.essence + gained.essence, core: value.core + gained.core }));
+    } else {
+      setItems((value) => [drop, ...value].slice(0, 24));
+    }
+    setMaps((value) => { const next = [...value]; next[mapDropTier] += 1; return next; });
+    pushLog(shouldSalvage ? 'SALVAGE' : 'LOOT', shouldSalvage ? `${drop.rarity} ${drop.name} 自動分解 · 廢料 +${salvageValue(drop).scrap}` : `${drop.rarity} ${drop.name} · ${dropEvaluation.dpsDelta >= 0 ? '+' : ''}${dropEvaluation.dpsDelta}% DPS · 通貨 +${newCurrency} · T${mapDropTier} 地圖 +1`);
+    const availableNext = maps[tier] + (mapDropTier === tier ? 1 : 0);
+    const reason = getRunStopReason({ mode, completed, goal, elapsedMs: Date.now() - sessionStart.current, availableNext, tier });
+    if (reason) {
+      setRunning(false); setProgress(100); pushLog('EXIT', `循環完成，共刷 ${completed} 張地圖 · ${reason}。`); return;
+    }
+    window.setTimeout(() => {
+      setMaps((value) => { const next = [...value]; if (next[tier] > 0) next[tier] -= 1; return next; });
+      setProgress(0); runStart.current = Date.now(); pushLog('MAP', `自動投入下一張 T${tier} 地圖，預計剩餘 ${Math.max(0, availableNext - 1)} 張。`);
+    }, 650);
+  };
 
   useEffect(() => {
     if (!running) return;
     const timer = window.setInterval(() => {
       setProgress((current) => {
-        const increment = policy === 'boss-rush' ? 5 : policy === 'currency' ? 3 : 4;
-        const next = Math.min(100, current + increment);
-        const step = Math.floor(next / increment);
-        const event = createEvent(step, build, policy);
-        setLogs((items) => [...items.slice(-48), { ...event, id: Date.now(), time: nowLabel(startedAt.current) }]);
-        setKills((value) => value + 4 + (step % 7));
-        if (event.kind === 'DROP') setLoot((value) => value + 3 + (step % 5));
-        if (event.kind === 'BOSS') setBoss(step >= 22 ? '已擊殺' : '已發現');
-        const reachedTarget = policy === 'full-clear' && next >= target;
-        const bossDone = policy === 'boss-rush' && step >= 22;
-        const currencyDone = policy === 'currency' && next >= Math.min(target, 76);
-        if (reachedTarget || bossDone || currencyDone || next >= 100) {
-          window.clearInterval(timer); setRunning(false); setFinished(true);
-          setLogs((items) => [...items, { id: Date.now() + 1, time: nowLabel(startedAt.current), kind: 'EXIT', message: `${policyInfo[policy].name}條件達成，開啟返程傳送門` }]);
+        if (current >= 100) return current;
+        const speed = progressPerTick({ skill, weapon, armor }, tier, policy);
+        const next = Math.min(100, current + speed);
+        const stage = Math.floor(next / 20);
+        if (stage !== Math.floor(current / 20)) {
+          const events = [
+            ['SCAN', `T${tier} 怪群已鎖定，威脅等級 ${tier * 17}`],
+            ['CAST', `${skill.name} 清除 ${7 + tier * 2} 個目標`],
+            ['DROP', `拾取餘燼碎片 ×${tier + 2}`],
+            ['RARE', `遭遇稀有敵人，生命 ${tier * 8200}`],
+            ['BOSS', policy === 'boss-rush' ? '切換首領配置，集中火力' : '首領區域已加入路徑'],
+          ];
+          const event = events[Math.min(stage - 1, 4)]; if (event) pushLog(event[0], event[1]);
+          setTotalKills((v) => v + 5 + tier * 2);
         }
+        if (next >= 100) window.setTimeout(finishMap, 120);
         return next;
       });
-    }, 430);
+    }, 360);
     return () => window.clearInterval(timer);
-  }, [running, build, policy, target]);
+  }, [running, dps, tier, policy, skill.name, runs, goal, mode, maps]);
 
-  useEffect(() => { terminalRef.current?.scrollTo({ top: terminalRef.current.scrollHeight, behavior: 'smooth' }); }, [logs]);
+  useEffect(() => { logRef.current?.scrollTo({ top: logRef.current.scrollHeight, behavior: 'smooth' }); }, [logs]);
 
-  const startRun = () => {
-    startedAt.current = Date.now(); setProgress(0); setKills(0); setLoot(0); setBoss('未發現'); setFinished(false);
-    setLogs([
-      { id: Date.now(), time: '00:00.000', kind: 'SYS', message: '載入地圖：灰燼礦坑 T1' },
-      { id: Date.now() + 1, time: '00:00.010', kind: 'AI', message: `啟用策略：${policyInfo[policy].name}，使用技能：${build.skill}` },
-    ]);
-    setRunning(true);
+  const start = () => {
+    if (inCampaign && operation) {
+      if (campaignStep === 1 && !armor) { pushLog('WARN', '先從背包裝上剛取得的護甲，確認數值變化。'); return; }
+      setRuns(0); setProgress(0); sessionStart.current = Date.now(); runStart.current = Date.now(); setRunning(true);
+      pushLog('QUEST', `接受 ${operation.title} · ${operation.lesson}`); return;
+    }
+    if (maps[tier] < 1) { pushLog('WARN', `T${tier} 地圖已耗盡，請選擇其他 Tier。`); return; }
+    setMaps((value) => { const next = [...value]; next[tier] -= 1; return next; });
+    setRuns(0); setProgress(0); sessionStart.current = Date.now(); runStart.current = Date.now(); setRunning(true);
+    pushLog('AI', `啟動 ${policies[policy][0]} · T${tier} · ${mode === 'count' ? `${goal} 張` : mode === 'time' ? `${goal * 10} 秒` : '直到地圖耗盡'}`);
   };
 
-  return (
-    <main className="min-h-screen bg-background text-foreground">
-      <div className="scanlines" aria-hidden="true" />
-      <header className="border-b border-border/80 bg-card/65 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-[1480px] items-center justify-between gap-4 px-4 py-3 sm:px-6">
-          <div className="flex items-center gap-3"><div className="brand-mark"><CircleDot className="size-5" /></div><div><div className="flex items-center gap-2"><h1 className="font-mono text-sm font-bold tracking-[0.18em] text-primary">TERMINAL ARPG</h1><span className="rounded border border-primary/30 bg-primary/10 px-1.5 py-0.5 font-mono text-[9px] tracking-wider text-primary">ALPHA 0.1</span></div><p className="text-[11px] text-muted-foreground">自動戰鬥實驗終端</p></div></div>
-          <div className="hidden items-center gap-5 text-xs text-muted-foreground md:flex"><span className="flex items-center gap-1.5"><span className="status-dot" />伺服器在線</span><span>賽季：先行測試</span><span className="font-mono">角色 Lv.12</span></div>
-        </div>
-      </header>
+  return <main className="min-h-screen bg-background text-foreground">
+    <div className="scanlines" aria-hidden="true" />
+    <header className="border-b border-border/80 bg-card/80 backdrop-blur-xl"><div className="mx-auto flex max-w-[1500px] items-center justify-between px-4 py-3 sm:px-6"><div className="flex items-center gap-3"><div className="brand-mark"><CircleDot className="size-5" /></div><div><div className="flex items-center gap-2"><h1 className="font-mono text-sm font-bold tracking-[.18em] text-primary">TERMINAL ARPG</h1><span className="rounded border border-primary/30 bg-primary/10 px-1.5 py-.5 font-mono text-[9px] text-primary">ALPHA 0.2</span></div><p className="text-[11px] text-muted-foreground">持續刷圖 · 裝備進化 · 地圖消耗</p></div></div><div className="flex gap-4 font-mono text-xs"><span>Lv.{level}</span><span className="text-amber-300">◈ {currency}</span><span className="hidden text-muted-foreground sm:inline">廢料 {materials.scrap} · 精華 {materials.essence}</span><span className="hidden text-muted-foreground sm:inline">XP {xp % 100}/100</span></div></div></header>
 
-      <div className="mx-auto grid max-w-[1480px] gap-4 px-4 py-4 sm:px-6 lg:grid-cols-[280px_minmax(0,1fr)_270px]">
-        <aside className="space-y-4">
-          <section className="panel p-4"><div className="section-label"><Swords className="size-3.5" />BUILD PROFILE</div><div className="mt-3 space-y-2">{(Object.keys(builds) as BuildId[]).map((id) => { const item = builds[id]; const Icon = item.icon; return <button key={id} onClick={() => !running && setBuildId(id)} disabled={running} className={`build-option ${buildId === id ? 'active' : ''}`} style={{ '--build-accent': item.accent } as React.CSSProperties}><span className="build-icon"><Icon className="size-4" /></span><span className="min-w-0 text-left"><strong>{item.name}</strong><small>{item.description}</small></span></button>; })}</div></section>
-          <section className="panel p-4"><div className="section-label"><Crosshair className="size-3.5" />RUN POLICY</div><div className="mt-3 grid grid-cols-3 gap-1 rounded-lg bg-muted/40 p-1 lg:grid-cols-1">{(Object.keys(policyInfo) as Policy[]).map((id) => <button key={id} disabled={running} onClick={() => setPolicy(id)} className={`policy-button ${policy === id ? 'active' : ''}`}><span>{policyInfo[id].name}</span><small className="hidden lg:block">{policyInfo[id].detail}</small></button>)}</div><div className="mt-4"><div className="mb-2 flex justify-between font-mono text-[11px] text-muted-foreground"><span>離場探索率</span><span className="text-primary">{target}%</span></div><Slider value={[target]} min={55} max={100} step={5} disabled={running} onValueChange={(value) => setTarget(Array.isArray(value) ? value[0] : value)} /></div></section>
-          <section className="panel grid grid-cols-2 gap-px overflow-hidden p-0"><Stat label="有效 DPS" value={effectiveDps.toLocaleString()} icon={Activity} /><Stat label="暴擊率" value={`${build.crit}%`} icon={Crosshair} /><Stat label="攻擊速度" value={`${build.attackSpeed}/s`} icon={Gauge} /><Stat label="移動速度" value={`${build.move}%`} icon={ChevronsUp} /></section>
-        </aside>
+    <div className="mx-auto grid max-w-[1500px] gap-4 px-4 py-4 sm:px-6 xl:grid-cols-[300px_minmax(0,1fr)_330px]">
+      <aside className="space-y-4">
+        {inCampaign && operation ? <Panel title="行動指引" icon={Crosshair}>
+          <div className="mission-card"><small>BUILD 啟動進度 {campaignStep}/6</small><b>{operation.title}</b><p>{operation.briefing}</p><div><span>學習</span>{operation.lesson}</div><div><span>獎勵</span>{operation.reward}</div></div>
+          {campaignStep === 2 && <div className="mt-3"><div className="field-label">選擇技能分支</div><div className="mt-2 grid grid-cols-2 gap-2"><button disabled={running} onClick={() => setSelectedUnlock('arc')} className={`mode-button ${selectedUnlock==='arc'?'active':''}`}>裂空電弧</button><button disabled={running} onClick={() => setSelectedUnlock('quake')} className={`mode-button ${selectedUnlock==='quake'?'active':''}`}>玄鐵震地</button></div></div>}
+        </Panel> : <Panel title="地圖終端" icon={Map}>
+          <div className="grid grid-cols-5 gap-1">{[1,2,3,4,5].map((value) => <button key={value} disabled={running || maps[value] === 0} onClick={() => setTier(value)} className={`tier-button ${tier === value ? 'active' : ''}`}><b>T{value}</b><small>×{maps[value]}</small></button>)}</div>
+          <div className="mt-4 space-y-2"><div className="field-label">刷圖策略</div>{(Object.keys(policies) as Policy[]).map((id) => <button key={id} aria-label={`${policies[id][0]}：${policies[id][1]}`} disabled={running} onClick={() => setPolicy(id)} className={`setting-row ${policy === id ? 'active' : ''}`}><span><b>{policies[id][0]}</b><small>{policies[id][1]}</small></span><i aria-hidden="true" /></button>)}</div>
+        </Panel>}
+        <Panel title={inCampaign ? '任務執行' : '持續執行'} icon={InfinityIcon}>
+          {!inCampaign && <>
+          <div className="grid grid-cols-3 gap-1">{([['count','次數'],['time','時間'],['empty','耗盡']] as const).map(([id,label]) => <button key={id} disabled={running} onClick={() => setMode(id)} className={`mode-button ${mode === id ? 'active' : ''}`}>{label}</button>)}</div>
+          {mode !== 'empty' && <div className="mt-4"><div className="mb-2 flex justify-between text-[11px] text-muted-foreground"><span>{mode === 'count' ? '目標張數' : '目標時間'}</span><b className="font-mono text-primary">{mode === 'count' ? `${goal} 張` : `${goal * 10} 秒`}</b></div><Slider aria-label={mode === 'count' ? '目標張數' : '目標時間'} min={1} max={mode === 'count' ? 20 : 12} value={[goal]} disabled={running} onValueChange={(v) => setGoal(Array.isArray(v) ? v[0] : v)} /></div>}
+          <div className="mt-4"><div className="field-label">自動分解</div><div className="mt-2 grid grid-cols-3 gap-1">{([['off','關閉'],['common','普通'],['smart','智慧']] as const).map(([id,label])=><button key={id} disabled={running} onClick={()=>setSalvageMode(id)} className={`mode-button ${salvageMode===id?'active':''}`}>{label}</button>)}</div><p className="mt-2 text-[10px] leading-relaxed text-muted-foreground">{salvageMode==='off'?'全部裝備進入背包':salvageMode==='common'?'普通裝備自動轉為廢料':'依目前 Build 評分，自動分解無效裝備'}</p></div>
+          </>}
+          <Button className="run-button mt-4 w-full" onClick={running ? () => { setRunning(false); pushLog('PAUSE','玩家中止自動循環'); } : start}>{running ? <><Pause />停止執行</> : <><Play />{inCampaign?'執行目前任務':'啟動自動刷圖'}</>}</Button>
+        </Panel>
+      </aside>
 
-        <section className="min-w-0 space-y-4">
-          <div className="terminal-shell"><div className="terminal-titlebar"><div className="flex items-center gap-2"><span className="terminal-light red" /><span className="terminal-light amber" /><span className="terminal-light green" /></div><span className="font-mono text-[10px] tracking-[0.2em] text-muted-foreground">COMBAT://ASHEN-MINE/T1</span><span className="font-mono text-[10px] text-muted-foreground">{running ? 'RUNNING' : finished ? 'COMPLETE' : 'IDLE'}</span></div><div ref={terminalRef} className="terminal-output" aria-live="polite">{logs.map((line) => <div key={line.id} className={`log-line log-${line.kind.toLowerCase()}`}><time>{line.time}</time><b>[{line.kind}]</b><span>{line.message}</span></div>)}{running && <div className="terminal-cursor"><span>&gt;</span><i /></div>}</div><div className="terminal-command"><span>&gt;</span><span className="text-muted-foreground">{running ? 'automation.run --watch' : finished ? 'run.summary --latest' : 'awaiting command'}</span></div></div>
-          <div className="panel p-4"><div className="mb-2 flex items-center justify-between gap-4"><div><div className="section-label"><CircleDot className="size-3.5" />MAP EXPLORATION</div><p className="mt-1 text-xs text-muted-foreground">灰燼礦坑 · 區域等級 12 · 怪物密度 84%</p></div><strong className="font-mono text-2xl text-primary">{progress}%</strong></div><div className="progress-track"><div className="progress-fill" style={{ width: `${progress}%` }} /></div><div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"><span className="font-mono text-[11px] text-muted-foreground">EXIT: {policyInfo[policy].target} · BOSS: {boss}</span><Button onClick={running ? () => setRunning(false) : startRun} className="run-button" size="lg">{running ? <><TimerReset />中止並返回</> : finished ? <><RotateCcw />再次刷圖</> : <><Play />開始刷圖</>}</Button></div></div>
-        </section>
+      <section className="min-w-0 space-y-4">
+        <div className="terminal-shell"><div className="terminal-titlebar"><span className="font-mono text-[10px] text-primary">AUTOMATION://T{tier}/{policy}</span><span className="font-mono text-[10px] text-muted-foreground">{running ? `RUN ${runs + 1}` : 'IDLE'}</span></div><div ref={logRef} className="terminal-output">{logs.map((log) => <div key={log.id} className={`log-line log-${log.kind.toLowerCase()}`}><time>{new Date(log.id).toLocaleTimeString('zh-TW',{hour12:false}).slice(0,8)}</time><b>[{log.kind}]</b><span>{log.text}</span></div>)}{running && <div className="terminal-cursor">&gt; automation.run<i /></div>}</div></div>
+        <div className="panel p-4"><div className="flex items-end justify-between"><div><div className="section-label"><Activity className="size-3.5" />T{tier} 地圖進度</div><p className="mt-1 text-xs text-muted-foreground">本次循環已完成 {runs} 張 · 庫存剩餘 {maps[tier]} 張</p></div><b className="font-mono text-2xl text-primary">{progress}%</b></div><div className="progress-track mt-3"><div className="progress-fill" style={{width:`${progress}%`}} /></div><div className="mt-3 grid grid-cols-3 gap-2"><Mini label="有效 DPS" value={dps.toLocaleString()} /><Mini label="總擊殺" value={totalKills.toString()} /><Mini label="本輪地圖" value={runs.toString()} /></div></div>
+      </section>
 
-        <aside className="space-y-4">
-          <section className="panel p-4"><div className="section-label"><Gauge className="size-3.5" />LIVE METRICS</div><div className="mt-3 space-y-3"><Metric label="擊殺數" value={kills.toString()} hint="mobs" icon={Skull} /><Metric label="戰利品分數" value={loot.toString()} hint="value" icon={Coins} /><Metric label="探索進度" value={`${progress}%`} hint="map" icon={CircleDot} /><Metric label="首領狀態" value={boss} hint="boss" icon={Swords} /></div></section>
-          <section className="panel overflow-hidden p-0"><div className="border-b border-border/70 p-4"><div className="section-label"><Sparkles className="size-3.5" />LATEST LOOT</div></div><div className="divide-y divide-border/60"><Loot rarity="RARE" name="熔火指環" mod="+18% 火焰傷害" /><Loot rarity="MAGIC" name="迅捷皮靴" mod="+12% 移動速度" /><Loot rarity="CURRENCY" name="餘燼碎片" mod={`目前持有 ${loot}`} /></div></section>
-          <section className="panel p-4"><div className="flex items-start gap-3"><div className="rounded-md bg-primary/10 p-2 text-primary"><CircleDot className="size-4" /></div><div><p className="text-xs font-semibold">ALPHA 測試目標</p><p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">嘗試三種 Build 與刷圖策略，找出最快完成地圖的組合。</p></div></div></section>
-        </aside>
-      </div>
-    </main>
-  );
+      <aside className="space-y-4">
+        <Panel title="BUILD 藍圖" icon={ChevronsUp}>
+          <div className="blueprint-head"><span>{blueprintSkill.name}藍圖</span><b>{Math.min(6,1+campaignStep)}/6</b></div>
+          <div className="blueprint-list">
+            {['穿焰矢','第一件護甲','升級武器',blueprintSkill.name,'自動化權限',`${blueprintSkill.tags.at(-1)} 增幅器`].map((label,index)=><div key={`${label}-${index}`} className={campaignStep>=index?'done':''}><i>{campaignStep>=index?'✓':'○'}</i><span>{label}</span>{campaignStep===index&&<em>目前目標</em>}</div>)}
+          </div>
+          {inCampaign && <p className="blueprint-next">下一步：{operation?.title}<br/>{operation?.lesson}</p>}
+        </Panel>
+        <Panel title="技能配置" icon={Swords}>
+          <div className="space-y-2">{(Object.keys(skills) as SkillId[]).map((id) => { const data=skills[id]; const Icon=skillIcons[id]; const acquired=acquiredSkills.includes(id); return <button key={id} disabled={running||!acquired} onClick={() => setSkillId(id)} className={`skill-card ${skillId===id?'active':''}`} style={{'--skill-color':data.color} as React.CSSProperties}><Icon className="size-4"/><span><b>{data.name}</b><small>{acquired?data.description:'尚未取得 · 行動 02'}</small></span><em>{acquired?data.baseDamage:'LOCK'}</em></button>; })}</div>
+        </Panel>
+        <Panel title="裝備背包" icon={Box}>
+          <div className="mb-3 grid grid-cols-2 gap-2"><Equip slot="武器" item={weapon} /><Equip slot="護甲" item={armor} /></div>
+          {!inCampaign && <button disabled={running||materials.scrap<5||!weapon} onClick={()=>{if(!weapon)return;setItems((value)=>value.map((item)=>item.id===weapon.id?refineItem(item):item));setMaterials((value)=>({...value,scrap:value.scrap-5}));pushLog('CRAFT',`${weapon.name} 完成校準，第一詞綴數值 +1`);}} className="craft-button">校準武器 <span>消耗 5 廢料</span></button>}
+          <div className="inventory-list">{evaluatedItems.map(({item,evaluation}) => { const isEquipped=equipped[item.slot]===item.id; const comparisons: Array<[number,string]>=item.slot==='weapon'?[[evaluation.dpsDelta,'DPS'],[evaluation.clearDelta,'清圖']]:[[evaluation.survivalDelta,'生存'],[evaluation.clearDelta,'清圖']]; const [delta,metric]=comparisons.sort((a,b)=>b[0]-a[0])[0]; return <button key={item.id} disabled={running || isEquipped} onClick={() => setEquipped((v) => ({...v,[item.slot]:item.id}))} className={`inventory-item ${isEquipped?'equipped':''}`}><span className={`rarity rarity-${item.rarity.toLowerCase()}`}>{item.rarity}</span><span><b>{delta>=0?'+':''}{delta}% {metric} · {item.name}</b><small>{item.slot==='weapon'?'武器':'護甲'} · {formatAffixes(item)}</small></span><em>{isEquipped?'使用中':evaluation.classification==='upgrade'?'升級':'裝備'}</em></button>; })}</div>
+        </Panel>
+      </aside>
+    </div>
+  </main>;
 }
 
-function Stat({ label, value, icon: Icon }: { label: string; value: string; icon: typeof Activity }) { return <div className="border-r border-b border-border/60 p-3"><Icon className="mb-2 size-3.5 text-primary" /><span className="block text-[10px] uppercase tracking-wider text-muted-foreground">{label}</span><strong className="mt-1 block font-mono text-sm">{value}</strong></div>; }
-function Metric({ label, value, hint, icon: Icon }: { label: string; value: string; hint: string; icon: typeof Activity }) { return <div className="flex items-center gap-3"><span className="metric-icon"><Icon className="size-4" /></span><span className="min-w-0 flex-1"><small>{label}</small><strong>{value}</strong></span><span className="font-mono text-[9px] uppercase text-muted-foreground">{hint}</span></div>; }
-function Loot({ rarity, name, mod }: { rarity: string; name: string; mod: string }) { return <div className="loot-row"><span className={`rarity rarity-${rarity.toLowerCase()}`}>{rarity}</span><div><strong>{name}</strong><small>{mod}</small></div></div>; }
+function Panel({title,icon:Icon,children}:{title:string;icon:typeof Activity;children:React.ReactNode}) { return <section className="panel p-4"><div className="section-label"><Icon className="size-3.5"/>{title}</div><div className="mt-3">{children}</div></section>; }
+function Mini({label,value}:{label:string;value:string}) { return <div className="metric-tile"><small>{label}</small><b>{value}</b></div>; }
+function Equip({slot,item}:{slot:string;item?:Item}) { return <div className="equip-slot"><small>{slot}</small><b>{item?.name??'空'}</b><span>{item?formatAffixes(item):'尚未裝備'}</span></div>; }

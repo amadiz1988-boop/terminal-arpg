@@ -2,4 +2,6 @@
 
 本專案使用 Dashi Taskboard。狀態流程為 backlog → todo → in_progress → in_review → done。
 
-第一批任務包含 Alpha 垂直切片、Modifier Engine、裝備技能配置、事件式刷圖、永久背包、朋友帳號及 Alpha 發布。
+目前依賴順序：穩定核心架構 → Modifier Engine → Build 感知裝備評分 → 自動分解與材料 → 永久角色 → 朋友帳號 → Alpha 發布。
+
+新手體驗由 Build 藍圖與從零開始的短篇教學組成。任何發布任務都必須通過 `docs/ROADMAP.md` 的遊玩閘門與 `docs/ARCHITECTURE.md` 的架構閘門。
