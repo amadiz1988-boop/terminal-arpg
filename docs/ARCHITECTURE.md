@@ -1,5 +1,11 @@
 # Terminal ARPG Architecture
 
+延伸規格：
+
+* [核心公式與內容架構](./CORE_FORMULA_ARCHITECTURE.md)
+* [ARPG 玩家循環研究](./ARPG_PLAYER_LOOP_RESEARCH.md)
+* [Alpha 0.5 實玩驗收](./PLAYTEST_ALPHA_0.5.md)
+
 ## Architecture goal
 
 Every release extends one stable simulation core. UI, seasonal content and persistence may change independently without rewriting combat, items or modifiers.
@@ -79,3 +85,5 @@ tests/game/      deterministic engine tests
 ## Architecture gate
 
 A release is blocked when domain logic exists in React, a new feature bypasses the modifier pipeline, a random outcome lacks a seed, or a saved-state change lacks migration coverage.
+
+Friends Alpha 另加一個遊玩閘門：每個候選版本需通過至少 30 分鐘等價的固定種子測試，再以真實手機尺寸操作核心流程。自動評分只檢查機械密度，人工評分必須扣除內容廣度、理解成本與操作問題。

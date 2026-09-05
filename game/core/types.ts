@@ -3,6 +3,7 @@ export type Policy = 'full-clear' | 'boss-rush' | 'currency';
 export type RunMode = 'count' | 'time' | 'empty';
 export type ContractId = 'scout' | 'greed' | 'apex';
 export type MasteryId = 'power' | 'tempo' | 'guard';
+export type FarmingRouteId = 'arsenal' | 'foundry' | 'hunter';
 export type ItemSlot = 'weapon' | 'armor';
 export type Rarity = 'COMMON' | 'MAGIC' | 'RARE' | 'LEGENDARY';
 export type AffixStat = 'damage' | 'speed' | 'crit' | 'move' | 'life' | 'armor';

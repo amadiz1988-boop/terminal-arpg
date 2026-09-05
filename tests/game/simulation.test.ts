@@ -4,6 +4,7 @@ import { createStarterWeapon } from '../../game/items/items';
 import { resolveStats } from '../../game/modifiers/resolve-stats';
 import { completeCampaignOperation } from '../../game/progression/campaign';
 import { getRunStopReason, progressPerTick, selectNextTier, simulateMapCompletion } from '../../game/simulation/map';
+import { simulateAcceleratedSession } from '../../game/simulation/session';
 
 const build = { skill: SKILLS.ember, weapon: createStarterWeapon() };
 
@@ -52,5 +53,16 @@ describe('simulation contracts', () => {
   it('continues into the highest available tier instead of stopping on ascent', () => {
     expect(selectNextTier([0, 0, 0, 0, 1, 0], 3)).toBe(4);
     expect(selectNextTier([0, 0, 0, 0, 0, 0], 5)).toBeNull();
+  });
+
+  it('passes the 30 minute equivalent play gate with measurable decisions', () => {
+    const report = simulateAcceleratedSession(824, 45);
+    console.info('ACCELERATED_PLAYTEST', JSON.stringify(report));
+    expect(report.equivalentMinutes).toBeGreaterThanOrEqual(30);
+    expect(report.mapsRun).toBe(45);
+    expect(report.decisions).toBeGreaterThanOrEqual(14);
+    expect(report.chaseRewards).toBeGreaterThanOrEqual(7);
+    expect(report.longestMapsWithoutReward).toBeLessThanOrEqual(5);
+    expect(report.score).toBeGreaterThanOrEqual(7);
   });
 });
