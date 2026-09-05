@@ -6,12 +6,13 @@ function sum(items: Array<Item | undefined>, stat: AffixStat) {
 
 export function resolveStats(build: BuildSnapshot): ResolvedStats {
   const items = [build.weapon, build.armor];
-  const damage = sum(items, 'damage');
-  const speed = sum(items, 'speed');
+  const mastery = build.masteries ?? { power: 0, tempo: 0, guard: 0 };
+  const damage = sum(items, 'damage') + mastery.power * 8;
+  const speed = sum(items, 'speed') + mastery.tempo * 5;
   const crit = build.skill.critChance + sum(items, 'crit');
-  const moveSpeed = build.skill.moveSpeed + sum(items, 'move');
-  const life = 500 + sum(items, 'life');
-  const armor = 100 + sum(items, 'armor');
+  const moveSpeed = build.skill.moveSpeed + sum(items, 'move') + mastery.tempo * 5;
+  const life = Math.round((500 + sum(items, 'life')) * (1 + mastery.guard * .12));
+  const armor = Math.round((100 + sum(items, 'armor')) * (1 + mastery.guard * .12));
   const hit = build.skill.baseDamage * (1 + damage / 100);
   const attacks = build.skill.attacksPerSecond * (1 + speed / 100);
   const dps = Math.round(hit * attacks * (1 + crit * 0.015));

@@ -7,11 +7,12 @@ import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { POLICIES as policies, SKILLS as skills } from '@/game/content/skills';
 import { CAMPAIGN } from '@/game/content/campaign';
-import type { Item, Policy, RunMode as Mode, SkillId } from '@/game/core/types';
+import { CONTRACTS, MASTERIES } from '@/game/content/contracts';
+import type { ContractId, Item, MasteryId, Policy, RunMode as Mode, SkillId } from '@/game/core/types';
 import { createStarterWeapon, evaluateItem, formatAffixes, refineItem, salvageValue } from '@/game/items/items';
 import { resolveStats } from '@/game/modifiers/resolve-stats';
 import { completeCampaignOperation } from '@/game/progression/campaign';
-import { getRunStopReason, progressPerTick, simulateMapCompletion } from '@/game/simulation/map';
+import { contractFailureChance, getRunStopReason, progressPerTick, simulateMapCompletion } from '@/game/simulation/map';
 
 type Log = { id: number; kind: string; text: string };
 const skillIcons = { ember: Flame, arc: Zap, quake: Shield } as const;
@@ -37,6 +38,8 @@ export function GameShell() {
   const [equipped, setEquipped] = useState<{ weapon?: string; armor?: string }>({ weapon: 'starter-weapon' });
   const [materials, setMaterials] = useState({ scrap: 0, essence: 0, core: 0 });
   const [salvageMode, setSalvageMode] = useState<'off'|'common'|'smart'>('common');
+  const [contractId, setContractId] = useState<ContractId>('scout');
+  const [masteries, setMasteries] = useState<Record<MasteryId, number>>({ power: 0, tempo: 0, guard: 0 });
   const [logs, setLogs] = useState<Log[]>([{ id: 1, kind: 'SYS', text: '自動刷圖核心已就緒，請設定循環條件。' }]);
   const sessionStart = useRef(0);
   const runStart = useRef(0);
@@ -45,10 +48,13 @@ export function GameShell() {
   const skill = skills[skillId];
   const weapon = items.find((item) => item.id === equipped.weapon);
   const armor = items.find((item) => item.id === equipped.armor);
-  const resolved = resolveStats({ skill, weapon, armor });
+  const resolved = resolveStats({ skill, weapon, armor, masteries });
   const dps = resolved.dps;
-  const evaluatedItems = items.map((item) => ({ item, evaluation: evaluateItem(item, { skill, weapon, armor }) })).sort((a, b) => Math.max(b.evaluation.dpsDelta, b.evaluation.survivalDelta) - Math.max(a.evaluation.dpsDelta, a.evaluation.survivalDelta));
+  const failureRisk = Math.round(contractFailureChance({ skill, weapon, armor, masteries }, tier, contractId) * 100);
+  const evaluatedItems = items.map((item) => ({ item, evaluation: evaluateItem(item, { skill, weapon, armor, masteries }) })).sort((a, b) => Math.max(b.evaluation.dpsDelta, b.evaluation.survivalDelta) - Math.max(a.evaluation.dpsDelta, a.evaluation.survivalDelta));
   const level = 1 + Math.floor(xp / 100);
+  const spentMastery = Object.values(masteries).reduce((sum, value) => sum + value, 0);
+  const masteryPoints = Math.max(0, Math.floor((level - 1) / 2) - spentMastery);
   const inCampaign = campaignStep < CAMPAIGN.length;
   const operation = CAMPAIGN[campaignStep];
   const blueprintSkill = campaignStep > 2 ? skills[selectedUnlock] : skills.ember;
@@ -65,6 +71,7 @@ export function GameShell() {
           setMaps(save.maps); setCampaignStep(save.campaignStep); setAcquiredSkills(save.acquiredSkills);
           setSelectedUnlock(save.selectedUnlock); setCurrency(save.currency); setXp(save.xp); setItems(save.items);
           setEquipped(save.equipped); setMaterials(save.materials); setTotalKills(save.totalKills); setSalvageMode(save.salvageMode ?? 'common');
+          setContractId(save.contractId ?? 'scout'); setMasteries(save.masteries ?? { power: 0, tempo: 0, guard: 0 });
         }
       }
     } catch { /* Corrupt local saves fall back to the versioned starter state. */ }
@@ -73,8 +80,8 @@ export function GameShell() {
 
   useEffect(() => {
     if (!saveLoaded || running) return;
-    window.localStorage.setItem('terminal-arpg-save', JSON.stringify({ schemaVersion: 1, skillId, policy, mode, goal, tier, maps, campaignStep, acquiredSkills, selectedUnlock, currency, xp, items, equipped, materials, totalKills, salvageMode }));
-  }, [saveLoaded, running, skillId, policy, mode, goal, tier, maps, campaignStep, acquiredSkills, selectedUnlock, currency, xp, items, equipped, materials, totalKills, salvageMode]);
+    window.localStorage.setItem('terminal-arpg-save', JSON.stringify({ schemaVersion: 1, skillId, policy, mode, goal, tier, maps, campaignStep, acquiredSkills, selectedUnlock, currency, xp, items, equipped, materials, totalKills, salvageMode, contractId, masteries }));
+  }, [saveLoaded, running, skillId, policy, mode, goal, tier, maps, campaignStep, acquiredSkills, selectedUnlock, currency, xp, items, equipped, materials, totalKills, salvageMode, contractId, masteries]);
 
   const finishMap = () => {
     const completed = runs + 1;
@@ -90,22 +97,24 @@ export function GameShell() {
       return;
     }
     seedRef.current += 1;
-    const result = simulateMapCompletion(seedRef.current, tier, policy, { skill, weapon, armor });
+    const result = simulateMapCompletion(seedRef.current, tier, policy, { skill, weapon, armor, masteries }, contractId);
     const newCurrency = result.currency;
     const mapDropTier = result.mapDropTier;
     const drop = result.item;
-    const dropEvaluation = evaluateItem(drop, { skill, weapon, armor });
+    const dropEvaluation = evaluateItem(drop, { skill, weapon, armor, masteries });
     const shouldSalvage = salvageMode === 'common' ? drop.rarity === 'COMMON' : salvageMode === 'smart' ? dropEvaluation.classification === 'salvage' && drop.rarity !== 'LEGENDARY' : false;
     setRuns(completed); setCurrency((v) => v + newCurrency); setXp((v) => v + result.xp);
-    if (shouldSalvage) {
+    if (!result.success) {
+      pushLog('DEATH', `${CONTRACTS[contractId].name} 失敗 · 保留少量經驗，未取得戰利品`);
+    } else if (shouldSalvage) {
       const gained = salvageValue(drop);
       setMaterials((value) => ({ scrap: value.scrap + gained.scrap, essence: value.essence + gained.essence, core: value.core + gained.core }));
     } else {
       setItems((value) => [drop, ...value].slice(0, 24));
     }
-    setMaps((value) => { const next = [...value]; next[mapDropTier] += 1; return next; });
-    pushLog(shouldSalvage ? 'SALVAGE' : 'LOOT', shouldSalvage ? `${drop.rarity} ${drop.name} 自動分解 · 廢料 +${salvageValue(drop).scrap}` : `${drop.rarity} ${drop.name} · ${dropEvaluation.dpsDelta >= 0 ? '+' : ''}${dropEvaluation.dpsDelta}% DPS · 通貨 +${newCurrency} · T${mapDropTier} 地圖 +1`);
-    const availableNext = maps[tier] + (mapDropTier === tier ? 1 : 0);
+    if (result.success) setMaps((value) => { const next = [...value]; next[mapDropTier] += 1; return next; });
+    if (result.success) pushLog(shouldSalvage ? 'SALVAGE' : 'LOOT', shouldSalvage ? `${drop.rarity} ${drop.name} 自動分解 · 廢料 +${salvageValue(drop).scrap}` : `${drop.rarity} ${drop.name} · ${dropEvaluation.dpsDelta >= 0 ? '+' : ''}${dropEvaluation.dpsDelta}% DPS · 通貨 +${newCurrency} · T${mapDropTier} 地圖 +1`);
+    const availableNext = maps[tier] + (result.success && mapDropTier === tier ? 1 : 0);
     const reason = getRunStopReason({ mode, completed, goal, elapsedMs: Date.now() - sessionStart.current, availableNext, tier });
     if (reason) {
       setRunning(false); setProgress(100); pushLog('EXIT', `循環完成，共刷 ${completed} 張地圖 · ${reason}。`); return;
@@ -153,12 +162,12 @@ export function GameShell() {
     if (maps[tier] < 1) { pushLog('WARN', `T${tier} 地圖已耗盡，請選擇其他 Tier。`); return; }
     setMaps((value) => { const next = [...value]; next[tier] -= 1; return next; });
     setRuns(0); setProgress(0); sessionStart.current = Date.now(); runStart.current = Date.now(); setRunning(true);
-    pushLog('AI', `啟動 ${policies[policy][0]} · T${tier} · ${mode === 'count' ? `${goal} 張` : mode === 'time' ? `${goal * 10} 秒` : '直到地圖耗盡'}`);
+    pushLog('AI', `啟動 ${CONTRACTS[contractId].name} · ${policies[policy][0]} · T${tier} · ${mode === 'count' ? `${goal} 張` : mode === 'time' ? `${goal * 10} 秒` : '直到地圖耗盡'}`);
   };
 
   return <main className="min-h-screen bg-background text-foreground">
     <div className="scanlines" aria-hidden="true" />
-    <header className="border-b border-border/80 bg-card/80 backdrop-blur-xl"><div className="mx-auto flex max-w-[1500px] items-center justify-between px-4 py-3 sm:px-6"><div className="flex items-center gap-3"><div className="brand-mark"><CircleDot className="size-5" /></div><div><div className="flex items-center gap-2"><h1 className="font-mono text-sm font-bold tracking-[.18em] text-primary">TERMINAL ARPG</h1><span className="rounded border border-primary/30 bg-primary/10 px-1.5 py-.5 font-mono text-[9px] text-primary">ALPHA 0.2</span></div><p className="text-[11px] text-muted-foreground">持續刷圖 · 裝備進化 · 地圖消耗</p></div></div><div className="flex gap-4 font-mono text-xs"><span>Lv.{level}</span><span className="text-amber-300">◈ {currency}</span><span className="hidden text-muted-foreground sm:inline">廢料 {materials.scrap} · 精華 {materials.essence}</span><span className="hidden text-muted-foreground sm:inline">XP {xp % 100}/100</span></div></div></header>
+    <header className="border-b border-border/80 bg-card/80 backdrop-blur-xl"><div className="mx-auto flex max-w-[1500px] items-center justify-between px-4 py-3 sm:px-6"><div className="flex items-center gap-3"><div className="brand-mark"><CircleDot className="size-5" /></div><div><div className="flex items-center gap-2"><h1 className="font-mono text-sm font-bold tracking-[.18em] text-primary">TERMINAL ARPG</h1><span className="rounded border border-primary/30 bg-primary/10 px-1.5 py-.5 font-mono text-[9px] text-primary">ALPHA 0.3</span></div><p className="text-[11px] text-muted-foreground">風險契約 · 專精成長 · 持續刷圖</p></div></div><div className="flex gap-4 font-mono text-xs"><span>Lv.{level}</span><span className="text-amber-300">◈ {currency}</span><span className="hidden text-muted-foreground sm:inline">廢料 {materials.scrap} · 精華 {materials.essence}</span><span className="hidden text-muted-foreground sm:inline">XP {xp % 100}/100</span></div></div></header>
 
     <div className="mx-auto grid max-w-[1500px] gap-4 px-4 py-4 sm:px-6 xl:grid-cols-[300px_minmax(0,1fr)_330px]">
       <aside className="space-y-4">
@@ -168,6 +177,7 @@ export function GameShell() {
         </Panel> : <Panel title="地圖終端" icon={Map}>
           <div className="grid grid-cols-5 gap-1">{[1,2,3,4,5].map((value) => <button key={value} disabled={running || maps[value] === 0} onClick={() => setTier(value)} className={`tier-button ${tier === value ? 'active' : ''}`}><b>T{value}</b><small>×{maps[value]}</small></button>)}</div>
           <div className="mt-4 space-y-2"><div className="field-label">刷圖策略</div>{(Object.keys(policies) as Policy[]).map((id) => <button key={id} aria-label={`${policies[id][0]}：${policies[id][1]}`} disabled={running} onClick={() => setPolicy(id)} className={`setting-row ${policy === id ? 'active' : ''}`}><span><b>{policies[id][0]}</b><small>{policies[id][1]}</small></span><i aria-hidden="true" /></button>)}</div>
+          <div className="mt-4 space-y-2"><div className="flex items-center justify-between"><div className="field-label">地圖契約</div><b className={failureRisk>20?'text-xs text-red-400':'text-xs text-emerald-400'}>失敗風險 {failureRisk}%</b></div>{(Object.keys(CONTRACTS) as ContractId[]).map((id) => <button key={id} aria-label={`${CONTRACTS[id].name}：${CONTRACTS[id].description}`} disabled={running} onClick={() => setContractId(id)} className={`setting-row ${contractId === id ? 'active' : ''}`}><span><b>{CONTRACTS[id].name}</b><small>{CONTRACTS[id].description}</small></span><i aria-hidden="true" /></button>)}</div>
         </Panel>}
         <Panel title={inCampaign ? '任務執行' : '持續執行'} icon={InfinityIcon}>
           {!inCampaign && <>
@@ -185,6 +195,7 @@ export function GameShell() {
       </section>
 
       <aside className="space-y-4">
+        {!inCampaign && <Panel title={`專精核心 · 可用 ${masteryPoints}`} icon={Zap}><div className="space-y-2">{(Object.keys(MASTERIES) as MasteryId[]).map((id)=><button key={id} disabled={running||masteryPoints<1||masteries[id]>=5} onClick={()=>setMasteries(v=>({...v,[id]:v[id]+1}))} className="setting-row"><span><b>{MASTERIES[id].name} Lv.{masteries[id]}</b><small>{MASTERIES[id].description}</small></span><em>{masteries[id]>=5?'MAX':masteryPoints>0?'+':'待升級'}</em></button>)}</div><p className="blueprint-next">每提升 2 級取得 1 點。高風險契約需要同步強化輸出與生存。</p></Panel>}
         <Panel title="BUILD 藍圖" icon={ChevronsUp}>
           <div className="blueprint-head"><span>{blueprintSkill.name}藍圖</span><b>{Math.min(6,1+campaignStep)}/6</b></div>
           <div className="blueprint-list">
