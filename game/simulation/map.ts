@@ -51,3 +51,8 @@ export function getRunStopReason(input: { mode: RunMode; completed: number; goal
   if (input.mode === 'count' && input.completed >= input.goal) return '達到設定張數';
   return null;
 }
+
+export function selectNextTier(maps: number[], currentTier: number) {
+  if (maps[currentTier] > 0) return currentTier;
+  return [5, 4, 3, 2, 1].find((tier) => maps[tier] > 0) ?? null;
+}

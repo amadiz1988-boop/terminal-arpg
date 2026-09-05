@@ -24,9 +24,9 @@ export function createCampaignItem(step: number, skillId: BuildSnapshot['skill']
   return undefined;
 }
 
-export function generateItem(seed: number, itemLevel: number): Item {
+export function generateItem(seed: number, itemLevel: number, forcedSlot?: ItemSlot): Item {
   const random = createRandom(seed);
-  const slot: ItemSlot = random() > .48 ? 'weapon' : 'armor';
+  const slot: ItemSlot = forcedSlot ?? (random() > .48 ? 'weapon' : 'armor');
   const rarityRoll = random();
   const rarity: Rarity = rarityRoll > .95 ? 'LEGENDARY' : rarityRoll > .6 ? 'RARE' : rarityRoll > .22 ? 'MAGIC' : 'COMMON';
   const affixCount = rarity === 'LEGENDARY' ? 4 : rarity === 'RARE' ? 3 : rarity === 'MAGIC' ? 2 : 1;

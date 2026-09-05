@@ -3,7 +3,7 @@ import { SKILLS } from '../../game/content/skills';
 import { createStarterWeapon } from '../../game/items/items';
 import { resolveStats } from '../../game/modifiers/resolve-stats';
 import { completeCampaignOperation } from '../../game/progression/campaign';
-import { getRunStopReason, progressPerTick, simulateMapCompletion } from '../../game/simulation/map';
+import { getRunStopReason, progressPerTick, selectNextTier, simulateMapCompletion } from '../../game/simulation/map';
 
 const build = { skill: SKILLS.ember, weapon: createStarterWeapon() };
 
@@ -47,5 +47,10 @@ describe('simulation contracts', () => {
     const guard = resolveStats({ ...build, masteries: { power: 0, tempo: 0, guard: 2 } });
     expect(power.dps).toBeGreaterThan(base.dps);
     expect(guard.life).toBeGreaterThan(base.life);
+  });
+
+  it('continues into the highest available tier instead of stopping on ascent', () => {
+    expect(selectNextTier([0, 0, 0, 0, 1, 0], 3)).toBe(4);
+    expect(selectNextTier([0, 0, 0, 0, 0, 0], 5)).toBeNull();
   });
 });
