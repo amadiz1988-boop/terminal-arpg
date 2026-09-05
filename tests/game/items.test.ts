@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { SKILLS } from '../../game/content/skills';
-import { createStarterWeapon, evaluateItem, generateItem, refineItem, salvageValue } from '../../game/items/items';
+import { SUPPORTS } from '../../game/content/supports';
+import { createStarterWeapon, evaluateItem, generateItem, itemLinks, refineItem, salvageValue } from '../../game/items/items';
 import { resolveStats } from '../../game/modifiers/resolve-stats';
+import type { Item } from '../../game/core/types';
 
 describe('deterministic item engine', () => {
   it('replays the same item for the same seed', () => {
@@ -29,6 +31,17 @@ describe('deterministic item engine', () => {
     const original = createStarterWeapon();
     const refined = refineItem(original);
     expect(refined).not.toBe(original);
-    expect(refined.affixes[0].value).toBe(original.affixes[0].value + 1);
+    expect(refined.affixes[0].value).toBeGreaterThan(original.affixes[0].value);
+  });
+
+  it('makes weapon links part of build power', () => {
+    const oneLink = createStarterWeapon('thief');
+    const threeLink: Item = { ...oneLink, id: 'three-link', links: 3, sockets: ['G','G','B'] };
+    const build = { skill: SKILLS.venom, weapon: oneLink, supports: [SUPPORTS.momentum, SUPPORTS.echo], supportSlots: itemLinks(oneLink) };
+    const current = resolveStats(build);
+    const evaluation = evaluateItem(threeLink, build);
+    expect(itemLinks(threeLink)).toBe(3);
+    expect(evaluation.dpsDelta).toBeGreaterThan(20);
+    expect(resolveStats({ ...build, weapon: threeLink, supportSlots: itemLinks(threeLink) }).dps).toBeGreaterThan(current.dps);
   });
 });

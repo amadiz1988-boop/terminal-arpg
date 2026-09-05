@@ -15,7 +15,7 @@ export function completeCampaignOperation(step: number, selectedSkill: SkillId):
     item: createCampaignItem(step, selectedSkill),
     unlockSkill: step === 2 ? selectedSkill : undefined,
     materials: step === 3 ? { scrap: 12, essence: 2, core: 0 } : undefined,
-    maps: step === 5 ? [0, 6, 0, 0, 0, 0] : undefined,
+    maps: step === 5 ? [0, 0, 2, 0, 0, 0] : undefined,
     xp: 35 + step * 10,
     currency: step * 2,
   };

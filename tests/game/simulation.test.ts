@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { SKILLS } from '../../game/content/skills';
+import { SUPPORTS } from '../../game/content/supports';
 import { createStarterWeapon } from '../../game/items/items';
 import { resolveStats } from '../../game/modifiers/resolve-stats';
 import { completeCampaignOperation } from '../../game/progression/campaign';
-import { getRunStopReason, progressPerTick, selectNextTier, simulateMapCompletion } from '../../game/simulation/map';
+import { exchangeMaps } from '../../game/progression/maps';
+import { getRunStopReason, progressPerTick, simulateMapCompletion } from '../../game/simulation/map';
 import { simulateAcceleratedSession } from '../../game/simulation/session';
+import type { Item } from '../../game/core/types';
 
 const build = { skill: SKILLS.ember, weapon: createStarterWeapon() };
 
@@ -19,7 +22,8 @@ describe('simulation contracts', () => {
 
   it('unlocks maps only after the final campaign operation', () => {
     expect(completeCampaignOperation(4, 'arc').maps).toBeUndefined();
-    expect(completeCampaignOperation(5, 'arc').maps?.[1]).toBe(6);
+    expect(completeCampaignOperation(5, 'arc').maps?.[1]).toBe(0);
+    expect(completeCampaignOperation(5, 'arc').maps?.[2]).toBe(2);
   });
 
   it('delivers rewards that match the campaign promise', () => {
@@ -28,8 +32,9 @@ describe('simulation contracts', () => {
     expect(completeCampaignOperation(4, 'arc').item?.name).toContain('雷');
   });
 
-  it('stops every run mode when the selected map tier is exhausted', () => {
-    expect(getRunStopReason({ mode: 'count', completed: 2, goal: 5, elapsedMs: 1000, availableNext: 0, tier: 1 })).toBe('T1 地圖耗盡');
+  it('keeps T1 infinite and stops a depleted higher tier', () => {
+    expect(getRunStopReason({ mode: 'count', completed: 2, goal: 5, elapsedMs: 1000, availableNext: 0, tier: 1 })).toBeNull();
+    expect(getRunStopReason({ mode: 'count', completed: 2, goal: 5, elapsedMs: 1000, availableNext: 0, tier: 2 })).toContain('T2 地圖耗盡');
   });
 
   it('honors count and time stop conditions', () => {
@@ -39,7 +44,17 @@ describe('simulation contracts', () => {
 
   it('makes contract outcomes deterministic and changes rewards', () => {
     expect(simulateMapCompletion(900, 2, 'currency', build, 'greed')).toEqual(simulateMapCompletion(900, 2, 'currency', build, 'greed'));
-    expect(simulateMapCompletion(900, 2, 'currency', build, 'greed').currency).toBeGreaterThanOrEqual(simulateMapCompletion(900, 2, 'currency', build, 'scout').currency);
+    expect(simulateMapCompletion(900, 2, 'currency', build, 'greed').orbs.alteration).toBeGreaterThan(0);
+    expect(simulateMapCompletion(900, 2, 'currency', build, 'greed').gemDrop).toBeDefined();
+  });
+
+  it('gives each map policy a measurable purpose', () => {
+    const full = simulateMapCompletion(912, 2, 'full-clear', build);
+    const rush = simulateMapCompletion(912, 2, 'boss-rush', build);
+    const currency = simulateMapCompletion(912, 2, 'currency', build);
+    expect(full.kills).toBeGreaterThan(rush.kills);
+    expect(currency.orbs.alteration).toBeGreaterThan(rush.orbs.alteration);
+    expect(rush.mapDropTier).toBeGreaterThanOrEqual(2);
   });
 
   it('lets mastery allocation create distinct character growth', () => {
@@ -50,9 +65,14 @@ describe('simulation contracts', () => {
     expect(guard.life).toBeGreaterThan(base.life);
   });
 
-  it('continues into the highest available tier instead of stopping on ascent', () => {
-    expect(selectNextTier([0, 0, 0, 0, 1, 0], 3)).toBe(4);
-    expect(selectNextTier([0, 0, 0, 0, 0, 0], 5)).toBeNull();
+  it('lets support choices trade clear speed for boss damage or defense', () => {
+    const linked: Item = { ...createStarterWeapon(), links: 2, sockets: ['G','W'] };
+    const clear = resolveStats({ ...build, weapon:linked, supports: [SUPPORTS.momentum], supportSlots: 2 });
+    const boss = resolveStats({ ...build, weapon:linked, supports: [SUPPORTS.focus], supportSlots: 2 });
+    const guard = resolveStats({ ...build, weapon:linked, supports: [SUPPORTS.fortify], supportSlots: 2 });
+    expect(clear.clearScore).toBeGreaterThan(boss.clearScore);
+    expect(boss.bossDps).toBeGreaterThan(clear.bossDps);
+    expect(guard.life).toBeGreaterThan(clear.life);
   });
 
   it('passes the 30 minute equivalent play gate with measurable decisions', () => {
@@ -61,8 +81,17 @@ describe('simulation contracts', () => {
     expect(report.equivalentMinutes).toBeGreaterThanOrEqual(30);
     expect(report.mapsRun).toBe(45);
     expect(report.decisions).toBeGreaterThanOrEqual(14);
-    expect(report.chaseRewards).toBeGreaterThanOrEqual(7);
+    expect(report.gemsFound).toBe(report.successes);
+    expect(report.mapExchanges).toBeGreaterThanOrEqual(5);
     expect(report.longestMapsWithoutReward).toBeLessThanOrEqual(5);
+    expect(report.lockouts).toBe(0);
+    expect(report.orbsSpent).toBeGreaterThan(0);
+    expect(report.powerGainPercent).toBeGreaterThanOrEqual(80);
+    expect(report.tiersUnlocked).toBeGreaterThanOrEqual(3);
     expect(report.score).toBeGreaterThanOrEqual(7);
+  });
+
+  it('exchanges three maps into one higher tier without locking T1 play', () => {
+    expect(exchangeMaps([0,3,0,0,0,0],1)).toEqual([0,0,1,0,0,0]);
   });
 });

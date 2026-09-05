@@ -14,17 +14,17 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://terminal-arpg-alpha.amadiz1988.chatgpt.site'),
-  title: 'Terminal ARPG · Alpha 0.5',
-  description: '選擇刷圖產業，連續推進異界並從批次戰利品中打造自己的 Build。',
+  title: 'Terminal ARPG · Alpha 0.7',
+  description: '選擇 RO 風格職業，從零收集技能寶石、通貨與六格裝備，透過自動遠征養成 Build。',
   openGraph: {
-    title: 'Terminal ARPG · Alpha 0.5',
-    description: '刷圖產業、三選一戰利品與 Build 成長。',
+    title: 'Terminal ARPG · Alpha 0.7',
+    description: 'RO 職業、技能寶石、彩色洞連線與自動遠征。',
     images: ['/og.png'],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Terminal ARPG · Alpha 0.5',
-    description: '刷圖產業、三選一戰利品與 Build 成長。',
+    title: 'Terminal ARPG · Alpha 0.7',
+    description: 'RO 職業、技能寶石、彩色洞連線與自動遠征。',
     images: ['/og.png'],
   },
 };

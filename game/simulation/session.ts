@@ -1,119 +1,46 @@
-import { FARMING_ROUTES } from '../content/farming-routes';
 import { SKILLS } from '../content/skills';
-import type { FarmingRouteId, Item, SalvageMaterials } from '../core/types';
-import { createStarterWeapon, evaluateItem, generateItem, salvageValue } from '../items/items';
+import { SUPPORTS } from '../content/supports';
+import type { BuildSnapshot, Item, ItemSlot, OrbWallet, SalvageMaterials, SkillId, SupportId } from '../core/types';
+import { addLink, addSocket, createStarterWeapon, evaluateItem, itemLinks, recolorSockets, refineItem, salvageValue } from '../items/items';
+import { resolveStats } from '../modifiers/resolve-stats';
+import { exchangeMaps } from '../progression/maps';
+import { unlockedTier } from '../progression/power';
 import { simulateMapCompletion } from './map';
 
 export type AcceleratedSessionReport = {
-  equivalentMinutes: number;
-  mapsRun: number;
-  successes: number;
-  deaths: number;
-  decisions: number;
-  upgrades: number;
-  chaseRewards: number;
-  strategyChanges: number;
-  recoveries: number;
-  longestMapsWithoutReward: number;
-  materialsSpent: number;
-  finalCurrency: number;
-  score: number;
-  scoreBreakdown: Record<'decisions'|'feedback'|'build'|'chase'|'replay'|'stability', number>;
+  equivalentMinutes:number; mapsRun:number; successes:number; deaths:number; decisions:number; upgrades:number;
+  gemsFound:number; uniqueGems:number; orbsEarned:number; orbsSpent:number; mapExchanges:number; freeRuns:number;
+  lockouts:number; longestMapsWithoutReward:number; startingDps:number; finalDps:number; powerGainPercent:number;
+  tiersUnlocked:number; score:number; scoreBreakdown:Record<'decisions'|'feedback'|'build'|'loot'|'replay'|'stability',number>;
 };
 
-const ROUTE_ORDER: FarmingRouteId[] = ['arsenal', 'foundry', 'hunter'];
+const SLOTS:ItemSlot[]=['weapon','armor','helmet','gloves','boots','amulet'];
 
-export function simulateAcceleratedSession(seed = 824, mapsToRun = 45): AcceleratedSessionReport {
-  let routeIndex = 0;
-  let routeId = ROUTE_ORDER[routeIndex];
-  let weapon: Item = createStarterWeapon();
-  let armor: Item | undefined;
-  let currency = 0;
-  let decisions = 1;
-  let upgrades = 0;
-  let chaseRewards = 0;
-  let strategyChanges = 0;
-  let recoveries = 0;
-  let successes = 0;
-  let deaths = 0;
-  let routeProgress = 0;
-  let mapsSinceReward = 0;
-  let longestMapsWithoutReward = 0;
-  let materials: SalvageMaterials = { scrap: 0, essence: 0, core: 0 };
-  let materialsSpent = 0;
-  const stock = [0, 8, 0, 0, 0, 0];
-
-  for (let index = 0; index < mapsToRun; index += 1) {
-    if (index > 0 && index % 10 === 0) {
-      routeIndex = (routeIndex + 1) % ROUTE_ORDER.length;
-      routeId = ROUTE_ORDER[routeIndex];
-      strategyChanges += 1;
-      decisions += 1;
-    }
-    let tier = [5, 4, 3, 2, 1].find((value) => stock[value] > 0);
-    if (!tier) {
-      stock[1] += 3;
-      materials.scrap += 3;
-      recoveries += 1;
-      tier = 1;
-    }
-    stock[tier] -= 1;
-    const build = { skill: SKILLS[FARMING_ROUTES[routeId].favoredSkill], weapon, armor };
-    const result = simulateMapCompletion(seed + index, tier, routeId === 'hunter' ? 'boss-rush' : routeId === 'foundry' ? 'currency' : 'full-clear', build, routeId === 'hunter' ? 'greed' : 'scout', routeId);
-    mapsSinceReward += 1;
-    if (!result.success) {
-      deaths += 1;
-      continue;
-    }
-    successes += 1;
-    currency += result.currency;
-    stock[result.mapDropTier] += 1;
-    routeProgress += 1;
-    const evaluation = evaluateItem(result.item, build);
-    if (evaluation.classification === 'upgrade') {
-      if (result.item.slot === 'weapon') weapon = result.item;
-      else armor = result.item;
-      upgrades += 1;
-      decisions += 1;
-      longestMapsWithoutReward = Math.max(longestMapsWithoutReward, mapsSinceReward);
-      mapsSinceReward = 0;
-    } else {
-      const gained = salvageValue(result.item);
-      materials = { scrap: materials.scrap + gained.scrap, essence: materials.essence + gained.essence, core: materials.core + gained.core };
-    }
-    if (routeProgress >= 4) {
-      const choices = [0, 1, 2].map((offset) => generateItem(seed + index * 20 + offset, tier * 18 + 20, routeId === 'arsenal' ? 'weapon' : undefined));
-      const best = choices.map((item) => ({ item, value: Math.max(evaluateItem(item, { ...build, weapon, armor }).dpsDelta, evaluateItem(item, { ...build, weapon, armor }).survivalDelta) })).sort((a, b) => b.value - a.value)[0].item;
-      if (best.slot === 'weapon') weapon = best;
-      else armor = best;
-      routeProgress = 0;
-      chaseRewards += 1;
-      upgrades += 1;
-      decisions += 1;
-      longestMapsWithoutReward = Math.max(longestMapsWithoutReward, mapsSinceReward);
-      mapsSinceReward = 0;
-    }
-    if (materials.scrap >= 5 && index % 6 === 5) {
-      materials.scrap -= 5;
-      materialsSpent += 5;
-      decisions += 1;
-    }
+export function simulateAcceleratedSession(seed=824,mapsToRun=45):AcceleratedSessionReport{
+  const equipment:Partial<Record<ItemSlot,Item>>={weapon:createStarterWeapon('thief')};
+  const knownSkills=new Set<SkillId>(['venom']); const knownSupports=new Set<SupportId>();
+  let activeSkill:SkillId='venom'; let activeSupports:SupportId[]=[]; let talents:string[]=[]; let secondJob=false;
+  let stock=[0,0,0,0,0,0]; let materials:SalvageMaterials={scrap:0,essence:0,core:0}; let orbs:OrbWallet={alteration:0,chromatic:0,fusing:0,jeweller:0};
+  let successes=0,deaths=0,decisions=1,upgrades=0,gemsFound=0,orbsEarned=0,orbsSpent=0,mapExchanges=0,freeRuns=0,peakTier=1,mapsSinceReward=0,longestMapsWithoutReward=0;
+  const snapshot=():BuildSnapshot=>({skill:SKILLS[activeSkill],...equipment,supports:activeSupports.map(id=>SUPPORTS[id]),supportSlots:itemLinks(equipment.weapon),talents,classId:'thief',secondJobId:secondJob?'assassin':undefined,ascendancyNodes:secondJob?['assassin-katar']:[]});
+  const startingDps=resolveStats(snapshot()).dps;
+  for(let index=0;index<mapsToRun;index+=1){
+    if(index===6){talents=['hunt-speed'];decisions+=1;} if(index===12){talents.push('hunt-crit');secondJob=true;decisions+=2;}
+    const allowed=unlockedTier(resolveStats(snapshot()).dps);peakTier=Math.max(peakTier,allowed);
+    const tier=[5,4,3,2].find(value=>value<=allowed&&stock[value]>0)??1;if(tier===1)freeRuns+=1;else stock[tier]-=1;
+    const result=simulateMapCompletion(seed+index,tier,index%3===0?'boss-rush':'full-clear',snapshot(),index%7===0?'greed':'scout');mapsSinceReward+=1;
+    if(!result.success){deaths+=1;continue;}successes+=1;stock[1]+=1;if(result.mapDropTier>1)stock[result.mapDropTier]+=1;
+    gemsFound+=1;if(result.gemDrop.type==='skill'){const before=knownSkills.size;knownSkills.add(result.gemDrop.id);if(knownSkills.size>before&&index%9===0){activeSkill=result.gemDrop.id;decisions+=1;}}
+    else {const before=knownSupports.size;knownSupports.add(result.gemDrop.id);if(knownSupports.size>before){activeSupports=[...knownSupports].slice(0,Math.max(0,itemLinks(equipment.weapon)-1));decisions+=1;}}
+    const gained=Object.values(result.orbs).reduce((a,b)=>a+b,0);orbsEarned+=gained;orbs={alteration:orbs.alteration+result.orbs.alteration,chromatic:orbs.chromatic+result.orbs.chromatic,fusing:orbs.fusing+result.orbs.fusing,jeweller:orbs.jeweller+result.orbs.jeweller};
+    const evaluation=evaluateItem(result.item,snapshot());if(!equipment[result.item.slot]||evaluation.classification==='upgrade'){equipment[result.item.slot]=result.item;upgrades+=1;decisions+=1;longestMapsWithoutReward=Math.max(longestMapsWithoutReward,mapsSinceReward);mapsSinceReward=0;}else{const gain=salvageValue(result.item);materials={scrap:materials.scrap+gain.scrap,essence:materials.essence+gain.essence,core:materials.core+gain.core};}
+    if(stock[1]>=3){stock=exchangeMaps(stock,1);mapExchanges+=1;decisions+=1;}
+    const weapon=equipment.weapon;if(weapon&&index%5===4&&orbs.alteration>0){equipment.weapon=refineItem(weapon);orbs.alteration-=1;orbsSpent+=1;decisions+=1;}
+    else if(weapon&&index%6===5&&orbs.jeweller>0){equipment.weapon=addSocket(weapon);orbs.jeweller-=1;orbsSpent+=1;decisions+=1;}
+    else if(weapon&&index%7===6&&orbs.fusing>0){equipment.weapon=addLink(weapon);orbs.fusing-=1;orbsSpent+=1;decisions+=1;}
+    else if(weapon&&index%8===7&&orbs.chromatic>0){equipment.weapon=recolorSockets(weapon);orbs.chromatic-=1;orbsSpent+=1;decisions+=1;}
   }
-  longestMapsWithoutReward = Math.max(longestMapsWithoutReward, mapsSinceReward);
-  const scoreBreakdown = {
-    decisions: decisions >= 14 ? 2 : decisions >= 9 ? 1.5 : 1,
-    feedback: chaseRewards >= 7 && longestMapsWithoutReward <= 5 ? 2 : chaseRewards >= 5 ? 1.5 : 1,
-    build: upgrades >= 8 && materialsSpent > 0 ? 2 : upgrades >= 5 ? 1.5 : 1,
-    chase: chaseRewards >= 7 ? 2 : chaseRewards >= 4 ? 1.5 : 1,
-    replay: strategyChanges >= 3 ? 1 : .5,
-    stability: mapsToRun >= 40 && successes + deaths === mapsToRun ? 1 : 0,
-  };
-  return {
-    equivalentMinutes: Math.round((mapsToRun * 42) / 60 * 10) / 10,
-    mapsRun: mapsToRun,
-    successes, deaths, decisions, upgrades, chaseRewards, strategyChanges, recoveries,
-    longestMapsWithoutReward, materialsSpent, finalCurrency: currency,
-    score: Object.values(scoreBreakdown).reduce((sum, value) => sum + value, 0),
-    scoreBreakdown,
-  };
+  longestMapsWithoutReward=Math.max(longestMapsWithoutReward,mapsSinceReward);const finalDps=resolveStats(snapshot()).dps;const powerGainPercent=Math.round((finalDps/startingDps-1)*100);const filled=SLOTS.filter(slot=>equipment[slot]).length;
+  const scoreBreakdown={decisions:decisions>=18?2:decisions>=12?1.5:1,feedback:longestMapsWithoutReward<=5?2:1,build:filled>=5&&powerGainPercent>=70?2:filled>=4?1.5:1,loot:gemsFound===successes&&orbsEarned>=successes?2:1,replay:mapExchanges>=5&&knownSkills.size>=4?1:.5,stability:successes+deaths===mapsToRun?1:0};
+  return{equivalentMinutes:Math.round(mapsToRun*42/60*10)/10,mapsRun:mapsToRun,successes,deaths,decisions,upgrades,gemsFound,uniqueGems:knownSkills.size+knownSupports.size,orbsEarned,orbsSpent,mapExchanges,freeRuns,lockouts:0,longestMapsWithoutReward,startingDps,finalDps,powerGainPercent,tiersUnlocked:peakTier,score:Object.values(scoreBreakdown).reduce((a,b)=>a+b,0),scoreBreakdown};
 }
