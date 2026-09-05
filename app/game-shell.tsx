@@ -149,12 +149,36 @@ export function GameShell() {
         const next = Math.min(100, current + speed);
         const stage = Math.floor(next / 20);
         if (stage !== Math.floor(current / 20)) {
+          const variant = (runs + tier + stage) % 3;
+          const scanText = [
+            `T${tier} 怪群已鎖定，威脅等級 ${tier * 17}`,
+            `偵測到岔路伏擊，${7 + tier * 2} 個敵人正在包圍`,
+            `地圖訊號異常，前方出現強化怪群`,
+          ];
+          const castText = [
+            `${skill.name} 清除 ${7 + tier * 2} 個目標`,
+            `${skill.name} 觸發連鎖，戰線向前推進`,
+            `${skill.name} 擊破精英護盾，清圖速度提升`,
+          ];
+          const dropText = [
+            `拾取餘燼碎片 ×${tier + 2}`,
+            `發現隱藏補給箱，掉落品質提高`,
+            `獵取線索發光，目標進度正在累積`,
+          ];
+          const rareText = [
+            `遭遇稀有敵人，生命 ${tier * 8200}`,
+            `稀有敵人施放壓制領域，輸出受到考驗`,
+            `精英怪攜帶額外戰利品，風險同步上升`,
+          ];
+          const bossText = policy === 'boss-rush'
+            ? ['切換首領配置，集中火力', '略過支線，直接鎖定首領房', '首領懸賞生效，準備爆發輸出']
+            : ['首領區域已加入路徑', '出口守衛現身，清除後即可結算', '最終房間開啟，戰利品訊號增強'];
           const events = [
-            ['SCAN', `T${tier} 怪群已鎖定，威脅等級 ${tier * 17}`],
-            ['CAST', `${skill.name} 清除 ${7 + tier * 2} 個目標`],
-            ['DROP', `拾取餘燼碎片 ×${tier + 2}`],
-            ['RARE', `遭遇稀有敵人，生命 ${tier * 8200}`],
-            ['BOSS', policy === 'boss-rush' ? '切換首領配置，集中火力' : '首領區域已加入路徑'],
+            ['SCAN', scanText[variant]],
+            ['CAST', castText[variant]],
+            ['DROP', dropText[variant]],
+            ['RARE', rareText[variant]],
+            ['BOSS', bossText[variant]],
           ];
           const event = events[Math.min(stage - 1, 4)]; if (event) pushLog(event[0], event[1]);
           setTotalKills((v) => v + 5 + tier * 2);
