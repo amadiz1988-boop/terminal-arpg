@@ -1,6 +1,7 @@
 import { createRandom } from '../core/random';
 import type { BuildSnapshot, ContractId, FarmingRouteId, GemDrop, Item, MonsterPack, MonsterPopulation, OrbWallet, Policy, RunMode, SkillId, SupportId } from '../core/types';
 import { CONTRACTS } from '../content/contracts';
+import { EMPTY_ORBS, rollCurrencyDrops } from '../content/currencies';
 import { evaluateItem, generateItem } from '../items/items';
 import { resolveStats } from '../modifiers/resolve-stats';
 
@@ -77,8 +78,8 @@ export function simulateMapCompletion(seed: number, tier: number, policy: Policy
   const gemDrop: GemDrop = gemIndex < skillDrops.length
     ? { type: 'skill', id: skillDrops[gemIndex] }
     : { type: 'support', id: supportDrops[gemIndex - skillDrops.length] };
-  const orbScore=monsters.normal*.0005+monsters.magic*.005+monsters.rare*.025+monsters.special*2+2;
-  const orbBudget=success?Math.max(2,Math.round(orbScore*(policy==='currency'?1.6:1))):0;
+  const orbScore=monsters.normal*.004+monsters.magic*.025+monsters.rare*.09+monsters.special*3+4;
+  const orbBudget=success?Math.max(8,Math.round(orbScore*(policy==='currency'?1.45:1))):0;
   const killRatio=policy==='full-clear'?1:policy==='currency'?.82:.56;
   const kills=success?Math.max(1,Math.round((monsters.total-1)*killRatio)+1):Math.round(monsters.total*.18);
   return {
@@ -91,12 +92,7 @@ export function simulateMapCompletion(seed: number, tier: number, policy: Policy
     items,
     itemDpsDelta: evaluation.dpsDelta,
     itemClassification: evaluation.classification,
-    orbs: success ? {
-      alteration: Math.max(1,Math.round(orbBudget*.55)),
-      chromatic: Math.floor(orbBudget*.2)+(monsters.special>0?1:0),
-      fusing: Math.floor(orbBudget*.15)+(monsters.special>0?1:0),
-      jeweller: Math.floor(orbBudget*.1),
-    } : { alteration: 0, chromatic: 0, fusing: 0, jeweller: 0 },
+    orbs: success ? rollCurrencyDrops(seed*97+31,orbBudget,tier*12+contract.itemLevel+(monsters.special>0?10:0)) : {...EMPTY_ORBS},
     gemDrop,
     monsters,
     packs,

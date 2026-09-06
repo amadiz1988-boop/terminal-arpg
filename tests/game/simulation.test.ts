@@ -44,7 +44,7 @@ describe('simulation contracts', () => {
 
   it('makes contract outcomes deterministic and changes rewards', () => {
     expect(simulateMapCompletion(900, 2, 'currency', build, 'greed')).toEqual(simulateMapCompletion(900, 2, 'currency', build, 'greed'));
-    expect(simulateMapCompletion(900, 2, 'currency', build, 'greed').orbs.alteration).toBeGreaterThan(0);
+    expect(Object.values(simulateMapCompletion(900, 2, 'currency', build, 'greed').orbs).reduce((sum,value)=>sum+value,0)).toBeGreaterThan(0);
     expect(simulateMapCompletion(900, 2, 'currency', build, 'greed').gemDrop).toBeDefined();
   });
 
@@ -53,7 +53,7 @@ describe('simulation contracts', () => {
     const rush = simulateMapCompletion(912, 2, 'boss-rush', build);
     const currency = simulateMapCompletion(912, 2, 'currency', build);
     expect(full.kills).toBeGreaterThan(rush.kills);
-    expect(currency.orbs.alteration).toBeGreaterThan(rush.orbs.alteration);
+    expect(Object.values(currency.orbs).reduce((sum,value)=>sum+value,0)).toBeGreaterThan(Object.values(rush.orbs).reduce((sum,value)=>sum+value,0));
     expect(rush.mapDropTier).toBeGreaterThanOrEqual(2);
   });
 
@@ -97,7 +97,7 @@ describe('simulation contracts', () => {
     const result=simulateMapCompletion(824,1,'full-clear',build);
     expect(result.items.length).toBeGreaterThanOrEqual(4);
     expect(result.monsters.rare).toBeGreaterThan(0);
-    expect(result.orbs.alteration).toBeGreaterThan(0);
+    expect(Object.values(result.orbs).reduce((sum,value)=>sum+value,0)).toBeGreaterThan(0);
   });
 
   it('passes the 30 minute equivalent play gate with measurable decisions', () => {

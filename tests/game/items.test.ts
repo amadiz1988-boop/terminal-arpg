@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { SKILLS } from '../../game/content/skills';
 import { SUPPORTS } from '../../game/content/supports';
-import { createStarterWeapon, evaluateItem, generateItem, itemLinks, itemSockets, refineItem, salvageValue } from '../../game/items/items';
+import { applyAlteration, applyChromatic, applyFusing, applyJeweller, createStarterWeapon, evaluateItem, generateItem, itemLinks, itemSockets, maxSocketsForItem, refineItem, salvageValue } from '../../game/items/items';
 import { resolveStats } from '../../game/modifiers/resolve-stats';
 import type { Item } from '../../game/core/types';
 
@@ -52,5 +52,40 @@ describe('deterministic item engine', () => {
     expect(itemLinks(threeLink)).toBe(3);
     expect(evaluation.dpsDelta).toBeGreaterThan(15);
     expect(resolveStats({ ...build, weapon: threeLink, supportSlots: itemLinks(threeLink) }).dps).toBeGreaterThan(current.dps);
+  });
+
+  it('uses alteration only to reroll all modifiers on magic items',()=>{
+    const magic={...generateItem(8100,24,'weapon'),rarity:'MAGIC' as const};
+    const rare={...magic,rarity:'RARE' as const};
+    const result=applyAlteration(magic,88);
+    expect(result.applied).toBe(true);
+    expect(result.item.affixes[0].id).not.toBe(magic.affixes[0].id);
+    expect(applyAlteration(rare,88).applied).toBe(false);
+  });
+
+  it('rerolls socket colors without changing socket count or links',()=>{
+    const item={...generateItem(8200,36,'armor'),sockets:['R','G','B'] as Array<'R'|'G'|'B'>,links:2};
+    const result=applyChromatic(item,91);
+    expect(result.applied).toBe(true);
+    expect(result.item.sockets).toHaveLength(3);
+    expect(result.item.links).toBe(2);
+  });
+
+  it('rerolls socket count within item level and base limits',()=>{
+    const item:Item={...generateItem(8300,24,'weapon'),baseId:'short-bow',sockets:['G'],links:1};
+    const result=applyJeweller(item,92);
+    expect(result.applied).toBe(true);
+    expect(result.item.sockets?.length).not.toBe(1);
+    expect(result.item.sockets!.length).toBeLessThanOrEqual(maxSocketsForItem(item));
+    const maxed:Item={...item,sockets:Array.from({length:maxSocketsForItem(item)},()=> 'G' as const)};
+    expect(applyJeweller(maxed,93).applied).toBe(false);
+  });
+
+  it('rerolls links while preserving socket count and colors',()=>{
+    const item={...generateItem(8400,36,'armor'),sockets:['R','G','B'] as Array<'R'|'G'|'B'>,links:1};
+    const result=applyFusing(item,94);
+    expect(result.applied).toBe(true);
+    expect(result.item.sockets).toEqual(item.sockets);
+    expect(result.item.links).not.toBe(1);
   });
 });

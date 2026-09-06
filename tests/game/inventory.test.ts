@@ -1,4 +1,5 @@
 import { describe,expect,it } from 'vitest';
+import { EMPTY_ORBS } from '../../game/content/currencies';
 import { spendWallet } from '../../game/economy/wallet';
 import { acceptInventoryDrops,repairEquippedItems } from '../../game/items/inventory';
 import { addLink,createStarterWeapon,generateItem } from '../../game/items/items';
@@ -16,7 +17,7 @@ describe('inventory and currency integrity',()=>{
   });
 
   it('deducts the exact orb cost and rejects insufficient balance',()=>{
-    const wallet={alteration:3,chromatic:2,fusing:1,jeweller:0};
+    const wallet={...EMPTY_ORBS,alteration:3,chromatic:2,fusing:1,jeweller:0};
     expect(spendWallet(wallet,'chromatic',2)?.chromatic).toBe(0);
     expect(spendWallet(wallet,'jeweller',1)).toBeNull();
     expect(wallet.chromatic).toBe(2);

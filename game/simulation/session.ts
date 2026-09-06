@@ -1,7 +1,8 @@
 import { SKILLS } from '../content/skills';
 import { SUPPORTS } from '../content/supports';
+import { addWallet, EMPTY_ORBS } from '../content/currencies';
 import type { BuildSnapshot, Item, ItemSlot, OrbWallet, SalvageMaterials, SkillId, SupportId } from '../core/types';
-import { addLink, addSocket, createStarterWeapon, evaluateItem, itemLinks, recolorSockets, refineItem, salvageValue } from '../items/items';
+import { applyAlteration, applyChromatic, applyFusing, applyJeweller, createStarterWeapon, evaluateItem, itemLinks, salvageValue } from '../items/items';
 import { resolveStats } from '../modifiers/resolve-stats';
 import { exchangeMaps } from '../progression/maps';
 import { unlockedTier } from '../progression/power';
@@ -20,7 +21,7 @@ export function simulateAcceleratedSession(seed=824,mapsToRun=45):AcceleratedSes
   const equipment:Partial<Record<ItemSlot,Item>>={weapon:createStarterWeapon('thief')};
   const knownSkills=new Set<SkillId>(['venom']); const knownSupports=new Set<SupportId>();
   let activeSkill:SkillId='venom'; let activeSupports:SupportId[]=[]; let talents:string[]=[]; let secondJob=false;
-  let stock=[0,0,0,0,0,0]; let materials:SalvageMaterials={scrap:0,essence:0,core:0}; let orbs:OrbWallet={alteration:0,chromatic:0,fusing:0,jeweller:0};
+  let stock=[0,0,0,0,0,0]; let materials:SalvageMaterials={scrap:0,essence:0,core:0}; let orbs:OrbWallet={...EMPTY_ORBS};
   let successes=0,deaths=0,decisions=1,upgrades=0,gemsFound=0,orbsEarned=0,orbsSpent=0,mapExchanges=0,freeRuns=0,peakTier=1,mapsSinceReward=0,longestMapsWithoutReward=0;
   const snapshot=():BuildSnapshot=>({skill:SKILLS[activeSkill],...equipment,supports:activeSupports.map(id=>SUPPORTS[id]),supportSlots:itemLinks(equipment.weapon),talents,classId:'thief',secondJobId:secondJob?'assassin':undefined,ascendancyNodes:secondJob?['assassin-katar']:[]});
   const startingDps=resolveStats(snapshot()).dps;
@@ -32,13 +33,12 @@ export function simulateAcceleratedSession(seed=824,mapsToRun=45):AcceleratedSes
     if(!result.success){deaths+=1;continue;}successes+=1;stock[1]+=1;if(result.mapDropTier>1)stock[result.mapDropTier]+=1;
     gemsFound+=1;if(result.gemDrop.type==='skill'){const before=knownSkills.size;knownSkills.add(result.gemDrop.id);if(knownSkills.size>before&&index%9===0){activeSkill=result.gemDrop.id;decisions+=1;}}
     else {const before=knownSupports.size;knownSupports.add(result.gemDrop.id);if(knownSupports.size>before){activeSupports=[...knownSupports].slice(0,Math.max(0,itemLinks(equipment.weapon)-1));decisions+=1;}}
-    const gained=Object.values(result.orbs).reduce((a,b)=>a+b,0);orbsEarned+=gained;orbs={alteration:orbs.alteration+result.orbs.alteration,chromatic:orbs.chromatic+result.orbs.chromatic,fusing:orbs.fusing+result.orbs.fusing,jeweller:orbs.jeweller+result.orbs.jeweller};
-    const evaluation=evaluateItem(result.item,snapshot());if(!equipment[result.item.slot]||evaluation.classification==='upgrade'){equipment[result.item.slot]=result.item;upgrades+=1;decisions+=1;longestMapsWithoutReward=Math.max(longestMapsWithoutReward,mapsSinceReward);mapsSinceReward=0;}else{const gain=salvageValue(result.item);materials={scrap:materials.scrap+gain.scrap,essence:materials.essence+gain.essence,core:materials.core+gain.core};}
+    const gained=Object.values(result.orbs).reduce((a,b)=>a+b,0);orbsEarned+=gained;orbs=addWallet(orbs,result.orbs);longestMapsWithoutReward=Math.max(longestMapsWithoutReward,mapsSinceReward);mapsSinceReward=0;
+    const evaluation=evaluateItem(result.item,snapshot());if(!equipment[result.item.slot]||evaluation.classification==='upgrade'){equipment[result.item.slot]=result.item;upgrades+=1;decisions+=1;}else{const gain=salvageValue(result.item);materials={scrap:materials.scrap+gain.scrap,essence:materials.essence+gain.essence,core:materials.core+gain.core};}
     if(stock[1]>=3){stock=exchangeMaps(stock,1);mapExchanges+=1;decisions+=1;}
-    const weapon=equipment.weapon;if(weapon&&index%5===4&&orbs.alteration>0){equipment.weapon=refineItem(weapon);orbs.alteration-=1;orbsSpent+=1;decisions+=1;}
-    else if(weapon&&index%6===5&&orbs.jeweller>0){equipment.weapon=addSocket(weapon);orbs.jeweller-=1;orbsSpent+=1;decisions+=1;}
-    else if(weapon&&index%7===6&&orbs.fusing>0){equipment.weapon=addLink(weapon);orbs.fusing-=1;orbsSpent+=1;decisions+=1;}
-    else if(weapon&&index%8===7&&orbs.chromatic>0){equipment.weapon=recolorSockets(weapon);orbs.chromatic-=1;orbsSpent+=1;decisions+=1;}
+    const weapon=equipment.weapon;const craft=weapon?(index%5===4?applyAlteration(weapon,9000+index):index%6===5?applyJeweller(weapon,9000+index):index%7===6?applyFusing(weapon,9000+index):index%8===7?applyChromatic(weapon,9000+index):null):null;
+    const orb= index%5===4?'alteration':index%6===5?'jeweller':index%7===6?'fusing':'chromatic';
+    if(craft?.applied&&orbs[orb]>0){equipment.weapon=craft.item;orbs[orb]-=1;orbsSpent+=1;decisions+=1;}
   }
   longestMapsWithoutReward=Math.max(longestMapsWithoutReward,mapsSinceReward);const finalDps=resolveStats(snapshot()).dps;const powerGainPercent=Math.round((finalDps/startingDps-1)*100);const filled=SLOTS.filter(slot=>equipment[slot]).length;
   const scoreBreakdown={decisions:decisions>=18?2:decisions>=12?1.5:1,feedback:longestMapsWithoutReward<=5?2:1,build:filled>=5&&powerGainPercent>=70?2:filled>=4?1.5:1,loot:gemsFound===successes&&orbsEarned>=successes?2:1,replay:mapExchanges>=5&&knownSkills.size>=4?1:.5,stability:successes+deaths===mapsToRun?1:0};

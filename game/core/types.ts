@@ -58,6 +58,8 @@ export type Item = {
   affixes: Affix[];
   links?: number;
   sockets?: SocketColor[];
+  quality?: number;
+  corrupted?: boolean;
   locked?: boolean;
 };
 
@@ -102,8 +104,9 @@ export type ItemEvaluation = {
 };
 
 export type SalvageMaterials = { scrap: number; essence: number; core: number };
-export type OrbWallet = { alteration: number; chromatic: number; fusing: number; jeweller: number };
+export type CurrencyId = 'whetstone'|'wisdom'|'chaos'|'armourer'|'mirror'|'alchemy'|'chance'|'regret'|'unmaking'|'transmutation'|'alteration'|'scouring'|'exalted'|'regal'|'augmentation'|'portal'|'glassblower'|'gemcutter'|'chromatic'|'fusing'|'jeweller'|'divine'|'blessed'|'sacred'|'chisel'|'vaal'|'annulment'|'binding'|'horizon'|'ancient'|'fracturing';
+export type OrbWallet = Record<CurrencyId, number>;
 export type GemDrop = { type: 'skill'; id: SkillId } | { type: 'support'; id: SupportId };
 export type MonsterPopulation = { total: number; normal: number; magic: number; rare: number; special: number; boss: 1 };
 export type MonsterPack = { position: number; normal: number; magic: number; rare: number; special: number };
-export type MarketListing = { id: string; owner: string; item: Item; priceOrb: keyof OrbWallet; price: number };
+export type MarketListing = { id: string; owner: string; item: Item; priceOrb: CurrencyId; price: number };
