@@ -35,6 +35,8 @@ export type SupportDefinition = {
   speedMultiplier: number;
   lifeMultiplier: number;
   socketColor: SocketColor;
+  requiredSkillTags: string[];
+  excludedSkillTags?: string[];
 };
 
 export type Affix = {
@@ -61,6 +63,8 @@ export type Item = {
 
 export type BuildSnapshot = {
   skill: SkillDefinition;
+  socketItem?: Item;
+  socketSlot?: ItemSlot;
   weapon?: Item;
   armor?: Item;
   helmet?: Item;
@@ -100,3 +104,6 @@ export type ItemEvaluation = {
 export type SalvageMaterials = { scrap: number; essence: number; core: number };
 export type OrbWallet = { alteration: number; chromatic: number; fusing: number; jeweller: number };
 export type GemDrop = { type: 'skill'; id: SkillId } | { type: 'support'; id: SupportId };
+export type MonsterPopulation = { total: number; normal: number; magic: number; rare: number; special: number; boss: 1 };
+export type MonsterPack = { position: number; normal: number; magic: number; rare: number; special: number };
+export type MarketListing = { id: string; owner: string; item: Item; priceOrb: keyof OrbWallet; price: number };

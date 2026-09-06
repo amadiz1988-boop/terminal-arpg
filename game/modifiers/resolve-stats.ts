@@ -1,6 +1,7 @@
 import type { AffixStat, BuildSnapshot, Item, ResolvedStats } from '../core/types';
 import { TALENTS_BY_ID } from '../content/talents';
 import { classEffects } from '../content/classes';
+import { isSupportCompatible } from '../content/supports';
 
 function sum(items: Array<Item | undefined>, stat: AffixStat) {
   return items.flatMap((item) => item?.affixes ?? []).filter((affix) => affix.stat === stat).reduce((total, affix) => total + affix.value, 0);
@@ -18,10 +19,12 @@ export function resolveStats(build: BuildSnapshot): ResolvedStats {
   const moveSpeed = build.skill.moveSpeed + sum(items, 'move') + mastery.tempo * 5 + talent('move') + (job.move ?? 0);
   const life = Math.round((500 + sum(items, 'life')) * (1 + mastery.guard * .12 + (talent('life') + (job.life ?? 0)) / 100));
   const armor = Math.round((100 + sum(items, 'armor')) * (1 + mastery.guard * .12 + (talent('armor') + (job.armor ?? 0)) / 100));
-  const linkedSockets = (build.weapon?.sockets ?? Array.from({ length: build.supportSlots ?? 1 }, () => 'W' as const)).slice(0, build.supportSlots ?? build.weapon?.links ?? 1);
+  const socketItem=build.socketItem??build.weapon;
+  const linkedSockets = (socketItem?.sockets ?? Array.from({ length: build.supportSlots ?? 1 }, () => 'W' as const)).slice(0, build.supportSlots ?? socketItem?.links ?? 1);
   const skillSocket = linkedSockets.findIndex((color) => color === 'W' || color === build.skill.socketColor);
   const availableSockets = skillSocket >= 0 ? linkedSockets.filter((_, index) => index !== skillSocket) : [];
   const supports = (build.supports ?? []).filter((support) => {
+    if (!isSupportCompatible(support, build.skill.tags)) return false;
     const socket = availableSockets.findIndex((color) => color === 'W' || color === support.socketColor);
     if (socket < 0) return false;
     availableSockets.splice(socket, 1);

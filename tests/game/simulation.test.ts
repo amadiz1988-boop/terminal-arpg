@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { SKILLS } from '../../game/content/skills';
-import { SUPPORTS } from '../../game/content/supports';
+import { isSupportCompatible, SUPPORTS } from '../../game/content/supports';
 import { createStarterWeapon } from '../../game/items/items';
 import { resolveStats } from '../../game/modifiers/resolve-stats';
 import { completeCampaignOperation } from '../../game/progression/campaign';
 import { exchangeMaps } from '../../game/progression/maps';
-import { getRunStopReason, progressPerTick, simulateMapCompletion } from '../../game/simulation/map';
+import { generateMonsterPacks, generateMonsterPopulation, getRunStopReason, progressPerTick, simulateMapCompletion } from '../../game/simulation/map';
 import { simulateAcceleratedSession } from '../../game/simulation/session';
 import type { Item } from '../../game/core/types';
 
@@ -66,13 +66,38 @@ describe('simulation contracts', () => {
   });
 
   it('lets support choices trade clear speed for boss damage or defense', () => {
-    const linked: Item = { ...createStarterWeapon(), links: 2, sockets: ['G','W'] };
-    const clear = resolveStats({ ...build, weapon:linked, supports: [SUPPORTS.momentum], supportSlots: 2 });
-    const boss = resolveStats({ ...build, weapon:linked, supports: [SUPPORTS.focus], supportSlots: 2 });
-    const guard = resolveStats({ ...build, weapon:linked, supports: [SUPPORTS.fortify], supportSlots: 2 });
+    const meleeBuild={skill:SKILLS.quake,weapon:createStarterWeapon('acolyte')};
+    const linked: Item = { ...createStarterWeapon('acolyte'), links: 2, sockets: ['R','W'] };
+    const clear = resolveStats({ ...meleeBuild, weapon:linked, supports: [SUPPORTS.momentum], supportSlots: 2 });
+    const boss = resolveStats({ ...meleeBuild, weapon:linked, supports: [SUPPORTS.focus], supportSlots: 2 });
+    const guard = resolveStats({ ...meleeBuild, weapon:linked, supports: [SUPPORTS.fortify], supportSlots: 2 });
     expect(clear.clearScore).toBeGreaterThan(boss.clearScore);
     expect(boss.bossDps).toBeGreaterThan(clear.bossDps);
     expect(guard.life).toBeGreaterThan(clear.life);
+  });
+
+  it('requires support conditions to match skill tags', () => {
+    expect(isSupportCompatible(SUPPORTS.echo,SKILLS.firebolt.tags)).toBe(true);
+    expect(isSupportCompatible(SUPPORTS.echo,SKILLS.venom.tags)).toBe(false);
+    expect(isSupportCompatible(SUPPORTS.fortify,SKILLS.venom.tags)).toBe(true);
+  });
+
+  it('builds 400 to 600 field monsters into mixed packs and keeps one boss separate', () => {
+    const population=generateMonsterPopulation(824);
+    const packs=generateMonsterPacks(824,population);
+    expect(population.total-1).toBeGreaterThanOrEqual(400);
+    expect(population.total-1).toBeLessThanOrEqual(600);
+    expect(population.boss).toBe(1);
+    expect(packs.some(pack=>[pack.normal,pack.magic,pack.rare].filter(value=>value>0).length>=2)).toBe(true);
+    expect(packs.every(pack=>pack.position<220)).toBe(true);
+    expect(packs.reduce((sum,pack)=>sum+pack.normal+pack.magic+pack.rare+pack.special,0)).toBe(population.total-1);
+  });
+
+  it('makes higher monster ranks contribute more to rewards', () => {
+    const result=simulateMapCompletion(824,1,'full-clear',build);
+    expect(result.items.length).toBeGreaterThanOrEqual(4);
+    expect(result.monsters.rare).toBeGreaterThan(0);
+    expect(result.orbs.alteration).toBeGreaterThan(0);
   });
 
   it('passes the 30 minute equivalent play gate with measurable decisions', () => {

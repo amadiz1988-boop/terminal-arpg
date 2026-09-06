@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { SKILLS } from '../../game/content/skills';
 import { SUPPORTS } from '../../game/content/supports';
-import { createStarterWeapon, evaluateItem, generateItem, itemLinks, refineItem, salvageValue } from '../../game/items/items';
+import { createStarterWeapon, evaluateItem, generateItem, itemLinks, itemSockets, refineItem, salvageValue } from '../../game/items/items';
 import { resolveStats } from '../../game/modifiers/resolve-stats';
 import type { Item } from '../../game/core/types';
 
@@ -27,6 +27,15 @@ describe('deterministic item engine', () => {
     expect(value.essence + value.core).toBeGreaterThanOrEqual(0);
   });
 
+  it('generates visible sockets and links on socketable equipment',()=>{
+    for(const slot of ['weapon','armor','helmet','gloves','boots'] as const){
+      const item=generateItem(7200+slot.length,24,slot);
+      expect(itemSockets(item).length).toBeGreaterThan(0);
+      expect(itemLinks(item)).toBeGreaterThan(0);
+    }
+    expect(itemSockets(generateItem(7300,24,'amulet'))).toHaveLength(0);
+  });
+
   it('spends crafting through an immutable item upgrade', () => {
     const original = createStarterWeapon();
     const refined = refineItem(original);
@@ -35,13 +44,13 @@ describe('deterministic item engine', () => {
   });
 
   it('makes weapon links part of build power', () => {
-    const oneLink = createStarterWeapon('thief');
-    const threeLink: Item = { ...oneLink, id: 'three-link', links: 3, sockets: ['G','G','B'] };
-    const build = { skill: SKILLS.venom, weapon: oneLink, supports: [SUPPORTS.momentum, SUPPORTS.echo], supportSlots: itemLinks(oneLink) };
+    const oneLink = createStarterWeapon('mage');
+    const threeLink: Item = { ...oneLink, id: 'three-link', links: 3, sockets: ['B','W','B'] };
+    const build = { skill: SKILLS.firebolt, weapon: oneLink, supports: [SUPPORTS.echo], supportSlots: itemLinks(oneLink) };
     const current = resolveStats(build);
     const evaluation = evaluateItem(threeLink, build);
     expect(itemLinks(threeLink)).toBe(3);
-    expect(evaluation.dpsDelta).toBeGreaterThan(20);
+    expect(evaluation.dpsDelta).toBeGreaterThan(15);
     expect(resolveStats({ ...build, weapon: threeLink, supportSlots: itemLinks(threeLink) }).dps).toBeGreaterThan(current.dps);
   });
 });

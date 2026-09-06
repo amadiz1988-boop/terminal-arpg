@@ -52,18 +52,19 @@ export function generateItem(seed: number, itemLevel: number, forcedSlot?: ItemS
     const value = Math.max(3, Math.round((10 - tier) * (2 + random() * 2)));
     return { id: `${seed}-${index}`, name: `+${value}${stat === 'life' || stat === 'armor' ? '' : '%'} ${LABELS[stat]}`, stat, value, tier, tags: [stat] };
   });
-  const socketCount = slot === 'weapon' ? Math.min(4, rarity === 'LEGENDARY' ? 4 : rarity === 'RARE' ? 3 : rarity === 'MAGIC' ? 2 : 1) : 0;
+  const canSocket=slot!=='amulet';
+  const socketCount = canSocket ? Math.min(4, rarity === 'LEGENDARY' ? 4 : rarity === 'RARE' ? 3 : rarity === 'MAGIC' ? 2 : 1) : 0;
   const colorPool: SocketColor[] = baseId === 'wand' ? ['B', 'B', 'G', 'R'] : baseId === 'hammer' ? ['R', 'R', 'B', 'G'] : ['G', 'G', 'B', 'R'];
-  const sockets = slot === 'weapon' ? Array.from({ length: socketCount }, () => colorPool[Math.floor(random() * colorPool.length)]) : undefined;
-  const links = slot === 'weapon' ? Math.max(1, socketCount - (random() > .78 ? 1 : 0)) : undefined;
+  const sockets = canSocket ? Array.from({ length: socketCount }, () => colorPool[Math.floor(random() * colorPool.length)]) : undefined;
+  const links = canSocket ? Math.max(1, socketCount - (random() > .78 ? 1 : 0)) : undefined;
   return { id: `item-${seed}`, baseId, name: `${PREFIX[Math.floor(random() * PREFIX.length)]}${baseName}`, slot, rarity, itemLevel, links, sockets, affixes };
 }
 
-export function itemLinks(item?: Item) { return item?.slot === 'weapon' ? Math.max(1, item.links ?? (item.rarity === 'LEGENDARY' ? 4 : item.rarity === 'RARE' ? 3 : item.rarity === 'MAGIC' ? 2 : 1)) : 0; }
+export function itemLinks(item?: Item) { return item?.sockets?.length ? Math.max(1,Math.min(item.sockets.length,item.links??1)) : 0; }
 
 export function itemSockets(item?: Item): SocketColor[] {
-  if (!item || item.slot !== 'weapon') return [];
-  return item.sockets ?? Array.from({ length: itemLinks(item) }, () => 'W' as SocketColor);
+  if (!item) return [];
+  return item.sockets ?? [];
 }
 
 export function recolorSockets(item: Item): Item {
@@ -86,7 +87,8 @@ function percentDelta(next: number, current: number) { return current === 0 ? 0 
 
 export function evaluateItem(item: Item, build: BuildSnapshot): ItemEvaluation {
   const current = resolveStats(build);
-  const candidate = resolveStats({ ...build, [item.slot]: item, supportSlots: item.slot === 'weapon' ? itemLinks(item) : build.supportSlots });
+  const replacesSocketItem=item.slot===(build.socketSlot??'weapon');
+  const candidate = resolveStats({ ...build, [item.slot]: item, socketItem:replacesSocketItem?item:build.socketItem, supportSlots:replacesSocketItem?itemLinks(item):build.supportSlots });
   const dpsDelta = percentDelta(candidate.dps, current.dps);
   const bossDelta = percentDelta(candidate.bossDps, current.bossDps);
   const clearDelta = percentDelta(candidate.clearScore, current.clearScore);
