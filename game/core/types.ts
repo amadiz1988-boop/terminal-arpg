@@ -98,6 +98,8 @@ export type ResolvedStats = {
   armor: number;
   moveSpeed: number;
   critChance: number;
+  manaPercent: number;
+  skillCostReduction: number;
 };
 
 export type ItemEvaluation = {

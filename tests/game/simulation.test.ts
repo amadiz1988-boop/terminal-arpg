@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { SKILLS } from '../../game/content/skills';
+import { TALENTS, TALENT_BOARDS } from '../../game/content/talents';
 import { isSupportCompatible, SUPPORTS } from '../../game/content/supports';
 import { createStarterWeapon } from '../../game/items/items';
 import { resolveStats } from '../../game/modifiers/resolve-stats';
@@ -76,6 +77,30 @@ describe('simulation contracts', () => {
     expect(guard.life).toBeGreaterThan(base.life);
   });
 
+  it('applies sourced talent effects only to matching skill tags', () => {
+    const attackBase=resolveStats({skill:SKILLS.venom,weapon:createStarterWeapon('thief')});
+    const attackMight=resolveStats({skill:SKILLS.venom,weapon:createStarterWeapon('thief'),talents:['might-damage']});
+    const spellBase=resolveStats({skill:SKILLS.firebolt,weapon:createStarterWeapon('mage')});
+    const spellMight=resolveStats({skill:SKILLS.firebolt,weapon:createStarterWeapon('mage'),talents:['might-damage']});
+    const spellWisdom=resolveStats({skill:SKILLS.firebolt,weapon:createStarterWeapon('mage'),talents:['wisdom-power','wisdom-speed','wisdom-mana']});
+    expect(attackMight.hitDamage).toBeGreaterThan(attackBase.hitDamage);
+    expect(spellMight.hitDamage).toBe(spellBase.hitDamage);
+    expect(spellWisdom.hitDamage).toBeGreaterThan(spellBase.hitDamage);
+    expect(spellWisdom.attacksPerSecond).toBeGreaterThan(spellBase.attacksPerSecond);
+    expect(maximumMana(1,spellWisdom.manaPercent)).toBe(43);
+  });
+
+  it('keeps unverified job bonuses outside the stat resolver', () => {
+    const plain=resolveStats({skill:SKILLS.venom,weapon:createStarterWeapon('thief')});
+    const pendingJob=resolveStats({skill:SKILLS.venom,weapon:createStarterWeapon('thief'),classId:'thief',secondJobId:'assassin',ascendancyNodes:['assassin-katar']});
+    expect(pendingJob).toEqual(plain);
+  });
+
+  it('stores source provenance for every active talent entry', () => {
+    expect(Object.values(TALENT_BOARDS).every(board=>board.sourceStatus==='verified'&&board.sourceUrl==='https://tlidb.com/tw/Talent')).toBe(true);
+    expect(TALENTS.every(node=>node.sourceStatus==='verified'&&node.verifiedAt==='2026-09-06')).toBe(true);
+  });
+
   it('lets support choices trade clear speed for boss damage or defense', () => {
     const meleeBuild={skill:SKILLS.quake,weapon:createStarterWeapon('acolyte')};
     const linked: Item = { ...createStarterWeapon('acolyte'), links: 2, sockets: ['R','W'] };
@@ -147,17 +172,31 @@ describe('simulation contracts', () => {
     const beforeMana=state.mana;
     while(state.mana>=beforeMana)state=stepCombat(state,{tier:1,level:10,build:slow,packs});
     expect(state.mana).toBeLessThan(beforeMana);
-    let sawDamage=false,sawHit=state.events.some(event=>event.kind==='HIT'||event.kind==='CRITICAL');
-    for(let index=0;index<20&&!sawDamage;index+=1){state=stepCombat(state,{tier:1,level:10,build:slow,packs});sawHit ||= state.events.some(event=>event.kind==='HIT'||event.kind==='CRITICAL');sawDamage ||= state.events.some(event=>event.kind==='DAMAGE');}
+    let sawDamage=false,sawHit=state.events.some(event=>['HIT','BASIC','CRITICAL'].includes(event.kind));
+    for(let index=0;index<20&&!sawDamage;index+=1){state=stepCombat(state,{tier:1,level:10,build:slow,packs});sawHit ||= state.events.some(event=>['HIT','BASIC','CRITICAL'].includes(event.kind));sawDamage ||= state.events.some(event=>event.kind==='DAMAGE');}
     expect(sawDamage).toBe(true);
     expect(sawHit).toBe(true);
+  });
+
+  it('uses Default Attack while mana is below the skill cost and resumes the skill after recovery',()=>{
+    const packs=generateMonsterPacks(824,generateMonsterPopulation(824));
+    const slow={...build,skill:{...SKILLS.arc,baseDamage:1,attacksPerSecond:1}};
+    let state=createCombatState(1,10,slow,packs);
+    for(let index=0;index<100&&state.phase!=='combat';index+=1)state=stepCombat(state,{tier:1,level:10,build:slow,packs});
+    state={...state,mana:0,manaFlaskCharges:0,playerClock:1000};
+    state=stepCombat(state,{tier:1,level:10,build:slow,packs,tickMs:250});
+    expect(state.events.some(event=>event.kind==='BASIC'&&event.text.includes('普通攻擊'))).toBe(true);
+    expect(state.events.some(event=>event.kind==='OOM')).toBe(false);
+    let skillReturned=false;
+    for(let index=0;index<100&&!skillReturned;index+=1){state=stepCombat(state,{tier:1,level:10,build:slow,packs,tickMs:250});skillReturned=state.events.some(event=>event.kind==='HIT'||event.kind==='CRITICAL'&&event.text.includes('電弧'));}
+    expect(skillReturned).toBe(true);
   });
 
   it('never credits a full map without processing its combat timeline',()=>{
     const packs=generateMonsterPacks(824,generateMonsterPopulation(824));
     const tank:Item={id:'test-tank',baseId:'test-tank',name:'test-tank',slot:'armor',rarity:'RARE',itemLevel:1,affixes:[{id:'life',name:'life',stat:'life',value:5000000,tier:1,tags:['life']},{id:'armor',name:'armor',stat:'armor',value:5000000,tier:1,tags:['armor']}]};
     const durable={...build,armor:tank};let state=createCombatState(1,10,durable,packs);let steps=0,hitRows=0,damageRows=0,lastKill='';const damagedTargets=new Set<string>();
-    while(state.phase!=='complete'&&state.phase!=='dead'&&steps<100000){state=stepCombat(state,{tier:1,level:10,build:durable,packs});for(const event of state.events){if(event.kind==='HIT'||event.kind==='CRITICAL'){hitRows+=1;const target=event.text.match(/→ ([^ ]+)/)?.[1];if(target)damagedTargets.add(target);}if(event.kind==='DAMAGE')damageRows+=1;if(event.kind==='KILL'){lastKill=event.text.split(' ')[0];expect(damagedTargets.has(lastKill)).toBe(true);}}steps+=1;}
+    while(state.phase!=='complete'&&state.phase!=='dead'&&steps<100000){state=stepCombat(state,{tier:1,level:10,build:durable,packs});for(const event of state.events){if(['HIT','BASIC','CRITICAL'].includes(event.kind)){hitRows+=1;const target=event.text.match(/→ ([^ ]+)/)?.[1];if(target)damagedTargets.add(target);}if(event.kind==='DAMAGE')damageRows+=1;if(event.kind==='KILL'){lastKill=event.text.split(' ')[0];expect(damagedTargets.has(lastKill)).toBe(true);}}steps+=1;}
     expect(state.phase).toBe('complete');
     expect(state.kills).toBe(state.totalMonsters);
     expect(lastKill).toBe('BOSS-001');
