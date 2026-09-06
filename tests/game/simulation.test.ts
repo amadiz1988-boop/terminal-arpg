@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { SKILLS } from '../../game/content/skills';
-import { TALENTS, TALENT_BOARDS } from '../../game/content/talents';
+import { DEFAULT_RO_STATS, nextStatCost, RO_STAT_DEFINITIONS, roMeleeAttack, spentStatusPoints, statusPointsForLevel } from '../../game/content/ro-stats';
 import { isSupportCompatible, SUPPORTS } from '../../game/content/supports';
 import { createStarterWeapon } from '../../game/items/items';
 import { resolveStats } from '../../game/modifiers/resolve-stats';
@@ -20,7 +20,7 @@ describe('simulation contracts', () => {
 
   it('uses sourced level-one skill damage instead of one-shot demo values', () => {
     const stats=resolveStats({skill:SKILLS.venom,weapon:createStarterWeapon('thief'),classId:'thief'});
-    expect(stats.hitDamage).toBe(10);
+    expect(stats.hitDamage).toBe(11);
     expect(stats.attacksPerSecond).toBeLessThan(2.1);
   });
 
@@ -77,17 +77,13 @@ describe('simulation contracts', () => {
     expect(guard.life).toBeGreaterThan(base.life);
   });
 
-  it('applies sourced talent effects only to matching skill tags', () => {
-    const attackBase=resolveStats({skill:SKILLS.venom,weapon:createStarterWeapon('thief')});
-    const attackMight=resolveStats({skill:SKILLS.venom,weapon:createStarterWeapon('thief'),talents:['might-damage']});
-    const spellBase=resolveStats({skill:SKILLS.firebolt,weapon:createStarterWeapon('mage')});
-    const spellMight=resolveStats({skill:SKILLS.firebolt,weapon:createStarterWeapon('mage'),talents:['might-damage']});
-    const spellWisdom=resolveStats({skill:SKILLS.firebolt,weapon:createStarterWeapon('mage'),talents:['wisdom-power','wisdom-speed','wisdom-mana']});
-    expect(attackMight.hitDamage).toBeGreaterThan(attackBase.hitDamage);
-    expect(spellMight.hitDamage).toBe(spellBase.hitDamage);
-    expect(spellWisdom.hitDamage).toBeGreaterThan(spellBase.hitDamage);
-    expect(spellWisdom.attacksPerSecond).toBeGreaterThan(spellBase.attacksPerSecond);
-    expect(maximumMana(1,spellWisdom.manaPercent)).toBe(43);
+  it('uses the sourced RO status point schedule and escalating costs', () => {
+    expect(statusPointsForLevel(1)).toBe(48);
+    expect(statusPointsForLevel(6)).toBe(64);
+    expect(statusPointsForLevel(99)).toBe(1273);
+    expect(nextStatCost(1)).toBe(2);
+    expect(nextStatCost(11)).toBe(3);
+    expect(spentStatusPoints({...DEFAULT_RO_STATS,str:99})).toBe(628);
   });
 
   it('keeps unverified job bonuses outside the stat resolver', () => {
@@ -96,9 +92,27 @@ describe('simulation contracts', () => {
     expect(pendingJob).toEqual(plain);
   });
 
-  it('stores source provenance for every active talent entry', () => {
-    expect(Object.values(TALENT_BOARDS).every(board=>board.sourceStatus==='verified'&&board.sourceUrl==='https://tlidb.com/tw/Talent')).toBe(true);
-    expect(TALENTS.every(node=>node.sourceStatus==='verified'&&node.verifiedAt==='2026-09-06')).toBe(true);
+  it('makes every RO stat change a combat-relevant value', () => {
+    const attackBase=resolveStats({skill:SKILLS.venom,weapon:createStarterWeapon('thief'),roStats:DEFAULT_RO_STATS});
+    const strength=resolveStats({skill:SKILLS.venom,weapon:createStarterWeapon('thief'),roStats:{...DEFAULT_RO_STATS,str:21}});
+    const agility=resolveStats({skill:SKILLS.venom,weapon:createStarterWeapon('thief'),roStats:{...DEFAULT_RO_STATS,agi:21}});
+    const vitality=resolveStats({skill:SKILLS.venom,weapon:createStarterWeapon('thief'),roStats:{...DEFAULT_RO_STATS,vit:21}});
+    const spellBase=resolveStats({skill:SKILLS.firebolt,weapon:createStarterWeapon('mage'),roStats:DEFAULT_RO_STATS});
+    const intelligence=resolveStats({skill:SKILLS.firebolt,weapon:createStarterWeapon('mage'),roStats:{...DEFAULT_RO_STATS,int:21}});
+    const dexterity=resolveStats({skill:SKILLS.firebolt,weapon:createStarterWeapon('mage'),roStats:{...DEFAULT_RO_STATS,dex:21}});
+    const luck=resolveStats({skill:SKILLS.venom,weapon:createStarterWeapon('thief'),roStats:{...DEFAULT_RO_STATS,luk:21}});
+    expect(strength.hitDamage).toBeGreaterThan(attackBase.hitDamage);
+    expect(agility.attacksPerSecond).toBeGreaterThan(attackBase.attacksPerSecond);
+    expect(vitality.life).toBeGreaterThan(attackBase.life);
+    expect(intelligence.hitDamage).toBeGreaterThan(spellBase.hitDamage);
+    expect(maximumMana(1,intelligence.manaPercent)).toBeGreaterThan(maximumMana(1,spellBase.manaPercent));
+    expect(dexterity.attacksPerSecond).toBeGreaterThan(spellBase.attacksPerSecond);
+    expect(luck.critChance).toBeGreaterThan(attackBase.critChance);
+    expect(roMeleeAttack({...DEFAULT_RO_STATS,str:20})).toBe(24);
+  });
+
+  it('stores source provenance for every active RO status entry', () => {
+    expect(RO_STAT_DEFINITIONS.every(stat=>stat.sourceStatus==='verified'&&stat.sourceUrl==='https://irowiki.org/classic/Stats'&&stat.verifiedAt==='2026-09-06')).toBe(true);
   });
 
   it('lets support choices trade clear speed for boss damage or defense', () => {

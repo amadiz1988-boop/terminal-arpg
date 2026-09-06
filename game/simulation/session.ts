@@ -1,6 +1,7 @@
 import { SKILLS } from '../content/skills';
 import { SUPPORTS } from '../content/supports';
 import { addWallet, EMPTY_ORBS } from '../content/currencies';
+import { DEFAULT_RO_STATS, type RoStats } from '../content/ro-stats';
 import type { BuildSnapshot, Item, ItemSlot, OrbWallet, SalvageMaterials, SkillId, SupportId } from '../core/types';
 import { applyAlteration, applyChromatic, applyFusing, applyJeweller, createStarterWeapon, evaluateItem, itemLinks, salvageValue } from '../items/items';
 import { resolveStats } from '../modifiers/resolve-stats';
@@ -18,13 +19,13 @@ export type AcceleratedSessionReport = {
 export function simulateAcceleratedSession(seed=824,mapsToRun=45):AcceleratedSessionReport{
   const equipment:Partial<Record<ItemSlot,Item>>={weapon:createStarterWeapon('thief')};
   const knownSkills=new Set<SkillId>(['venom']); const knownSupports=new Set<SupportId>();
-  let activeSkill:SkillId='venom'; let activeSupports:SupportId[]=[]; let talents:string[]=[]; let secondJob=false;
+  let activeSkill:SkillId='venom'; let activeSupports:SupportId[]=[]; let roStats:RoStats={...DEFAULT_RO_STATS}; let secondJob=false;
   let stock=[0,0,0,0,0,0]; let materials:SalvageMaterials={scrap:0,essence:0,core:0}; let orbs:OrbWallet={...EMPTY_ORBS};
   let successes=0,deaths=0,decisions=1,upgrades=0,gemsFound=0,orbsEarned=0,orbsSpent=0,mapExchanges=0,freeRuns=0,peakTier=1,mapsSinceReward=0,longestMapsWithoutReward=0;
-  const snapshot=():BuildSnapshot=>({skill:SKILLS[activeSkill],...equipment,supports:activeSupports.map(id=>SUPPORTS[id]),supportSlots:itemLinks(equipment.weapon),talents,classId:'thief',secondJobId:secondJob?'assassin':undefined,ascendancyNodes:secondJob?['assassin-katar']:[]});
+  const snapshot=():BuildSnapshot=>({skill:SKILLS[activeSkill],...equipment,supports:activeSupports.map(id=>SUPPORTS[id]),supportSlots:itemLinks(equipment.weapon),roStats,classId:'thief',secondJobId:secondJob?'assassin':undefined,ascendancyNodes:secondJob?['assassin-katar']:[]});
   const startingDps=resolveStats(snapshot()).dps;
   for(let index=0;index<mapsToRun;index+=1){
-    if(index===6){talents=['hunt-speed'];decisions+=1;} if(index===12){talents.push('hunt-crit');secondJob=true;decisions+=2;}
+    if(index===6){roStats={...roStats,agi:11};decisions+=1;} if(index===12){roStats={...roStats,luk:11};secondJob=true;decisions+=2;}
     const allowed=unlockedTier(resolveStats(snapshot()).dps);peakTier=Math.max(peakTier,allowed);
     const tier=[5,4,3,2].find(value=>value<=allowed&&stock[value]>0)??1;if(tier===1)freeRuns+=1;else stock[tier]-=1;
     const result=simulateMapCompletion(seed+index,tier,index%3===0?'boss-rush':'full-clear',snapshot(),index%7===0?'greed':'scout');mapsSinceReward+=1;

@@ -1,3 +1,5 @@
+import type { RoStats } from '../content/ro-stats';
+
 export type SkillId = 'ember' | 'arc' | 'quake' | 'venom' | 'firebolt' | 'smite';
 export type Policy = 'full-clear' | 'boss-rush' | 'currency';
 export type RunMode = 'count' | 'time' | 'empty';
@@ -82,7 +84,7 @@ export type BuildSnapshot = {
   masteries?: Record<MasteryId, number>;
   supports?: SupportDefinition[];
   supportSlots?: number;
-  talents?: string[];
+  roStats?: RoStats;
   classId?: ClassId;
   secondJobId?: SecondJobId;
   ascendancyNodes?: string[];
