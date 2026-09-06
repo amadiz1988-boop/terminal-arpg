@@ -31,6 +31,8 @@
 
 遊戲資料、Modifier、物品、進度與地圖模擬位於 `game/`。React 介面負責編排玩家操作與呈現領域結果。
 
+* [遊戲資料來源鐵律](AGENTS.md)
+* [資料查證與核准制度](docs/DESIGN_SOURCE_POLICY.md)
 * [架構規則](docs/ARCHITECTURE.md)
 * [PoE 與火炬玩家循環研究](docs/ARPG_PLAYER_LOOP_RESEARCH.md)
 * [核心公式與內容架構](docs/CORE_FORMULA_ARCHITECTURE.md)

@@ -1,5 +1,9 @@
 # 通貨系統基準
 
+## 合規狀態
+
+目前通貨名稱與主要用途為 `原作可確認`。Alpha 掉落權重為 `分析推導／待使用者核准`，不得視為 PoE 原始設定或後續正式經濟基準。核准流程依 `DESIGN_SOURCE_POLICY.md` 執行。
+
 ## 證據界線
 
 - PoEDB 可確認通貨名稱、用途、堆疊數量與部分掉落等級：https://poedb.tw/tw/Stackable_Currency
