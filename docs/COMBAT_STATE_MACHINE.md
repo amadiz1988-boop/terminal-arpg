@@ -2,7 +2,7 @@
 
 資料查證日期：2026-09-06
 
-## Alpha 0.11 執行順序
+## Alpha 0.12 執行順序
 
 每張圖建立獨立怪物清單，每隻怪物都有自己的編號、座標、稀有度與生命。執行順序為 `探索未知格 → 視野索敵 → 走到目標 → 鎖定單一怪物 → 逐次使用技能 → 扣除該怪生命與角色魔力 → 怪物反擊 → 扣除角色生命 → 單一怪物死亡 → 再次索敵`。野外怪物清除後才會前往首領房。只有首領生命歸零後，地圖結算函式才能發放裝備、寶石、通貨與經驗。角色生命歸零時停止本圖，不發放完成獎勵。
 
@@ -10,7 +10,7 @@
 
 ## RO 式小地圖呈現
 
-Alpha 0.11 使用 64×40 格地圖。每個種子生成 12 個不規則分布的區域，再以直角走道連通。這是依使用者要求製作的 RO 俯視地圖呈現規格，沒有宣稱為 RO 官方地圖公式。未走過的區域保持黑色迷霧，角色只會鎖定視野距離 3 格內的野外怪物；視野內沒有怪物時，會逐格探索最近的未知可行走格。普通、魔法、稀有、特殊與首領在已揭露區域使用不同顏色。
+Alpha 0.12 使用 64×40 格地圖。每個種子生成 12 個不規則分布的區域，再以直角走道連通。這是依使用者要求製作的 RO 俯視地圖呈現規格，沒有宣稱為 RO 官方地圖公式。未走過的區域保持黑色迷霧，角色只會鎖定視野距離 3 格內的野外怪物；視野內沒有怪物時，會逐格探索最近的未知可行走格。普通、魔法、稀有、特殊與首領在已揭露區域使用不同顏色。
 
 ## 已查證資料
 
@@ -21,17 +21,21 @@ Alpha 0.11 使用 64×40 格地圖。每個種子生成 12 個不規則分布的
 | 護甲減傷 | `護甲 ÷（護甲 + 單次物理傷害 × 5）`，上限 90% | 原作可確認 | https://poedb.tw/tw/Armour |
 | 地圖階級 | T1 至 T5 對應怪物等級 68 至 72 | 原作可確認 | https://www.poewiki.net/wiki/Monster_level |
 | 地圖首領基礎資料 | 使用等級 68 至 72 基礎生命、傷害與地圖階級加成 | 原作可確認 | https://www.poewiki.net/wiki/Monster_level |
+| 新手區怪物基礎資料 | 角色等級 1 至 3 對應基礎傷害 4.99、5.56、6.16，基礎生命 22、26、31 | 原作可確認 | https://www.poewiki.net/wiki/Monster_level |
 | 魔法怪 | 148% 更多生命、30% 更多傷害、20% 更少傷害、等級生命倍率 | 原作可確認 | https://www.poewiki.net/wiki/Rarity |
 | 稀有怪 | 390% 更多生命、50% 更多傷害、33% 更少傷害、等級生命倍率 | 原作可確認 | https://www.poewiki.net/wiki/Rarity |
+| 新手區首領 | 698% 更多生命、70% 更多傷害、33% 更多攻速及 33% 更少傷害 | 原作可確認 | https://www.poewiki.net/wiki/List_of_innate_unique_monster_modifiers |
 | 小型生命藥劑 | 3 秒回復 70 生命，消耗 7/21 充能 | 原作可確認 | https://poedb.tw/tw/Flasks |
 | 小型魔力藥劑 | 3 秒回復 50 魔力，消耗 6/24 充能 | 原作可確認 | https://poedb.tw/tw/Flasks |
 | 擊殺藥劑充能 | 普通 1、魔法 3.5、稀有 6、傳奇 11 | 原作可確認 | https://poedb.tw/tw/Flasks |
-| 音速投擲 | 對照毒蛇鞭笞，Lv.1 消耗 5 魔力、連鎖 3 次 | 原作可確認 | https://poedb.tw/tw/Cobra_Lash |
-| 火箭術 | 對照火球，Lv.1 消耗 5 魔力 | 原作可確認 | https://poedb.tw/tw/Fireball |
-| 裂空電弧 | 對照電弧，Lv.1 消耗 10 魔力、連鎖 4 次 | 原作可確認 | https://poedb.tw/tw/Arc |
-| 玄鐵震地 | 對照震地，Lv.1 消耗 10 魔力 | 原作可確認 | https://poedb.tw/tw/Earthquake |
-| 穿焰矢 | 對照燃燒箭矢，Lv.1 消耗 7 魔力 | 原作可確認 | https://poedb.tw/tw/Burning_Arrow |
-| 聖光重擊 | 對照雷鳴重擊，Lv.1 消耗 7 魔力 | 原作可確認 | https://poedb.tw/tw/Smite |
+| 毒蛇鞭笞 | Lv.1 使用玻璃利片平均物理傷害 8、125% 傷害效用、120% 攻速、5 魔力、8% 武器暴擊 | 原作可確認 | https://poedb.tw/tw/Cobra_Lash、https://poedb.tw/tw/Glass_Shank |
+| 火球 | Lv.1 平均火焰傷害 11.5、施放時間 0.75 秒、5 魔力、5% 暴擊 | 原作可確認 | https://poedb.tw/tw/Fireball |
+| 電弧 | Lv.1 平均閃電傷害 19、施放時間 0.60 秒、10 魔力、6% 暴擊 | 原作可確認 | https://poedb.tw/tw/Arc |
+| 震地 | Lv.1 使用朽木之棒平均物理傷害 7、144% 傷害效用、75% 攻速、10 魔力 | 原作可確認 | https://poedb.tw/tw/Earthquake、https://poedb.tw/tw/Driftwood_Club |
+| 燃燒箭矢 | 使用粗製弓平均物理傷害 9、280% 傷害效用、70% 攻速、8 魔力 | 原作可確認 | https://poedb.tw/tw/Burning_Arrow、https://poedb.tw/tw/Crude_Bow |
+| 雷鳴重擊 | Lv.1 使用朽木之棒平均物理傷害 7、225% 傷害效用、85% 攻速、7 魔力 | 原作可確認 | https://poedb.tw/tw/Smite、https://poedb.tw/tw/Driftwood_Club |
+
+Alpha 0.12 已移除技能等級每級增加 6% 的舊展示公式，因為該值沒有可查證來源。每筆主動技能資料現在保存 `sourceGame`、`sourceUrl`、`sourceVersion`、`verifiedAt`、`sourceStatus` 與實作對照。
 
 ## 尚待來源稽核
 

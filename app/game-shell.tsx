@@ -86,7 +86,7 @@ export function GameShell() {
   const socketItem=equippedItems[gemHostSlot];
   const linkCount = itemLinks(socketItem);
   const supportCapacity = Math.max(0, linkCount - 1);
-  const activeSkill = {...skills[skillId], baseDamage:Math.round(skills[skillId].baseDamage*(1+((skillLevels[skillId]??1)-1)*.06))};
+  const activeSkill = skills[skillId];
   const build = { ...equippedItems, skill: activeSkill, socketItem, socketSlot:gemHostSlot, supports: selectedSupports.map((id) => SUPPORTS[id]), supportSlots: linkCount, talents, classId, secondJobId, ascendancyNodes };
   const resolved = resolveStats(build);
   const dps = resolved.dps;
@@ -106,7 +106,7 @@ export function GameShell() {
   const mapPopulation=generateMonsterPopulation(seedRef.current+1);
   const mapPacks=generateMonsterPacks(seedRef.current+1,mapPopulation);
   const mapTerrain=generateTerrain(seedRef.current+1);
-  const mapRoster=generateMonsterRoster(seedRef.current+1,tier,mapPacks);
+  const mapRoster=generateMonsterRoster(seedRef.current+1,tier,mapPacks,inCampaign?level:undefined);
   const walkableCells=new Set(mapTerrain.walkable);
   const exploredCells=new Set(combat?.explored??[mapTerrain.start]);
   const visibleCells=new Set<number>();for(const cell of exploredCells){const x=cell%MAP_WIDTH,y=Math.floor(cell/MAP_WIDTH);for(let dy=-2;dy<=2;dy+=1)for(let dx=-2;dx<=2;dx+=1){const near=(y+dy)*MAP_WIDTH+x+dx;if(x+dx>=0&&x+dx<MAP_WIDTH&&y+dy>=0&&near<MAP_SIZE)visibleCells.add(near);}}
@@ -130,11 +130,11 @@ export function GameShell() {
       const raw = window.localStorage.getItem('terminal-arpg-save');
       if (raw) {
         const s = JSON.parse(raw);
-        if (s.schemaVersion === 4||s.schemaVersion===5) {
+        if (s.schemaVersion === 4||s.schemaVersion===5||s.schemaVersion===6) {
           setClassChosen(s.classChosen); setClassId(s.classId); setSecondJobId(s.secondJobId); setAscendancyNodes(s.ascendancyNodes); setTalentBoard(s.talentBoard); setTalents(s.talents);
           setSkillId(s.skillId); setAcquiredSkills(s.acquiredSkills); setSkillLevels(s.skillLevels??{[s.skillId]:1}); setAcquiredSupports(s.acquiredSupports); setSelectedSupports(s.selectedSupports); setPolicy(s.policy); setContractId(s.contractId);
           setMode(s.mode); setGoal(s.goal); setTier(s.tier); setMaps(s.maps); setCampaignStep(s.campaignStep); setLifetimeRuns(s.lifetimeRuns); setTotalKills(s.totalKills); setXp(s.xp);
-          const loadedItems:Item[]=s.items??[];setItems(loadedItems); setEquipped(repairEquippedItems(loadedItems,s.equipped??{})); setMaterials(s.materials); setOrbs(repairWallet(s.orbs)); setSalvageMode(s.salvageMode); seedRef.current=s.seed;
+          const loadedItems:Item[]=(s.items??[]).map((item:Item)=>item.id==='starter-weapon'?createStarterWeapon(s.classId):item);setItems(loadedItems); setEquipped(repairEquippedItems(loadedItems,s.equipped??{})); setMaterials(s.materials); setOrbs(repairWallet(s.orbs)); setSalvageMode(s.salvageMode); seedRef.current=s.seed;
           setGemHostSlot(s.gemHostSlot??'weapon');setCraftSlot(s.craftSlot??'weapon');craftSeedRef.current=s.craftSeed??1701;if(s.stashPages)setStashPages(s.stashPages);if(s.activeStashId)setActiveStashId(s.activeStashId);if(s.listings)setListings(s.listings);
         }
       }
@@ -144,7 +144,7 @@ export function GameShell() {
 
   useEffect(() => {
     if (!saveLoaded || running) return;
-    window.localStorage.setItem('terminal-arpg-save',JSON.stringify({schemaVersion:5,seed:seedRef.current,craftSeed:craftSeedRef.current,classChosen,classId,secondJobId,ascendancyNodes,talentBoard,talents,skillId,skillLevels,acquiredSkills,acquiredSupports,selectedSupports,gemHostSlot,craftSlot,policy,contractId,mode,goal,tier,maps,campaignStep,lifetimeRuns,totalKills,xp,items,equipped,materials,orbs,salvageMode,stashPages,activeStashId,listings}));
+    window.localStorage.setItem('terminal-arpg-save',JSON.stringify({schemaVersion:6,seed:seedRef.current,craftSeed:craftSeedRef.current,classChosen,classId,secondJobId,ascendancyNodes,talentBoard,talents,skillId,skillLevels,acquiredSkills,acquiredSupports,selectedSupports,gemHostSlot,craftSlot,policy,contractId,mode,goal,tier,maps,campaignStep,lifetimeRuns,totalKills,xp,items,equipped,materials,orbs,salvageMode,stashPages,activeStashId,listings}));
   },[saveLoaded,running,classChosen,classId,secondJobId,ascendancyNodes,talentBoard,talents,skillId,skillLevels,acquiredSkills,acquiredSupports,selectedSupports,gemHostSlot,craftSlot,policy,contractId,mode,goal,tier,maps,campaignStep,lifetimeRuns,totalKills,xp,items,equipped,materials,orbs,salvageMode,stashPages,activeStashId,listings]);
 
   const equipItem = (item:Item) => {
@@ -196,7 +196,7 @@ export function GameShell() {
   useEffect(()=>{
     if(!running||!combat)return;
     const timer=window.setInterval(()=>setCombat(current=>{
-      if(!current)return current;const next=stepCombat(current,{tier,level,build,packs:mapPacks,seed:seedRef.current+1,tickMs:250});
+      if(!current)return current;const next=stepCombat(current,{tier,level,build,packs:mapPacks,seed:seedRef.current+1,tickMs:250,areaLevel:inCampaign?level:undefined});
       setProgress(Math.min(100,Math.round(next.kills/next.totalMonsters*100)));
       const visible=combatDetail==='full'?next.events:next.events.filter(event=>event.kind!=='HIT'||next.action%4===0||next.targetLife===0);
       if(visible.length)pushLogs(visible.map(event=>[event.kind,event.text]));
@@ -210,7 +210,7 @@ export function GameShell() {
   useEffect(()=>{logRef.current?.scrollTo({top:logRef.current.scrollHeight,behavior:'smooth'});},[logs]);
 
   const start=()=>{
-    if(inCampaign){setRuns(0);setProgress(0);const next=createCombatState(1,level,build,mapPacks,seedRef.current+1);setCombat(next);setRunning(true);pushLogs([['QUEST',`接受 ${operation.title} · ${operation.lesson}`],...next.events.map(event=>[event.kind,event.text] as [string,string])]);return;}
+    if(inCampaign){setRuns(0);setProgress(0);const next=createCombatState(1,level,build,mapPacks,seedRef.current+1,level);setCombat(next);setRunning(true);pushLogs([['QUEST',`接受 ${operation.title} · ${operation.lesson}`],...next.events.map(event=>[event.kind,event.text] as [string,string])]);return;}
     if(tier>maxTier){pushLog('WARN',`有效 DPS 需達 ${TIER_POWER_REQUIREMENTS[tier].toLocaleString()} 才能進入 T${tier}`);return;}
     const startTier=tier===1||maps[tier]>0?tier:1;if(startTier!==tier){setTier(1);pushLog('RECOVER','高階圖已耗盡，切回無限 T1 繼續成長');}
     if(startTier>1)setMaps(v=>{const n=[...v];n[startTier]-=1;return n;});
@@ -231,7 +231,7 @@ export function GameShell() {
 
   if(!saveLoaded)return null;
   return <main className="min-h-screen bg-background text-foreground"><div className="scanlines" aria-hidden="true" />
-    <header className="border-b border-border/80 bg-card/80"><div className="mx-auto flex max-w-[1500px] items-center justify-between px-4 py-3 sm:px-6"><div className="flex items-center gap-3"><div className="brand-mark"><CircleDot className="size-5"/></div><div><div className="flex gap-2"><h1 className="font-mono text-sm font-bold tracking-[.16em] text-primary">TERMINAL ARPG</h1><span className="rounded border border-primary/30 px-1.5 font-mono text-[9px] text-primary">ALPHA 0.11</span></div><p className="text-[11px] text-muted-foreground">RO 職業 × 技能寶石 × 自動遠征</p></div></div><div className="text-right font-mono text-xs"><b className="text-primary">Lv.{level} · {classChosen?(secondJobId?SECOND_JOBS[secondJobId].name:CLASSES[classId].name):'未選職'}</b><small className="block text-muted-foreground">DPS {dps.toLocaleString()}</small></div></div></header>
+    <header className="border-b border-border/80 bg-card/80"><div className="mx-auto flex max-w-[1500px] items-center justify-between px-4 py-3 sm:px-6"><div className="flex items-center gap-3"><div className="brand-mark"><CircleDot className="size-5"/></div><div><div className="flex gap-2"><h1 className="font-mono text-sm font-bold tracking-[.16em] text-primary">TERMINAL ARPG</h1><span className="rounded border border-primary/30 px-1.5 font-mono text-[9px] text-primary">ALPHA 0.12</span></div><p className="text-[11px] text-muted-foreground">RO 職業 × 技能寶石 × 自動遠征</p></div></div><div className="text-right font-mono text-xs"><b className="text-primary">Lv.{level} · {classChosen?(secondJobId?SECOND_JOBS[secondJobId].name:CLASSES[classId].name):'未選職'}</b><small className="block text-muted-foreground">DPS {dps.toLocaleString()}</small></div></div></header>
     {!classChosen&&<div className="mx-auto max-w-4xl px-4 py-12"><Panel title="選擇初心職業" icon={Swords}><p className="mb-5 text-sm text-muted-foreground">每個職業從一把新手武器與一顆技能寶石開始。技能不綁職業，後續都能靠掉落取得。</p><div className="grid gap-3 md:grid-cols-3">{(Object.keys(CLASSES) as ClassId[]).map(id=>{const c=CLASSES[id];return <button key={id} onClick={()=>chooseClass(id)} className="class-card"><small>一轉職業</small><b>{c.name}</b><strong>{c.trait}</strong><p>{c.description}</p><em>起始技能：{skills[c.starterSkill].name}</em></button>})}</div></Panel></div>}
     {classChosen&&<><div className="mx-auto grid max-w-[1500px] grid-cols-4 gap-2 px-4 pt-4 sm:grid-cols-5 sm:px-6"><Resource label="改造石" value={orbs.alteration} purpose="重骰魔法詞綴"/><Resource label="混沌石" value={orbs.chaos} purpose="重骰稀有詞綴"/><Resource label="鏈結石" value={orbs.fusing} purpose="重骰連線"/><Resource label="神聖石" value={orbs.divine} purpose="重骰詞綴數值"/><div className="hidden sm:block"><Resource label="通貨總量" value={Object.values(orbs).reduce((sum,value)=>sum+value,0)} purpose="31 種無上限"/></div></div>
     <div className="mx-auto grid max-w-[1500px] gap-4 px-4 py-4 sm:px-6 xl:grid-cols-[300px_minmax(0,1fr)_340px]">
@@ -241,7 +241,7 @@ export function GameShell() {
         <Panel title={inCampaign?'任務執行':'持續執行'} icon={InfinityIcon}>{!inCampaign&&<><div className="grid grid-cols-3 gap-1">{([['count','次數'],['time','時間'],['empty','耗盡']] as const).map(([id,label])=><button key={id} disabled={running} onClick={()=>setMode(id)} className={`mode-button ${mode===id?'active':''}`}>{label}</button>)}</div>{mode!=='empty'&&<div className="mt-4"><div className="mb-2 flex justify-between text-xs"><span>{mode==='count'?'張數':'時間'}</span><b>{mode==='count'?`${goal} 張`:`${goal*10} 秒`}</b></div><Slider min={1} max={mode==='count'?30:18} value={[goal]} disabled={running} onValueChange={v=>setGoal(Array.isArray(v)?v[0]:v)}/></div>}</>}<Button className="run-button mt-4 w-full" onClick={running?()=>{setRunning(false);pushLog('PAUSE','玩家中止循環');}:start}>{running?<><Pause/>停止</>:<><Play/>{inCampaign?'執行任務':'啟動自動刷圖'}</>}</Button></Panel>
       </aside>
       <section className="min-w-0 space-y-4">
-        <div className="character-hud"><div><b>{secondJobId?SECOND_JOBS[secondJobId].name:CLASSES[classId].name} Lv.{level}</b><small>{skills[skillId].name} · {CLASSES[classId].trait}</small></div><StatusBar label="HP" value={Math.ceil(combat?.life??resolved.life)} max={combat?.maxLife??resolved.life} tone="hp"/><StatusBar label="MP" value={Math.floor(combat?.mana??maximumMana(level))} max={combat?.maxMana??maximumMana(level)} tone="mp"/><StatusBar label="EXP" value={xp%100} max={100} tone="xp"/></div>
+        <div className="character-hud"><div><b>{secondJobId?SECOND_JOBS[secondJobId].name:CLASSES[classId].name} Lv.{level}</b><small>{skills[skillId].name} · 原作可確認 · {CLASSES[classId].trait}</small></div><StatusBar label="HP" value={Math.ceil(combat?.life??resolved.life)} max={combat?.maxLife??resolved.life} tone="hp"/><StatusBar label="MP" value={Math.floor(combat?.mana??maximumMana(level))} max={combat?.maxMana??maximumMana(level)} tone="mp"/><StatusBar label="EXP" value={xp%100} max={100} tone="xp"/></div>
         <div className="map-frame"><div className="map-population"><b>本圖 {mapPopulation.total} 隻</b><span>普通 {mapPopulation.normal}</span><span className="magic-text">魔法 {mapPopulation.magic}</span><span className="rare-text">稀有 {mapPopulation.rare}</span><span className="special-text">特殊 {mapPopulation.special}</span><span>首領 1</span></div><div className="field-map" aria-label="RO 式俯視迷霧地圖">{Array.from({length:MAP_SIZE},(_,i)=>{const visible=visibleCells.has(i),walkable=walkableCells.has(i),player=i===(combat?.playerPosition??mapTerrain.start),boss=i===mapTerrain.boss,occupants=livingByCell.get(i),count=occupants?.count??0;const title=count?`此格有 ${count} 隻未擊殺怪物`:boss?'首領房':walkable?'可行走地形':'障礙地形';return <i key={i} title={title} className={!visible?'fog':player?'player':boss?'boss':!walkable?'void':count?`monster ${occupants?.rank??'normal'}`:'floor'}>{!visible?'':player?'◆':boss?'B':count?count>9?'●':String(count):''}</i>})}<span>◆ 玩家　數字 怪物　B 首領房　黑色 未探索迷霧</span></div></div>
         <div className="terminal-grid"><div className="terminal-shell"><div className="terminal-titlebar"><span className="font-mono text-[10px] text-primary">戰鬥終端://T{tier}/{skills[skillId].name}</span><div className="flex gap-1"><button onClick={()=>setCombatDetail('compact')} className={combatDetail==='compact'?'active':''}>精簡</button><button onClick={()=>setCombatDetail('full')} className={combatDetail==='full'?'active':''}>完整</button></div><span className="font-mono text-[10px] text-muted-foreground">{running?`RUN ${runs+1}`:'IDLE'}</span></div><div ref={logRef} className="terminal-output">{logs.map(log=><div key={log.id} className={`log-line log-${log.kind.toLowerCase()}`}><time>{log.id===1?'00:00:00':new Date(log.id).toLocaleTimeString('zh-TW',{hour12:false}).slice(0,8)}</time><b>[{log.kind}]</b><span>{log.text}</span></div>)}{running&&<div className="terminal-cursor">&gt; attack.auto<i/></div>}</div></div><div className="chat-shell"><div className="chat-title">區域聊天 <span>單機預覽</span></div><div className="chat-output">{chat.map(row=><p key={row.id}><b>[{row.name}]</b> {row.text}</p>)}</div><form onSubmit={event=>{event.preventDefault();const text=chatInput.trim();if(!text)return;setChat(v=>[...v.slice(-30),{id:Date.now(),name:'你',text}]);setChatInput('');}}><input aria-label="聊天訊息" value={chatInput} onChange={e=>setChatInput(e.target.value)} placeholder="輸入訊息…"/><button>送出</button></form></div></div>
         <div className="panel p-4"><div className="flex justify-between"><div><div className="section-label"><Activity className="size-3.5"/>T{tier} 探索 {progress}%</div><p className="mt-1 text-xs text-muted-foreground">目標 {combat?.target?.id??'搜尋中'} · 本圖擊殺 {combat?.kills??0}/{combat?.totalMonsters??mapPopulation.total} · 剩餘 {combat?.targets.length??mapPopulation.total} · 藥劑 生命 {Math.floor(combat?.lifeFlaskCharges??21)}/21／魔力 {Math.floor(combat?.manaFlaskCharges??24)}/24</p></div><b className="font-mono text-xl text-primary">{totalKills+(combat?.kills??0)} KILLS</b></div><div className="progress-track mt-3"><div className="progress-fill" style={{width:`${progress}%`}}/></div><div className="mt-3 grid grid-cols-4 gap-2"><Mini label="裝備" value={String(sessionLoot.items)}/><Mini label="寶石" value={String(sessionLoot.gems)}/><Mini label="通貨" value={String(sessionLoot.orbs)}/><Mini label="經驗" value={String(sessionLoot.xp)}/></div></div>

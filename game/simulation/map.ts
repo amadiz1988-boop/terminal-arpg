@@ -46,11 +46,6 @@ export function generateMonsterPacks(seed:number, population:MonsterPopulation):
   return packs;
 }
 
-export function progressPerTick(build: BuildSnapshot, tier: number, policy: Policy) {
-  const stats = resolveStats(build);
-  return Math.max(3, Math.round((stats.dps / (tier * 2100)) * (policy === 'boss-rush' ? 8 : 6)));
-}
-
 export function contractFailureChance(build: BuildSnapshot, tier: number, contractId: ContractId) {
   const stats = resolveStats(build);
   return Math.max(0, CONTRACTS[contractId].danger + tier * .025 - Math.min(.22, stats.dps / (tier * 60000)));

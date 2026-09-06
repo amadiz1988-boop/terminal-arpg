@@ -23,6 +23,12 @@ export type SkillDefinition = {
   moveSpeed: number;
   color: string;
   socketColor: SocketColor;
+  sourceGame: 'Path of Exile';
+  sourceUrl: string;
+  sourceVersion: string;
+  verifiedAt: string;
+  sourceStatus: 'verified';
+  implementationNotes: string;
 };
 
 export type SupportDefinition = {

@@ -42,11 +42,11 @@ function rollSocketColors(item:Pick<Item,'baseId'>,count:number,random:()=>numbe
 
 export function createStarterWeapon(classId: ClassId = 'thief'): Item {
   const starter = {
-    thief: { baseId: 'novice-katar', name: '見習拳刃', color: 'G' as SocketColor },
-    mage: { baseId: 'novice-wand', name: '見習法杖', color: 'B' as SocketColor },
-    acolyte: { baseId: 'novice-mace', name: '見習權杖', color: 'R' as SocketColor },
+    thief: { baseId: 'glass-shank', name: '玻璃利片', color: 'G' as SocketColor },
+    mage: { baseId: 'driftwood-wand', name: '朽木法杖', color: 'B' as SocketColor },
+    acolyte: { baseId: 'driftwood-club', name: '朽木之棒', color: 'R' as SocketColor },
   }[classId];
-  return { id: 'starter-weapon', baseId: starter.baseId, name: starter.name, slot: 'weapon', rarity: 'COMMON', itemLevel: 1, links: 1, sockets: [starter.color], affixes: [{ id: 'starter-damage', name: '+4% 傷害', stat: 'damage', value: 4, tier: 8, tags: ['attack'] }], locked: true };
+  return { id: 'starter-weapon', baseId: starter.baseId, name: starter.name, slot: 'weapon', rarity: 'COMMON', itemLevel: 1, links: 1, sockets: [starter.color], affixes: [], locked: true };
 }
 
 export function createCampaignItem(step: number, skillId: BuildSnapshot['skill']['id']): Item | undefined {
