@@ -42,10 +42,8 @@ try {
   await call('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
   await evaluate("document.querySelector('.class-card')?.click()");
   await new Promise((resolve) => setTimeout(resolve, 500));
-  const before = await evaluate("({url:location.href,title:document.body.innerText.includes('RO 能力配點 · 剩餘 48'),oldTalent:document.body.innerText.includes('天賦 ·'),resourceTiles:document.querySelectorAll('.resource-tile').length,statRows:[...document.querySelectorAll('.setting-row')].filter(x=>/STR|AGI|VIT|INT|DEX|LUK/.test(x.innerText)).length,overflow:document.documentElement.scrollWidth>innerWidth,dps:document.body.innerText.match(/DPS [0-9,]+/)?.[0],excerpt:document.body.innerText.slice(0,120)})");
-  await evaluate("[...document.querySelectorAll('.setting-row')].find(x=>x.innerText.includes('STR 力量'))?.querySelector('button')?.click()");
-  await new Promise((resolve) => setTimeout(resolve, 250));
-  const after = await evaluate("({remaining:document.body.innerText.includes('RO 能力配點 · 剩餘 46'),str:[...document.querySelectorAll('.setting-row')].find(x=>x.innerText.includes('STR 力量'))?.innerText,dps:document.body.innerText.match(/DPS [0-9,]+/)?.[0]})");
+  const before = await evaluate("({url:location.href,title:document.body.innerText.includes('人物能力與屬性狀態欄'),zeroStart:document.body.innerText.includes('Lv.1 從六圍各 1、剩餘 0 點開始'),statusPoint:[...document.querySelectorAll('.ro-derived div')].find(x=>x.innerText.includes('STATUS POINT'))?.innerText,oldTalent:document.body.innerText.includes('天賦 ·'),resourceTiles:document.querySelectorAll('.resource-tile').length,statRows:document.querySelectorAll('.ro-primary>div').length,derivedRows:document.querySelectorAll('.ro-derived>div').length,enabledPlus:document.querySelectorAll('.ro-primary button:not(:disabled)').length,overflow:document.documentElement.scrollWidth>innerWidth,dps:document.body.innerText.match(/DPS [0-9,]+/)?.[0],excerpt:document.body.innerText.slice(0,120)})");
+  const after = await evaluate("({atk:[...document.querySelectorAll('.ro-derived div')].find(x=>x.innerText.startsWith('ATK'))?.innerText,def:[...document.querySelectorAll('.ro-derived div')].find(x=>x.innerText.startsWith('DEF'))?.innerText,resetDisabled:document.querySelector('.stat-reset')?.disabled})");
   console.log(JSON.stringify({ before, after }, null, 2));
   await call('Browser.close');
 } finally {

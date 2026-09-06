@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { SKILLS } from '../../game/content/skills';
-import { DEFAULT_RO_STATS, nextStatCost, RO_STAT_DEFINITIONS, roMeleeAttack, spentStatusPoints, statusPointsForLevel } from '../../game/content/ro-stats';
+import { DEFAULT_RO_STATS, nextStatCost, repairRoStatsForLevel, RO_STAT_DEFINITIONS, roAspdFromAttacksPerSecond, roAverageMagicAttack, roFlee, roHit, roMagicDefense, roMeleeAttack, roPerfectDodge, roPhysicalDefense, roRangedAttack, roVariableCastMultiplier, spentStatusPoints, statusPointsForLevel } from '../../game/content/ro-stats';
 import { isSupportCompatible, SUPPORTS } from '../../game/content/supports';
 import { createStarterWeapon } from '../../game/items/items';
 import { resolveStats } from '../../game/modifiers/resolve-stats';
@@ -78,9 +78,10 @@ describe('simulation contracts', () => {
   });
 
   it('uses the sourced RO status point schedule and escalating costs', () => {
-    expect(statusPointsForLevel(1)).toBe(48);
-    expect(statusPointsForLevel(6)).toBe(64);
-    expect(statusPointsForLevel(99)).toBe(1273);
+    expect(statusPointsForLevel(1)).toBe(0);
+    expect(statusPointsForLevel(2)).toBe(3);
+    expect(statusPointsForLevel(6)).toBe(16);
+    expect(statusPointsForLevel(99)).toBe(1225);
     expect(nextStatCost(1)).toBe(2);
     expect(nextStatCost(11)).toBe(3);
     expect(spentStatusPoints({...DEFAULT_RO_STATS,str:99})).toBe(628);
@@ -108,11 +109,43 @@ describe('simulation contracts', () => {
     expect(maximumMana(1,intelligence.manaPercent)).toBeGreaterThan(maximumMana(1,spellBase.manaPercent));
     expect(dexterity.attacksPerSecond).toBeGreaterThan(spellBase.attacksPerSecond);
     expect(luck.critChance).toBeGreaterThan(attackBase.critChance);
-    expect(roMeleeAttack({...DEFAULT_RO_STATS,str:20})).toBe(24);
+    expect(roMeleeAttack({...DEFAULT_RO_STATS,str:20})).toBe(20);
   });
 
   it('stores source provenance for every active RO status entry', () => {
-    expect(RO_STAT_DEFINITIONS.every(stat=>stat.sourceStatus==='verified'&&stat.sourceUrl==='https://irowiki.org/classic/Stats'&&stat.verifiedAt==='2026-09-06')).toBe(true);
+    expect(RO_STAT_DEFINITIONS.every(stat=>stat.sourceStatus==='verified'&&stat.sourceUrl==='https://ro.ntome.com/stat/attr'&&stat.verifiedAt==='2026-09-06')).toBe(true);
+  });
+
+  it('calculates the displayed Renewal derived stats from the live six stats', () => {
+    const stats={str:20,agi:10,vit:10,int:10,dex:10,luk:10};
+    expect(roMeleeAttack(stats,20)).toBe(30);
+    expect(roRangedAttack(stats,20)).toBe(22);
+    expect(roAverageMagicAttack(stats,20)).toBe(25);
+    expect(roPhysicalDefense(stats,20)).toBe(17);
+    expect(roMagicDefense(stats,20)).toBe(19);
+    expect(roHit(20,stats)).toBe(33);
+    expect(roFlee(20,stats)).toBe(32);
+    expect(roPerfectDodge(stats)).toBe(2);
+    expect(roVariableCastMultiplier(stats)).toBeCloseTo(1-Math.sqrt(30/530));
+    expect(roAspdFromAttacksPerSecond(5)).toBe(190);
+  });
+
+  it('migrates old level-one 48-point saves back to the zero-point start', () => {
+    expect(repairRoStatsForLevel({...DEFAULT_RO_STATS,str:2},1)).toEqual(DEFAULT_RO_STATS);
+    expect(repairRoStatsForLevel({...DEFAULT_RO_STATS,str:2},2).str).toBe(2);
+  });
+
+  it('recalculates life and mana during an active combat state', () => {
+    const packs=[{position:1,normal:1,magic:0,rare:0,special:0}];
+    const baseBuild={skill:SKILLS.venom,weapon:createStarterWeapon('thief'),roStats:DEFAULT_RO_STATS};
+    const state=createCombatState(1,2,baseBuild,packs,824,1);
+    state.life=state.maxLife/2;
+    state.mana=state.maxMana/2;
+    const next=stepCombat(state,{tier:1,level:2,build:{...baseBuild,roStats:{...DEFAULT_RO_STATS,vit:21,int:21}},packs,seed:824,tickMs:1,areaLevel:1});
+    expect(next.maxLife).toBeGreaterThan(state.maxLife);
+    expect(next.maxMana).toBeGreaterThan(state.maxMana);
+    expect(next.life/next.maxLife).toBeCloseTo(.5,2);
+    expect(next.mana/next.maxMana).toBeCloseTo(.5,2);
   });
 
   it('lets support choices trade clear speed for boss damage or defense', () => {

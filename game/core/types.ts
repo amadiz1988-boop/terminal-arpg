@@ -72,6 +72,7 @@ export type Item = {
 };
 
 export type BuildSnapshot = {
+  level?: number;
   skill: SkillDefinition;
   socketItem?: Item;
   socketSlot?: ItemSlot;

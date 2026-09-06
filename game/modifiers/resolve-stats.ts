@@ -1,5 +1,5 @@
 import type { AffixStat, BuildSnapshot, Item, ResolvedStats } from '../core/types';
-import { DEFAULT_RO_STATS, roAverageMagicAttack, roMeleeAttack, roRangedAttack } from '../content/ro-stats';
+import { DEFAULT_RO_STATS, roAverageMagicAttack, roMeleeAttack, roRangedAttack, roVariableCastMultiplier } from '../content/ro-stats';
 import { isSupportCompatible } from '../content/supports';
 
 function sum(items: Array<Item | undefined>, stat: AffixStat) {
@@ -22,7 +22,7 @@ export function resolveDefaultAttack(build: BuildSnapshot) {
   const speed = sum(items, 'speed') + mastery.tempo * 5;
   const attackDelayMultiplier = Math.max(.05, 1 - roStats.agi * .004 - roStats.dex * .001);
   return {
-    hitDamage: Math.max(1, Math.round((base.hit + roMeleeAttack(roStats)) * (1 + damage / 100))),
+    hitDamage: Math.max(1, Math.round((base.hit + roMeleeAttack(roStats,build.level)) * (1 + damage / 100))),
     attacksPerSecond: base.attacksPerSecond * (1 + speed / 100) / attackDelayMultiplier,
     critChance: base.critChance + sum(items, 'crit') + roStats.luk * .3,
   };
@@ -56,8 +56,8 @@ export function resolveStats(build: BuildSnapshot): ResolvedStats {
   const supportClear = supports.reduce((value, support) => value * support.clearMultiplier, 1);
   const supportLife = supports.reduce((value, support) => value * support.lifeMultiplier, 1);
   const socketPenalty = skillSocket >= 0 ? 1 : .55;
-  const statusDamage = attack ? (build.skill.tags.includes('bow') ? roRangedAttack(roStats) : roMeleeAttack(roStats)) : spell ? roAverageMagicAttack(roStats) : 0;
-  const actionDelayMultiplier = attack ? Math.max(.05, 1 - roStats.agi * .004 - roStats.dex * .001) : spell ? Math.max(.05, 1 - roStats.dex / 150) : 1;
+  const statusDamage = attack ? (build.skill.tags.includes('bow') ? roRangedAttack(roStats,build.level) : roMeleeAttack(roStats,build.level)) : spell ? roAverageMagicAttack(roStats,build.level) : 0;
+  const actionDelayMultiplier = attack ? Math.max(.05, 1 - roStats.agi * .004 - roStats.dex * .001) : spell ? Math.max(.05,roVariableCastMultiplier(roStats)) : 1;
   const hit = (build.skill.baseDamage + statusDamage) * (1 + damage / 100) * supportDamage * socketPenalty;
   const attacks = build.skill.attacksPerSecond * (1 + speed / 100) * supportSpeed / actionDelayMultiplier;
   const dps = Math.round(hit * attacks * (1 + Math.min(100,crit) / 100 * .5));
