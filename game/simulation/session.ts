@@ -12,10 +12,8 @@ export type AcceleratedSessionReport = {
   equivalentMinutes:number; mapsRun:number; successes:number; deaths:number; decisions:number; upgrades:number;
   gemsFound:number; uniqueGems:number; orbsEarned:number; orbsSpent:number; mapExchanges:number; freeRuns:number;
   lockouts:number; longestMapsWithoutReward:number; startingDps:number; finalDps:number; powerGainPercent:number;
-  tiersUnlocked:number; score:number; scoreBreakdown:Record<'decisions'|'feedback'|'build'|'loot'|'replay'|'stability',number>;
+  tiersUnlocked:number;
 };
-
-const SLOTS:ItemSlot[]=['weapon','armor','helmet','gloves','boots','amulet'];
 
 export function simulateAcceleratedSession(seed=824,mapsToRun=45):AcceleratedSessionReport{
   const equipment:Partial<Record<ItemSlot,Item>>={weapon:createStarterWeapon('thief')};
@@ -40,7 +38,6 @@ export function simulateAcceleratedSession(seed=824,mapsToRun=45):AcceleratedSes
     const orb= index%5===4?'alteration':index%6===5?'jeweller':index%7===6?'fusing':'chromatic';
     if(craft?.applied&&orbs[orb]>0){equipment.weapon=craft.item;orbs[orb]-=1;orbsSpent+=1;decisions+=1;}
   }
-  longestMapsWithoutReward=Math.max(longestMapsWithoutReward,mapsSinceReward);const finalDps=resolveStats(snapshot()).dps;const powerGainPercent=Math.round((finalDps/startingDps-1)*100);const filled=SLOTS.filter(slot=>equipment[slot]).length;
-  const scoreBreakdown={decisions:decisions>=18?2:decisions>=12?1.5:1,feedback:longestMapsWithoutReward<=5?2:1,build:filled>=5&&powerGainPercent>=70?2:filled>=4?1.5:1,loot:gemsFound===successes&&orbsEarned>=successes?2:1,replay:mapExchanges>=5&&knownSkills.size>=4?1:.5,stability:successes+deaths===mapsToRun?1:0};
-  return{equivalentMinutes:Math.round(mapsToRun*42/60*10)/10,mapsRun:mapsToRun,successes,deaths,decisions,upgrades,gemsFound,uniqueGems:knownSkills.size+knownSupports.size,orbsEarned,orbsSpent,mapExchanges,freeRuns,lockouts:0,longestMapsWithoutReward,startingDps,finalDps,powerGainPercent,tiersUnlocked:peakTier,score:Object.values(scoreBreakdown).reduce((a,b)=>a+b,0),scoreBreakdown};
+  longestMapsWithoutReward=Math.max(longestMapsWithoutReward,mapsSinceReward);const finalDps=resolveStats(snapshot()).dps;const powerGainPercent=Math.round((finalDps/startingDps-1)*100);
+  return{equivalentMinutes:Math.round(mapsToRun*42/60*10)/10,mapsRun:mapsToRun,successes,deaths,decisions,upgrades,gemsFound,uniqueGems:knownSkills.size+knownSupports.size,orbsEarned,orbsSpent,mapExchanges,freeRuns,lockouts:0,longestMapsWithoutReward,startingDps,finalDps,powerGainPercent,tiersUnlocked:peakTier};
 }

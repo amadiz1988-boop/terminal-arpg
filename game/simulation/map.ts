@@ -56,14 +56,14 @@ export function contractFailureChance(build: BuildSnapshot, tier: number, contra
   return Math.max(0, CONTRACTS[contractId].danger + tier * .025 - Math.min(.22, stats.dps / (tier * 60000)));
 }
 
-export function simulateMapCompletion(seed: number, tier: number, policy: Policy, build: BuildSnapshot, contractId: ContractId = 'scout', routeId: FarmingRouteId = 'arsenal'): MapCompletion {
+export function simulateMapCompletion(seed: number, tier: number, policy: Policy, build: BuildSnapshot, contractId: ContractId = 'scout', routeId: FarmingRouteId = 'arsenal', forceSuccess?:boolean): MapCompletion {
   const random = createRandom(seed);
   const monsters=generateMonsterPopulation(seed);
   const packs=generateMonsterPacks(seed,monsters);
   const contract = CONTRACTS[contractId];
   void routeId;
   const failureChance = contractFailureChance(build, tier, contractId);
-  const success = random() >= failureChance;
+  const success = forceSuccess ?? random() >= failureChance;
   const mapDropTier = Math.min(5, tier + (random() > .68 - contract.mapChance - (policy === 'boss-rush' ? .16 : 0) ? 1 : 0));
   const emptySlots = SLOT_ORDER.filter((slot) => !build[slot]);
   const plannedSlot = emptySlots.length > 0 ? emptySlots[seed % emptySlots.length] : SLOT_ORDER[seed % SLOT_ORDER.length];

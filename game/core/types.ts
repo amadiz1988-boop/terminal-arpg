@@ -84,6 +84,8 @@ export type BuildSnapshot = {
 
 export type ResolvedStats = {
   dps: number;
+  hitDamage: number;
+  attacksPerSecond: number;
   bossDps: number;
   clearScore: number;
   life: number;

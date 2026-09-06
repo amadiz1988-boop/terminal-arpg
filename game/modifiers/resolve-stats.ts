@@ -38,9 +38,11 @@ export function resolveStats(build: BuildSnapshot): ResolvedStats {
   const socketPenalty = skillSocket >= 0 ? 1 : .55;
   const hit = build.skill.baseDamage * (1 + damage / 100) * supportDamage * socketPenalty;
   const attacks = build.skill.attacksPerSecond * (1 + speed / 100) * supportSpeed;
-  const dps = Math.round(hit * attacks * (1 + crit * 0.015));
+  const dps = Math.round(hit * attacks * (1 + Math.min(100,crit) / 100 * .5));
   return {
     dps,
+    hitDamage: Math.round(hit),
+    attacksPerSecond: attacks,
     bossDps: Math.round(dps * (build.skill.tags.includes('projectile') ? 1.12 : 1) * supportBoss * (1 + (talent('boss') + (job.boss ?? 0)) / 100)),
     clearScore: Math.round(dps * (moveSpeed / 100) * (build.skill.tags.includes('chain') || build.skill.tags.includes('area') ? 1.25 : 1) * supportClear * (1 + (talent('clear') + (job.clear ?? 0)) / 100)),
     life: Math.round(life * supportLife),
