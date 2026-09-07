@@ -49,17 +49,6 @@ export function createStarterWeapon(classId: ClassId = 'thief'): Item {
   return { id: 'starter-weapon', baseId: starter.baseId, name: starter.name, slot: 'weapon', rarity: 'COMMON', itemLevel: 1, links: 1, sockets: [starter.color], affixes: [], locked: true };
 }
 
-export function createCampaignItem(step: number, skillId: BuildSnapshot['skill']['id']): Item | undefined {
-  if (step === 0) return { id: 'campaign-armor', baseId: 'scout-leather', name: '偵察員皮甲', slot: 'armor', rarity: 'MAGIC', itemLevel: 4, affixes: [{ id: 'campaign-life', name: '+18 生命', stat: 'life', value: 18, tier: 7, tags: ['life'] }] };
-  if (step === 1) return { id: 'campaign-weapon', baseId: 'relay-weapon', name: '中繼站戰弓', slot: 'weapon', rarity: 'RARE', itemLevel: 8, links: 2, sockets: ['G', 'B'], affixes: [{ id: 'campaign-damage', name: '+14% 傷害', stat: 'damage', value: 14, tier: 6, tags: ['damage'] }, { id: 'campaign-speed', name: '+9% 攻擊速度', stat: 'speed', value: 9, tier: 6, tags: ['speed'] }] };
-  if (step === 4) {
-    const names = { ember: '餘燼增幅弓', arc: '雷脈增幅杖', quake: '震央增幅錘', venom: '音速拳刃', firebolt: '熾焰法杖', smite: '聖光權杖' };
-    const skillColors: Record<BuildSnapshot['skill']['id'], SocketColor[]> = { ember: ['G', 'G', 'B'], arc: ['B', 'B', 'G'], quake: ['R', 'R', 'B'], venom: ['G', 'G', 'R'], firebolt: ['B', 'B', 'G'], smite: ['R', 'R', 'B'] };
-    return { id: `campaign-core-${skillId}`, baseId: `${skillId}-core`, name: names[skillId], slot: 'weapon', rarity: 'RARE', itemLevel: 20, links: 3, sockets: skillColors[skillId], affixes: [{ id: `${skillId}-damage`, name: '+24% 傷害', stat: 'damage', value: 24, tier: 4, tags: [skillId] }, { id: `${skillId}-speed`, name: '+12% 攻擊速度', stat: 'speed', value: 12, tier: 5, tags: [skillId] }, { id: `${skillId}-crit`, name: '+10% 暴擊率', stat: 'crit', value: 10, tier: 5, tags: [skillId] }] };
-  }
-  return undefined;
-}
-
 export function generateItem(seed: number, itemLevel: number, forcedSlot?: ItemSlot): Item {
   const random = createRandom(seed);
   const slots: ItemSlot[] = ['weapon', 'armor', 'helmet', 'gloves', 'boots', 'amulet'];

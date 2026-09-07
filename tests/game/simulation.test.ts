@@ -4,9 +4,8 @@ import { DEFAULT_RO_STATS, nextStatCost, repairRoStatsForLevel, RO_STAT_DEFINITI
 import { isSupportCompatible, SUPPORTS } from '../../game/content/supports';
 import { createStarterWeapon } from '../../game/items/items';
 import { resolveStats } from '../../game/modifiers/resolve-stats';
-import { completeCampaignOperation } from '../../game/progression/campaign';
 import { exchangeMaps } from '../../game/progression/maps';
-import { generateMonsterPacks, generateMonsterPopulation, getRunStopReason, selectCampaignPacks, simulateMapCompletion } from '../../game/simulation/map';
+import { generateMonsterPacks, generateMonsterPopulation, getRunStopReason, simulateMapCompletion } from '../../game/simulation/map';
 import { simulateAcceleratedSession } from '../../game/simulation/session';
 import { armourReduction, createCombatState, generateMonsterRoster, maximumMana, SKILL_MANA_COST, stepCombat } from '../../game/simulation/combat';
 import { progressMapRewards } from '../../game/simulation/rewards';
@@ -25,25 +24,14 @@ describe('simulation contracts', () => {
     expect(stats.attacksPerSecond).toBeLessThan(2.1);
   });
 
-  it('uses sourced level-one life scaling in the opening area', () => {
-    const roster=generateMonsterRoster(824,1,[{position:1,normal:1,magic:1,rare:1,special:0}],1).targets;
-    expect(roster.find(target=>target.rank==='normal')?.maxLife).toBe(22);
-    expect(roster.find(target=>target.rank==='magic')?.maxLife).toBe(82);
-    expect(roster.find(target=>target.rank==='rare')?.maxLife).toBe(143);
-    expect(roster.find(target=>target.rank==='boss')?.maxLife).toBe(176);
+  it('uses formal T1 monster life immediately after character creation', () => {
+    const roster=generateMonsterRoster(824,1,[{position:1,normal:1,magic:1,rare:1,special:0}]).targets;
+    expect(roster.find(target=>target.rank==='normal')?.maxLife).toBe(62);
+    expect(roster.find(target=>target.rank==='magic')?.maxLife).toBe(269);
+    expect(roster.find(target=>target.rank==='rare')?.maxLife).toBe(608);
+    expect(roster.find(target=>target.rank==='boss')?.maxLife).toBe(9742);
   });
 
-  it('unlocks maps only after the final campaign operation', () => {
-    expect(completeCampaignOperation(4, 'arc').maps).toBeUndefined();
-    expect(completeCampaignOperation(5, 'arc').maps?.[1]).toBe(0);
-    expect(completeCampaignOperation(5, 'arc').maps?.[2]).toBe(2);
-  });
-
-  it('delivers rewards that match the campaign promise', () => {
-    expect(completeCampaignOperation(0, 'arc').item?.slot).toBe('armor');
-    expect(completeCampaignOperation(1, 'arc').item?.rarity).toBe('RARE');
-    expect(completeCampaignOperation(4, 'arc').item?.name).toContain('雷');
-  });
 
   it('keeps T1 infinite and stops a depleted higher tier', () => {
     expect(getRunStopReason({ mode: 'count', completed: 2, goal: 5, elapsedMs: 1000, availableNext: 0, tier: 1 })).toBeNull();
@@ -139,10 +127,10 @@ describe('simulation contracts', () => {
   it('recalculates life and mana during an active combat state', () => {
     const packs=[{position:1,normal:1,magic:0,rare:0,special:0}];
     const baseBuild={skill:SKILLS.venom,weapon:createStarterWeapon('thief'),roStats:DEFAULT_RO_STATS};
-    const state=createCombatState(1,2,baseBuild,packs,824,1);
+    const state=createCombatState(1,2,baseBuild,packs,824);
     state.life=state.maxLife/2;
     state.mana=state.maxMana/2;
-    const next=stepCombat(state,{tier:1,level:2,build:{...baseBuild,roStats:{...DEFAULT_RO_STATS,vit:21,int:21}},packs,seed:824,tickMs:1,areaLevel:1});
+    const next=stepCombat(state,{tier:1,level:2,build:{...baseBuild,roStats:{...DEFAULT_RO_STATS,vit:21,int:21}},packs,seed:824,tickMs:1});
     expect(next.maxLife).toBeGreaterThan(state.maxLife);
     expect(next.maxMana).toBeGreaterThan(state.maxMana);
     expect(next.life/next.maxLife).toBeCloseTo(.5,2);
@@ -177,24 +165,6 @@ describe('simulation contracts', () => {
     expect(packs.reduce((sum,pack)=>sum+pack.normal+pack.magic+pack.rare+pack.special,0)).toBe(population.total-1);
   });
 
-  it('keeps the six-part onboarding inside a shorter combat zone while maps retain full density',()=>{
-    const population=generateMonsterPopulation(824),packs=generateMonsterPacks(824,population),campaign=selectCampaignPacks(packs);
-    const campaignMonsters=campaign.reduce((sum,pack)=>sum+pack.normal+pack.magic+pack.rare+pack.special,0);
-    expect(campaign.length).toBe(Math.ceil(packs.length/10));
-    expect(campaignMonsters).toBeGreaterThan(20);
-    expect(campaignMonsters).toBeLessThan(90);
-    expect(population.total-1).toBeGreaterThanOrEqual(400);
-  });
-
-  it('finishes one sourced-chain onboarding operation within the planned session cadence',()=>{
-    const population=generateMonsterPopulation(824),packs=selectCampaignPacks(generateMonsterPacks(824,population));
-    const campaignBuild={skill:SKILLS.venom,weapon:createStarterWeapon('thief'),classId:'thief' as const};
-    let state=createCombatState(1,1,campaignBuild,packs,824,1),steps=0;
-    while(!['complete','dead'].includes(state.phase)&&steps<8000){state=stepCombat(state,{tier:1,level:1,build:campaignBuild,packs,seed:824,tickMs:125,areaLevel:1});steps+=1;}
-    expect(state.phase).toBe('complete');
-    expect(steps*125).toBeGreaterThanOrEqual(2*60*1000);
-    expect(steps*125).toBeLessThanOrEqual(8*60*1000);
-  });
 
   it('makes higher monster ranks contribute more to rewards', () => {
     const result=simulateMapCompletion(824,1,'full-clear',build);
@@ -277,10 +247,10 @@ describe('simulation contracts', () => {
   it('resolves sourced chain hits against living monsters in the encountered pack',()=>{
     const chainBuild={skill:SKILLS.venom,weapon:createStarterWeapon('thief'),classId:'thief' as const};
     const packs=[{position:1,normal:4,magic:0,rare:0,special:0}];
-    let state=createCombatState(1,1,chainBuild,packs,824,1);
+    let state=createCombatState(1,1,chainBuild,packs,824);
     const targets=Array.from({length:4},(_,index)=>({id:`chain-${index}`,rank:'normal' as const,position:state.playerPosition,maxLife:11,life:11}));
     state={...state,phase:'combat',targets,target:targets[0],targetLife:11,totalMonsters:4,playerClock:1000};
-    state=stepCombat(state,{tier:1,level:1,build:chainBuild,packs,seed:824,tickMs:1,areaLevel:1});
+    state=stepCombat(state,{tier:1,level:1,build:chainBuild,packs,seed:824,tickMs:1});
     expect(state.kills).toBe(4);
     expect(state.killRanks).toHaveLength(4);
     expect(state.events.some(event=>event.kind==='CHAIN'&&event.text.includes('額外命中 3'))).toBe(true);
@@ -294,26 +264,32 @@ describe('simulation contracts', () => {
     expect(SKILLS.smite.targeting.mode).toBe('area');
   });
 
-  it('keeps a visible movement trail and lets projectiles engage before contact',()=>{
+  it('moves by actual movement speed and lets projectiles engage before contact',()=>{
     const ranged={skill:SKILLS.venom,weapon:createStarterWeapon('thief'),classId:'thief' as const};
     const packs=[{position:1,normal:1,magic:0,rare:0,special:0}];
-    let state=createCombatState(1,1,ranged,packs,824,1);
+    let state=createCombatState(1,1,ranged,packs,824);
     const target={id:'range-target',rank:'normal' as const,position:3,maxLife:22,life:22};
-    state={...state,phase:'travel',targets:[target],target,targetLife:22,playerPosition:0,path:[1,2,3],travelMode:'target',trail:[0]};
-    state=stepCombat(state,{tier:1,level:1,build:ranged,packs,seed:824,tickMs:1,areaLevel:1});
+    state={...state,phase:'travel',targets:[target],target,targetLife:22,playerPosition:0,path:[1,2,3],travelMode:'target'};
+    state=stepCombat(state,{tier:1,level:1,build:ranged,packs,seed:824,tickMs:1});
     expect(state.phase).toBe('combat');
     expect(state.playerPosition).toBe(0);
     state={...state,playerClock:1000};
-    state=stepCombat(state,{tier:1,level:1,build:ranged,packs,seed:824,tickMs:1,areaLevel:1});
+    state=stepCombat(state,{tier:1,level:1,build:ranged,packs,seed:824,tickMs:1});
     expect(state.attackFrom).toBe(0);
     expect(state.attackTo).toBe(3);
 
     const melee={skill:SKILLS.smite,weapon:createStarterWeapon('acolyte'),classId:'acolyte' as const};
-    let meleeState=createCombatState(1,1,melee,packs,824,1);
-    meleeState={...meleeState,phase:'travel',targets:[target],target,targetLife:22,playerPosition:0,path:[1,2,3],travelMode:'target',trail:[0]};
-    meleeState=stepCombat(meleeState,{tier:1,level:1,build:melee,packs,seed:824,tickMs:1,areaLevel:1});
+    let meleeState=createCombatState(1,1,melee,packs,824);
+    meleeState={...meleeState,phase:'travel',targets:[target],target,targetLife:22,playerPosition:0,path:[1,2,3],travelMode:'target',travel:0};
+    meleeState=stepCombat(meleeState,{tier:1,level:1,build:melee,packs,seed:824,tickMs:125});
+    expect(meleeState.playerPosition).toBe(0);
+    meleeState=stepCombat(meleeState,{tier:1,level:1,build:melee,packs,seed:824,tickMs:125});
     expect(meleeState.playerPosition).toBe(1);
-    expect(meleeState.trail).toEqual([0,1]);
+    const fastBoots:Item={id:'fast-boots',baseId:'treads',name:'boots',slot:'boots',rarity:'MAGIC',itemLevel:1,affixes:[{id:'move',name:'move',stat:'move',value:100,tier:1,tags:['move']}]};
+    const fast={...melee,boots:fastBoots};let fastState=createCombatState(1,1,fast,packs,824);
+    fastState={...fastState,phase:'travel',targets:[target],target,targetLife:22,playerPosition:0,path:[1,2,3],travelMode:'target',travel:0};
+    fastState=stepCombat(fastState,{tier:1,level:1,build:fast,packs,seed:824,tickMs:125});
+    expect(fastState.playerPosition).toBe(1);
   });
 
   it('never credits a full map without processing its combat timeline',()=>{

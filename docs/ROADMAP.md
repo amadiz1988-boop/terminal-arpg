@@ -7,8 +7,8 @@ The player forms a build hypothesis, automates maps, reads evidence, changes ski
 ## Foundation 0.2: repeatable core
 
 - New characters begin with one starter weapon and one active skill
-- Five-operation onboarding campaign unlocks systems in sequence
-- Build Blueprints show milestones, missing parts and acquisition sources
+- New characters enter an infinite T1 map immediately
+- Random equipment bases, gems and currency create the first build direction
 - Map count, duration and inventory-depletion modes
 - Tier selection and map inventory
 - Equipment drops, comparison and equip action
@@ -16,7 +16,7 @@ The player forms a build hypothesis, automates maps, reads evidence, changes ski
 - Deterministic simulation contracts
 - Modular architecture and regression tests
 
-Success: one input starts multiple maps; the player makes at least two meaningful build or farming decisions between sessions.
+Success: one input starts multiple T1 maps; actual drops create at least two meaningful build decisions between sessions.
 
 ## Foundation 0.3: real build engine
 

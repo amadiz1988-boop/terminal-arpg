@@ -10,6 +10,11 @@ import { simulateAcceleratedSession } from '../../game/simulation/session';
 const build={skill:SKILLS.venom,weapon:createStarterWeapon('thief'),classId:'thief' as const};
 
 describe('release stress gate',()=>{
+  it('drops all six equipment slots from deterministic T1 maps without empty-slot guarantees',()=>{
+    const slots=new Set<string>();
+    for(let seed=1;seed<=200;seed+=1)for(const item of simulateMapCompletion(seed,1,'full-clear',build,'scout','arsenal',true).items)slots.add(item.slot);
+    expect([...slots].sort()).toEqual(['amulet','armor','boots','gloves','helmet','weapon']);
+  });
   it('survives 5,000 deterministic map outcomes without invalid rewards',()=>{
     for(let seed=1;seed<=1000;seed+=1)for(let tier=1;tier<=5;tier+=1){
       const result=simulateMapCompletion(seed,tier,'full-clear',build,'scout','arsenal',true);

@@ -22,8 +22,6 @@ export type MapCompletion = {
   specialEncounter: boolean;
 };
 
-const SLOT_ORDER = ['weapon', 'armor', 'helmet', 'gloves', 'boots', 'amulet'] as const;
-
 export function generateMonsterPopulation(seed:number):MonsterPopulation {
   const random=createRandom(seed*17+9);
   const nonBoss=400+Math.floor(random()*201);
@@ -46,10 +44,6 @@ export function generateMonsterPacks(seed:number, population:MonsterPopulation):
   return packs;
 }
 
-export function selectCampaignPacks(packs:MonsterPack[]){
-  return packs.slice(0,Math.max(1,Math.ceil(packs.length/10)));
-}
-
 export function contractFailureChance(build: BuildSnapshot, tier: number, contractId: ContractId) {
   const stats = resolveStats(build);
   return Math.max(0, CONTRACTS[contractId].danger + tier * .025 - Math.min(.22, stats.dps / (tier * 60000)));
@@ -64,12 +58,10 @@ export function simulateMapCompletion(seed: number, tier: number, policy: Policy
   const failureChance = contractFailureChance(build, tier, contractId);
   const success = forceSuccess ?? random() >= failureChance;
   const mapDropTier = Math.min(5, tier + (random() > .68 - contract.mapChance - (policy === 'boss-rush' ? .16 : 0) ? 1 : 0));
-  const emptySlots = SLOT_ORDER.filter((slot) => !build[slot]);
-  const plannedSlot = emptySlots.length > 0 ? emptySlots[seed % emptySlots.length] : SLOT_ORDER[seed % SLOT_ORDER.length];
   const dropScore=monsters.normal*.002+monsters.magic*.012+monsters.rare*.07+monsters.special*1.5+3;
   const itemCount=success?Math.max(4,Math.round(dropScore*(.85+random()*.3))):0;
-  const items=Array.from({length:itemCount},(_,index)=>generateItem(seed+824+index*101,tier*12+contract.itemLevel+(policy==='full-clear'?4:0)+(index===0&&monsters.special>0?10:0),index===0?plannedSlot:undefined));
-  const item = items[0] ?? generateItem(seed + 824, tier * 12, plannedSlot);
+  const items=Array.from({length:itemCount},(_,index)=>generateItem(seed+824+index*101,tier*12+contract.itemLevel+(policy==='full-clear'?4:0)+(index===0&&monsters.special>0?10:0)));
+  const item = items[0] ?? generateItem(seed + 824, tier * 12);
   const evaluation = evaluateItem(item, build);
   const skillDrops: SkillId[] = ['venom', 'firebolt', 'smite', 'ember', 'arc', 'quake'];
   const supportDrops: SupportId[] = ['momentum', 'echo', 'focus', 'fortify'];
