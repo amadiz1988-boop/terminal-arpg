@@ -9,6 +9,7 @@ import { exchangeMaps } from '../../game/progression/maps';
 import { generateMonsterPacks, generateMonsterPopulation, getRunStopReason, simulateMapCompletion } from '../../game/simulation/map';
 import { simulateAcceleratedSession } from '../../game/simulation/session';
 import { armourReduction, createCombatState, generateMonsterRoster, maximumMana, SKILL_MANA_COST, stepCombat } from '../../game/simulation/combat';
+import { progressMapRewards } from '../../game/simulation/rewards';
 import type { Item } from '../../game/core/types';
 
 const build = { skill: SKILLS.ember, weapon: createStarterWeapon() };
@@ -181,6 +182,21 @@ describe('simulation contracts', () => {
     expect(result.items.length).toBeGreaterThanOrEqual(4);
     expect(result.monsters.rare).toBeGreaterThan(0);
     expect(Object.values(result.orbs).reduce((sum,value)=>sum+value,0)).toBeGreaterThan(0);
+  });
+
+  it('credits experience immediately and conserves every planned map reward', () => {
+    const plan=simulateMapCompletion(825,1,'full-clear',build,'scout','arsenal',true);
+    const first=progressMapRewards(plan,undefined,1,plan.monsters.total,'normal');
+    expect(first.delta.xp).toBeGreaterThan(0);
+    expect(first.delta.itemEnd-first.delta.itemStart).toBe(0);
+    const magic=progressMapRewards(plan,first.progress,2,plan.monsters.total,'magic');
+    expect(magic.delta.itemEnd-magic.delta.itemStart).toBeGreaterThan(0);
+    expect(Object.values(magic.delta.orbs).reduce((sum,value)=>sum+value,0)).toBeGreaterThan(0);
+    const boss=progressMapRewards(plan,magic.progress,plan.monsters.total,plan.monsters.total,'boss');
+    expect(boss.progress.xp).toBe(plan.xp);
+    expect(boss.progress.items).toBe(plan.items.length);
+    expect(boss.progress.orbs).toBe(Object.values(plan.orbs).reduce((sum,value)=>sum+value,0));
+    expect(boss.progress.gem).toBe(true);
   });
 
   it('passes the 30 minute equivalent play gate with measurable decisions', () => {

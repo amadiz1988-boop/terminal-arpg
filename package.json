@@ -1,6 +1,6 @@
 {
   "name": "terminal-arpg",
-  "version": "0.16.0",
+  "version": "0.17.0",
   "private": true,
   "engines": {
     "node": ">=22.13.0"
@@ -11,6 +11,7 @@
     "start": "wrangler dev --config dist/server/wrangler.json",
     "test": "vitest run",
     "qa:ui": "node scripts/ui-qa.mjs",
+    "test:release": "node scripts/release-gate.mjs",
     "lint": "oxlint app game tests",
     "format": "oxfmt"
   },

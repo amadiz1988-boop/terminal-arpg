@@ -2,6 +2,13 @@
 
 以 Build 規劃、自動刷圖、打寶成長與戰鬥終端為核心的文字放置 ARPG。
 
+## Alpha 0.17
+
+- 怪物死亡時立即結算經驗，不再等整張地圖完成
+- 魔法、稀有、特殊與首領怪會在實際死亡時把裝備及通貨送入玩家帳戶
+- 地圖結束只做結果核對，避免獎勵重複入帳
+- 新增強制公開版本壓力門檻：5,000 圖、1,000 組逐殺守恆、1,000 圖長期養成及手機實玩流程
+
 ## Alpha 0.16
 
 - Lv.1 六圍皆為 1，可用能力點改為 0；升級後依 RO 公式取得能力點
@@ -75,6 +82,7 @@
 * [架構規則](docs/ARCHITECTURE.md)
 * [PoE 與火炬玩家循環研究](docs/ARPG_PLAYER_LOOP_RESEARCH.md)
 * [核心公式與內容架構](docs/CORE_FORMULA_ARCHITECTURE.md)
+* [公開版本壓力測試流程](docs/RELEASE_STRESS_GATE.md)
 * [Alpha 0.5 實玩驗收](docs/PLAYTEST_ALPHA_0.5.md)
 
 ## 開發與驗證

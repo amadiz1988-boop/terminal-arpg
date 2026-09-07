@@ -24,6 +24,7 @@ import { exchangeMaps } from '@/game/progression/maps';
 import { nextPowerGoal, SLOT_LABELS, TIER_POWER_REQUIREMENTS, unlockedTier } from '@/game/progression/power';
 import { contractFailureChance, generateMonsterPacks, generateMonsterPopulation, getRunStopReason, simulateMapCompletion } from '@/game/simulation/map';
 import { createCombatState, generateMonsterRoster, generateTerrain, MAP_SIZE, MAP_WIDTH, maximumMana, stepCombat, type CombatState } from '@/game/simulation/combat';
+import { progressMapRewards, type RewardDelta } from '@/game/simulation/rewards';
 
 type Log = { id: number; kind: string; text: string };
 const COLOR_LABEL = { R: '紅', G: '綠', B: '藍', W: '白' } as const;
@@ -161,43 +162,52 @@ export function GameShell() {
     pushLog('CRAFT',`${ORB_LABEL[kind]}消耗 1 顆 · ${craftItem.name} · ${result.message}`);
   };
 
+  const deliverLiveRewards=(plan:ReturnType<typeof simulateMapCompletion>,delta:RewardDelta)=>{
+    const rewardLogs:Array<[string,string]>=[];
+    if(delta.xp>0){setXp(value=>value+delta.xp);setSessionLoot(value=>({...value,xp:value.xp+delta.xp}));rewardLogs.push(['EXP',`擊殺經驗 +${delta.xp}`]);}
+    const dropped=plan.items.slice(delta.itemStart,delta.itemEnd);
+    if(dropped.length){
+      const processed=dropped.map(item=>{const evaluation=evaluateItem(item,build);const auto=salvageMode==='common'?item.rarity==='COMMON':salvageMode==='smart'?evaluation.classification==='salvage'&&item.rarity!=='LEGENDARY':false;return{item,evaluation,auto};});
+      const kept=processed.filter(entry=>!entry.auto),acceptedItems=acceptInventoryDrops(items,kept.map(entry=>entry.item)),acceptedIds=new Set(acceptedItems.map(item=>item.id)),accepted=kept.filter(entry=>acceptedIds.has(entry.item.id)),overflow=kept.length-accepted.length;
+      const recycled=processed.filter(entry=>entry.auto).reduce((sum,entry)=>{const gain=salvageValue(entry.item);return{scrap:sum.scrap+gain.scrap,essence:sum.essence+gain.essence,core:sum.core+gain.core};},{scrap:0,essence:0,core:0});
+      if(recycled.scrap+recycled.essence+recycled.core>0)setMaterials(value=>({scrap:value.scrap+recycled.scrap,essence:value.essence+recycled.essence,core:value.core+recycled.core}));
+      if(accepted.length)setItems(value=>[...accepted.map(entry=>entry.item),...value].slice(0,100));
+      setSessionLoot(value=>({...value,items:value.items+accepted.length}));
+      rewardLogs.push(['DROP',`${delta.rank==='magic'?'魔法':delta.rank==='rare'?'稀有':delta.rank==='special'?'特殊':'首領'}怪掉落 ${dropped.map(item=>item.name).join('、')} · 拾取 ${accepted.length} · 分解 ${processed.length-kept.length}`]);
+      if(overflow>0)rewardLogs.push(['BAG',`背包已滿 · ${overflow} 件裝備留在地面`]);
+    }
+    const orbCount=Object.values(delta.orbs).reduce((sum,value)=>sum+value,0);
+    if(orbCount>0){setOrbs(value=>addWallet(value,delta.orbs));setSessionLoot(value=>({...value,orbs:value.orbs+orbCount}));rewardLogs.push(['CURRENCY',formatCurrencyDrops(delta.orbs)]);}
+    if(delta.gem){const gem=plan.gemDrop;if(gem.type==='skill'){const owned=acquiredSkills.includes(gem.id);setAcquiredSkills(value=>value.includes(gem.id)?value:[...value,gem.id]);setSkillLevels(value=>({...value,[gem.id]:(value[gem.id]??0)+1}));rewardLogs.push(['GEM',owned?`${skills[gem.id].name} 寶石經驗 +1`:`技能寶石掉落：${skills[gem.id].name} Lv.1`]);}else{setAcquiredSupports(value=>value.includes(gem.id)?value:[...value,gem.id]);rewardLogs.push(['GEM',`輔助寶石掉落：${SUPPORTS[gem.id].name}`]);}setSessionLoot(value=>({...value,gems:value.gems+1}));}
+    if(rewardLogs.length)pushLogs(rewardLogs);
+  };
+
   const finishMap = () => {
     if(inCampaign && operation){
       const reward=completeCampaignOperation(campaignStep,CLASSES[classId].starterSkill);
       if(reward.item) setItems(v=>[reward.item!,...v]);
       const support=SUPPORT_ORDER[campaignStep]; if(support)setAcquiredSupports(v=>v.includes(support)?v:[...v,support]);
       if(reward.materials)setMaterials(v=>({scrap:v.scrap+reward.materials!.scrap,essence:v.essence+reward.materials!.essence,core:v.core+reward.materials!.core}));
-      if(reward.maps)setMaps(reward.maps); setXp(v=>v+reward.xp); setCampaignStep(v=>v+1); setRuns(1); setRunning(false); setCombat(undefined); setProgress(100);
+      if(reward.maps)setMaps(reward.maps); setXp(v=>v+reward.xp); setCampaignStep(v=>v+1); setRuns(1); setRunning(false); setCombat(undefined); setProgress(100);seedRef.current+=1;
       pushLogs([['QUEST',`${operation.title} 完成 · ${operation.reward}`],['EXP',`角色 EXP +${reward.xp}`]]); return;
     }
     seedRef.current+=1; const result=simulateMapCompletion(seedRef.current,tier,policy,build,contractId,'arsenal',true);
-    let acquiredThisRun=0;
-    const completed=runs+1; setRuns(completed); setLifetimeRuns(v=>v+1); setXp(v=>v+result.xp); setTotalKills(v=>v+result.kills);
+    const completed=runs+1; setRuns(completed); setLifetimeRuns(v=>v+1); setTotalKills(v=>v+result.kills);
     if(result.success){
-      const processed=result.items.map(item=>{const evaluation=evaluateItem(item,build);const auto=salvageMode==='common'?item.rarity==='COMMON':salvageMode==='smart'?evaluation.classification==='salvage'&&item.rarity!=='LEGENDARY':false;return {item,evaluation,auto};});
-      const kept=processed.filter(entry=>!entry.auto);const acceptedItems=acceptInventoryDrops(items,kept.map(entry=>entry.item));const acceptedIds=new Set(acceptedItems.map(item=>item.id));const accepted=kept.filter(entry=>acceptedIds.has(entry.item.id));const overflow=kept.length-accepted.length;
-      acquiredThisRun=accepted.length;
-      const recycled=processed.filter(entry=>entry.auto).reduce((sum,entry)=>{const gain=salvageValue(entry.item);return {scrap:sum.scrap+gain.scrap,essence:sum.essence+gain.essence,core:sum.core+gain.core};},{scrap:0,essence:0,core:0});
-      if(recycled.scrap+recycled.essence+recycled.core>0)setMaterials(v=>({scrap:v.scrap+recycled.scrap,essence:v.essence+recycled.essence,core:v.core+recycled.core}));
-      if(accepted.length>0)setItems(v=>[...accepted.map(entry=>entry.item),...v].slice(0,100));
-      setOrbs(v=>addWallet(v,result.orbs));
       setMaps(v=>{const n=[...v];n[1]+=1;if(result.mapDropTier>1)n[result.mapDropTier]+=1;return n;});
-      if(result.gemDrop.type==='skill'){const id=result.gemDrop.id;const owned=acquiredSkills.includes(id);setAcquiredSkills(v=>v.includes(id)?v:[...v,id]);setSkillLevels(v=>({...v,[id]:(v[id]??0)+1}));pushLog('GEM',owned?`${skills[id].name} 寶石經驗 +1 · 升至 Lv.${(skillLevels[id]??1)+1}`:`技能寶石掉落：${skills[id].name} Lv.1 · ${COLOR_LABEL[skills[id].socketColor]}色`);}
-      else {const id=result.gemDrop.id;setAcquiredSupports(v=>v.includes(id)?v:[...v,id]);pushLog('GEM',`輔助寶石掉落：${SUPPORTS[id].name} · ${COLOR_LABEL[SUPPORTS[id].socketColor]}色`);}
-      const strongest=processed.toSorted((a,b)=>Math.max(b.evaluation.dpsDelta,b.evaluation.clearDelta,b.evaluation.survivalDelta)-Math.max(a.evaluation.dpsDelta,a.evaluation.clearDelta,a.evaluation.survivalDelta))[0];
-      const orbTotal=Object.values(result.orbs).reduce((a,b)=>a+b,0); setSessionLoot(v=>({items:v.items+accepted.length,gems:v.gems+1,orbs:v.orbs+orbTotal,xp:v.xp+result.xp}));
-      pushLogs([['MONSTER',`怪物 ${result.monsters.total} · 普通 ${result.monsters.normal}／魔法 ${result.monsters.magic}／稀有 ${result.monsters.rare}／特殊 ${result.monsters.special}／首領 1`],...(result.specialEncounter?[['SECRET','發現迷霧中的異變旅人 · 彩蛋事件啟動 · 掉落加成'] as [string,string]]:[]),['LOOT',`掉落 ${result.items.length} 件 · 拾取 ${accepted.length} · 分解 ${processed.length-kept.length}${strongest?` · 最佳 ${strongest.evaluation.dpsDelta>=0?'+':''}${strongest.evaluation.dpsDelta}% DPS`:''}`],...(overflow>0?[['BAG',`背包 100/100 · ${overflow} 件裝備留在地面，通貨照常拾取`] as [string,string]]:[]),['CURRENCY',formatCurrencyDrops(result.orbs)||'本圖未取得通貨'],['EXP',`角色 EXP +${result.xp} · 本圖擊殺 ${result.kills}`]]);
+      pushLogs([['MONSTER',`怪物 ${result.monsters.total} · 普通 ${result.monsters.normal}／魔法 ${result.monsters.magic}／稀有 ${result.monsters.rare}／特殊 ${result.monsters.special}／首領 1`],...(result.specialEncounter?[['SECRET','發現迷霧中的異變旅人 · 彩蛋事件啟動 · 掉落加成'] as [string,string]]:[]),['LOOT','本圖獎勵已於實際擊殺時逐筆入帳']]);
     } else pushLog('DEATH',`${CONTRACTS[contractId].name} 失敗 · 保留少量經驗`);
     const projected=[...maps]; if(result.success){projected[1]+=1;if(result.mapDropTier>1)projected[result.mapDropTier]+=1;}
     const available=tier===1?1:projected[tier]; const reason=getRunStopReason({mode,completed,goal,elapsedMs:Date.now()-sessionStart.current,availableNext:available,tier});
-    if(reason){setRunning(false);setCombat(undefined);setProgress(100);pushLog('REPORT',`循環結束 · ${completed} 圖 · ${sessionLoot.items+acquiredThisRun} 件入袋 · ${sessionLoot.gems+(result.success?1:0)} 寶石 · ${sessionLoot.orbs+Object.values(result.orbs).reduce((a,b)=>a+b,0)} 通貨`);return;}
+    if(reason){setRunning(false);setCombat(undefined);setProgress(100);pushLog('REPORT',`循環結束 · ${completed} 圖 · ${sessionLoot.items} 件入袋 · ${sessionLoot.gems} 寶石 · ${sessionLoot.orbs} 通貨`);return;}
     window.setTimeout(()=>{if(tier>1)setMaps(v=>{const n=[...v];if(n[tier]>0)n[tier]-=1;return n;});const population=generateMonsterPopulation(seedRef.current+1);const packs=generateMonsterPacks(seedRef.current+1,population);const next=createCombatState(tier,level,build,packs,seedRef.current+1);setProgress(0);setCombat(next);setRunning(true);pushLogs([['ROUTE',`計算下一張 T${tier} 路線 · 座標 ${24+tier},${60+completed}`],...next.events.map(event=>[event.kind,event.text] as [string,string])]);},500);
   };
 
   useEffect(()=>{
     if(!running||!combat)return;
     const timer=window.setInterval(()=>setCombat(current=>{
-      if(!current)return current;const next=stepCombat(current,{tier,level,build,packs:mapPacks,seed:seedRef.current+1,tickMs:250,areaLevel:inCampaign?level:undefined});
+      if(!current)return current;const rewardPlan=current.rewardPlan??simulateMapCompletion(seedRef.current+1,tier,inCampaign?'full-clear':policy,build,contractId,'arsenal',true);const next=stepCombat(current,{tier,level,build,packs:mapPacks,seed:seedRef.current+1,tickMs:250,areaLevel:inCampaign?level:undefined});next.rewardPlan=rewardPlan;
+      if(next.kills>current.kills&&next.lastKillRank){const reward=progressMapRewards(rewardPlan,current.rewardProgress,next.kills,next.totalMonsters,next.lastKillRank);next.rewardProgress=reward.progress;deliverLiveRewards(rewardPlan,reward.delta);}
       setProgress(Math.min(100,Math.round(next.kills/next.totalMonsters*100)));
       const visible=combatDetail==='full'?next.events:next.events.filter(event=>!['HIT','BASIC'].includes(event.kind)||next.action%4===0||next.targetLife===0);
       if(visible.length)pushLogs(visible.map(event=>[event.kind,event.text]));
@@ -234,7 +244,7 @@ export function GameShell() {
 
   if(!saveLoaded)return null;
   return <main className="min-h-screen bg-background text-foreground"><div className="scanlines" aria-hidden="true" />
-    <header className="border-b border-border/80 bg-card/80"><div className="mx-auto flex max-w-[1500px] items-center justify-between px-4 py-3 sm:px-6"><div className="flex items-center gap-3"><div className="brand-mark"><CircleDot className="size-5"/></div><div><div className="flex gap-2"><h1 className="font-mono text-sm font-bold tracking-[.16em] text-primary">TERMINAL ARPG</h1><span className="rounded border border-primary/30 px-1.5 font-mono text-[9px] text-primary">ALPHA 0.16</span></div><p className="text-[11px] text-muted-foreground">RO 職業 × 技能寶石 × 自動遠征</p></div></div><div className="text-right font-mono text-xs"><b className="text-primary">Lv.{level} · {classChosen?(secondJobId?SECOND_JOBS[secondJobId].name:CLASSES[classId].name):'未選職'}</b><small className="block text-muted-foreground">DPS {dps.toLocaleString()}</small></div></div></header>
+    <header className="border-b border-border/80 bg-card/80"><div className="mx-auto flex max-w-[1500px] items-center justify-between px-4 py-3 sm:px-6"><div className="flex items-center gap-3"><div className="brand-mark"><CircleDot className="size-5"/></div><div><div className="flex gap-2"><h1 className="font-mono text-sm font-bold tracking-[.16em] text-primary">TERMINAL ARPG</h1><span className="rounded border border-primary/30 px-1.5 font-mono text-[9px] text-primary">ALPHA 0.17</span></div><p className="text-[11px] text-muted-foreground">RO 職業 × 技能寶石 × 自動遠征</p></div></div><div className="text-right font-mono text-xs"><b className="text-primary">Lv.{level} · {classChosen?(secondJobId?SECOND_JOBS[secondJobId].name:CLASSES[classId].name):'未選職'}</b><small className="block text-muted-foreground">DPS {dps.toLocaleString()}</small></div></div></header>
     {!classChosen&&<div className="mx-auto max-w-4xl px-4 py-12"><Panel title="選擇初心職業" icon={Swords}><p className="mb-5 text-sm text-muted-foreground">每個職業從一把新手武器與一顆技能寶石開始。技能不綁職業，後續都能靠掉落取得。</p><div className="grid gap-3 md:grid-cols-3">{(Object.keys(CLASSES) as ClassId[]).map(id=>{const c=CLASSES[id];return <button key={id} onClick={()=>chooseClass(id)} className="class-card"><small>一轉職業 · 名稱已確認</small><b>{c.name}</b><strong>特性草案：{c.trait}</strong><p>{c.description}</p><em>數值尚未生效 · 起始技能：{skills[c.starterSkill].name}</em></button>})}</div></Panel></div>}
     {classChosen&&<><div className="mx-auto grid max-w-[1500px] gap-4 px-4 py-4 sm:px-6 xl:grid-cols-[300px_minmax(0,1fr)_340px]">
       <aside className="space-y-4">
