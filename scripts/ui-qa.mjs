@@ -37,16 +37,23 @@ try {
     socket.send(JSON.stringify({ id, method, params }));
   });
   const evaluate = async (expression) => (await call('Runtime.evaluate', { expression, returnByValue: true })).result.result.value;
+  const waitUntil = async (expression, attempts = 40) => {
+    for (let attempt = 0; attempt < attempts; attempt += 1) {
+      try { if (await evaluate(expression)) return true; } catch { /* Navigation context is not ready yet. */ }
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
+    return false;
+  };
 
   await call('Runtime.enable');
   await call('Log.enable');
   await call('Page.enable');
   const qaUrl = process.env.QA_URL ?? 'http://127.0.0.1:3000/?fresh=1';
   await call('Page.navigate', { url: qaUrl });
-  await new Promise((resolve) => setTimeout(resolve, 1800));
+  if (!await waitUntil("document.body?.innerText.includes('TERMINAL ARPG')")) throw new Error('Site did not become ready');
   await call('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
   await evaluate("document.querySelector('.class-card')?.click()");
-  await new Promise((resolve) => setTimeout(resolve, 500));
+  if (!await waitUntil("document.body?.innerText.includes('人物能力與屬性狀態欄')")) throw new Error('Character screen did not become ready');
   const before = await evaluate("({url:location.href,title:document.body.innerText.includes('人物能力與屬性狀態欄'),zeroStart:document.body.innerText.includes('Lv.1 從六圍各 1、剩餘 0 點開始'),statusPoint:[...document.querySelectorAll('.ro-derived div')].find(x=>x.innerText.includes('STATUS POINT'))?.innerText,oldTalent:document.body.innerText.includes('天賦 ·'),resourceTiles:document.querySelectorAll('.resource-tile').length,statRows:document.querySelectorAll('.ro-primary>div').length,derivedRows:document.querySelectorAll('.ro-derived>div').length,enabledPlus:document.querySelectorAll('.ro-primary button:not(:disabled)').length,overflow:document.documentElement.scrollWidth>innerWidth,dps:document.body.innerText.match(/DPS [0-9,]+/)?.[0],excerpt:document.body.innerText.slice(0,120)})");
   const after = await evaluate("({atk:[...document.querySelectorAll('.ro-derived div')].find(x=>x.innerText.startsWith('ATK'))?.innerText,def:[...document.querySelectorAll('.ro-derived div')].find(x=>x.innerText.startsWith('DEF'))?.innerText,resetDisabled:document.querySelector('.stat-reset')?.disabled})");
   await evaluate("[...document.querySelectorAll('button')].find(x=>x.innerText.includes('執行任務'))?.click()");
