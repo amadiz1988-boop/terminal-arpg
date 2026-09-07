@@ -44,6 +44,14 @@ try {
     }
     return false;
   };
+  const observeCombat = async (attempts = 150) => {
+    let sawProjectile=false,sawHurt=false;
+    for (let attempt = 0; attempt < attempts && (!sawProjectile||!sawHurt); attempt += 1) {
+      try { const pulse=await evaluate("({projectile:Boolean(document.querySelector('.combat-vector')),hurt:Boolean(document.querySelector('.field-map .player.hurt'))})");sawProjectile ||= pulse.projectile;sawHurt ||= pulse.hurt; } catch { /* Animation frame replaced during observation. */ }
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+    return {sawProjectile,sawHurt};
+  };
 
   await call('Runtime.enable');
   await call('Log.enable');
@@ -57,11 +65,18 @@ try {
   const before = await evaluate("({url:location.href,title:document.body.innerText.includes('人物能力與屬性狀態欄'),zeroStart:document.body.innerText.includes('Lv.1 從六圍各 1、剩餘 0 點開始'),statusPoint:[...document.querySelectorAll('.ro-derived div')].find(x=>x.innerText.includes('STATUS POINT'))?.innerText,oldTalent:document.body.innerText.includes('天賦 ·'),resourceTiles:document.querySelectorAll('.resource-tile').length,statRows:document.querySelectorAll('.ro-primary>div').length,derivedRows:document.querySelectorAll('.ro-derived>div').length,enabledPlus:document.querySelectorAll('.ro-primary button:not(:disabled)').length,overflow:document.documentElement.scrollWidth>innerWidth,dps:document.body.innerText.match(/DPS [0-9,]+/)?.[0],excerpt:document.body.innerText.slice(0,120)})");
   const after = await evaluate("({atk:[...document.querySelectorAll('.ro-derived div')].find(x=>x.innerText.startsWith('ATK'))?.innerText,def:[...document.querySelectorAll('.ro-derived div')].find(x=>x.innerText.startsWith('DEF'))?.innerText,resetDisabled:document.querySelector('.stat-reset')?.disabled})");
   await evaluate("[...document.querySelectorAll('button')].find(x=>x.innerText.includes('執行任務'))?.click()");
-  await new Promise((resolve) => setTimeout(resolve, 18000));
-  const combat = await evaluate("({kills:Number(document.body.innerText.match(/本圖擊殺 (\\d+)\\//)?.[1]??0),xp:Number([...document.querySelectorAll('.metric-tile')].find(x=>x.innerText.includes('經驗'))?.innerText.match(/\\d+/)?.[0]??0),expLogs:[...document.querySelectorAll('.log-line')].filter(x=>/\\[EXP\\]/.test(x.innerText)).length,dropLogs:[...document.querySelectorAll('.log-line')].filter(x=>/\\[DROP\\]/.test(x.innerText)).length,currencyLogs:[...document.querySelectorAll('.log-line')].filter(x=>/\\[CURRENCY\\]/.test(x.innerText)).length})");
-  combat.errors=browserErrors;
-  const pass=before.title&&before.zeroStart&&before.statusPoint?.includes('0')&&!before.oldTalent&&before.resourceTiles===0&&before.statRows===6&&before.derivedRows===9&&before.enabledPlus===0&&!before.overflow&&after.atk&&after.def&&after.resetDisabled&&combat.kills>0&&combat.xp>0&&combat.expLogs>0&&combat.dropLogs>0&&combat.currencyLogs>0&&combat.errors.length===0;
-  console.log(JSON.stringify({ before, after, combat, pass }, null, 2));
+  const {sawProjectile,sawHurt}=await observeCombat();
+  await waitUntil("Boolean(document.querySelector('.upgrade-alert button')&&document.querySelector('.log-drop')&&document.querySelector('.log-currency'))",60);
+  const mapVisual=await evaluate("({trail:document.querySelectorAll('.field-map .trail').length,zoomBefore:document.querySelector('.field-map')?.style.width,zoomButtons:document.querySelectorAll('.map-zoom button').length})");
+  await evaluate("[...document.querySelectorAll('.map-zoom button')].at(-1)?.click()");
+  mapVisual.zoomAfter=await evaluate("document.querySelector('.field-map')?.style.width");
+  mapVisual.sawProjectile=sawProjectile;mapVisual.sawHurt=sawHurt;
+  const upgradeVisible = await evaluate("Boolean(document.querySelector('.upgrade-alert button'))");
+  if(upgradeVisible){await evaluate("document.querySelector('.upgrade-alert button').click()");await new Promise((resolve)=>setTimeout(resolve,500));}
+  const combat = await evaluate("({kills:Number(document.body.innerText.match(/本圖擊殺 (\\d+)\\//)?.[1]??0),xp:Number([...document.querySelectorAll('.metric-tile')].find(x=>x.innerText.includes('經驗'))?.innerText.match(/\\d+/)?.[0]??0),expLogs:[...document.querySelectorAll('.log-line')].filter(x=>/\\[EXP\\]/.test(x.innerText)).length,dropLogs:[...document.querySelectorAll('.log-line')].filter(x=>/\\[DROP\\]/.test(x.innerText)).length,currencyLogs:[...document.querySelectorAll('.log-line')].filter(x=>/\\[CURRENCY\\]/.test(x.innerText)).length,chainLogs:[...document.querySelectorAll('.log-line')].filter(x=>/\\[CHAIN\\]/.test(x.innerText)).length,powerLogs:[...document.querySelectorAll('.log-line')].filter(x=>/\\[POWER\\]/.test(x.innerText)).length})");
+  combat.errors=browserErrors;combat.upgradeVisible=upgradeVisible;
+  const pass=before.title&&before.zeroStart&&before.statusPoint?.includes('0')&&!before.oldTalent&&before.resourceTiles===0&&before.statRows===6&&before.derivedRows===9&&before.enabledPlus===0&&!before.overflow&&after.atk&&after.def&&after.resetDisabled&&combat.kills>=4&&combat.xp>0&&combat.expLogs>0&&combat.dropLogs>0&&combat.currencyLogs>0&&combat.chainLogs>0&&combat.upgradeVisible&&combat.powerLogs>0&&mapVisual.trail>0&&mapVisual.zoomBefore==='150%'&&mapVisual.zoomAfter==='200%'&&mapVisual.zoomButtons===2&&mapVisual.sawProjectile&&mapVisual.sawHurt&&combat.errors.length===0;
+  console.log(JSON.stringify({ before, after, combat, mapVisual, pass }, null, 2));
   if(!pass)throw new Error('UI release gate failed');
   await call('Browser.close');
 } finally {

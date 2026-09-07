@@ -25,6 +25,7 @@ export type SkillDefinition = {
   moveSpeed: number;
   color: string;
   socketColor: SocketColor;
+  targeting: { mode: 'single' | 'chain' | 'area'; additionalTargets?: number };
   sourceGame: 'Path of Exile';
   sourceUrl: string;
   sourceVersion: string;

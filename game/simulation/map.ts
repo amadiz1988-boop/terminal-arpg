@@ -46,6 +46,10 @@ export function generateMonsterPacks(seed:number, population:MonsterPopulation):
   return packs;
 }
 
+export function selectCampaignPacks(packs:MonsterPack[]){
+  return packs.slice(0,Math.max(1,Math.ceil(packs.length/10)));
+}
+
 export function contractFailureChance(build: BuildSnapshot, tier: number, contractId: ContractId) {
   const stats = resolveStats(build);
   return Math.max(0, CONTRACTS[contractId].danger + tier * .025 - Math.min(.22, stats.dps / (tier * 60000)));
