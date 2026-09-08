@@ -17,6 +17,8 @@ export type CombatTarget = {
   position: number;
   maxLife: number;
   life?: number;
+  moveClock?: number;
+  attackClock?: number;
 };
 export type CombatState = {
   phase: CombatPhase;
@@ -30,6 +32,10 @@ export type CombatState = {
   explored: number[];
   attackFrom?: number;
   attackTo?: number;
+  enemyAttackFrom?: number;
+  enemyAttackTo?: number;
+  aggroIds?: string[];
+  attackers?: number;
   kills: number;
   totalMonsters: number;
   lastKillRank?: MonsterRank;
@@ -129,6 +135,20 @@ const rankLife = {
     rare: 1.5 * 0.67,
     special: 1.5 * 0.67,
     boss: 1,
+  },
+  rankMoveBonus = {
+    normal: 0,
+    magic: 10,
+    rare: 25,
+    special: 25,
+    boss: 0,
+  },
+  rankActionSpeed = {
+    normal: 1,
+    magic: 1.2,
+    rare: 1.33,
+    special: 1.33,
+    boss: 1.33,
   },
   rankCharge = { normal: 1, magic: 3.5, rare: 6, special: 11, boss: 11 },
   rankName = {
@@ -376,6 +396,9 @@ export function stepCombat(
       explored: [...previous.explored],
       attackFrom: undefined,
       attackTo: undefined,
+      enemyAttackFrom: undefined,
+      enemyAttackTo: undefined,
+      attackers: 0,
       lastKillRank: undefined,
       killRanks: [],
       killPositions: [],
@@ -563,6 +586,74 @@ export function stepCombat(
   }
   state.playerClock += tickMs;
   state.enemyClock += tickMs;
+  const activePackId = state.target?.packId,
+    activeEnemies = state.targets.filter((target) =>
+      state.target?.rank === 'boss'
+        ? target.id === state.target.id
+        : activePackId !== undefined
+          ? target.packId === activePackId
+          : target.id === state.target?.id,
+    ),
+    occupied = new Set(state.targets.map((target) => target.position));
+  state.aggroIds = activeEnemies.map((target) => target.id);
+  let movedEnemies = 0;
+  for (const enemy of activeEnemies) {
+    const here = coord(enemy.position),
+      player = coord(state.playerPosition),
+      distance = Math.abs(here.x - player.x) + Math.abs(here.y - player.y);
+    if (distance <= 1) continue;
+    enemy.moveClock = (enemy.moveClock ?? 0) + tickMs;
+    const moveDelay = Math.max(
+      60,
+      250 * (100 / (100 + rankMoveBonus[enemy.rank])),
+    );
+    if (enemy.moveClock < moveDelay) continue;
+    enemy.moveClock -= moveDelay;
+    const route = shortestPath(enemy.position, state.playerPosition, walkable),
+      preferred = route[0],
+      candidates = [
+        preferred,
+        here.x > 0 ? enemy.position - 1 : undefined,
+        here.x < MAP_WIDTH - 1 ? enemy.position + 1 : undefined,
+        here.y > 0 ? enemy.position - MAP_WIDTH : undefined,
+        here.y < MAP_HEIGHT - 1 ? enemy.position + MAP_WIDTH : undefined,
+      ]
+        .filter((cell): cell is number => cell !== undefined)
+        .filter(
+          (cell, index, values) =>
+            values.indexOf(cell) === index &&
+            walkable.has(cell) &&
+            cell !== state.playerPosition &&
+            !occupied.has(cell),
+        )
+        .sort((a, b) => {
+          const aAt = coord(a),
+            bAt = coord(b);
+          return (
+            Math.abs(aAt.x - player.x) +
+            Math.abs(aAt.y - player.y) -
+            (Math.abs(bAt.x - player.x) + Math.abs(bAt.y - player.y))
+          );
+        }),
+      next = candidates[0];
+    if (next === undefined) continue;
+    occupied.delete(enemy.position);
+    enemy.position = next;
+    occupied.add(next);
+    movedEnemies += 1;
+  }
+  if (movedEnemies > 0 && state.enemyClock >= 500) {
+    const adjacent = activeEnemies.filter((enemy) => {
+      const at = coord(enemy.position),
+        player = coord(state.playerPosition);
+      return Math.abs(at.x - player.x) + Math.abs(at.y - player.y) <= 1;
+    }).length;
+    state.events.push({
+      kind: 'PRESSURE',
+      text: `怪群推進 ${movedEnemies} 隻 · 近身 ${adjacent} 隻 · 保持移動才能降低包圍壓力`,
+    });
+    state.enemyClock -= 500;
+  }
   const skillRateMultiplier =
       input.build.skill.mechanic === 'cyclone'
         ? 1 + Math.floor(state.skillStage ?? 0) * 0.25
@@ -706,20 +797,30 @@ export function stepCombat(
       return state;
     }
   }
-  if (state.enemyClock >= 1000 && state.targetLife > 0) {
-    state.enemyClock -= 1000;
+  for (const enemy of activeEnemies) {
+    const at = coord(enemy.position),
+      player = coord(state.playerPosition),
+      distance = Math.abs(at.x - player.x) + Math.abs(at.y - player.y);
+    if (distance > 1 || (enemy.life ?? enemy.maxLife) <= 0) continue;
+    enemy.attackClock = (enemy.attackClock ?? 0) + tickMs;
+    const attackDelay = 1000 / rankActionSpeed[enemy.rank];
+    if (enemy.attackClock < attackDelay) continue;
+    enemy.attackClock -= attackDelay;
     const raw =
-        state.target!.rank === 'boss'
+        enemy.rank === 'boss'
           ? boss.damage * (1 + boss.mapDamage)
-          : field.damage * rankDamage[state.target!.rank],
+          : field.damage * rankDamage[enemy.rank],
       taken = Math.max(
         1,
         Math.round(raw * (1 - armourReduction(stats.armor, raw))),
       );
     state.life = Math.max(0, state.life - taken);
+    state.enemyAttackFrom = enemy.position;
+    state.enemyAttackTo = state.playerPosition;
+    state.attackers = (state.attackers ?? 0) + 1;
     state.events.push({
       kind: 'DAMAGE',
-      text: `${state.target!.id} 攻擊你 · 承受 ${taken} 物理傷害 · HP ${Math.ceil(state.life)}/${state.maxLife}`,
+      text: `${enemy.id} 近身攻擊 · 承受 ${taken} 物理傷害 · HP ${Math.ceil(state.life)}/${state.maxLife} · Attack Time ${Math.round(attackDelay)}ms`,
     });
   }
   if (

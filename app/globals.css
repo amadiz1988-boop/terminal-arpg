@@ -822,6 +822,10 @@ button:disabled {
 .log-death b {
   color: #ff8585;
 }
+.log-pressure span,
+.log-pressure b {
+  color: #ffad7a;
+}
 .log-kill span,
 .log-kill b,
 .log-clear span,
@@ -1340,6 +1344,13 @@ button:disabled {
   background: #b6c0ba;
   box-shadow: 0 0 3px rgba(216, 229, 220, 0.72);
   pointer-events: none;
+  transition:
+    left 0.22s linear,
+    top 0.22s linear;
+}
+.field-map > i.monster-marker.aggro {
+  border-color: rgba(255, 112, 99, 0.9);
+  box-shadow: 0 0 6px rgba(255, 85, 72, 0.8);
 }
 .field-map > i.monster-marker.magic {
   background: #55aaff;
@@ -1435,6 +1446,26 @@ button:disabled {
   fill: #fff4a5;
   filter: drop-shadow(0 0 3px #fff);
 }
+.enemy-attack-vector {
+  position: absolute;
+  inset: 0.5rem 0.5rem 1.45rem;
+  z-index: 5;
+  width: calc(100% - 1rem);
+  height: calc(100% - 1.95rem);
+  overflow: visible;
+  pointer-events: none;
+}
+.enemy-attack-vector line {
+  stroke: #ff5a52;
+  stroke-width: 0.55;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 3px #ff2b24);
+  animation: enemy-strike 0.18s ease-out 1;
+}
+.enemy-attack-vector circle {
+  fill: #ff8d84;
+  filter: drop-shadow(0 0 4px #ff3d35);
+}
 .field-map > i.skill-shape {
   position: absolute;
   z-index: 4;
@@ -1508,6 +1539,16 @@ button:disabled {
 @keyframes projectile-dash {
   to {
     stroke-dashoffset: -3;
+  }
+}
+@keyframes enemy-strike {
+  from {
+    opacity: 1;
+    stroke-width: 1.1;
+  }
+  to {
+    opacity: 0.35;
+    stroke-width: 0.25;
   }
 }
 @keyframes map-hurt {

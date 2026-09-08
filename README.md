@@ -2,6 +2,13 @@
 
 以 Build 規劃、自動刷圖、打寶成長與戰鬥終端為核心的文字放置 ARPG。
 
+## Alpha 0.21
+
+- 交戰中的整個怪群會依各自稀有度速度逐格逼近玩家，地圖上的怪物位置會真實變化
+- 每隻近身怪物擁有獨立攻擊時鐘，多隻怪物能同時形成包圍與生命壓力
+- 小地圖新增紅色怪物攻擊線、追擊狀態與怪群推進訊號
+- 新增固定版本檢討、五項玩法評分與主軸追蹤紀錄，未達 7/10 持續開發
+
 ## Alpha 0.20
 
 - 每隻存活怪物各自使用一個小地圖標記，依普通、魔法、稀有、特殊與首領分色，受攻擊目標會放大閃爍
@@ -106,6 +113,7 @@
 * [PoE 與火炬玩家循環研究](docs/ARPG_PLAYER_LOOP_RESEARCH.md)
 * [核心公式與內容架構](docs/CORE_FORMULA_ARCHITECTURE.md)
 * [公開版本壓力測試流程](docs/RELEASE_STRESS_GATE.md)
+* [開發檢討與主軸追蹤](docs/DEVELOPMENT_REVIEW_LOG.md)
 * [Alpha 0.5 實玩驗收](docs/PLAYTEST_ALPHA_0.5.md)
 
 ## 開發與驗證

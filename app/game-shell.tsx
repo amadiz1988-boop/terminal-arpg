@@ -381,6 +381,9 @@ export function GameShell() {
       100;
   const attackVisible =
     combat?.attackFrom !== undefined && combat.attackTo !== undefined;
+  const enemyAttackVisible =
+    combat?.enemyAttackFrom !== undefined &&
+    combat.enemyAttackTo !== undefined;
   const attackFrom = attackVisible
     ? {
         x: (((combat!.attackFrom! % MAP_WIDTH) + 0.5) / MAP_WIDTH) * 100,
@@ -395,6 +398,25 @@ export function GameShell() {
         x: (((combat!.attackTo! % MAP_WIDTH) + 0.5) / MAP_WIDTH) * 100,
         y:
           ((Math.floor(combat!.attackTo! / MAP_WIDTH) + 0.5) /
+            (MAP_SIZE / MAP_WIDTH)) *
+          100,
+      }
+    : undefined;
+  const enemyAttackFrom = enemyAttackVisible
+    ? {
+        x:
+          (((combat!.enemyAttackFrom! % MAP_WIDTH) + 0.5) / MAP_WIDTH) * 100,
+        y:
+          ((Math.floor(combat!.enemyAttackFrom! / MAP_WIDTH) + 0.5) /
+            (MAP_SIZE / MAP_WIDTH)) *
+          100,
+      }
+    : undefined;
+  const enemyAttackTo = enemyAttackVisible
+    ? {
+        x: (((combat!.enemyAttackTo! % MAP_WIDTH) + 0.5) / MAP_WIDTH) * 100,
+        y:
+          ((Math.floor(combat!.enemyAttackTo! / MAP_WIDTH) + 0.5) /
             (MAP_SIZE / MAP_WIDTH)) *
           100,
       }
@@ -856,7 +878,9 @@ export function GameShell() {
             batchedRanks: NonNullable<CombatState['killRanks']> = [];
           let next = current,
             lastAttackFrom: number | undefined,
-            lastAttackTo: number | undefined;
+            lastAttackTo: number | undefined,
+            lastEnemyAttackFrom: number | undefined,
+            lastEnemyAttackTo: number | undefined;
           for (
             let batch = 0;
             batch < qaSpeedRef.current &&
@@ -877,12 +901,18 @@ export function GameShell() {
               lastAttackFrom = next.attackFrom;
               lastAttackTo = next.attackTo;
             }
+            if (next.enemyAttackFrom !== undefined) {
+              lastEnemyAttackFrom = next.enemyAttackFrom;
+              lastEnemyAttackTo = next.enemyAttackTo;
+            }
           }
           next.events = batchedEvents;
           next.killRanks = batchedRanks;
           next.lastKillRank = batchedRanks.at(-1);
           next.attackFrom = lastAttackFrom;
           next.attackTo = lastAttackTo;
+          next.enemyAttackFrom = lastEnemyAttackFrom;
+          next.enemyAttackTo = lastEnemyAttackTo;
           next.rewardPlan = rewardPlan;
           if (next.kills > current.kills) {
             let rewardProgress = current.rewardProgress;
@@ -913,7 +943,7 @@ export function GameShell() {
               : next.events.filter((event) =>
                   event.kind === 'MOVE'
                     ? next.playerPosition % 3 === 0
-                    : !['HIT', 'BASIC'].includes(event.kind) ||
+                    : !['HIT', 'BASIC', 'PRESSURE'].includes(event.kind) ||
                       next.action % 4 === 0 ||
                       next.targetLife === 0,
                 );
@@ -1206,7 +1236,7 @@ export function GameShell() {
                   TERMINAL ARPG
                 </h1>
                 <span className="rounded border border-primary/30 px-1.5 font-mono text-[9px] text-primary">
-                  ALPHA 0.20
+                  ALPHA 0.21
                 </span>
               </div>
               <p className="text-[11px] text-muted-foreground">
@@ -1600,12 +1630,13 @@ export function GameShell() {
                           ((Math.floor(monster.position / MAP_WIDTH) + 0.5) /
                             (MAP_SIZE / MAP_WIDTH)) *
                           100,
-                        engaged = combat?.target?.id === monster.id;
+                        engaged = combat?.target?.id === monster.id,
+                        aggro = combat?.aggroIds?.includes(monster.id);
                       return (
                         <i
                           key={monster.id}
                           data-monster-id={monster.id}
-                          className={`monster-marker ${monster.rank}${engaged ? ' engaged' : ''}`}
+                          className={`monster-marker ${monster.rank}${aggro ? ' aggro' : ''}${engaged ? ' engaged' : ''}`}
                           title={`${monster.id} · ${monster.rank} · HP ${Math.ceil(monster.life ?? monster.maxLife)}/${monster.maxLife}`}
                           style={{ left: `${x}%`, top: `${y}%` }}
                         >
@@ -1697,9 +1728,29 @@ export function GameShell() {
                           <circle cx={attackTo.x} cy={attackTo.y} r="1.1" />
                         </svg>
                       )}
+                    {enemyAttackVisible && enemyAttackFrom && enemyAttackTo && (
+                      <svg
+                        className="enemy-attack-vector"
+                        viewBox="0 0 100 100"
+                        preserveAspectRatio="none"
+                        aria-hidden="true"
+                      >
+                        <line
+                          x1={enemyAttackFrom.x}
+                          y1={enemyAttackFrom.y}
+                          x2={enemyAttackTo.x}
+                          y2={enemyAttackTo.y}
+                        />
+                        <circle
+                          cx={enemyAttackFrom.x}
+                          cy={enemyAttackFrom.y}
+                          r="0.8"
+                        />
+                      </svg>
+                    )}
                     <span>
                       ◆ 玩家　• 普通　• 魔法　• 稀有　• 特殊　B 首領　
-                      技能形態 {activeSkill.name}　閃紅 交戰　移速{' '}
+                      技能形態 {activeSkill.name}　紅線 怪物攻擊　移速{' '}
                       {Math.round(resolved.moveSpeed)}%
                     </span>
                   </div>

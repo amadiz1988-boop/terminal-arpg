@@ -45,12 +45,13 @@ try {
     return false;
   };
   const observeCombat = async (attempts = 3000) => {
-    let sawProjectile=false,sawCyclone=false,sawHurt=false,sawEngaged=false,maxMonsterDots=0;
-    for (let attempt = 0; attempt < attempts && (!sawCyclone||!sawHurt||!sawEngaged||maxMonsterDots<5); attempt += 1) {
-      try { const pulse=await evaluate("({projectile:Boolean(document.querySelector('.combat-vector')),cyclone:Boolean(document.querySelector('.cyclone-shape')),hurt:Boolean(document.querySelector('.field-map .player-marker.hurt')),engaged:Boolean(document.querySelector('.monster-marker.engaged')),monsterDots:document.querySelectorAll('.monster-marker').length})");sawProjectile ||= pulse.projectile;sawCyclone ||= pulse.cyclone;sawHurt ||= pulse.hurt;sawEngaged ||= pulse.engaged;maxMonsterDots=Math.max(maxMonsterDots,pulse.monsterDots); } catch { /* Animation frame replaced during observation. */ }
+    let sawProjectile=false,sawCyclone=false,sawHurt=false,sawEngaged=false,sawEnemyAttack=false,sawMonsterMovement=false,maxMonsterDots=0;
+    const monsterPositions=new Map();
+    for (let attempt = 0; attempt < attempts && (!sawCyclone||!sawHurt||!sawEngaged||!sawEnemyAttack||!sawMonsterMovement||maxMonsterDots<5); attempt += 1) {
+      try { const pulse=await evaluate("({projectile:Boolean(document.querySelector('.combat-vector')),cyclone:Boolean(document.querySelector('.cyclone-shape')),hurt:Boolean(document.querySelector('.field-map .player-marker.hurt')),engaged:Boolean(document.querySelector('.monster-marker.engaged')),enemyAttack:Boolean(document.querySelector('.enemy-attack-vector')),monsterDots:document.querySelectorAll('.monster-marker').length,positions:[...document.querySelectorAll('.monster-marker.aggro')].map(x=>[x.dataset.monsterId,x.style.left,x.style.top])})");sawProjectile ||= pulse.projectile;sawCyclone ||= pulse.cyclone;sawHurt ||= pulse.hurt;sawEngaged ||= pulse.engaged;sawEnemyAttack ||= pulse.enemyAttack;maxMonsterDots=Math.max(maxMonsterDots,pulse.monsterDots);for(const [id,left,top] of pulse.positions){const next=`${left}/${top}`;if(monsterPositions.has(id)&&monsterPositions.get(id)!==next)sawMonsterMovement=true;monsterPositions.set(id,next);} } catch { /* Animation frame replaced during observation. */ }
       await new Promise((resolve) => setTimeout(resolve, 5));
     }
-    return {sawProjectile,sawCyclone,sawHurt,sawEngaged,maxMonsterDots};
+    return {sawProjectile,sawCyclone,sawHurt,sawEngaged,sawEnemyAttack,sawMonsterMovement,maxMonsterDots};
   };
 
   await call('Runtime.enable');
@@ -90,7 +91,7 @@ try {
     return waitUntil(`Boolean(document.querySelector('${selector}'))`,80);
   };
   const skillShapes={winterOrb:await smokeSkillShape(1,'.combat-vector.winter-orb'),penanceBrand:await smokeSkillShape(2,'.brand-vector')};
-  const pass=before.title&&before.zeroStart&&before.directT1&&!before.legacyTutorial&&before.fieldMonsters>=400&&before.fieldMonsters<=600&&before.statusPoint?.includes('0')&&!before.oldTalent&&before.resourceTiles===0&&before.statRows===6&&before.derivedRows===9&&before.enabledPlus===0&&!before.overflow&&after.atk&&after.def&&after.resetDisabled&&combat.kills>=4&&combat.xp>0&&combat.expLogs>0&&combat.dropLogs>0&&combat.currencyLogs>0&&combat.upgradeVisible&&combat.powerLogs>0&&/拾取 [1-9]/.test(combat.lootLedger??'')&&/通貨 [1-9]/.test(combat.lootLedger??'')&&mapVisual.playerMarker===1&&mapVisual.legacyTrail===0&&mapVisual.moveTiming.includes('linear')&&mapVisual.moveDuration!=='0s'&&mapVisual.zoomBefore==='150%'&&mapVisual.zoomAfter==='200%'&&mapVisual.zoomButtons===2&&mapVisual.sawCyclone&&mapVisual.sawHurt&&mapVisual.sawEngaged&&mapVisual.maxMonsterDots>=5&&skillShapes.winterOrb&&skillShapes.penanceBrand&&combat.errors.length===0;
+  const pass=before.title&&before.zeroStart&&before.directT1&&!before.legacyTutorial&&before.fieldMonsters>=400&&before.fieldMonsters<=600&&before.statusPoint?.includes('0')&&!before.oldTalent&&before.resourceTiles===0&&before.statRows===6&&before.derivedRows===9&&before.enabledPlus===0&&!before.overflow&&after.atk&&after.def&&after.resetDisabled&&combat.kills>=4&&combat.xp>0&&combat.expLogs>0&&combat.dropLogs>0&&combat.currencyLogs>0&&combat.upgradeVisible&&combat.powerLogs>0&&/拾取 [1-9]/.test(combat.lootLedger??'')&&/通貨 [1-9]/.test(combat.lootLedger??'')&&mapVisual.playerMarker===1&&mapVisual.legacyTrail===0&&mapVisual.moveTiming.includes('linear')&&mapVisual.moveDuration!=='0s'&&mapVisual.zoomBefore==='150%'&&mapVisual.zoomAfter==='200%'&&mapVisual.zoomButtons===2&&mapVisual.sawCyclone&&mapVisual.sawHurt&&mapVisual.sawEngaged&&mapVisual.sawEnemyAttack&&mapVisual.sawMonsterMovement&&mapVisual.maxMonsterDots>=5&&skillShapes.winterOrb&&skillShapes.penanceBrand&&combat.errors.length===0;
   console.log(JSON.stringify({ before, after, combat, mapVisual, skillChoice, skillShapes, pass }, null, 2));
   if(!pass)throw new Error('UI release gate failed');
   await call('Browser.close');

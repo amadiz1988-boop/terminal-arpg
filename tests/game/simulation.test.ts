@@ -8,7 +8,7 @@ import { resolveStats } from '../../game/modifiers/resolve-stats';
 import { exchangeMaps } from '../../game/progression/maps';
 import { generateMonsterPacks, generateMonsterPopulation, getRunStopReason, simulateMapCompletion } from '../../game/simulation/map';
 import { simulateAcceleratedSession } from '../../game/simulation/session';
-import { armourReduction, createCombatState, generateMonsterRoster, maximumMana, SKILL_MANA_COST, stepCombat } from '../../game/simulation/combat';
+import { armourReduction, createCombatState, generateMonsterRoster, generateTerrain, MAP_HEIGHT, MAP_WIDTH, maximumMana, SKILL_MANA_COST, stepCombat } from '../../game/simulation/combat';
 import { progressMapRewards } from '../../game/simulation/rewards';
 import type { Item } from '../../game/core/types';
 
@@ -214,6 +214,7 @@ describe('simulation contracts', () => {
 
   it('passes the 30 minute equivalent play gate with measurable decisions', () => {
     const report = simulateAcceleratedSession(824, 45);
+    console.log('PLAYTEST_REPORT', JSON.stringify(report));
     expect(report.equivalentMinutes).toBeGreaterThanOrEqual(30);
     expect(report.mapsRun).toBe(45);
     expect(report.decisions).toBeGreaterThanOrEqual(14);
@@ -315,6 +316,37 @@ describe('simulation contracts', () => {
     fastState={...fastState,phase:'travel',targets:[target],target,targetLife:22,playerPosition:0,path:[1,2,3],travelMode:'target',travel:0};
     fastState=stepCombat(fastState,{tier:1,level:1,build:fast,packs,seed:824,tickMs:125});
     expect(fastState.playerPosition).toBe(1);
+  });
+
+  it('moves every living monster in the engaged pack toward the player',()=>{
+    const packs=generateMonsterPacks(824,generateMonsterPopulation(824));
+    const slow={...build,skill:{...SKILLS.ember,baseDamage:1,attacksPerSecond:.1}};
+    let state=createCombatState(1,10,slow,packs,824);
+    for(let index=0;index<200&&state.phase!=='combat';index+=1)state=stepCombat(state,{tier:1,level:10,build:slow,packs,seed:824,tickMs:125});
+    expect(state.phase).toBe('combat');
+    const packId=state.target?.packId;
+    expect(packId).toBeTypeOf('number');
+    const before=new Map(state.targets.filter(target=>target.packId===packId).map(target=>[target.id,target.position]));
+    for(let index=0;index<4;index+=1)state=stepCombat(state,{tier:1,level:10,build:slow,packs,seed:824,tickMs:125});
+    const moved=state.targets.filter(target=>target.packId===packId&&before.get(target.id)!==target.position);
+    expect(moved.length).toBeGreaterThan(0);
+    expect(state.aggroIds?.length).toBe(before.size);
+    expect(state.events.some(event=>event.kind==='PRESSURE')).toBe(true);
+  });
+
+  it('lets multiple adjacent pack monsters attack on their own clocks',()=>{
+    const packs=[{position:1,normal:2,magic:0,rare:0,special:0}];
+    const terrain=generateTerrain(824),start=terrain.start,
+      neighbors=[start-1,start+1,start-MAP_WIDTH,start+MAP_WIDTH].filter(cell=>cell>=0&&cell<MAP_WIDTH*MAP_HEIGHT&&terrain.walkable.includes(cell));
+    expect(neighbors.length).toBeGreaterThanOrEqual(2);
+    const targets=neighbors.slice(0,2).map((position,index)=>({id:`attacker-${index}`,rank:'normal' as const,packId:7,position,maxLife:620,life:620,attackClock:1000}));
+    let state=createCombatState(1,10,build,packs,824);
+    state={...state,phase:'combat',targets,target:targets[0],targetLife:620,totalMonsters:2,playerPosition:start,playerClock:0};
+    state=stepCombat(state,{tier:1,level:10,build,packs,seed:824,tickMs:1});
+    expect(state.events.filter(event=>event.kind==='DAMAGE')).toHaveLength(2);
+    expect(state.attackers).toBe(2);
+    expect(state.enemyAttackFrom).toBeTypeOf('number');
+    expect(state.enemyAttackTo).toBe(start);
   });
 
   it('never credits a full map without processing its combat timeline',()=>{
