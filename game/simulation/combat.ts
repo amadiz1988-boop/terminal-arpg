@@ -13,6 +13,7 @@ export type CombatPhase = 'search' | 'travel' | 'combat' | 'complete' | 'dead';
 export type CombatTarget = {
   id: string;
   rank: MonsterRank;
+  packId?: number;
   position: number;
   maxLife: number;
   life?: number;
@@ -33,6 +34,7 @@ export type CombatState = {
   totalMonsters: number;
   lastKillRank?: MonsterRank;
   killRanks?: MonsterRank[];
+  killPositions?: number[];
   rewardProgress?: RewardProgress;
   rewardPlan?: MapCompletion;
   life: number;
@@ -46,10 +48,14 @@ export type CombatState = {
   enemyClock: number;
   playerClock: number;
   action: number;
+  skillStage?: number;
   events: CombatEvent[];
 };
 
 export const SKILL_MANA_COST: Record<SkillId, number> = {
+  cycloneTumult: 4,
+  winterOrb: 2,
+  penanceBrand: 15,
   ember: 8,
   arc: 10,
   quake: 10,
@@ -251,17 +257,40 @@ export function generateMonsterRoster(
       (cell) => cell !== terrain.start && cell !== terrain.boss,
     ),
     field = FIELD[tier] ?? FIELD[5],
-    targets: CombatTarget[] = [];
+    targets: CombatTarget[] = [],
+    occupied = new Set<number>();
   let monsterIndex = 0;
-  for (const pack of packs) {
-    const position = cells[Math.floor(random() * cells.length)];
+  for (let packId = 0; packId < packs.length; packId += 1) {
+    const pack = packs[packId],
+      anchor = cells[Math.floor(random() * cells.length)],
+      anchorCoord = coord(anchor),
+      nearby = cells
+        .filter((cell) => !occupied.has(cell))
+        .map((cell) => {
+          const at = coord(cell);
+          return {
+            cell,
+            distance:
+              Math.abs(at.x - anchorCoord.x) + Math.abs(at.y - anchorCoord.y),
+            tie: random(),
+          };
+        })
+        .sort((a, b) => a.distance - b.distance || a.tie - b.tie),
+      positions = nearby;
+    let packOffset = 0;
     for (const rank of ['normal', 'magic', 'rare', 'special'] as const)
       for (let index = 0; index < pack[rank]; index += 1) {
         monsterIndex += 1;
+        const position =
+          positions[packOffset]?.cell ??
+          cells[Math.floor(random() * cells.length)];
+        packOffset += 1;
+        occupied.add(position);
         const maxLife = Math.round(field.life * rankLife[rank]);
         targets.push({
           id: `M-${String(monsterIndex).padStart(3, '0')}`,
           rank,
+          packId,
           position,
           maxLife,
           life: maxLife,
@@ -312,6 +341,7 @@ export function createCombatState(
     enemyClock: 0,
     playerClock: 0,
     action: 0,
+    skillStage: 0,
     events: [
       {
         kind: 'ROUTE',
@@ -348,6 +378,7 @@ export function stepCombat(
       attackTo: undefined,
       lastKillRank: undefined,
       killRanks: [],
+      killPositions: [],
       events: [],
     },
     stats = resolveStats(input.build),
@@ -388,6 +419,25 @@ export function stepCombat(
   );
   state.manaRecovery = Math.max(0, state.manaRecovery - 50 * slice);
   state.lifeRecovery = Math.max(0, state.lifeRecovery - 70 * slice);
+  if (state.phase === 'combat') {
+    if (input.build.skill.mechanic === 'cyclone')
+      state.skillStage = Math.min(
+        5,
+        (state.skillStage ?? 0) + tickMs / 400,
+      );
+    if (input.build.skill.mechanic === 'winter-orb')
+      state.skillStage = Math.min(
+        8,
+        (state.skillStage ?? 0) + tickMs / 250,
+      );
+    if (input.build.skill.mechanic === 'penance-brand')
+      state.skillStage = Math.min(
+        20,
+        (state.skillStage ?? 0) + tickMs / 100,
+      );
+  } else if (input.build.skill.mechanic === 'cyclone') {
+    state.skillStage = Math.max(0, (state.skillStage ?? 0) - tickMs / 400);
+  }
   if (state.phase === 'search') {
     if (!state.targets.length) {
       state.phase = 'complete';
@@ -513,9 +563,17 @@ export function stepCombat(
   }
   state.playerClock += tickMs;
   state.enemyClock += tickMs;
-  const skillDelay = Math.max(
+  const skillRateMultiplier =
+      input.build.skill.mechanic === 'cyclone'
+        ? 1 + Math.floor(state.skillStage ?? 0) * 0.25
+        : input.build.skill.mechanic === 'winter-orb'
+          ? 1 + Math.max(0, Math.floor(state.skillStage ?? 0) - 1) * 0.2
+          : 1,
+    skillDelay = Math.max(
       1,
-      Math.round(1000 / Math.max(0.1, stats.attacksPerSecond)),
+      Math.round(
+        1000 / Math.max(0.1, stats.attacksPerSecond * skillRateMultiplier),
+      ),
     ),
     cost = Math.max(
       0,
@@ -555,12 +613,29 @@ export function stepCombat(
       primary = state.target!;
     state.attackFrom = state.playerPosition;
     state.attackTo = primary.position;
-    const pack = state.targets.filter(
-      (target) =>
-        target.position === primary.position &&
-        target.id !== primary.id &&
-        target.rank !== 'boss',
-    );
+    const primaryCoord = coord(primary.position),
+      playerCoord = coord(state.playerPosition),
+      pack = state.targets.filter((target) => {
+        if (target.id === primary.id || target.rank === 'boss') return false;
+        const at = coord(target.position),
+          samePack =
+            primary.packId !== undefined
+              ? target.packId === primary.packId
+              : target.position === primary.position;
+        if (!samePack) return false;
+        if (input.build.skill.mechanic === 'cyclone')
+          return (
+            Math.abs(at.x - playerCoord.x) + Math.abs(at.y - playerCoord.y) <=
+            2 + Math.floor((state.skillStage ?? 0) / 2)
+          );
+        if (input.build.skill.mechanic === 'winter-orb')
+          return (
+            Math.abs(at.x - primaryCoord.x) +
+              Math.abs(at.y - primaryCoord.y) <=
+            2
+          );
+        return true;
+      });
     const additional = useSkill
       ? input.build.skill.targeting.mode === 'area'
         ? pack
@@ -577,6 +652,23 @@ export function stepCombat(
       kind: crit ? 'CRITICAL' : useSkill ? 'HIT' : 'BASIC',
       text: `${useSkill ? input.build.skill.name : '普通攻擊'} → ${primary.id} · ${crit ? 'CRITICAL DAMAGE ' : 'Dmg '}${hit.toLocaleString()} · HP ${state.targetLife.toLocaleString()}/${primary.maxLife.toLocaleString()} · MP ${Math.floor(state.mana)}/${state.maxMana} · Delay ${actionDelay}ms`,
     });
+    if (useSkill && input.build.skill.mechanic === 'cyclone')
+      state.events.push({
+        kind: 'CHANNEL',
+        text: `旋風斬．騷動 ${Math.floor(state.skillStage ?? 0)}/5 層 · 持續旋轉攻擊周圍怪物`,
+      });
+    if (useSkill && input.build.skill.mechanic === 'winter-orb')
+      state.events.push({
+        kind: 'CHANNEL',
+        text: `冬季之球 ${Math.floor(state.skillStage ?? 0)}/8 層 · 冰霜投射物落地爆炸`,
+      });
+    if (useSkill && input.build.skill.mechanic === 'penance-brand') {
+      state.events.push({
+        kind: 'BRAND',
+        text: `贖罪烙印 20/20 能量 · ${primary.id} 引爆`,
+      });
+      state.skillStage = 0;
+    }
     if (additional.length)
       state.events.push({
         kind: input.build.skill.targeting.mode === 'chain' ? 'CHAIN' : 'AREA',
@@ -589,6 +681,7 @@ export function stepCombat(
         state.kills += 1;
         state.lastKillRank = target.rank;
         state.killRanks!.push(target.rank);
+        state.killPositions!.push(target.position);
         state.lifeFlaskCharges = Math.min(
           21,
           state.lifeFlaskCharges + rankCharge[target.rank],

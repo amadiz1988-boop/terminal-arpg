@@ -1326,6 +1326,86 @@ button:disabled {
   background: #793830;
   box-shadow: 0 0 6px rgba(255, 90, 82, 0.6);
 }
+.field-map > i.monster-marker {
+  position: absolute;
+  z-index: 4;
+  display: block;
+  width: clamp(3px, 0.48vw, 6px);
+  min-height: 0;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 50%;
+  color: transparent;
+  background: #b6c0ba;
+  box-shadow: 0 0 3px rgba(216, 229, 220, 0.72);
+  pointer-events: none;
+}
+.field-map > i.monster-marker.magic {
+  background: #55aaff;
+  box-shadow: 0 0 5px rgba(85, 170, 255, 0.92);
+}
+.field-map > i.monster-marker.rare {
+  width: clamp(4px, 0.58vw, 7px);
+  background: #ffd84f;
+  box-shadow: 0 0 6px rgba(255, 216, 79, 0.95);
+}
+.field-map > i.monster-marker.special {
+  width: clamp(5px, 0.68vw, 8px);
+  background: #dd72ff;
+  box-shadow: 0 0 8px rgba(221, 114, 255, 1);
+}
+.field-map > i.monster-marker.boss {
+  z-index: 5;
+  display: grid;
+  width: clamp(9px, 1vw, 13px);
+  place-items: center;
+  border-radius: 2px;
+  color: #fff0e9;
+  background: #e94d43;
+  box-shadow: 0 0 10px rgba(255, 73, 63, 0.95);
+  font: 800 clamp(0.32rem, 0.5vw, 0.5rem) monospace;
+}
+.field-map > i.monster-marker.engaged {
+  z-index: 6;
+  animation: monster-engaged 0.32s steps(2) infinite;
+}
+@keyframes monster-engaged {
+  50% {
+    transform: translate(-50%, -50%) scale(1.9);
+    border-color: #fff;
+    filter: brightness(2.1);
+  }
+}
+.map-loot-ledger {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.8rem;
+  align-items: center;
+  border-top: 1px solid #1b2c23;
+  padding: 0.55rem 0.7rem;
+  color: #7c9084;
+  background: #080d0a;
+  font: 650 0.56rem monospace;
+}
+.map-loot-ledger b {
+  color: #b7c8bd;
+}
+.map-loot-ledger .picked {
+  color: #78e8a4;
+}
+.map-loot-ledger .salvaged {
+  color: #9baea3;
+}
+.map-loot-ledger .left {
+  color: #ef7770;
+}
+.map-loot-ledger .currency {
+  color: #e8c661;
+}
+.map-loot-ledger .gem {
+  color: #70d8ff;
+}
 .field-map > span {
   position: absolute;
   right: 0.55rem;
@@ -1354,6 +1434,76 @@ button:disabled {
 .combat-vector circle {
   fill: #fff4a5;
   filter: drop-shadow(0 0 3px #fff);
+}
+.field-map > i.skill-shape {
+  position: absolute;
+  z-index: 4;
+  min-height: 0;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: transparent;
+  pointer-events: none;
+}
+.field-map > i.cyclone-shape {
+  width: calc(16px + var(--skill-stage) * 2px);
+  aspect-ratio: 1;
+  border: 2px dashed rgba(135, 255, 188, 0.92);
+  box-shadow:
+    0 0 6px rgba(112, 240, 167, 0.8),
+    inset 0 0 5px rgba(112, 240, 167, 0.55);
+  animation: cyclone-spin 0.28s linear infinite;
+}
+.field-map > i.winter-orb-shape {
+  width: 8px;
+  aspect-ratio: 1;
+  transform: translate(-50%, -155%);
+  border: 1px solid #ddf6ff;
+  background: #77d9ff;
+  box-shadow: 0 0 9px #66d4ff;
+  animation: winter-orb-pulse 0.65s ease-in-out infinite alternate;
+}
+.brand-vector {
+  position: absolute;
+  inset: 0.5rem 0.5rem 1.45rem;
+  z-index: 5;
+  width: calc(100% - 1rem);
+  height: calc(100% - 1.95rem);
+  overflow: visible;
+  pointer-events: none;
+}
+.brand-vector line {
+  stroke: rgba(255, 217, 93, 0.7);
+  stroke-width: 0.22;
+  stroke-dasharray: 0.8 0.7;
+  animation: projectile-dash 0.3s linear infinite;
+}
+.brand-vector circle {
+  fill: rgba(255, 205, 70, 0.18);
+  stroke: #ffd75a;
+  stroke-width: 0.25;
+  filter: drop-shadow(0 0 4px #ffca37);
+  animation: brand-charge 0.38s ease-in-out infinite alternate;
+}
+.brand-vector text {
+  fill: #ffe9a2;
+  font: 700 1.4px monospace;
+  text-anchor: middle;
+}
+@keyframes cyclone-spin {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+@keyframes winter-orb-pulse {
+  to {
+    transform: translate(-50%, -155%) scale(1.35);
+    filter: brightness(1.6);
+  }
+}
+@keyframes brand-charge {
+  to {
+    opacity: 0.45;
+  }
 }
 @keyframes projectile-dash {
   to {

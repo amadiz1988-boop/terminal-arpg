@@ -18,8 +18,8 @@ export type AcceleratedSessionReport = {
 
 export function simulateAcceleratedSession(seed=824,mapsToRun=45):AcceleratedSessionReport{
   const equipment:Partial<Record<ItemSlot,Item>>={weapon:createStarterWeapon('thief')};
-  const knownSkills=new Set<SkillId>(['venom']); const knownSupports=new Set<SupportId>();
-  let activeSkill:SkillId='venom'; let activeSupports:SupportId[]=[]; let roStats:RoStats={...DEFAULT_RO_STATS}; let secondJob=false;
+  const knownSkills=new Set<SkillId>(['cycloneTumult']); const knownSupports=new Set<SupportId>();
+  let activeSkill:SkillId='cycloneTumult'; let activeSupports:SupportId[]=[]; let roStats:RoStats={...DEFAULT_RO_STATS}; let secondJob=false;
   let stock=[0,0,0,0,0,0]; let materials:SalvageMaterials={scrap:0,essence:0,core:0}; let orbs:OrbWallet={...EMPTY_ORBS};
   let successes=0,deaths=0,decisions=1,upgrades=0,gemsFound=0,orbsEarned=0,orbsSpent=0,mapExchanges=0,freeRuns=0,peakTier=1,mapsSinceReward=0,longestMapsWithoutReward=0;
   const snapshot=():BuildSnapshot=>({skill:SKILLS[activeSkill],...equipment,supports:activeSupports.map(id=>SUPPORTS[id]),supportSlots:itemLinks(equipment.weapon),roStats,classId:'thief',secondJobId:secondJob?'assassin':undefined,ascendancyNodes:secondJob?['assassin-katar']:[]});
@@ -30,7 +30,7 @@ export function simulateAcceleratedSession(seed=824,mapsToRun=45):AcceleratedSes
     const tier=[5,4,3,2].find(value=>value<=allowed&&stock[value]>0)??1;if(tier===1)freeRuns+=1;else stock[tier]-=1;
     const result=simulateMapCompletion(seed+index,tier,index%3===0?'boss-rush':'full-clear',snapshot(),index%7===0?'greed':'scout');mapsSinceReward+=1;
     if(!result.success){deaths+=1;continue;}successes+=1;stock[1]+=1;if(result.mapDropTier>1)stock[result.mapDropTier]+=1;
-    gemsFound+=1;if(result.gemDrop.type==='skill'){const before=knownSkills.size;knownSkills.add(result.gemDrop.id);if(knownSkills.size>before&&index%9===0){activeSkill=result.gemDrop.id;decisions+=1;}}
+    gemsFound+=1;if(result.gemDrop.type==='skill'){const before=knownSkills.size;knownSkills.add(result.gemDrop.id);if(knownSkills.size>before&&index%9===0&&resolveStats({...snapshot(),skill:SKILLS[result.gemDrop.id]}).dps>resolveStats(snapshot()).dps){activeSkill=result.gemDrop.id;decisions+=1;}}
     else {const before=knownSupports.size;knownSupports.add(result.gemDrop.id);if(knownSupports.size>before){activeSupports=[...knownSupports].slice(0,Math.max(0,itemLinks(equipment.weapon)-1));decisions+=1;}}
     const gained=Object.values(result.orbs).reduce((a,b)=>a+b,0);orbsEarned+=gained;orbs=addWallet(orbs,result.orbs);longestMapsWithoutReward=Math.max(longestMapsWithoutReward,mapsSinceReward);mapsSinceReward=0;
     const evaluation=evaluateItem(result.item,snapshot());if(!equipment[result.item.slot]||evaluation.classification==='upgrade'){equipment[result.item.slot]=result.item;upgrades+=1;decisions+=1;}else{const gain=salvageValue(result.item);materials={scrap:materials.scrap+gain.scrap,essence:materials.essence+gain.essence,core:materials.core+gain.core};}

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { SKILLS } from '../../game/content/skills';
+import { CLASSES } from '../../game/content/classes';
 import { DEFAULT_RO_STATS, nextStatCost, repairRoStatsForLevel, RO_STAT_DEFINITIONS, roAspdFromAttacksPerSecond, roAverageMagicAttack, roFlee, roHit, roMagicDefense, roMeleeAttack, roPerfectDodge, roPhysicalDefense, roRangedAttack, roVariableCastMultiplier, spentStatusPoints, statusPointsForLevel } from '../../game/content/ro-stats';
 import { isSupportCompatible, SUPPORTS } from '../../game/content/supports';
 import { createStarterWeapon } from '../../game/items/items';
@@ -14,6 +15,18 @@ import type { Item } from '../../game/core/types';
 const build = { skill: SKILLS.ember, weapon: createStarterWeapon() };
 
 describe('simulation contracts', () => {
+  it('starts the three classes with verified popular Allflame skill shapes', () => {
+    expect(CLASSES.thief.starterSkill).toBe('cycloneTumult');
+    expect(CLASSES.mage.starterSkill).toBe('winterOrb');
+    expect(CLASSES.acolyte.starterSkill).toBe('penanceBrand');
+    expect(SKILLS.cycloneTumult.mechanic).toBe('cyclone');
+    expect(SKILLS.winterOrb.mechanic).toBe('winter-orb');
+    expect(SKILLS.penanceBrand.mechanic).toBe('penance-brand');
+    expect(SKILL_MANA_COST.cycloneTumult).toBe(4);
+    expect(SKILL_MANA_COST.winterOrb).toBe(2);
+    expect(SKILL_MANA_COST.penanceBrand).toBe(15);
+  });
+
   it('replays map rewards from a seed', () => {
     expect(simulateMapCompletion(824, 1, 'full-clear', build)).toEqual(simulateMapCompletion(824, 1, 'full-clear', build));
   });
@@ -165,6 +178,17 @@ describe('simulation contracts', () => {
     expect(packs.reduce((sum,pack)=>sum+pack.normal+pack.magic+pack.rare+pack.special,0)).toBe(population.total-1);
   });
 
+  it('gives every generated monster its own minimap point and a real pack identity', () => {
+    const population=generateMonsterPopulation(824);
+    const packs=generateMonsterPacks(824,population);
+    const roster=generateMonsterRoster(824,1,packs);
+    const field=roster.targets.filter(target=>target.rank!=='boss');
+    expect(field).toHaveLength(population.total-1);
+    expect(new Set(field.map(target=>target.id)).size).toBe(field.length);
+    expect(new Set(field.map(target=>target.position)).size).toBe(field.length);
+    expect(field.every(target=>target.packId!==undefined)).toBe(true);
+  });
+
 
   it('makes higher monster ranks contribute more to rewards', () => {
     const result=simulateMapCompletion(824,1,'full-clear',build);
@@ -253,6 +277,7 @@ describe('simulation contracts', () => {
     state=stepCombat(state,{tier:1,level:1,build:chainBuild,packs,seed:824,tickMs:1});
     expect(state.kills).toBe(4);
     expect(state.killRanks).toHaveLength(4);
+    expect(state.killPositions).toHaveLength(4);
     expect(state.events.some(event=>event.kind==='CHAIN'&&event.text.includes('額外命中 3'))).toBe(true);
   });
 

@@ -63,7 +63,7 @@ export function simulateMapCompletion(seed: number, tier: number, policy: Policy
   const items=Array.from({length:itemCount},(_,index)=>generateItem(seed+824+index*101,tier*12+contract.itemLevel+(policy==='full-clear'?4:0)+(index===0&&monsters.special>0?10:0)));
   const item = items[0] ?? generateItem(seed + 824, tier * 12);
   const evaluation = evaluateItem(item, build);
-  const skillDrops: SkillId[] = ['venom', 'firebolt', 'smite', 'ember', 'arc', 'quake'];
+  const skillDrops: SkillId[] = ['venom', 'firebolt', 'smite', 'ember', 'arc', 'quake', 'cycloneTumult', 'winterOrb', 'penanceBrand'];
   const supportDrops: SupportId[] = ['momentum', 'echo', 'focus', 'fortify'];
   const gemIndex = seed % (skillDrops.length + supportDrops.length);
   const gemDrop: GemDrop = gemIndex < skillDrops.length

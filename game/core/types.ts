@@ -1,6 +1,6 @@
 import type { RoStats } from '../content/ro-stats';
 
-export type SkillId = 'ember' | 'arc' | 'quake' | 'venom' | 'firebolt' | 'smite';
+export type SkillId = 'ember' | 'arc' | 'quake' | 'venom' | 'firebolt' | 'smite' | 'cycloneTumult' | 'winterOrb' | 'penanceBrand';
 export type Policy = 'full-clear' | 'boss-rush' | 'currency';
 export type RunMode = 'count' | 'time' | 'empty';
 export type ContractId = 'scout' | 'greed' | 'apex';
@@ -26,6 +26,7 @@ export type SkillDefinition = {
   color: string;
   socketColor: SocketColor;
   targeting: { mode: 'single' | 'chain' | 'area'; additionalTargets?: number };
+  mechanic?: 'cyclone' | 'winter-orb' | 'penance-brand';
   sourceGame: 'Path of Exile';
   sourceUrl: string;
   sourceVersion: string;

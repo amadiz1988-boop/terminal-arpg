@@ -146,14 +146,23 @@ const COLOR_LABEL = { R: '紅', G: '綠', B: '藍', W: '白' } as const;
 const ORB_LABEL = Object.fromEntries(
   CURRENCIES.map((currency) => [currency.id, currency.name]),
 ) as Record<CurrencyId, string>;
-const MONSTER_RANK_PRIORITY = {
-  normal: 0,
-  magic: 1,
-  rare: 2,
-  special: 3,
-  boss: 4,
-} as const;
 type StashPage = { id: string; name: string; items: Item[] };
+type MapLootStats = {
+  dropped: number;
+  picked: number;
+  salvaged: number;
+  left: number;
+  currency: number;
+  gems: number;
+};
+const EMPTY_MAP_LOOT: MapLootStats = {
+  dropped: 0,
+  picked: 0,
+  salvaged: 0,
+  left: 0,
+  currency: 0,
+  gems: 0,
+};
 const DEMO_LISTING: MarketListing = {
   id: 'demo-market-1',
   owner: '旅人#017',
@@ -169,11 +178,13 @@ export function GameShell() {
   const [secondJobId, setSecondJobId] = useState<SecondJobId>();
   const [ascendancyNodes, setAscendancyNodes] = useState<string[]>([]);
   const [roStats, setRoStats] = useState<RoStats>({ ...DEFAULT_RO_STATS });
-  const [skillId, setSkillId] = useState<SkillId>('venom');
-  const [acquiredSkills, setAcquiredSkills] = useState<SkillId[]>(['venom']);
+  const [skillId, setSkillId] = useState<SkillId>('cycloneTumult');
+  const [acquiredSkills, setAcquiredSkills] = useState<SkillId[]>([
+    'cycloneTumult',
+  ]);
   const [skillLevels, setSkillLevels] = useState<
     Partial<Record<SkillId, number>>
-  >({ venom: 1 });
+  >({ cycloneTumult: 1 });
   const [pendingSkillId, setPendingSkillId] = useState<SkillId>();
   const [acquiredSupports, setAcquiredSupports] = useState<SupportId[]>([]);
   const [selectedSupports, setSelectedSupports] = useState<SupportId[]>([]);
@@ -225,6 +236,7 @@ export function GameShell() {
     orbs: 0,
     xp: 0,
   });
+  const [mapLoot, setMapLoot] = useState<MapLootStats>(EMPTY_MAP_LOOT);
   const [combatDetail, setCombatDetail] = useState<'compact' | 'full'>(
     'compact',
   );
@@ -340,11 +352,9 @@ export function GameShell() {
     special: encounterPacks.reduce((sum, pack) => sum + pack.special, 0),
   };
   const mapTerrain = generateTerrain(seedRef.current + 1);
-  const mapRoster = generateMonsterRoster(
-    seedRef.current + 1,
-    tier,
-    encounterPacks,
-  );
+  const mapRoster = combat
+    ? { targets: combat.targets, terrain: mapTerrain }
+    : generateMonsterRoster(seedRef.current + 1, tier, encounterPacks);
   const walkableCells = new Set(mapTerrain.walkable);
   const exploredCells = new Set(combat?.explored ?? [mapTerrain.start]);
   const visibleCells = new Set<number>();
@@ -358,22 +368,9 @@ export function GameShell() {
           visibleCells.add(near);
       }
   }
-  const livingByCell = new globalThis.Map<
-    number,
-    { count: number; rank: keyof typeof MONSTER_RANK_PRIORITY }
-  >();
-  for (const monster of combat?.targets ?? mapRoster.targets) {
-    const current = livingByCell.get(monster.position);
-    livingByCell.set(monster.position, {
-      count: (current?.count ?? 0) + 1,
-      rank:
-        !current ||
-        MONSTER_RANK_PRIORITY[monster.rank] >
-          MONSTER_RANK_PRIORITY[current.rank]
-          ? monster.rank
-          : current.rank,
-    });
-  }
+  const visibleMonsters = (combat?.targets ?? mapRoster.targets).filter(
+    (monster) => visibleCells.has(monster.position),
+  );
   const playerHurt = Boolean(
     combat?.events.some((event) => event.kind === 'DAMAGE'),
   );
@@ -398,6 +395,16 @@ export function GameShell() {
         x: (((combat!.attackTo! % MAP_WIDTH) + 0.5) / MAP_WIDTH) * 100,
         y:
           ((Math.floor(combat!.attackTo! / MAP_WIDTH) + 0.5) /
+            (MAP_SIZE / MAP_WIDTH)) *
+          100,
+      }
+    : undefined;
+  const targetMapPoint = combat?.target
+    ? {
+        x:
+          (((combat.target.position % MAP_WIDTH) + 0.5) / MAP_WIDTH) * 100,
+        y:
+          ((Math.floor(combat.target.position / MAP_WIDTH) + 0.5) /
             (MAP_SIZE / MAP_WIDTH)) *
           100,
       }
@@ -647,7 +654,8 @@ export function GameShell() {
         ),
         acceptedIds = new Set(acceptedItems.map((item) => item.id)),
         accepted = kept.filter((entry) => acceptedIds.has(entry.item.id)),
-        overflow = kept.length - accepted.length;
+        overflow = kept.length - accepted.length,
+        salvaged = processed.length - kept.length;
       const recycled = processed
         .filter((entry) => entry.auto)
         .reduce(
@@ -675,9 +683,16 @@ export function GameShell() {
         ...value,
         items: value.items + accepted.length,
       }));
+      setMapLoot((value) => ({
+        ...value,
+        dropped: value.dropped + dropped.length,
+        picked: value.picked + accepted.length,
+        salvaged: value.salvaged + salvaged,
+        left: value.left + overflow,
+      }));
       rewardLogs.push([
         'DROP',
-        `${delta.rank === 'magic' ? '魔法' : delta.rank === 'rare' ? '稀有' : delta.rank === 'special' ? '特殊' : '首領'}怪掉落 ${dropped.map((item) => item.name).join('、')} · 拾取 ${accepted.length} · 分解 ${processed.length - kept.length}`,
+        `${delta.rank === 'magic' ? '魔法' : delta.rank === 'rare' ? '稀有' : delta.rank === 'special' ? '特殊' : '首領'}怪掉落 ${dropped.map((item) => item.name).join('、')} · 拾取 ${accepted.length} · 分解 ${salvaged} · 留地 ${overflow}`,
       ]);
       if (overflow > 0)
         rewardLogs.push(['BAG', `背包已滿 · ${overflow} 件裝備留在地面`]);
@@ -689,6 +704,10 @@ export function GameShell() {
     if (orbCount > 0) {
       setOrbs((value) => addWallet(value, delta.orbs));
       setSessionLoot((value) => ({ ...value, orbs: value.orbs + orbCount }));
+      setMapLoot((value) => ({
+        ...value,
+        currency: value.currency + orbCount,
+      }));
       rewardLogs.push(['CURRENCY', formatCurrencyDrops(delta.orbs)]);
     }
     if (delta.gem) {
@@ -716,6 +735,7 @@ export function GameShell() {
         rewardLogs.push(['GEM', `輔助寶石掉落：${SUPPORTS[gem.id].name}`]);
       }
       setSessionLoot((value) => ({ ...value, gems: value.gems + 1 }));
+      setMapLoot((value) => ({ ...value, gems: value.gems + 1 }));
     }
     if (rewardLogs.length) pushLogs(rewardLogs);
   };
@@ -799,6 +819,7 @@ export function GameShell() {
         packs,
         seedRef.current + 1,
       );
+      setMapLoot(EMPTY_MAP_LOOT);
       setProgress(0);
       setCombat(next);
       setRunning(true);
@@ -983,6 +1004,7 @@ export function GameShell() {
     );
     setRuns(0);
     setSessionLoot({ items: 0, gems: 0, orbs: 0, xp: 0 });
+    setMapLoot(EMPTY_MAP_LOOT);
     setProgress(0);
     setCombat(next);
     sessionStart.current = Date.now();
@@ -1184,7 +1206,7 @@ export function GameShell() {
                   TERMINAL ARPG
                 </h1>
                 <span className="rounded border border-primary/30 px-1.5 font-mono text-[9px] text-primary">
-                  ALPHA 0.19
+                  ALPHA 0.20
                 </span>
               </div>
               <p className="text-[11px] text-muted-foreground">
@@ -1506,13 +1528,8 @@ export function GameShell() {
               <div className="map-frame">
                 <div className="map-population">
                   <b>
-                    T1 ·{' '}
-                    {encounterPopulation.normal +
-                      encounterPopulation.magic +
-                      encounterPopulation.rare +
-                      encounterPopulation.special +
-                      1}{' '}
-                    隻
+                    T1 · 存活 {combat?.targets.length ?? mapRoster.targets.length}
+                    /{combat?.totalMonsters ?? mapRoster.targets.length}
                   </b>
                   <span>普通 {encounterPopulation.normal}</span>
                   <span className="magic-text">
@@ -1556,36 +1573,43 @@ export function GameShell() {
                     {Array.from({ length: MAP_SIZE }, (_, i) => {
                       const visible = visibleCells.has(i),
                         walkable = walkableCells.has(i),
-                        boss = i === mapTerrain.boss,
-                        occupants = livingByCell.get(i),
-                        count = occupants?.count ?? 0;
-                      const title = count
-                        ? `此格有 ${count} 隻未擊殺怪物`
-                        : boss
-                          ? '首領房'
-                          : walkable
-                            ? '可行走地形'
-                            : '障礙地形';
+                        boss = i === mapTerrain.boss;
+                      const title = boss
+                        ? '首領房'
+                        : walkable
+                          ? '可行走地形'
+                          : '障礙地形';
                       const base = !visible
                         ? 'fog'
                         : boss
                           ? 'boss'
                           : !walkable
                             ? 'void'
-                            : count
-                              ? `monster ${occupants?.rank ?? 'normal'}`
-                              : 'floor';
+                            : 'floor';
                       return (
                         <i key={i} title={title} className={base}>
-                          {!visible
-                            ? ''
-                            : boss
-                              ? 'B'
-                              : count
-                                ? count > 9
-                                  ? '●'
-                                  : String(count)
-                                : ''}
+                          {visible && boss ? 'B' : ''}
+                        </i>
+                      );
+                    })}
+                    {visibleMonsters.map((monster) => {
+                      const x =
+                          (((monster.position % MAP_WIDTH) + 0.5) / MAP_WIDTH) *
+                          100,
+                        y =
+                          ((Math.floor(monster.position / MAP_WIDTH) + 0.5) /
+                            (MAP_SIZE / MAP_WIDTH)) *
+                          100,
+                        engaged = combat?.target?.id === monster.id;
+                      return (
+                        <i
+                          key={monster.id}
+                          data-monster-id={monster.id}
+                          className={`monster-marker ${monster.rank}${engaged ? ' engaged' : ''}`}
+                          title={`${monster.id} · ${monster.rank} · HP ${Math.ceil(monster.life ?? monster.maxLife)}/${monster.maxLife}`}
+                          style={{ left: `${x}%`, top: `${y}%` }}
+                        >
+                          {monster.rank === 'boss' ? 'B' : ''}
                         </i>
                       );
                     })}
@@ -1601,13 +1625,65 @@ export function GameShell() {
                     >
                       ◆
                     </i>
+                    {activeSkill.mechanic === 'cyclone' &&
+                      combat?.phase === 'combat' && (
+                        <i
+                          className="skill-shape cyclone-shape"
+                          style={
+                            {
+                              left: `${playerMapX}%`,
+                              top: `${playerMapY}%`,
+                              '--skill-stage': Math.floor(
+                                combat.skillStage ?? 0,
+                              ),
+                            } as React.CSSProperties
+                          }
+                          aria-hidden="true"
+                        />
+                      )}
+                    {activeSkill.mechanic === 'winter-orb' && (
+                      <i
+                        className="skill-shape winter-orb-shape"
+                        style={{ left: `${playerMapX}%`, top: `${playerMapY}%` }}
+                        aria-hidden="true"
+                      />
+                    )}
+                    {activeSkill.mechanic === 'penance-brand' &&
+                      targetMapPoint && (
+                        <svg
+                          className="brand-vector"
+                          viewBox="0 0 100 100"
+                          preserveAspectRatio="none"
+                          aria-hidden="true"
+                        >
+                          <line
+                            x1={playerMapX}
+                            y1={playerMapY}
+                            x2={targetMapPoint.x}
+                            y2={targetMapPoint.y}
+                          />
+                          <circle
+                            cx={targetMapPoint.x}
+                            cy={targetMapPoint.y}
+                            r={
+                              0.6 +
+                              (Math.floor(combat?.skillStage ?? 0) / 20) * 1.7
+                            }
+                          />
+                          <text
+                            x={targetMapPoint.x}
+                            y={targetMapPoint.y - 1.8}
+                          >
+                            {Math.floor(combat?.skillStage ?? 0)}/20
+                          </text>
+                        </svg>
+                      )}
                     {attackVisible &&
                       attackFrom &&
                       attackTo &&
-                      (activeSkill.tags.includes('projectile') ||
-                        activeSkill.tags.includes('spell')) && (
+                      activeSkill.tags.includes('projectile') && (
                         <svg
-                          className="combat-vector"
+                          className={`combat-vector ${activeSkill.mechanic ?? 'projectile'}`}
                           viewBox="0 0 100 100"
                           preserveAspectRatio="none"
                           aria-hidden="true"
@@ -1622,10 +1698,20 @@ export function GameShell() {
                         </svg>
                       )}
                     <span>
-                      ◆ 玩家　光束 投射物　閃紅 受傷　移速{' '}
+                      ◆ 玩家　• 普通　• 魔法　• 稀有　• 特殊　B 首領　
+                      技能形態 {activeSkill.name}　閃紅 交戰　移速{' '}
                       {Math.round(resolved.moveSpeed)}%
                     </span>
                   </div>
+                </div>
+                <div className="map-loot-ledger" aria-label="本圖掉落與拾取統計">
+                  <b>本圖掉落</b>
+                  <span>裝備 {mapLoot.dropped}</span>
+                  <span className="picked">拾取 {mapLoot.picked}</span>
+                  <span className="salvaged">分解 {mapLoot.salvaged}</span>
+                  <span className="left">留地 {mapLoot.left}</span>
+                  <span className="currency">通貨 {mapLoot.currency}</span>
+                  <span className="gem">寶石 {mapLoot.gems}</span>
                 </div>
               </div>
               <div className="terminal-grid">

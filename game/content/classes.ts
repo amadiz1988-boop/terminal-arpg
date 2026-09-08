@@ -3,9 +3,9 @@ import type { ClassId, SecondJobId, SkillId } from '../core/types';
 type Effect = { damage?: number; speed?: number; crit?: number; move?: number; life?: number; armor?: number; boss?: number; clear?: number };
 
 export const CLASSES: Record<ClassId, { name: string; trait: string; description: string; starterSkill: SkillId; effect: Effect; jobs: SecondJobId[] }> = {
-  thief: { name: '盜賊', trait: '雙擊節奏', description: '攻擊越快，暴擊回饋越密集', starterSkill: 'venom', effect: { speed: 15, crit: 12, move: 8 }, jobs: ['assassin', 'rogue'] },
-  mage: { name: '魔法師', trait: '元素共鳴', description: '法術寶石獲得額外傷害與清圖能力', starterSkill: 'firebolt', effect: { damage: 18, clear: 12 }, jobs: ['wizard', 'sage'] },
-  acolyte: { name: '服事', trait: '信仰轉換', description: '生命與傷害同時成長，可走暴力或召喚', starterSkill: 'smite', effect: { damage: 8, life: 18 }, jobs: ['priest', 'monk'] },
+  thief: { name: '盜賊', trait: '雙擊節奏', description: '攻擊越快，暴擊回饋越密集', starterSkill: 'cycloneTumult', effect: { speed: 15, crit: 12, move: 8 }, jobs: ['assassin', 'rogue'] },
+  mage: { name: '魔法師', trait: '元素共鳴', description: '法術寶石獲得額外傷害與清圖能力', starterSkill: 'winterOrb', effect: { damage: 18, clear: 12 }, jobs: ['wizard', 'sage'] },
+  acolyte: { name: '服事', trait: '信仰轉換', description: '生命與傷害同時成長，可走暴力或召喚', starterSkill: 'penanceBrand', effect: { damage: 8, life: 18 }, jobs: ['priest', 'monk'] },
 };
 
 export const SECOND_JOBS: Record<SecondJobId, { name: string; classId: ClassId; trait: string; description: string; effect: Effect; nodes: Array<{ id: string; name: string; description: string; effect: Effect }> }> = {
