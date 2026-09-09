@@ -11,7 +11,11 @@
 | 狀態 | 工作 | 驗收 |
 | --- | --- | --- |
 | done | 鎖定 RO 資料來源 | rAthena Renewal 與 OpenKore 固定 commit 已記錄 |
+| done | OpenKore 功能盤點 | `docs/OPENKORE_FEATURE_AUDIT.md` 已確認掛圖、跨圖、傳送、MVP、補給與社交功能 |
 | in_progress | RO 最小垂直切片 | 無介面世界循環已完成逐格找怪、普攻、受傷、死亡、掉落、拾取與暫停續跑；下一步為怪物移動與前端可視化 |
+| todo | 多人共享地圖權威 | 同圖玩家共用怪物、HP、掉落、重生及交戰歸屬 |
+| todo | 單一 lockMap 與 MapRoute | 手動指定唯一掛圖；最短跨圖路線支援蝴蝶翅膀候選與無道具步行備援 |
+| todo | Fly Wing 與 MVP 政策 | 無怪找怪傳送；MVP預設迴避，勾選後才列為攻擊目標 |
 | todo | rAthena 資料轉換器 | 從固定版本轉為型別化角色、怪物、物品、技能資料 |
 | in_progress | OpenKore AI 佇列 | route、attack、items_take 已有可回放狀態；sitAuto、storageAuto 尚未完成 |
 | in_progress | RO 即時戰鬥公式 | 命中、迴避、攻速、射程、普攻傷害、HP 與自然恢復已接入；SP 與狀態尚未完成 |
