@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { passesDropRate, PORING_RENEWAL } from '../../game/ro/content/poring';
 import { PRT_FILD08, PRT_FILD08_PORING_COUNT } from '../../game/ro/content/prt-fild08';
+import { RO_ZH_TW, zhTwActor, zhTwItem } from '../../game/ro/content/zh-tw';
 import {
   renewalBaseAttack,
   renewalAttackDelayMs,
@@ -24,6 +25,15 @@ const novice = { level: 1, str: 1, agi: 1, vit: 1, int: 1, dex: 1, luk: 1 };
 const poring = { level: 1, ...PORING_RENEWAL.stats };
 
 describe('pinned RO source baseline', () => {
+  it('exposes verified Traditional Chinese player-facing labels without changing source IDs', () => {
+    expect(RO_ZH_TW.maps.prt_fild08).toBe('普隆德拉原野');
+    expect(RO_ZH_TW.monsters.PORING).toBe('波利');
+    expect(zhTwItem('Jellopy')).toBe('傑勒比結晶');
+    expect(zhTwItem('Wing_Of_Fly')).toBe('蒼蠅翅膀');
+    expect(zhTwActor('poring-67')).toBe('波利 #67');
+    expect(zhTwItem('UNKNOWN_ITEM')).toBe('未校正名稱（UNKNOWN_ITEM）');
+  });
+
   it('does not follow mutable upstream branches at runtime', () => {
     expect(RO_RULESET.commit).toMatch(/^[0-9a-f]{40}$/);
     expect(AUTOMATION_RULESET.commit).toMatch(/^[0-9a-f]{40}$/);

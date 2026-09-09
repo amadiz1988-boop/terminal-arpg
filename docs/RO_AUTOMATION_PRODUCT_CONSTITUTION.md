@@ -133,6 +133,14 @@ twRO官方流程也確認：與城鎮精煉師交談後開啟精煉介面，從�
 
 每項功能必須通過來源追蹤、無介面規則測試、自動移動與NPC抵達測試、UI流程測試、暫停斷線重試測試、多人一致性測試及加速壓力測試。任何只有外觀、沒有真實世界流程的功能均不能標記完成。
 
+## 台灣繁中顯示鐵律
+
+- 玩家可見的地圖、怪物、物品、職業、技能、屬性、LOG、設定與功能視窗以台灣繁體中文顯示。
+- rAthena Aegis 名稱、地圖代碼與內部 ID 保留在資料層，不能直接取代玩家名稱。
+- 繁中名稱需對應可追溯的 twRO 資料。查無資料時顯示「未校正名稱」與原始 ID，禁止自行翻譯成正式名稱。
+- 小地圖地形與所有角色標記必須採用相同座標轉換；不可行走格不能出現角色或怪物。
+- 地圖選擇需顯示繁中地圖名及目前載入怪物等級；地圖情報需列出怪物等級、HP、攻防、種族、體型、屬性、經驗與逐項掉落率。
+
 ## 視覺與流程參考
 
 - 使用者提供精煉影片：https://www.youtube.com/watch?v=Qs6sOOcKfUw
@@ -141,5 +149,7 @@ twRO官方流程也確認：與城鎮精煉師交談後開啟精煉介面，從�
 - rAthena卡普拉腳本：https://github.com/rathena/rathena/blob/e985006171d2eb320ee512a653f4c83aea3d81b6/npc/kafras/kafras.txt
 - RO傳統介面導覽：https://steamcommunity.com/sharedfiles/filedetails/?id=190870754
 - RO官方角色與裝備介面範例：https://ragnarokonline.gungho.jp/campaign_event/campaign/baselv220cp-2.html
+- twRO地圖與繁中名稱資料：https://ragnaplace.com/zh-t/twro/map/prt_fild08
+- twRO波利與掉落繁中名稱：https://ragnaplace.com/zh-t/twro/mob/1002
 
 影片內容目前無法由研究工具擷取，暫不把未核實的影片細節寫成規則。

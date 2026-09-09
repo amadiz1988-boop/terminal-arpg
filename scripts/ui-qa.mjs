@@ -40,21 +40,21 @@ try {
   await call('Runtime.enable'); await call('Log.enable'); await call('Page.enable'); await call('Network.enable');
   await call('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
   await call('Page.navigate', { url: process.env.QA_URL ?? 'http://127.0.0.1:3000/' });
-  if (!await waitUntil("document.body?.innerText.includes('Basic Information') && Boolean(document.querySelector('.field-canvas'))")) {
+  if (!await waitUntil("document.body?.innerText.includes('基本資訊') && Boolean(document.querySelector('.field-canvas'))")) {
     console.log(JSON.stringify({ body: await evaluate('document.body?.innerText'), href: await evaluate('location.href'), errors }, null, 2));
     throw new Error('RO interface did not load');
   }
-  await evaluate("const s=document.querySelector('.control-window select');s.value='4';s.dispatchEvent(new Event('change',{bubbles:true}))");
   if (!await waitUntil("document.querySelectorAll('.event-player_hit').length >= 3", 160)) throw new Error('Step combat did not become visible');
   if (!await waitUntil("Boolean(document.querySelector('.event-death') && document.querySelector('.event-pickup'))", 220)) throw new Error('Death or pickup did not become visible');
   const beforePause = await evaluate("document.querySelectorAll('[data-testid=combat-log] p').length");
   await evaluate("document.querySelector('.control-window button').click()");
   await new Promise((resolve) => setTimeout(resolve, 650));
   const afterPause = await evaluate("document.querySelectorAll('[data-testid=combat-log] p').length");
-  const report = await evaluate("({title:document.title,canvas:document.querySelector('.field-canvas').width,attack:document.querySelectorAll('.event-player_hit').length,death:document.querySelectorAll('.event-death').length,pickup:document.querySelectorAll('.event-pickup').length,baseExp:document.body.innerText.match(/Base EXP ([0-9,]+)/)?.[1],jobExp:document.body.innerText.match(/Job EXP ([0-9,]+)/)?.[1],overflow:document.documentElement.scrollWidth>innerWidth})");
+  await evaluate("[...document.querySelectorAll('.ro-tabs button')].find(x=>x.innerText==='地圖情報')?.click()");
+  const report = await evaluate("({title:document.title,canvas:document.querySelector('.field-canvas').width,attack:document.querySelectorAll('.event-player_hit').length,death:document.querySelectorAll('.event-death').length,pickup:document.querySelectorAll('.event-pickup').length,baseExp:document.body.innerText.match(/人物經驗 ([0-9,]+)/)?.[1],jobExp:document.body.innerText.match(/職業經驗 ([0-9,]+)/)?.[1],mapInfo:document.body.innerText.includes('掉落物')&&document.body.innerText.includes('傑勒比結晶')&&document.body.innerText.includes('水 1'),englishItem:/\b(Jellopy|Sticky Mucus|Fly Wing|Poring Card)\b/.test(document.body.innerText),qaControlsAbsent:!document.body.innerText.includes('四倍測試')&&!document.body.innerText.includes('重新開始')&&!document.body.innerText.includes('4x'),overflow:document.documentElement.scrollWidth>innerWidth})");
   report.paused = beforePause === afterPause;
   report.errors = errors;
-  report.pass = report.canvas === 720 && report.attack >= 3 && report.death >= 1 && report.pickup >= 1 && Number(report.baseExp?.replaceAll(',', '')) > 0 && Number(report.jobExp?.replaceAll(',', '')) > 0 && report.paused && !report.overflow && errors.length === 0;
+  report.pass = report.canvas === 720 && report.attack >= 3 && report.death >= 1 && report.pickup >= 1 && Number(report.baseExp?.replaceAll(',', '')) > 0 && Number(report.jobExp?.replaceAll(',', '')) > 0 && report.mapInfo && !report.englishItem && report.qaControlsAbsent && report.paused && !report.overflow && errors.length === 0;
   console.log(JSON.stringify(report, null, 2));
   if (!report.pass) throw new Error('RO UI release gate failed');
   await call('Browser.close');
