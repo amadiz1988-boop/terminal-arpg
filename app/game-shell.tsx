@@ -10,8 +10,11 @@ import { AUTOMATION_RULESET, RO_RULESET } from '@/game/ro/source';
 import { RO_ZH_TW, zhTwActor, zhTwItem } from '@/game/ro/content/zh-tw';
 
 type Panel = 'status' | 'equipment' | 'inventory' | 'mapInfo' | 'automation';
+type InventoryFilter = 'all' | 'consumable' | 'equipment' | 'card' | 'ammo' | 'misc';
 const PLAYER_NAME = '你';
 const PLAYER_CLASS = '初心者';
+const INVENTORY_FILTERS: ReadonlyArray<readonly [InventoryFilter, string]> = [['all', '全部'], ['consumable', '消耗品'], ['equipment', '裝備'], ['card', '卡片'], ['ammo', '箭矢／彈藥'], ['misc', '其他']];
+const ITEM_CATEGORIES: Record<string, InventoryFilter> = { Apple: 'consumable', Wing_Of_Fly: 'consumable', Knife_: 'equipment', Poring_Card: 'card', Jellopy: 'misc', Sticky_Mucus: 'misc', Unripe_Apple: 'misc' };
 const EVENT_LABELS: Record<RoWorldEvent['type'], string> = {
   target: '目標', move: '移動', player_hit: '攻擊', player_miss: '未命中', monster_hit: '受傷',
   monster_miss: '閃避', death: '擊倒', drop: '掉落', pickup: '拾取', heal: '恢復', use_item: '道具',
@@ -83,6 +86,7 @@ export function GameShell() {
   const [world, setWorld] = useState<RoWorldState>();
   const [running, setRunning] = useState(true);
   const [panel, setPanel] = useState<Panel>('status');
+  const [inventoryFilter, setInventoryFilter] = useState<InventoryFilter>('all');
   const [loadError, setLoadError] = useState('');
   const logRef = useRef<HTMLDivElement>(null);
 
@@ -132,7 +136,7 @@ export function GameShell() {
       <div className="detail-stack"><nav className="ro-tabs">{([['status','能力'],['equipment','裝備'],['inventory','道具'],['mapInfo','地圖情報'],['automation','掛機設定']] as const).map(([id,label]) => <button className={panel === id ? 'active' : ''} key={id} onClick={() => setPanel(id)}>{label}</button>)}</nav><section className="ro-window detail-window"><WindowTitle title={panel === 'status' ? '人物能力' : panel === 'equipment' ? '裝備欄' : panel === 'inventory' ? '道具欄' : panel === 'mapInfo' ? '地圖情報' : 'OpenKore 掛機設定'} trailing="革新制" />
         {panel === 'status' && <div className="status-panel"><div className="primary-stats">{[['力量 STR',1],['敏捷 AGI',1],['體力 VIT',1],['智力 INT',1],['靈巧 DEX',1],['幸運 LUK',1]].map(([stat,value]) => <div key={stat}><b>{stat}</b><span>{value} + 0</span></div>)}</div><div className="derived-stats"><div>物理攻擊 ATK <b>{atk} + 17</b></div><div>物理防禦 DEF <b>0 + 0</b></div><div>魔法攻擊 MATK <b>1 + 1</b></div><div>魔法防禦 MDEF <b>0 + 0</b></div><div>命中 HIT <b>{hit}</b></div><div>迴避 FLEE <b>{flee}</b></div><div>暴擊 CRITICAL <b>1</b></div><div>攻速 ASPD <b>{aspd}</b></div><div>能力點 <b>0</b></div></div><SourceNote text={`rAthena Renewal ${RO_RULESET.commit.slice(0,8)}`} /></div>}
         {panel === 'equipment' && <div className="equipment-panel"><Slot name="頭上段" /><Slot name="頭下段" /><Slot name="右手" item="短劍" detail="物理攻擊 17 · 短劍類" /><Slot name="左手" /><Slot name="鎧甲" item="棉襯衫" detail="物理防禦 10" /><Slot name="披肩" /><Slot name="鞋子" /><Slot name="飾品" /><Slot name="飾品" /></div>}
-        {panel === 'inventory' && <div className="inventory-panel">{Object.entries(world.inventory).length === 0 && <p>目前沒有道具</p>}{Object.entries(world.inventory).map(([item,count]) => <div className="item-row" key={item}><i>□</i><b>{zhTwItem(item)}</b><span>{count}</span></div>)}<footer>共 {inventoryCount} 件</footer></div>}
+        {panel === 'inventory' && <InventoryPanel inventory={world.inventory} filter={inventoryFilter} onFilterChange={setInventoryFilter} total={inventoryCount} />}
         {panel === 'mapInfo' && <MapInformation />}
         {panel === 'automation' && <div className="config-panel"><Setting label="固定掛機地圖" value={RO_ZH_TW.maps.prt_fild08} /><Setting label="自動攻擊" value="開啟" /><Setting label="自動拾取" value="開啟" /><Setting label="生命低於 50% 使用蘋果" value="開啟" /><Setting label="攻擊 MVP" value="關閉" /><SourceNote text={`OpenKore ${AUTOMATION_RULESET.commit.slice(0,8)}`} /></div>}
       </section></div>
@@ -146,6 +150,11 @@ function Meter({ label, value, max, tone }: { label: string; value: number; max:
 function Slot({ name, item, detail }: { name: string; item?: string; detail?: string }) { return <div className="slot"><span>{name}</span><b>{item ?? '空'}</b>{detail && <small>{detail}</small>}</div>; }
 function Setting({ label, value }: { label: string; value: string }) { return <div className="setting"><i /><code>{label}</code><b>{value}</b></div>; }
 function SourceNote({ text }: { text: string }) { return <p className="source-note">資料來源：{text}</p>; }
+
+function InventoryPanel({ inventory, filter, onFilterChange, total }: { inventory: Record<string, number>; filter: InventoryFilter; onFilterChange: (filter: InventoryFilter) => void; total: number }) {
+  const entries = Object.entries(inventory).filter(([item]) => filter === 'all' || ITEM_CATEGORIES[item] === filter);
+  return <div className="inventory-panel"><nav className="inventory-filters" aria-label="道具分類">{INVENTORY_FILTERS.map(([id, label]) => <button type="button" className={filter === id ? 'active' : ''} key={id} onClick={() => onFilterChange(id)}>{label}</button>)}</nav>{entries.length === 0 ? <p>此分類目前沒有道具</p> : entries.map(([item,count]) => <div className="item-row" key={item}><i>□</i><b>{zhTwItem(item)}</b><span>{count}</span></div>)}<footer>目前分類 {entries.reduce((sum, [, count]) => sum + count, 0)} 件／背包共 {total} 件</footer></div>;
+}
 
 function MapInformation() {
   return <div className="map-info-panel">
