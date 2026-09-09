@@ -6,7 +6,7 @@
 
 目前依賴順序：來源鎖版 → RO 資料轉換 → 格狀世界 → OpenKore AI → 戰鬥與掉落 → 補給與死亡 → 成長與轉職 → 朋友測試。
 
-目前還原度：**30 / 100（30.0%）**。細項、證據與下一批工作見 `docs/RO_RESTORATION_PROGRESS.md`。Dashi Taskboard 服務無法連線期間，此檔與還原度追蹤檔為進度真實來源。
+目前還原度：**31 / 100（31.0%）**。細項、證據與下一批工作見 `docs/RO_RESTORATION_PROGRESS.md`。Dashi Taskboard 服務無法連線期間，此檔與還原度追蹤檔為進度真實來源。
 
 ## 目前追蹤
 

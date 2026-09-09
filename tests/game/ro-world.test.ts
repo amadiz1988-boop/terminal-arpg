@@ -17,6 +17,7 @@ import {
   allocateNoviceSkill,
   allocateStatusPoint,
   createRoWorld,
+  equipInventoryItem,
   resetStatusPoints,
 } from '../../game/ro/world/simulation';
 
@@ -116,6 +117,16 @@ describe('pinned prt_fild08 world', () => {
     expect(reset.player.statusPoints).toBeGreaterThan(
       stronger.player.statusPoints,
     );
+  });
+
+  it('equips an eligible dropped weapon and returns the replaced weapon', () => {
+    const world = createRoWorld(field, 824);
+    world.player.baseLevel = 2;
+    world.inventory.Sword_ = 1;
+    const equipped = equipInventoryItem(world, 'Sword_');
+    expect(equipped.player.equipment.rightHand).toBe('Sword_');
+    expect(equipped.inventory.Knife_).toBe(1);
+    expect(equipped.inventory.Sword_).toBeUndefined();
   });
 
   it('walks, trades hits, kills, drops, and picks up through causal events', () => {

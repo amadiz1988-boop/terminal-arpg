@@ -6,6 +6,7 @@ import {
   type RoStats,
 } from '../../content/ro-stats';
 import { APPLE_RENEWAL } from '../content/items';
+import { EQUIPMENT } from '../content/equipment';
 import { PRT_FILD08 } from '../content/prt-fild08';
 import {
   PRT_FILD08_MONSTERS,
@@ -99,6 +100,7 @@ export type RoWorldState = {
     statusPoints: number;
     skillPoints: number;
     skills: NoviceSkills;
+    equipment: { rightHand: string | null; leftHand: string | null };
     nextActionAt: number;
     nextHpRegenAt: number;
   };
@@ -112,8 +114,7 @@ export type RoWorldState = {
   kills: number;
 };
 
-const PLAYER_WALK_DELAY_MS = 150,
-  KNIFE_ATTACK = 17;
+const PLAYER_WALK_DELAY_MS = 150;
 export const BASE_EXP_REQUIREMENTS = [
   548, 894, 1486, 2173, 3152, 3732, 4112, 4441, 4866, 5337,
 ];
@@ -157,6 +158,7 @@ function cloneWorld(s: RoWorldState): RoWorldState {
       position: { ...s.player.position },
       stats: { ...s.player.stats },
       skills: { ...s.player.skills },
+      equipment: { ...s.player.equipment },
     },
     monsters: s.monsters.map((m) => ({
       ...m,
@@ -218,6 +220,24 @@ export function allocateNoviceSkill(input: RoWorldState) {
   s.player.skills.NV_BASIC += 1;
   s.player.skillPoints -= 1;
   return s;
+}
+
+export function equipInventoryItem(input: RoWorldState, item: string) {
+  const definition = EQUIPMENT[item];
+  const state = cloneWorld(input);
+  if (
+    !definition ||
+    (state.inventory[item] ?? 0) < 1 ||
+    state.player.baseLevel < definition.equipLevelMin
+  )
+    return state;
+  state.inventory[item] -= 1;
+  if (state.inventory[item] === 0) delete state.inventory[item];
+  const previous = state.player.equipment[definition.slot];
+  if (previous)
+    state.inventory[previous] = (state.inventory[previous] ?? 0) + 1;
+  state.player.equipment[definition.slot] = item;
+  return state;
 }
 
 function chooseTarget(s: RoWorldState) {
@@ -476,8 +496,10 @@ function processPlayerAction(s: RoWorldState, field: RoField) {
       ),
     )
   ) {
+    const weaponAttack =
+      EQUIPMENT[s.player.equipment.rightHand ?? '']?.attack ?? 0;
     const damage = renewalPhysicalDefense(
-      renewalBaseAttack(stats) + KNIFE_ATTACK,
+      renewalBaseAttack(stats) + weaponAttack,
       d.defense,
       d.stats.vit,
     );
@@ -519,9 +541,14 @@ function processMonsterAttacks(s: RoWorldState) {
       renewalPlayerFlee(playerStats(s)),
     );
     if (rollPercent(s, chance)) {
-      const damage =
+      const shieldDefense =
+        EQUIPMENT[s.player.equipment.leftHand ?? '']?.defense ?? 0;
+      const damage = renewalPhysicalDefense(
         d.attackMin +
-        Math.trunc(nextRandom(s) * (d.attackMax - d.attackMin + 1));
+          Math.trunc(nextRandom(s) * (d.attackMax - d.attackMin + 1)),
+        shieldDefense,
+        s.player.stats.vit,
+      );
       s.player.hp = Math.max(0, s.player.hp - damage);
       pushEvent(s, {
         type: 'monster_hit',
@@ -557,6 +584,7 @@ export function createRoWorld(field: RoField, seed: number): RoWorldState {
       statusPoints: 0,
       skillPoints: 0,
       skills: { NV_BASIC: 0, NV_FIRSTAID: 0 },
+      equipment: { rightHand: 'Knife_', leftHand: null },
       nextActionAt: 0,
       nextHpRegenAt: 6000,
     },

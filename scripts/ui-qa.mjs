@@ -145,7 +145,7 @@ try {
     "[...document.querySelectorAll('.ro-tabs button')].find(x=>x.innerText==='還原進度')?.click()",
   );
   const progress = await evaluate(
-    "document.body.innerText.includes('30%')&&document.body.innerText.includes('世界地圖與怪物')&&document.body.innerText.includes('多人社交與伺服器')",
+    "document.body.innerText.includes('世界地圖與怪物')&&document.body.innerText.includes('多人社交與伺服器')&&document.querySelector('.progress-panel meter')!==null",
   );
   const report = await evaluate(
     "({title:document.title,canvas:document.querySelector('.field-canvas').width,attack:document.querySelectorAll('.event-player_hit').length,death:document.querySelectorAll('.event-death').length,pickup:document.querySelectorAll('.event-pickup').length,baseExp:document.body.innerText.match(/人物經驗 ([0-9,]+)/)?.[1],jobExp:document.body.innerText.match(/職業經驗 ([0-9,]+)/)?.[1],pickedItems:document.body.innerText.includes('拾取物品'),englishItem:/\b(Jellopy|Sticky Mucus|Fly Wing|Poring Card)\b/.test(document.body.innerText),qaControlsAbsent:!document.body.innerText.includes('四倍測試')&&!document.body.innerText.includes('重新開始')&&!document.body.innerText.includes('4x'),stoppedWorld:document.body.innerText.includes('世界與怪物仍持續運作'),overflow:document.documentElement.scrollWidth>innerWidth})",

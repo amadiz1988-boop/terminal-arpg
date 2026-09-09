@@ -10,6 +10,7 @@ import {
   experienceProgress,
   JOB_EXP_REQUIREMENTS,
   resetStatusPoints,
+  equipInventoryItem,
   type RoWorldEvent,
   type RoWorldState,
 } from '@/game/ro/world/simulation';
@@ -20,6 +21,7 @@ import {
   PRT_FILD08_MONSTER_COUNTS,
 } from '@/game/ro/content/prt-fild08';
 import { PRT_FILD08_MONSTERS } from '@/game/ro/content/monsters';
+import { EQUIPMENT } from '@/game/ro/content/equipment';
 import {
   RESTORATION_CATEGORIES,
   RESTORATION_COMPLETED,
@@ -273,6 +275,8 @@ export function GameShell() {
       luk: 1,
     }),
   };
+  const weaponAttack =
+    EQUIPMENT[world?.player.equipment.rightHand ?? '']?.attack ?? 0;
   const atk = renewalBaseAttack(novice),
     hit = renewalPlayerHit(novice),
     flee = renewalPlayerFlee(novice);
@@ -505,7 +509,10 @@ export function GameShell() {
                 </div>
                 <div className="derived-stats">
                   <div>
-                    物理攻擊 ATK <b>{atk} + 17</b>
+                    物理攻擊 ATK{' '}
+                    <b>
+                      {atk} + {weaponAttack}
+                    </b>
                   </div>
                   <div>
                     物理防禦 DEF <b>0 + 0</b>
@@ -575,8 +582,32 @@ export function GameShell() {
               <div className="equipment-panel">
                 <Slot name="頭上段" />
                 <Slot name="頭下段" />
-                <Slot name="右手" item="短劍" detail="物理攻擊 17 · 短劍類" />
-                <Slot name="左手" />
+                <Slot
+                  name="右手"
+                  item={
+                    world.player.equipment.rightHand
+                      ? zhTwItem(world.player.equipment.rightHand)
+                      : undefined
+                  }
+                  detail={
+                    world.player.equipment.rightHand
+                      ? `物理攻擊 ${EQUIPMENT[world.player.equipment.rightHand]?.attack} · ${EQUIPMENT[world.player.equipment.rightHand]?.slots} 洞`
+                      : undefined
+                  }
+                />
+                <Slot
+                  name="左手"
+                  item={
+                    world.player.equipment.leftHand
+                      ? zhTwItem(world.player.equipment.leftHand)
+                      : undefined
+                  }
+                  detail={
+                    world.player.equipment.leftHand
+                      ? `物理防禦 ${EQUIPMENT[world.player.equipment.leftHand]?.defense} · ${EQUIPMENT[world.player.equipment.leftHand]?.slots} 洞`
+                      : undefined
+                  }
+                />
                 <Slot name="鎧甲" item="棉襯衫" detail="物理防禦 10" />
                 <Slot name="披肩" />
                 <Slot name="鞋子" />
@@ -590,6 +621,12 @@ export function GameShell() {
                 filter={inventoryFilter}
                 onFilterChange={setInventoryFilter}
                 total={inventoryCount}
+                level={world.player.baseLevel}
+                onEquip={(item) =>
+                  setWorld((current) =>
+                    current ? equipInventoryItem(current, item) : current,
+                  )
+                }
               />
             )}
             {panel === 'mapInfo' && <MapInformation />}
@@ -707,11 +744,15 @@ function InventoryPanel({
   filter,
   onFilterChange,
   total,
+  level,
+  onEquip,
 }: {
   inventory: Record<string, number>;
   filter: InventoryFilter;
   onFilterChange: (filter: InventoryFilter) => void;
   total: number;
+  level: number;
+  onEquip: (item: string) => void;
 }) {
   const entries = Object.entries(inventory).filter(
     ([item]) => filter === 'all' || ITEM_CATEGORIES[item] === filter,
@@ -738,6 +779,16 @@ function InventoryPanel({
             <i>□</i>
             <b>{zhTwItem(item)}</b>
             <span>{count}</span>
+            {EQUIPMENT[item] && (
+              <button
+                disabled={level < EQUIPMENT[item].equipLevelMin}
+                onClick={() => onEquip(item)}
+              >
+                {level < EQUIPMENT[item].equipLevelMin
+                  ? `Lv.${EQUIPMENT[item].equipLevelMin}`
+                  : '裝備'}
+              </button>
+            )}
           </div>
         ))
       )}

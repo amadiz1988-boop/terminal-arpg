@@ -19,9 +19,9 @@ export const RESTORATION_CATEGORIES = Object.freeze([
   },
   {
     name: '道具裝備與經濟',
-    completed: 4,
+    completed: 5,
     total: 16,
-    evidence: '五類背包、真實怪物掉落、自動拾取與消耗蘋果',
+    evidence: '五類背包、真實掉落、拾取、消耗品與武器盾牌穿脫',
   },
   { name: 'NPC、城鎮與任務', completed: 0, total: 12, evidence: '尚未實裝' },
   {

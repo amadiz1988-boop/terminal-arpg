@@ -589,7 +589,7 @@ button {
 }
 .item-row {
   display: grid;
-  grid-template-columns: 24px 1fr auto;
+  grid-template-columns: 24px 1fr auto auto;
   gap: 5px;
   align-items: center;
   padding: 4px;
@@ -605,6 +605,12 @@ button {
   border: 1px solid #b6aa82;
   background: #e7dfc4;
   font-style: normal;
+}
+.item-row button {
+  border: 1px solid #76859a;
+  background: linear-gradient(#fff, #d0d5da);
+  color: #26384f;
+  font-size: 9px;
 }
 .inventory-panel footer {
   margin-top: 5px;
