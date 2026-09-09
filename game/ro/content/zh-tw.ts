@@ -27,7 +27,7 @@ export function zhTwItem(aegisName: string) {
 
 export function zhTwActor(actorId?: string) {
   if (!actorId) return '未知目標';
-  if (actorId === 'player') return '初心者';
+  if (actorId === 'player') return '你';
   if (actorId === 'PORING') return RO_ZH_TW.monsters.PORING;
   if (actorId.startsWith('poring-')) return `波利 #${actorId.slice('poring-'.length)}`;
   return actorId;

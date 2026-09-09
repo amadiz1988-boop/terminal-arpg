@@ -10,6 +10,8 @@ import { AUTOMATION_RULESET, RO_RULESET } from '@/game/ro/source';
 import { RO_ZH_TW, zhTwActor, zhTwItem } from '@/game/ro/content/zh-tw';
 
 type Panel = 'status' | 'equipment' | 'inventory' | 'mapInfo' | 'automation';
+const PLAYER_NAME = '你';
+const PLAYER_CLASS = '初心者';
 const EVENT_LABELS: Record<RoWorldEvent['type'], string> = {
   target: '目標', move: '移動', player_hit: '攻擊', player_miss: '未命中', monster_hit: '受傷',
   monster_miss: '閃避', death: '擊倒', drop: '掉落', pickup: '拾取', heal: '恢復', use_item: '道具',
@@ -28,10 +30,10 @@ function eventText(event: RoWorldEvent) {
   switch (event.type) {
     case 'target': return `鎖定 ${monster} · 座標 (${event.position?.x}, ${event.position?.y})`;
     case 'move': return `前往 (${event.position?.x}, ${event.position?.y})`;
-    case 'player_hit': return `初心者普通攻擊 → ${monster} · 傷害 ${event.amount} · 生命 ${event.remainingHp}/${event.maximumHp}`;
-    case 'player_miss': return `初心者攻擊 ${monster} · 未命中`;
-    case 'monster_hit': return `${monster} 攻擊初心者 · 傷害 ${event.amount} · 生命 ${event.remainingHp}/${event.maximumHp}`;
-    case 'monster_miss': return `${monster} 攻擊初心者 · 未命中`;
+    case 'player_hit': return `${PLAYER_NAME}普通攻擊 → ${monster} · 傷害 ${event.amount} · 生命 ${event.remainingHp}/${event.maximumHp}`;
+    case 'player_miss': return `${PLAYER_NAME}攻擊 ${monster} · 未命中`;
+    case 'monster_hit': return `${monster} 攻擊${PLAYER_NAME} · 傷害 ${event.amount} · 生命 ${event.remainingHp}/${event.maximumHp}`;
+    case 'monster_miss': return `${monster} 攻擊${PLAYER_NAME} · 未命中`;
     case 'death': return `${zhTwActor(event.actorId)} 死亡 · 人物經驗 +${PORING_RENEWAL.baseExp} · 職業經驗 +${PORING_RENEWAL.jobExp}`;
     case 'drop': return `${zhTwActor(event.actorId)} 掉落 ${zhTwItem(event.item ?? '')}`;
     case 'pickup': return `拾取 ${zhTwItem(event.item ?? '')}`;
@@ -108,10 +110,10 @@ export function GameShell() {
 
   return <main className="ro-desktop">
     <section className="ro-window basic-window">
-      <WindowTitle title="基本資訊" trailing="初心者" />
+      <WindowTitle title="基本資訊" trailing={PLAYER_NAME} />
       <div className="basic-grid">
-        <div className="portrait">初心者</div>
-        <div className="identity"><b>初心者</b><span>人物等級 1　職業等級 1</span></div>
+        <div className="portrait">{PLAYER_CLASS}</div>
+        <div className="identity"><b>{PLAYER_NAME}</b><span>{PLAYER_CLASS}</span><small>人物等級 1　職業等級 1</small></div>
         <Meter label="生命" value={world.player.hp} max={world.player.maxHp} tone="hp" />
         <Meter label="魔力" value={11} max={11} tone="sp" />
         <div className="exp-values">人物經驗 {world.player.baseExp.toLocaleString()}<br />職業經驗 {world.player.jobExp.toLocaleString()}</div>
@@ -137,7 +139,7 @@ export function GameShell() {
         {panel === 'automation' && <div className="config-panel"><Setting label="固定掛機地圖" value={RO_ZH_TW.maps.prt_fild08} /><Setting label="自動攻擊" value="開啟" /><Setting label="自動拾取" value="開啟" /><Setting label="生命低於 50% 使用蘋果" value="開啟" /><Setting label="攻擊 MVP" value="關閉" /><SourceNote text={`OpenKore ${AUTOMATION_RULESET.commit.slice(0,8)}`} /></div>}
       </section></div>
     </section>
-    <footer className="release-note">R0.2 · 地圖 400×400 · 固定種子 824 · 地圖、戰鬥、經驗與掉落共用同一份模擬狀態</footer>
+    <footer className="release-note">R0.3 · 地圖 400×400 · 固定種子 824 · 地圖、戰鬥、經驗與掉落共用同一份模擬狀態</footer>
   </main>;
 }
 
