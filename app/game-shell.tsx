@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { advanceRoWorld, createRoWorld, type RoWorldEvent, type RoWorldState } from '@/game/ro/world/simulation';
+import { advanceRoWorld, BASE_EXP_REQUIREMENTS, createRoWorld, experienceProgress, JOB_EXP_REQUIREMENTS, type RoWorldEvent, type RoWorldState } from '@/game/ro/world/simulation';
 import { loadFld2Gzip, type RoField } from '@/game/ro/world/fld2';
 import { PRT_FILD08, PRT_FILD08_PORING_COUNT } from '@/game/ro/content/prt-fild08';
 import { PORING_RENEWAL } from '@/game/ro/content/poring';
@@ -37,7 +37,7 @@ function eventText(event: RoWorldEvent) {
     case 'player_miss': return `${PLAYER_NAME}攻擊 ${monster} · 未命中`;
     case 'monster_hit': return `${monster} 攻擊${PLAYER_NAME} · 傷害 ${event.amount} · 生命 ${event.remainingHp}/${event.maximumHp}`;
     case 'monster_miss': return `${monster} 攻擊${PLAYER_NAME} · 未命中`;
-    case 'death': return `${zhTwActor(event.actorId)} 死亡 · 人物經驗 +${PORING_RENEWAL.baseExp} · 職業經驗 +${PORING_RENEWAL.jobExp}`;
+    case 'death': return `${zhTwActor(event.actorId)} 死亡 · 人物經驗 +${PORING_RENEWAL.baseExp}（${event.baseExpCurrent}/${event.baseExpRequired} · ${((event.baseExpCurrent ?? 0) / (event.baseExpRequired ?? 1) * 100).toFixed(1)}%）· 職業經驗 +${PORING_RENEWAL.jobExp}（${event.jobExpCurrent}/${event.jobExpRequired} · ${((event.jobExpCurrent ?? 0) / (event.jobExpRequired ?? 1) * 100).toFixed(1)}%）${event.levelUp ? '· 升級！' : ''}`;
     case 'drop': return `${zhTwActor(event.actorId)} 掉落 ${zhTwItem(event.item ?? '')}`;
     case 'pickup': return `拾取 ${zhTwItem(event.item ?? '')}`;
     case 'heal': return `自然恢復 HP +${event.amount}`;
@@ -103,6 +103,8 @@ export function GameShell() {
   const visibleEvents = useMemo(() => world?.events.slice(-120) ?? [], [world?.events]);
   const inventoryCount = world ? Object.values(world.inventory).reduce((sum, value) => sum + value, 0) : 0;
   const alive = world?.monsters.filter((monster) => monster.alive).length ?? 0;
+  const baseProgress = experienceProgress(world?.player.baseExp ?? 0, BASE_EXP_REQUIREMENTS);
+  const jobProgress = experienceProgress(world?.player.jobExp ?? 0, JOB_EXP_REQUIREMENTS);
   const novice = { level: 1, str: 1, agi: 1, vit: 1, int: 1, dex: 1, luk: 1 };
   const atk = renewalBaseAttack(novice), hit = renewalPlayerHit(novice), flee = renewalPlayerFlee(novice);
   const aspd = renewalDisplayedAspd({ agi: 1, dex: 1 }, 55);
@@ -118,7 +120,7 @@ export function GameShell() {
         <div className="identity"><b>{PLAYER_NAME}</b><span>{PLAYER_CLASS}</span><small>人物等級 1　職業等級 1</small></div>
         <Meter label="生命" value={world.player.hp} max={world.player.maxHp} tone="hp" />
         <Meter label="魔力" value={11} max={11} tone="sp" />
-        <div className="exp-values">人物經驗 {world.player.baseExp.toLocaleString()}<br />職業經驗 {world.player.jobExp.toLocaleString()}</div>
+        <div className="exp-values"><ExpMeter label={`人物 Lv. ${baseProgress.level}`} progress={baseProgress} /><ExpMeter label={`職業 Lv. ${jobProgress.level}`} progress={jobProgress} /></div>
         <div className="weight">負重 {inventoryCount * 2} / 2000　 Zeny 0</div>
       </div>
     </section>
@@ -147,6 +149,7 @@ export function GameShell() {
 
 function WindowTitle({ title, trailing }: { title: string; trailing: string }) { return <div className="window-title"><b>{title}</b><span>{trailing}</span><i>×</i></div>; }
 function Meter({ label, value, max, tone }: { label: string; value: number; max: number; tone: 'hp' | 'sp' }) { return <div className="meter"><b>{label}</b><div><i className={tone} style={{ width: `${value / max * 100}%` }} /></div><span>{value} / {max}</span></div>; }
+function ExpMeter({ label, progress }: { label: string; progress: { current: number; required: number; percent: number } }) { return <div className="exp-meter"><b>{label}</b><div><i style={{ width: `${progress.percent}%` }} /></div><span>{progress.current.toLocaleString()} / {progress.required.toLocaleString()}　{progress.percent.toFixed(1)}%</span></div>; }
 function Slot({ name, item, detail }: { name: string; item?: string; detail?: string }) { return <div className="slot"><span>{name}</span><b>{item ?? '空'}</b>{detail && <small>{detail}</small>}</div>; }
 function Setting({ label, value }: { label: string; value: string }) { return <div className="setting"><i /><code>{label}</code><b>{value}</b></div>; }
 function SourceNote({ text }: { text: string }) { return <p className="source-note">資料來源：{text}</p>; }

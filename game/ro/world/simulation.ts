@@ -35,6 +35,13 @@ export type RoWorldEvent = Readonly<{
   maximumHp?: number;
   item?: string;
   position?: GridPosition;
+  baseLevel?: number;
+  jobLevel?: number;
+  baseExpCurrent?: number;
+  baseExpRequired?: number;
+  jobExpCurrent?: number;
+  jobExpRequired?: number;
+  levelUp?: boolean;
 }>;
 
 export type PoringActor = {
@@ -84,6 +91,19 @@ const PLAYER_WALK_DELAY_MS = 150;
 const PLAYER_ATTACK_DELAY_MS = 1180;
 const PLAYER_DAMAGE_TO_PORING = 12;
 const PORING_DAMAGE_TO_NOVICE = 1;
+export const BASE_EXP_REQUIREMENTS = [548, 894, 1486, 2173, 3152, 3732, 4112, 4441, 4866, 5337];
+export const JOB_EXP_REQUIREMENTS = [10, 18, 28, 40, 91, 151, 205, 268, 340, 999];
+
+export function experienceProgress(total: number, requirements: readonly number[]) {
+  let level = 1;
+  let remaining = total;
+  while (level <= requirements.length && remaining >= requirements[level - 1]) {
+    remaining -= requirements[level - 1];
+    level += 1;
+  }
+  const required = requirements[Math.min(level - 1, requirements.length - 1)] ?? 999999999;
+  return { level, current: remaining, required, percent: Math.min(100, Math.floor((remaining / required) * 1000) / 10) };
+}
 
 function nextRandom(state: RoWorldState) {
   state.randomState = (state.randomState + 0x6d2b79f5) >>> 0;
@@ -257,7 +277,9 @@ function processPlayerAction(state: RoWorldState, field: RoField) {
       state.kills += 1;
       state.player.baseExp += PORING_RENEWAL.baseExp;
       state.player.jobExp += PORING_RENEWAL.jobExp;
-      pushEvent(state, { type: 'death', actorId: target.id, targetId: 'player', position: target.position });
+      const baseProgress = experienceProgress(state.player.baseExp, BASE_EXP_REQUIREMENTS);
+      const jobProgress = experienceProgress(state.player.jobExp, JOB_EXP_REQUIREMENTS);
+      pushEvent(state, { type: 'death', actorId: target.id, targetId: 'player', position: target.position, amount: PORING_RENEWAL.baseExp, baseLevel: baseProgress.level, jobLevel: jobProgress.level, baseExpCurrent: baseProgress.current, baseExpRequired: baseProgress.required, jobExpCurrent: jobProgress.current, jobExpRequired: jobProgress.required, levelUp: baseProgress.level > 1 || jobProgress.level > 1 });
       createDrops(state, target);
       state.targetId = null;
       state.route = [];
