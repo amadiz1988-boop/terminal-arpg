@@ -5,6 +5,7 @@ export type EquipmentDefinition = Readonly<{
   defense: number;
   slots: number;
   equipLevelMin: number;
+  weight: number;
 }>;
 
 export const EQUIPMENT: Readonly<Record<string, EquipmentDefinition>> =
@@ -16,6 +17,7 @@ export const EQUIPMENT: Readonly<Record<string, EquipmentDefinition>> =
       defense: 0,
       slots: 4,
       equipLevelMin: 1,
+      weight: 400,
     },
     Sword_: {
       aegisName: 'Sword_',
@@ -24,6 +26,7 @@ export const EQUIPMENT: Readonly<Record<string, EquipmentDefinition>> =
       defense: 0,
       slots: 4,
       equipLevelMin: 2,
+      weight: 500,
     },
     Club: {
       aegisName: 'Club',
@@ -32,6 +35,7 @@ export const EQUIPMENT: Readonly<Record<string, EquipmentDefinition>> =
       defense: 0,
       slots: 3,
       equipLevelMin: 2,
+      weight: 700,
     },
     Club_: {
       aegisName: 'Club_',
@@ -40,6 +44,7 @@ export const EQUIPMENT: Readonly<Record<string, EquipmentDefinition>> =
       defense: 0,
       slots: 4,
       equipLevelMin: 2,
+      weight: 700,
     },
     Guard_: {
       aegisName: 'Guard_',
@@ -48,5 +53,6 @@ export const EQUIPMENT: Readonly<Record<string, EquipmentDefinition>> =
       defense: 20,
       slots: 1,
       equipLevelMin: 1,
+      weight: 300,
     },
   });

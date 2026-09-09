@@ -5,7 +5,14 @@ import {
   type RoStatId,
   type RoStats,
 } from '../../content/ro-stats';
-import { APPLE_RENEWAL, FLY_WING_RENEWAL } from '../content/items';
+import {
+  APPLE_RENEWAL,
+  FLY_WING_RENEWAL,
+  MAJOR_OVERWEIGHT_PERCENT,
+  NOVICE_MAX_WEIGHT,
+  RENEWAL_NATURAL_HEAL_WEIGHT_PERCENT,
+  roItemWeight,
+} from '../content/items';
 import { EQUIPMENT } from '../content/equipment';
 import { PRT_FILD08 } from '../content/prt-fild08';
 import {
@@ -52,7 +59,9 @@ export type RoWorldEventType =
   | 'player_death'
   | 'respawn'
   | 'random_walk'
-  | 'teleport';
+  | 'teleport'
+  | 'pickup_overweight'
+  | 'overweight';
 export type RoWorldEvent = Readonly<{
   atMs: number;
   type: RoWorldEventType;
@@ -121,6 +130,7 @@ export type RoWorldState = {
   targetId: string | null;
   pickupId: string | null;
   route: GridPosition[];
+  ignoredGroundItemIds: string[];
   events: RoWorldEvent[];
   kills: number;
   deaths: number;
@@ -187,6 +197,7 @@ function cloneWorld(s: RoWorldState): RoWorldState {
     })),
     inventory: { ...s.inventory },
     route: s.route.map((p) => ({ ...p })),
+    ignoredGroundItemIds: [...s.ignoredGroundItemIds],
     events: [...s.events],
   };
 }
@@ -207,6 +218,22 @@ const maxHp = (s: RoWorldState) =>
   Math.trunc(40 * (1 + s.player.stats.vit * 0.01));
 const maxSp = (s: RoWorldState) =>
   Math.trunc(11 * (1 + s.player.stats.int * 0.01));
+
+export function carriedWeight(s: RoWorldState) {
+  const inventory = Object.entries(s.inventory).reduce(
+    (sum, [item, amount]) => sum + roItemWeight(item) * amount,
+    0,
+  );
+  const equipment = Object.values(s.player.equipment).reduce(
+    (sum, item) => sum + (item ? roItemWeight(item) : 0),
+    0,
+  );
+  return inventory + equipment;
+}
+
+export function carriedWeightPercent(s: RoWorldState) {
+  return Math.trunc((carriedWeight(s) * 100) / NOVICE_MAX_WEIGHT);
+}
 
 export function allocateStatusPoint(input: RoWorldState, stat: RoStatId) {
   const s = cloneWorld(input),
@@ -350,7 +377,11 @@ function processMonsterMovement(s: RoWorldState, field: RoField) {
   }
 }
 function processRecovery(s: RoWorldState) {
-  if (s.route.length === 0 && s.player.hp < s.player.maxHp) {
+  if (
+    carriedWeightPercent(s) < RENEWAL_NATURAL_HEAL_WEIGHT_PERCENT &&
+    s.route.length === 0 &&
+    s.player.hp < s.player.maxHp
+  ) {
     const amount = Math.min(
       renewalNaturalHpRecovery(s.player.maxHp, s.player.stats.vit),
       s.player.maxHp - s.player.hp,
@@ -365,6 +396,7 @@ function preparePickup(s: RoWorldState, field: RoField) {
   const visible = s.groundItems
     .filter(
       (item) =>
+        !s.ignoredGroundItemIds.includes(item.id) &&
         blockDistance(s.player.position, item.position) < OPENKORE_CLIENT_SIGHT,
     )
     .sort(
@@ -455,6 +487,18 @@ function processPlayerAction(s: RoWorldState, field: RoField) {
     const item = s.groundItems.find((i) => i.id === s.pickupId);
     if (!item) return;
     if (samePosition(s.player.position, item.position)) {
+      const nextWeight = carriedWeight(s) + roItemWeight(item.item);
+      if (nextWeight > NOVICE_MAX_WEIGHT) {
+        s.ignoredGroundItemIds.push(item.id);
+        pushEvent(s, {
+          type: 'pickup_overweight',
+          item: item.item,
+          position: item.position,
+        });
+        s.pickupId = null;
+        s.route = [];
+        return;
+      }
       s.inventory[item.item] = (s.inventory[item.item] ?? 0) + 1;
       s.groundItems = s.groundItems.filter((i) => i.id !== item.id);
       pushEvent(s, {
@@ -551,6 +595,11 @@ function processPlayerAction(s: RoWorldState, field: RoField) {
       });
     }
     s.player.nextActionAt = s.nowMs + PLAYER_WALK_DELAY_MS;
+    return;
+  }
+  if (carriedWeightPercent(s) >= MAJOR_OVERWEIGHT_PERCENT) {
+    pushEvent(s, { type: 'overweight', actorId: 'player' });
+    s.player.nextActionAt = s.nowMs + 1000;
     return;
   }
   target.engaged = true;
@@ -717,6 +766,7 @@ export function createRoWorld(field: RoField, seed: number): RoWorldState {
     targetId: null,
     pickupId: null,
     route: [],
+    ignoredGroundItemIds: [],
     events: [],
     kills: 0,
     deaths: 0,

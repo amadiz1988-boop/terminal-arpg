@@ -25,3 +25,41 @@ export const FLY_WING_RENEWAL = Object.freeze({
   skillLevel: 1,
   source: rAthenaSource('db/re/item_db_usable.yml', 'Id: 601'),
 });
+
+export const NOVICE_MAX_WEIGHT = 20_000;
+export const RENEWAL_NATURAL_HEAL_WEIGHT_PERCENT = 70;
+export const MAJOR_OVERWEIGHT_PERCENT = 90;
+
+export const RO_ITEM_WEIGHTS: Readonly<Record<string, number>> = Object.freeze({
+  Jellopy: 10,
+  Knife_: 400,
+  Sticky_Mucus: 10,
+  Apple: 20,
+  Wing_Of_Fly: 50,
+  Unripe_Apple: 50,
+  Poring_Card: 10,
+  Clover: 10,
+  Feather: 10,
+  Pierrot_Nose: 100,
+  Sword_: 500,
+  Carrot: 20,
+  Rainbow_Carrot: 50,
+  Lunatic_Card: 10,
+  Fluff: 10,
+  Club_: 700,
+  Green_Herb: 30,
+  Club: 700,
+  Fabre_Card: 10,
+  Phracon: 200,
+  Chrysalis: 10,
+  Guard_: 300,
+  Shell: 10,
+  Iron_Ore: 150,
+  Pupa_Card: 10,
+  Red_Herb: 30,
+  Novice_Poring_Card: 10,
+});
+
+export function roItemWeight(aegisName: string) {
+  return RO_ITEM_WEIGHTS[aegisName] ?? 0;
+}

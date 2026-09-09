@@ -161,6 +161,9 @@ try {
   report.skills = skills;
   report.progress = progress;
   report.flyWingPolicy = flyWingPolicy;
+  report.weightVisible = await evaluate(
+    "document.body.innerText.includes('負重')&&document.body.innerText.includes('/ 2,000（')",
+  );
   report.errors = errors;
   report.pass =
     report.canvas === 720 &&
@@ -173,6 +176,7 @@ try {
     report.skills &&
     report.progress &&
     report.flyWingPolicy &&
+    report.weightVisible &&
     report.pickedItems &&
     !report.englishItem &&
     report.qaControlsAbsent &&

@@ -6,6 +6,8 @@ import {
   allocateNoviceSkill,
   allocateStatusPoint,
   BASE_EXP_REQUIREMENTS,
+  carriedWeight,
+  carriedWeightPercent,
   createRoWorld,
   experienceProgress,
   JOB_EXP_REQUIREMENTS,
@@ -23,6 +25,7 @@ import {
 } from '@/game/ro/content/prt-fild08';
 import { PRT_FILD08_MONSTERS } from '@/game/ro/content/monsters';
 import { EQUIPMENT } from '@/game/ro/content/equipment';
+import { NOVICE_MAX_WEIGHT } from '@/game/ro/content/items';
 import {
   RESTORATION_CATEGORIES,
   RESTORATION_COMPLETED,
@@ -100,6 +103,8 @@ const EVENT_LABELS: Record<RoWorldEvent['type'], string> = {
   respawn: '重生',
   random_walk: '尋路',
   teleport: '傳送',
+  pickup_overweight: '負重',
+  overweight: '負重',
 };
 
 function formatClock(ms: number) {
@@ -148,6 +153,10 @@ function eventText(event: RoWorldEvent) {
       return `視野內無目標 · 隨機巡走至 (${event.position?.x}, ${event.position?.y})`;
     case 'teleport':
       return `視野內無目標 · 使用 ${zhTwItem(event.item ?? '')} 隨機傳送至 (${event.position?.x}, ${event.position?.y})`;
+    case 'pickup_overweight':
+      return `無法拾取 ${zhTwItem(event.item ?? '')} · 超過負重上限`;
+    case 'overweight':
+      return '負重達 90% · 無法攻擊或使用技能';
   }
 }
 
@@ -270,6 +279,8 @@ export function GameShell() {
   const inventoryCount = world
     ? Object.values(world.inventory).reduce((sum, value) => sum + value, 0)
     : 0;
+  const weight = world ? carriedWeight(world) : 0;
+  const weightPercent = world ? carriedWeightPercent(world) : 0;
   const alive = world?.monsters.filter((monster) => monster.alive).length ?? 0;
   const baseProgress = experienceProgress(
     world?.player.baseExp ?? 0,
@@ -346,7 +357,9 @@ export function GameShell() {
             />
           </div>
           <div className="weight">
-            負重 {inventoryCount * 2} / 2000　 Zeny 0
+            負重 {(weight / 10).toLocaleString()} /{' '}
+            {(NOVICE_MAX_WEIGHT / 10).toLocaleString()}（{weightPercent}%）　
+            Zeny 0
           </div>
         </div>
       </section>
@@ -690,7 +703,7 @@ export function GameShell() {
         </div>
       </section>
       <footer className="release-note">
-        R0.7 · RO 還原 {RESTORATION_PERCENT}% ·
+        R0.8 · RO 還原 {RESTORATION_PERCENT}% ·
         地圖、怪物、戰鬥、成長、經驗與掉落共用同一份模擬狀態
       </footer>
     </main>

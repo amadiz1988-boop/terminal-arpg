@@ -9,6 +9,7 @@ import {
   PRT_FILD08_PORING_COUNT,
 } from '../../game/ro/content/prt-fild08';
 import { PRT_FILD08_MONSTERS } from '../../game/ro/content/monsters';
+import { NOVICE_MAX_WEIGHT, roItemWeight } from '../../game/ro/content/items';
 import { parseFld2, isWalkable } from '../../game/ro/world/fld2';
 import {
   createPoringPositions,
@@ -20,6 +21,8 @@ import {
   advanceRoWorld,
   allocateNoviceSkill,
   allocateStatusPoint,
+  carriedWeight,
+  carriedWeightPercent,
   createRoWorld,
   equipInventoryItem,
   OPENKORE_CLIENT_SIGHT,
@@ -336,6 +339,78 @@ describe('pinned prt_fild08 world', () => {
     expect(equipped.player.equipment.rightHand).toBe('Sword_');
     expect(equipped.inventory.Knife_).toBe(1);
     expect(equipped.inventory.Sword_).toBeUndefined();
+    expect(carriedWeight(equipped)).toBe(900);
+  });
+
+  it('uses rAthena internal weight units and includes equipped items', () => {
+    const world = createRoWorld(field, 824);
+    expect(carriedWeight(world)).toBe(400);
+    expect(carriedWeightPercent(world)).toBe(2);
+    world.inventory.Apple = 2;
+    world.inventory.Wing_Of_Fly = 1;
+    expect(carriedWeight(world)).toBe(490);
+    expect(NOVICE_MAX_WEIGHT).toBe(20_000);
+    for (const monster of Object.values(PRT_FILD08_MONSTERS))
+      for (const drop of monster.drops)
+        expect(roItemWeight(drop.item), drop.item).toBeGreaterThan(0);
+  });
+
+  it('leaves an item on the ground when pickup would exceed maximum weight', () => {
+    const world = createRoWorld(field, 824);
+    for (const monster of world.monsters) {
+      monster.alive = false;
+      monster.respawnAt = null;
+    }
+    world.inventory.Club_ = 28;
+    world.groundItems.push({
+      id: 'overweight-drop',
+      item: 'Apple',
+      position: { ...world.player.position },
+    });
+    const result = advanceRoWorld(world, field, 1);
+    expect(carriedWeight(world)).toBe(20_000);
+    expect(result.inventory.Apple).toBeUndefined();
+    expect(
+      result.groundItems.some((item) => item.id === 'overweight-drop'),
+    ).toBe(true);
+    expect(
+      result.events.some((event) => event.type === 'pickup_overweight'),
+    ).toBe(true);
+  });
+
+  it('stops natural recovery at the renewal 70 percent weight threshold', () => {
+    const world = createRoWorld(field, 824);
+    world.player.hp = 20;
+    world.inventory.Club_ = 20;
+    expect(carriedWeightPercent(world)).toBe(72);
+    const result = advanceRoWorld(world, field, 6_000, false);
+    expect(result.player.hp).toBe(20);
+  });
+
+  it('blocks attacks at the rAthena 90 percent major overweight state', () => {
+    const world = createRoWorld(field, 824);
+    for (const monster of world.monsters) {
+      monster.alive = false;
+      monster.respawnAt = null;
+    }
+    const nearby = [
+      { x: world.player.position.x + 1, y: world.player.position.y },
+      { x: world.player.position.x - 1, y: world.player.position.y },
+      { x: world.player.position.x, y: world.player.position.y + 1 },
+      { x: world.player.position.x, y: world.player.position.y - 1 },
+    ].find((position) => isWalkable(field, position.x, position.y))!;
+    world.monsters[0].alive = true;
+    world.monsters[0].position = nearby;
+    world.monsters[0].hp = PRT_FILD08_MONSTERS[world.monsters[0].monster].hp;
+    world.inventory.Club_ = 26;
+    expect(carriedWeightPercent(world)).toBeGreaterThanOrEqual(90);
+    const result = advanceRoWorld(world, field, 1);
+    expect(result.events.some((event) => event.type === 'overweight')).toBe(
+      true,
+    );
+    expect(result.events.some((event) => event.type === 'player_hit')).toBe(
+      false,
+    );
   });
 
   it('walks, trades hits, kills, drops, and picks up through causal events', () => {
