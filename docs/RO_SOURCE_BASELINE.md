@@ -15,7 +15,7 @@
 
 rAthena 的 Renewal 設定明確分離 Renewal 公式、詠唱、掉落、經驗、等級傷害、攻速與能力值計算。`db/re` 提供 Renewal 物品、技能、怪物及相關資料。戰鬥與狀態公式可從 `battle.cpp`、`status.cpp`、`skill.cpp` 追蹤。
 
-OpenKore 的 AI 原始碼提供路線、沿途攻擊、目標選擇、攻擊流程、戰後拾取與工作佇列。`Field.pm` 定義格狀地圖及 `.fld2` 可行走資料的讀取方式。
+OpenKore 的 AI 原始碼提供路線、沿途攻擊、目標選擇、攻擊流程、戰後拾取與工作佇列。`Field.pm` 定義格狀地圖及 `.fld2` 資料的讀取方式，實際可行走判斷以 `src/auto/XSTools/PathFinding/algorithm.cpp` 的 `checkTile_inner` 位元檢查為準。
 
 ## 單一版本規則
 
@@ -39,3 +39,4 @@ OpenKore 的 AI 原始碼提供路線、沿途攻擊、目標選擇、攻擊流�
 - https://github.com/OpenKore/openkore/tree/51de1ddfc4449ae5217f6886de702f87ca934030
 - https://github.com/OpenKore/openkore/blob/51de1ddfc4449ae5217f6886de702f87ca934030/src/AI/Attack.pm
 - https://github.com/OpenKore/openkore/blob/51de1ddfc4449ae5217f6886de702f87ca934030/src/Field.pm
+- https://github.com/OpenKore/openkore/blob/51de1ddfc4449ae5217f6886de702f87ca934030/src/auto/XSTools/PathFinding/algorithm.cpp

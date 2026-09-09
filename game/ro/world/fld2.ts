@@ -4,7 +4,7 @@ export const FLD2_SOURCE: SourceTrace = Object.freeze({
   repository: AUTOMATION_RULESET.repository,
   commit: AUTOMATION_RULESET.commit,
   path: 'src/Field.pm',
-  symbol: 'loadFile/getOffset/isWalkable',
+  symbol: 'loadFile/getOffset/isWalkable + src/auto/XSTools/PathFinding/algorithm.cpp::checkTile_inner',
 });
 
 export type RoField = Readonly<{
@@ -25,6 +25,19 @@ export function parseFld2(bytes: Uint8Array): RoField {
   return { width, height, cells: bytes.slice(4) };
 }
 
+export async function gunzipFld2(bytes: Uint8Array) {
+  const copy = new Uint8Array(bytes.byteLength);
+  copy.set(bytes);
+  const stream = new Blob([copy.buffer]).stream().pipeThrough(new DecompressionStream('gzip'));
+  return parseFld2(new Uint8Array(await new Response(stream).arrayBuffer()));
+}
+
+export async function loadFld2Gzip(url: string) {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`Unable to load FLD2 field: ${response.status}`);
+  return gunzipFld2(new Uint8Array(await response.arrayBuffer()));
+}
+
 export function fieldOffset(field: RoField, x: number, y: number) {
   if (!Number.isInteger(x) || !Number.isInteger(y) || x < 0 || y < 0 || x >= field.width || y >= field.height) {
     return -1;
@@ -38,5 +51,6 @@ export function fieldCell(field: RoField, x: number, y: number) {
 }
 
 export function isWalkable(field: RoField, x: number, y: number) {
-  return fieldCell(field, x, y) === 0;
+  const cell = fieldCell(field, x, y);
+  return cell !== undefined && (cell & 1) !== 0;
 }

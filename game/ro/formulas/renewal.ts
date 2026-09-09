@@ -19,6 +19,11 @@ export const RENEWAL_FORMULA_SOURCES = Object.freeze({
   hitRateConfig: rAthenaSource('conf/battle/battle.conf', 'min_hitrate/max_hitrate'),
   maxHp: rAthenaSource('src/map/status.cpp', 'status_calc_maxhp_pc'),
   maxSp: rAthenaSource('src/map/status.cpp', 'status_calc_maxsp_pc'),
+  attackSpeed: rAthenaSource('src/map/status.cpp', 'status_base_amotion_pc'),
+  attackMotion: rAthenaSource('src/map/status.cpp', 'status_calc_pc_'),
+  weaponVariance: rAthenaSource('src/map/battle.cpp', 'battle_calc_base_weapon_attack'),
+  weaponSize: rAthenaSource('db/size_fix.yml', 'Dagger'),
+  physicalDefense: rAthenaSource('src/map/battle.cpp', 'battle_calc_defense_reduction'),
 });
 
 const intDiv = (value: number, divisor: number) => Math.trunc(value / divisor);
@@ -70,4 +75,44 @@ export function renewalMaxHp(baseHp: number, vit: number) {
 
 export function renewalMaxSp(baseSp: number, intelligence: number) {
   return Math.max(1, Math.trunc(baseSp * (1 + intelligence * 0.01)));
+}
+
+export function renewalDisplayedAspd(
+  stats: Pick<RenewalStats, 'agi' | 'dex'>,
+  weaponBaseAspd: number,
+  rangedWeapon = false,
+) {
+  const dexDivisor = rangedWeapon ? 7 : 5;
+  const statAspd = Math.sqrt((stats.dex * stats.dex) / dexDivisor + stats.agi * stats.agi * 0.5) * 0.25 + 196;
+  return Math.trunc(statAspd) - Math.min(weaponBaseAspd, 200);
+}
+
+export function renewalAttackDelayMs(displayedAspd: number) {
+  const attackMotion = 2000 - displayedAspd * 10;
+  return attackMotion * 2;
+}
+
+export function renewalWeaponAttackRange(
+  weaponAttack: number,
+  weaponLevel: number,
+  baseStat: number,
+) {
+  const variance = (5 * weaponAttack * weaponLevel) / 100;
+  const baseStatBonus = (weaponAttack * baseStat) / 200;
+  return {
+    minimum: Math.max(0, Math.trunc(weaponAttack - variance + baseStatBonus)),
+    maximum: Math.min(65535, Math.trunc(weaponAttack + variance + baseStatBonus)),
+  };
+}
+
+export function renewalSizeAdjustedDamage(damage: number, sizePercent: number) {
+  return Math.trunc((damage * sizePercent) / 100);
+}
+
+export function renewalPhysicalDefense(damage: number, hardDefense: number, softDefense: number) {
+  const safeHardDefense = hardDefense === -400 ? -399 : hardDefense;
+  return Math.max(
+    1,
+    Math.trunc((damage * (4000 + safeHardDefense)) / (4000 + 10 * safeHardDefense)) - softDefense,
+  );
 }
