@@ -62,6 +62,7 @@ export type RoWorldState = {
     hp: number;
     maxHp: number;
     baseExp: number;
+    jobExp: number;
     nextActionAt: number;
     nextHpRegenAt: number;
   };
@@ -250,6 +251,7 @@ function processPlayerAction(state: RoWorldState, field: RoField) {
       target.respawnAt = state.nowMs + target.respawnMs;
       state.kills += 1;
       state.player.baseExp += PORING_RENEWAL.baseExp;
+      state.player.jobExp += PORING_RENEWAL.jobExp;
       pushEvent(state, { type: 'death', actorId: target.id, targetId: 'player', position: target.position });
       createDrops(state, target);
       state.targetId = null;
@@ -287,6 +289,7 @@ export function createRoWorld(field: RoField, seed: number): RoWorldState {
       hp: 40,
       maxHp: 40,
       baseExp: 0,
+      jobExp: 0,
       nextActionAt: 0,
       nextHpRegenAt: 6000,
     },

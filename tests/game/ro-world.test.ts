@@ -87,11 +87,14 @@ describe('pinned prt_fild08 world', () => {
       elapsedMs: result.nowMs,
       kills: result.kills,
       baseExp: result.player.baseExp,
+      jobExp: result.player.jobExp,
       hp: result.player.hp,
       events: result.events.length,
       inventory: result.inventory,
     });
     expect(result.nowMs).toBeLessThanOrEqual(30 * 60_000);
     expect(result.events.filter((event) => event.type === 'death')).toHaveLength(result.kills);
+    expect(result.player.baseExp).toBe(result.kills * 150);
+    expect(result.player.jobExp).toBe(result.kills * 40);
   });
 });
