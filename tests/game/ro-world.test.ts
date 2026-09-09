@@ -98,6 +98,25 @@ describe('pinned prt_fild08 world', () => {
     ).toBe(true);
   });
 
+  it('keeps a dead player stopped, then respawns at the save point after four seconds', () => {
+    const world = createRoWorld(field, 824);
+    world.status = 'dead';
+    world.player.hp = 0;
+    world.player.deadAt = 0;
+    world.player.respawnAt = 4_000;
+    const stopped = advanceRoWorld(world, field, 5_000, false);
+    expect(stopped.status).toBe('dead');
+    expect(stopped.player.hp).toBe(0);
+    const resumed = advanceRoWorld(stopped, field, 1, true);
+    expect(resumed.status).toBe('running');
+    expect(
+      resumed.events.find((event) => event.type === 'respawn')?.position,
+    ).toEqual(world.player.savePoint);
+    expect(resumed.player.hp).toBe(resumed.player.maxHp);
+    expect(resumed.player.sp).toBe(resumed.player.maxSp);
+    expect(resumed.events.some((event) => event.type === 'respawn')).toBe(true);
+  });
+
   it('awards real level points and allows reversible allocations', () => {
     const progressed = advanceRoWorld(
       createRoWorld(field, 824),

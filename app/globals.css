@@ -334,6 +334,15 @@ button {
 .console-output .event-monster_hit b {
   color: #ff6767;
 }
+.console-output .event-player_death span,
+.console-output .event-player_death b {
+  color: #ff4545;
+  font-weight: 700;
+}
+.console-output .event-respawn span,
+.console-output .event-respawn b {
+  color: #56e68d;
+}
 .console-output .event-death span,
 .console-output .event-death b {
   color: #56e68d;

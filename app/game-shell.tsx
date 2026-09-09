@@ -95,6 +95,8 @@ const EVENT_LABELS: Record<RoWorldEvent['type'], string> = {
   use_item: '道具',
   base_level_up: '升級',
   job_level_up: '職業升級',
+  player_death: '死亡',
+  respawn: '重生',
 };
 
 function formatClock(ms: number) {
@@ -135,6 +137,10 @@ function eventText(event: RoWorldEvent) {
       return `你的人物等級提升至 ${event.baseLevel} · 獲得能力點 ${event.statusPointsGained}`;
     case 'job_level_up':
       return `你的職業等級提升至 ${event.jobLevel} · 獲得技能點 ${event.skillPointsGained}`;
+    case 'player_death':
+      return '你已死亡 · OpenKore 等待 4 秒後送出重生';
+    case 'respawn':
+      return `你在儲存點復活 · 生命與魔力完全恢復 · (${event.position?.x}, ${event.position?.y})`;
   }
 }
 
@@ -337,7 +343,14 @@ export function GameShell() {
       </section>
 
       <div className="workspace-title">
-        <span>鬼島傳說 · {running ? '掛機中' : '已暫停'}</span>
+        <span>
+          鬼島傳說 ·{' '}
+          {world.status === 'dead'
+            ? '死亡等待重生'
+            : running
+              ? '掛機中'
+              : '已暫停'}
+        </span>
         <label>
           掛機地圖{' '}
           <select aria-label="掛機地圖">
@@ -404,6 +417,9 @@ export function GameShell() {
             </span>
             <span>
               職業經驗 <strong>{world.player.jobExp.toLocaleString()}</strong>
+            </span>
+            <span>
+              死亡 <strong>{world.deaths}</strong>
             </span>
             <div className="picked-items">
               <b>拾取物品</b>
@@ -640,6 +656,8 @@ export function GameShell() {
                 <Setting label="自動拾取" value="開啟" />
                 <Setting label="生命低於 50% 使用蘋果" value="開啟" />
                 <Setting label="攻擊 MVP" value="關閉" />
+                <Setting label="死亡後自動重生" value="4 秒" />
+                <Setting label="DEMO 儲存點" value="普隆德拉南門入口" />
                 <SourceNote
                   text={`OpenKore ${AUTOMATION_RULESET.commit.slice(0, 8)}`}
                 />
@@ -650,7 +668,7 @@ export function GameShell() {
         </div>
       </section>
       <footer className="release-note">
-        R0.4 · RO 還原 {RESTORATION_PERCENT}% ·
+        R0.5 · RO 還原 {RESTORATION_PERCENT}% ·
         地圖、怪物、戰鬥、成長、經驗與掉落共用同一份模擬狀態
       </footer>
     </main>

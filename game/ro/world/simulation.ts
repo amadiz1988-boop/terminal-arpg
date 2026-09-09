@@ -45,7 +45,9 @@ export type RoWorldEventType =
   | 'heal'
   | 'use_item'
   | 'base_level_up'
-  | 'job_level_up';
+  | 'job_level_up'
+  | 'player_death'
+  | 'respawn';
 export type RoWorldEvent = Readonly<{
   atMs: number;
   type: RoWorldEventType;
@@ -101,6 +103,9 @@ export type RoWorldState = {
     skillPoints: number;
     skills: NoviceSkills;
     equipment: { rightHand: string | null; leftHand: string | null };
+    savePoint: GridPosition;
+    deadAt: number | null;
+    respawnAt: number | null;
     nextActionAt: number;
     nextHpRegenAt: number;
   };
@@ -112,6 +117,7 @@ export type RoWorldState = {
   route: GridPosition[];
   events: RoWorldEvent[];
   kills: number;
+  deaths: number;
 };
 
 const PLAYER_WALK_DELAY_MS = 150;
@@ -558,11 +564,52 @@ function processMonsterAttacks(s: RoWorldState) {
         remainingHp: s.player.hp,
         maximumHp: s.player.maxHp,
       });
-      if (s.player.hp === 0) s.status = 'dead';
+      if (s.player.hp === 0) {
+        s.status = 'dead';
+        s.deaths += 1;
+        s.player.deadAt = s.nowMs;
+        s.player.respawnAt = s.nowMs + 4000;
+        s.targetId = null;
+        s.pickupId = null;
+        s.route = [];
+        for (const monster of s.monsters) {
+          monster.engaged = false;
+          monster.nextAttackAt = 0;
+        }
+        pushEvent(s, {
+          type: 'player_death',
+          actorId: 'player',
+          position: s.player.position,
+        });
+        break;
+      }
     } else
       pushEvent(s, { type: 'monster_miss', actorId: m.id, targetId: 'player' });
     m.nextAttackAt = s.nowMs + d.attackDelayMs;
   }
+}
+
+function processPlayerRespawn(s: RoWorldState, playerAutomation: boolean) {
+  if (
+    !playerAutomation ||
+    s.status !== 'dead' ||
+    s.player.respawnAt === null ||
+    s.player.respawnAt > s.nowMs
+  )
+    return;
+  s.status = 'running';
+  s.player.position = { ...s.player.savePoint };
+  s.player.hp = s.player.maxHp;
+  s.player.sp = s.player.maxSp;
+  s.player.deadAt = null;
+  s.player.respawnAt = null;
+  s.player.nextActionAt = s.nowMs;
+  s.player.nextHpRegenAt = s.nowMs + 6000;
+  pushEvent(s, {
+    type: 'respawn',
+    actorId: 'player',
+    position: s.player.position,
+  });
 }
 
 export function createRoWorld(field: RoField, seed: number): RoWorldState {
@@ -585,6 +632,9 @@ export function createRoWorld(field: RoField, seed: number): RoWorldState {
       skillPoints: 0,
       skills: { NV_BASIC: 0, NV_FIRSTAID: 0 },
       equipment: { rightHand: 'Knife_', leftHand: null },
+      savePoint: { ...PRT_FILD08.noviceEntry },
+      deadAt: null,
+      respawnAt: null,
       nextActionAt: 0,
       nextHpRegenAt: 6000,
     },
@@ -596,6 +646,7 @@ export function createRoWorld(field: RoField, seed: number): RoWorldState {
     route: [],
     events: [],
     kills: 0,
+    deaths: 0,
   };
   s.monsters = createMonsterPlacements(field, seed).map((p, index) => {
     const d = PRT_FILD08_MONSTERS[p.monster];
@@ -626,7 +677,7 @@ export function advanceRoWorld(
     throw new RangeError('duration must be non-negative');
   const s = cloneWorld(input),
     finishAt = s.nowMs + durationMs;
-  while (s.status === 'running') {
+  while (s.nowMs < finishAt) {
     const attack = s.monsters.reduce(
         (n, m) =>
           m.alive && m.engaged && m.nextAttackAt > 0
@@ -646,17 +697,25 @@ export function advanceRoWorld(
         Infinity,
       ),
       nextAt = Math.min(
-        playerAutomation ? s.player.nextActionAt : Infinity,
-        s.player.nextHpRegenAt,
-        attack,
-        move,
-        respawn,
+        playerAutomation && s.status === 'running'
+          ? Math.max(s.nowMs, s.player.nextActionAt)
+          : Infinity,
+        s.status === 'running'
+          ? Math.max(s.nowMs, s.player.nextHpRegenAt)
+          : Infinity,
+        playerAutomation && s.status === 'dead'
+          ? Math.max(s.nowMs, s.player.respawnAt ?? Infinity)
+          : Infinity,
+        Math.max(s.nowMs, attack),
+        Math.max(s.nowMs, move),
+        Math.max(s.nowMs, respawn),
       );
     if (nextAt > finishAt) break;
     s.nowMs = nextAt;
     processRespawns(s, field);
     processMonsterMovement(s, field);
-    processMonsterAttacks(s);
+    processPlayerRespawn(s, playerAutomation);
+    if (s.status === 'running') processMonsterAttacks(s);
     if (s.status === 'running' && s.player.nextHpRegenAt <= s.nowMs)
       processRecovery(s);
     if (
@@ -666,6 +725,6 @@ export function advanceRoWorld(
     )
       processPlayerAction(s, field);
   }
-  if (s.status === 'running') s.nowMs = finishAt;
+  s.nowMs = finishAt;
   return s;
 }
