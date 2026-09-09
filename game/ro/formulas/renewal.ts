@@ -24,6 +24,7 @@ export const RENEWAL_FORMULA_SOURCES = Object.freeze({
   weaponVariance: rAthenaSource('src/map/battle.cpp', 'battle_calc_base_weapon_attack'),
   weaponSize: rAthenaSource('db/size_fix.yml', 'Dagger'),
   physicalDefense: rAthenaSource('src/map/battle.cpp', 'battle_calc_defense_reduction'),
+  naturalRegen: rAthenaSource('src/map/status.cpp', 'status_calc_regen/status_natural_heal'),
 });
 
 const intDiv = (value: number, divisor: number) => Math.trunc(value / divisor);
@@ -115,4 +116,8 @@ export function renewalPhysicalDefense(damage: number, hardDefense: number, soft
     1,
     Math.trunc((damage * (4000 + safeHardDefense)) / (4000 + 10 * safeHardDefense)) - softDefense,
   );
+}
+
+export function renewalNaturalHpRecovery(maxHp: number, vit: number) {
+  return Math.max(0, Math.trunc(vit / 5) + Math.max(1, Math.trunc(maxHp / 200)));
 }

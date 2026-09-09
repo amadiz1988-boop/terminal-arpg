@@ -10,6 +10,7 @@ import {
   renewalMaxSp,
   renewalMonsterFlee,
   renewalMonsterHit,
+  renewalNaturalHpRecovery,
   renewalPlayerFlee,
   renewalPlayerHit,
   renewalPhysicalDefense,
@@ -34,6 +35,7 @@ describe('pinned RO source baseline', () => {
     expect(renewalBaseAttack(novice)).toBe(1);
     expect(renewalMaxHp(40, novice.vit)).toBe(40);
     expect(renewalMaxSp(11, novice.int)).toBe(11);
+    expect(renewalNaturalHpRecovery(40, novice.vit)).toBe(1);
   });
 
   it('uses rAthena monster defaults for omitted Poring stats', () => {
