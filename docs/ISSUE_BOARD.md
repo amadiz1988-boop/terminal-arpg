@@ -11,7 +11,7 @@
 | 狀態 | 工作 | 驗收 |
 | --- | --- | --- |
 | done | 鎖定 RO 資料來源 | rAthena Renewal 與 OpenKore 固定 commit 已記錄 |
-| in_progress | RO 最小垂直切片 | 初心者在格狀地圖逐格找怪、普攻、受傷、死亡、掉落、拾取 |
+| in_progress | RO 最小垂直切片 | FLD2 解析已完成；下一步為初心者逐格找怪、普攻、受傷、死亡、掉落、拾取 |
 | todo | rAthena 資料轉換器 | 從固定版本轉為型別化角色、怪物、物品、技能資料 |
 | todo | OpenKore AI 佇列 | route、attack、items_take、sitAuto、storageAuto 可觀測且可暫停 |
 | todo | RO 即時戰鬥公式 | 命中、迴避、攻速、射程、傷害、HP、SP 與狀態使用同一引擎 |

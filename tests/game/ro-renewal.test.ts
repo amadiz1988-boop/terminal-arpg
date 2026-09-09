@@ -11,6 +11,7 @@ import {
   renewalPlayerHit,
 } from '../../game/ro/formulas/renewal';
 import { AUTOMATION_RULESET, RO_RULESET } from '../../game/ro/source';
+import { fieldCell, fieldOffset, isWalkable, parseFld2 } from '../../game/ro/world/fld2';
 
 const novice = { level: 1, str: 1, agi: 1, vit: 1, int: 1, dex: 1, luk: 1 };
 const poring = { level: 1, ...PORING_RENEWAL.stats };
@@ -40,5 +41,20 @@ describe('pinned RO source baseline', () => {
     expect(passesDropRate(20, 19)).toBe(true);
     expect(passesDropRate(20, 20)).toBe(false);
     expect(() => passesDropRate(20, 10000)).toThrow(RangeError);
+  });
+
+  it('parses OpenKore FLD2 little-endian dimensions and row offsets', () => {
+    const field = parseFld2(new Uint8Array([3, 0, 2, 0, 0, 1, 0, 1, 0, 1]));
+    expect(field.width).toBe(3);
+    expect(field.height).toBe(2);
+    expect(fieldOffset(field, 2, 1)).toBe(5);
+    expect(fieldCell(field, 1, 0)).toBe(1);
+    expect(isWalkable(field, 0, 0)).toBe(true);
+    expect(isWalkable(field, 1, 0)).toBe(false);
+    expect(fieldOffset(field, 3, 0)).toBe(-1);
+  });
+
+  it('rejects truncated FLD2 data', () => {
+    expect(() => parseFld2(new Uint8Array([2, 0, 2, 0, 0]))).toThrow(RangeError);
   });
 });
