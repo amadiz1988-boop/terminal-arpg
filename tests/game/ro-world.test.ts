@@ -9,7 +9,11 @@ import {
   PRT_FILD08_PORING_COUNT,
 } from '../../game/ro/content/prt-fild08';
 import { PRT_FILD08_MONSTERS } from '../../game/ro/content/monsters';
-import { NOVICE_MAX_WEIGHT, roItemWeight } from '../../game/ro/content/items';
+import {
+  NOVICE_MAX_WEIGHT,
+  OPENKORE_ITEMS_MAX_WEIGHT_PERCENT,
+  roItemWeight,
+} from '../../game/ro/content/items';
 import { parseFld2, isWalkable } from '../../game/ro/world/fld2';
 import {
   createPoringPositions,
@@ -21,6 +25,7 @@ import {
   advanceRoWorld,
   allocateNoviceSkill,
   allocateStatusPoint,
+  canCarryItem,
   carriedWeight,
   carriedWeightPercent,
   createRoWorld,
@@ -355,7 +360,7 @@ describe('pinned prt_fild08 world', () => {
         expect(roItemWeight(drop.item), drop.item).toBeGreaterThan(0);
   });
 
-  it('leaves an item on the ground when pickup would exceed maximum weight', () => {
+  it('keeps the server maximum-weight calculation exact', () => {
     const world = createRoWorld(field, 824);
     for (const monster of world.monsters) {
       monster.alive = false;
@@ -369,13 +374,54 @@ describe('pinned prt_fild08 world', () => {
     });
     const result = advanceRoWorld(world, field, 1);
     expect(carriedWeight(world)).toBe(20_000);
+    expect(canCarryItem(world, 'Apple')).toBe(false);
     expect(result.inventory.Apple).toBeUndefined();
     expect(
       result.groundItems.some((item) => item.id === 'overweight-drop'),
     ).toBe(true);
+    expect(result.events.some((event) => event.type === 'pickup')).toBe(false);
+  });
+
+  it('stops OpenKore auto pickup when current weight reaches 89 percent', () => {
+    const world = createRoWorld(field, 824);
+    for (const monster of world.monsters) {
+      monster.alive = false;
+      monster.respawnAt = null;
+    }
+    world.inventory.Club_ = 25;
+    world.groundItems.push({
+      id: 'policy-stop-drop',
+      item: 'Apple',
+      position: { ...world.player.position },
+    });
+    expect(OPENKORE_ITEMS_MAX_WEIGHT_PERCENT).toBe(89);
+    expect(carriedWeightPercent(world)).toBe(89);
+    const result = advanceRoWorld(world, field, 1);
+    expect(result.inventory.Apple).toBeUndefined();
     expect(
-      result.events.some((event) => event.type === 'pickup_overweight'),
+      result.groundItems.some((item) => item.id === 'policy-stop-drop'),
     ).toBe(true);
+    expect(result.events.some((event) => event.type === 'pickup')).toBe(false);
+  });
+
+  it('allows a take request below 89 percent when the server maximum permits it', () => {
+    const world = createRoWorld(field, 824);
+    for (const monster of world.monsters) {
+      monster.alive = false;
+      monster.respawnAt = null;
+    }
+    world.inventory.Club_ = 24;
+    world.inventory.Apple = 20;
+    world.groundItems.push({
+      id: 'policy-allowed-drop',
+      item: 'Club_',
+      position: { ...world.player.position },
+    });
+    expect(carriedWeightPercent(world)).toBe(88);
+    const result = advanceRoWorld(world, field, 1);
+    expect(result.inventory.Club_).toBe(25);
+    expect(result.events.some((event) => event.type === 'pickup')).toBe(true);
+    expect(carriedWeightPercent(result)).toBe(91);
   });
 
   it('stops natural recovery at the renewal 70 percent weight threshold', () => {

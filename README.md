@@ -2,7 +2,7 @@
 
 以 rAthena Renewal 資料與 OpenKore 自動化邏輯為基準的 RO 純掛機遊戲。角色的移動與戰鬥由自動化代理執行，玩家負責人物養成、裝備、道具、技能、轉職與策略設定。
 
-## RO Demo R0.8
+## RO Demo R0.9
 
 玩家介面只保留「停止掛機／繼續掛機」。四倍測試與重新開始屬於開發驗證工具，玩家端不顯示，也不改變正常遊戲時間。
 
@@ -18,6 +18,7 @@
 - 停止掛機後只凍結玩家自動化；怪物巡走、攻擊與重生繼續，玩家從原位置恢復。
 - 索敵採 OpenKore `clientSight 17`；視野無怪時依玩家策略使用蒼蠅翅膀，沒有翅膀則隨機巡走。
 - `prt_fild08` 全部掉落與已穿裝備採 rAthena 重量；超過上限無法拾取，Renewal 70% 停止自然恢復、90% 停止攻擊。
+- OpenKore 自動拾取遵循 `itemsMaxWeight 89`；達 89% 後停止送出拾取要求，地面物品不會憑空進入背包。
 - Basic Information、Status、Equipment、Item 採 RO 客戶端既有資訊結構。
 
 ## 固定資料版本
@@ -53,6 +54,7 @@ npm run test:release
 - [OpenKore 功能盤點](docs/OPENKORE_FEATURE_AUDIT.md)
 - [蒼蠅翅膀與索敵來源核對](docs/RO_FLY_WING_SOURCE_AUDIT.md)
 - [Renewal 負重來源核對](docs/RO_WEIGHT_SOURCE_AUDIT.md)
+- [OpenKore 拾取負重來源核對](docs/OPENKORE_PICKUP_WEIGHT_SOURCE_AUDIT.md)
 - [來源政策](docs/DESIGN_SOURCE_POLICY.md)
 - [Issue Board](docs/ISSUE_BOARD.md)
 - [版本檢討](docs/DEVELOPMENT_REVIEW_LOG.md)

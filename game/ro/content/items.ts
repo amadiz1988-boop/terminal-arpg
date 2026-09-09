@@ -29,6 +29,7 @@ export const FLY_WING_RENEWAL = Object.freeze({
 export const NOVICE_MAX_WEIGHT = 20_000;
 export const RENEWAL_NATURAL_HEAL_WEIGHT_PERCENT = 70;
 export const MAJOR_OVERWEIGHT_PERCENT = 90;
+export const OPENKORE_ITEMS_MAX_WEIGHT_PERCENT = 89;
 
 export const RO_ITEM_WEIGHTS: Readonly<Record<string, number>> = Object.freeze({
   Jellopy: 10,

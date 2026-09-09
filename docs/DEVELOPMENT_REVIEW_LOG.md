@@ -123,3 +123,12 @@ RO 版本工作優先序固定為：可行走地圖 → OpenKore AI 佇列 → �
 - 還原度：34 / 100。新增一項道具、裝備與經濟驗收能力。
 - 自評：負重已成為真實養成限制，缺少倉庫自動補給時，長時間掛機仍會在 90% 卡住。狀態維持持續開發。
 - 下一步：完成蝴蝶翅膀、回儲存點、倉庫與 lockMap 返回掛圖閉環。
+
+## RO Demo R0.9 檢討
+
+- 玩家可感知改動：掛機設定顯示 OpenKore 自動拾取負重上限 89%，本次掛機統計常駐顯示負重百分比。
+- 行為：目前負重達 89% 後退出拾取；88% 時仍能拾取伺服器允許的道具，下一次拾取才停止。
+- 來源：OpenKore 固定版本 `config.txt`、`Network/Receive.pm` 與 `AI/CoreLogic.pm`。完整核對見 `docs/OPENKORE_PICKUP_WEIGHT_SOURCE_AUDIT.md`。
+- 還原度：35 / 100。新增一項 OpenKore 自動化驗收能力。
+- 自評：已避免自動掛機因無限制拾取直接進入 90% 嚴重超重；尚未具備回城存倉與返回掛圖閉環，維持持續開發。
+- 下一步：實作 `itemsMaxWeight_sellOrStore 48`、`storageAuto`、蝴蝶翅膀與 lockMap 返回流程。

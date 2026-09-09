@@ -6,7 +6,7 @@
 
 目前依賴順序：來源鎖版 → RO 資料轉換 → 格狀世界 → OpenKore AI → 戰鬥與掉落 → 補給與死亡 → 成長與轉職 → 朋友測試。
 
-目前還原度：**34 / 100（34.0%）**。細項、證據與下一批工作見 `docs/RO_RESTORATION_PROGRESS.md`。Dashi Taskboard 服務無法連線期間，此檔與還原度追蹤檔為進度真實來源。
+目前還原度：**35 / 100（35.0%）**。細項、證據與下一批工作見 `docs/RO_RESTORATION_PROGRESS.md`。Dashi Taskboard 服務無法連線期間，此檔與還原度追蹤檔為進度真實來源。
 
 ## 目前追蹤
 
@@ -22,7 +22,7 @@
 | done | Fly Wing 找怪策略 | 17 格視野無怪時消耗蒼蠅翅膀；合法落點、傳點排除、暫停不消耗均有測試 |
 | todo | MVP 政策 | MVP 預設迴避，勾選後才列為攻擊目標 |
 | todo | rAthena 資料轉換器 | 從固定版本轉為型別化角色、怪物、物品、技能資料 |
-| in_progress | OpenKore AI 佇列 | route、attack、items_take 已有可回放狀態；sitAuto、storageAuto 尚未完成 |
+| in_progress | OpenKore AI 佇列 | route、attack、items_take 與 89% 拾取上限已有可回放狀態；sitAuto、storageAuto 尚未完成 |
 | in_progress | RO 即時戰鬥公式 | 命中、迴避、攻速、射程、普攻傷害、HP 與自然恢復已接入；SP 與狀態尚未完成 |
 | in_progress | 掉落、負重與補給 | 逐件掉落、真實重量、拾取上限與 70%／90% 狀態已完成；倉庫補給尚未完成 |
 | in_progress | 能力、技能與轉職 | Base／Job 升級、能力點、重置、技能點與初心者基本技能已接入；任務技能與轉職尚未完成 |

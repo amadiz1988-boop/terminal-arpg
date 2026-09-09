@@ -25,7 +25,10 @@ import {
 } from '@/game/ro/content/prt-fild08';
 import { PRT_FILD08_MONSTERS } from '@/game/ro/content/monsters';
 import { EQUIPMENT } from '@/game/ro/content/equipment';
-import { NOVICE_MAX_WEIGHT } from '@/game/ro/content/items';
+import {
+  NOVICE_MAX_WEIGHT,
+  OPENKORE_ITEMS_MAX_WEIGHT_PERCENT,
+} from '@/game/ro/content/items';
 import {
   RESTORATION_CATEGORIES,
   RESTORATION_COMPLETED,
@@ -447,6 +450,9 @@ export function GameShell() {
             <span>
               蒼蠅翅膀 <strong>{world.flyWingsUsed}</strong>
             </span>
+            <span>
+              負重 <strong>{weightPercent}%</strong>
+            </span>
             <div className="picked-items">
               <b>拾取物品</b>
               {Object.entries(world.inventory).length === 0 ? (
@@ -681,6 +687,10 @@ export function GameShell() {
                 <Setting label="自動攻擊" value="開啟" />
                 <Setting label="自動拾取" value="開啟" />
                 <Setting
+                  label="自動拾取負重上限"
+                  value={`${OPENKORE_ITEMS_MAX_WEIGHT_PERCENT}%`}
+                />
+                <Setting
                   label="索敵視野"
                   value={`${OPENKORE_CLIENT_SIGHT} 格`}
                 />
@@ -703,7 +713,7 @@ export function GameShell() {
         </div>
       </section>
       <footer className="release-note">
-        R0.8 · RO 還原 {RESTORATION_PERCENT}% ·
+        R0.9 · RO 還原 {RESTORATION_PERCENT}% ·
         地圖、怪物、戰鬥、成長、經驗與掉落共用同一份模擬狀態
       </footer>
     </main>

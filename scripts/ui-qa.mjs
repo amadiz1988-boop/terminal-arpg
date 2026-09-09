@@ -135,6 +135,9 @@ try {
   const flyWingPolicy = await evaluate(
     "document.body.innerText.includes('索敵視野')&&document.body.innerText.includes('17 格')&&document.body.innerText.includes('視野無怪時使用蒼蠅翅膀')&&document.body.innerText.includes('玩家策略')&&document.body.innerText.includes('沒有蒼蠅翅膀')&&document.body.innerText.includes('隨機巡走')",
   );
+  const pickupWeightPolicy = await evaluate(
+    "document.body.innerText.includes('自動拾取負重上限')&&document.body.innerText.includes('89%')",
+  );
   await evaluate(
     "[...document.querySelectorAll('.ro-tabs button')].find(x=>x.innerText==='地圖情報')?.click()",
   );
@@ -161,6 +164,7 @@ try {
   report.skills = skills;
   report.progress = progress;
   report.flyWingPolicy = flyWingPolicy;
+  report.pickupWeightPolicy = pickupWeightPolicy;
   report.weightVisible = await evaluate(
     "document.body.innerText.includes('負重')&&document.body.innerText.includes('/ 2,000（')",
   );
@@ -176,6 +180,7 @@ try {
     report.skills &&
     report.progress &&
     report.flyWingPolicy &&
+    report.pickupWeightPolicy &&
     report.weightVisible &&
     report.pickedItems &&
     !report.englishItem &&

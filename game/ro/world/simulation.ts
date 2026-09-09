@@ -10,6 +10,7 @@ import {
   FLY_WING_RENEWAL,
   MAJOR_OVERWEIGHT_PERCENT,
   NOVICE_MAX_WEIGHT,
+  OPENKORE_ITEMS_MAX_WEIGHT_PERCENT,
   RENEWAL_NATURAL_HEAL_WEIGHT_PERCENT,
   roItemWeight,
 } from '../content/items';
@@ -235,6 +236,10 @@ export function carriedWeightPercent(s: RoWorldState) {
   return Math.trunc((carriedWeight(s) * 100) / NOVICE_MAX_WEIGHT);
 }
 
+export function canCarryItem(s: RoWorldState, item: string) {
+  return carriedWeight(s) + roItemWeight(item) <= NOVICE_MAX_WEIGHT;
+}
+
 export function allocateStatusPoint(input: RoWorldState, stat: RoStatId) {
   const s = cloneWorld(input),
     cost = nextStatCost(s.player.stats[stat]);
@@ -392,6 +397,11 @@ function processRecovery(s: RoWorldState) {
   s.player.nextHpRegenAt = s.nowMs + 6000;
 }
 function preparePickup(s: RoWorldState, field: RoField) {
+  if (carriedWeightPercent(s) >= OPENKORE_ITEMS_MAX_WEIGHT_PERCENT) {
+    s.pickupId = null;
+    s.route = [];
+    return false;
+  }
   if (s.pickupId && s.groundItems.some((i) => i.id === s.pickupId)) return true;
   const visible = s.groundItems
     .filter(
@@ -487,8 +497,7 @@ function processPlayerAction(s: RoWorldState, field: RoField) {
     const item = s.groundItems.find((i) => i.id === s.pickupId);
     if (!item) return;
     if (samePosition(s.player.position, item.position)) {
-      const nextWeight = carriedWeight(s) + roItemWeight(item.item);
-      if (nextWeight > NOVICE_MAX_WEIGHT) {
+      if (!canCarryItem(s, item.item)) {
         s.ignoredGroundItemIds.push(item.id);
         pushEvent(s, {
           type: 'pickup_overweight',
