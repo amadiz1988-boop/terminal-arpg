@@ -31,6 +31,8 @@ export type RoWorldEvent = Readonly<{
   actorId?: string;
   targetId?: string;
   amount?: number;
+  remainingHp?: number;
+  maximumHp?: number;
   item?: string;
   position?: GridPosition;
 }>;
@@ -244,7 +246,10 @@ function processPlayerAction(state: RoWorldState, field: RoField) {
   const chance = renewalHitChance(renewalPlayerHit(novice), renewalMonsterFlee(poring));
   if (rollPercent(state, chance)) {
     target.hp = Math.max(0, target.hp - PLAYER_DAMAGE_TO_PORING);
-    pushEvent(state, { type: 'player_hit', actorId: 'player', targetId: target.id, amount: PLAYER_DAMAGE_TO_PORING });
+    pushEvent(state, {
+      type: 'player_hit', actorId: 'player', targetId: target.id,
+      amount: PLAYER_DAMAGE_TO_PORING, remainingHp: target.hp, maximumHp: PORING_RENEWAL.hp,
+    });
     if (target.hp === 0) {
       target.alive = false;
       target.engaged = false;
@@ -270,7 +275,10 @@ function processMonsterAttacks(state: RoWorldState) {
     const chance = renewalHitChance(renewalMonsterHit(poring), renewalPlayerFlee(novice));
     if (rollPercent(state, chance)) {
       state.player.hp = Math.max(0, state.player.hp - PORING_DAMAGE_TO_NOVICE);
-      pushEvent(state, { type: 'monster_hit', actorId: monster.id, targetId: 'player', amount: PORING_DAMAGE_TO_NOVICE });
+      pushEvent(state, {
+        type: 'monster_hit', actorId: monster.id, targetId: 'player',
+        amount: PORING_DAMAGE_TO_NOVICE, remainingHp: state.player.hp, maximumHp: state.player.maxHp,
+      });
       if (state.player.hp === 0) state.status = 'dead';
     } else {
       pushEvent(state, { type: 'monster_miss', actorId: monster.id, targetId: 'player' });

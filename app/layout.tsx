@@ -14,18 +14,18 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://terminal-arpg-alpha.amadiz1988.chatgpt.site'),
-  title: 'Terminal ARPG · Alpha 0.21',
-  description: '選擇 RO 風格職業，從零收集技能寶石、通貨與六格裝備，透過自動遠征養成 Build。',
+  title: '鬼島傳說 · RO 自動冒險 R0.1',
+  description: '以 rAthena Renewal 資料與 OpenKore 自動化邏輯驅動的純掛機 RO 核心預覽。',
   icons: { icon: '/favicon.svg' },
   openGraph: {
-    title: 'Terminal ARPG · Alpha 0.21',
-    description: 'RO 職業、技能寶石、彩色洞連線與自動遠征。',
+    title: '鬼島傳說 · RO 自動冒險 R0.1',
+    description: '真實 prt_fild08 尋路、逐擊戰鬥、掉落與雙 EXP。',
     images: ['/og.png'],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Terminal ARPG · Alpha 0.21',
-    description: 'RO 職業、技能寶石、彩色洞連線與自動遠征。',
+    title: '鬼島傳說 · RO 自動冒險 R0.1',
+    description: '真實 prt_fild08 尋路、逐擊戰鬥、掉落與雙 EXP。',
     images: ['/og.png'],
   },
 };

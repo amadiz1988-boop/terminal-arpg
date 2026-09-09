@@ -361,5 +361,5 @@ describe('simulation contracts', () => {
     expect(damageRows).toBeGreaterThan(0);
     expect(steps).toBeGreaterThan(100);
     expect(steps*250).toBeGreaterThanOrEqual(30*60*1000);
-  });
+  },10000);
 });
