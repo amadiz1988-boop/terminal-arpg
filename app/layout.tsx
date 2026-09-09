@@ -14,17 +14,18 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://terminal-arpg-alpha.amadiz1988.chatgpt.site'),
-  title: '鬼島傳說 · RO 自動冒險 R0.3',
-  description: '以 rAthena Renewal 資料與 OpenKore 自動化邏輯驅動的純掛機 RO 核心預覽。',
+  title: '鬼島傳說 · RO 自動冒險 R0.4',
+  description:
+    '以 rAthena Renewal 資料與 OpenKore 自動化邏輯驅動的純掛機 RO 核心預覽。',
   icons: { icon: '/favicon.svg' },
   openGraph: {
-    title: '鬼島傳說 · RO 自動冒險 R0.3',
+    title: '鬼島傳說 · RO 自動冒險 R0.4',
     description: '真實 prt_fild08 尋路、逐擊戰鬥、掉落與雙 EXP。',
     images: ['/og.png'],
   },
   twitter: {
     card: 'summary_large_image',
-    title: '鬼島傳說 · RO 自動冒險 R0.3',
+    title: '鬼島傳說 · RO 自動冒險 R0.4',
     description: '真實 prt_fild08 尋路、逐擊戰鬥、掉落與雙 EXP。',
     images: ['/og.png'],
   },

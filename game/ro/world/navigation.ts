@@ -1,9 +1,14 @@
 import { createRandom } from '../../core/random';
-import { PRT_FILD08, type PoringSpawn } from '../content/prt-fild08';
+import { PRT_FILD08, type MonsterSpawn } from '../content/prt-fild08';
 import { fieldOffset, isWalkable, type RoField } from './fld2';
 
 export type GridPosition = Readonly<{ x: number; y: number }>;
-export type PoringPlacement = GridPosition & Readonly<{ spawnIndex: number; respawnMs: number }>;
+export type MonsterPlacement = GridPosition &
+  Readonly<{
+    monster: MonsterSpawn['monster'];
+    spawnIndex: number;
+    respawnMs: number;
+  }>;
 
 const DIRECTIONS = Object.freeze([
   { x: 1, y: 0 },
@@ -16,7 +21,8 @@ export function floodWalkable(field: RoField, origin: GridPosition) {
   const distance = new Int32Array(field.width * field.height);
   distance.fill(-1);
   const originOffset = fieldOffset(field, origin.x, origin.y);
-  if (originOffset < 0 || !isWalkable(field, origin.x, origin.y)) return distance;
+  if (originOffset < 0 || !isWalkable(field, origin.x, origin.y))
+    return distance;
 
   const queue = new Int32Array(field.width * field.height);
   let read = 0;
@@ -32,7 +38,12 @@ export function floodWalkable(field: RoField, origin: GridPosition) {
       const nextX = x + direction.x;
       const nextY = y + direction.y;
       const nextOffset = fieldOffset(field, nextX, nextY);
-      if (nextOffset < 0 || distance[nextOffset] >= 0 || !isWalkable(field, nextX, nextY)) continue;
+      if (
+        nextOffset < 0 ||
+        distance[nextOffset] >= 0 ||
+        !isWalkable(field, nextX, nextY)
+      )
+        continue;
       distance[nextOffset] = distance[offset] + 1;
       queue[write++] = nextOffset;
     }
@@ -41,7 +52,11 @@ export function floodWalkable(field: RoField, origin: GridPosition) {
   return distance;
 }
 
-export function shortestPath(field: RoField, origin: GridPosition, destination: GridPosition) {
+export function shortestPath(
+  field: RoField,
+  origin: GridPosition,
+  destination: GridPosition,
+) {
   const originOffset = fieldOffset(field, origin.x, origin.y);
   const destinationOffset = fieldOffset(field, destination.x, destination.y);
   if (
@@ -49,7 +64,8 @@ export function shortestPath(field: RoField, origin: GridPosition, destination: 
     destinationOffset < 0 ||
     !isWalkable(field, origin.x, origin.y) ||
     !isWalkable(field, destination.x, destination.y)
-  ) return [];
+  )
+    return [];
   if (originOffset === destinationOffset) return [];
 
   const previous = new Int32Array(field.width * field.height);
@@ -66,7 +82,12 @@ export function shortestPath(field: RoField, origin: GridPosition, destination: 
     const y = Math.trunc(offset / field.width);
     for (const direction of DIRECTIONS) {
       const nextOffset = fieldOffset(field, x + direction.x, y + direction.y);
-      if (nextOffset < 0 || previous[nextOffset] !== -2 || !isWalkable(field, x + direction.x, y + direction.y)) continue;
+      if (
+        nextOffset < 0 ||
+        previous[nextOffset] !== -2 ||
+        !isWalkable(field, x + direction.x, y + direction.y)
+      )
+        continue;
       previous[nextOffset] = offset;
       queue[write++] = nextOffset;
       if (nextOffset === destinationOffset) break;
@@ -75,13 +96,20 @@ export function shortestPath(field: RoField, origin: GridPosition, destination: 
   if (previous[destinationOffset] === -2) return [];
 
   const reversed: GridPosition[] = [];
-  for (let offset = destinationOffset; offset !== originOffset; offset = previous[offset]) {
-    reversed.push({ x: offset % field.width, y: Math.trunc(offset / field.width) });
+  for (
+    let offset = destinationOffset;
+    offset !== originOffset;
+    offset = previous[offset]
+  ) {
+    reversed.push({
+      x: offset % field.width,
+      y: Math.trunc(offset / field.width),
+    });
   }
   return reversed.reverse();
 }
 
-function spawnBounds(field: RoField, spawn: PoringSpawn) {
+function spawnBounds(field: RoField, spawn: MonsterSpawn) {
   if (spawn.width === 0 || spawn.height === 0) {
     return { minX: 0, maxX: field.width - 1, minY: 0, maxY: field.height - 1 };
   }
@@ -95,27 +123,30 @@ function spawnBounds(field: RoField, spawn: PoringSpawn) {
   };
 }
 
-export function createPoringPlacements(field: RoField, seed: number) {
+export function createMonsterPlacements(field: RoField, seed: number) {
   const random = createRandom(seed);
   const reachable = floodWalkable(field, PRT_FILD08.noviceEntry);
   const occupied = new Set<number>();
-  const positions: PoringPlacement[] = [];
+  const positions: MonsterPlacement[] = [];
 
-  for (const [spawnIndex, spawn] of PRT_FILD08.poringSpawns.entries()) {
+  for (const [spawnIndex, spawn] of PRT_FILD08.monsterSpawns.entries()) {
     const bounds = spawnBounds(field, spawn);
     const candidates: number[] = [];
     for (let y = bounds.minY; y <= bounds.maxY; y += 1) {
       for (let x = bounds.minX; x <= bounds.maxX; x += 1) {
         const offset = fieldOffset(field, x, y);
-        if (reachable[offset] >= 0 && !occupied.has(offset)) candidates.push(offset);
+        if (reachable[offset] >= 0 && !occupied.has(offset))
+          candidates.push(offset);
       }
     }
-    if (candidates.length < spawn.count) throw new RangeError('Poring spawn area lacks reachable cells');
+    if (candidates.length < spawn.count)
+      throw new RangeError(`${spawn.monster} spawn area lacks reachable cells`);
     for (let index = 0; index < spawn.count; index += 1) {
       const selectedIndex = Math.trunc(random() * candidates.length);
       const [offset] = candidates.splice(selectedIndex, 1);
       occupied.add(offset);
       positions.push({
+        monster: spawn.monster,
         x: offset % field.width,
         y: Math.trunc(offset / field.width),
         spawnIndex,
@@ -127,6 +158,11 @@ export function createPoringPlacements(field: RoField, seed: number) {
   return positions;
 }
 
-export function createPoringPositions(field: RoField, seed: number): GridPosition[] {
-  return createPoringPlacements(field, seed).map(({ x, y }) => ({ x, y }));
+export function createPoringPositions(
+  field: RoField,
+  seed: number,
+): GridPosition[] {
+  return createMonsterPlacements(field, seed)
+    .filter(({ monster }) => monster === 'PORING')
+    .map(({ x, y }) => ({ x, y }));
 }

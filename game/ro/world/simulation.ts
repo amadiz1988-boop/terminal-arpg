@@ -1,16 +1,35 @@
-import { PORING_RENEWAL, passesDropRate } from '../content/poring';
+import {
+  DEFAULT_RO_STATS,
+  nextStatCost,
+  statusPointsForLevel,
+  type RoStatId,
+  type RoStats,
+} from '../../content/ro-stats';
 import { APPLE_RENEWAL } from '../content/items';
 import { PRT_FILD08 } from '../content/prt-fild08';
 import {
+  PRT_FILD08_MONSTERS,
+  type PrtFild08MonsterKey,
+} from '../content/monsters';
+import { passesDropRate } from '../content/poring';
+import {
+  renewalAttackDelayMs,
+  renewalBaseAttack,
+  renewalDisplayedAspd,
   renewalHitChance,
   renewalMonsterFlee,
   renewalMonsterHit,
   renewalNaturalHpRecovery,
+  renewalPhysicalDefense,
   renewalPlayerFlee,
   renewalPlayerHit,
 } from '../formulas/renewal';
-import type { RoField } from './fld2';
-import { createPoringPlacements, shortestPath, type GridPosition } from './navigation';
+import { isWalkable, type RoField } from './fld2';
+import {
+  createMonsterPlacements,
+  shortestPath,
+  type GridPosition,
+} from './navigation';
 
 export type RoWorldEventType =
   | 'target'
@@ -23,14 +42,16 @@ export type RoWorldEventType =
   | 'drop'
   | 'pickup'
   | 'heal'
-  | 'use_item';
-
+  | 'use_item'
+  | 'base_level_up'
+  | 'job_level_up';
 export type RoWorldEvent = Readonly<{
   atMs: number;
   type: RoWorldEventType;
   actorId?: string;
   targetId?: string;
   amount?: number;
+  jobAmount?: number;
   remainingHp?: number;
   maximumHp?: number;
   item?: string;
@@ -41,27 +62,25 @@ export type RoWorldEvent = Readonly<{
   baseExpRequired?: number;
   jobExpCurrent?: number;
   jobExpRequired?: number;
-  levelUp?: boolean;
+  statusPointsGained?: number;
+  skillPointsGained?: number;
 }>;
-
-export type PoringActor = {
+export type MonsterActor = {
   id: string;
+  monster: PrtFild08MonsterKey;
+  spawnIndex: number;
   position: GridPosition;
   home: GridPosition;
   hp: number;
   alive: boolean;
   engaged: boolean;
   nextAttackAt: number;
+  nextMoveAt: number;
   respawnAt: number | null;
   respawnMs: number;
 };
-
-export type GroundItem = {
-  id: string;
-  item: string;
-  position: GridPosition;
-};
-
+export type GroundItem = { id: string; item: string; position: GridPosition };
+export type NoviceSkills = { NV_BASIC: number; NV_FIRSTAID: 0 };
 export type RoWorldState = {
   nowMs: number;
   randomState: number;
@@ -70,12 +89,20 @@ export type RoWorldState = {
     position: GridPosition;
     hp: number;
     maxHp: number;
+    sp: number;
+    maxSp: number;
     baseExp: number;
     jobExp: number;
+    baseLevel: number;
+    jobLevel: number;
+    stats: RoStats;
+    statusPoints: number;
+    skillPoints: number;
+    skills: NoviceSkills;
     nextActionAt: number;
     nextHpRegenAt: number;
   };
-  monsters: PoringActor[];
+  monsters: MonsterActor[];
   groundItems: GroundItem[];
   inventory: Record<string, number>;
   targetId: string | null;
@@ -85,232 +112,434 @@ export type RoWorldState = {
   kills: number;
 };
 
-const novice = Object.freeze({ level: 1, str: 1, agi: 1, vit: 1, int: 1, dex: 1, luk: 1 });
-const poring = Object.freeze({ level: 1, ...PORING_RENEWAL.stats });
-const PLAYER_WALK_DELAY_MS = 150;
-const PLAYER_ATTACK_DELAY_MS = 1180;
-const PLAYER_DAMAGE_TO_PORING = 12;
-const PORING_DAMAGE_TO_NOVICE = 1;
-export const BASE_EXP_REQUIREMENTS = [548, 894, 1486, 2173, 3152, 3732, 4112, 4441, 4866, 5337];
-export const JOB_EXP_REQUIREMENTS = [10, 18, 28, 40, 91, 151, 205, 268, 340, 999];
-
-export function experienceProgress(total: number, requirements: readonly number[]) {
-  let level = 1;
-  let remaining = total;
+const PLAYER_WALK_DELAY_MS = 150,
+  KNIFE_ATTACK = 17;
+export const BASE_EXP_REQUIREMENTS = [
+  548, 894, 1486, 2173, 3152, 3732, 4112, 4441, 4866, 5337,
+];
+export const JOB_EXP_REQUIREMENTS = [
+  10, 18, 28, 40, 91, 151, 205, 268, 340, 999,
+];
+export function experienceProgress(
+  total: number,
+  requirements: readonly number[],
+) {
+  let level = 1,
+    remaining = total;
   while (level <= requirements.length && remaining >= requirements[level - 1]) {
     remaining -= requirements[level - 1];
     level += 1;
   }
-  const required = requirements[Math.min(level - 1, requirements.length - 1)] ?? 999999999;
-  return { level, current: remaining, required, percent: Math.min(100, Math.floor((remaining / required) * 1000) / 10) };
-}
-
-function nextRandom(state: RoWorldState) {
-  state.randomState = (state.randomState + 0x6d2b79f5) >>> 0;
-  let result = state.randomState;
-  result = Math.imul(result ^ (result >>> 15), result | 1);
-  result ^= result + Math.imul(result ^ (result >>> 7), result | 61);
-  return ((result ^ (result >>> 14)) >>> 0) / 4294967296;
-}
-
-function rollPercent(state: RoWorldState, chance: number) {
-  return Math.trunc(nextRandom(state) * 100) < chance;
-}
-
-function cloneWorld(state: RoWorldState): RoWorldState {
+  const required =
+    requirements[Math.min(level - 1, requirements.length - 1)] ?? 999999999;
   return {
-    ...state,
-    player: { ...state.player, position: { ...state.player.position } },
-    monsters: state.monsters.map((monster) => ({
-      ...monster,
-      position: { ...monster.position },
-      home: { ...monster.home },
-    })),
-    groundItems: state.groundItems.map((item) => ({ ...item, position: { ...item.position } })),
-    inventory: { ...state.inventory },
-    route: state.route.map((position) => ({ ...position })),
-    events: [...state.events],
+    level,
+    current: remaining,
+    required,
+    percent: Math.min(100, Math.floor((remaining / required) * 1000) / 10),
   };
 }
+function nextRandom(s: RoWorldState) {
+  s.randomState = (s.randomState + 0x6d2b79f5) >>> 0;
+  let r = s.randomState;
+  r = Math.imul(r ^ (r >>> 15), r | 1);
+  r ^= r + Math.imul(r ^ (r >>> 7), r | 61);
+  return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+}
+function rollPercent(s: RoWorldState, chance: number) {
+  return Math.trunc(nextRandom(s) * 100) < chance;
+}
+function cloneWorld(s: RoWorldState): RoWorldState {
+  return {
+    ...s,
+    player: {
+      ...s.player,
+      position: { ...s.player.position },
+      stats: { ...s.player.stats },
+      skills: { ...s.player.skills },
+    },
+    monsters: s.monsters.map((m) => ({
+      ...m,
+      position: { ...m.position },
+      home: { ...m.home },
+    })),
+    groundItems: s.groundItems.map((i) => ({
+      ...i,
+      position: { ...i.position },
+    })),
+    inventory: { ...s.inventory },
+    route: s.route.map((p) => ({ ...p })),
+    events: [...s.events],
+  };
+}
+const samePosition = (a: GridPosition, b: GridPosition) =>
+  a.x === b.x && a.y === b.y;
+const distance = (a: GridPosition, b: GridPosition) =>
+  Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+function pushEvent(s: RoWorldState, e: Omit<RoWorldEvent, 'atMs'>) {
+  s.events.push({ atMs: s.nowMs, ...e });
+}
+const playerStats = (s: RoWorldState) => ({
+  level: s.player.baseLevel,
+  ...s.player.stats,
+});
+const maxHp = (s: RoWorldState) =>
+  Math.trunc(40 * (1 + s.player.stats.vit * 0.01));
+const maxSp = (s: RoWorldState) =>
+  Math.trunc(11 * (1 + s.player.stats.int * 0.01));
 
-function samePosition(left: GridPosition, right: GridPosition) {
-  return left.x === right.x && left.y === right.y;
+export function allocateStatusPoint(input: RoWorldState, stat: RoStatId) {
+  const s = cloneWorld(input),
+    cost = nextStatCost(s.player.stats[stat]);
+  if (s.player.statusPoints < cost || s.player.stats[stat] >= 99) return s;
+  s.player.stats[stat] += 1;
+  s.player.statusPoints -= cost;
+  const oldHp = s.player.maxHp,
+    oldSp = s.player.maxSp;
+  s.player.maxHp = maxHp(s);
+  s.player.maxSp = maxSp(s);
+  s.player.hp = Math.min(s.player.maxHp, s.player.hp + s.player.maxHp - oldHp);
+  s.player.sp = Math.min(s.player.maxSp, s.player.sp + s.player.maxSp - oldSp);
+  return s;
+}
+export function resetStatusPoints(input: RoWorldState) {
+  const s = cloneWorld(input);
+  s.player.stats = { ...DEFAULT_RO_STATS };
+  s.player.statusPoints = statusPointsForLevel(s.player.baseLevel);
+  s.player.maxHp = maxHp(s);
+  s.player.maxSp = maxSp(s);
+  s.player.hp = Math.min(s.player.hp, s.player.maxHp);
+  s.player.sp = Math.min(s.player.sp, s.player.maxSp);
+  return s;
+}
+export function allocateNoviceSkill(input: RoWorldState) {
+  const s = cloneWorld(input);
+  if (s.player.skillPoints < 1 || s.player.skills.NV_BASIC >= 9) return s;
+  s.player.skills.NV_BASIC += 1;
+  s.player.skillPoints -= 1;
+  return s;
 }
 
-function distance(left: GridPosition, right: GridPosition) {
-  return Math.abs(left.x - right.x) + Math.abs(left.y - right.y);
-}
-
-function pushEvent(state: RoWorldState, event: Omit<RoWorldEvent, 'atMs'>) {
-  state.events.push({ atMs: state.nowMs, ...event });
-}
-
-function chooseTarget(state: RoWorldState) {
-  const target = state.monsters
-    .filter((monster) => monster.alive)
-    .sort((left, right) => distance(state.player.position, left.position) - distance(state.player.position, right.position))[0];
+function chooseTarget(s: RoWorldState) {
+  const target = s.monsters
+    .filter((m) => m.alive)
+    .sort(
+      (a, b) =>
+        distance(s.player.position, a.position) -
+        distance(s.player.position, b.position),
+    )[0];
   if (!target) return;
-  state.targetId = target.id;
-  state.route = [];
-  pushEvent(state, { type: 'target', targetId: target.id, position: target.position });
+  s.targetId = target.id;
+  s.route = [];
+  pushEvent(s, {
+    type: 'target',
+    targetId: target.id,
+    position: target.position,
+  });
 }
-
-function createDrops(state: RoWorldState, monster: PoringActor) {
-  for (const drop of PORING_RENEWAL.drops) {
-    const roll = Math.trunc(nextRandom(state) * 10000);
-    if (!passesDropRate(drop.ratePerTenThousand, roll)) continue;
-    const groundItem: GroundItem = {
-      id: `drop-${state.kills}-${state.groundItems.length}`,
+function createDrops(s: RoWorldState, m: MonsterActor) {
+  for (const drop of PRT_FILD08_MONSTERS[m.monster].drops) {
+    if (
+      !passesDropRate(
+        drop.ratePerTenThousand,
+        Math.trunc(nextRandom(s) * 10000),
+      )
+    )
+      continue;
+    const item = {
+      id: `drop-${s.kills}-${s.groundItems.length}`,
       item: drop.item,
-      position: { ...monster.position },
+      position: { ...m.position },
     };
-    state.groundItems.push(groundItem);
-    pushEvent(state, { type: 'drop', actorId: monster.id, item: drop.item, position: monster.position });
+    s.groundItems.push(item);
+    pushEvent(s, {
+      type: 'drop',
+      actorId: m.id,
+      item: drop.item,
+      position: m.position,
+    });
   }
 }
-
-function processRespawns(state: RoWorldState) {
-  for (const monster of state.monsters) {
-    if (monster.respawnAt === null || monster.respawnAt > state.nowMs) continue;
-    monster.position = { ...monster.home };
-    monster.hp = PORING_RENEWAL.hp;
-    monster.alive = true;
-    monster.engaged = false;
-    monster.respawnAt = null;
-    monster.nextAttackAt = 0;
+function respawnPosition(s: RoWorldState, field: RoField, m: MonsterActor) {
+  const spawn = PRT_FILD08.monsterSpawns[m.spawnIndex];
+  const halfWidth = Math.trunc(spawn.width / 2),
+    halfHeight = Math.trunc(spawn.height / 2);
+  const minX = spawn.width === 0 ? 0 : Math.max(0, spawn.centerX - halfWidth),
+    maxX =
+      spawn.width === 0
+        ? field.width - 1
+        : Math.min(field.width - 1, spawn.centerX + halfWidth),
+    minY = spawn.height === 0 ? 0 : Math.max(0, spawn.centerY - halfHeight),
+    maxY =
+      spawn.height === 0
+        ? field.height - 1
+        : Math.min(field.height - 1, spawn.centerY + halfHeight);
+  for (let attempt = 0; attempt < 200; attempt += 1) {
+    const position = {
+      x: minX + Math.trunc(nextRandom(s) * (maxX - minX + 1)),
+      y: minY + Math.trunc(nextRandom(s) * (maxY - minY + 1)),
+    };
+    if (
+      isWalkable(field, position.x, position.y) &&
+      !s.monsters.some(
+        (other) =>
+          other !== m && other.alive && samePosition(other.position, position),
+      )
+    )
+      return position;
+  }
+  return { ...m.home };
+}
+function processRespawns(s: RoWorldState, field: RoField) {
+  for (const m of s.monsters) {
+    if (m.respawnAt === null || m.respawnAt > s.nowMs) continue;
+    const d = PRT_FILD08_MONSTERS[m.monster];
+    m.position = respawnPosition(s, field, m);
+    m.home = { ...m.position };
+    m.hp = d.hp;
+    m.alive = true;
+    m.engaged = false;
+    m.respawnAt = null;
+    m.nextAttackAt = 0;
+    m.nextMoveAt = s.nowMs + d.walkSpeedMs;
   }
 }
-
-function isPlayerWalking(state: RoWorldState) {
-  return state.route.length > 0;
+function processMonsterMovement(s: RoWorldState, field: RoField) {
+  const directions = [
+    { x: 1, y: 0 },
+    { x: -1, y: 0 },
+    { x: 0, y: 1 },
+    { x: 0, y: -1 },
+  ];
+  for (const m of s.monsters) {
+    if (!m.alive || m.engaged || m.id === s.targetId || m.nextMoveAt > s.nowMs)
+      continue;
+    const d = PRT_FILD08_MONSTERS[m.monster],
+      direction = directions[Math.trunc(nextRandom(s) * directions.length)],
+      next = { x: m.position.x + direction.x, y: m.position.y + direction.y };
+    if (isWalkable(field, next.x, next.y)) m.position = next;
+    m.nextMoveAt = s.nowMs + d.walkSpeedMs;
+  }
 }
-
-function processNaturalRecovery(state: RoWorldState) {
-  if (!isPlayerWalking(state) && state.player.hp < state.player.maxHp) {
+function processRecovery(s: RoWorldState) {
+  if (s.route.length === 0 && s.player.hp < s.player.maxHp) {
     const amount = Math.min(
-      renewalNaturalHpRecovery(state.player.maxHp, novice.vit),
-      state.player.maxHp - state.player.hp,
+      renewalNaturalHpRecovery(s.player.maxHp, s.player.stats.vit),
+      s.player.maxHp - s.player.hp,
     );
-    state.player.hp += amount;
-    if (amount > 0) pushEvent(state, { type: 'heal', actorId: 'player', amount });
+    s.player.hp += amount;
+    if (amount > 0) pushEvent(s, { type: 'heal', actorId: 'player', amount });
   }
-  state.player.nextHpRegenAt = state.nowMs + 6000;
+  s.player.nextHpRegenAt = s.nowMs + 6000;
 }
-
-function preparePickup(state: RoWorldState, field: RoField) {
-  if (state.pickupId && state.groundItems.some((item) => item.id === state.pickupId)) return true;
-  const item = state.groundItems[0];
+function preparePickup(s: RoWorldState, field: RoField) {
+  if (s.pickupId && s.groundItems.some((i) => i.id === s.pickupId)) return true;
+  const item = s.groundItems[0];
   if (!item) return false;
-  state.pickupId = item.id;
-  state.route = shortestPath(field, state.player.position, item.position);
+  s.pickupId = item.id;
+  s.route = shortestPath(field, s.player.position, item.position);
   return true;
 }
+function awardExperience(s: RoWorldState, m: MonsterActor) {
+  const d = PRT_FILD08_MONSTERS[m.monster],
+    beforeBase = s.player.baseLevel,
+    beforeJob = s.player.jobLevel;
+  s.player.baseExp += d.baseExp;
+  s.player.jobExp += d.jobExp;
+  const base = experienceProgress(s.player.baseExp, BASE_EXP_REQUIREMENTS),
+    job = experienceProgress(s.player.jobExp, JOB_EXP_REQUIREMENTS);
+  s.player.baseLevel = base.level;
+  s.player.jobLevel = job.level;
+  if (base.level > beforeBase) {
+    const gained =
+      statusPointsForLevel(base.level) - statusPointsForLevel(beforeBase);
+    s.player.statusPoints += gained;
+    s.player.maxHp = maxHp(s);
+    pushEvent(s, {
+      type: 'base_level_up',
+      actorId: 'player',
+      baseLevel: base.level,
+      statusPointsGained: gained,
+    });
+  }
+  if (job.level > beforeJob) {
+    const gained = job.level - beforeJob;
+    s.player.skillPoints += gained;
+    pushEvent(s, {
+      type: 'job_level_up',
+      actorId: 'player',
+      jobLevel: job.level,
+      skillPointsGained: gained,
+    });
+  }
+  pushEvent(s, {
+    type: 'death',
+    actorId: m.id,
+    targetId: 'player',
+    position: m.position,
+    amount: d.baseExp,
+    jobAmount: d.jobExp,
+    baseLevel: base.level,
+    jobLevel: job.level,
+    baseExpCurrent: base.current,
+    baseExpRequired: base.required,
+    jobExpCurrent: job.current,
+    jobExpRequired: job.required,
+  });
+}
 
-function processPlayerAction(state: RoWorldState, field: RoField) {
-  if (state.player.hp <= Math.trunc(state.player.maxHp / 2) && (state.inventory.Apple ?? 0) > 0) {
-    state.inventory.Apple -= 1;
+function processPlayerAction(s: RoWorldState, field: RoField) {
+  if (
+    s.player.hp <= Math.trunc(s.player.maxHp / 2) &&
+    (s.inventory.Apple ?? 0) > 0
+  ) {
+    s.inventory.Apple -= 1;
     const rolled =
       APPLE_RENEWAL.healMinimum +
-      Math.trunc(nextRandom(state) * (APPLE_RENEWAL.healMaximum - APPLE_RENEWAL.healMinimum + 1));
-    const amount = Math.min(rolled, state.player.maxHp - state.player.hp);
-    state.player.hp += amount;
-    pushEvent(state, { type: 'use_item', actorId: 'player', item: APPLE_RENEWAL.aegisName, amount });
+      Math.trunc(
+        nextRandom(s) *
+          (APPLE_RENEWAL.healMaximum - APPLE_RENEWAL.healMinimum + 1),
+      );
+    const amount = Math.min(rolled, s.player.maxHp - s.player.hp);
+    s.player.hp += amount;
+    pushEvent(s, {
+      type: 'use_item',
+      actorId: 'player',
+      item: APPLE_RENEWAL.aegisName,
+      amount,
+    });
   }
-
-  if (preparePickup(state, field)) {
-    const item = state.groundItems.find((candidate) => candidate.id === state.pickupId);
+  if (preparePickup(s, field)) {
+    const item = s.groundItems.find((i) => i.id === s.pickupId);
     if (!item) return;
-    if (samePosition(state.player.position, item.position)) {
-      state.inventory[item.item] = (state.inventory[item.item] ?? 0) + 1;
-      state.groundItems = state.groundItems.filter((candidate) => candidate.id !== item.id);
-      pushEvent(state, { type: 'pickup', item: item.item, position: item.position });
-      state.pickupId = null;
-      state.route = [];
+    if (samePosition(s.player.position, item.position)) {
+      s.inventory[item.item] = (s.inventory[item.item] ?? 0) + 1;
+      s.groundItems = s.groundItems.filter((i) => i.id !== item.id);
+      pushEvent(s, {
+        type: 'pickup',
+        item: item.item,
+        position: item.position,
+      });
+      s.pickupId = null;
+      s.route = [];
       return;
     }
-    if (state.route.length === 0) state.route = shortestPath(field, state.player.position, item.position);
-    const step = state.route.shift();
+    if (s.route.length === 0)
+      s.route = shortestPath(field, s.player.position, item.position);
+    const step = s.route.shift();
     if (step) {
-      state.player.position = step;
-      pushEvent(state, { type: 'move', actorId: 'player', position: step });
+      s.player.position = step;
+      pushEvent(s, { type: 'move', actorId: 'player', position: step });
     }
-    state.player.nextActionAt = state.nowMs + PLAYER_WALK_DELAY_MS;
+    s.player.nextActionAt = s.nowMs + PLAYER_WALK_DELAY_MS;
     return;
   }
-
-  if (!state.targetId) chooseTarget(state);
-  const target = state.monsters.find((monster) => monster.id === state.targetId && monster.alive);
+  if (!s.targetId) chooseTarget(s);
+  const target = s.monsters.find((m) => m.id === s.targetId && m.alive);
   if (!target) {
-    state.targetId = null;
-    state.route = [];
-    state.player.nextActionAt = state.nowMs;
+    s.targetId = null;
+    s.route = [];
+    s.player.nextActionAt = s.nowMs;
     return;
   }
-
-  if (distance(state.player.position, target.position) > PORING_RENEWAL.attackRange) {
-    if (state.route.length === 0) {
-      const routeToTarget = shortestPath(field, state.player.position, target.position);
-      state.route = routeToTarget.slice(0, -PORING_RENEWAL.attackRange);
-    }
-    const step = state.route.shift();
+  const d = PRT_FILD08_MONSTERS[target.monster];
+  if (distance(s.player.position, target.position) > d.attackRange) {
+    if (s.route.length === 0)
+      s.route = shortestPath(field, s.player.position, target.position).slice(
+        0,
+        -d.attackRange,
+      );
+    const step = s.route.shift();
     if (step) {
-      state.player.position = step;
-      pushEvent(state, { type: 'move', actorId: 'player', targetId: target.id, position: step });
+      s.player.position = step;
+      pushEvent(s, {
+        type: 'move',
+        actorId: 'player',
+        targetId: target.id,
+        position: step,
+      });
     }
-    state.player.nextActionAt = state.nowMs + PLAYER_WALK_DELAY_MS;
+    s.player.nextActionAt = s.nowMs + PLAYER_WALK_DELAY_MS;
     return;
   }
-
   target.engaged = true;
-  if (target.nextAttackAt === 0) target.nextAttackAt = state.nowMs + PORING_RENEWAL.attackDelayMs;
-  const chance = renewalHitChance(renewalPlayerHit(novice), renewalMonsterFlee(poring));
-  if (rollPercent(state, chance)) {
-    target.hp = Math.max(0, target.hp - PLAYER_DAMAGE_TO_PORING);
-    pushEvent(state, {
-      type: 'player_hit', actorId: 'player', targetId: target.id,
-      amount: PLAYER_DAMAGE_TO_PORING, remainingHp: target.hp, maximumHp: PORING_RENEWAL.hp,
+  if (target.nextAttackAt === 0)
+    target.nextAttackAt = s.nowMs + d.attackDelayMs;
+  const stats = playerStats(s),
+    monsterStats = { level: d.level, ...d.stats };
+  if (
+    rollPercent(
+      s,
+      renewalHitChance(
+        renewalPlayerHit(stats),
+        renewalMonsterFlee(monsterStats),
+      ),
+    )
+  ) {
+    const damage = renewalPhysicalDefense(
+      renewalBaseAttack(stats) + KNIFE_ATTACK,
+      d.defense,
+      d.stats.vit,
+    );
+    target.hp = Math.max(0, target.hp - damage);
+    pushEvent(s, {
+      type: 'player_hit',
+      actorId: 'player',
+      targetId: target.id,
+      amount: damage,
+      remainingHp: target.hp,
+      maximumHp: d.hp,
     });
     if (target.hp === 0) {
       target.alive = false;
       target.engaged = false;
-      target.respawnAt = state.nowMs + target.respawnMs;
-      state.kills += 1;
-      state.player.baseExp += PORING_RENEWAL.baseExp;
-      state.player.jobExp += PORING_RENEWAL.jobExp;
-      const baseProgress = experienceProgress(state.player.baseExp, BASE_EXP_REQUIREMENTS);
-      const jobProgress = experienceProgress(state.player.jobExp, JOB_EXP_REQUIREMENTS);
-      pushEvent(state, { type: 'death', actorId: target.id, targetId: 'player', position: target.position, amount: PORING_RENEWAL.baseExp, baseLevel: baseProgress.level, jobLevel: jobProgress.level, baseExpCurrent: baseProgress.current, baseExpRequired: baseProgress.required, jobExpCurrent: jobProgress.current, jobExpRequired: jobProgress.required, levelUp: baseProgress.level > 1 || jobProgress.level > 1 });
-      createDrops(state, target);
-      state.targetId = null;
-      state.route = [];
+      target.respawnAt = s.nowMs + target.respawnMs;
+      s.kills += 1;
+      awardExperience(s, target);
+      createDrops(s, target);
+      s.targetId = null;
+      s.route = [];
     }
-  } else {
-    pushEvent(state, { type: 'player_miss', actorId: 'player', targetId: target.id });
-  }
-  state.player.nextActionAt = state.nowMs + PLAYER_ATTACK_DELAY_MS;
+  } else
+    pushEvent(s, {
+      type: 'player_miss',
+      actorId: 'player',
+      targetId: target.id,
+    });
+  s.player.nextActionAt =
+    s.nowMs + renewalAttackDelayMs(renewalDisplayedAspd(s.player.stats, 55));
 }
-
-function processMonsterAttacks(state: RoWorldState) {
-  for (const monster of state.monsters) {
-    if (!monster.alive || !monster.engaged || monster.nextAttackAt > state.nowMs) continue;
-    if (distance(monster.position, state.player.position) > PORING_RENEWAL.attackRange) continue;
-    const chance = renewalHitChance(renewalMonsterHit(poring), renewalPlayerFlee(novice));
-    if (rollPercent(state, chance)) {
-      state.player.hp = Math.max(0, state.player.hp - PORING_DAMAGE_TO_NOVICE);
-      pushEvent(state, {
-        type: 'monster_hit', actorId: monster.id, targetId: 'player',
-        amount: PORING_DAMAGE_TO_NOVICE, remainingHp: state.player.hp, maximumHp: state.player.maxHp,
+function processMonsterAttacks(s: RoWorldState) {
+  for (const m of s.monsters) {
+    if (!m.alive || !m.engaged || m.nextAttackAt > s.nowMs) continue;
+    const d = PRT_FILD08_MONSTERS[m.monster];
+    if (distance(m.position, s.player.position) > d.attackRange) continue;
+    const chance = renewalHitChance(
+      renewalMonsterHit({ level: d.level, ...d.stats }),
+      renewalPlayerFlee(playerStats(s)),
+    );
+    if (rollPercent(s, chance)) {
+      const damage =
+        d.attackMin +
+        Math.trunc(nextRandom(s) * (d.attackMax - d.attackMin + 1));
+      s.player.hp = Math.max(0, s.player.hp - damage);
+      pushEvent(s, {
+        type: 'monster_hit',
+        actorId: m.id,
+        targetId: 'player',
+        amount: damage,
+        remainingHp: s.player.hp,
+        maximumHp: s.player.maxHp,
       });
-      if (state.player.hp === 0) state.status = 'dead';
-    } else {
-      pushEvent(state, { type: 'monster_miss', actorId: monster.id, targetId: 'player' });
-    }
-    monster.nextAttackAt = state.nowMs + PORING_RENEWAL.attackDelayMs;
+      if (s.player.hp === 0) s.status = 'dead';
+    } else
+      pushEvent(s, { type: 'monster_miss', actorId: m.id, targetId: 'player' });
+    m.nextAttackAt = s.nowMs + d.attackDelayMs;
   }
 }
 
 export function createRoWorld(field: RoField, seed: number): RoWorldState {
-  return {
+  const s: RoWorldState = {
     nowMs: 0,
     randomState: seed >>> 0,
     status: 'running',
@@ -318,22 +547,20 @@ export function createRoWorld(field: RoField, seed: number): RoWorldState {
       position: { ...PRT_FILD08.noviceEntry },
       hp: 40,
       maxHp: 40,
+      sp: 11,
+      maxSp: 11,
       baseExp: 0,
       jobExp: 0,
+      baseLevel: 1,
+      jobLevel: 1,
+      stats: { ...DEFAULT_RO_STATS },
+      statusPoints: 0,
+      skillPoints: 0,
+      skills: { NV_BASIC: 0, NV_FIRSTAID: 0 },
       nextActionAt: 0,
       nextHpRegenAt: 6000,
     },
-    monsters: createPoringPlacements(field, seed).map((placement, index) => ({
-      id: `poring-${index + 1}`,
-      position: { x: placement.x, y: placement.y },
-      home: { x: placement.x, y: placement.y },
-      hp: PORING_RENEWAL.hp,
-      alive: true,
-      engaged: false,
-      nextAttackAt: 0,
-      respawnAt: null,
-      respawnMs: placement.respawnMs,
-    })),
+    monsters: [],
     groundItems: [],
     inventory: {},
     targetId: null,
@@ -342,39 +569,75 @@ export function createRoWorld(field: RoField, seed: number): RoWorldState {
     events: [],
     kills: 0,
   };
+  s.monsters = createMonsterPlacements(field, seed).map((p, index) => {
+    const d = PRT_FILD08_MONSTERS[p.monster];
+    return {
+      id: `${p.monster.toLowerCase()}-${index + 1}`,
+      monster: p.monster,
+      spawnIndex: p.spawnIndex,
+      position: { x: p.x, y: p.y },
+      home: { x: p.x, y: p.y },
+      hp: d.hp,
+      alive: true,
+      engaged: false,
+      nextAttackAt: 0,
+      nextMoveAt: d.walkSpeedMs,
+      respawnAt: null,
+      respawnMs: p.respawnMs,
+    };
+  });
+  return s;
 }
-
-export function advanceRoWorld(input: RoWorldState, field: RoField, durationMs: number) {
-  if (!Number.isFinite(durationMs) || durationMs < 0) throw new RangeError('duration must be non-negative');
-  const state = cloneWorld(input);
-  const finishAt = state.nowMs + durationMs;
-
-  while (state.status === 'running') {
-    const nextMonsterAttack = state.monsters.reduce(
-      (next, monster) =>
-        monster.alive && monster.engaged && monster.nextAttackAt > 0
-          ? Math.min(next, monster.nextAttackAt)
-          : next,
-      Number.POSITIVE_INFINITY,
-    );
-    const nextRespawn = state.monsters.reduce(
-      (next, monster) => (monster.respawnAt === null ? next : Math.min(next, monster.respawnAt)),
-      Number.POSITIVE_INFINITY,
-    );
-    const nextAt = Math.min(
-      state.player.nextActionAt,
-      state.player.nextHpRegenAt,
-      nextMonsterAttack,
-      nextRespawn,
-    );
+export function advanceRoWorld(
+  input: RoWorldState,
+  field: RoField,
+  durationMs: number,
+  playerAutomation = true,
+) {
+  if (!Number.isFinite(durationMs) || durationMs < 0)
+    throw new RangeError('duration must be non-negative');
+  const s = cloneWorld(input),
+    finishAt = s.nowMs + durationMs;
+  while (s.status === 'running') {
+    const attack = s.monsters.reduce(
+        (n, m) =>
+          m.alive && m.engaged && m.nextAttackAt > 0
+            ? Math.min(n, m.nextAttackAt)
+            : n,
+        Infinity,
+      ),
+      move = s.monsters.reduce(
+        (n, m) =>
+          m.alive && !m.engaged && m.id !== s.targetId
+            ? Math.min(n, m.nextMoveAt)
+            : n,
+        Infinity,
+      ),
+      respawn = s.monsters.reduce(
+        (n, m) => (m.respawnAt === null ? n : Math.min(n, m.respawnAt)),
+        Infinity,
+      ),
+      nextAt = Math.min(
+        playerAutomation ? s.player.nextActionAt : Infinity,
+        s.player.nextHpRegenAt,
+        attack,
+        move,
+        respawn,
+      );
     if (nextAt > finishAt) break;
-    state.nowMs = nextAt;
-    processRespawns(state);
-    processMonsterAttacks(state);
-    if (state.status === 'running' && state.player.nextHpRegenAt <= state.nowMs) processNaturalRecovery(state);
-    if (state.status === 'running' && state.player.nextActionAt <= state.nowMs) processPlayerAction(state, field);
+    s.nowMs = nextAt;
+    processRespawns(s, field);
+    processMonsterMovement(s, field);
+    processMonsterAttacks(s);
+    if (s.status === 'running' && s.player.nextHpRegenAt <= s.nowMs)
+      processRecovery(s);
+    if (
+      playerAutomation &&
+      s.status === 'running' &&
+      s.player.nextActionAt <= s.nowMs
+    )
+      processPlayerAction(s, field);
   }
-
-  if (state.status === 'running') state.nowMs = finishAt;
-  return state;
+  if (s.status === 'running') s.nowMs = finishAt;
+  return s;
 }
