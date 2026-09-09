@@ -668,7 +668,7 @@ export function GameShell() {
         </div>
       </section>
       <footer className="release-note">
-        R0.5 · RO 還原 {RESTORATION_PERCENT}% ·
+        R0.6 · RO 還原 {RESTORATION_PERCENT}% ·
         地圖、怪物、戰鬥、成長、經驗與掉落共用同一份模擬狀態
       </footer>
     </main>

@@ -7,6 +7,7 @@ import {
   PRT_FILD08_MONSTER_COUNTS,
   PRT_FILD08_PORING_COUNT,
 } from '../../game/ro/content/prt-fild08';
+import { PRT_FILD08_MONSTERS } from '../../game/ro/content/monsters';
 import { parseFld2, isWalkable } from '../../game/ro/world/fld2';
 import {
   createPoringPositions,
@@ -35,14 +36,11 @@ describe('pinned prt_fild08 world', () => {
     ).toBe(true);
   });
 
-  it('spawns all 87 Porings on distinct reachable cells deterministically', () => {
+  it('spawns all 87 source-defined Poring actors deterministically', () => {
     const first = createPoringPositions(field, 824);
     const second = createPoringPositions(field, 824);
     expect(first).toEqual(second);
     expect(first).toHaveLength(PRT_FILD08_PORING_COUNT);
-    expect(new Set(first.map(({ x, y }) => `${x},${y}`)).size).toBe(
-      PRT_FILD08_PORING_COUNT,
-    );
     expect(first.every(({ x, y }) => isWalkable(field, x, y))).toBe(true);
     expect(
       shortestPath(field, PRT_FILD08.noviceEntry, first[0]).length,
@@ -83,6 +81,41 @@ describe('pinned prt_fild08 world', () => {
     ).toEqual(PRT_FILD08_MONSTER_COUNTS);
   });
 
+  it('keeps the exact rAthena spawn areas and fixed respawn delays', () => {
+    expect(
+      PRT_FILD08.monsterSpawns
+        .filter((spawn) => spawn.monster === 'LUNATIC' && spawn.count === 10)
+        .map(({ centerX, centerY, width, height }) => [
+          centerX,
+          centerY,
+          width,
+          height,
+        ]),
+    ).toEqual([
+      [228, 230, 30, 30],
+      [246, 263, 50, 50],
+      [190, 237, 50, 50],
+      [100, 256, 50, 50],
+    ]);
+    expect(
+      PRT_FILD08.monsterSpawns
+        .filter((spawn) => spawn.monster === 'FABRE' && spawn.count === 20)
+        .map(({ centerX, centerY, width, height }) => [
+          centerX,
+          centerY,
+          width,
+          height,
+        ]),
+    ).toEqual([
+      [70, 164, 70, 70],
+      [144, 147, 70, 70],
+      [263, 79, 90, 90],
+    ]);
+    expect(
+      PRT_FILD08.monsterSpawns.every((spawn) => spawn.respawnVarianceMs === 0),
+    ).toBe(true);
+  });
+
   it('keeps monsters moving while player automation is stopped', () => {
     const world = createRoWorld(field, 824);
     const playerPosition = world.player.position;
@@ -96,6 +129,29 @@ describe('pinned prt_fild08 world', () => {
           monster.position.y !== positions[index].y,
       ),
     ).toBe(true);
+  });
+
+  it('keeps monster respawn timers running while player automation is stopped', () => {
+    const world = createRoWorld(field, 824);
+    const monster = world.monsters[0];
+    monster.alive = false;
+    monster.hp = 0;
+    monster.respawnAt = monster.respawnMs;
+    const waiting = advanceRoWorld(world, field, monster.respawnMs - 1, false);
+    expect(waiting.monsters[0].alive).toBe(false);
+    const respawned = advanceRoWorld(waiting, field, 1, false);
+    expect(respawned.monsters[0].alive).toBe(true);
+    expect(respawned.monsters[0].hp).toBe(
+      PRT_FILD08_MONSTERS[respawned.monsters[0].monster].hp,
+    );
+    expect(
+      isWalkable(
+        field,
+        respawned.monsters[0].position.x,
+        respawned.monsters[0].position.y,
+      ),
+    ).toBe(true);
+    expect(respawned.player.position).toEqual(world.player.position);
   });
 
   it('keeps a dead player stopped, then respawns at the save point after four seconds', () => {

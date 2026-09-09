@@ -8,6 +8,7 @@ export type MonsterPlacement = GridPosition &
     monster: MonsterSpawn['monster'];
     spawnIndex: number;
     respawnMs: number;
+    respawnVarianceMs: number;
   }>;
 
 const DIRECTIONS = Object.freeze([
@@ -111,46 +112,73 @@ export function shortestPath(
 
 function spawnBounds(field: RoField, spawn: MonsterSpawn) {
   if (spawn.width === 0 || spawn.height === 0) {
-    return { minX: 0, maxX: field.width - 1, minY: 0, maxY: field.height - 1 };
+    return {
+      minX: 15,
+      maxX: field.width - 16,
+      minY: 15,
+      maxY: field.height - 16,
+    };
   }
-  const halfWidth = Math.trunc(spawn.width / 2);
-  const halfHeight = Math.trunc(spawn.height / 2);
+  const radiusX = spawn.width - 1;
+  const radiusY = spawn.height - 1;
   return {
-    minX: Math.max(0, spawn.centerX - halfWidth),
-    maxX: Math.min(field.width - 1, spawn.centerX + halfWidth),
-    minY: Math.max(0, spawn.centerY - halfHeight),
-    maxY: Math.min(field.height - 1, spawn.centerY + halfHeight),
+    minX: Math.max(5, spawn.centerX - radiusX),
+    maxX: Math.min(field.width - 5, spawn.centerX + radiusX),
+    minY: Math.max(5, spawn.centerY - radiusY),
+    maxY: Math.min(field.height - 5, spawn.centerY + radiusY),
   };
+}
+
+export function sourceSpawnPosition(
+  field: RoField,
+  spawn: MonsterSpawn,
+  random: () => number,
+): GridPosition {
+  const bounds = spawnBounds(field, spawn);
+  const center = { x: spawn.centerX, y: spawn.centerY };
+  const mapWide = spawn.width === 0 || spawn.height === 0;
+  const centerReachable = !mapWide && isWalkable(field, center.x, center.y);
+  const keepCenter =
+    centerReachable && random() < 1 / (spawn.width * spawn.height);
+  if (keepCenter) return center;
+
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    const position = {
+      x: bounds.minX + Math.trunc(random() * (bounds.maxX - bounds.minX + 1)),
+      y: bounds.minY + Math.trunc(random() * (bounds.maxY - bounds.minY + 1)),
+    };
+    if (
+      (mapWide || position.x !== center.x || position.y !== center.y) &&
+      isWalkable(field, position.x, position.y)
+    )
+      return position;
+  }
+  if (centerReachable) return center;
+
+  for (let attempt = 0; attempt < 50; attempt += 1) {
+    const position = {
+      x: 15 + Math.trunc(random() * (field.width - 30)),
+      y: 15 + Math.trunc(random() * (field.height - 30)),
+    };
+    if (isWalkable(field, position.x, position.y)) return position;
+  }
+  throw new RangeError(`${spawn.monster} spawn area lacks a reachable cell`);
 }
 
 export function createMonsterPlacements(field: RoField, seed: number) {
   const random = createRandom(seed);
-  const reachable = floodWalkable(field, PRT_FILD08.noviceEntry);
-  const occupied = new Set<number>();
   const positions: MonsterPlacement[] = [];
 
   for (const [spawnIndex, spawn] of PRT_FILD08.monsterSpawns.entries()) {
-    const bounds = spawnBounds(field, spawn);
-    const candidates: number[] = [];
-    for (let y = bounds.minY; y <= bounds.maxY; y += 1) {
-      for (let x = bounds.minX; x <= bounds.maxX; x += 1) {
-        const offset = fieldOffset(field, x, y);
-        if (reachable[offset] >= 0 && !occupied.has(offset))
-          candidates.push(offset);
-      }
-    }
-    if (candidates.length < spawn.count)
-      throw new RangeError(`${spawn.monster} spawn area lacks reachable cells`);
     for (let index = 0; index < spawn.count; index += 1) {
-      const selectedIndex = Math.trunc(random() * candidates.length);
-      const [offset] = candidates.splice(selectedIndex, 1);
-      occupied.add(offset);
+      const position = sourceSpawnPosition(field, spawn, random);
       positions.push({
         monster: spawn.monster,
-        x: offset % field.width,
-        y: Math.trunc(offset / field.width),
+        x: position.x,
+        y: position.y,
         spawnIndex,
         respawnMs: spawn.respawnMs,
+        respawnVarianceMs: spawn.respawnVarianceMs,
       });
     }
   }

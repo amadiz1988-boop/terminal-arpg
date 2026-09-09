@@ -19,6 +19,7 @@ export type MonsterSpawn = Readonly<{
   height: number;
   count: number;
   respawnMs: number;
+  respawnVarianceMs: number;
 }>;
 
 export const PRT_FILD08 = Object.freeze({
@@ -36,6 +37,7 @@ export const PRT_FILD08 = Object.freeze({
       height: 0,
       count: 20,
       respawnMs: 5000,
+      respawnVarianceMs: 0,
     },
     {
       monster: 'PORING',
@@ -45,6 +47,7 @@ export const PRT_FILD08 = Object.freeze({
       height: 10,
       count: 2,
       respawnMs: 15000,
+      respawnVarianceMs: 0,
     },
     {
       monster: 'PORING',
@@ -54,6 +57,7 @@ export const PRT_FILD08 = Object.freeze({
       height: 20,
       count: 5,
       respawnMs: 15000,
+      respawnVarianceMs: 0,
     },
     {
       monster: 'PORING',
@@ -63,6 +67,7 @@ export const PRT_FILD08 = Object.freeze({
       height: 50,
       count: 20,
       respawnMs: 10000,
+      respawnVarianceMs: 0,
     },
     {
       monster: 'PORING',
@@ -72,6 +77,7 @@ export const PRT_FILD08 = Object.freeze({
       height: 50,
       count: 20,
       respawnMs: 10000,
+      respawnVarianceMs: 0,
     },
     {
       monster: 'PORING',
@@ -81,6 +87,7 @@ export const PRT_FILD08 = Object.freeze({
       height: 50,
       count: 20,
       respawnMs: 10000,
+      respawnVarianceMs: 0,
     },
     {
       monster: 'LUNATIC',
@@ -90,6 +97,7 @@ export const PRT_FILD08 = Object.freeze({
       height: 0,
       count: 20,
       respawnMs: 5000,
+      respawnVarianceMs: 0,
     },
     {
       monster: 'LUNATIC',
@@ -99,6 +107,7 @@ export const PRT_FILD08 = Object.freeze({
       height: 10,
       count: 2,
       respawnMs: 15000,
+      respawnVarianceMs: 0,
     },
     {
       monster: 'LUNATIC',
@@ -108,20 +117,22 @@ export const PRT_FILD08 = Object.freeze({
       height: 20,
       count: 5,
       respawnMs: 15000,
+      respawnVarianceMs: 0,
     },
     ...[
-      [228, 230],
-      [246, 263],
-      [190, 237],
-      [100, 256],
-    ].map(([centerX, centerY]) => ({
+      [228, 230, 30, 30],
+      [246, 263, 50, 50],
+      [190, 237, 50, 50],
+      [100, 256, 50, 50],
+    ].map(([centerX, centerY, width, height]) => ({
       monster: 'LUNATIC' as const,
       centerX,
       centerY,
-      width: 20,
-      height: 20,
+      width,
+      height,
       count: 10,
       respawnMs: 10000,
+      respawnVarianceMs: 0,
     })),
     {
       monster: 'FABRE',
@@ -131,6 +142,7 @@ export const PRT_FILD08 = Object.freeze({
       height: 0,
       count: 10,
       respawnMs: 5000,
+      respawnVarianceMs: 0,
     },
     {
       monster: 'FABRE',
@@ -140,6 +152,7 @@ export const PRT_FILD08 = Object.freeze({
       height: 10,
       count: 2,
       respawnMs: 15000,
+      respawnVarianceMs: 0,
     },
     {
       monster: 'FABRE',
@@ -149,19 +162,21 @@ export const PRT_FILD08 = Object.freeze({
       height: 20,
       count: 5,
       respawnMs: 15000,
+      respawnVarianceMs: 0,
     },
     ...[
-      [70, 164],
-      [144, 147],
-      [263, 79],
-    ].map(([centerX, centerY]) => ({
+      [70, 164, 70, 70],
+      [144, 147, 70, 70],
+      [263, 79, 90, 90],
+    ].map(([centerX, centerY, width, height]) => ({
       monster: 'FABRE' as const,
       centerX,
       centerY,
-      width: 50,
-      height: 50,
+      width,
+      height,
       count: 20,
       respawnMs: 10000,
+      respawnVarianceMs: 0,
     })),
     {
       monster: 'PUPA',
@@ -171,6 +186,7 @@ export const PRT_FILD08 = Object.freeze({
       height: 40,
       count: 20,
       respawnMs: 10000,
+      respawnVarianceMs: 0,
     },
     {
       monster: 'LITTLE_PORING',
@@ -180,6 +196,7 @@ export const PRT_FILD08 = Object.freeze({
       height: 40,
       count: 20,
       respawnMs: 10000,
+      respawnVarianceMs: 0,
     },
   ] satisfies readonly MonsterSpawn[],
 });

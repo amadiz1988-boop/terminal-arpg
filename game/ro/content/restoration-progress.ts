@@ -3,7 +3,7 @@ export const RESTORATION_CATEGORIES = Object.freeze([
     name: '世界地圖與怪物',
     completed: 5,
     total: 12,
-    evidence: '真實 prt_fild08 地形、五種怪物、271 個重生個體',
+    evidence: '真實 prt_fild08 地形、五種怪物、271 個原生成區域重生個體',
   },
   {
     name: '角色成長與職業',

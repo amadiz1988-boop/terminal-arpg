@@ -29,6 +29,7 @@ import { isWalkable, type RoField } from './fld2';
 import {
   createMonsterPlacements,
   shortestPath,
+  sourceSpawnPosition,
   type GridPosition,
 } from './navigation';
 
@@ -81,6 +82,7 @@ export type MonsterActor = {
   nextMoveAt: number;
   respawnAt: number | null;
   respawnMs: number;
+  respawnVarianceMs: number;
 };
 export type GroundItem = { id: string; item: string; position: GridPosition };
 export type NoviceSkills = { NV_BASIC: number; NV_FIRSTAID: 0 };
@@ -288,33 +290,11 @@ function createDrops(s: RoWorldState, m: MonsterActor) {
 }
 function respawnPosition(s: RoWorldState, field: RoField, m: MonsterActor) {
   const spawn = PRT_FILD08.monsterSpawns[m.spawnIndex];
-  const halfWidth = Math.trunc(spawn.width / 2),
-    halfHeight = Math.trunc(spawn.height / 2);
-  const minX = spawn.width === 0 ? 0 : Math.max(0, spawn.centerX - halfWidth),
-    maxX =
-      spawn.width === 0
-        ? field.width - 1
-        : Math.min(field.width - 1, spawn.centerX + halfWidth),
-    minY = spawn.height === 0 ? 0 : Math.max(0, spawn.centerY - halfHeight),
-    maxY =
-      spawn.height === 0
-        ? field.height - 1
-        : Math.min(field.height - 1, spawn.centerY + halfHeight);
-  for (let attempt = 0; attempt < 200; attempt += 1) {
-    const position = {
-      x: minX + Math.trunc(nextRandom(s) * (maxX - minX + 1)),
-      y: minY + Math.trunc(nextRandom(s) * (maxY - minY + 1)),
-    };
-    if (
-      isWalkable(field, position.x, position.y) &&
-      !s.monsters.some(
-        (other) =>
-          other !== m && other.alive && samePosition(other.position, position),
-      )
-    )
-      return position;
+  try {
+    return sourceSpawnPosition(field, spawn, () => nextRandom(s));
+  } catch {
+    return { ...m.home };
   }
-  return { ...m.home };
 }
 function processRespawns(s: RoWorldState, field: RoField) {
   for (const m of s.monsters) {
@@ -521,7 +501,15 @@ function processPlayerAction(s: RoWorldState, field: RoField) {
     if (target.hp === 0) {
       target.alive = false;
       target.engaged = false;
-      target.respawnAt = s.nowMs + target.respawnMs;
+      target.respawnAt =
+        s.nowMs +
+        Math.max(
+          1000,
+          target.respawnMs +
+            (target.respawnVarianceMs > 0
+              ? Math.trunc(nextRandom(s) * target.respawnVarianceMs)
+              : 0),
+        );
       s.kills += 1;
       awardExperience(s, target);
       createDrops(s, target);
@@ -663,6 +651,7 @@ export function createRoWorld(field: RoField, seed: number): RoWorldState {
       nextMoveAt: d.walkSpeedMs,
       respawnAt: null,
       respawnMs: p.respawnMs,
+      respawnVarianceMs: p.respawnVarianceMs,
     };
   });
   return s;

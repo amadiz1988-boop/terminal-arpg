@@ -16,6 +16,7 @@
 | done | OpenKore 功能盤點 | `docs/OPENKORE_FEATURE_AUDIT.md` 已確認掛圖、跨圖、傳送、MVP、補給與社交功能 |
 | done | RO產品鐵律 | `docs/RO_AUTOMATION_PRODUCT_CONSTITUTION.md` 已鎖定自動戰鬥與完整養成、UI、NPC服務邊界 |
 | done | RO 第一個公開垂直切片 | 真實 `prt_fild08`、五種怪物共 271 隻、逐格尋路、逐擊交戰、掉落拾取、雙 EXP、小地圖及 OpenKore 終端共用單一狀態 |
+| done | rAthena 怪物重生校準 | 原始生成範圍、固定延遲、8 次區域取點、中心與全圖回退均有來源核對及自動測試 |
 | todo | 多人共享地圖權威 | 同圖玩家共用怪物、HP、掉落、重生及交戰歸屬 |
 | todo | 單一 lockMap 與 MapRoute | 手動指定唯一掛圖；最短跨圖路線支援蝴蝶翅膀候選與無道具步行備援 |
 | todo | Fly Wing 與 MVP 政策 | 無怪找怪傳送；MVP預設迴避，勾選後才列為攻擊目標 |
