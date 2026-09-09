@@ -26,9 +26,9 @@ export const RESTORATION_CATEGORIES = Object.freeze([
   { name: 'NPC、城鎮與任務', completed: 0, total: 12, evidence: '尚未實裝' },
   {
     name: 'OpenKore 自動化',
-    completed: 6,
+    completed: 7,
     total: 12,
-    evidence: '索敵、尋路、戰鬥、拾取、暫停續跑與死亡後 4 秒重生',
+    evidence: '17 格視野索敵、巡走、蒼蠅翅膀、戰鬥、拾取與暫停續跑',
   },
   { name: '多人社交與伺服器', completed: 0, total: 10, evidence: '尚未實裝' },
   {

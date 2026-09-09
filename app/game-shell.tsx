@@ -9,6 +9,7 @@ import {
   createRoWorld,
   experienceProgress,
   JOB_EXP_REQUIREMENTS,
+  OPENKORE_CLIENT_SIGHT,
   resetStatusPoints,
   equipInventoryItem,
   type RoWorldEvent,
@@ -97,6 +98,8 @@ const EVENT_LABELS: Record<RoWorldEvent['type'], string> = {
   job_level_up: '職業升級',
   player_death: '死亡',
   respawn: '重生',
+  random_walk: '尋路',
+  teleport: '傳送',
 };
 
 function formatClock(ms: number) {
@@ -141,6 +144,10 @@ function eventText(event: RoWorldEvent) {
       return '你已死亡 · OpenKore 等待 4 秒後送出重生';
     case 'respawn':
       return `你在儲存點復活 · 生命與魔力完全恢復 · (${event.position?.x}, ${event.position?.y})`;
+    case 'random_walk':
+      return `視野內無目標 · 隨機巡走至 (${event.position?.x}, ${event.position?.y})`;
+    case 'teleport':
+      return `視野內無目標 · 使用 ${zhTwItem(event.item ?? '')} 隨機傳送至 (${event.position?.x}, ${event.position?.y})`;
   }
 }
 
@@ -178,8 +185,10 @@ function FieldMap({ field, world }: { field: RoField; world: RoWorldState }) {
     for (const monster of world.monsters) {
       if (
         !monster.alive ||
-        Math.abs(monster.position.x - player.x) > 20 ||
-        Math.abs(monster.position.y - player.y) > 20
+        Math.max(
+          Math.abs(monster.position.x - player.x),
+          Math.abs(monster.position.y - player.y),
+        ) >= OPENKORE_CLIENT_SIGHT
       )
         continue;
       context.beginPath();
@@ -390,7 +399,8 @@ export function GameShell() {
           </div>
           <div className="console-output" ref={logRef} data-testid="combat-log">
             <p className="system-line">
-              [系統] 已進入普隆德拉原野，自動索敵與拾取已啟用。
+              [系統] 已進入普隆德拉原野，17
+              格視野索敵、拾取與蒼蠅翅膀策略已啟用。
             </p>
             {visibleEvents.map((event, index) => (
               <p
@@ -420,6 +430,9 @@ export function GameShell() {
             </span>
             <span>
               死亡 <strong>{world.deaths}</strong>
+            </span>
+            <span>
+              蒼蠅翅膀 <strong>{world.flyWingsUsed}</strong>
             </span>
             <div className="picked-items">
               <b>拾取物品</b>
@@ -654,6 +667,15 @@ export function GameShell() {
                 />
                 <Setting label="自動攻擊" value="開啟" />
                 <Setting label="自動拾取" value="開啟" />
+                <Setting
+                  label="索敵視野"
+                  value={`${OPENKORE_CLIENT_SIGHT} 格`}
+                />
+                <Setting
+                  label="視野無怪時使用蒼蠅翅膀"
+                  value="開啟（玩家策略）"
+                />
+                <Setting label="沒有蒼蠅翅膀" value="隨機巡走" />
                 <Setting label="生命低於 50% 使用蘋果" value="開啟" />
                 <Setting label="攻擊 MVP" value="關閉" />
                 <Setting label="死亡後自動重生" value="4 秒" />
@@ -668,7 +690,7 @@ export function GameShell() {
         </div>
       </section>
       <footer className="release-note">
-        R0.6 · RO 還原 {RESTORATION_PERCENT}% ·
+        R0.7 · RO 還原 {RESTORATION_PERCENT}% ·
         地圖、怪物、戰鬥、成長、經驗與掉落共用同一份模擬狀態
       </footer>
     </main>

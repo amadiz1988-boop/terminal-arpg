@@ -2,7 +2,7 @@
 
 以 rAthena Renewal 資料與 OpenKore 自動化邏輯為基準的 RO 純掛機遊戲。角色的移動與戰鬥由自動化代理執行，玩家負責人物養成、裝備、道具、技能、轉職與策略設定。
 
-## RO Demo R0.6
+## RO Demo R0.7
 
 玩家介面只保留「停止掛機／繼續掛機」。四倍測試與重新開始屬於開發驗證工具，玩家端不顯示，也不改變正常遊戲時間。
 
@@ -16,6 +16,7 @@
 - 戰鬥終端只呈現模擬狀態實際產生的 OpenKore-like 事件。
 - 小地圖上的角色位置、怪物位置及交戰標記與戰鬥共用同一份狀態。
 - 停止掛機後只凍結玩家自動化；怪物巡走、攻擊與重生繼續，玩家從原位置恢復。
+- 索敵採 OpenKore `clientSight 17`；視野無怪時依玩家策略使用蒼蠅翅膀，沒有翅膀則隨機巡走。
 - Basic Information、Status、Equipment、Item 採 RO 客戶端既有資訊結構。
 
 ## 固定資料版本
@@ -30,7 +31,7 @@
 - 跨圖回城、補給、儲存點與 lockMap 路線
 - 完整職業 Base／Job 等級曲線與技能樹
 - 負重上限及消耗品手動操作
-- Fly Wing 找怪、Butterfly Wing 回城、跨圖 MapRoute
+- Butterfly Wing 回城、跨圖 MapRoute
 - 城鎮、Kafra、倉庫、商店、精煉及轉職 NPC
 - 多人共享地圖與聊天
 
@@ -49,6 +50,7 @@ npm run test:release
 
 - [產品鐵律](docs/RO_AUTOMATION_PRODUCT_CONSTITUTION.md)
 - [OpenKore 功能盤點](docs/OPENKORE_FEATURE_AUDIT.md)
+- [蒼蠅翅膀與索敵來源核對](docs/RO_FLY_WING_SOURCE_AUDIT.md)
 - [來源政策](docs/DESIGN_SOURCE_POLICY.md)
 - [Issue Board](docs/ISSUE_BOARD.md)
 - [版本檢討](docs/DEVELOPMENT_REVIEW_LOG.md)

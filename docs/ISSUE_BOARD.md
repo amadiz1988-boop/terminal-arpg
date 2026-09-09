@@ -6,7 +6,7 @@
 
 目前依賴順序：來源鎖版 → RO 資料轉換 → 格狀世界 → OpenKore AI → 戰鬥與掉落 → 補給與死亡 → 成長與轉職 → 朋友測試。
 
-目前還原度：**32 / 100（32.0%）**。細項、證據與下一批工作見 `docs/RO_RESTORATION_PROGRESS.md`。Dashi Taskboard 服務無法連線期間，此檔與還原度追蹤檔為進度真實來源。
+目前還原度：**33 / 100（33.0%）**。細項、證據與下一批工作見 `docs/RO_RESTORATION_PROGRESS.md`。Dashi Taskboard 服務無法連線期間，此檔與還原度追蹤檔為進度真實來源。
 
 ## 目前追蹤
 
@@ -19,7 +19,8 @@
 | done | rAthena 怪物重生校準 | 原始生成範圍、固定延遲、8 次區域取點、中心與全圖回退均有來源核對及自動測試 |
 | todo | 多人共享地圖權威 | 同圖玩家共用怪物、HP、掉落、重生及交戰歸屬 |
 | todo | 單一 lockMap 與 MapRoute | 手動指定唯一掛圖；最短跨圖路線支援蝴蝶翅膀候選與無道具步行備援 |
-| todo | Fly Wing 與 MVP 政策 | 無怪找怪傳送；MVP預設迴避，勾選後才列為攻擊目標 |
+| done | Fly Wing 找怪策略 | 17 格視野無怪時消耗蒼蠅翅膀；合法落點、傳點排除、暫停不消耗均有測試 |
+| todo | MVP 政策 | MVP 預設迴避，勾選後才列為攻擊目標 |
 | todo | rAthena 資料轉換器 | 從固定版本轉為型別化角色、怪物、物品、技能資料 |
 | in_progress | OpenKore AI 佇列 | route、attack、items_take 已有可回放狀態；sitAuto、storageAuto 尚未完成 |
 | in_progress | RO 即時戰鬥公式 | 命中、迴避、攻速、射程、普攻傷害、HP 與自然恢復已接入；SP 與狀態尚未完成 |

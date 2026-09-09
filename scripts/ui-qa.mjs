@@ -130,6 +130,12 @@ try {
     "document.querySelectorAll('.event-player_hit,.event-player_miss,.event-move,.event-pickup').length",
   );
   await evaluate(
+    "[...document.querySelectorAll('.ro-tabs button')].find(x=>x.innerText==='掛機設定')?.click()",
+  );
+  const flyWingPolicy = await evaluate(
+    "document.body.innerText.includes('索敵視野')&&document.body.innerText.includes('17 格')&&document.body.innerText.includes('視野無怪時使用蒼蠅翅膀')&&document.body.innerText.includes('玩家策略')&&document.body.innerText.includes('沒有蒼蠅翅膀')&&document.body.innerText.includes('隨機巡走')",
+  );
+  await evaluate(
     "[...document.querySelectorAll('.ro-tabs button')].find(x=>x.innerText==='地圖情報')?.click()",
   );
   const mapInfo = await evaluate(
@@ -154,6 +160,7 @@ try {
   report.mapInfo = mapInfo;
   report.skills = skills;
   report.progress = progress;
+  report.flyWingPolicy = flyWingPolicy;
   report.errors = errors;
   report.pass =
     report.canvas === 720 &&
@@ -165,6 +172,7 @@ try {
     report.mapInfo &&
     report.skills &&
     report.progress &&
+    report.flyWingPolicy &&
     report.pickedItems &&
     !report.englishItem &&
     report.qaControlsAbsent &&

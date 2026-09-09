@@ -1,6 +1,7 @@
 import { gunzipSync } from 'node:zlib';
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+import { createRandom } from '../../game/core/random';
 import {
   PRT_FILD08,
   PRT_FILD08_MONSTER_COUNT,
@@ -11,6 +12,8 @@ import { PRT_FILD08_MONSTERS } from '../../game/ro/content/monsters';
 import { parseFld2, isWalkable } from '../../game/ro/world/fld2';
 import {
   createPoringPositions,
+  isNearWarpPortal,
+  randomTeleportPosition,
   shortestPath,
 } from '../../game/ro/world/navigation';
 import {
@@ -19,6 +22,7 @@ import {
   allocateStatusPoint,
   createRoWorld,
   equipInventoryItem,
+  OPENKORE_CLIENT_SIGHT,
   resetStatusPoints,
 } from '../../game/ro/world/simulation';
 
@@ -58,6 +62,136 @@ describe('pinned prt_fild08 world', () => {
       previous = step;
     }
     expect(previous).toEqual(target);
+  });
+
+  it('preserves the five renewal prt_fild08 warp portals', () => {
+    expect(PRT_FILD08.warpPortals).toEqual([
+      {
+        centerX: 16,
+        centerY: 187,
+        spanX: 3,
+        spanY: 17,
+        destination: 'prt_fild07',
+      },
+      {
+        centerX: 16,
+        centerY: 239,
+        spanX: 3,
+        spanY: 15,
+        destination: 'prt_fild07',
+      },
+      {
+        centerX: 170,
+        centerY: 378,
+        spanX: 3,
+        spanY: 2,
+        destination: 'prontera',
+      },
+      {
+        centerX: 233,
+        centerY: 16,
+        spanX: 12,
+        spanY: 1,
+        destination: 'moc_fild01',
+      },
+      {
+        centerX: 55,
+        centerY: 21,
+        spanX: 4,
+        spanY: 2,
+        destination: 'moc_fild01',
+      },
+    ]);
+  });
+
+  it('chooses only legal non-portal cells for Fly Wing teleport', () => {
+    const random = createRandom(824);
+    for (let index = 0; index < 100; index += 1) {
+      const position = randomTeleportPosition(field, random);
+      expect(position.x).toBeGreaterThanOrEqual(15);
+      expect(position.x).toBeLessThanOrEqual(384);
+      expect(position.y).toBeGreaterThanOrEqual(15);
+      expect(position.y).toBeLessThanOrEqual(384);
+      expect(isWalkable(field, position.x, position.y)).toBe(true);
+      expect(isNearWarpPortal(position)).toBe(false);
+    }
+  });
+
+  it('targets an actor inside the OpenKore client sight before teleporting', () => {
+    const world = createRoWorld(field, 824);
+    for (const monster of world.monsters) {
+      monster.alive = false;
+      monster.respawnAt = null;
+    }
+    const nearby = [
+      { x: world.player.position.x + 1, y: world.player.position.y },
+      { x: world.player.position.x - 1, y: world.player.position.y },
+      { x: world.player.position.x, y: world.player.position.y + 1 },
+      { x: world.player.position.x, y: world.player.position.y - 1 },
+    ].find((position) => isWalkable(field, position.x, position.y));
+    expect(nearby).toBeDefined();
+    world.monsters[0].alive = true;
+    world.monsters[0].position = nearby!;
+    world.monsters[0].hp = PRT_FILD08_MONSTERS[world.monsters[0].monster].hp;
+    world.inventory.Wing_Of_Fly = 1;
+    const result = advanceRoWorld(world, field, 1);
+    expect(OPENKORE_CLIENT_SIGHT).toBe(17);
+    expect(result.events.some((event) => event.type === 'target')).toBe(true);
+    expect(result.events.some((event) => event.type === 'teleport')).toBe(
+      false,
+    );
+    expect(result.inventory.Wing_Of_Fly).toBe(1);
+  });
+
+  it('uses one Fly Wing when no monster is visible', () => {
+    const world = createRoWorld(field, 824);
+    for (const monster of world.monsters) {
+      monster.alive = false;
+      monster.respawnAt = null;
+    }
+    world.inventory.Wing_Of_Fly = 1;
+    const result = advanceRoWorld(world, field, 1);
+    expect(result.events.some((event) => event.type === 'teleport')).toBe(true);
+    expect(result.inventory.Wing_Of_Fly).toBeUndefined();
+    expect(result.flyWingsUsed).toBe(1);
+    expect(
+      isWalkable(field, result.player.position.x, result.player.position.y),
+    ).toBe(true);
+    expect(isNearWarpPortal(result.player.position)).toBe(false);
+  });
+
+  it('leaves the player and Fly Wing untouched while automation is stopped', () => {
+    const world = createRoWorld(field, 824);
+    for (const monster of world.monsters) {
+      monster.alive = false;
+      monster.respawnAt = null;
+    }
+    world.inventory.Wing_Of_Fly = 1;
+    const result = advanceRoWorld(world, field, 1_000, false);
+    expect(result.player.position).toEqual(world.player.position);
+    expect(result.inventory.Wing_Of_Fly).toBe(1);
+    expect(result.flyWingsUsed).toBe(0);
+    expect(result.events.some((event) => event.type === 'teleport')).toBe(
+      false,
+    );
+  });
+
+  it('walks one cell at a time when no monster and no Fly Wing are available', () => {
+    const world = createRoWorld(field, 824);
+    for (const monster of world.monsters) {
+      monster.alive = false;
+      monster.respawnAt = null;
+    }
+    const result = advanceRoWorld(world, field, 200);
+    const move = result.events.find((event) => event.type === 'move');
+    expect(result.events.some((event) => event.type === 'random_walk')).toBe(
+      true,
+    );
+    expect(move?.position).toBeDefined();
+    expect(
+      Math.abs(move!.position!.x - world.player.position.x) +
+        Math.abs(move!.position!.y - world.player.position.y),
+    ).toBe(1);
   });
 
   it('preserves the exact simulation when paused and resumed', () => {
@@ -244,9 +378,12 @@ describe('pinned prt_fild08 world', () => {
   it('never moves the player farther than one cell per movement event', () => {
     const result = advanceRoWorld(createRoWorld(field, 824), field, 120_000);
     let previous = PRT_FILD08.noviceEntry;
-    for (const event of result.events.filter(
-      (candidate) => candidate.type === 'move',
-    )) {
+    for (const event of result.events) {
+      if (event.type === 'teleport') {
+        previous = event.position!;
+        continue;
+      }
+      if (event.type !== 'move') continue;
       expect(event.position).toBeDefined();
       expect(
         Math.abs(event.position!.x - previous.x) +
@@ -270,6 +407,7 @@ describe('pinned prt_fild08 world', () => {
       jobExp: result.player.jobExp,
       hp: result.player.hp,
       events: result.events.length,
+      flyWingsUsed: result.flyWingsUsed,
       inventory: result.inventory,
     });
     expect(result.nowMs).toBeLessThanOrEqual(30 * 60_000);

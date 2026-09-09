@@ -11,6 +11,11 @@ export const PRT_FILD08_SPAWN_SOURCE = rAthenaSource(
   'prt_fild08 Poring spawns',
 );
 
+export const PRT_FILD08_WARP_SOURCE = rAthenaSource(
+  'npc/re/warps/fields/prontera_fild.txt',
+  'prt_fild08 warp portals',
+);
+
 export type MonsterSpawn = Readonly<{
   monster: 'PORING' | 'LUNATIC' | 'FABRE' | 'PUPA' | 'LITTLE_PORING';
   centerX: number;
@@ -22,12 +27,45 @@ export type MonsterSpawn = Readonly<{
   respawnVarianceMs: number;
 }>;
 
+export type WarpPortal = Readonly<{
+  centerX: number;
+  centerY: number;
+  spanX: number;
+  spanY: number;
+  destination: string;
+}>;
+
 export const PRT_FILD08 = Object.freeze({
   id: 'prt_fild08',
   fieldUrl: '/ro/maps/prt_fild08.fld2.bin',
   width: 400,
   height: 400,
   noviceEntry: { x: 170, y: 375 },
+  warpPortals: [
+    {
+      centerX: 16,
+      centerY: 187,
+      spanX: 3,
+      spanY: 17,
+      destination: 'prt_fild07',
+    },
+    {
+      centerX: 16,
+      centerY: 239,
+      spanX: 3,
+      spanY: 15,
+      destination: 'prt_fild07',
+    },
+    { centerX: 170, centerY: 378, spanX: 3, spanY: 2, destination: 'prontera' },
+    {
+      centerX: 233,
+      centerY: 16,
+      spanX: 12,
+      spanY: 1,
+      destination: 'moc_fild01',
+    },
+    { centerX: 55, centerY: 21, spanX: 4, spanY: 2, destination: 'moc_fild01' },
+  ] satisfies readonly WarpPortal[],
   monsterSpawns: [
     {
       monster: 'PORING',

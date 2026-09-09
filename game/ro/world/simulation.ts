@@ -5,7 +5,7 @@ import {
   type RoStatId,
   type RoStats,
 } from '../../content/ro-stats';
-import { APPLE_RENEWAL } from '../content/items';
+import { APPLE_RENEWAL, FLY_WING_RENEWAL } from '../content/items';
 import { EQUIPMENT } from '../content/equipment';
 import { PRT_FILD08 } from '../content/prt-fild08';
 import {
@@ -28,6 +28,8 @@ import {
 import { isWalkable, type RoField } from './fld2';
 import {
   createMonsterPlacements,
+  randomTeleportPosition,
+  randomWalkDestination,
   shortestPath,
   sourceSpawnPosition,
   type GridPosition,
@@ -48,7 +50,9 @@ export type RoWorldEventType =
   | 'base_level_up'
   | 'job_level_up'
   | 'player_death'
-  | 'respawn';
+  | 'respawn'
+  | 'random_walk'
+  | 'teleport';
 export type RoWorldEvent = Readonly<{
   atMs: number;
   type: RoWorldEventType;
@@ -120,9 +124,13 @@ export type RoWorldState = {
   events: RoWorldEvent[];
   kills: number;
   deaths: number;
+  flyWingsUsed: number;
 };
 
 const PLAYER_WALK_DELAY_MS = 150;
+export const OPENKORE_CLIENT_SIGHT = 17;
+const OPENKORE_ATTACK_SCAN_MS = 500;
+const OPENKORE_RANDOM_WALK_MAX_MS = 75_000;
 export const BASE_EXP_REQUIREMENTS = [
   548, 894, 1486, 2173, 3152, 3732, 4112, 4441, 4866, 5337,
 ];
@@ -186,6 +194,8 @@ const samePosition = (a: GridPosition, b: GridPosition) =>
   a.x === b.x && a.y === b.y;
 const distance = (a: GridPosition, b: GridPosition) =>
   Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+const blockDistance = (a: GridPosition, b: GridPosition) =>
+  Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
 function pushEvent(s: RoWorldState, e: Omit<RoWorldEvent, 'atMs'>) {
   s.events.push({ atMs: s.nowMs, ...e });
 }
@@ -248,22 +258,34 @@ export function equipInventoryItem(input: RoWorldState, item: string) {
   return state;
 }
 
-function chooseTarget(s: RoWorldState) {
-  const target = s.monsters
-    .filter((m) => m.alive)
+function chooseTarget(s: RoWorldState, field: RoField) {
+  const visible = s.monsters
+    .filter(
+      (m) =>
+        m.alive &&
+        blockDistance(s.player.position, m.position) < OPENKORE_CLIENT_SIGHT,
+    )
     .sort(
       (a, b) =>
         distance(s.player.position, a.position) -
         distance(s.player.position, b.position),
-    )[0];
-  if (!target) return;
-  s.targetId = target.id;
-  s.route = [];
-  pushEvent(s, {
-    type: 'target',
-    targetId: target.id,
-    position: target.position,
-  });
+    );
+  for (const target of visible) {
+    if (
+      !samePosition(s.player.position, target.position) &&
+      shortestPath(field, s.player.position, target.position).length === 0
+    )
+      continue;
+    s.targetId = target.id;
+    s.route = [];
+    pushEvent(s, {
+      type: 'target',
+      targetId: target.id,
+      position: target.position,
+    });
+    return true;
+  }
+  return false;
 }
 function createDrops(s: RoWorldState, m: MonsterActor) {
   for (const drop of PRT_FILD08_MONSTERS[m.monster].drops) {
@@ -340,11 +362,25 @@ function processRecovery(s: RoWorldState) {
 }
 function preparePickup(s: RoWorldState, field: RoField) {
   if (s.pickupId && s.groundItems.some((i) => i.id === s.pickupId)) return true;
-  const item = s.groundItems[0];
-  if (!item) return false;
-  s.pickupId = item.id;
-  s.route = shortestPath(field, s.player.position, item.position);
-  return true;
+  const visible = s.groundItems
+    .filter(
+      (item) =>
+        blockDistance(s.player.position, item.position) < OPENKORE_CLIENT_SIGHT,
+    )
+    .sort(
+      (a, b) =>
+        distance(s.player.position, a.position) -
+        distance(s.player.position, b.position),
+    );
+  for (const item of visible) {
+    const route = shortestPath(field, s.player.position, item.position);
+    if (!samePosition(s.player.position, item.position) && route.length === 0)
+      continue;
+    s.pickupId = item.id;
+    s.route = route;
+    return true;
+  }
+  return false;
 }
 function awardExperience(s: RoWorldState, m: MonsterActor) {
   const d = PRT_FILD08_MONSTERS[m.monster],
@@ -440,7 +476,56 @@ function processPlayerAction(s: RoWorldState, field: RoField) {
     s.player.nextActionAt = s.nowMs + PLAYER_WALK_DELAY_MS;
     return;
   }
-  if (!s.targetId) chooseTarget(s);
+  if (!s.targetId && !chooseTarget(s, field)) {
+    if ((s.inventory[FLY_WING_RENEWAL.aegisName] ?? 0) > 0) {
+      let destination: GridPosition | null = null;
+      try {
+        destination = randomTeleportPosition(field, () => nextRandom(s));
+      } catch {
+        destination = null;
+      }
+      if (destination) {
+        s.inventory[FLY_WING_RENEWAL.aegisName] -= 1;
+        if (s.inventory[FLY_WING_RENEWAL.aegisName] === 0)
+          delete s.inventory[FLY_WING_RENEWAL.aegisName];
+        s.player.position = destination;
+        s.pickupId = null;
+        s.route = [];
+        s.flyWingsUsed += 1;
+        pushEvent(s, {
+          type: 'teleport',
+          actorId: 'player',
+          item: FLY_WING_RENEWAL.aegisName,
+          position: destination,
+        });
+        s.player.nextActionAt = s.nowMs + OPENKORE_ATTACK_SCAN_MS;
+        return;
+      }
+    }
+
+    if (s.route.length === 0) {
+      const destination = randomWalkDestination(field, () => nextRandom(s));
+      if (destination) {
+        s.route = shortestPath(field, s.player.position, destination).slice(
+          0,
+          Math.floor(OPENKORE_RANDOM_WALK_MAX_MS / PLAYER_WALK_DELAY_MS),
+        );
+        if (s.route.length > 0)
+          pushEvent(s, {
+            type: 'random_walk',
+            actorId: 'player',
+            position: destination,
+          });
+      }
+    }
+    const step = s.route.shift();
+    if (step) {
+      s.player.position = step;
+      pushEvent(s, { type: 'move', actorId: 'player', position: step });
+      s.player.nextActionAt = s.nowMs + PLAYER_WALK_DELAY_MS;
+    } else s.player.nextActionAt = s.nowMs + OPENKORE_ATTACK_SCAN_MS;
+    return;
+  }
   const target = s.monsters.find((m) => m.id === s.targetId && m.alive);
   if (!target) {
     s.targetId = null;
@@ -635,6 +720,7 @@ export function createRoWorld(field: RoField, seed: number): RoWorldState {
     events: [],
     kills: 0,
     deaths: 0,
+    flyWingsUsed: 0,
   };
   s.monsters = createMonsterPlacements(field, seed).map((p, index) => {
     const d = PRT_FILD08_MONSTERS[p.monster];

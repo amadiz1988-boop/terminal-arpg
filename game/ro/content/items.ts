@@ -1,6 +1,9 @@
 import { rAthenaSource } from '../source';
 
-export const APPLE_SOURCE = rAthenaSource('db/re/item_db_usable.yml', 'Id: 512');
+export const APPLE_SOURCE = rAthenaSource(
+  'db/re/item_db_usable.yml',
+  'Id: 512',
+);
 
 export const APPLE_RENEWAL = Object.freeze({
   id: 512,
@@ -10,4 +13,15 @@ export const APPLE_RENEWAL = Object.freeze({
   weight: 20,
   healMinimum: 16,
   healMaximum: 22,
+});
+
+export const FLY_WING_RENEWAL = Object.freeze({
+  id: 601,
+  aegisName: 'Wing_Of_Fly',
+  name: 'Fly Wing',
+  type: 'DelayConsume',
+  weight: 50,
+  skill: 'AL_TELEPORT',
+  skillLevel: 1,
+  source: rAthenaSource('db/re/item_db_usable.yml', 'Id: 601'),
 });

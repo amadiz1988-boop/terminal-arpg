@@ -165,6 +165,53 @@ export function sourceSpawnPosition(
   throw new RangeError(`${spawn.monster} spawn area lacks a reachable cell`);
 }
 
+export function isNearWarpPortal(position: GridPosition) {
+  return PRT_FILD08.warpPortals.some(
+    (portal) =>
+      Math.abs(position.x - portal.centerX) <= portal.spanX + 1 &&
+      Math.abs(position.y - portal.centerY) <= portal.spanY + 1,
+  );
+}
+
+export function randomTeleportPosition(
+  field: RoField,
+  random: () => number,
+): GridPosition {
+  for (let attempt = 0; attempt < 1000; attempt += 1) {
+    const position = {
+      x: 15 + Math.trunc(random() * (field.width - 30)),
+      y: 15 + Math.trunc(random() * (field.height - 30)),
+    };
+    if (
+      isWalkable(field, position.x, position.y) &&
+      !isNearWarpPortal(position)
+    )
+      return position;
+  }
+  throw new RangeError('random teleport could not find a legal cell');
+}
+
+export function randomWalkDestination(
+  field: RoField,
+  random: () => number,
+): GridPosition | null {
+  for (let attempt = 0; attempt < 500; attempt += 1) {
+    const position = {
+      x: Math.trunc(random() * field.width),
+      y: Math.trunc(random() * field.height),
+    };
+    if (
+      position.x > 0 &&
+      position.y > 0 &&
+      position.x < field.width - 1 &&
+      position.y < field.height - 1 &&
+      isWalkable(field, position.x, position.y)
+    )
+      return position;
+  }
+  return null;
+}
+
 export function createMonsterPlacements(field: RoField, seed: number) {
   const random = createRandom(seed);
   const positions: MonsterPlacement[] = [];

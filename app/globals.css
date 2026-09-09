@@ -355,6 +355,14 @@ button {
 .console-output .event-pickup b {
   color: #5ed7ff;
 }
+.console-output .event-teleport span,
+.console-output .event-teleport b {
+  color: #d88cff;
+}
+.console-output .event-random_walk span,
+.console-output .event-random_walk b {
+  color: #91b8c7;
+}
 .console-output .event-player_miss span,
 .console-output .event-monster_miss span {
   color: #9b9b9b;
