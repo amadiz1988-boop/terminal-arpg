@@ -12,6 +12,7 @@
 | --- | --- | --- |
 | done | 鎖定 RO 資料來源 | rAthena Renewal 與 OpenKore 固定 commit 已記錄 |
 | done | OpenKore 功能盤點 | `docs/OPENKORE_FEATURE_AUDIT.md` 已確認掛圖、跨圖、傳送、MVP、補給與社交功能 |
+| done | RO產品鐵律 | `docs/RO_AUTOMATION_PRODUCT_CONSTITUTION.md` 已鎖定自動戰鬥與完整養成、UI、NPC服務邊界 |
 | in_progress | RO 最小垂直切片 | 無介面世界循環已完成逐格找怪、普攻、受傷、死亡、掉落、拾取與暫停續跑；下一步為怪物移動與前端可視化 |
 | todo | 多人共享地圖權威 | 同圖玩家共用怪物、HP、掉落、重生及交戰歸屬 |
 | todo | 單一 lockMap 與 MapRoute | 手動指定唯一掛圖；最短跨圖路線支援蝴蝶翅膀候選與無道具步行備援 |

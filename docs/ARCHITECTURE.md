@@ -1,5 +1,7 @@
 # RO OpenKore-like Architecture
 
+產品責任分界與NPC服務流程以 `docs/RO_AUTOMATION_PRODUCT_CONSTITUTION.md` 為最高層契約。世界服務產生唯一權威事件，小地圖、終端、角色介面及NPC視窗只能讀取狀態或提交命令，不能自行模擬結果。
+
 延伸規格：
 
 * [核心公式與內容架構](./CORE_FORMULA_ARCHITECTURE.md)

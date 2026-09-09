@@ -1,5 +1,7 @@
 # RO OpenKore-like 產品基準
 
+最高層產品契約：`docs/RO_AUTOMATION_PRODUCT_CONSTITUTION.md`。產品固定為「RO完整養成與NPC遊戲性，加上OpenKore自動移動及戰鬥，小地圖與終端取代即時美術戰鬥畫面」。
+
 ## 玩家核心體驗
 
 玩家建立 RO 角色、設定掛機策略，觀看角色在真實格狀地圖上尋路、索敵、戰鬥、拾取、補給、死亡與返回。所有終端訊息都由同一套模擬狀態產生。
