@@ -2,18 +2,21 @@
 
 本專案使用 Dashi Taskboard。狀態流程為 backlog → todo → in_progress → in_review → done。
 
-目前依賴順序：穩定核心架構 → Modifier Engine → Build 感知裝備評分 → 自動分解與材料 → 永久角色 → 朋友帳號 → Alpha 發布。
+2026-09-09 起主軸改為 rAthena Renewal 規則與 OpenKore-like 純掛機。PoE、火炬、T1 地圖、通貨、寶石與詞綴任務全部停止。
 
-起始流程為選職後直接進入無限 T1，Build 由隨機取得的裝備、底材、技能與通貨形成。任何發布任務都必須通過 `docs/ROADMAP.md` 的遊玩閘門與 `docs/ARCHITECTURE.md` 的架構閘門。
+目前依賴順序：來源鎖版 → RO 資料轉換 → 格狀世界 → OpenKore AI → 戰鬥與掉落 → 補給與死亡 → 成長與轉職 → 朋友測試。
 
 ## 目前追蹤
 
 | 狀態 | 工作 | 驗收 |
 | --- | --- | --- |
-| in_review | Alpha 0.21 怪群真實追擊與獨立攻擊 | 怪點實際位移、多人近身傷害、紅色攻擊訊號、完整發布門檻 |
-| todo | T1 實際怪物原型與技能資料 | 每種怪物綁定 PoEDB 條目、攻擊時間、技能與冷卻 |
-| todo | 裝備掉落決策密度 | 每張圖至少出現一次查看、換裝、保留或打造決策 |
-| todo | 多步驟打造策略 | 底材、詞綴層級與通貨操作形成可選路徑 |
-| todo | 流派改造效果 | 傳奇或特殊機制實際改變技能玩法 |
+| done | 鎖定 RO 資料來源 | rAthena Renewal 與 OpenKore 固定 commit 已記錄 |
+| in_progress | RO 最小垂直切片 | 初心者在格狀地圖逐格找怪、普攻、受傷、死亡、掉落、拾取 |
+| todo | rAthena 資料轉換器 | 從固定版本轉為型別化角色、怪物、物品、技能資料 |
+| todo | OpenKore AI 佇列 | route、attack、items_take、sitAuto、storageAuto 可觀測且可暫停 |
+| todo | RO 即時戰鬥公式 | 命中、迴避、攻速、射程、傷害、HP、SP 與狀態使用同一引擎 |
+| todo | 掉落、負重與補給 | 逐件掉落、拾取權重、負重限制、消耗品與倉庫流程 |
+| todo | 能力、技能與轉職 | Base EXP、能力點、技能點與職業進程皆依鎖定來源 |
+| blocked | RO 公開版本 | 原名、劇情、地圖與素材的公開使用邊界尚未確認 |
 
-每版自評、證據與下一步統一記錄於 `docs/DEVELOPMENT_REVIEW_LOG.md`。綜合未達 7.0/10 時維持「持續開發」。
+每版自評、證據與下一步統一記錄於 `docs/DEVELOPMENT_REVIEW_LOG.md`。RO 新核心未完成前禁止沿用舊版分數或發布門檻結果。

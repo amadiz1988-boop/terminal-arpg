@@ -1,81 +1,70 @@
-# Product Roadmap
+# RO OpenKore-like Roadmap
 
-## North star
+## 北極星
 
-The player forms a build hypothesis, automates maps, reads evidence, changes skills or gear, and sees measurable efficiency gains. Long-term depth comes from interacting build, farming and economy decisions.
+角色在同一個持續世界中逐格移動、找怪、戰鬥、拾取、補給與成長。玩家可從地圖與終端完整理解 AI 的每個決定，並透過 RO 的角色設定改變掛機結果。
 
-## Foundation 0.2: repeatable core
+## R0：來源與狀態核心
 
-- New characters begin with one starter weapon and one active skill
-- New characters enter an infinite T1 map immediately
-- Random equipment bases, gems and currency create the first build direction
-- Map count, duration and inventory-depletion modes
-- Tier selection and map inventory
-- Equipment drops, comparison and equip action
-- Skill selection with visible stat impact
-- Deterministic simulation contracts
-- Modular architecture and regression tests
+- 鎖定 rAthena Renewal 與 OpenKore commit
+- 定義世界、角色、怪物、地面物品與 AI 工作佇列
+- 所有事件可由 seed 與 tick 重播
+- 暫停後保留座標、HP、SP、目標及怪物狀態
 
-Success: one input starts multiple T1 maps; actual drops create at least two meaningful build decisions between sessions.
+成功條件：同一 seed 的 10 分鐘模擬得到完全相同的事件與結果。
 
-## Foundation 0.3: real build engine
+## R1：初心者掛機切片
 
-- Base, increased, more and conditional modifier layers
-- Damage, speed, crit, area, movement and defenses
-- Active skill plus support links
-- Character sheet and dummy encounter use the same resolved stats
-- Item affix pools with item level and tier
+- 單張 RO 格狀地圖
+- 初心者與一種已查證怪物
+- randomWalk、route、attack、items_take
+- 普攻命中、傷害、攻速、受傷、死亡、重生
+- 逐件掉落、逐格走近與拾取
+- 小地圖與戰鬥終端共享狀態
 
-Success: two builds with similar tooltip DPS produce measurably different clear speed, boss time or survival.
+成功條件：角色可連續掛機 30 分鐘等效時間，畫面中沒有瞬移、瞬殺整群或結算式假事件。
 
-## Alpha 0.4: mapping game
+## R2：補給與角色成長
 
-- Map layouts, packs, rares, bosses and failure states
-- Atlas unlock path from T1 upward
-- Map modifiers, quantity, rarity and risk
-- Run policy with measurable tradeoffs
-- Efficiency report: maps per hour, currency per hour, deaths and upgrade value
+- HP、SP 自然恢復與坐下
+- 負重、消耗品、回城、購買、出售與倉庫
+- Base EXP、升級、能力點與即時面板
+- 死亡損失及安全回復流程
 
-Success: players deliberately choose a Tier, layout and policy for a stated goal.
+成功條件：不同補給策略會改變存活時間、收益及回城頻率。
 
-## Friends Alpha 0.5: persistent characters
+## R3：一轉職業與技能
 
-- Accounts, server-authoritative runs and database persistence
-- Character slots, inventory, stash and save migrations
-- Shareable build summary
-- Telemetry for session length, decisions, abandonment and progression
+- 劍士、魔法師、弓箭手、服事、商人、盜賊
+- Job EXP、技能點、技能樹與轉職條件
+- 近戰、遠程、施法、支援與消耗品需求
+- 各職業至少一條可持續掛機路線
 
-Success: 3 to 10 invited players can return on another device without lost progress.
+成功條件：六種職業在相同地圖呈現可觀察的行為與資源差異。
 
-## Economy Alpha 0.6
+## R4：世界與內容擴張
 
-- Currency identities and crafting sinks
-- Item listing and asynchronous trade
-- Price history and server validation
-- Seasonal reset rehearsal
+- 多張地圖、傳送點與跨圖路線
+- 怪物重生、主動性、協助、施法與掉落表
+- NPC、商店、卡片、裝備精煉與任務
+- 二轉與後續職業依來源覆蓋度逐步加入
 
-Success: farming choices create distinct supply and demand without developer-injected prices.
+成功條件：玩家能設定長時間路線並因等級、裝備、技能或補給改變地圖。
 
-## Season 1
+## R5：朋友測試
 
-- One modular encounter mechanic
-- One new crafting resource
-- New affixes, farming specialization and boss
-- Full reset, migration and balance process
+- 帳號與伺服器權威狀態
+- 聊天終端、組隊及交易的最小版本
+- 行為記錄、異常回復與存檔遷移
+- 公開內容授權邊界完成確認
 
-Success: seasonal content changes build and farming decisions while core engines remain unchanged.
+成功條件：3 至 10 位玩家能跨裝置持續遊玩，沒有資料回溯或重複獎勵。
 
-## Work order
+## 固定發布閘門
 
-Contracts → formulas → deterministic tests → application state → UI → persistence → multiplayer → economy → season content.
-
-## Playtest gate
-
-Before a public link is sent:
-
-1. Complete three sessions with different skills and policies.
-2. Verify every continuous-run stop condition.
-3. Equip at least two drops and confirm resolved stats change.
-4. Confirm Tier inventory consumption and progression.
-5. Record one decision that improved efficiency and one remaining dead choice.
-6. Pass build, lint and deterministic engine tests.
+1. 30 分鐘等效掛機測試。
+2. 10 倍速、100 倍速及長時間壓力測試結果一致。
+3. 暫停、重整、死亡、回城及斷線可恢復。
+4. 地圖與終端事件逐筆對得上。
+5. 來源稽核、單元測試、建置與公開玩家流程全部通過。
+6. 自評達 7.0/10 且核心項目不得低於 5.0/10。

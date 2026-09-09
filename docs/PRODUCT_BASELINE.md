@@ -1,36 +1,38 @@
-# Product Baseline
+# RO OpenKore-like 產品基準
 
-## Player fantasy
+## 玩家核心體驗
 
-Build a specialist, encode a farming plan, watch it operate through a terminal, interpret results, and improve the machine.
+玩家建立 RO 角色、設定掛機策略，觀看角色在真實格狀地圖上尋路、索敵、戰鬥、拾取、補給、死亡與返回。所有終端訊息都由同一套模擬狀態產生。
 
-## Core loops
+## 核心循環
 
 ```text
-Moment: encounter → combat event → loot
-Session: configure → continuous maps → report → equip or respec
-Progression: unlock Tier → raise risk → specialize farming → defeat boss
-Season: discover mechanic → create industry → trade → reset and rebuild
+設定角色與自動策略
+→ 在地圖逐格移動
+→ 發現並選擇目標
+→ 依攻速、射程、詠唱與技能需求交戰
+→ 怪物死亡後逐件判定掉落與拾取
+→ 負重、HP、SP 或消耗品觸發補給
+→ 升級、配點、學技能、轉職、換地圖
+→ 繼續掛機
 ```
 
-## Four connected decision systems
+## 唯一主軸
 
-1. Build: skill, supports, equipment, passives and defenses.
-2. Automation: Tier, stop condition, target priority, loot filter and retreat policy.
-3. Farming: map supply, risk, encounter selection and efficiency.
-4. Economy: keep, equip, craft, list, buy and specialize.
+1. RO Renewal 的角色、職業、技能、怪物、物品、經驗與戰鬥規則。
+2. OpenKore 的逐格尋路、AI 佇列、自動攻擊、拾取、補給與終端節奏。
+3. 純掛機操作，玩家的決策集中在設定、配點、裝備、技能、地圖與資源政策。
+4. 地圖、戰鬥、背包及終端共享同一個即時世界狀態。
 
-Every feature must change at least one player decision and one measurable outcome. Terminal lines are evidence produced by the simulation, not the main reward.
+## 品質門檻
 
-## Alpha quality bar
+- 每次移動、攻擊、受傷、死亡與拾取都能由狀態回放。
+- HP、SP、負重、攻速、射程、命中、迴避與詠唱會實際限制行為。
+- 怪物依資料庫生成，具有個別位置、能力、AI 與掉落表。
+- 掛機至少連續運作 30 分鐘等效時間，沒有瞬移清圖或結算式假戰鬥。
+- 終端可看懂角色正在做什麼，也能切換精簡與完整訊息。
+- 來源不完整的公式維持未實作狀態。
 
-- No repeated manual click for an automated action.
-- Every run consumes or risks a resource.
-- Drops can alter the next run.
-- Strategies have visible tradeoffs.
-- Failure and opportunity cost exist.
-- The game explains why a result changed.
+## 已取消方向
 
-## Explicit exclusions before Friends Alpha
-
-Large story content, broad skill quantity, complex guild systems and multiple league mechanics remain outside scope until the build, mapping and persistence loops pass playtests.
+PoE 通貨、技能寶石、洞色連線、地圖 Tier、詞綴打造、火炬天賦與流派推薦全部退出現行產品基準。相關文件只保留為歷史紀錄，不能作為新功能依據。

@@ -1,5 +1,7 @@
 # RO 職業與戰鬥終端設計基準
 
+> 歷史文件。2026-09-09 起，PoE 寶石、通用天賦、T1 地圖與自創職業特性全部停用。現行基準見 `PRODUCT_BASELINE.md`、`RO_SOURCE_BASELINE.md` 與 `ROADMAP.md`。
+
 更新日期：2026-09-06
 
 ## 產品決策
