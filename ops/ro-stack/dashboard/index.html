@@ -146,6 +146,7 @@
             </div>
             <fieldset class="create-job">
               <legend>一轉志願職業</legend>
+              <div class="job-group-heading">標準一轉</div>
               <label
                 ><input
                   type="radio"
@@ -174,6 +175,23 @@
               <label
                 ><input type="radio" name="targetJob" value="thief" checked />
                 盜賊</label
+              >
+              <div class="job-group-heading">擴充一轉</div>
+              <label
+                ><input type="radio" name="targetJob" value="supernovice" />
+                超級初心者</label
+              >
+              <label
+                ><input type="radio" name="targetJob" value="taekwon" />
+                跆拳</label
+              >
+              <label
+                ><input type="radio" name="targetJob" value="gunslinger" />
+                神槍手</label
+              >
+              <label
+                ><input type="radio" name="targetJob" value="ninja" />
+                忍者</label
               >
             </fieldset>
             <button
@@ -628,6 +646,7 @@
           </div>
           <p id="jobEligibility" class="notice"></p>
           <div id="firstJobChoices" class="first-job-choices">
+            <div class="job-group-heading">標準一轉</div>
             <button type="button" data-job-route="swordman">
               <b>劍士</b><small>近戰與高 HP</small>
             </button>
@@ -645,6 +664,19 @@
             </button>
             <button type="button" data-job-route="thief">
               <b>盜賊</b><small>迴避與爆擊</small>
+            </button>
+            <div class="job-group-heading">擴充一轉</div>
+            <button type="button" data-job-route="supernovice">
+              <b>超級初心者</b><small>多系技能與自由配點 · Base Lv.45</small>
+            </button>
+            <button type="button" data-job-route="taekwon">
+              <b>跆拳</b><small>踢技與姿勢</small>
+            </button>
+            <button type="button" data-job-route="gunslinger">
+              <b>神槍手</b><small>槍械與遠距離</small>
+            </button>
+            <button type="button" data-job-route="ninja">
+              <b>忍者</b><small>忍術與飛刀</small>
             </button>
           </div>
           <div id="jobRoutePanel" class="job-route-panel hidden">

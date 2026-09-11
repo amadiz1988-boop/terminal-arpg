@@ -58,6 +58,10 @@ const jobNames = {
     4: '服事',
     5: '商人',
     6: '盜賊',
+    21: '跆拳',
+    23: '超級初心者',
+    24: '神槍手',
+    25: '忍者',
   },
   firstJobs = {
     swordman: {
@@ -90,7 +94,29 @@ const jobNames = {
       destination: '克里圖拉學院',
       transport: '新生快速引導',
     },
+    supernovice: {
+      name: '超級初心者',
+      destination: '克里圖拉學院',
+      transport: '新生快速引導',
+      requirement: 'Base Lv.45、Job Lv.10',
+    },
+    taekwon: {
+      name: '跆拳',
+      destination: '克里圖拉學院',
+      transport: '新生快速引導',
+    },
+    gunslinger: {
+      name: '神槍手',
+      destination: '克里圖拉學院',
+      transport: '新生快速引導',
+    },
+    ninja: {
+      name: '忍者',
+      destination: '克里圖拉學院',
+      transport: '新生快速引導',
+    },
   },
+  allowedFirstJobIds = new Set([1, 2, 3, 4, 5, 6, 21, 23, 24, 25]),
   defaultAudio = {
     musicEnabled: true,
     soundEnabled: true,
@@ -1895,13 +1921,17 @@ async function loadSkillTrees() {
 function renderJobChange(character, live) {
   if (!character) return;
   const classId = Number(live?.jobId ?? character.classId ?? 0),
+    jobLevel = Number(live?.jobLevel ?? character.jobLevel ?? 0),
+    baseLevel = Number(live?.baseLevel ?? character.baseLevel ?? 0),
     basicLevel = Number(live?.basicSkillLevel ?? 0),
-    eligible =
-      classId === 0 && Number(character.jobLevel) >= 10 && basicLevel >= 9,
     route = live?.jobRoute,
     dialog = live?.npcDialog,
     routeJob = route ? firstJobs[route.job] : null,
-    targetJob = character.targetJob || null;
+    targetJob = character.targetJob || null,
+    targetNeedsBase45 = targetJob === 'supernovice',
+    baseEligible = !targetNeedsBase45 || baseLevel >= 45,
+    eligible =
+      classId === 0 && jobLevel >= 10 && basicLevel >= 9 && baseEligible;
   $('#jobChangeState').textContent =
     classId !== 0
       ? `已轉職：${jobNames[classId] ?? `職業 ${classId}`}`
@@ -1910,11 +1940,14 @@ function renderJobChange(character, live) {
         : '尚未符合資格';
   $('#jobEligibility').textContent =
     classId !== 0
-      ? `角色已完成一轉，Job Lv.${character.jobLevel}。`
-      : `${targetJob ? `創角志願：${firstJobs[targetJob]?.name ?? targetJob}。` : '舊角色請先選擇一轉志願。'} 一轉資格：初心者 Job Lv.10、基本技能 Lv.9。目前為 Job Lv.${character.jobLevel}、基本技能 Lv.${basicLevel}。`;
+      ? `角色已完成一轉，Job Lv.${jobLevel}。`
+      : `${targetJob ? `創角志願：${firstJobs[targetJob]?.name ?? targetJob}。` : '舊角色請先選擇一轉志願。'} 一轉資格：初心者 Job Lv.10、基本技能 Lv.9${targetNeedsBase45 ? '、超級初心者另需 Base Lv.45' : ''}。目前為 Base Lv.${baseLevel}、Job Lv.${jobLevel}、基本技能 Lv.${basicLevel}。`;
   document.querySelectorAll('[data-job-route]').forEach((button) => {
     show(button, !targetJob || button.dataset.jobRoute === targetJob);
     button.disabled = !eligible || Boolean(route);
+  });
+  document.querySelectorAll('.first-job-choices .job-group-heading').forEach((heading) => {
+    show(heading, !targetJob);
   });
   show($('#firstJobChoices'), classId === 0);
   show($('#jobRoutePanel'), Boolean(route));
@@ -2427,8 +2460,7 @@ function renderEden(eden, character) {
   const journey = eden?.journey,
     member = Boolean(eden?.member || journey?.member),
     active = Boolean(journey?.active),
-    eligible =
-      Number(character?.classId) >= 1 && Number(character?.classId) <= 6;
+    eligible = allowedFirstJobIds.has(Number(character?.classId));
   $('#edenSummary').textContent = active
     ? '自動入團中'
     : member

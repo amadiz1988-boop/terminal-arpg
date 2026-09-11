@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-11T11:52:00.328Z",
+  "generatedAt": "2026-09-11T17:07:36.239Z",
   "sources": {
     "ruleset": "Renewal",
     "locale": "zh-Hant"
@@ -2234,6 +2234,3855 @@
           "resources": {
             "spCostByLevel": [
               2
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        }
+      ]
+    },
+    "21": {
+      "id": 21,
+      "key": "Taekwon",
+      "name": "跆拳",
+      "skills": [
+        {
+          "id": 411,
+          "handle": "TK_RUN",
+          "name": "跑步",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [],
+          "description": "跑步\nMAX Lv : 10\n系列 : 移動及被動\n內容 : 當在7等級以上跑步時候，在沒有裝備武器的狀態下突然從跑步的狀態停止時，\n會得到 STR以 150秒間上升的爆發力效果.當裝備武器時爆發力狀態會解除，\n還有當跑步技能每升1級在沒有裝備武器下的腳踢威力是以+10的增加\n [Lv 1] 施法時間 6秒，消耗SP 100\n [Lv 2] 施法時間 5秒，消耗SP 90\n [Lv 3] 施法時間 4秒，消耗SP 80\n [Lv 4] 施法時間 3秒，消耗SP 70\n [Lv 5] 施法時間 2秒，消耗SP 60\n [Lv 6] 施法時間 1秒，消耗SP 50\n [Lv 7] 施法時間 0秒，消耗SP 40\n [Lv 8] 施法時間 0秒，消耗SP 30\n [Lv 9] 施法時間 0秒，消耗SP 20\n[Lv 10] 施法時間 0秒，消耗SP 10",
+          "englishName": "Running",
+          "type": "Misc",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              100,
+              90,
+              80,
+              70,
+              60,
+              50,
+              40,
+              30,
+              20,
+              10
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 412,
+          "handle": "TK_READYSTORM",
+          "name": "迴旋準備",
+          "maxLevel": 1,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "TK_STORMKICK",
+              "name": "迴旋踢",
+              "level": 1
+            }
+          ],
+          "description": "迴旋準備\nMAX Lv : 1\n習得條件 : 迴旋踢 1系列 : 準備\n內容 : 用攻擊打中敵人時，有15%的機率做迴旋準備的姿態\n悟靈士不能使用\n[Lv 1] 施法時間 0秒，消耗SP 1",
+          "englishName": "Tornado Stance",
+          "type": "Weapon",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              1
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 413,
+          "handle": "TK_STORMKICK",
+          "name": "迴旋踢",
+          "maxLevel": 7,
+          "excluded": false,
+          "requires": [],
+          "description": "迴旋踢\nMAX Lv : 7\n系列 : 攻擊\n內容 : 只能在迴旋準備姿態時才能使用\n對自己周圍 5x5格內的敵人做攻擊\n[Lv 1] 消耗SP 14，180%\n[Lv 2] 消耗SP 12，200%\n[Lv 3] 消耗SP 10，220%\n[Lv 4] 消耗SP 8，240%\n[Lv 5] 消耗SP 6，260%\n[Lv 6] 消耗SP 4，280%\n[Lv 7] 消耗SP 2，300%",
+          "englishName": "Tornado Kick",
+          "type": "Weapon",
+          "targetType": "Self",
+          "range": -2,
+          "automationMode": "attackSelf",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              14,
+              12,
+              10,
+              8,
+              6,
+              4,
+              2
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 414,
+          "handle": "TK_READYDOWN",
+          "name": "砸踢準備",
+          "maxLevel": 1,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "TK_DOWNKICK",
+              "name": "砸踢",
+              "level": 1
+            }
+          ],
+          "description": "砸踢準備\nMAX Lv : 1\n習得條件 : 砸踢 1\n系列 : 準備\n內容 : 用攻擊打中敵人時，有15%的機率做砸踢準備的姿態\n悟靈士不能使用\n[Lv 1] 施法時間 0秒，消耗SP 1",
+          "englishName": "Heel Drop Stance",
+          "type": "Weapon",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              1
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 415,
+          "handle": "TK_DOWNKICK",
+          "name": "砸踢",
+          "maxLevel": 7,
+          "excluded": false,
+          "requires": [],
+          "description": "砸踢\nMAX Lv : 7\n系列 : 攻擊\n內容 : 只能在砸踢準備姿態時才能使用\n給予敵人傷害力，有3秒鐘得到昏眩\n[Lv 1] 消耗SP 14，180%\n[Lv 2] 消耗SP 12，200%\n[Lv 3] 消耗SP 10，220%\n[Lv 4] 消耗SP 8，240%\n[Lv 5] 消耗SP 6，260%\n[Lv 6] 消耗SP 4，280%\n[Lv 7] 消耗SP 2，300%",
+          "englishName": "Heel Drop",
+          "type": "Weapon",
+          "targetType": "Self",
+          "range": -2,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              14,
+              12,
+              10,
+              8,
+              6,
+              4,
+              2
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 416,
+          "handle": "TK_READYTURN",
+          "name": "踢準備",
+          "maxLevel": 1,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "TK_TURNKICK",
+              "name": "轉身踢",
+              "level": 1
+            }
+          ],
+          "description": "踢準備\nMAX Lv : 1\n習得條件 : 轉身踢 1\n系列 : 準備\n內容 : 用攻擊打中敵人時，有15%的機率做踢準備的姿態\n悟靈士不能使用\n[Lv 1] 施法時間 0秒，消耗SP 1",
+          "englishName": "Roundhouse Stance",
+          "type": "Weapon",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              1
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 417,
+          "handle": "TK_TURNKICK",
+          "name": "轉身踢",
+          "maxLevel": 7,
+          "excluded": false,
+          "requires": [],
+          "description": "轉身踢\nMAX Lv : 7\n系列 : 攻擊\n內容 : 只能在踢準備姿態時才能使用\n給予敵人傷害力，在敵人附近的其它敵人不給予傷害力只讓他們彈出後得到昏眩\n[Lv 1] 消耗SP 14，220%\n[Lv 2] 消耗SP 12，250%\n[Lv 3] 消耗SP 10，280%\n[Lv 4] 消耗SP 8，310%\n[Lv 5] 消耗SP 6，340%\n[Lv 6] 消耗SP 4，370%\n[Lv 7] 消耗SP 2，400%",
+          "englishName": "Roundhouse Kick",
+          "type": "Weapon",
+          "targetType": "Self",
+          "range": -2,
+          "automationMode": "attackSelf",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              14,
+              12,
+              10,
+              8,
+              6,
+              4,
+              2
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 418,
+          "handle": "TK_READYCOUNTER",
+          "name": "還擊準備",
+          "maxLevel": 1,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "TK_COUNTER",
+              "name": "還擊踢",
+              "level": 1
+            }
+          ],
+          "description": "還擊準備\nMAX Lv : 1\n習得條件 : 還擊踢 1\n系列 : 準備\n內容 : 用攻擊打中敵人時，有20%的機率做還擊準備的姿態\n悟靈士不能使用\n[Lv 1] : 施法時間 0秒，消耗SP 1",
+          "englishName": "Counter Kick Stance",
+          "type": "Weapon",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              1
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 419,
+          "handle": "TK_COUNTER",
+          "name": "還擊踢",
+          "maxLevel": 7,
+          "excluded": false,
+          "requires": [],
+          "description": "還擊踢\nMAX Lv : 7\n系列 : 攻擊\n內容 : 只能在還擊準備姿態時才能使用\n還擊踢100%給予敵人打擊\n[Lv 1] 消耗SP 14，220%\n[Lv 2] 消耗SP 12，250%\n[Lv 3] 消耗SP 10，280%\n[Lv 4] 消耗SP 8，310%\n[Lv 5] 消耗SP 6，340%\n[Lv 6] 消耗SP 4，370%\n[Lv 7] 消耗SP 2，400%",
+          "englishName": "Counter Kick",
+          "type": "Weapon",
+          "targetType": "Self",
+          "range": -2,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              14,
+              12,
+              10,
+              8,
+              6,
+              4,
+              2
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 420,
+          "handle": "TK_DODGE",
+          "name": "落法",
+          "maxLevel": 1,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "TK_JUMPKICK",
+              "name": "飛腳踢",
+              "level": 7
+            }
+          ],
+          "description": "落法\nMAX Lv : 1\n習得條件 : 飛腳踢 7\n系列 : 準備\n內容 : 對敵人的遠距離攻擊，以 20%的機率完美的防禦後做落法，\n當爆發力狀態時，對遠距離攻擊和以外的攻擊也有所反應\n[Lv 1] 施法時間 0秒，消耗SP 1",
+          "englishName": "Tumbling",
+          "type": "Weapon",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              1
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 421,
+          "handle": "TK_JUMPKICK",
+          "name": "飛腳踢",
+          "maxLevel": 7,
+          "excluded": false,
+          "requires": [],
+          "description": "飛腳踢\nMAX Lv : 7\n系列 : 攻擊\n內容 : 對遠距離的敵人迅速的飛過去做攻擊\n在落法的狀態時使用的話，攻擊的威力受玩家等級的影響而增加\n悟靈士不能使用，把對象有關的跆拳系列和大部份的狀態給轟掉，\n(所有靈魂狀態、單手劍攻擊速度增加、 所有速度激發、凱阿希、凱易特、菠色克藥水)\n不過對於自由保護技能所保護者的狀態時，是不能給轟掉的，\n在跑步時使用飛腳踢時，會受角色等級的影響威力因此而上升，\n在跑步時使用飛腳踢在爆發力狀態時，威力會更上升\n[Lv 1] 消耗SP 70，40%\n[Lv 2] 消耗SP 60，50%\n[Lv 3] 消耗SP 50，60%\n[Lv 4] 消耗SP 40，70%\n[Lv 5] 消耗SP 30，80%\n[Lv 6] 消耗SP 20，90%\n[Lv 7] 消耗SP 10，100%",
+          "englishName": "Flying Kick",
+          "type": "Weapon",
+          "targetType": "Attack",
+          "range": 9,
+          "automationMode": "attack",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              70,
+              60,
+              50,
+              40,
+              30,
+              20,
+              10
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 422,
+          "handle": "TK_HPTIME",
+          "name": "平安的休息",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [],
+          "description": "平安的休息\nMAX Lv : 10\n系列 : 被動\n內容 : 當做坐下時旁邊有跆拳系列角色時HP會恢復，VIT的恢復量也受到影響\n輸入/doridori的話，恢復量+30 \n [Lv 1] HP恢復量 : 30\n [Lv 2] HP恢復量 : 60\n [Lv 3] HP恢復量 : 90\n [Lv 4] HP恢復量 : 120\n [Lv 5] HP恢復量 : 150\n [Lv 6] HP恢復量 : 180\n [Lv 7] HP恢復量 : 210\n [Lv 8] HP恢復量 : 240\n [Lv 9] HP恢復量 : 270\n[Lv 10] HP恢復量 : 300",
+          "englishName": "Peaceful Break",
+          "type": "",
+          "targetType": "Passive",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 423,
+          "handle": "TK_SPTIME",
+          "name": "快樂的休息",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [],
+          "description": "快樂的休息\nMAX Lv : 10\n系列 : 被動\n內容 : 當做坐下時旁邊有跆拳系列角色時SP會恢復，\nMax SP的恢復量也受到影響，\n在快樂的休息中使用/doridori來提升恢復量時，有30分鐘變成 [快樂的狀態]，\n在快樂的狀態時使用地震術的咒文書時，\nSP會消耗10，以較底的機率會消耗掉地震術的咒文書，\n1等級時以 10%的機率會消耗掉，10等級時只以 1%的機率來消耗掉地震術的咒文書.\n輸入/doridori的話，恢復量+3\n [Lv 1] SP恢復量 : 3\n [Lv 2] SP恢復量 : 6\n [Lv 3] SP恢復量 : 9\n [Lv 4] SP恢復量 : 12\n [Lv 5] SP恢復量 : 15\n [Lv 6] SP恢復量 : 18\n [Lv 7] SP恢復量 : 21\n [Lv 8] SP恢復量 : 24\n [Lv 9] SP恢復量 : 27\n[Lv 10] SP恢復量 : 30",
+          "englishName": "Happy Break",
+          "type": "",
+          "targetType": "Passive",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 424,
+          "handle": "TK_POWER",
+          "name": "加油",
+          "maxLevel": 5,
+          "excluded": false,
+          "requires": [],
+          "description": "加油\nMAX Lv : 5\n系列 : 被動\n內容 : 依據同一張地圖上組隊員的人數而增加攻擊力\n普通攻擊是 (100 x 增加量%) + 100%傷害力給予敵人\n當使用500%威力技能使用時， (100 x 增加量%) + 500%的傷害力給予敵人\n[Lv 1] 對單人給予 2%\n[Lv 2] 對單人給予 4%\n[Lv 3] 對單人給予 6%\n[Lv 4] 對單人給予 8%\n[Lv 5] 對單人給予 10%",
+          "englishName": "Kihop",
+          "type": "Weapon",
+          "targetType": "Passive",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 425,
+          "handle": "TK_SEVENWIND",
+          "name": "溫暖的風",
+          "maxLevel": 7,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "TK_HPTIME",
+              "name": "平安的休息",
+              "level": 5
+            },
+            {
+              "handle": "TK_SPTIME",
+              "name": "快樂的休息",
+              "level": 5
+            },
+            {
+              "handle": "TK_POWER",
+              "name": "加油",
+              "level": 5
+            }
+          ],
+          "description": "溫暖的風\nMAX Lv : 7\n習得條件 : 平安的休息 5, 快樂的休息 5, 加油 5\n系列 : 輔助\n內容 : 5分鐘攻擊時引起屬性的風，把攻擊改變為該屬性\n[Lv 1] 地 (消耗SP:20)\n[Lv 2] 風 (消耗SP:20)\n[Lv 3] 水 (消耗SP:20)\n[Lv 4] 火 (消耗SP:20)\n[Lv 5] 念 (消耗SP:50)\n[Lv 6] 暗 (消耗SP:50)\n[Lv 7] 聖 (消耗SP:50)",
+          "englishName": "Mild Wind",
+          "type": "Weapon",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              20,
+              20,
+              20,
+              20,
+              50,
+              50,
+              50
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 426,
+          "handle": "TK_HIGHJUMP",
+          "name": "跳高",
+          "maxLevel": 5,
+          "excluded": false,
+          "requires": [],
+          "description": "跳高\nMAX Lv : 5\n系列 : 移動\n內容 : 用跳高來移動位置\n當落地地點不是封閉區域或落地地點沒有人時，像牆壁這樣的障礙物都可以跳過去的，\n除了攻城地圖外在不能使用蒼蠅翅膀的地圖上不能被移動使用的，\n當習得跳高技能時，公會技能的緊急呼叫詠唱時間會增加 2倍\n[Lv 1] 施法時間 5秒，移動空格數 2\n[Lv 2] 施法時間 4秒，移動空格數 4\n[Lv 3] 施法時間 3秒，移動空格數 6\n[Lv 4] 施法時間 2秒，移動空格數 8\n[Lv 5] 施法時間 1秒，移動空格數 10",
+          "englishName": "Taekwon Jump",
+          "type": "Weapon",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              50,
+              50,
+              50,
+              50,
+              50
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 493,
+          "handle": "TK_MISSION",
+          "name": "太拳任務",
+          "maxLevel": 1,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "TK_POWER",
+              "name": "加油",
+              "level": 5
+            }
+          ],
+          "description": "太拳任務\nMAX Lv : 1\n習得條件 : 加油 5\n系列 : 排行榜 (/taekwon)\n內容 : 轉職成拳聖或悟靈士就不能使用\n使用這技能時，把現在目標的魔物名字顯示出來，\n抓到要攻擊的魔物100隻時會得到1 point，\n目標魔物隨機的鎖定其它魔物 (中Boss，Boss級除外) 0%時，使用太拳任務時，以較低的機率目標會變換\n當太拳排行榜在 (10位以內時) 迴旋踢，轉身踢，砸踢，還擊踢\n使用後可以直接連續到其它技能\n例如 : 迴旋踢 -> 轉身踢 -> 砸踢 \n還有等級90以上的跆拳榜首，MAX HP和 MAX SP 會增加到 3倍，可以使用所有跆拳少年的技能.",
+          "englishName": "Taekwon Mission",
+          "type": "",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              10
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        }
+      ]
+    },
+    "23": {
+      "id": 23,
+      "key": "Supernovice",
+      "name": "超級初心者",
+      "skills": [
+        {
+          "id": 2,
+          "handle": "SM_SWORD",
+          "name": "單手劍使用熟練度",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [],
+          "description": "單手劍使用熟練度(Sword Mastery)\nMAX Lv : 10\n系列 : 被動\n內容 : 以單手劍、短劍來攻擊敵人時，物理傷害加計技能等級的傷害增加量。\n_\n[Lv 1] : 傷害量+4\n[Lv 2] : 傷害量+8\n[Lv 3] : 傷害量+12\n[Lv 4] : 傷害量+16\n[Lv 5] : 傷害量+20\n[Lv 6] : 傷害量+24\n[Lv 7] : 傷害量+28\n[Lv 8] : 傷害量+32\n[Lv 9] : 傷害量+36\n[Lv10] : 傷害量+40",
+          "englishName": "Sword Mastery",
+          "type": "Weapon",
+          "targetType": "Passive",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 4,
+          "handle": "SM_RECOVERY",
+          "name": "快速恢復",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [],
+          "description": "快速恢復(Increase recuperative power)\nMAX Lv : 10\n系列 : 被動\n內容 : 靜止時每10秒恢復HP，由MaxHP在基本數值中增加一定比例。\n移動中或因負重量而賦予HP/SP不可恢復逞罰時，則無法恢復。\n_\n[Lv 1] : 每10秒HP+(5+MHP的0.2%)\n[Lv 2] : 每10秒HP+(10+MHP的0.4%)\n[Lv 3] : 每10秒HP+(15+MHP的0.6%)\n[Lv 4] : 每10秒HP+(20+MHP的0.8%)\n[Lv 5] : 每10秒HP+(25+MHP的1.0%)\n[Lv 6] : 每10秒HP+(30+MHP的1.2%)\n[Lv 7] : 每10秒HP+(35+MHP的1.4%)\n[Lv 8] : 每10秒HP+(40+MHP的1.6%)\n[Lv 9] : 每10秒HP+(45+MHP的1.8%)\n[Lv10] : 每10秒HP+(50+MHP的2.0%)",
+          "englishName": "Increase HP Recovery",
+          "type": "",
+          "targetType": "Passive",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 5,
+          "handle": "SM_BASH",
+          "name": "狂擊",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [],
+          "description": "狂擊(Bash)\nMAX Lv : 10\n系列 : 主動\n類型 : 近距離物理\n對象 : 目標1個\n內容 : 猛攻指定敵人並給予嚴重傷害。\n學習攻擊弱點後，狂擊[LV6]起有機率讓目標陷入[異常狀態:暈眩]。\n_\n[Lv 1] : ATK130%、命中補正: 5%、SP消耗: 8\n[Lv 2] : ATK160%、命中補正:10%、SP消耗: 8\n[Lv 3] : ATK190%、命中補正:15%、SP消耗: 8\n[Lv 4] : ATK220%、命中補正:20%、SP消耗: 8\n[Lv 5] : ATK250%、命中補正:25%、SP消耗: 8\n[Lv 6] : ATK280%、命中補正:30%、SP消耗:15\n[Lv 7] : ATK310%、命中補正:35%、SP消耗:15\n[Lv 8] : ATK340%、命中補正:40%、SP消耗:15\n[Lv 9] : ATK370%、命中補正:45%、SP消耗:15\n[Lv10] : ATK400%、命中補正:50%、SP消耗:15",
+          "englishName": "Bash",
+          "type": "Weapon",
+          "targetType": "Attack",
+          "range": -1,
+          "automationMode": "attack",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              8,
+              8,
+              8,
+              8,
+              8,
+              15,
+              15,
+              15,
+              15,
+              15
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [
+              "Fist",
+              "Dagger",
+              "1hSword",
+              "2hSword",
+              "1hSpear",
+              "2hSpear",
+              "1hAxe",
+              "2hAxe",
+              "Mace",
+              "2hMace",
+              "Staff",
+              "Knuckle",
+              "Musical",
+              "Whip",
+              "Book",
+              "Katar",
+              "Revolver",
+              "Rifle",
+              "Gatling",
+              "Shotgun",
+              "Grenade",
+              "Huuma"
+            ],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 6,
+          "handle": "SM_PROVOKE",
+          "name": "挑釁",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [],
+          "description": "挑釁(Provoke)\nMAX Lv : 10\n系列 : 主動\n類型 : Debuff\n對象 : 目標1個\n內容 : 使敵人興奮，指定對象為玩家時會降低對象VIT防禦力，怪物則會降低物理防禦力。\n防禦力下降的同時，對象的攻擊力也會增加。施展者能誘使怪物攻擊，但對不死型怪及BOSS沒有功效。\n_\n[Lv 1] : 敵人攻擊力+5%、敵人防禦力-10%\n[Lv 2] : 敵人攻擊力+8%、敵人防禦力-15%\n[Lv 3] : 敵人攻擊力+11%、敵人防禦力-20%\n[Lv 4] : 敵人攻擊力+14%、敵人防禦力-25%\n[Lv 5] : 敵人攻擊力+17%、敵人防禦力-30%\n[Lv 6] : 敵人攻擊力+20%、敵人防禦力-35%\n[Lv 7] : 敵人攻擊力+23%、敵人防禦力-40%\n[Lv 8] : 敵人攻擊力+26%、敵人防禦力-45%\n[Lv 9] : 敵人攻擊力+29%、敵人防禦力-50%\n[Lv10] : 敵人攻擊力+32%、敵人防禦力-55%",
+          "englishName": "Provoke",
+          "type": "",
+          "targetType": "Attack",
+          "range": 9,
+          "automationMode": "attack",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 7,
+          "handle": "SM_MAGNUM",
+          "name": "怒爆",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "SM_BASH",
+              "name": "狂擊",
+              "level": 5
+            }
+          ],
+          "description": "怒爆(Magnum Break)\nMAX Lv : 10\n習得條件 : 狂擊 5\n系列 : 主動\n類型 : 近距離物理，Buff\n對象 : 立即施展\n內容 : 消耗SP30後，以自己為中心，向5X5格範圍的敵軍全體給予火屬性物理傷害，並倒退2格。\n另外在10秒內攻擊時會增加火屬性武器傷害20%。\n_\n[Lv 1] : ATK120%\n[Lv 2] : ATK140%\n[Lv 3] : ATK160%\n[Lv 4] : ATK180%\n[Lv 5] : ATK200%\n[Lv 6] : ATK220%\n[Lv 7] : ATK240%\n[Lv 8] : ATK260%\n[Lv 9] : ATK280%\n[Lv10] : ATK300%",
+          "englishName": "Magnum Break",
+          "type": "Weapon",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": "attackSelf",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              30,
+              30,
+              30,
+              30,
+              30,
+              30,
+              30,
+              30,
+              30,
+              30
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 8,
+          "handle": "SM_ENDURE",
+          "name": "霸體",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "SM_PROVOKE",
+              "name": "挑釁",
+              "level": 5
+            }
+          ],
+          "description": "霸體(Endure)\nMAX Lv : 10\n習得條件 : 挑釁 5\n系列 : 主動\n類型 : 輔助\n對象 : 自己\n內容 : 在一定時間內即使受到攻擊也能移動或攻擊。但受到魔法及技能攻擊傷害時還是會出現停頓現象。\n在霸體狀態下若被敵人攻擊7次以上，就會解除霸體，在城戰地圖時無效。\n_\n[Lv 1] : 持續時間10秒，MDEF+1\n[Lv 2] : 持續時間13秒，MDEF+2\n[Lv 3] : 持續時間16秒，MDEF+3\n[Lv 4] : 持續時間19秒，MDEF+4\n[Lv 5] : 持續時間22秒，MDEF+5\n[Lv 6] : 持續時間25秒，MDEF+6\n[Lv 7] : 持續時間28秒，MDEF+7\n[Lv 8] : 持續時間31秒，MDEF+8\n[Lv 9] : 持續時間34秒，MDEF+9\n[Lv10] : 持續時間37秒，MDEF+10",
+          "englishName": "Endure",
+          "type": "Weapon",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": "selfBuff",
+          "automationStatus": "EFST_ENDURE",
+          "resources": {
+            "spCostByLevel": [
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 9,
+          "handle": "MG_SRECOVERY",
+          "name": "禪心",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [],
+          "description": "SP快速恢復(Increase spiritual power)\nMAX Lv : 10\n系列 : 被動\n內容 : 靜止時每10秒恢復SP，由MaxHP在基本數值中增加一定比例。\n移動中或因負重量而賦予HP/SP不可恢復逞罰時，則無法恢復。\n_\n[Lv 1] : 每10秒SP+(3+MSP的0.2%)\n[Lv 2] : 每10秒SP+(6+MSP的0.4%)\n[Lv 3] : 每10秒SP+(9+MSP的0.6%)\n[Lv 4] : 每10秒SP+(12+MSP的0.8%)\n[Lv 5] : 每10秒SP+(15+MSP的1.0%)\n[Lv 6] : 每10秒SP+(18+MSP的1.2%)\n[Lv 7] : 每10秒SP+(21+MSP的1.4%)\n[Lv 8] : 每10秒SP+(24+MSP的1.6%)\n[Lv 9] : 每10秒SP+(27+MSP的1.8%)\n[Lv10] : 每10秒SP+(30+MSP的2.0%)",
+          "englishName": "Increase SP Recovery",
+          "type": "",
+          "targetType": "Passive",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 10,
+          "handle": "MG_SIGHT",
+          "name": "火狩",
+          "maxLevel": 1,
+          "excluded": false,
+          "requires": [],
+          "description": "火狩(Sight)\nMAX Lv : 1\n系列 : 主動\n類型 : 輔助\n對象 : 立即施展\n內容 : 消耗SP10後，10秒內會把自己周圍7X7格內藏匿的目標都找出來。",
+          "englishName": "Sight",
+          "type": "Magic",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              10
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 11,
+          "handle": "MG_NAPALMBEAT",
+          "name": "心靈爆破",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [],
+          "description": "心靈爆破(Napalm beat)\nMAX Lv : 10\n系列 : 主動\n類型 : 特殊攻擊(魔法)\n對象 : 目標1個\n內容 : 使用念力直接攻擊敵人，對敵人目標及周圍3X3格的敵人給予念屬性魔法傷害。\n目標越多時，傷害會分散。\n_\n[Lv 1] : MATK80%、SP消耗: 9\n[Lv 2] : MATK90%、SP消耗: 9\n[Lv 3] : MATK100%、SP消耗: 9\n[Lv 4] : MATK110%、SP消耗:12\n[Lv 5] : MATK120%、SP消耗:12\n[Lv 6] : MATK130%、SP消耗:12\n[Lv 7] : MATK140%、SP消耗:15\n[Lv 8] : MATK150%、SP消耗:15\n[Lv 9] : MATK160%、SP消耗:15\n[Lv10] : MATK170%、SP消耗:18",
+          "englishName": "Napalm Beat",
+          "type": "Magic",
+          "targetType": "Attack",
+          "range": 9,
+          "automationMode": "attack",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              9,
+              9,
+              9,
+              12,
+              12,
+              12,
+              15,
+              15,
+              15,
+              18
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 12,
+          "handle": "MG_SAFETYWALL",
+          "name": "暗之障壁",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "MG_NAPALMBEAT",
+              "name": "心靈爆破",
+              "level": 7
+            },
+            {
+              "handle": "MG_SOULSTRIKE",
+              "name": "聖靈召喚",
+              "level": 5
+            }
+          ],
+          "description": "暗之障壁(Safety wall)\nMAX Lv : 10\n2習得條件 : 心靈爆破 7、聖靈召喚 5\n23習得條件 : 心靈爆破 7、聖靈召喚 5\n8習得條件 : 撒水祈福 4、光耀之堂 3\n系列 : 主動\n類型 : 魔法、輔助\n對象 : 地面1格\n內容 : 在指定位置上形成可以阻擋敵人一定次數攻擊且擁有耐久力的魔法防護壁，防護壁的耐久力消失或過了持續時間時就會消失，防護壁只可阻擋近距離的物理攻擊，使用時需要藍色魔力礦石 1個。\n防護壁的耐久力依施展者的INT、BaseLV、\nMSP而增加，限第一次會阻止超過耐久力總量的傷害。\n_\n[Lv 1] : 耐久力: 300、防禦次數: 2次\n[Lv 2] : 耐久力: 600、防禦次數: 3次\n[Lv 3] : 耐久力: 900、防禦次數: 4次\n[Lv 4] : 耐久力:1200、防禦次數: 5次\n[Lv 5] : 耐久力:1500、防禦次數: 6次\n[Lv 6] : 耐久力:1800、防禦次數: 7次\n[Lv 7] : 耐久力:2100、防禦次數: 8次\n[Lv 8] : 耐久力:2400、防禦次數: 9次\n[Lv 9] : 耐久力:2700、防禦次數:10次\n[Lv10] : 耐久力:3000、防禦次數:11次",
+          "englishName": "Safety Wall",
+          "type": "Magic",
+          "targetType": "Ground",
+          "range": 9,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              30,
+              30,
+              30,
+              35,
+              35,
+              35,
+              40,
+              40,
+              40,
+              40
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 13,
+          "handle": "MG_SOULSTRIKE",
+          "name": "聖靈召喚",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "MG_NAPALMBEAT",
+              "name": "心靈爆破",
+              "level": 4
+            }
+          ],
+          "description": "聖靈召喚(Soul Strike)\nMAX Lv : 10\n習得條件 : 心靈爆破 4\n系列 : 主動\n類型 : 魔法\n對象 : 目標1個\n內容 : 召喚聖靈直接攻擊敵人，\n給予MATK100%的念屬性魔法傷害，\n給予不死屬性敵人的傷害更多。\n_\n[Lv 1] : 1次攻擊、不死型:+5%、SP消耗:18\n[Lv 2] : 1次攻擊、不死型:+10%、SP消耗:14\n[Lv 3] : 2次攻擊、不死型:+15%、SP消耗:24\n[Lv 4] : 2次攻擊、不死型:+20%、SP消耗:20\n[Lv 5] : 3次攻擊、不死型:+25%、SP消耗:30\n[Lv 6] : 3次攻擊、不死型:+30%、SP消耗:26\n[Lv 7] : 4次攻擊、不死型:+35%、SP消耗:36\n[Lv 8] : 4次攻擊、不死型:+40%、SP消耗:32\n[Lv 9] : 5次攻擊、不死型:+45%、SP消耗:42\n[Lv10] : 5次攻擊、不死型:+50%、SP消耗:38",
+          "englishName": "Soul Strike",
+          "type": "Magic",
+          "targetType": "Attack",
+          "range": 9,
+          "automationMode": "attack",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              18,
+              14,
+              24,
+              20,
+              30,
+              26,
+              36,
+              32,
+              42,
+              38
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 14,
+          "handle": "MG_COLDBOLT",
+          "name": "冰箭術",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [],
+          "description": "冰箭術(Coldbolt)\nMAX Lv : 10\n系列 : 主動\n類型 : 魔法\n對象 : 目標1個\n內容 : 用冰箭攻擊敵人，\n給予MATK100%的水屬性魔法傷害。\n_\n[Lv 1] :  1次攻擊、SP消耗:12\n[Lv 2] :  2次攻擊、SP消耗:14\n[Lv 3] :  3次攻擊、SP消耗:16\n[Lv 4] :  4次攻擊、SP消耗:18\n[Lv 5] :  5次攻擊、SP消耗:20\n[Lv 6] :  6次攻擊、SP消耗:22\n[Lv 7] :  7次攻擊、SP消耗:24\n[Lv 8] :  8次攻擊、SP消耗:26\n[Lv 9] :  9次攻擊、SP消耗:28\n[Lv10] : 10次攻擊、SP消耗:30",
+          "englishName": "Cold Bolt",
+          "type": "Magic",
+          "targetType": "Attack",
+          "range": 9,
+          "automationMode": "attack",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              12,
+              14,
+              16,
+              18,
+              20,
+              22,
+              24,
+              26,
+              28,
+              30
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 15,
+          "handle": "MG_FROSTDIVER",
+          "name": "冰凍術",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "MG_COLDBOLT",
+              "name": "冰箭術",
+              "level": 5
+            }
+          ],
+          "description": "冰凍術(Frost diver)\nMAX Lv : 10\n習得條件 : 冰箭術 5\n系列 : 主動\n類型 : 魔法、Debuff\n對象 : 目標1個\n內容 : 給予敵人水屬性魔法傷害及陷入[異常狀態:冰凍]。\n冰凍機率和冰凍時間會依目標的等級、魔法防禦力、LUK而改變。\n_\n[Lv 1] : MATK110%、冰凍機率: 38%\n[Lv 2] : MATK120%、冰凍機率: 41%\n[Lv 3] : MATK130%、冰凍機率: 44%\n[Lv 4] : MATK140%、冰凍機率: 47%\n[Lv 5] : MATK150%、冰凍機率: 50%\n[Lv 6] : MATK160%、冰凍機率: 53%\n[Lv 7] : MATK170%、冰凍機率: 56%\n[Lv 8] : MATK180%、冰凍機率: 59%\n[Lv 9] : MATK190%、冰凍機率: 62%\n[Lv10] : MATK200%、冰凍機率: 65%",
+          "englishName": "Frost Diver",
+          "type": "Magic",
+          "targetType": "Attack",
+          "range": 9,
+          "automationMode": "attack",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              25,
+              24,
+              23,
+              22,
+              21,
+              20,
+              19,
+              18,
+              17,
+              16
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 16,
+          "handle": "MG_STONECURSE",
+          "name": "石化術",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [],
+          "description": "石化術(Stone curse)\nMAX Lv : 10\n系列 : 主動\n類型 : 魔法、Debuff\n對象 : 目標1個\n內容 : 對敵人賦予[異常狀態:石化]效果，使用技能時會消耗紅色魔力礦石1個。\n自技能等級6起只有成功時才會消耗紅色魔力礦石。\n石化機率和石化持續時間會依目標的等級、魔法防禦力、LUK而改變。\n_\n[Lv 1] : 使用後消耗催化劑:石化機率: 24%\n[Lv 2] : 使用後消耗催化劑:石化機率: 28%\n[Lv 3] : 使用後消耗催化劑:石化機率: 32%\n[Lv 4] : 使用後消耗催化劑:石化機率: 36%\n[Lv 5] : 使用後消耗催化劑:石化機率: 40%\n[Lv 6] : 成功時消耗催化劑:石化機率: 44%\n[Lv 7] : 成功時消耗催化劑:石化機率: 48%\n[Lv 8] : 成功時消耗催化劑:石化機率: 52%\n[Lv 9] : 成功時消耗催化劑:石化機率: 56%\n[Lv10] : 成功時消耗催化劑:石化機率: 60%",
+          "englishName": "Stone Curse",
+          "type": "Magic",
+          "targetType": "Attack",
+          "range": 2,
+          "automationMode": "attack",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              25,
+              24,
+              23,
+              22,
+              21,
+              20,
+              19,
+              18,
+              17,
+              16
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 17,
+          "handle": "MG_FIREBALL",
+          "name": "火球術",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "MG_FIREBOLT",
+              "name": "火箭術",
+              "level": 4
+            }
+          ],
+          "description": "火球術(Fireball)\nMAX Lv : 10\n習得條件 : 火箭術 4\n系列 : 主動\n類型 : 魔法\n對象 : 目標1個\n內容 : 用火球攻擊敵人，並給予周圍5X5格內的敵人火屬性魔法傷害，中間(3X3格)和外圍(5X5格)的傷害會不同。\n_\n[Lv 1] : 中間: MATK160%、外圍: MATK120%\n[Lv 2] : 中間: MATK180%、外圍: MATK135%\n[Lv 3] : 中間: MATK200%、外圍: MATK150%\n[Lv 4] : 中間: MATK220%、外圍: MATK165%\n[Lv 5] : 中間: MATK240%、外圍: MATK180%\n[Lv 6] : 中間: MATK260%、外圍: MATK195%\n[Lv 7] : 中間: MATK280%、外圍: MATK210%\n[Lv 8] : 中間: MATK300%、外圍: MATK225%\n[Lv 9] : 中間: MATK320%、外圍: MATK240%\n[Lv10] : 中間: MATK340%、外圍: MATK255%",
+          "englishName": "Fire Ball",
+          "type": "Magic",
+          "targetType": "Attack",
+          "range": 9,
+          "automationMode": "attack",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              25,
+              25,
+              25,
+              25,
+              25,
+              25,
+              25,
+              25,
+              25,
+              25
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 18,
+          "handle": "MG_FIREWALL",
+          "name": "火焰之壁",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "MG_FIREBALL",
+              "name": "火球術",
+              "level": 5
+            },
+            {
+              "handle": "MG_SIGHT",
+              "name": "火狩",
+              "level": 1
+            }
+          ],
+          "description": "火焰之壁(Firewall)\nMAX Lv : 10\n習得條件 : 火狩 1、火球術 5\n系列 : 主動\n類型 : 魔法\n對象 : 地面1格\n內容 : 消耗SP40後，建立火牆對靠近的敵人給予MATK50%的火屬性魔法傷害，並倒退2格。\n最多可安裝3個。\n_\n[Lv 1] : 每1個牆壁: 3次攻擊、持續時間: 5秒\n[Lv 2] : 每1個牆壁: 4次攻擊、持續時間: 6秒\n[Lv 3] : 每1個牆壁: 5次攻擊、持續時間: 7秒\n[Lv 4] : 每1個牆壁: 6次攻擊、持續時間: 8秒\n[Lv 5] : 每1個牆壁: 7次攻擊、持續時間: 9秒\n[Lv 6] : 每1個牆壁: 8次攻擊、持續時間:10秒\n[Lv 7] : 每1個牆壁: 9次攻擊、持續時間:11秒\n[Lv 8] : 每1個牆壁:10次攻擊、持續時間:12秒\n[Lv 9] : 每1個牆壁:11次攻擊、持續時間:13秒\n[Lv10] : 每1個牆壁:12次攻擊、持續時間:14秒",
+          "englishName": "Fire Wall",
+          "type": "Magic",
+          "targetType": "Ground",
+          "range": 9,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              40,
+              40,
+              40,
+              40,
+              40,
+              40,
+              40,
+              40,
+              40,
+              40
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 19,
+          "handle": "MG_FIREBOLT",
+          "name": "火箭術",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [],
+          "description": "火箭術(Firebolt)\nMAX Lv : 10\n系列 : 主動\n類型 : 魔法\n對象 : 目標1個\n內容 : 用火箭攻擊敵人，\n給予MATK100%的火屬性魔法傷害。\n_\n[Lv 1] :  1次攻擊、SP消耗:12\n[Lv 2] :  2次攻擊、SP消耗:14\n[Lv 3] :  3次攻擊、SP消耗:16\n[Lv 4] :  4次攻擊、SP消耗:18\n[Lv 5] :  5次攻擊、SP消耗:20\n[Lv 6] :  6次攻擊、SP消耗:22\n[Lv 7] :  7次攻擊、SP消耗:24\n[Lv 8] :  8次攻擊、SP消耗:26\n[Lv 9] :  9次攻擊、SP消耗:28\n[Lv10] : 10次攻擊、SP消耗:30",
+          "englishName": "Fire Bolt",
+          "type": "Magic",
+          "targetType": "Attack",
+          "range": 9,
+          "automationMode": "attack",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              12,
+              14,
+              16,
+              18,
+              20,
+              22,
+              24,
+              26,
+              28,
+              30
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 20,
+          "handle": "MG_LIGHTNINGBOLT",
+          "name": "雷擊術",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [],
+          "description": "雷擊術(Lightning bolt)\nMAX Lv : 10\n系列 : 主動\n類型 : 魔法\n對象 : 目標1個\n內容 : 從天空落下雷擊攻擊敵人，給予MATK100%的風屬性魔法傷害。\n_\n[Lv 1] :  1次攻擊、SP消耗:12\n[Lv 2] :  2次攻擊、SP消耗:14\n[Lv 3] :  3次攻擊、SP消耗:16\n[Lv 4] :  4次攻擊、SP消耗:18\n[Lv 5] :  5次攻擊、SP消耗:20\n[Lv 6] :  6次攻擊、SP消耗:22\n[Lv 7] :  7次攻擊、SP消耗:24\n[Lv 8] :  8次攻擊、SP消耗:26\n[Lv 9] :  9次攻擊、SP消耗:28\n[Lv10] : 10次攻擊、SP消耗:30",
+          "englishName": "Lightning Bolt",
+          "type": "Magic",
+          "targetType": "Attack",
+          "range": 9,
+          "automationMode": "attack",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              12,
+              14,
+              16,
+              18,
+              20,
+              22,
+              24,
+              26,
+              28,
+              30
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 21,
+          "handle": "MG_THUNDERSTORM",
+          "name": "雷爆術",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "MG_LIGHTNINGBOLT",
+              "name": "雷擊術",
+              "level": 4
+            }
+          ],
+          "description": "雷爆術(Thunder storm)\nMAX Lv : 10\n習得條件 : 雷擊術 4\n系列 : 主動\n類型 : 魔法\n對象 : 地面1格\n內容 : 在指定的位置落下雷擊，對5X5格範圍內的敵人給予MATK100%的風屬性魔法傷害。\n_\n[Lv 1] :  1次攻擊、SP消耗:29\n[Lv 2] :  2次攻擊、SP消耗:34\n[Lv 3] :  3次攻擊、SP消耗:39\n[Lv 4] :  4次攻擊、SP消耗:44\n[Lv 5] :  5次攻擊、SP消耗:49\n[Lv 6] :  6次攻擊、SP消耗:54\n[Lv 7] :  7次攻擊、SP消耗:59\n[Lv 8] :  8次攻擊、SP消耗:64\n[Lv 9] :  9次攻擊、SP消耗:69\n[Lv10] : 10次攻擊、SP消耗:74",
+          "englishName": "Thunderstorm",
+          "type": "Magic",
+          "targetType": "Ground",
+          "range": 9,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              29,
+              34,
+              39,
+              44,
+              49,
+              54,
+              59,
+              64,
+              69,
+              74
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 22,
+          "handle": "AL_DP",
+          "name": "天使之護",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [],
+          "description": "天使之護(Divine Protection)\nMAX Lv : 10\n14習得條件 : 治療術 1\n系列 : 被動\n內容 : 可增加對惡魔型怪和不死屬性敵人攻擊時的防禦力，角色等級越高時傷害減少量越多。\n在受到惡魔型怪、不死屬性敵人的最終傷害中扣除傷害減少量。\n_\n[Lv 1] : 傷害減少量+3\n[Lv 2] : 傷害減少量+6\n[Lv 3] : 傷害減少量+9\n[Lv 4] : 傷害減少量+12\n[Lv 5] : 傷害減少量+15\n[Lv 6] : 傷害減少量+18\n[Lv 7] : 傷害減少量+21\n[Lv 8] : 傷害減少量+24\n[Lv 9] : 傷害減少量+27\n[Lv10] : 傷害減少量+30",
+          "englishName": "Divine Protection",
+          "type": "Weapon",
+          "targetType": "Passive",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 23,
+          "handle": "AL_DEMONBANE",
+          "name": "天使之擊",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "AL_DP",
+              "name": "天使之護",
+              "level": 3
+            }
+          ],
+          "description": "天使之擊(Demonbane)\nMAX Lv : 10\n習得條件 : 天使之護 3\n系列 : 被動\n內容 : 提升對惡魔型怪和不死屬性敵人的攻擊效果，角色等級越高時攻擊力越高。\n給予惡魔型怪、不死屬性敵人的物理傷害加計傷害增加量。\n_\n[Lv 1] : 傷害量+3\n[Lv 2] : 傷害量+6\n[Lv 3] : 傷害量+9\n[Lv 4] : 傷害量+12\n[Lv 5] : 傷害量+15\n[Lv 6] : 傷害量+18\n[Lv 7] : 傷害量+21\n[Lv 8] : 傷害量+24\n[Lv 9] : 傷害量+27\n[Lv10] : 傷害量+30",
+          "englishName": "Demon Bane",
+          "type": "Weapon",
+          "targetType": "Passive",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 24,
+          "handle": "AL_RUWACH",
+          "name": "光獵",
+          "maxLevel": 1,
+          "excluded": false,
+          "requires": [],
+          "description": "光獵(Ruwach)\nMAX Lv : 1\n系列 : 主動\n類型 : 輔助、魔法\n對象 : 立即施展\n內容 : 消耗SP10後，憑藉聖靈的力量在10秒內發現自己周圍5X5格內藏匿的目標。\n如果藏匿的目標是敵人時，給予MATK145%的聖屬性魔法傷害。",
+          "englishName": "Ruwach",
+          "type": "Magic",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              10
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 25,
+          "handle": "AL_PNEUMA",
+          "name": "光之障壁",
+          "maxLevel": 1,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "AL_WARP",
+              "name": "傳送之陣",
+              "level": 4
+            }
+          ],
+          "description": "光之障壁(Pneuma)\nMAX Lv : 1\n習得條件 : 傳送之陣 4\n系列 : 主動\n類型 : 輔助\n對象 : 地面1格\n內容 : 消耗SP10後，10秒內在指定地點及周圍3X3格範圍內打造免疫遠距離物理傷害的防禦區域。",
+          "englishName": "Pneuma",
+          "type": "Magic",
+          "targetType": "Ground",
+          "range": 9,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              10
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 26,
+          "handle": "AL_TELEPORT",
+          "name": "瞬間移動",
+          "maxLevel": 2,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "AL_RUWACH",
+              "name": "光獵",
+              "level": 1
+            }
+          ],
+          "description": "瞬間移動(Teleportation)\nMAX Lv : 2\n習得條件 : 光獵 1\n系列 : 主動\n類型 : 輔助\n對象 : 立即施展\n內容 : 瞬間移動至其他地區。\n但在地元素領域效果內不能使用。\n_\n[Lv 1] : 可飛到地圖內任何地點，消耗SP: 10\n[Lv 2] : 可飛到記憶點，消耗SP: 9",
+          "englishName": "Teleport",
+          "type": "Magic",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              10,
+              9
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 27,
+          "handle": "AL_WARP",
+          "name": "傳送之陣",
+          "maxLevel": 4,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "AL_TELEPORT",
+              "name": "瞬間移動",
+              "level": 2
+            }
+          ],
+          "description": "傳送之陣(Warp portal)\nMAX Lv : 4\n習得條件 : 瞬間移動 2\n系列 : 主動\n對象 : 地面1格\n內容 : 在指定位置設置能飛到其他地區的次元門，不限等級最多可傳送8名，會消耗藍色魔力礦石 1個。\n但在地元素領域效果內不能使用。\n_\n[Lv 1] : 移動到儲存點。\n[Lv 2] : 可使用1個記憶點\n[Lv 3] : 可使用2個記憶點\n[Lv 4] : 可使用3個記憶點\n[記憶點] : 輸入/memo可記憶位置。",
+          "englishName": "Warp Portal",
+          "type": "Magic",
+          "targetType": "Ground",
+          "range": 9,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              35,
+              32,
+              29,
+              26
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 28,
+          "handle": "AL_HEAL",
+          "name": "治癒術",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [],
+          "description": "治癒術(Heal)\nMAX Lv : 10\n14習得條件 : 信任 10、天使之擊 5\n系列 : 主動\n類型 : 恢復\n對象 : 目標1個\n內容 : 可恢復指定玩家的體力，根據技能等級提高基本恢復量外，視施展者的LV和總INT、武器的基本及精煉產生的魔法攻擊力而增加恢復量。\n對不死屬性怪使用時，給予治癒恢復量50%的聖屬性魔法傷害。",
+          "englishName": "Heal",
+          "type": "Magic",
+          "targetType": "Support",
+          "range": 9,
+          "automationMode": "selfRecovery",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              13,
+              16,
+              19,
+              22,
+              25,
+              28,
+              31,
+              34,
+              37,
+              40
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 29,
+          "handle": "AL_INCAGI",
+          "name": "加速術",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "AL_HEAL",
+              "name": "治癒術",
+              "level": 3
+            }
+          ],
+          "description": "加速術(Increase agility)\nMAX Lv : 10\n習得條件 : 治癒術 3\n系列 : 主動\n類型 : Buff\n對象 : 目標1個\n內容 : 在一定時間內能增加指定目標的移動速度及攻擊速度(攻擊後延遲減少)，使用時消耗HP 15。\n對陷入[異常狀態:緩速術]的目標使用時，會解除該狀態及附加加速術效果。\n_\n[Lv 1] : AGI+3、攻擊速度:+1%、持續時間: 60秒\n[Lv 2] : AGI+4、攻擊速度:+2%、持續時間: 80秒\n[Lv 3] : AGI+5、攻擊速度:+3%、持續時間:100秒\n[Lv 4] : AGI+6、攻擊速度:+4%、持續時間:120秒\n[Lv 5] : AGI+7、攻擊速度:+5%、持續時間:140秒\n[Lv 6] : AGI+8、攻擊速度:+6%、持續時間:160秒\n[Lv 7] : AGI+9、攻擊速度:+7%、持續時間:180秒\n[Lv 8] : AGI+10、攻擊速度:+8%、持續時間:200秒\n[Lv 9] : AGI+11、攻擊速度:+9%、持續時間:220秒\n[Lv10] : AGI+12、攻擊速度:+10%、持續時間:240秒",
+          "englishName": "Increase AGI",
+          "type": "Magic",
+          "targetType": "Support",
+          "range": 9,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              18,
+              21,
+              24,
+              27,
+              30,
+              33,
+              36,
+              39,
+              42,
+              45
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 30,
+          "handle": "AL_DECAGI",
+          "name": "緩速術",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "AL_INCAGI",
+              "name": "加速術",
+              "level": 1
+            }
+          ],
+          "description": "緩速術(Decrease agility)\nMAX Lv : 10\n習得條件 : 加速術 1\n系列 : 主動\n類型 : Debuff\n對象 : 目標1個\n內容 : 在一定時間內讓指定敵人有機率陷入[異常狀態:緩速術]。\n持續時間內減少目標的AGI及降低移動速度。\n_\n[Lv 1] : AGI- 3、成功率: 53%、持續時間: 20秒\n[Lv 2] : AGI- 4、成功率: 56%、持續時間: 25秒\n[Lv 3] : AGI- 5、成功率: 59%、持續時間: 30秒\n[Lv 4] : AGI- 6、成功率: 62%、持續時間: 35秒\n[Lv 5] : AGI- 7、成功率: 65%、持續時間: 40秒\n[Lv 6] : AGI- 8、成功率: 68%、持續時間: 45秒\n[Lv 7] : AGI- 9、成功率: 71%、持續時間: 50秒\n[Lv 8] : AGI-10、成功率: 74%、持續時間: 55秒\n[Lv 9] : AGI-11、成功率: 77%、持續時間: 60秒\n[Lv10] : AGI-12、成功率: 80%、持續時間: 65秒",
+          "englishName": "Decrease AGI",
+          "type": "Magic",
+          "targetType": "Attack",
+          "range": 9,
+          "automationMode": "attack",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              15,
+              17,
+              19,
+              21,
+              23,
+              25,
+              27,
+              29,
+              31,
+              33
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 31,
+          "handle": "AL_HOLYWATER",
+          "name": "天使之淚",
+          "maxLevel": 1,
+          "excluded": false,
+          "requires": [],
+          "description": "天使之淚 (Aqua Benedicta)\nMAX Lv : 1\n系列 : 主動\n類型 : 輔助\n對象 : 立即施展\n內容 : 消耗SP10後，在空瓶1個中製作出聖水1個，需在腳泡水處使用。",
+          "englishName": "Aqua Benedicta",
+          "type": "Magic",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              10
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 32,
+          "handle": "AL_CRUCIS",
+          "name": "天使之光",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "AL_DEMONBANE",
+              "name": "天使之擊",
+              "level": 3
+            }
+          ],
+          "description": "天使之光(Signum Crucis)\nMAX Lv : 10\n習得條件 : 天使之擊 3\n系列 : 主動\n類型 : Debuff\n對象 : 立即施展\n內容 : 畫十字符號以降低畫面內惡魔型、不死屬性魔物的物理防禦力。\n_\n[Lv 1] : 物理防禦力-14%、成功率: 27%\n[Lv 2] : 物理防禦力-18%、成功率: 31%\n[Lv 3] : 物理防禦力-22%、成功率: 35%\n[Lv 4] : 物理防禦力-26%、成功率: 39%\n[Lv 5] : 物理防禦力-30%、成功率: 43%\n[Lv 6] : 物理防禦力-34%、成功率: 47%\n[Lv 7] : 物理防禦力-38%、成功率: 51%\n[Lv 8] : 物理防禦力-42%、成功率: 55%\n[Lv 9] : 物理防禦力-46%、成功率: 59%\n[Lv10] : 物理防禦力-50%、成功率: 63%",
+          "englishName": "Signum Crucis",
+          "type": "Magic",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              35,
+              35,
+              35,
+              35,
+              35,
+              35,
+              35,
+              35,
+              35,
+              35
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 33,
+          "handle": "AL_ANGELUS",
+          "name": "天使之障壁",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "AL_DP",
+              "name": "天使之護",
+              "level": 3
+            }
+          ],
+          "description": "天使之障壁(Angelus)\nMAX Lv : 10\n習得條件 : 天使之護 3\n系列 : 主動\n類型 : Buff\n對象 : 立即施展\n內容 : 透過三鐘經祈禱在一定時間內提升自己和畫面內隊員的VIT物理防禦力及MaxHP。\n_\n[Lv 1] : VIT防禦力+5%、HP+50、持續時間: 30秒\n[Lv 2] : VIT防禦力+10%、HP+100、持續時間: 60秒\n[Lv 3] : VIT防禦力+15%、HP+150、持續時間: 90秒\n[Lv 4] : VIT防禦力+20%、HP+200、持續時間:120秒\n[Lv 5] : VIT防禦力+25%、HP+250、持續時間:150秒\n[Lv 6] : VIT防禦力+30%、HP+300、持續時間:180秒\n[Lv 7] : VIT防禦力+35%、HP+350、持續時間:210秒\n[Lv 8] : VIT防禦力+40%、HP+400、持續時間:240秒\n[Lv 9] : VIT防禦力+45%、HP+450、持續時間:270秒\n[Lv10] : VIT防禦力+50%、HP+500、持續時間:300秒",
+          "englishName": "Angelus",
+          "type": "Magic",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": "selfBuff",
+          "automationStatus": "EFST_ANGELUS",
+          "resources": {
+            "spCostByLevel": [
+              23,
+              26,
+              29,
+              32,
+              35,
+              38,
+              41,
+              44,
+              47,
+              50
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 34,
+          "handle": "AL_BLESSING",
+          "name": "天使之賜福",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "AL_DP",
+              "name": "天使之護",
+              "level": 5
+            }
+          ],
+          "description": "天使之賜福(Blessing)\nMAX Lv : 10\n習得條件 : 天使之護 5\n系列 : 主動\n類型 : Buff\n對象 : 目標1個\n內容 : 暫時提升指定玩家的STR/INT/DEX和命中率，對陷入詛咒或石化狀態的玩家使用時，可恢復異常狀態。\n對不死型、惡魔型怪使用時，STR/INT/DEX-50%。\n_\n[Lv 1] : STR/INT/DEX+1、HIT+2、持續時間: 60秒\n[Lv 2] : STR/INT/DEX+2、HIT+4、持續時間: 80秒\n[Lv 3] : STR/INT/DEX+3、HIT+6、持續時間:100秒\n[Lv 4] : STR/INT/DEX+4、HIT+8、持續時間:120秒\n[Lv 5] : STR/INT/DEX+5、HIT+10、持續時間:140秒\n[Lv 6] : STR/INT/DEX+6、HIT+12、持續時間:160秒\n[Lv 7] : STR/INT/DEX+7、HIT+14、持續時間:180秒\n[Lv 8] : STR/INT/DEX+8、HIT+16、持續時間:200秒\n[Lv 9] : STR/INT/DEX+9、HIT+18、持續時間:220秒\n[Lv10] : STR/INT/DEX+10、HIT+20、持續時間:240秒",
+          "englishName": "Blessing",
+          "type": "Magic",
+          "targetType": "Support",
+          "range": 9,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              28,
+              32,
+              36,
+              40,
+              44,
+              48,
+              52,
+              56,
+              60,
+              64
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 35,
+          "handle": "AL_CURE",
+          "name": "治療術",
+          "maxLevel": 1,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "AL_HEAL",
+              "name": "治癒術",
+              "level": 2
+            }
+          ],
+          "description": "治療術(Cure)\nMAX Lv : 1\n4習得條件 : 治癒術 2\n14習得條件 : 信任 5\n系列 : 主動\n類型 : 輔助\n對象 : 目標1個\n內容 : 消耗SP15後，讓陷入沉默、混亂、黑暗狀態的玩家恢復異常狀態。000000",
+          "englishName": "Cure",
+          "type": "Magic",
+          "targetType": "Support",
+          "range": 9,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              15
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 36,
+          "handle": "MC_INCCARRY",
+          "name": "負重量上升",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [],
+          "description": "負重量上升(Enlarge Weight limit)\nMAX Lv : 10\n系列 : 被動\n內容 : 可提高道具負重限制。\n_\n[Lv 1] : 負重量限制+200\n[Lv 2] : 負重量限制+400\n[Lv 3] : 負重量限制+600\n[Lv 4] : 負重量限制+800\n[Lv 5] : 負重量限制+1000\n[Lv 6] : 負重量限制+1200\n[Lv 7] : 負重量限制+1400\n[Lv 8] : 負重量限制+1600\n[Lv 9] : 負重量限制+1800\n[Lv10] : 負重量限制+2000",
+          "englishName": "Enlarge Weight Limit",
+          "type": "",
+          "targetType": "Passive",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 37,
+          "handle": "MC_DISCOUNT",
+          "name": "低價買進",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "MC_INCCARRY",
+              "name": "負重量上升",
+              "level": 3
+            }
+          ],
+          "description": "低價買進 (Discount)\nMAX Lv : 10\n習得條件 : 負重量上升 3\n系列 : 被動\n內容 : 在一般NPC商店購買物品時，能買到比定價更便宜的價格。\n_\n[Lv 1] : 折扣率7%\n[Lv 2] : 折扣率9%\n[Lv 3] : 折扣率11%\n[Lv 4] : 折扣率13%\n[Lv 5] : 折扣率15%\n[Lv 6] : 折扣率17%\n[Lv 7] : 折扣率19%\n[Lv 8] : 折扣率21%\n[Lv 9] : 折扣率23%\n[Lv10] : 折扣率24%",
+          "englishName": "Discount",
+          "type": "",
+          "targetType": "Passive",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 38,
+          "handle": "MC_OVERCHARGE",
+          "name": "高價賣出",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "MC_DISCOUNT",
+              "name": "低價買進",
+              "level": 3
+            }
+          ],
+          "description": "高價賣出(Overcharge)\nMAX Lv : 10\n習得條件 : 低價買進 3\n系列 : 被動\n內容 : 向NPC販售時可賣出比出價更高的價錢。\n_\n[Lv 1] : 獲利7%\n[Lv 2] : 獲利9%\n[Lv 3] : 獲利11%\n[Lv 4] : 獲利13%\n[Lv 5] : 獲利15%\n[Lv 6] : 獲利17%\n[Lv 7] : 獲利19%\n[Lv 8] : 獲利21%\n[Lv 9] : 獲利23%\n[Lv10] : 獲利24%",
+          "englishName": "Overcharge",
+          "type": "",
+          "targetType": "Passive",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 39,
+          "handle": "MC_PUSHCART",
+          "name": "手推車使用",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "MC_INCCARRY",
+              "name": "負重量上升",
+              "level": 5
+            }
+          ],
+          "description": "手推車使用(Pushcart)\nMAX Lv : 10\n習得條件 : 負重量上升 5\n系列 : 被動\n內容 : 可使用能搬運許多道具的手推車。\n手推車可向卡普拉職員承租，按[Alt-W]鍵就能使用。\n習得1Lv時，雖因手推車而降低移動速度，但隨習得等級而下降的移動速度會恢復，到10Lv時則恢復原狀。\n手推車上的道具無法直接使用。\n_\n[Lv 1] : 移動速度減少懲罰: 45%\n[Lv 2] : 移動速度減少懲罰: 40%\n[Lv 3] : 移動速度減少懲罰: 35%\n[Lv 4] : 移動速度減少懲罰: 30%\n[Lv 5] : 移動速度減少懲罰: 25%\n[Lv 6] : 移動速度減少懲罰: 20%\n[Lv 7] : 移動速度減少懲罰: 15%\n[Lv 8] : 移動速度減少懲罰: 10%\n[Lv 9] : 移動速度減少懲罰: 5%\n[Lv10] : 移動速度減少懲罰: 無",
+          "englishName": "Pushcart",
+          "type": "",
+          "targetType": "Passive",
+          "range": 1,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 40,
+          "handle": "MC_IDENTIFY",
+          "name": "物品鑑定",
+          "maxLevel": 1,
+          "excluded": false,
+          "requires": [],
+          "description": "物品鑑定(Identify)\nMAX Lv : 1\n系列 : 主動\n類型 : 輔助\n對象 : 自己\n內容 : 消耗SP10後，來鑑定道具。",
+          "englishName": "Item Appraisal",
+          "type": "",
+          "targetType": "Self",
+          "range": 1,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              10
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 41,
+          "handle": "MC_VENDING",
+          "name": "露天商店",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "MC_PUSHCART",
+              "name": "手推車使用",
+              "level": 3
+            }
+          ],
+          "description": "露天商店(Vending)\nMAX Lv : 10\n習得條件 : 手推車使用 3\n系列 : 主動\n類型 : 輔助\n對象 : 自己\n內容 : 裝備手推車時能使用，消耗SP30後，在原地開設可銷售各類道具的簡易露天商店。\n僅能販售手推車內的道具，而且可銷售的品項數量隨等級而增加。\n_\n[Lv 1] : 可販售品項: 3樣\n[Lv 2] : 可販售品項: 4樣\n[Lv 3] : 可販售品項: 5樣\n[Lv 4] : 可販售品項: 6樣\n[Lv 5] : 可販售品項: 7樣\n[Lv 6] : 可販售品項: 8樣\n[Lv 7] : 可販售品項: 9樣\n[Lv 8] : 可販售品項:10樣\n[Lv 9] : 可販售品項:11樣\n[Lv10] : 可販售品項:12樣",
+          "englishName": "Vending",
+          "type": "",
+          "targetType": "Self",
+          "range": 1,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              30,
+              30,
+              30,
+              30,
+              30,
+              30,
+              30,
+              30,
+              30,
+              30
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 42,
+          "handle": "MC_MAMMONITE",
+          "name": "金錢攻擊",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [],
+          "description": "金錢攻擊(Mammonite)\nMAX Lv : 10\n系列 : 主動\n類型 : 近距離物理\n對象 : 目標1個\n內容 : 消耗SP5後，對指定的敵人使用錢幣來進行猛烈攻擊。\n使用時會消耗Zeny。\n_\n[Lv 1] : ATK150%、Zeny消耗: 100Z\n[Lv 2] : ATK200%、Zeny消耗: 200Z\n[Lv 3] : ATK250%、Zeny消耗: 300Z\n[Lv 4] : ATK300%、Zeny消耗: 400Z\n[Lv 5] : ATK350%、Zeny消耗: 500Z\n[Lv 6] : ATK400%、Zeny消耗: 600Z\n[Lv 7] : ATK450%、Zeny消耗: 700Z\n[Lv 8] : ATK500%、Zeny消耗: 800Z\n[Lv 9] : ATK550%、Zeny消耗: 900Z\n[Lv10] : ATK600%、Zeny消耗:1000Z",
+          "englishName": "Mammonite",
+          "type": "Weapon",
+          "targetType": "Attack",
+          "range": -1,
+          "automationMode": "attack",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5
+            ],
+            "zenyCostByLevel": [
+              100,
+              200,
+              300,
+              400,
+              500,
+              600,
+              700,
+              800,
+              900,
+              1000
+            ],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 43,
+          "handle": "AC_OWL",
+          "name": "鶚梟之眼",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [],
+          "description": "鶚梟之眼(Owl's Eye)\nMAX Lv : 10\n系列 : 被動\n內容 : 可提高DEX。\n_\n[Lv 1] : DEX+1\n[Lv 2] : DEX+2\n[Lv 3] : DEX+3\n[Lv 4] : DEX+4\n[Lv 5] : DEX+5\n[Lv 6] : DEX+6\n[Lv 7] : DEX+7\n[Lv 8] : DEX+8\n[Lv 9] : DEX+9\n[Lv10] : DEX+10",
+          "englishName": "Owl's Eye",
+          "type": "",
+          "targetType": "Passive",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 44,
+          "handle": "AC_VULTURE",
+          "name": "蒼鷹之眼",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "AC_OWL",
+              "name": "鶚梟之眼",
+              "level": 3
+            }
+          ],
+          "description": "蒼鷹之眼(Vulture's Eye)\nMAX Lv : 10\n習得條件 : 鶚梟之眼 3\n系列 : 被動\n內容 : 使用弓時會再增加射程，並能補正命中率。\n_\n[Lv 1] : 弓箭射程+1、命中補正: 1%\n[Lv 2] : 弓箭射程+2、命中補正: 2%\n[Lv 3] : 弓箭射程+3、命中補正: 3%\n[Lv 4] : 弓箭射程+4、命中補正: 4%\n[Lv 5] : 弓箭射程+5、命中補正: 5%\n[Lv 6] : 弓箭射程+6、命中補正: 6%\n[Lv 7] : 弓箭射程+7、命中補正: 7%\n[Lv 8] : 弓箭射程+8、命中補正: 8%\n[Lv 9] : 弓箭射程+9、命中補正: 9%\n[Lv10] : 弓箭射程+10、命中補正:10%",
+          "englishName": "Vulture's Eye",
+          "type": "",
+          "targetType": "Passive",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 45,
+          "handle": "AC_CONCENTRATION",
+          "name": "心神凝聚",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "AC_VULTURE",
+              "name": "蒼鷹之眼",
+              "level": 1
+            }
+          ],
+          "description": "心神凝聚(Attention concentrate)\nMAX Lv : 10\n習得條件 : 蒼鷹之眼 1\n系列 : 主動\n類型 : Buff、輔助\n對象 : 自己\n內容 : 可暫時增加DEX和AGI。\n若再施展心神凝聚時，\n能找出自己周圍3X3格內藏匿的目標。\n_\n[Lv 1] : DEX、AGI+3%、持續時間: 60秒\n[Lv 2] : DEX、AGI+4%、持續時間: 80秒\n[Lv 3] : DEX、AGI+5%、持續時間: 100秒\n[Lv 4] : DEX、AGI+6%、持續時間: 120秒\n[Lv 5] : DEX、AGI+7%、持續時間: 140秒\n[Lv 6] : DEX、AGI+8%、持續時間: 160秒\n[Lv 7] : DEX、AGI+9%、持續時間: 180秒\n[Lv 8] : DEX、AGI+10%、持續時間: 200秒\n[Lv 9] : DEX、AGI+11%、持續時間: 220秒\n[Lv10] : DEX、AGI+12%、持續時間: 240秒",
+          "englishName": "Improve Concentration",
+          "type": "Weapon",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": "selfBuff",
+          "automationStatus": "EFST_CONCENTRATION",
+          "resources": {
+            "spCostByLevel": [
+              25,
+              30,
+              35,
+              40,
+              45,
+              50,
+              55,
+              60,
+              65,
+              70
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 48,
+          "handle": "TF_DOUBLE",
+          "name": "二刀連擊",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [],
+          "description": "二刀連擊\nMAX Lv : 10\n系列 : 被動\n內容 : 使用短劍攻擊敵人時，有機率造成連續攻擊，技能等級越高時觸發機率越高，還少量增加命中率補正效果。\n使用拳刃系列武器時，會影響左手的傷害。\n_\n[Lv 1] : 觸發機率: 7%、命中補正: 1%\n[Lv 2] : 觸發機率: 14%、命中補正: 2%\n[Lv 3] : 觸發機率: 21%、命中補正: 3%\n[Lv 4] : 觸發機率: 28%、命中補正: 4%\n[Lv 5] : 觸發機率: 35%、命中補正: 5%\n[Lv 6] : 觸發機率: 42%、命中補正: 6%\n[Lv 7] : 觸發機率: 49%、命中補正: 7%\n[Lv 8] : 觸發機率: 56%、命中補正: 8%\n[Lv 9] : 觸發機率: 63%、命中補正: 9%\n[Lv10] : 觸發機率: 70%、命中補正: 10%",
+          "englishName": "Double Attack",
+          "type": "Weapon",
+          "targetType": "Passive",
+          "range": -1,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 49,
+          "handle": "TF_MISS",
+          "name": "殘影",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [],
+          "description": "殘影(Increase dodge)\nMAX Lv : 10\n系列 : 被動\n內容 : 能提高迴避敵人攻擊的機率，2轉職業後，迴避率也會增加。\n刺客系列時，移動速度增加效果也將提升。\n_\n[Lv 1] : FLEE+3、2轉之後FLEE+4\n[Lv 2] : FLEE+6、2轉之後FLEE+8\n[Lv 3] : FLEE+9、2轉之後FLEE+12\n[Lv 4] : FLEE+12、2轉之後FLEE+16\n[Lv 5] : FLEE+15、2轉之後FLEE+20\n[Lv 6] : FLEE+18、2轉之後FLEE+24\n[Lv 7] : FLEE+21、2轉之後FLEE+28\n[Lv 8] : FLEE+24、2轉之後FLEE+32\n[Lv 9] : FLEE+27、2轉之後FLEE+36\n[Lv10] : FLEE+30、2轉之後FLEE+40",
+          "englishName": "Improve Dodge",
+          "type": "Weapon",
+          "targetType": "Passive",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 50,
+          "handle": "TF_STEAL",
+          "name": "偷竊",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [],
+          "description": "偷竊(Steal)\nMAX Lv : 10\n系列 : 主動\n類型 : 輔助\n對象 : 目標1個\n內容 : 消耗SP10後，可偷取指定目標身上的道具，目標的DEX值比自己高時成功率會下降。\n不適用於BOSS怪及玩家，不能從偷走過的對象再次偷取。\n_\n[Lv 1] : 基本成功率: 8%\n[Lv 2] : 基本成功率: 14%\n[Lv 3] : 基本成功率: 20%\n[Lv 4] : 基本成功率: 26%\n[Lv 5] : 基本成功率: 32%\n[Lv 6] : 基本成功率: 38%\n[Lv 7] : 基本成功率: 44%\n[Lv 8] : 基本成功率: 50%\n[Lv 9] : 基本成功率: 56%\n[Lv10] : 基本成功率: 62%",
+          "englishName": "Steal",
+          "type": "Weapon",
+          "targetType": "Attack",
+          "range": 1,
+          "automationMode": "attack",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 51,
+          "handle": "TF_HIDING",
+          "name": "隱匿",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "TF_STEAL",
+              "name": "偷竊",
+              "level": 5
+            }
+          ],
+          "description": "隱匿(Hiding)\nMAX Lv : 10\n習得條件 : 偷竊 5\n系列 : 主動\n類型 : 輔助\n對象 : 立即施展\n內容 : 消耗SP10後，可躲藏到地底下，但會被敵人的搜索技能發現。\n也會被惡魔型、昆蟲型怪及BOSS怪發現，隱匿狀態下再次使用隱匿時就會解除。\n_\n[Lv 1] : 持續時間: 30秒、每5秒再消耗SP1\n[Lv 2] : 持續時間: 60秒、每6秒再消耗SP1\n[Lv 3] : 持續時間: 90秒、每7秒再消耗SP1\n[Lv 4] : 持續時間: 120秒、每8秒再消耗SP1\n[Lv 5] : 持續時間: 150秒、每9秒再消耗SP1\n[Lv 6] : 持續時間: 180秒、每10秒再消耗SP 1\n[Lv 7] : 持續時間: 210秒、每11秒再消耗SP1\n[Lv 8] : 持續時間: 240秒、每12秒再消耗SP1\n[Lv 9] : 持續時間: 270秒、每13秒再消耗SP1\n[Lv10] : 持續時間: 300秒、每14秒再消耗SP1",
+          "englishName": "Hiding",
+          "type": "",
+          "targetType": "Self",
+          "range": 1,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 52,
+          "handle": "TF_POISON",
+          "name": "施毒",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [],
+          "description": "施毒(Envenom)\nMAX Lv : 10\n系列 : 主動\n類型 : 近距離物理\n對象 : 目標1個\n內容 : 消耗SP12後，給予指定的敵人毒屬性物理傷害，有機率讓敵人陷入[異常狀態:中毒]。\n已中毒的敵人每秒鐘會受到MHP比例的傷害，物理防禦力-25%。\n施毒技能的傷害為一般物理傷害加計依技能的傷害量。\n_\n[Lv 1] : 毒屬性傷害:+15、施毒成功率: 14%\n[Lv 2] : 毒屬性傷害:+30、施毒成功率: 18%\n[Lv 3] : 毒屬性傷害:+45、施毒成功率: 22%\n[Lv 4] : 毒屬性傷害:+60、施毒成功率: 26%\n[Lv 5] : 毒屬性傷害:+75、施毒成功率: 30%\n[Lv 6] : 毒屬性傷害:+90、施毒成功率: 34%\n[Lv 7] : 毒屬性傷害:+105、施毒成功率: 38%\n[Lv 8] : 毒屬性傷害:+120、施毒成功率: 42%\n[Lv 9] : 毒屬性傷害:+135、施毒成功率: 46%\n[Lv10] : 毒屬性傷害:+150、施毒成功率: 50%",
+          "englishName": "Envenom",
+          "type": "Weapon",
+          "targetType": "Attack",
+          "range": -2,
+          "automationMode": "attack",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              12,
+              12,
+              12,
+              12,
+              12,
+              12,
+              12,
+              12,
+              12,
+              12
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 53,
+          "handle": "TF_DETOXIFY",
+          "name": "解毒",
+          "maxLevel": 1,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "TF_POISON",
+              "name": "施毒",
+              "level": 3
+            }
+          ],
+          "description": "解毒(Detoxify)\nMAX Lv : 1\n習得條件 : 施毒 3\n系列 : 主動\n類型 : 輔助\n對象 : 目標1個\n內容 : 消耗SP10後，對中毒的玩家使用時可解毒。",
+          "englishName": "Detoxify",
+          "type": "Weapon",
+          "targetType": "Support",
+          "range": 9,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              10
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": null,
+          "handle": "ALL_BUYING_STORE",
+          "name": "開設購買商店(BUYING STORE)",
+          "maxLevel": 1,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "MC_VENDING",
+              "name": "露天商店",
+              "level": 1
+            }
+          ],
+          "description": "開設採購商店 (BUYING STORE)\n系列：輔助\n內容：在你站的位置上開設可以購買各種物品的簡易商店 。會消耗採購商店執照 1個。",
+          "englishName": "Open Buying Store",
+          "type": "",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              30
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": null,
+          "handle": "MC_CARTDECORATE",
+          "name": "改裝手推車II",
+          "maxLevel": 1,
+          "excluded": false,
+          "requires": [],
+          "description": "改裝手推車 2 (Change Cart 2)\n習得條件: 完成任務\n系列: 輔助\n內容: 可挑選豐富多樣又可愛外觀的手推車。",
+          "englishName": "Decorate Cart",
+          "type": "",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              40
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        }
+      ]
+    },
+    "24": {
+      "id": 24,
+      "key": "Gunslinger",
+      "name": "神槍手",
+      "skills": [
+        {
+          "id": 500,
+          "handle": "GS_GLITTERING",
+          "name": "裝滿硬幣",
+          "maxLevel": 5,
+          "excluded": false,
+          "requires": [],
+          "description": "裝滿硬幣\nMAX Lv : 5\n系列 : 輔助\n內容 : 彈起硬幣後出現正面時，會獲得徘徊在自己附近的一枚金色硬幣，反面則失去一枚。\n最多可收集10枚，技能等級越高時出現正面的機率會越高，使用本技能時，會消耗1個金幣。",
+          "englishName": "Flip the Coin",
+          "type": "Misc",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              2,
+              2,
+              2,
+              2,
+              2
+            ],
+            "zenyCostByLevel": [
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 501,
+          "handle": "GS_FLING",
+          "name": "投擲硬幣",
+          "maxLevel": 1,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "GS_GLITTERING",
+              "name": "裝滿硬幣",
+              "level": 1
+            }
+          ],
+          "description": "投擲硬幣\nMAX Lv : 1\n習得條件 : 裝滿硬幣 1\n系列 : 攻擊\n內容 : 使用硬幣攻擊的同時降低敵人的防禦力，施展的同時最多會消耗5枚硬幣，硬幣消耗的越多降低防禦力的效果就越大。",
+          "englishName": "Fling",
+          "type": "Misc",
+          "targetType": "Attack",
+          "range": 9,
+          "automationMode": "attack",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              10
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 502,
+          "handle": "GS_TRIPLEACTION",
+          "name": "三連攻擊",
+          "maxLevel": 1,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "GS_GLITTERING",
+              "name": "裝滿硬幣",
+              "level": 1
+            }
+          ],
+          "description": "三連攻擊\nMAX Lv : 1\n習得條件 : 裝滿硬幣 1\n系列 : 攻擊\n內容 : 消耗1枚硬幣可施以3連發的攻擊。",
+          "englishName": "Triple Action",
+          "type": "Weapon",
+          "targetType": "Attack",
+          "range": -9,
+          "automationMode": "attack",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              20
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [
+              "Arrow",
+              "Dagger",
+              "Bullet",
+              "Shell",
+              "Grenade",
+              "Shuriken",
+              "Kunai",
+              "Cannonball",
+              "Throwweapon"
+            ],
+            "ammoAmount": 1
+          }
+        },
+        {
+          "id": 503,
+          "handle": "GS_BULLSEYE",
+          "name": "公牛之眼",
+          "maxLevel": 1,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "GS_GLITTERING",
+              "name": "裝滿硬幣",
+              "level": 5
+            }
+          ],
+          "description": "公牛之眼\nMAX Lv : 1\n習得條件 : 裝滿硬幣 5\n系列 : 攻擊\n內容 : 對人類型或動物型的1個敵人，施以猛烈的攻擊，會消耗1枚硬幣，並造成500%的傷害力，有0.1%的機率施展頻死。\n對Boss怪不會產生頻死效果。",
+          "englishName": "Bulls Eye",
+          "type": "Weapon",
+          "targetType": "Attack",
+          "range": -9,
+          "automationMode": "attack",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              30
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [
+              "Arrow",
+              "Dagger",
+              "Bullet",
+              "Shell",
+              "Grenade",
+              "Shuriken",
+              "Kunai",
+              "Cannonball",
+              "Throwweapon"
+            ],
+            "ammoAmount": 1
+          }
+        },
+        {
+          "id": 504,
+          "handle": "GS_MADNESSCANCEL",
+          "name": "瘋狂凱斯樂",
+          "maxLevel": 1,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "GS_GLITTERING",
+              "name": "裝滿硬幣",
+              "level": 4
+            }
+          ],
+          "description": "瘋狂凱斯樂\nMAX Lv : 1\n習得條件 : 裝滿硬幣 4\n系列 : 輔助\n內容 : 消耗1枚硬幣來施展技能時，ATK+100、攻擊速度+20%，但變成不可移動的狀態，若再次使用技能或15秒過後就會解除。\n不能和終極閃躲、加速子彈、白金祭壇同時使用。",
+          "englishName": "Madness Canceller",
+          "type": "Weapon",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              30
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 505,
+          "handle": "GS_ADJUSTMENT",
+          "name": "終極閃躲",
+          "maxLevel": 1,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "GS_GLITTERING",
+              "name": "裝滿硬幣",
+              "level": 4
+            }
+          ],
+          "description": "終極閃躲\nMAX Lv : 1\n習得條件 : 裝滿硬幣 4\n系列 : 輔助\n內容 : 消耗2枚硬幣來施展技能時，在30秒內會有命中率 -30、迴避率+30的效果，遭受遠距離物理攻擊的傷害 -20%，不能和瘋狂凱斯樂同時使用。",
+          "englishName": "Adjustment",
+          "type": "Weapon",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              15
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 506,
+          "handle": "GS_INCREASING",
+          "name": "命中率遞增  ",
+          "maxLevel": 1,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "GS_GLITTERING",
+              "name": "裝滿硬幣",
+              "level": 2
+            }
+          ],
+          "description": "命中率遞增\nMAX Lv : 1\n習得條件 : 裝滿硬幣 2\n系列 : 輔助\n內容 : 消耗4枚硬幣後，在1分鐘內會有命中率+20、DEX+4、AGI+4的效果。",
+          "englishName": "Increasing Accuracy",
+          "type": "Weapon",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              30
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 507,
+          "handle": "GS_MAGICALBULLET",
+          "name": "魔術彈",
+          "maxLevel": 1,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "GS_GLITTERING",
+              "name": "裝滿硬幣",
+              "level": 1
+            }
+          ],
+          "description": "魔術彈\nMAX Lv : 1\n習得條件 : 裝滿硬幣 1\n系列 : 輔助\n內容 : 消耗1枚硬幣後，會在子彈上注入魔力，且在30秒內增加魔法傷害，對技能沒有影響。",
+          "englishName": "Magical Bullet",
+          "type": "Magic",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              7
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 508,
+          "handle": "GS_CRACKER",
+          "name": "轟然巨響",
+          "maxLevel": 1,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "GS_GLITTERING",
+              "name": "裝滿硬幣",
+              "level": 1
+            }
+          ],
+          "description": "轟然巨響\nMAX Lv : 1\n習得條件 : 裝滿硬幣 1\n系列 : 輔助\n內容 : 開槍後使其驚嚇陷入暈眩狀態，會消耗1枚硬幣；位置越近時暈眩機率越高。",
+          "englishName": "Cracker",
+          "type": "Weapon",
+          "targetType": "Attack",
+          "range": -9,
+          "automationMode": "attack",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              10
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [
+              "Arrow",
+              "Dagger",
+              "Bullet",
+              "Shell",
+              "Grenade",
+              "Shuriken",
+              "Kunai",
+              "Cannonball",
+              "Throwweapon"
+            ],
+            "ammoAmount": 1
+          }
+        },
+        {
+          "id": 509,
+          "handle": "GS_SINGLEACTION",
+          "name": "單槍射擊",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [],
+          "description": "單槍射擊\nMAX Lv : 10\n系列 : 被動\n內容 : 讓已裝備的槍械可以準確又快速射擊的基本神槍手技能，技能等級越高時命中率和攻速就越高。\n[Level 1] : 命中率+2，攻擊速度+1%\n[Level 2] : 命中率+4，攻擊速度+1%\n[Level 3] : 命中率+6，攻擊速度+2%\n[Level 4] : 命中率+8，攻擊速度+2%\n[Level 5] : 命中率+10，攻擊速度+3%\n[Level 6] : 命中率+12，攻擊速度+3%\n[Level 7] : 命中率+14，攻擊速度+4%\n[Level 8] : 命中率+16，攻擊速度+4%\n[Level 9] : 命中率+18，攻擊速度+5%\n[Level 10] : 命中率+20，攻擊速度+5%",
+          "englishName": "Single Action",
+          "type": "",
+          "targetType": "Passive",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 510,
+          "handle": "GS_SNAKEEYE",
+          "name": "瞄準之眼",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [],
+          "description": "瞄準之眼\nMAX Lv : 10\n系列 : 被動\n內容 : 提升槍械的射程距離和命中率。\n[Level 1] : 命中率+1，射程距離+1\n[Level 2] : 命中率+2，射程距離+2\n[Level 3] : 命中率+3，射程距離+3\n[Level 4] : 命中率+4，射程距離+4\n[Level 5] : 命中率+5，射程距離+5\n[Level 6] : 命中率+6，射程距離+6\n[Level 7] : 命中率+7，射程距離+7\n[Level 8] : 命中率+8，射程距離+8\n[Level 9] : 命中率+9，射程距離+9\n[Level 10] : 命中率+10，射程距離+10",
+          "englishName": "Snake Eye",
+          "type": "",
+          "targetType": "Passive",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 511,
+          "handle": "GS_CHAINACTION",
+          "name": "連鎖衝擊",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "GS_SINGLEACTION",
+              "name": "單槍射擊",
+              "level": 1
+            }
+          ],
+          "description": "連鎖衝擊\nMAX Lv : 10\n習得條件 : 單槍射擊 1\n系列 : 被動\n內容 : 每次開槍時有機率會射出2顆子彈，技能等級越高時射出2顆子彈的機率越高，但子彈只會消耗1發。",
+          "englishName": "Chain Action",
+          "type": "Weapon",
+          "targetType": "Passive",
+          "range": -9,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 512,
+          "handle": "GS_TRACKING",
+          "name": "百步穿楊",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "GS_SINGLEACTION",
+              "name": "單槍射擊",
+              "level": 5
+            }
+          ],
+          "description": "百步穿楊\nMAX Lv : 10\n習得條件 : 單槍射擊 5\n系列 : 攻擊\n內容 : 仔細的瞄準敵人後，對目標對象造成嚴重傷害；技能等級越高時詠唱時間和攻擊力越高。\n唯有裝備手槍和來福槍時才能使用。\n[Level 1] : 攻擊力 300%, 詠唱時間 0.6秒\n[Level 2] : 攻擊力 400%, 詠唱時間 0.7秒\n[Level 3] : 攻擊力 500%, 詠唱時間 0.8秒\n[Level 4] : 攻擊力 600%, 詠唱時間 0.9秒\n[Level 5] : 攻擊力 700%, 詠唱時間 1.0秒\n[Level 6] : 攻擊力 800%, 詠唱時間 1.1秒\n[Level 7] : 攻擊力 900%, 詠唱時間 1.2秒\n[Level 8] : 攻擊力 1000%, 詠唱時間 1.3秒\n[Level 9] : 攻擊力 1100%, 詠唱時間 1.4秒\n[Level 10] : 攻擊力 1200%, 詠唱時間 1.5秒",
+          "englishName": "Tracking",
+          "type": "Weapon",
+          "targetType": "Attack",
+          "range": -9,
+          "automationMode": "attack",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              15,
+              20,
+              25,
+              30,
+              35,
+              40,
+              45,
+              50,
+              55,
+              60
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [
+              "Revolver",
+              "Rifle"
+            ],
+            "ammo": [
+              "Bullet"
+            ],
+            "ammoAmount": 1
+          }
+        },
+        {
+          "id": 513,
+          "handle": "GS_DISARM",
+          "name": "拋戈卸甲",
+          "maxLevel": 5,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "GS_TRACKING",
+              "name": "百步穿楊",
+              "level": 7
+            }
+          ],
+          "description": "拋戈卸甲\nMAX Lv : 5\n習得條件 : 百步穿楊 7\n系列 : 攻擊\n內容 : 以射程距離9格之攻擊，瞄準敵人之手後加以攻擊使其武器掉落。\n對怪物使用時，會有ATK -25%的效果，技能等級越高時成功機率越高。\n唯有裝備手槍和來福槍時才能使用。\n本技能對Boss怪無效。",
+          "englishName": "Disarm",
+          "type": "Weapon",
+          "targetType": "Attack",
+          "range": -9,
+          "automationMode": "attack",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              15,
+              20,
+              25,
+              30,
+              35
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [
+              "Revolver",
+              "Rifle"
+            ],
+            "ammo": [
+              "Bullet"
+            ],
+            "ammoAmount": 1
+          }
+        },
+        {
+          "id": 514,
+          "handle": "GS_PIERCINGSHOT",
+          "name": "霹靂彈",
+          "maxLevel": 5,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "GS_TRACKING",
+              "name": "百步穿楊",
+              "level": 5
+            }
+          ],
+          "description": "霹靂彈\nMAX Lv : 5\n習得條件 : 百步穿楊 5\n系列 : 攻擊\n內容 : 射擊不理會敵人防禦力的子彈，中彈的對象有機率出現出血狀態。\n唯有裝備手槍和來福槍時才能使用，使用來福槍時攻擊力增加。\n[Level 1] : 攻擊力 220%(280%)，出血機率 3%\n[Level 2] : 攻擊力 240%(310%)，出血機率 6%\n[Level 3] : 攻擊力 260%(340%)，出血機率 9%\n[Level 4] : 攻擊力 280%(370%)，出血機率 12%\n[Level 5] : 攻擊力 300%(400%)，出血機率 15%",
+          "englishName": "Piercing Shot",
+          "type": "Weapon",
+          "targetType": "Attack",
+          "range": -9,
+          "automationMode": "attack",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              11,
+              12,
+              13,
+              14,
+              15
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [
+              "Revolver",
+              "Rifle"
+            ],
+            "ammo": [
+              "Bullet"
+            ],
+            "ammoAmount": 1
+          }
+        },
+        {
+          "id": 515,
+          "handle": "GS_RAPIDSHOWER",
+          "name": "五連擊",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "GS_CHAINACTION",
+              "name": "連鎖衝擊",
+              "level": 3
+            }
+          ],
+          "description": "五連擊\nMAX Lv : 10\n習得條件 : 連鎖衝擊 3\n系列 : 攻擊\n內容 : 向1個敵人連續射擊5次，唯有裝備手槍類時才能使用。\n只消耗1發子彈。\n[Level 1] : 攻擊力 550%\n[Level 2] : 攻擊力 600%\n[Level 3] : 攻擊力 650%\n[Level 4] : 攻擊力 700%\n[Level 5] : 攻擊力 750%\n[Level 6] : 攻擊力 800%\n[Level 7] : 攻擊力 850%\n[Level 8] : 攻擊力 900%\n[Level 9] : 攻擊力 950%\n[Level 10] : 攻擊力 1000%",
+          "englishName": "Rapid Shower",
+          "type": "Weapon",
+          "targetType": "Attack",
+          "range": -9,
+          "automationMode": "attack",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              22,
+              24,
+              26,
+              28,
+              30,
+              32,
+              34,
+              36,
+              38,
+              40
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [
+              "Revolver"
+            ],
+            "ammo": [
+              "Bullet"
+            ],
+            "ammoAmount": 1
+          }
+        },
+        {
+          "id": 516,
+          "handle": "GS_DESPERADO",
+          "name": "亡命之徒",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "GS_RAPIDSHOWER",
+              "name": "五連擊",
+              "level": 5
+            }
+          ],
+          "description": "亡命之徒\nMAX Lv : 10\n習得條件 : 五連擊 5\n系列 : 攻擊\n內容 : 對自己周圍7格以內的敵人四處亂射，可向範圍內的敵人最多有10次的打擊。\n唯有裝備手槍類時才能使用，使用該技能時會消耗10發子彈。\n[Level 1] : 攻擊力 100%\n[Level 2] : 攻擊力 150%\n[Level 3] : 攻擊力 200%\n[Level 4] : 攻擊力 250%\n[Level 5] : 攻擊力 300%\n[Level 6] : 攻擊力 350%\n[Level 7] : 攻擊力 400%\n[Level 8] : 攻擊力 450%\n[Level 9] : 攻擊力 500%\n[Level 10] : 攻擊力 550%",
+          "englishName": "Desperado",
+          "type": "Weapon",
+          "targetType": "Self",
+          "range": 5,
+          "automationMode": "attackSelf",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              32,
+              34,
+              36,
+              38,
+              40,
+              42,
+              44,
+              46,
+              48,
+              50
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [
+              "Revolver"
+            ],
+            "ammo": [
+              "Bullet"
+            ],
+            "ammoAmount": 10
+          }
+        },
+        {
+          "id": 517,
+          "handle": "GS_GATLINGFEVER",
+          "name": "格林狂熱",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "GS_RAPIDSHOWER",
+              "name": "五連擊",
+              "level": 7
+            },
+            {
+              "handle": "GS_DESPERADO",
+              "name": "亡命之徒",
+              "level": 5
+            }
+          ],
+          "description": "格林狂熱\nMAX Lv : 10\n習得條件 : 五連擊 7, 亡命之徒 5\n系列 : 輔助\n內容 : 持續時間內能提升攻擊速度和傷害力，但會降低迴避率和移動速度。在持續時間內再次使用本技能時，就會解除技能效果，這是格林機槍專用技能。\n[Level 1] : 傷害+30，攻擊速度+1%，迴避率-5，持續時間30秒\n[Level 2] : 傷害+40，攻擊速度+2%，迴避率-10，持續時間45秒\n[Level 3] : 傷害+50，攻擊速度+3%，迴避率-15，持續時間60秒\n[Level 4] : 傷害+60，攻擊速度+4%，迴避率-20，持續時間75秒\n[Level 5] : 傷害+70，攻擊速度+5%，迴避率-25，持續時間90秒\n[Level 6] : 傷害+80，攻擊速度+6%，迴避率-30，持續時間105秒\n[Level 7] : 傷害+90，攻擊速度+7%，迴避率-35，持續時間120秒\n[Level 8] : 傷害+100，攻擊速度+8%，迴避率-40，持續時間135秒\n[Level 9] : 傷害+110，攻擊速度+9%，迴避率-45，持續時間150秒\n[Level 10] : 傷害+120，攻擊速度+10%，迴避率-50，持續時間165秒",
+          "englishName": "Gatling Fever",
+          "type": "Weapon",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              30,
+              32,
+              34,
+              36,
+              38,
+              40,
+              42,
+              44,
+              46,
+              48
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [
+              "Gatling"
+            ],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 518,
+          "handle": "GS_DUST",
+          "name": "彈片四射",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "GS_SINGLEACTION",
+              "name": "單槍射擊",
+              "level": 5
+            }
+          ],
+          "description": "彈片四射\nMAX Lv : 10\n習得條件 : 單槍射擊 5\n系列 : 攻擊\n內容 : 把擴散的子彈集中射擊近距離的敵人，以造成嚴重傷害的技能，挨子彈的敵人會退後5格。\n唯有裝備霰彈槍時才能使用。\n[Level 1] : 攻擊力 150%\n[Level 2] : 攻擊力 200%\n[Level 3] : 攻擊力 250%\n[Level 4] : 攻擊力 300%\n[Level 5] : 攻擊力 350%\n[Level 6] : 攻擊力 400%\n[Level 7] : 攻擊力 450%\n[Level 8] : 攻擊力 500%\n[Level 9] : 攻擊力 550%\n[Level 10] : 攻擊力 600%",
+          "englishName": "Dust",
+          "type": "Weapon",
+          "targetType": "Attack",
+          "range": 2,
+          "automationMode": "attack",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              3,
+              6,
+              9,
+              12,
+              15,
+              18,
+              21,
+              24,
+              27,
+              30
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [
+              "Shotgun"
+            ],
+            "ammo": [
+              "Bullet"
+            ],
+            "ammoAmount": 1
+          }
+        },
+        {
+          "id": 519,
+          "handle": "GS_FULLBUSTER",
+          "name": "全面破壞",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "GS_DUST",
+              "name": "彈片四射",
+              "level": 3
+            }
+          ],
+          "description": "全面破壞\nMAX Lv : 10\n習得條件 : 彈片四射 3\n系列 : 攻擊\n內容 : 把全部子彈一次擊發後造成嚴重的傷害力，因受反衝力影響，使用技能後有時會陷入黑暗狀態。\n唯有裝備霰彈槍時才能使用，使用該技能時會消耗2發子彈。\n[Level 1] : 攻擊力 400%\n[Level 2] : 攻擊力 500%\n[Level 3] : 攻擊力 600%\n[Level 4] : 攻擊力 700%\n[Level 5] : 攻擊力 800%\n[Level 6] : 攻擊力 900%\n[Level 7] : 攻擊力 1000%\n[Level 8] : 攻擊力 1100%\n[Level 9] : 攻擊力 1200%\n[Level 10] : 攻擊力 1300%",
+          "englishName": "Full Buster",
+          "type": "Weapon",
+          "targetType": "Attack",
+          "range": -9,
+          "automationMode": "attack",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              20,
+              25,
+              30,
+              35,
+              40,
+              45,
+              50,
+              55,
+              60,
+              65
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [
+              "Shotgun"
+            ],
+            "ammo": [
+              "Bullet"
+            ],
+            "ammoAmount": 2
+          }
+        },
+        {
+          "id": 520,
+          "handle": "GS_SPREADATTACK",
+          "name": "火力全開",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "GS_SINGLEACTION",
+              "name": "單槍射擊",
+              "level": 5
+            }
+          ],
+          "description": "火力全開\nMAX Lv : 10\n習得條件 : 單槍射擊 5\n系列 : 攻擊\n內容 : 能把子彈擴散至廣泛範圍地方的攻擊，唯有裝備霰彈槍或榴彈發射器時才能使用。\n使用該技能時會消耗5發子彈。\n[Level 1] : 攻擊力 230%，範圍 3*3格\n[Level 2] : 攻擊力 260%，範圍 3*3格\n[Level 3] : 攻擊力 290%，範圍 3*3格\n[Level 4] : 攻擊力 320%，範圍 5*5格\n[Level 5] : 攻擊力 350%，範圍 5*5格\n[Level 6] : 攻擊力 380%，範圍 5*5格\n[Level 7] : 攻擊力 410%，範圍 7*7格\n[Level 8] : 攻擊力 440%，範圍 7*7格\n[Level 9] : 攻擊力 470%，範圍 7*7格\n[Level 10] : 攻擊力 500%，範圍 9*9格",
+          "englishName": "Spread Attack",
+          "type": "Weapon",
+          "targetType": "Attack",
+          "range": -9,
+          "automationMode": "attack",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              13,
+              16,
+              19,
+              22,
+              25,
+              28,
+              31,
+              34,
+              37,
+              40
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [
+              "Shotgun",
+              "Grenade"
+            ],
+            "ammo": [
+              "Bullet"
+            ],
+            "ammoAmount": 5
+          }
+        },
+        {
+          "id": 521,
+          "handle": "GS_GROUNDDRIFT",
+          "name": "四面埋伏",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "GS_SPREADATTACK",
+              "name": "火力全開",
+              "level": 7
+            }
+          ],
+          "description": "四面埋伏\nMAX Lv : 10\n習得條件 : 火力全開 7\n系列 : 攻擊\n內容 : 使用榴彈槍把手榴彈埋在地面上，當敵人接觸到埋彈的區域時會引爆而造成傷害，隨著使用不同的彈藥效果也會不同。\n這是榴彈發射器專用技能。\n[Level 1] : 傷害 220%，持續時間3秒\n[Level 2] : 傷害 240%，持續時間6秒\n[Level 3] : 傷害 260%，持續時間9秒\n[Level 4] : 傷害 280%，持續時間12秒\n[Level 5] : 傷害 300%，持續時間15秒\n[Level 6] : 傷害 320%，持續時間18秒\n[Level 7] : 傷害 340%，持續時間21秒\n[Level 8] : 傷害 360%，持續時間24秒\n[Level 9] : 傷害 380%，持續時間27秒\n[Level 10] : 傷害 400%，持續時間30秒",
+          "englishName": "Ground Drift",
+          "type": "Weapon",
+          "targetType": "Ground",
+          "range": -9,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              3,
+              6,
+              9,
+              12,
+              15,
+              18,
+              21,
+              24,
+              27,
+              30
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [
+              "Grenade"
+            ],
+            "ammo": [
+              "Bullet"
+            ],
+            "ammoAmount": 1
+          }
+        }
+      ]
+    },
+    "25": {
+      "id": 25,
+      "key": "Ninja",
+      "name": "忍者",
+      "skills": [
+        {
+          "id": 522,
+          "handle": "NJ_TOBIDOUGU",
+          "name": "飛刀修練",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [],
+          "description": "飛刀 修練\nMAX Lv : 10\n系列 : 被動\n內容 : 可以提升忍者飛鏢系列的攻擊力。\n使用投擲飛鏢、投擲飛刀、投擲風魔飛鏢技能時，加計技能等級的傷害增加量。\n_\n[Lv 1] : 傷害增加量+3\n[Lv 2] : 傷害增加量+6\n[Lv 3] : 傷害增加量+9\n[Lv 4] : 傷害增加量+12\n[Lv 5] : 傷害增加量+15\n[Lv 6] : 傷害增加量+18\n[Lv 7] : 傷害增加量+21\n[Lv 8] : 傷害增加量+24\n[Lv 9] : 傷害增加量+27\n[Lv10] : 傷害增加量+30",
+          "englishName": "Shuriken Training",
+          "type": "Weapon",
+          "targetType": "Passive",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 523,
+          "handle": "NJ_SYURIKEN",
+          "name": "投擲飛鏢",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "NJ_TOBIDOUGU",
+              "name": "飛刀修練",
+              "level": 1
+            }
+          ],
+          "description": "投擲飛鏢\nMAX Lv : 10\n習得條件 : 飛刀修練 1\n系列 : 主動\n類型 : 遠距離物理\n對象 : 目標1個\n內容 : 向目標投擲1個飛鏢造成傷害。\n消耗1個飛鏢，基本射程是9格。\n_\n[Lv 1] : ATK 105%\n[Lv 2] : ATK 110%\n[Lv 3] : ATK 115%\n[Lv 4] : ATK 120%\n[Lv 5] : ATK 125%\n[Lv 6] : ATK 130%\n[Lv 7] : ATK 135%\n[Lv 8] : ATK 140%\n[Lv 9] : ATK 145%\n[Lv10] : ATK 150%",
+          "englishName": "Throw Shuriken",
+          "type": "Weapon",
+          "targetType": "Attack",
+          "range": 9,
+          "automationMode": "attack",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [
+              "Shuriken"
+            ],
+            "ammoAmount": 1
+          }
+        },
+        {
+          "id": 524,
+          "handle": "NJ_KUNAI",
+          "name": "投擲飛刀",
+          "maxLevel": 5,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "NJ_SYURIKEN",
+              "name": "投擲飛鏢",
+              "level": 5
+            }
+          ],
+          "description": "投擲飛刀\nMAX Lv : 5\n習得條件 : 投擲飛鏢 5\n系列 : 主動\n類型 : 遠距離物理\n對象 : 目標1個\n內容 : 向目標投擲1個飛刀造成傷害。\n消耗1個飛刀，套用飛刀的屬性。\n_\n[Lv 1] : ATK 100%\n[Lv 2] : ATK 200%\n[Lv 3] : ATK 300%\n[Lv 4] : ATK 400%\n[Lv 5] : ATK 500%",
+          "englishName": "Throw Kunai",
+          "type": "Weapon",
+          "targetType": "Attack",
+          "range": 9,
+          "automationMode": "attack",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              10,
+              10,
+              10,
+              10,
+              10
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [
+              "Kunai"
+            ],
+            "ammoAmount": 1
+          }
+        },
+        {
+          "id": 525,
+          "handle": "NJ_HUUMA",
+          "name": "投擲風魔飛鏢",
+          "maxLevel": 5,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "NJ_TOBIDOUGU",
+              "name": "飛刀修練",
+              "level": 5
+            },
+            {
+              "handle": "NJ_KUNAI",
+              "name": "投擲飛刀",
+              "level": 5
+            }
+          ],
+          "description": "投擲風魔飛鏢\nMAX Lv : 5\n習得條件 : 飛刀修練 5、投擲飛刀 5\n系列 : 主動\n類型 : 遠距離物理\n對象 : 目標1個\n內容 : 投擲巨大飛鏢後攻擊目標及其周圍。\n技能等級越高效果範圍越大，詠唱中受到攻擊也無法取消。\n_\n[Lv 1] : ATK 200% / 範圍: 3 X 3\n[Lv 2] : ATK 450% / 範圍: 3 X 3\n[Lv 3] : ATK 700% / 範圍: 3 X 3\n[Lv 4] : ATK 950% / 範圍: 5 X 5\n[Lv 5] : ATK1200% / 範圍: 5 X 5",
+          "englishName": "Throw Huuma Shuriken",
+          "type": "Weapon",
+          "targetType": "Attack",
+          "range": 9,
+          "automationMode": "attack",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              15,
+              20,
+              25,
+              30,
+              35
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [
+              "Huuma"
+            ],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 526,
+          "handle": "NJ_ZENYNAGE",
+          "name": "投擲金錢",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "NJ_TOBIDOUGU",
+              "name": "飛刀修練",
+              "level": 10
+            },
+            {
+              "handle": "NJ_HUUMA",
+              "name": "投擲風魔飛鏢",
+              "level": 5
+            }
+          ],
+          "description": "投擲金錢\nMAX Lv : 10\n習得條件 : 飛刀修練 10、投擲風魔飛鏢 5\n系列 : 主動\n類型 : 特殊攻擊(遠距離)\n對象 : 目標1個\n內容 : 投擲金錢給予對方同額程度的無視防禦力的傷害。\n玩家所受傷害減少1/3，BOSS所受傷害減少一半。\n_\n[Lv 1] : Zeny消耗500~1000zeny\n[Lv 2] : Zeny消耗1000~2000zeny\n[Lv 3] : Zeny消耗1500~3000zeny\n[Lv 4] : Zeny消耗2000~4000zeny\n[Lv 5] : Zeny消耗2500~5000zeny\n[Lv 6] : Zeny消耗3000~6000zeny\n[Lv 7] : Zeny消耗3500~7000zeny\n[Lv 8] : Zeny消耗4000~8000zeny\n[Lv 9] : Zeny消耗4500~9000zeny\n[Lv10] : Zeny消耗5000~10000zeny",
+          "englishName": "Throw Zeny",
+          "type": "Misc",
+          "targetType": "Attack",
+          "range": 9,
+          "automationMode": "attack",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              50,
+              50,
+              50,
+              50,
+              50,
+              50,
+              50,
+              50,
+              50,
+              50
+            ],
+            "zenyCostByLevel": [
+              500,
+              1000,
+              1500,
+              2000,
+              2500,
+              3000,
+              3500,
+              4000,
+              4500,
+              5000
+            ],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 527,
+          "handle": "NJ_TATAMIGAESHI",
+          "name": "榻榻米攻擊",
+          "maxLevel": 5,
+          "excluded": false,
+          "requires": [],
+          "description": "榻榻米攻擊\nMAX Lv : 5\n系列 : 主動\n類型 : 近距離物理\n對象 : 立即施展\n內容 : 把自己周圍四個方向的榻榻米掀起後攻擊敵人。\n被榻榻米攻擊到的敵人則退移5格，3秒內在施展技能的位置上觸發[光之障壁]效果。\n_\n[Lv 1] : 攻擊範圍1格，ATK 110%\n[Lv 2] : 攻擊範圍2格，ATK 120%\n[Lv 3] : 攻擊範圍2格，ATK 130%\n[Lv 4] : 攻擊範圍3格，ATK 140%\n[Lv 5] : 攻擊範圍3格，ATK 150%",
+          "englishName": "Improvised Defense",
+          "type": "Weapon",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              15,
+              15,
+              15,
+              15,
+              15
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 528,
+          "handle": "NJ_KASUMIKIRI",
+          "name": "霧裡砍劈",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "NJ_SHADOWJUMP",
+              "name": "影子跳躍",
+              "level": 1
+            }
+          ],
+          "description": "霧裡砍劈\nMAX Lv : 10\n習得條件 : 影子跳躍 1\n系列 : 主動\n類型 : 近距離物理\n對象 : 目標1個\n內容 : 攻擊敵人若命中時，立即呈現隱匿狀態。\n隱匿狀態時每隔一段時間持續消耗SP。\n_\n[Lv 1] : ATK 120%\n[Lv 2] : ATK 140%\n[Lv 3] : ATK 160%\n[Lv 4] : ATK 180%\n[Lv 5] : ATK 200%\n[Lv 6] : ATK 220%\n[Lv 7] : ATK 240%\n[Lv 8] : ATK 260%\n[Lv 9] : ATK 280%\n[Lv10] : ATK 300%",
+          "englishName": "Vanishing Slash",
+          "type": "Weapon",
+          "targetType": "Attack",
+          "range": -1,
+          "automationMode": "attack",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              8,
+              8,
+              8,
+              8,
+              8,
+              8,
+              8,
+              8,
+              8,
+              8
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 529,
+          "handle": "NJ_SHADOWJUMP",
+          "name": "影子跳躍",
+          "maxLevel": 5,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "NJ_TATAMIGAESHI",
+              "name": "榻榻米攻擊",
+              "level": 1
+            }
+          ],
+          "description": "影子跳躍\n習得條件 : 榻榻米攻擊 1\nMAX Lv : 5\n系列 : 主動\n類型 : 輔助\n對象 : 地面1格\n內容 : 可於隱匿狀態使用。\n可瞬移至指定的格子上，移動時解除隱匿狀態。\n雖然無法移動，但可移動至能發射飛鏢、箭等遠距離攻擊的格子上。\n_\n[Lv 1] : 移動距離 : 6格\n[Lv 2] : 移動距離 : 7格\n[Lv 3] : 移動距離 : 8格\n[Lv 4] : 移動距離 : 9格\n[Lv 5] : 移動距離 :10格",
+          "englishName": "Shadow Leap",
+          "type": "",
+          "targetType": "Ground",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              10,
+              10,
+              10,
+              10,
+              10
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 530,
+          "handle": "NJ_KIRIKAGE",
+          "name": "隱身攻擊",
+          "maxLevel": 5,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "NJ_KASUMIKIRI",
+              "name": "霧裡砍劈",
+              "level": 5
+            }
+          ],
+          "description": "隱身攻擊\nMAXLv : 5\n習得條件:霧裡砍劈5\n系列:主動\n類型:近距離物理\n對象:目標1個\n內容:可於隱匿狀態使用。\n在可影子跳躍的範圍內，會瞬移至目標後造成傷害。\n在使用的同時隱匿會解除，依據技能固有機率而套用暴擊傷害。\n若是暴擊傷害，會套用暴擊傷害增加能力總和的一半。\n_\n[Lv 1] : ATK 200%/暴擊觸發機率30%\n[Lv 2] : ATK 350%/暴擊觸發機率35%\n[Lv 3] : ATK 500%/暴擊觸發機率40%\n[Lv 4] : ATK 650%/暴擊觸發機率45%\n[Lv 5] : ATK 800%/暴擊觸發機率50%",
+          "englishName": "Shadow Slash",
+          "type": "Weapon",
+          "targetType": "Attack",
+          "range": 0,
+          "automationMode": "attack",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              10,
+              11,
+              12,
+              13,
+              14
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 531,
+          "handle": "NJ_UTSUSEMI",
+          "name": "金蟬脫殼",
+          "maxLevel": 5,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "NJ_SHADOWJUMP",
+              "name": "影子跳躍",
+              "level": 5
+            }
+          ],
+          "description": "金蟬脫殼\nMAX Lv : 5\n習得條件 : 影子跳躍 5\n系列 : 主動\n類型 : 輔助\n對象 : 自己\n內容 : 使用技能時會進入[金蟬脫殼]的狀態，在該狀態下受到一般攻擊時會自動迴避，並退移至6格之後。\n受到指定次數的攻擊時，金蟬脫殼狀態就會解除。\n_\n[Lv 1] : 持續時間20秒，次數 1次\n[Lv 2] : 持續時間30秒，次數 1次\n[Lv 3] : 持續時間40秒，次數 2次\n[Lv 4] : 持續時間50秒，次數 2次\n[Lv 5] : 持續時間60秒，次數 3次",
+          "englishName": "Cicada Skin Sheeding",
+          "type": "",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              12,
+              15,
+              18,
+              21,
+              24
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 532,
+          "handle": "NJ_BUNSINJYUTSU",
+          "name": "幻影分身",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "NJ_UTSUSEMI",
+              "name": "金蟬脫殼",
+              "level": 4
+            },
+            {
+              "handle": "NJ_KIRIKAGE",
+              "name": "隱身攻擊",
+              "level": 3
+            },
+            {
+              "handle": "NJ_NEN",
+              "name": "念",
+              "level": 1
+            }
+          ],
+          "description": "幻影分身\nMAX Lv : 10\n習得條件 : 隱身攻擊 3、念1、金蟬脫殼 4\n系列 : 主動\n類型 : 輔助\n對象 : 自己\n內容 : 只有在[念]狀態下才能使用。\n消耗丸球1個，複製出自己的分身。\n雖然可以透過分身迴避一定次數的一般攻擊，但無法迴避魔法攻擊。\n_\n[Lv 1] : 迴避次數1次，持續時間60秒\n[Lv 2] : 迴避次數1次，持續時間80秒\n[Lv 3] : 迴避次數2次，持續時間100秒\n[Lv 4] : 迴避次數2次，持續時間120秒\n[Lv 5] : 迴避次數3次，持續時間140秒\n[Lv 6] : 迴避次數3次，持續時間160秒\n[Lv 7] : 迴避次數4次，持續時間180秒\n[Lv 8] : 迴避次數4次，持續時間200秒\n[Lv 9] : 迴避次數5次，持續時間220秒\n[Lv10] : 迴避次數5次，持續時間240秒",
+          "englishName": "Mirror Image",
+          "type": "Magic",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              30,
+              32,
+              34,
+              36,
+              38,
+              40,
+              42,
+              44,
+              46,
+              48
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 533,
+          "handle": "NJ_NINPOU",
+          "name": "忍術修練",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [],
+          "description": "忍術修練\nMAX Lv : 10\n系列 : 被動\n內容 : 透過忍術修練靜止時，每10秒恢復SP。MaxHP在基本數值中增加一定比例。\n移動中或因負重量而賦予HP/SP不可恢復逞罰時，則無法恢復。\n_\n[Lv 1] : 每10秒SP + (3 + MSP的0.2%)\n[Lv 2] : 每10秒SP + (6 + MSP的0.4%)\n[Lv 3] : 每10秒SP + (9 + MSP的0.6%)\n[Lv 4] : 每10秒SP +(12 + MSP的0.8%)\n[Lv 5] : 每10秒SP +(15 + MSP的1.0%)\n[Lv 6] : 每10秒SP +(18 + MSP的1.2%)\n[Lv 7] : 每10秒SP +(21 + MSP的1.4%)\n[Lv 8] : 每10秒SP +(24 + MSP的1.6%)\n[Lv 9] : 每10秒SP +(27 + MSP的1.8%)\n[Lv10] : 每10秒SP +(30 + MSP的2.0%)",
+          "englishName": "Spirit of the Blade",
+          "type": "",
+          "targetType": "Passive",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 534,
+          "handle": "NJ_KOUENKA",
+          "name": "火炎花",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "NJ_NINPOU",
+              "name": "忍術修練",
+              "level": 1
+            }
+          ],
+          "description": "火炎花\nMAX Lv : 10\n習得條件 : 忍術修練 1\n系列 : 主動\n類型 : 魔法\n對象 : 目標1個\n內容 : 對目標射出如火花般的花葉，給予MATK 90%攻擊力的火屬性魔法傷害。\n_\n[Lv 1] :  1次攻擊\n[Lv 2] :  2次攻擊\n[Lv 3] :  3次攻擊\n[Lv 4] :  4次攻擊\n[Lv 5] :  5次攻擊\n[Lv 6] :  6次攻擊\n[Lv 7] :  7次攻擊\n[Lv 8] :  8次攻擊\n[Lv 9] :  9次攻擊\n[Lv10] : 10次攻擊",
+          "englishName": "Crimson Fire Petal",
+          "type": "Magic",
+          "targetType": "Attack",
+          "range": 9,
+          "automationMode": "attack",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              18,
+              20,
+              22,
+              24,
+              26,
+              28,
+              30,
+              32,
+              34,
+              36
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 535,
+          "handle": "NJ_KAENSIN",
+          "name": "火炎陣",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "NJ_KOUENKA",
+              "name": "火炎花",
+              "level": 5
+            }
+          ],
+          "description": "火炎陣\nMAX Lv : 10\n習得條件 : 火炎花 5\n系列 : 主動\n類型 : 魔法\n對象 : 立即施展\n內容 : 消耗熱火石1個，在自己附近5*5範圍內引起火焰風暴，連續給予範圍內敵人MATK 50%的火屬性魔法傷害。\n技能持續時間為20秒，到達最大打擊次數後消失。\n但是施展位置的格子上不會產生火焰。\n_\n[Lv 1] : 每1格5次打擊\n[Lv 2] : 每1格5次打擊\n[Lv 3] : 每1格6次打擊\n[Lv 4] : 每1格6次打擊\n[Lv 5] : 每1格7次打擊\n[Lv 6] : 每1格7次打擊\n[Lv 7] : 每1格8次打擊\n[Lv 8] : 每1格8次打擊\n[Lv 9] : 每1格9次打擊\n[Lv10] : 每1格9次打擊",
+          "englishName": "Crimson Fire Formation",
+          "type": "Magic",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              25,
+              25,
+              25,
+              25,
+              25,
+              25,
+              25,
+              25,
+              25,
+              25
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 536,
+          "handle": "NJ_BAKUENRYU",
+          "name": "爆炎龍",
+          "maxLevel": 5,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "NJ_NINPOU",
+              "name": "忍術修練",
+              "level": 10
+            },
+            {
+              "handle": "NJ_KAENSIN",
+              "name": "火炎陣",
+              "level": 7
+            }
+          ],
+          "description": "爆炎龍\nMAX Lv : 5\n習得條件 : 忍術修練 10、火炎陣 7\n系列 : 主動\n類型 : 魔法\n對象 : 目標1個\n內容 : 消耗熱火石 1個，給予目標與附近5X5範圍火屬性魔法傷害。\n_\n[Lv 1] : MATK 300%\n[Lv 2] : MATK 450%\n[Lv 3] : MATK 600%\n[Lv 4] : MATK 750%\n[Lv 5] : MATK 900%",
+          "englishName": "Raging Fire Dragon",
+          "type": "Magic",
+          "targetType": "Attack",
+          "range": 9,
+          "automationMode": "attack",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              20,
+              25,
+              30,
+              35,
+              40
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 537,
+          "handle": "NJ_HYOUSENSOU",
+          "name": "冰閃槍",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "NJ_NINPOU",
+              "name": "忍術修練",
+              "level": 1
+            }
+          ],
+          "description": "冰閃槍\nMAX Lv : 10\n習得條件 : 忍術修練 1\n系列 : 主動\n類型 : 魔法\n對象 : 目標1個\n內容 : 在地面上形成冰槍後進行攻擊，給予對象MATK 70%的水屬性魔法傷害。\n_\n[Lv 1] :  3次攻擊\n[Lv 2] :  4次攻擊\n[Lv 3] :  5次攻擊\n[Lv 4] :  6次攻擊\n[Lv 5] :  7次攻擊\n[Lv 6] :  8次攻擊\n[Lv 7] :  9次攻擊\n[Lv 8] : 10次攻擊\n[Lv 9] : 11次攻擊\n[Lv10] : 12次攻擊",
+          "englishName": "Spear of Ice",
+          "type": "Magic",
+          "targetType": "Attack",
+          "range": 9,
+          "automationMode": "attack",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              15,
+              18,
+              21,
+              24,
+              27,
+              30,
+              33,
+              36,
+              39,
+              42
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 538,
+          "handle": "NJ_SUITON",
+          "name": "水鈍",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "NJ_HYOUSENSOU",
+              "name": "冰閃槍",
+              "level": 5
+            }
+          ],
+          "description": "水鈍\nMAX Lv : 10\n習得條件 : 冰閃槍 5\n系列 : 主動\n類型 : 魔法\n對象 : 立即施展\n內容 : 消耗冰閃石1個，在地面上形成水坑。\n進入此範圍內的敵人移動速度會降低一半，並減少AGI的數值。\n在效果範圍內能使用水球術和天使之淚技能，使用時水鈍效果範圍一併減少。\n對效果範圍內敵人使用冰閃槍時，會增加傷害。\n施展者與其他忍者在此範圍內時，不會降低移動速度與AGI。\n_\n[Lv 1] : 效果範圍:3X3、持續時間:15秒、AGI-0\n[Lv 2] : 效果範圍:3X3、持續時間:20秒、AGI-3\n[Lv 3] : 效果範圍:3X3、持續時間:25秒、AGI-3\n[Lv 4] : 效果範圍:5X5、持續時間:30秒、AGI-3\n[Lv 5] : 效果範圍:5X5、持續時間:35秒、AGI-5\n[Lv 6] : 效果範圍:5X5、持續時間:40秒、AGI-5\n[Lv 7] : 效果範圍:7X7、持續時間:45秒、AGI-5\n[Lv 8] : 效果範圍:7X7、持續時間:50秒、AGI-8\n[Lv 9] : 效果範圍:7X7、持續時間:55秒、AGI-8\n[Lv10] : 效果範圍:9X9、持續時間:60秒、AGI-8",
+          "englishName": "Hidden Water",
+          "type": "Magic",
+          "targetType": "Ground",
+          "range": 9,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              15,
+              18,
+              21,
+              24,
+              27,
+              30,
+              33,
+              36,
+              39,
+              42
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 539,
+          "handle": "NJ_HYOUSYOURAKU",
+          "name": "冰晶落",
+          "maxLevel": 5,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "NJ_NINPOU",
+              "name": "忍術修練",
+              "level": 10
+            },
+            {
+              "handle": "NJ_SUITON",
+              "name": "水鈍",
+              "level": 7
+            }
+          ],
+          "description": "冰晶落\nMAX Lv : 5\n習得條件 : 忍術修練 10, 水鈍 7\n系列 : 主動\n類型 : 魔法\n對象 : 立即施展\n內容 : 消耗冰閃石1個，巨大的冰塊從天而降。\n給予施展者周圍7*7範圍的敵人水屬性魔法傷害，以及[狀態異常:冰凍]效果。\n冰凍機率與冰凍時間依照敵人等級、魔法防禦力、LUK而改變。\n_\n[Lv 1] : MATK 300%、冰凍機率: 20%\n[Lv 2] : MATK 450%、冰凍機率: 30%\n[Lv 3] : MATK 600%、冰凍機率: 40%\n[Lv 4] : MATK 750%、冰凍機率: 50%\n[Lv 5] : MATK 900%、冰凍機率: 60%",
+          "englishName": "Ice Meteor",
+          "type": "Magic",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              40,
+              45,
+              50,
+              55,
+              60
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 540,
+          "handle": "NJ_HUUJIN",
+          "name": "風刃",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "NJ_NINPOU",
+              "name": "忍術修練",
+              "level": 1
+            }
+          ],
+          "description": "風刃\nMAX Lv : 10\n習得條件 : 忍術修練 1\n系列 : 主動\n類型 : 魔法\n對象 : 目標1個\n內容 : 飄起真空之刃後，給於敵人MATK 150%的風屬性魔法傷害。 \n_\n[Lv 1] : 1次打擊\n[Lv 2] : 2次打擊\n[Lv 3] : 2次打擊\n[Lv 4] : 3次打擊\n[Lv 5] : 3次打擊\n[Lv 6] : 4次打擊\n[Lv 7] : 4次打擊\n[Lv 8] : 5次打擊\n[Lv 9] : 5次打擊\n[Lv10] : 6次打擊",
+          "englishName": "Wind Blade",
+          "type": "Magic",
+          "targetType": "Attack",
+          "range": 9,
+          "automationMode": "attack",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              12,
+              14,
+              16,
+              18,
+              20,
+              22,
+              24,
+              26,
+              28,
+              30
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 541,
+          "handle": "NJ_RAIGEKISAI",
+          "name": "雷擊碎",
+          "maxLevel": 5,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "NJ_HUUJIN",
+              "name": "風刃",
+              "level": 5
+            }
+          ],
+          "description": "雷擊碎\nMAX Lv : 5\n習得條件 : 風刃 5\n系列 : 主動\n類型 : 魔法\n對象 : 地面1格\n內容 : 消耗風靈石1個，在指定格子上落雷擊後給予附近敵人風屬性魔法傷害。\n_\n[Lv 1] : MATK 200%、效果範圍: 3X3\n[Lv 2] : MATK 300%、效果範圍: 3X3\n[Lv 3] : MATK 400%、效果範圍: 5X5\n[Lv 4] : MATK 500%、效果範圍: 5X5\n[Lv 5] : MATK 600%、效果範圍: 7X7",
+          "englishName": "Lightning Strike of Destruction",
+          "type": "Magic",
+          "targetType": "Ground",
+          "range": 9,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              16,
+              20,
+              24,
+              28,
+              32
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 542,
+          "handle": "NJ_KAMAITACHI",
+          "name": "朔風",
+          "maxLevel": 5,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "NJ_NINPOU",
+              "name": "忍術修練",
+              "level": 10
+            },
+            {
+              "handle": "NJ_RAIGEKISAI",
+              "name": "雷擊碎",
+              "level": 5
+            }
+          ],
+          "description": "朔風\nMAX Lv : 5\n習得條件 : 忍術修練 10, 雷擊碎 5\n系列 : 主動\n類型 : 魔法\n對象 : 目標1個\n內容 : 消耗風靈石1個，召喚風中之刃，在施展者位置朝敵人方向給予直線上敵人風屬性魔法傷害。\n_\n[Lv 1] : MATK 200%、射程: 5格\n[Lv 2] : MATK 300%、射程: 6格\n[Lv 3] : MATK 400%、射程: 7格\n[Lv 4] : MATK 500%、射程: 8格\n[Lv 5] : MATK 600%、射程: 9格",
+          "englishName": "Kamaitachi",
+          "type": "Magic",
+          "targetType": "Attack",
+          "range": 0,
+          "automationMode": "attack",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              24,
+              28,
+              32,
+              36,
+              40
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 543,
+          "handle": "NJ_NEN",
+          "name": "念",
+          "maxLevel": 5,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "NJ_NINPOU",
+              "name": "忍術修練",
+              "level": 5
+            }
+          ],
+          "description": "念\nMAX Lv : 5\n習得條件 : 忍術修練 5\n系列 : 主動\n類型 : 輔助\n對象 : 自己\n內容 : 聚集念後變成赤紅，在念的狀態下INT和STR會增加。\n使用時MHP消耗5%。\n若想使用幻影分身或一閃擊技能時，一定要在念的狀態下。當使用幻影分身或一閃擊技能時就會自動解除。\n[Lv 1] : STR/INT +1、持續時間: 30秒\n[Lv 2] : STR/INT +2、持續時間: 45秒\n[Lv 3] : STR/INT +3、持續時間: 60秒\n[Lv 4] : STR/INT +4、持續時間: 75秒\n[Lv 5] : STR/INT +5、持續時間: 90秒",
+          "englishName": "Soul",
+          "type": "",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              20,
+              30,
+              40,
+              50,
+              60
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 544,
+          "handle": "NJ_ISSEN",
+          "name": "一閃擊",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "NJ_TOBIDOUGU",
+              "name": "飛刀修練",
+              "level": 7
+            },
+            {
+              "handle": "NJ_KIRIKAGE",
+              "name": "隱身攻擊",
+              "level": 5
+            },
+            {
+              "handle": "NJ_NEN",
+              "name": "念",
+              "level": 1
+            }
+          ],
+          "description": "一閃擊\nMAX Lv : 10\n習得條件 : 飛刀修練 7, 隱身攻擊 5, 念1\n系列 : 主動\n類型 : 特殊攻擊(遠距離)\n對象 : 目標1個\n內容 : 只有在念的狀態下才可使用。\n消耗自己剩餘的HP後給予特殊的遠距離物理傷害。\n剩餘的HP越多時造成的傷害就越大，施展技能後自己的HP會變1%。\n若是在施展幻影分身技能時，會依據剩餘分身數量多寡增加打擊數和傷害。",
+          "englishName": "Final Strike",
+          "type": "Misc",
+          "targetType": "Attack",
+          "range": -5,
+          "automationMode": "attack",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              55,
+              60,
+              65,
+              70,
+              75,
+              80,
+              85,
+              90,
+              95,
+              100
             ],
             "zenyCostByLevel": [],
             "weapons": [],

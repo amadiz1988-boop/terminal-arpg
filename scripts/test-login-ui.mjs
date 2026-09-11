@@ -107,11 +107,14 @@ try {
       cardHeight: card.height,
       server: document.querySelector('#loginServerStatus').textContent,
       title: document.querySelector('.server-picker-title').textContent,
-      confirmation: document.querySelector('.login-actions button').textContent,
+      confirmation: document.querySelector('.login-actions button').textContent.trim(),
       duplicateLogoCount: document.querySelectorAll('.classic-logo').length,
       loginSexCount: document.querySelectorAll('#loginForm [name=sex]').length,
       createSexCount: document.querySelectorAll('#characterForm [name=createSex]').length,
       createJobCount: document.querySelectorAll('#characterForm [name=targetJob]').length,
+      createJobValues: [...document.querySelectorAll('#characterForm [name=targetJob]')].map(
+        (input) => input.value,
+      ),
       defaultTargetJob: document.querySelector('#characterForm [name=targetJob]:checked')?.value,
       hairInputType: document.querySelector('#hair').type,
       hairColorInputType: document.querySelector('#hairColor').type,
@@ -179,7 +182,9 @@ try {
     layout.duplicateLogoCount === 0 &&
     layout.loginSexCount === 0 &&
     layout.createSexCount === 2 &&
-    layout.createJobCount === 6 &&
+    layout.createJobCount === 10 &&
+    layout.createJobValues.join(',') ===
+      'swordman,mage,archer,acolyte,merchant,thief,supernovice,taekwon,gunslinger,ninja' &&
     layout.defaultTargetJob === 'thief' &&
     layout.hairInputType === 'hidden' &&
     layout.hairColorInputType === 'hidden' &&

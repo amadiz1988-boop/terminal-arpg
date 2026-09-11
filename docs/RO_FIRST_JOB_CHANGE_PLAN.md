@@ -2,9 +2,9 @@
 
 ## 現行產品規則
 
-- 創角時由玩家選定六種一轉志願：劍士、魔法師、弓箭手、服事、商人、盜賊。
+- 創角時由玩家選定十種一轉志願：劍士、魔法師、弓箭手、服事、商人、盜賊，以及官方 Job Master 列出的超級初心者、跆拳、神槍手、忍者。
 - 志願寫入角色永久變數 `terminal_target_job$`，角色完成一轉前不可改選。
-- 資格固定為初心者 Job Lv.10 與基本技能 `NV_BASIC` Lv.9。
+- 一般與擴充一轉資格固定為初心者 Job Lv.10 與基本技能 `NV_BASIC` Lv.9。超級初心者另需 Base Lv.45，符合 rAthena Job Master 的特殊門檻。
 - 達標後由 OpenKore 暫停戰鬥並快速引導至伊斯魯得島 `Criatura Academy`。
 - `iz_ac01 (104,39)` 的結業導師再次檢查角色職業、Job 等級、基本技能與創角志願。
 - rAthena NPC 腳本執行 `jobchange`、學院報到、原職業新手裝備及弓箭手箭筒發放。
@@ -22,6 +22,10 @@
 | 服事 | `Job_Acolyte` | `N_Mace` |
 | 商人 | `Job_Merchant` | `N_Battle_Axe` |
 | 盜賊 | `Job_Thief` | `N_Main_Gauche` |
+| 超級初心者 | `Job_Super_Novice` | `Main_Gauche [4]` |
+| 跆拳 | `Job_Taekwon` | 不發放武器，使用徒手踢技 |
+| 神槍手 | `Job_Gunslinger` | `Six Shooter [2]` 與子彈 |
+| 忍者 | `Job_Ninja` | `Asura [2]` 與飛鏢 |
 
 首次學院報到另依 Renewal Academy Receptionist 規格發放初心者防具、武器、學院帽、髮型券與新手藥水。
 
@@ -33,6 +37,7 @@
 
 - 鎖定版 rAthena `npc/re/jobs/novice/academy.txt`
 - 鎖定版 rAthena `npc/re/jobs/1-1/*.txt`
+- 鎖定版 rAthena `npc/custom/jobmaster.txt`：`Job_Options` 明列十種可由初心者選擇的職業，並定義超級初心者 Base Lv.45 門檻。
 - 鎖定版 rAthena `npc/other/Global_Functions.txt`
 - 專案腳本 `ops/ro-stack/templates/terminal_academy_job_change.txt`
 
@@ -43,4 +48,4 @@
 - NPC 對話、結業確認、Job ID 6、Job Lv.1、十項盜賊技能、新手短劍及返回掛機均通過。
 - 瀏覽器錯誤 0，素材載入失敗 0，測試角色結束後停止。
 - 商人同流程已由 rAthena 回送 Job ID 5、Job Lv.1 與 `N_Battle_Axe`；玩家頁的專用戰斧圖示缺件，該職驗收尚未通過。
-- 其餘四職及六職並發仍待現行學院流程驗收。
+- 擴充四職的學院流程與十職並發仍待現行學院流程驗收。

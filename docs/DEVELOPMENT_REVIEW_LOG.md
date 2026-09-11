@@ -10,6 +10,13 @@
 - `RO_JOB_AND_TERMINAL_DESIGN.md` 改為現行 RO 職業、任務日誌與轉職試煉規格。
 - `ISSUE_BOARD.md`、`PRODUCT_BASELINE.md`、`RELEASE_STRESS_GATE.md` 改為 RO-only 版本。
 
+## 2026-09-12 一轉職業清單核對
+
+- 鎖定版 rAthena `npc/custom/jobmaster.txt` 的 `Job_Options` 明列初心者可選十種人類一轉：劍士、魔法師、弓箭手、服事、商人、盜賊、超級初心者、跆拳、神槍手、忍者。
+- 玩家創角頁與一轉任務頁已補齊十種選項，並以「標準一轉／擴充一轉」分組顯示。
+- `MAPID` 將超級初心者列為初心者的 2-1 類型；神槍手與忍者的後續職業分別為反叛者及影狼／朧。召喚師屬於 Doram 起始職業，保留在種族職業系統，不列入人類初心者一轉清單。
+- 超級初心者的 Base Lv.45 門檻已在玩家頁、Dashboard API 與學院 NPC 腳本同步檢查，未達門檻不會建立轉職路線或傳送。
+
 ## 現行基線
 
 - rAthena Renewal commit：`e985006171d2eb320ee512a653f4c83aea3d81b6`

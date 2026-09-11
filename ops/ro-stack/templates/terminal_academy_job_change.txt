@@ -40,6 +40,27 @@ iz_ac01,60,67,3	script	學院結業導師#terminal	4_F_01,{
 		.@job = Job_Thief;
 		.@reward = 13041; // N_Main_Gauche
 		.@name$ = "盜賊";
+	} else if (.@target$ == "supernovice") {
+		if (BaseLevel < 45) {
+			mes "[新生學院結業導師]";
+			mes "超級初心者需要 Base Lv.45。";
+			close;
+		}
+		.@job = Job_Super_Novice;
+		.@reward = 1208; // Main Gauche [4]
+		.@name$ = "超級初心者";
+	} else if (.@target$ == "taekwon") {
+		.@job = Job_Taekwon;
+		.@reward = 0; // Taekwon fights without a weapon.
+		.@name$ = "跆拳";
+	} else if (.@target$ == "gunslinger") {
+		.@job = Job_Gunslinger;
+		.@reward = 13101; // Six Shooter [2]
+		.@name$ = "神槍手";
+	} else if (.@target$ == "ninja") {
+		.@job = Job_Ninja;
+		.@reward = 13010; // Asura [2]
+		.@name$ = "忍者";
 	} else {
 		mes "[新生學院結業導師]";
 		mes "這名角色建立時沒有選擇一轉志願。";
@@ -73,8 +94,10 @@ iz_ac01,60,67,3	script	學院結業導師#terminal	4_F_01,{
 	while (BaseLevel < 4)
 		getexp NextBaseExp - BaseExp,0;
 	jobchange .@job;
-	getitem .@reward,1;
-	equip .@reward;
+	if (.@reward > 0) {
+		getitem .@reward,1;
+		equip .@reward;
+	}
 	equip 18730; // Academy reward is auto-equipped only during this onboarding script.
 	if (.@target$ == "archer") {
 		getitem 1750,500; // Arrow
@@ -82,6 +105,12 @@ iz_ac01,60,67,3	script	學院結業導師#terminal	4_F_01,{
 		getitem 12008,1;
 		equip 1750;
 		terminal_archer_repaired = 1;
+	} else if (.@target$ == "gunslinger") {
+		getitem 13200,500; // Bullet
+		equip 13200;
+	} else if (.@target$ == "ninja") {
+		getitem 13250,500; // Shuriken
+		equip 13250;
 	}
 	terminal_academy_graduated = 1;
 	specialeffect2 EF_ANGEL2;

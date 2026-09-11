@@ -451,6 +451,7 @@ function publicErrorMessage(error) {
     '技能自動化類型不符',
     '技能需要',
     'Zeny 不足',
+    '超級初心者需要 Base Lv.45',
     '基本技能目前無法提升',
     '角色已經是伊甸園成員',
     '請先完成一轉',
@@ -1247,7 +1248,12 @@ const allowedFirstJobs = new Set([
   'acolyte',
   'merchant',
   'thief',
+  'supernovice',
+  'taekwon',
+  'gunslinger',
+  'ninja',
 ]);
+const allowedFirstJobIds = new Set([1, 2, 3, 4, 5, 6, 21, 23, 24, 25]);
 const renewalStartPoints = Object.freeze([
   { map: 'iz_int', x: 18, y: 26 },
   { map: 'iz_int01', x: 18, y: 26 },
@@ -1400,6 +1406,8 @@ async function queueJobChangeAction(account, input) {
       Number(snapshot.basicSkillLevel) < 9
     )
       throw new Error('角色尚未符合一轉資格');
+    if (job === 'supernovice' && Number(snapshot.baseLevel) < 45)
+      throw new Error('超級初心者需要 Base Lv.45');
     return await queueCharacterCommand(
       account,
       action === 'route' ? 'job_route' : 'job_talk',
@@ -1453,7 +1461,7 @@ async function queueEdenEnrollment(account) {
   if (!account.characterId) throw new Error('請先建立角色');
   const character = await queryCharacter(account.accountId);
   if (!character) throw new Error('找不到角色');
-  if (Number(character.classId) < 1 || Number(character.classId) > 6)
+  if (!allowedFirstJobIds.has(Number(character.classId)))
     throw new Error('請先完成一轉，再加入伊甸園');
   const progress = await queryEdenProgress(
     account.characterId,
@@ -1473,7 +1481,7 @@ async function queueEdenEnrollment(account) {
       currentLog(id),
     ]);
     if (worker.running && live) {
-      if (Number(live.jobId) < 1 || Number(live.jobId) > 6)
+      if (!allowedFirstJobIds.has(Number(live.jobId)))
         throw new Error('請先完成一轉，再加入伊甸園');
       return await queueCharacterCommand(account, 'eden_join', '1');
     }

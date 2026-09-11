@@ -11,6 +11,10 @@ const jobIds = {
   Acolyte: 4,
   Merchant: 5,
   Thief: 6,
+  Taekwon: 21,
+  Supernovice: 23,
+  Gunslinger: 24,
+  Ninja: 25,
 };
 const jobNames = {
   Novice: '初心者',
@@ -20,6 +24,10 @@ const jobNames = {
   Acolyte: '服事',
   Merchant: '商人',
   Thief: '盜賊',
+  Taekwon: '跆拳',
+  Supernovice: '超級初心者',
+  Gunslinger: '神槍手',
+  Ninja: '忍者',
 };
 const selfBuffStatuses = new Map([
   ['SM_ENDURE', 'EFST_ENDURE'],
