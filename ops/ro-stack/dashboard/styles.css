@@ -1843,17 +1843,54 @@ html {
 .auth-body .skin-step-right:active {
   background-image: url('/ro/client/skin/default/btn_next_b.png');
 }
-.quest-layout {
+.task-categories {
   display: grid;
-  grid-template-columns: minmax(180px, 0.8fr) minmax(220px, 1.2fr);
-  min-height: 260px;
-  border-bottom: 1px solid #9aa5ab;
+  gap: 1px;
+  padding: 6px;
+  background: #aab2b7;
+}
+.task-section {
+  background: #f5f6f2;
+}
+.task-section-title {
+  width: 100%;
+  min-height: 30px;
+  padding: 5px 9px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border: 0;
+  border-bottom: 1px solid #405b79;
+  color: #fff;
+  background: linear-gradient(#9bb0c9, #546d8b);
+  font-weight: bold;
+  text-align: left;
+  cursor: pointer;
+}
+.task-section-title > :first-child {
+  margin-right: auto;
+}
+.task-section-fold {
+  width: 19px;
+  min-width: 19px;
+  height: 15px;
+  border: 1px solid #405b79;
+  background: #edf2f7 url('/ro/client/skin/default/scroll0up.png') center /
+    17px 11px no-repeat;
+  box-shadow: inset 1px 1px #fff, inset -1px -1px #9ba9b7;
+}
+.task-section.is-collapsed > .task-section-body {
+  display: none;
+}
+.task-section.is-collapsed > .task-section-title .task-section-fold {
+  background-image: url('/ro/client/skin/default/scroll0down.png');
 }
 .quest-list {
   display: grid;
   align-content: start;
   gap: 1px;
-  padding: 6px;
+  padding: 1px 1px 1px 18px;
   background: #aab2b7;
 }
 .quest-entry {
@@ -1890,6 +1927,7 @@ html {
   height: 360px;
   min-height: 260px;
   max-height: 360px;
+  border-top: 1px solid #405b79;
 }
 .quest-detail.task-console {
   padding: 9px;
@@ -1928,23 +1966,30 @@ html {
 .quest-controls {
   border-top: 0;
 }
-.eden-window {
-  margin-top: 10px;
-}
 .eden-milestones {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1px;
-  padding: 6px;
+  padding: 1px 1px 1px 18px;
   background: #aab2b7;
 }
 .eden-milestone {
+  width: 100%;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 2px 8px;
   min-height: 48px;
   padding: 7px 9px;
+  border: 1px solid transparent;
   background: #f5f6f2;
+  color: inherit;
+  text-align: left;
+}
+.eden-milestone:not(:disabled) {
+  cursor: pointer;
+}
+.eden-milestone.selected {
+  border-color: #4f759a;
+  background: #dce9f5;
 }
 .eden-milestone > span {
   color: #315d89;
@@ -2262,17 +2307,11 @@ html {
     max-height: calc(100vh - 18px);
     overflow: auto;
   }
-  .quest-layout {
-    grid-template-columns: 1fr;
-  }
   .quest-list {
     max-height: 220px;
     overflow: auto;
   }
   .quest-detail {
     min-height: 150px;
-  }
-  .eden-milestones {
-    grid-template-columns: 1fr;
   }
 }

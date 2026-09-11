@@ -386,6 +386,18 @@ function setupFoldableWindows() {
     titlebar.append(button);
   });
 }
+function setupTaskSections() {
+  document.querySelectorAll('.task-section-title').forEach((button) => {
+    if (button.dataset.bound === '1') return;
+    button.dataset.bound = '1';
+    button.addEventListener('click', () => {
+      const section = button.closest('.task-section');
+      if (!section) return;
+      const collapsed = section.classList.toggle('is-collapsed');
+      button.setAttribute('aria-expanded', String(!collapsed));
+    });
+  });
+}
 function setRandomLoginBackground() {
   const bytes = new Uint8Array(1);
   crypto.getRandomValues(bytes);
@@ -2371,18 +2383,13 @@ function renderOnboarding(onboarding, character, running, live) {
     : migratedFirstJob
       ? '一轉完成，任務未記錄'
       : 'Renewal 新生訓練';
-  $('#questResume').disabled = complete || migratedFirstJob;
-  $('#questResume').textContent = currentQuest
-    ? `${running ? '返回' : '啟動並返回'}「${currentQuest.title}」`
-    : '繼續自動任務';
-  $('#questPause').disabled = !running || complete || migratedFirstJob;
   $('#questNotice').textContent = complete
     ? character?.map === 'prt_fild08'
       ? '已抵達普隆德拉原野 08 並開始掛機。後續會依角色等級提供推薦地圖。'
       : '一轉已完成，正在前往普隆德拉原野 08。'
     : migratedFirstJob
-      ? '此角色於新版流程接入前已完成一轉，沒有 Renewal 新生任務紀錄；不補寫完成狀態。'
-      : `目前位置：${mapNames[character?.map] ?? character?.map ?? '同步中'}。按下返回後，會依任務紀錄傳送到正確階段並續跑。`;
+      ? '此角色已完成一轉，新手任務已標記完成。'
+      : `目前位置：${mapNames[character?.map] ?? character?.map ?? '同步中'}。雙擊未完成任務即可從目前進度繼續。`;
   if (!quests.length) {
     const empty = document.createElement('p');
     empty.textContent = '正在讀取任務資料';
@@ -2406,13 +2413,17 @@ function renderOnboarding(onboarding, character, running, live) {
           entry.classList.toggle('selected', entry === button),
         );
     };
+    button.ondblclick = () => {
+      if (quest.status === 'complete' || migratedFirstJob) return;
+      resumeOnboarding(quest.id);
+    };
     if (index === currentIndex) button.classList.add('selected');
     return button;
   });
   $('#questList').replaceChildren(...entries);
   renderTaskActionLog(live);
 }
-function renderEden(eden, character, running) {
+function renderEden(eden, character) {
   const journey = eden?.journey,
     member = Boolean(eden?.member || journey?.member),
     active = Boolean(journey?.active),
@@ -2425,14 +2436,6 @@ function renderEden(eden, character, running) {
       : eligible
         ? '可加入'
         : '一轉後開放';
-  $('#edenEnroll').disabled = active || member || !eligible;
-  $('#edenEnroll').textContent = active
-    ? '正在前往伊甸園'
-    : member
-      ? '已加入伊甸園'
-      : running
-        ? '暫停掛機並加入伊甸園'
-        : '啟動並加入伊甸園';
   const phaseNotices = {
     route_officer: '正在前往普隆德拉的伊甸園傳送員。',
     enter_headquarters: '正在使用原生伊甸園傳送服務。',
@@ -2450,12 +2453,14 @@ function renderEden(eden, character, running) {
           ? '會從目前地圖前往普隆德拉，使用遊戲內建傳送服務，向秘書 Lime Evenor 正式入團。'
           : '完成一轉後開放伊甸園入團與階段裝備訓練。';
   const milestones = (eden?.milestones ?? []).map((milestone) => {
-    const row = document.createElement('div'),
+    const row = document.createElement('button'),
       title = document.createElement('span'),
       level = document.createElement('small'),
       status = document.createElement('b');
+    row.type = 'button';
     row.className = `eden-milestone ${milestone.status}`;
     row.setAttribute('role', 'listitem');
+    row.disabled = active || milestone.status === 'locked';
     title.textContent = milestone.title;
     level.textContent =
       milestone.id === 'member'
@@ -2463,6 +2468,17 @@ function renderEden(eden, character, running) {
         : `Base Lv.${milestone.minimumLevel}`;
     status.textContent = questStatusNames[milestone.status] ?? '未開始';
     row.append(title, level, status);
+    row.onclick = () => {
+      document
+        .querySelectorAll('.eden-milestone')
+        .forEach((entry) =>
+          entry.classList.toggle('selected', entry === row),
+        );
+    };
+    row.ondblclick = () => {
+      if (milestone.id === 'member' && !member && milestone.status !== 'locked')
+        enrollEden();
+    };
     return row;
   });
   if (milestones.length) $('#edenMilestones').replaceChildren(...milestones);
@@ -2525,7 +2541,7 @@ async function refresh() {
       state.running,
       state.derived,
     );
-    renderEden(state.eden, state.character, state.running);
+    renderEden(state.eden, state.character);
     setMusicContext(state.character?.map);
     const editingChat = document.activeElement === $('#chatInput');
     if (!editingChat) {
@@ -2651,11 +2667,14 @@ async function act(action) {
   }
   setTimeout(refresh, 500);
 }
-async function resumeOnboarding() {
-  $('#questResume').disabled = true;
+async function resumeOnboarding(questId = '') {
   $('#questNotice').textContent = '正在核對任務進度與正確返回地點';
   try {
-    await api('/api/onboarding/resume', { method: 'POST' });
+    await api('/api/onboarding/resume', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ questId }),
+    });
     $('#questNotice').textContent = '已送出恢復請求，正在返回未完成的新生任務';
   } catch (error) {
     $('#questNotice').textContent = error.message;
@@ -2663,7 +2682,6 @@ async function resumeOnboarding() {
   setTimeout(refresh, 300);
 }
 async function enrollEden() {
-  $('#edenEnroll').disabled = true;
   $('#edenNotice').textContent = '正在啟動角色並核對伊甸園成員資格';
   try {
     await api('/api/eden/enroll', { method: 'POST' });
@@ -2788,9 +2806,6 @@ $('#quickAudio').onclick = () => {
   document.querySelector('[data-tab="system"]').click();
   $('#system').scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
-$('#questResume').onclick = () => resumeOnboarding();
-$('#questPause').onclick = () => act('stop');
-$('#edenEnroll').onclick = () => enrollEden();
 document.addEventListener('pointerdown', () => unlockAudio(true));
 document.addEventListener('keydown', () => unlockAudio(true));
 setRandomLoginBackground();
@@ -3364,6 +3379,7 @@ setInterval(() => {
     $('#logLatency').textContent = '等待戰鬥事件';
 }, 1000);
 setupFoldableWindows();
+setupTaskSections();
 enter();
 function setItemActionNotice(message) {
   $('#itemNotice').textContent = message;

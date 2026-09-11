@@ -529,57 +529,58 @@
       <section id="quests" class="panel">
         <div class="window quest-window">
           <div class="titlebar">
-            <span>任務視窗</span><span id="questSummary">新生訓練</span>
+            <span>任務日誌</span><span id="questSummary">新生訓練</span>
           </div>
-          <div class="quest-layout">
-            <div
-              id="questList"
-              class="quest-list"
-              role="list"
-              aria-label="角色任務"
-            >
-              <p>正在讀取任務資料</p>
-            </div>
-            <article
-              id="questDetail"
-              class="quest-detail console task-console task-log"
-              aria-live="polite"
-              aria-label="任務行動紀錄"
-            >
-              <p class="task-log-empty">
-                啟動自動新手任務後，這裡會顯示移動、NPC 對話與任務需求。
-              </p>
-            </article>
+          <div class="task-categories" aria-label="任務分類">
+            <section class="task-section" data-task-section="beginner">
+              <button class="task-section-title" type="button" aria-expanded="true">
+                <span>新手任務</span>
+                <span class="task-section-fold" aria-hidden="true"></span>
+              </button>
+              <div class="task-section-body">
+                <div
+                  id="questList"
+                  class="quest-list"
+                  role="list"
+                  aria-label="新手任務"
+                >
+                  <p>正在讀取任務資料</p>
+                </div>
+              </div>
+            </section>
+            <section class="task-section" data-task-section="eden">
+              <button class="task-section-title" type="button" aria-expanded="true">
+                <span>伊甸園成長訓練</span>
+                <span id="edenSummary">資格確認中</span>
+                <span class="task-section-fold" aria-hidden="true"></span>
+              </button>
+              <div class="task-section-body">
+                <div
+                  id="edenMilestones"
+                  class="eden-milestones"
+                  role="list"
+                  aria-label="伊甸園成長訓練"
+                >
+                  <p>正在讀取伊甸園進度</p>
+                </div>
+                <p id="edenNotice" class="notice">
+                  雙擊可執行的任務即可開始或繼續。
+                </p>
+              </div>
+            </section>
           </div>
-          <div class="controls quest-controls">
-            <button id="questResume" class="primary" type="button">
-              繼續自動任務
-            </button>
-            <button id="questPause" type="button">暫停自動任務</button>
-          </div>
-          <p id="questNotice" class="notice">
-            一轉完成後會前往普隆德拉原野 08 並開始掛機。
-          </p>
-        </div>
-        <div class="window eden-window">
-          <div class="titlebar">
-            <span>伊甸園成長訓練</span><span id="edenSummary">資格確認中</span>
-          </div>
-          <div
-            id="edenMilestones"
-            class="eden-milestones"
-            role="list"
-            aria-label="伊甸園成長階段"
+          <article
+            id="questDetail"
+            class="quest-detail console task-console task-log"
+            aria-live="polite"
+            aria-label="任務行動紀錄"
           >
-            <p>正在讀取伊甸園進度</p>
-          </div>
-          <div class="controls eden-controls">
-            <button id="edenEnroll" class="primary" type="button">
-              前往並加入伊甸園
-            </button>
-          </div>
-          <p id="edenNotice" class="notice">
-            一轉後可由普隆德拉傳送員進入伊甸園，後續銜接 Lv.12、26、40 階段裝備訓練。
+            <p class="task-log-empty">
+              任務執行後，這裡會顯示移動、NPC 對話與任務需求。
+            </p>
+          </article>
+          <p id="questNotice" class="notice">
+            雙擊未完成的任務可開始或從中斷處繼續。
           </p>
         </div>
       </section>

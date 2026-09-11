@@ -130,6 +130,7 @@ try {
     evaluate("!document.querySelector('#game')?.classList.contains('hidden')"),
   );
   await evaluate("document.querySelector('[data-tab=quests]').click()");
+  await evaluate("document.querySelector('#questList .quest-entry')?.ondblclick?.()", true);
   const result = await waitFor(
     () =>
       evaluate(`(() => {
@@ -146,6 +147,14 @@ try {
           viewportWidth:innerWidth,
           backgroundColor:getComputedStyle(detail).backgroundColor,
           fontFamily:getComputedStyle(detail).fontFamily,
+          title:document.querySelector('.quest-window .titlebar span')?.textContent || '',
+          beginnerSection:document.querySelector('[data-task-section="beginner"]')?.textContent || '',
+          edenSection:document.querySelector('[data-task-section="eden"]')?.textContent || '',
+          categoriesInsideJournal:Boolean(document.querySelector('.quest-window > .task-categories [data-task-section="beginner"]')) && Boolean(document.querySelector('.quest-window > .task-categories [data-task-section="eden"]')),
+          sharedLogAfterCategories:Boolean(document.querySelector('.task-categories + #questDetail')),
+          hasSeparateEdenWindow:Boolean(document.querySelector('.eden-window')),
+          hasLegacyControls:Boolean(document.querySelector('#questResume,#questPause')),
+          hasDoubleClick:typeof document.querySelector('#questList .quest-entry')?.ondblclick === 'function',
         };
       })()`),
     (value) => value?.rowCount > 2 && value.baseExp.includes('尚差'),
@@ -197,6 +206,14 @@ try {
     result.text.includes('普隆德拉原野 08') &&
     result.backgroundColor === 'rgb(3, 6, 3)' &&
     /Consolas/.test(result.fontFamily) &&
+    result.title === '任務日誌' &&
+    result.beginnerSection.includes('新手任務') &&
+    result.edenSection.includes('伊甸園成長訓練') &&
+    result.categoriesInsideJournal &&
+    result.sharedLogAfterCategories &&
+    !result.hasSeparateEdenWindow &&
+    !result.hasLegacyControls &&
+    result.hasDoubleClick &&
     result.pageWidth <= result.viewportWidth &&
     localizedRewards.every((name) => equipmentText.includes(name)) &&
     !englishRewardPattern.test(equipmentText) &&

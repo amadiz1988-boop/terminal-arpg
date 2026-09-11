@@ -15,6 +15,7 @@ import {
   mkdir,
   readFile,
   readdir,
+  rename,
   stat,
   unlink,
   writeFile,
@@ -802,14 +803,16 @@ const renewalNoviceQuests = Object.freeze([
 ]);
 
 async function queryOnboardingProgress(charId) {
-  const [questOutput, graduationOutput] = await Promise.all([
+  const [questOutput, graduationOutput, classOutput] = await Promise.all([
     sql(
       `SELECT quest_id,state,count1,count2,count3 FROM quest WHERE char_id=${Number(charId)} AND quest_id IN (${renewalNoviceQuests.map((quest) => quest.id).join(',')});`,
     ),
     sql(
       `SELECT value FROM char_reg_num WHERE char_id=${Number(charId)} AND \`key\`='terminal_academy_graduated' AND \`index\`=0 LIMIT 1;`,
     ),
+    sql(`SELECT \`class\` FROM \`char\` WHERE char_id=${Number(charId)} LIMIT 1;`),
   ]);
+  const alreadyFirstJob = Number(classOutput || 0) > 0;
   const rows = new Map(
     questOutput
       ? questOutput.split(/\r?\n/).map((line) => {
@@ -824,7 +827,12 @@ async function queryOnboardingProgress(charId) {
     const row = rows.get(quest.id);
     return {
       ...quest,
-      status: row?.state === 2 ? 'complete' : row ? 'active' : 'locked',
+      status:
+        alreadyFirstJob || row?.state === 2
+          ? 'complete'
+          : row
+            ? 'active'
+            : 'locked',
       counts: row?.counts ?? [0, 0, 0],
     };
   });
@@ -832,12 +840,15 @@ async function queryOnboardingProgress(charId) {
     id: 'graduation',
     title: '一轉結業',
     place: '克里圖拉學院',
-    status: Number(graduationOutput || 0) > 0 ? 'complete' : 'locked',
+    status:
+      alreadyFirstJob || Number(graduationOutput || 0) > 0
+        ? 'complete'
+        : 'locked',
     counts: [0, 0, 0],
   });
   const activeIndex = quests.findIndex((quest) => quest.status === 'active');
   const nextIndex = quests.findIndex((quest) => quest.status === 'locked');
-  const graduated = Number(graduationOutput || 0) > 0;
+  const graduated = alreadyFirstJob || Number(graduationOutput || 0) > 0;
   return {
     source: '遊戲伺服器任務資料',
     quests,
@@ -1516,13 +1527,15 @@ function spentStatusPoints(character) {
 }
 async function queueCharacterCommand(account, action, argument) {
   const commandId = randomUUID(),
-    commandDir = join(instancesRoot, instanceId(account.accountId), 'commands');
+    commandDir = join(instancesRoot, instanceId(account.accountId), 'commands'),
+    pendingPath = join(commandDir, `${commandId}.pending`),
+    commandPath = join(commandDir, `${commandId}.cmd`);
   await mkdir(commandDir, { recursive: true });
-  await writeFile(
-    join(commandDir, `${commandId}.cmd`),
-    `${action}\n${argument}\n`,
-    { encoding: 'utf8', flag: 'wx' },
-  );
+  await writeFile(pendingPath, `${action}\n${argument}\n`, {
+    encoding: 'utf8',
+    flag: 'wx',
+  });
+  await rename(pendingPath, commandPath);
   return { commandId, accepted: true };
 }
 

@@ -60,6 +60,8 @@ my $last_task_y;
 my $last_position_changed_at = time;
 my $onboarding_stuck_pending = 0;
 my $last_stuck_recovery = 0;
+my $archer_repair_attempts = 0;
+my $last_archer_repair = 0;
 my %onboarding_phase_info = (
   starting => ['準備新生訓練', '正在確認角色與 Renewal 任務狀態。', ''],
   respawning => ['返回重生點', '角色已倒下，等待伺服器完成重生。', ''],
@@ -83,7 +85,7 @@ my %onboarding_phase_info = (
   academy_training => ['新生戰鬥訓練', '戰鬥中，目標為初心者 Job Lv.10。', '訓練怪物'],
   academy_return => ['返回新生學院', '訓練條件已完成，正在返回學院。', '結業引導員'],
   academy_graduation => ['辦理一轉結業', '正在向結業引導員確認一轉資格。', '結業引導員'],
-  academy_exit => ['離開新手村', '一轉已完成，正在前往伊斯魯得島。', '結業引導員'],
+  academy_exit => ['離開新手村', '一轉已完成，正在前往普隆德拉原野 08。', '結業引導員'],
   returning_hunt => ['前往第一張掛機地圖', '正在前往普隆德拉原野 08，抵達後會自動開始掛機。', '普隆德拉原野 08'],
   awaiting_map => ['新生訓練完成', '已抵達普隆德拉原野 08並開始掛機。後續可依角色等級選擇推薦地圖。', '普隆德拉原野 08']
 );
@@ -91,7 +93,7 @@ my %eden_phase_info = (
   route_officer => ['前往伊甸園傳送員', '正由普隆德拉南門前往伊甸園傳送員。', '伊甸園傳送員'],
   enter_headquarters => ['進入伊甸園總部', '正在使用遊戲內建伊甸園傳送服務。', '伊甸園傳送員'],
   route_secretary => ['尋找伊甸園秘書', '已抵達伊甸園總部，正在前往秘書 Lime Evenor。', '秘書 Lime Evenor'],
-  register_member => ['辦理伊甸園入團', '正在依 rAthena 原生對話填寫成員資料。', '秘書 Lime Evenor'],
+  register_member => ['辦理伊甸園入團', '正在依官方流程填寫成員資料。', '秘書 Lime Evenor'],
   returning_hunt => ['返回掛機地圖', '伊甸園入團完成，正在返回普隆德拉原野 08。', '普隆德拉原野 08'],
   complete => ['伊甸園入團完成', '已取得伊甸園徽章並恢復自動掛機。', '普隆德拉原野 08']
 );
@@ -511,6 +513,20 @@ sub finish_onboarding {
   $job_route_key = '';
   $onboarding_dialog_owned = 0;
   $onboarding_dialog_seen = 0;
+}
+
+sub process_archer_onboarding_repair {
+  return if !$field || !$char || number_or_zero($char->{jobID}) != 3;
+  return if !$char->inventory->isReady();
+  my $bow = $char->inventory->getByNameID(1742);
+  return if !$bow;
+  return if number_or_zero($char->{lv}) >= 4
+    && $bow->{equipped}
+    && $field->baseName eq 'prt_fild08';
+  return if $archer_repair_attempts >= 4 || time - $last_archer_repair < 3;
+  $messageSender->sendChat('@terminal_archer_repair');
+  $archer_repair_attempts++;
+  $last_archer_repair = time;
 }
 
 sub set_eden_phase {
@@ -1346,7 +1362,7 @@ sub process_commands {
         append_task_event(
           'recovery',
           '恢復新生訓練',
-          '伺服器正在依 rAthena 任務進度返回正確階段。',
+          '伺服器正在依官方任務進度返回正確階段。',
           '當前新生任務',
           join('|', 'onboarding_resume', int(time))
         );
@@ -1473,6 +1489,7 @@ sub export_status {
   process_stuck_recovery();
   process_dialog_cancel();
   process_commands();
+  process_archer_onboarding_repair();
   process_job_death();
   my $onboarding_handled = process_onboarding();
   my $eden_handled = $onboarding_handled ? 0 : process_eden();

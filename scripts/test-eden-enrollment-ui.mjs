@@ -109,8 +109,9 @@ try {
   const observedPhases = new Set();
   await evaluate(`(() => {
     document.querySelector('[data-tab="quests"]').click();
-    document.querySelector('#edenEnroll').scrollIntoView({block:'center'});
-    document.querySelector('#edenEnroll').click();
+    const row=document.querySelector('#edenMilestones .eden-milestone');
+    row.scrollIntoView({block:'center'});
+    row.dispatchEvent(new MouseEvent('dblclick',{bubbles:true}));
   })()`);
   await waitFor(
     async () => {

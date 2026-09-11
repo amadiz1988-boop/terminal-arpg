@@ -33,6 +33,7 @@
     "test:onboarding": "node scripts/test-renewal-onboarding.mjs",
     "test:onboarding-ui": "node scripts/test-onboarding-task-ui.mjs",
     "test:onboarding-recovery-ui": "node scripts/test-onboarding-recovery-ui.mjs",
+    "test:eden-ui": "node scripts/test-eden-enrollment-ui.mjs",
     "test:item-command": "node scripts/test-item-command.mjs",
     "test:combat-equipment-ui": "node scripts/test-combat-equipment-ui.mjs",
     "test:skill-automation-ui": "node scripts/test-skill-automation-ui.mjs",

@@ -4,9 +4,9 @@
 iz_ac01,60,67,3	script	學院結業導師#terminal	4_F_01,{
 	if (Class != Job_Novice) {
 		mes "[新生學院結業導師]";
-		mes "你已完成第一次轉職，我會送你前往伊斯魯得島。";
+		mes "你已完成第一次轉職，我會送你前往普隆德拉原野 08。";
 		close2;
-		warp "izlude",127,253;
+		warp "prt_fild08",170,375;
 		end;
 	}
 	if (JobLevel < 10 || getskilllv("NV_BASIC") < 9) {
@@ -68,23 +68,28 @@ iz_ac01,60,67,3	script	學院結業導師#terminal	4_F_01,{
 		getitem 569,300; // Novice_Potion
 	}
 
+	// All first-job starter weapons require Base Lv.4. This only repairs
+	// accelerated onboarding fixtures that reached Job Lv.10 unusually early.
+	while (BaseLevel < 4)
+		getexp NextBaseExp - BaseExp,0;
 	jobchange .@job;
 	getitem .@reward,1;
 	equip .@reward;
 	equip 18730; // Academy reward is auto-equipped only during this onboarding script.
 	if (.@target$ == "archer") {
-		getitem 12004,1;
+		getitem 1750,500; // Arrow
 		getitem 12009,1;
 		getitem 12008,1;
-		equip 12004;
+		equip 1750;
+		terminal_archer_repaired = 1;
 	}
 	terminal_academy_graduated = 1;
 	specialeffect2 EF_ANGEL2;
 	mes "[新生學院結業導師]";
 	mes "恭喜你正式成為" + .@name$ + "。";
-	mes "接下來會先前往伊斯魯得島，再由自動導航帶你到普隆德拉原野 08。";
+	mes "接下來會直接前往普隆德拉原野 08，並由自動導航開始練功。";
 	close2;
-	warp "izlude",127,253;
+	warp "prt_fild08",170,375;
 	end;
 }
 
@@ -98,13 +103,30 @@ iz_ac01_d,60,67,3	duplicate(學院結業導師#terminal)	學院結業導師#term
 // the original rAthena quest scripts and the terminal graduation NPC.
 -	script	#terminal_onboarding_recovery	-1,{
 OnInit:
-	bindatcmd("terminal_onboarding_resume",strnpcinfo(0)+"::OnResume",0,99);
-	bindatcmd("web_eden_return",strnpcinfo(0)+"::OnEdenReturn",0,99);
+	bindatcmd("terminal_onboarding_resume",strnpcinfo(0)+"::OnResume",0,100);
+	bindatcmd("web_eden_return",strnpcinfo(0)+"::OnEdenReturn",0,100);
+	bindatcmd("terminal_archer_repair",strnpcinfo(0)+"::OnArcherRepair",0,100);
+	end;
+
+OnArcherRepair:
+	if (Class != Job_Archer || terminal_archer_repaired) {
+		end;
+	}
+	while (BaseLevel < 4)
+		getexp NextBaseExp - BaseExp,0;
+	if (countitem(1742))
+		equip 1742;
+	if (!countitem(1750))
+		getitem 1750,500;
+	equip 1750;
+	terminal_archer_repaired = 1;
+	if (strcharinfo(3) == "izlude")
+		warp "prt_fild08",170,375;
 	end;
 
 OnEdenReturn:
 	if (strcharinfo(3) != "moc_para01" || (countitem(6219) == 0 && countitem(22508) == 0)) {
-		dispmottomessage "目前無法使用返回服務。";
+		dispbottom "目前無法使用返回服務。";
 		end;
 	}
 	warp "prt_fild08",170,375;

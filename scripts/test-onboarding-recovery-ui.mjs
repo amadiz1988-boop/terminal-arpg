@@ -271,19 +271,22 @@ try {
     () =>
       evaluate(`fetch('/api/state').then(r=>r.json()).then(state => ({
         character:document.querySelector('#name')?.textContent || '',
-        button:document.querySelector('#questResume')?.textContent || '',
-        disabled:Boolean(document.querySelector('#questResume')?.disabled),
         firstQuest:document.querySelector('#questList .quest-entry')?.textContent || '',
         notice:document.querySelector('#questNotice')?.textContent || '',
+        title:document.querySelector('.quest-window .titlebar span')?.textContent || '',
+        hasLegacyControls:Boolean(document.querySelector('#questResume,#questPause')),
+        hasDoubleClick:typeof document.querySelector('#questList .quest-entry')?.ondblclick === 'function',
         map:state.character?.map || '',
         running:Boolean(state.running)
       }))`),
     (value) =>
       value?.character === before[0] &&
-      value.button.includes('逃離沉船') &&
-      !value.disabled,
+      value.firstQuest.includes('逃離沉船') &&
+      value.title === '任務日誌' &&
+      !value.hasLegacyControls &&
+      value.hasDoubleClick,
   );
-  await evaluate("document.querySelector('#questResume').click()");
+  await evaluate("document.querySelector('#questList .quest-entry')?.ondblclick?.()", true);
   const recovered = await waitFor(
     () =>
       evaluate(`fetch('/api/state').then(r=>r.json()).then(state => ({
@@ -306,8 +309,11 @@ try {
   })()`);
   await sleep(500);
   const visual = await evaluate(`(() => ({
-    button:document.querySelector('#questResume')?.textContent || '',
-    disabled:Boolean(document.querySelector('#questResume')?.disabled),
+    title:document.querySelector('.quest-window .titlebar span')?.textContent || '',
+    hasLegacyControls:Boolean(document.querySelector('#questResume,#questPause')),
+    categoriesInsideJournal:Boolean(document.querySelector('.quest-window > .task-categories [data-task-section="beginner"]')) && Boolean(document.querySelector('.quest-window > .task-categories [data-task-section="eden"]')),
+    sharedLogAfterCategories:Boolean(document.querySelector('.task-categories + #questDetail')),
+    hasSeparateEdenWindow:Boolean(document.querySelector('.eden-window')),
     log:document.querySelector('#questDetail')?.textContent || '',
     pageWidth:document.documentElement.scrollWidth,
     viewportWidth:innerWidth
@@ -356,6 +362,11 @@ INSERT INTO char_reg_num (char_id,\`key\`,\`index\`,value) VALUES (${charId},'te
     recovered.active &&
     !recovered.graduated &&
     visual.log.includes('恢復新生訓練') &&
+    visual.title === '任務日誌' &&
+    !visual.hasLegacyControls &&
+    visual.categoriesInsideJournal &&
+    visual.sharedLogAfterCategories &&
+    !visual.hasSeparateEdenWindow &&
     visual.pageWidth <= visual.viewportWidth &&
     completionGate.status === 400 &&
     completionGate.body?.error?.includes('新生訓練已結束') &&
