@@ -35,7 +35,14 @@ export async function gunzipFld2(bytes: Uint8Array) {
 export async function loadFld2Gzip(url: string) {
   const response = await fetch(url);
   if (!response.ok) throw new Error(`Unable to load FLD2 field: ${response.status}`);
-  return gunzipFld2(new Uint8Array(await response.arrayBuffer()));
+  const bytes = new Uint8Array(await response.arrayBuffer());
+  // Some preview hosts transparently decode .gz files without retaining the
+  // Content-Encoding header. Accept both the original gzip stream and the
+  // already-decoded FLD2 payload so the same checked-in asset works locally
+  // and after hosting.
+  return bytes[0] === 0x1f && bytes[1] === 0x8b
+    ? gunzipFld2(bytes)
+    : parseFld2(bytes);
 }
 
 export function fieldOffset(field: RoField, x: number, y: number) {

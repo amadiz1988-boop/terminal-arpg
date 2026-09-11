@@ -1,0 +1,40 @@
+default_codepage: utf8mb4
+
+login_server_ip: 127.0.0.1
+login_server_port: {{DB_PORT}}
+login_server_id: {{DB_USER}}
+login_server_pw: {{DB_PASSWORD}}
+login_server_db: {{MAIN_DATABASE}}
+login_codepage: utf8mb4
+
+ipban_db_ip: 127.0.0.1
+ipban_db_port: {{DB_PORT}}
+ipban_db_id: {{DB_USER}}
+ipban_db_pw: {{DB_PASSWORD}}
+ipban_db_db: {{MAIN_DATABASE}}
+ipban_codepage: utf8mb4
+
+char_server_ip: 127.0.0.1
+char_server_port: {{DB_PORT}}
+char_server_id: {{DB_USER}}
+char_server_pw: {{DB_PASSWORD}}
+char_server_db: {{MAIN_DATABASE}}
+
+map_server_ip: 127.0.0.1
+map_server_port: {{DB_PORT}}
+map_server_id: {{DB_USER}}
+map_server_pw: {{DB_PASSWORD}}
+map_server_db: {{MAIN_DATABASE}}
+
+web_server_ip: 127.0.0.1
+web_server_port: {{DB_PORT}}
+web_server_id: {{DB_USER}}
+web_server_pw: {{DB_PASSWORD}}
+web_server_db: {{MAIN_DATABASE}}
+
+log_db_ip: 127.0.0.1
+log_db_port: {{DB_PORT}}
+log_db_id: {{DB_USER}}
+log_db_pw: {{DB_PASSWORD}}
+log_db_db: {{LOG_DATABASE}}
+log_codepage: utf8mb4

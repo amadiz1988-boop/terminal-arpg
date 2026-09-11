@@ -1,0 +1,922 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#566d8b" />
+    <title>鬼島傳說｜冒險掛機</title>
+    <link rel="icon" href="/ro/client/paperdoll/novice-male.png" />
+    <link rel="stylesheet" href="/styles.css?v=r044-foldable-windows" />
+  </head>
+  <body>
+    <section id="auth" class="auth">
+      <form id="loginForm" class="window auth-card">
+        <div class="titlebar">
+          <span>Ragnarok Online</span><span>帳號登入</span>
+        </div>
+        <div class="auth-body">
+          <div class="server-picker" role="listbox" aria-label="伺服器選擇">
+            <div class="server-picker-title">選擇伺服器</div>
+            <label class="server-row">
+              <input type="radio" name="server" value="ghost-island" checked />
+              <span>鬼島傳說</span>
+              <small id="loginServerStatus">連線確認中</small>
+            </label>
+          </div>
+          <div class="login-fields">
+            <label
+              ><span>帳號</span
+              ><input
+                id="username"
+                required
+                minlength="4"
+                maxlength="23"
+                autocomplete="username"
+                pattern="[A-Za-z0-9_]+" /></label
+            ><label
+              ><span>密碼</span
+              ><input
+                id="password"
+                type="password"
+                required
+                minlength="8"
+                maxlength="32"
+                autocomplete="current-password"
+            /></label>
+          </div>
+          <fieldset class="registration-settings">
+            <legend>首次登入會建立帳號</legend>
+            <span>角色資料將於創角畫面設定</span>
+          </fieldset>
+          <div class="audio-settings compact">
+            <label
+              >音樂
+              <input
+                id="authMusicVolume"
+                type="range"
+                min="0"
+                max="100"
+                value="20"
+              /><output id="authMusicValue">20%</output></label
+            ><label class="audio-check"
+              ><input id="authMusicToggle" type="checkbox" checked />
+              <span>播放背景音樂</span></label
+            >
+          </div>
+          <div class="login-actions">
+            <button
+              class="primary official-skin-button official-ok"
+              type="submit"
+            >
+              確定
+            </button>
+          </div>
+          <strong id="authError"></strong>
+        </div>
+      </form>
+      <form id="characterForm" class="window auth-card hidden">
+        <div class="titlebar"><span>建立初心者</span><span>創角</span></div>
+        <div class="auth-body character-create">
+          <div class="create-preview">
+            <img
+              id="createPaperdoll"
+              src="/ro/client/paperdoll/novice-male.png"
+              alt="初心者紙娃娃"
+            /><b>初心者</b>
+          </div>
+          <div class="create-fields">
+            <fieldset class="create-sex">
+              <legend>角色性別</legend>
+              <label
+                ><input type="radio" name="createSex" value="M" checked />
+                男</label
+              ><label
+                ><input type="radio" name="createSex" value="F" /> 女</label
+              >
+            </fieldset>
+            <label
+              >角色名稱<input
+                id="characterName"
+                required
+                minlength="2"
+                maxlength="24"
+            /></label>
+            <div class="two appearance-controls">
+              <div class="appearance-control">
+                <span>髮型</span>
+                <div class="appearance-stepper">
+                  <button
+                    id="hairPrev"
+                    class="skin-step skin-step-left"
+                    type="button"
+                    aria-label="上一個髮型"
+                  ></button>
+                  <output id="hairValue" for="hair">1 / 42</output>
+                  <button
+                    id="hairNext"
+                    class="skin-step skin-step-right"
+                    type="button"
+                    aria-label="下一個髮型"
+                  ></button>
+                  <input id="hair" type="hidden" value="1" />
+                </div>
+              </div>
+              <div class="appearance-control">
+                <span>髮色</span>
+                <div class="appearance-stepper">
+                  <button
+                    id="hairColorPrev"
+                    class="skin-step skin-step-left"
+                    type="button"
+                    aria-label="上一個髮色"
+                  ></button>
+                  <output id="hairColorValue" for="hairColor">1 / 9</output>
+                  <button
+                    id="hairColorNext"
+                    class="skin-step skin-step-right"
+                    type="button"
+                    aria-label="下一個髮色"
+                  ></button>
+                  <input id="hairColor" type="hidden" value="0" />
+                </div>
+              </div>
+            </div>
+            <fieldset class="create-job">
+              <legend>一轉志願職業</legend>
+              <label
+                ><input
+                  type="radio"
+                  name="targetJob"
+                  value="swordman"
+                  required
+                />
+                劍士</label
+              >
+              <label
+                ><input type="radio" name="targetJob" value="mage" />
+                魔法師</label
+              >
+              <label
+                ><input type="radio" name="targetJob" value="archer" />
+                弓箭手</label
+              >
+              <label
+                ><input type="radio" name="targetJob" value="acolyte" />
+                服事</label
+              >
+              <label
+                ><input type="radio" name="targetJob" value="merchant" />
+                商人</label
+              >
+              <label
+                ><input type="radio" name="targetJob" value="thief" checked />
+                盜賊</label
+              >
+            </fieldset>
+            <button
+              class="primary official-skin-button official-ok"
+              type="submit"
+              aria-label="建立角色"
+            >
+              建立角色</button
+            ><strong id="characterError"></strong>
+          </div>
+        </div>
+      </form>
+      <form
+        id="characterSelectForm"
+        class="window auth-card character-select hidden"
+      >
+        <div class="titlebar">
+          <span>角色選擇</span><span>Character Select</span>
+        </div>
+        <div class="auth-body">
+          <div class="character-slots" role="listbox" aria-label="角色選擇">
+            <label class="character-slot selected">
+              <input type="radio" name="characterSlot" value="0" checked />
+              <img
+                id="selectPaperdoll"
+                src="/ro/client/paperdoll/novice-male-hair-1.png"
+                alt="角色紙娃娃"
+              />
+              <span
+                ><b id="selectCharacterName">讀取中</b
+                ><small id="selectCharacterMeta">初心者</small></span
+              >
+            </label>
+            <div class="character-slot empty"><span>空白角色欄位</span></div>
+            <div class="character-slot empty"><span>空白角色欄位</span></div>
+          </div>
+          <div class="login-actions character-select-actions">
+            <button
+              id="selectLogout"
+              class="official-skin-button official-cancel"
+              type="button"
+              aria-label="返回登入"
+            >
+              返回登入
+            </button>
+            <button
+              id="selectEnter"
+              class="primary official-skin-button official-ok"
+              type="submit"
+              aria-label="進入遊戲"
+            >
+              進入遊戲
+            </button>
+          </div>
+          <strong id="characterSelectError"></strong>
+        </div>
+      </form>
+    </section>
+    <main id="game" class="desktop hidden">
+      <header class="brand">
+        <div>
+          <b>鬼島傳說</b><small id="accountName">連線確認中</small>
+        </div>
+        <div>
+          <span id="worldLamp" class="lamp">連線確認中</span
+          ><button
+            id="quickAudio"
+            class="quick-audio"
+            type="button"
+            aria-label="開啟音效設定"
+          >
+            音效</button
+          ><button id="logout" class="logout">登出</button>
+        </div>
+      </header>
+      <section class="window">
+        <div class="titlebar"><span>基本訊息視窗</span><span>●</span></div>
+        <div class="basic">
+          <div class="identity">
+            <b id="name">讀取中</b><span id="jobName">初心者</span
+            ><small id="location">位置讀取中</small>
+          </div>
+          <div class="vitals">
+            <label>HP <span id="hpText">0 / 0</span></label>
+            <div class="bar"><i id="hpBar" class="hp"></i></div>
+            <label>SP <span id="spText">0 / 0</span></label>
+            <div class="bar"><i id="spBar" class="sp"></i></div>
+            <label
+              >Base Lv. <span id="base">0</span></label
+            >
+            <div class="bar exp-bar">
+              <i id="baseBar" class="level"></i
+              ><span id="baseExp">0 / 0 EXP</span>
+            </div>
+            <label
+              >Job Lv. <span id="jobLevel">0</span></label
+            >
+            <div class="bar exp-bar">
+              <i id="jobBar" class="level"></i
+              ><span id="jobExp">0 / 0 EXP</span>
+            </div>
+          </div>
+          <div class="money">
+            Weight：<b id="weight">0 / 0</b>　Zeny：<b id="zeny">0</b>
+          </div>
+        </div>
+      </section>
+      <section class="window social-window" aria-label="玩家對話欄">
+        <div class="titlebar">
+          <span>對話欄</span><span id="chatChannel">全部訊息</span>
+        </div>
+        <div
+          id="chatChannels"
+          class="chat-channels"
+          role="tablist"
+          aria-label="聊天頻道"
+        >
+          <button
+            class="active"
+            type="button"
+            role="tab"
+            data-chat-channel="all"
+          >
+            全部
+          </button>
+          <button type="button" role="tab" data-chat-channel="public">
+            一般
+          </button>
+          <button type="button" role="tab" data-chat-channel="private">
+            密語
+          </button>
+          <button type="button" role="tab" data-chat-channel="party">
+            隊伍
+          </button>
+          <button type="button" role="tab" data-chat-channel="guild">
+            公會
+          </button>
+          <button type="button" role="tab" data-chat-channel="clan">
+            家族
+          </button>
+          <button type="button" role="tab" data-chat-channel="battleground">
+            戰場
+          </button>
+          <button type="button" role="tab" data-chat-channel="map">地圖</button>
+          <button type="button" role="tab" data-chat-channel="global">
+            全服
+          </button>
+          <button type="button" role="tab" data-chat-channel="trade">
+            交易
+          </button>
+          <button type="button" role="tab" data-chat-channel="support">
+            支援
+          </button>
+          <button type="button" role="tab" data-chat-channel="ally">
+            同盟
+          </button>
+          <button type="button" role="tab" data-chat-channel="system">
+            系統
+          </button>
+        </div>
+        <div id="chatFeed" class="chat-feed" aria-live="polite">
+          <p class="chat-empty">正在連接對話頻道...</p>
+        </div>
+        <label id="chatRecipientRow" class="chat-recipient hidden">
+          <span>密語對象</span
+          ><input
+            id="chatRecipient"
+            maxlength="24"
+            autocomplete="off"
+            placeholder="輸入角色名稱"
+          />
+        </label>
+        <form id="chatForm" class="chat-compose">
+          <button
+            id="emotionToggle"
+            class="emotion-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="emotionPalette"
+            title="RO 表情"
+            disabled
+          >
+            表情
+          </button>
+          <button
+            id="voiceRecord"
+            class="voice-record"
+            type="button"
+            aria-pressed="false"
+            title="錄製最多 30 秒語音"
+            disabled
+          >
+            錄音
+          </button>
+          <input
+            id="chatInput"
+            maxlength="80"
+            autocomplete="off"
+            placeholder="輸入一般頻道訊息"
+            aria-label="聊天訊息"
+            disabled
+          />
+          <button
+            id="chatSend"
+            class="official-skin-button official-send"
+            type="submit"
+            disabled
+          >
+            傳送
+          </button>
+        </form>
+        <div id="emotionPalette" class="emotion-palette hidden"></div>
+        <small id="chatStatus" class="chat-status"
+          >文字由遊戲伺服器回送後顯示；語音最長 30 秒、最大 1 MB。</small
+        >
+      </section>
+      <nav class="tabs">
+        <button class="active" data-tab="hunt">掛機</button
+        ><button data-tab="quests">任務</button
+        ><button data-tab="character">能力</button
+        ><button data-tab="skills">技能</button
+        ><button data-tab="equipment">裝備</button
+        ><button data-tab="inventory">道具</button
+        ><button data-tab="mapInfo">地圖情報</button
+        ><button data-tab="system">系統</button>
+      </nav>
+      <section id="hunt" class="panel active">
+        <div class="window">
+          <div class="titlebar">
+            <span>自動戰鬥控制</span><span id="status">讀取中</span>
+          </div>
+          <div class="controls">
+            <button id="start" class="primary">開始掛機</button
+            ><button id="stop">停止掛機</button>
+          </div>
+          <div class="session-grid">
+            <div><span>掛機時間</span><b id="duration">00:00:00</b></div>
+            <div><span>擊倒怪物</span><b id="kills">0</b></div>
+            <div><span>人物 EXP</span><b id="baseExpGained">0</b></div>
+            <div><span>職業 EXP</span><b id="jobExpGained">0</b></div>
+            <div><span>撿取種類</span><b id="itemKinds">0</b></div>
+            <div><span>死亡次數</span><b id="deaths">0</b></div>
+          </div>
+        </div>
+        <div class="window map-window">
+          <div class="titlebar">
+            <span>即時小地圖</span><span id="mapPosition">等待角色位置</span>
+          </div>
+          <div class="minimap-wrap">
+            <canvas
+              id="minimap"
+              width="720"
+              height="420"
+              aria-label="即時小地圖"
+            ></canvas>
+            <div class="map-legend">
+              <span class="you">■ 你</span><span class="monster">● 怪物</span
+              ><span class="engaged">● 交戰</span
+              ><span class="player">■ 玩家</span>
+            </div>
+          </div>
+        </div>
+        <div class="window">
+          <div class="titlebar">
+            <span>本次掛機拾取統計</span><span id="lootTotal">0 件</span>
+          </div>
+          <div id="lootSummary" class="loot-summary"><p>尚未撿取物品</p></div>
+        </div>
+        <div class="window supply-window">
+          <div class="titlebar">
+            <span>回城補給循環</span><span id="supplyStage">尚未啟用</span>
+          </div>
+          <form id="supplyForm" class="supply-form">
+            <label class="check-row">
+              <input id="supplyEnabled" type="checkbox" />
+              <span>啟用自動回城補給</span>
+            </label>
+            <div class="supply-grid">
+              <label>
+                <span>負重達到</span>
+                <span
+                  ><input
+                    id="supplyWeight"
+                    type="number"
+                    min="40"
+                    max="88"
+                    value="68"
+                  />%</span
+                >
+              </label>
+              <label class="check-row">
+                <input id="supplyStore" type="checkbox" checked />
+                <span>卡普拉存倉</span>
+              </label>
+              <label class="check-row">
+                <input id="supplySell" type="checkbox" checked />
+                <span>販售戰利品</span>
+              </label>
+              <label class="check-row">
+                <input id="supplyBuy" type="checkbox" checked />
+                <span>補充紅色藥水</span>
+              </label>
+              <label>
+                <span>藥水低於</span>
+                <input
+                  id="redPotionMin"
+                  type="number"
+                  min="0"
+                  max="500"
+                  value="20"
+                />
+              </label>
+              <label>
+                <span>補到</span>
+                <input
+                  id="redPotionMax"
+                  type="number"
+                  min="0"
+                  max="1000"
+                  value="100"
+                />
+              </label>
+            </div>
+            <p class="supply-route">
+              南門卡普拉存倉 → 普隆德拉道具商販售與補給 → 自動返回原掛機地圖
+            </p>
+            <details class="supply-rules">
+              <summary>逐項拾取、丟棄、販售與存倉規則</summary>
+              <div id="supplyRuleList"><p>正在讀取背包道具</p></div>
+            </details>
+            <div class="controls">
+              <button id="saveSupply" type="submit" class="primary">
+                套用補給設定
+              </button>
+            </div>
+            <p id="supplyNotice" class="notice">
+              預設保留補品與傳送道具、販售一般戰利品、存放卡片及未穿裝備。
+            </p>
+          </form>
+        </div>
+        <section class="window combat-window">
+          <div class="titlebar">
+            <span>戰鬥終端</span><span id="logLatency">即時</span>
+          </div>
+          <div class="console" id="log">正在連接真實戰鬥紀錄...</div>
+          <div
+            id="damageFloatLayer"
+            class="damage-float-layer"
+            aria-hidden="true"
+          ></div>
+        </section>
+      </section>
+      <section id="quests" class="panel">
+        <div class="window quest-window">
+          <div class="titlebar">
+            <span>任務視窗</span><span id="questSummary">新生訓練</span>
+          </div>
+          <div class="quest-layout">
+            <div
+              id="questList"
+              class="quest-list"
+              role="list"
+              aria-label="角色任務"
+            >
+              <p>正在讀取任務資料</p>
+            </div>
+            <article
+              id="questDetail"
+              class="quest-detail console task-console task-log"
+              aria-live="polite"
+              aria-label="任務行動紀錄"
+            >
+              <p class="task-log-empty">
+                啟動自動新手任務後，這裡會顯示移動、NPC 對話與任務需求。
+              </p>
+            </article>
+          </div>
+          <div class="controls quest-controls">
+            <button id="questResume" class="primary" type="button">
+              繼續自動任務
+            </button>
+            <button id="questPause" type="button">暫停自動任務</button>
+          </div>
+          <p id="questNotice" class="notice">
+            一轉完成後會前往普隆德拉原野 08 並開始掛機。
+          </p>
+        </div>
+        <div class="window eden-window">
+          <div class="titlebar">
+            <span>伊甸園成長訓練</span><span id="edenSummary">資格確認中</span>
+          </div>
+          <div
+            id="edenMilestones"
+            class="eden-milestones"
+            role="list"
+            aria-label="伊甸園成長階段"
+          >
+            <p>正在讀取伊甸園進度</p>
+          </div>
+          <div class="controls eden-controls">
+            <button id="edenEnroll" class="primary" type="button">
+              前往並加入伊甸園
+            </button>
+          </div>
+          <p id="edenNotice" class="notice">
+            一轉後可由普隆德拉傳送員進入伊甸園，後續銜接 Lv.12、26、40 階段裝備訓練。
+          </p>
+        </div>
+      </section>
+      <section id="character" class="panel">
+        <div class="window">
+          <div class="titlebar">
+            <span>人物能力屬性狀態欄</span
+            ><span id="points">Status Point 0</span>
+          </div>
+          <div class="status-layout">
+            <div class="base-stats" id="stats"></div>
+            <div class="derived-stats" id="derivedStats">
+              <div><span>Atk</span><b>資料同步中</b></div>
+              <div><span>Def</span><b>資料同步中</b></div>
+              <div><span>Matk</span><b>資料同步中</b></div>
+              <div><span>Mdef</span><b>資料同步中</b></div>
+              <div><span>Hit</span><b>資料同步中</b></div>
+              <div><span>Flee</span><b>資料同步中</b></div>
+              <div><span>Critical</span><b>資料同步中</b></div>
+              <div><span>Aspd</span><b>資料同步中</b></div>
+            </div>
+          </div>
+          <div class="stat-actions">
+            <button id="resetStats" type="button">全部重置</button>
+            <p id="statNotice" class="notice">
+              點擊增加 1 點，長按可連續配點。
+            </p>
+          </div>
+        </div>
+      </section>
+      <section id="skills" class="panel">
+        <div class="window">
+          <div class="titlebar">
+            <span>技能欄</span><span id="skillPoints">Skill Point 0</span>
+          </div>
+          <div id="skillList" class="skill-list"></div>
+          <p id="skillNotice" class="notice">
+            技能樹、前置條件、說明、等級與可加點狀態均由遊戲伺服器同步。
+          </p>
+        </div>
+        <div class="window job-change-window">
+          <div class="titlebar">
+            <span>Criatura Academy 新生訓練</span
+            ><span id="jobChangeState">資格確認中</span>
+          </div>
+          <p id="jobEligibility" class="notice"></p>
+          <div id="firstJobChoices" class="first-job-choices">
+            <button type="button" data-job-route="swordman">
+              <b>劍士</b><small>近戰與高 HP</small>
+            </button>
+            <button type="button" data-job-route="mage">
+              <b>魔法師</b><small>元素魔法</small>
+            </button>
+            <button type="button" data-job-route="archer">
+              <b>弓箭手</b><small>遠距物理</small>
+            </button>
+            <button type="button" data-job-route="acolyte">
+              <b>服事</b><small>治療與支援</small>
+            </button>
+            <button type="button" data-job-route="merchant">
+              <b>商人</b><small>交易與製造</small>
+            </button>
+            <button type="button" data-job-route="thief">
+              <b>盜賊</b><small>迴避與爆擊</small>
+            </button>
+          </div>
+          <div id="jobRoutePanel" class="job-route-panel hidden">
+            <p id="jobRouteStatus"></p>
+            <div class="controls">
+              <button id="jobTalk" type="button">與學院結業導師對話</button>
+              <button
+                id="jobResume"
+                class="official-skin-button official-back"
+                type="button"
+                aria-label="返回掛機"
+              >
+                返回掛機
+              </button>
+            </div>
+          </div>
+          <div id="npcDialog" class="npc-dialog hidden">
+            <div class="npc-name" id="npcName">轉職 NPC</div>
+            <p id="npcMessage"></p>
+            <div id="npcActions" class="npc-actions"></div>
+          </div>
+          <p id="jobChangeNotice" class="notice">
+            選擇職業後，角色保持在線並優先使用卡普拉傳送服務；免費利用券來自新生訓練獎勵。
+          </p>
+        </div>
+      </section>
+      <section id="equipment" class="panel">
+        <div class="window equipment-window">
+          <div class="titlebar">
+            <span>裝備欄</span><span id="appearanceMeta">初心者</span>
+          </div>
+          <div class="paperdoll-layout">
+            <div class="equip-column">
+              <div class="equip-slot" data-slot="headTop">
+                <span>頭上</span><b>未裝備</b>
+              </div>
+              <div class="equip-slot" data-slot="headMid">
+                <span>頭中</span><b>未裝備</b>
+              </div>
+              <div class="equip-slot" data-slot="headLow">
+                <span>頭下</span><b>未裝備</b>
+              </div>
+              <div class="equip-slot" data-slot="rightHand">
+                <span>右手</span><b>未裝備</b>
+              </div>
+              <div class="equip-slot" data-slot="garment">
+                <span>披肩</span><b>未裝備</b>
+              </div>
+            </div>
+            <div class="paperdoll-stage">
+              <img id="paperdollBody" alt="角色紙娃娃" /><strong
+                id="paperdollName"
+                >讀取中</strong
+              ><small id="paperdollDetails">外觀讀取中</small>
+            </div>
+            <div class="equip-column">
+              <div class="equip-slot" data-slot="armor">
+                <span>鎧甲</span><b>未裝備</b>
+              </div>
+              <div class="equip-slot" data-slot="leftHand">
+                <span>左手</span><b>未裝備</b>
+              </div>
+              <div class="equip-slot" data-slot="shoes">
+                <span>鞋子</span><b>未裝備</b>
+              </div>
+              <div class="equip-slot" data-slot="accessoryLeft">
+                <span>飾品</span><b>未裝備</b>
+              </div>
+              <div class="equip-slot" data-slot="accessoryRight">
+                <span>飾品</span><b>未裝備</b>
+              </div>
+            </div>
+          </div>
+          <p class="notice">人物基底與裝備狀態由遊戲伺服器即時同步。</p>
+        </div>
+        <div class="window equipment-bag">
+          <div class="titlebar">
+            <span>可穿戴裝備</span><span>雙擊穿上</span>
+          </div>
+          <div id="equipmentInventoryList" class="inventory-list">
+            <p>讀取裝備中</p>
+          </div>
+          <p id="equipmentItemNotice" class="notice">
+            雙擊上方已穿戴裝備可卸下；雙擊此處裝備可穿上。
+          </p>
+        </div>
+      </section>
+      <section id="inventory" class="panel">
+        <div class="window">
+          <div class="titlebar">
+            <span>道具欄</span><span id="inventoryTotal">0 種</span>
+          </div>
+          <div class="inventory-tabs">
+            <button class="active" data-inventory="consumable">消耗品</button
+            ><button data-inventory="equipment">裝備</button
+            ><button data-inventory="etc">其他</button
+            ><button data-inventory="card">卡片</button>
+          </div>
+          <div id="inventoryList" class="inventory-list"><p>讀取道具中</p></div>
+          <p id="itemNotice" class="notice">
+            雙擊消耗品使用；雙擊裝備穿上或卸下。
+          </p>
+        </div>
+      </section>
+      <section id="mapInfo" class="panel">
+        <div class="window">
+          <div class="titlebar">
+            <span id="mapInfoTitle">地圖情報</span
+            ><span id="mapInfoTotal">讀取中</span>
+          </div>
+          <div id="mapInfoSource" class="map-info-source">
+            正在讀取地圖資料
+          </div>
+          <div id="mapMonsterList" class="map-monster-list"></div>
+        </div>
+      </section>
+      <section id="system" class="panel">
+        <div class="window">
+          <div class="titlebar"><span>聲音設定</span><span>帳號共用</span></div>
+          <div class="audio-settings">
+            <label
+              >背景音樂
+              <input
+                id="musicVolume"
+                type="range"
+                min="0"
+                max="100"
+                value="20"
+              /><output id="musicValue">20%</output></label
+            ><label
+              >音效
+              <input
+                id="soundVolume"
+                type="range"
+                min="0"
+                max="100"
+                value="35"
+              /><output id="soundValue">35%</output></label
+            ><label class="audio-check"
+              ><input id="musicToggle" type="checkbox" checked />
+              <span>播放背景音樂</span></label
+            ><label class="audio-check"
+              ><input id="soundToggle" type="checkbox" checked />
+              <span>播放音效</span></label
+            >
+          </div>
+        </div>
+        <div class="window">
+          <div class="titlebar"><span>戰鬥顯示</span><span>帳號共用</span></div>
+          <div class="audio-settings combat-visual-settings">
+            <label
+              >傷害大小
+              <input
+                id="damageFloatScale"
+                type="range"
+                min="10"
+                max="1000"
+                step="10"
+                value="50"
+              /><output id="damageFloatScaleValue">50%</output></label
+            ><label
+              >透明度
+              <input
+                id="damageFloatOpacity"
+                type="range"
+                min="10"
+                max="100"
+                step="5"
+                value="100"
+              /><output id="damageFloatOpacityValue">100%</output></label
+            ><label class="visual-select"
+              >字體粗細
+              <select id="damageFloatWeight">
+                <option value="400">一般</option>
+                <option value="500">中等</option>
+                <option value="600">半粗</option>
+                <option value="700">粗體</option>
+                <option value="800" selected>特粗</option>
+                <option value="900">最粗</option>
+              </select></label
+            ><label class="visual-select"
+              >傷害字體
+              <select id="damageFloatFont">
+                <option value="classic" selected>RO 經典</option>
+                <option value="traditional">繁體黑體</option>
+                <option value="arial">Arial</option>
+                <option value="consolas">Consolas</option>
+                <option value="system">系統字體</option>
+              </select></label
+            ><label
+              >水平位置
+              <input
+                id="damageFloatPositionX"
+                type="range"
+                min="0"
+                max="100"
+                step="1"
+                value="72"
+              /><output id="damageFloatPositionXValue">72%</output></label
+            ><label
+              >垂直位置
+              <input
+                id="damageFloatPositionY"
+                type="range"
+                min="0"
+                max="100"
+                step="1"
+                value="72"
+              /><output id="damageFloatPositionYValue">72%</output></label
+            ><label
+              >跳動範圍
+              <input
+                id="damageFloatArc"
+                type="range"
+                min="0"
+                max="200"
+                step="5"
+                value="100"
+              /><output id="damageFloatArcValue">100%</output></label
+            ><label class="audio-check"
+              ><input id="damageFloatToggle" type="checkbox" checked />
+              <span>顯示傷害跳字</span></label
+            >
+            <div
+              id="damageFloatPreview"
+              class="damage-float-preview"
+              aria-label="傷害跳字預覽"
+            >
+              <span class="damage-preview-boundary">戰鬥黑窗可見範圍</span>
+              <svg class="damage-preview-path" aria-hidden="true">
+                <polyline id="damagePreviewPathLine"></polyline>
+              </svg>
+              <span
+                class="damage-preview-marker start"
+                data-preview-marker="start"
+                aria-hidden="true"
+              ></span>
+              <span
+                class="damage-preview-marker apex"
+                data-preview-marker="apex"
+                aria-hidden="true"
+              ></span>
+              <span
+                class="damage-preview-marker end"
+                data-preview-marker="end"
+                aria-hidden="true"
+              ></span>
+              <span class="damage-preview-reference" aria-hidden="true"
+                >60</span
+              >
+              <span class="damage-preview segment">60</span>
+              <span class="damage-preview total">120</span>
+              <span class="damage-preview critical">99</span>
+            </div>
+            <p>
+              小黑窗即為戰鬥終端可見範圍；圓點依序標示起點、最高點與終點。白色為單段傷害，金色為短時間累積傷害，暴擊使用星形底圖。
+            </p>
+          </div>
+        </div>
+        <div class="window">
+          <div class="titlebar">
+            <span>伺服器狀態</span><span id="onlinePlayers">0 人在線</span>
+          </div>
+          <div class="service-grid" id="services"></div>
+        </div>
+      </section>
+    </main>
+    <audio
+      id="bgm"
+      src="/ro/client/bgm/01-title.mp3"
+      loop
+      preload="metadata"
+    ></audio>
+    <script src="/app.js?v=r046-official-ui-audio" defer></script>
+  </body>
+</html>

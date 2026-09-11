@@ -1,0 +1,146 @@
+// Ghost Island RO: Renewal Criatura Academy fast first-job graduation.
+// The selected vocation is written at character creation and is enforced here.
+
+iz_ac01,60,67,3	script	學院結業導師#terminal	4_F_01,{
+	if (Class != Job_Novice) {
+		mes "[新生學院結業導師]";
+		mes "你已完成第一次轉職，我會送你前往伊斯魯得島。";
+		close2;
+		warp "izlude",127,253;
+		end;
+	}
+	if (JobLevel < 10 || getskilllv("NV_BASIC") < 9) {
+		mes "[新生學院結業導師]";
+		mes "結業條件為初心者 Job Lv.10，基本技能 Lv.9。";
+		close;
+	}
+
+	.@target$ = terminal_target_job$;
+	if (.@target$ == "swordman") {
+		.@job = Job_Swordman;
+		.@reward = 13415; // N_Falchion
+		.@name$ = "劍士";
+	} else if (.@target$ == "mage") {
+		.@job = Job_Mage;
+		.@reward = 1639; // N_Rod
+		.@name$ = "魔法師";
+	} else if (.@target$ == "archer") {
+		.@job = Job_Archer;
+		.@reward = 1742; // N_Composite_Bow
+		.@name$ = "弓箭手";
+	} else if (.@target$ == "acolyte") {
+		.@job = Job_Acolyte;
+		.@reward = 1545; // N_Mace
+		.@name$ = "服事";
+	} else if (.@target$ == "merchant") {
+		.@job = Job_Merchant;
+		.@reward = 1381; // N_Battle_Axe
+		.@name$ = "商人";
+	} else if (.@target$ == "thief") {
+		.@job = Job_Thief;
+		.@reward = 13041; // N_Main_Gauche
+		.@name$ = "盜賊";
+	} else {
+		mes "[新生學院結業導師]";
+		mes "這名角色建立時沒有選擇一轉志願。";
+		close;
+	}
+
+	mes "[新生學院結業導師]";
+	mes "歡迎來到克里圖拉學院，" + strcharinfo(0) + "。";
+	mes "你選擇的一轉志願是 ^0055FF" + .@name$ + "^000000。";
+	next;
+	mes "[新生學院結業導師]";
+	mes "學院已確認你的初心者訓練紀錄。";
+	mes "現在完成登記並正式結業嗎？";
+	next;
+	if (select("完成結業。:先確認訓練內容。") == 2) {
+		mes "[新生學院結業導師]";
+		mes "確認學院導師交付的訓練後，再回來找我。";
+		close;
+	}
+
+	if (!isbegin_quest(4269)) {
+		setquest 4269;
+		completequest 4269;
+		getitem 18730,1; // Criatura_Academy_Hat
+		getitem 6593,1; // Criatura_Hair_Coupon
+		getitem 569,300; // Novice_Potion
+	}
+
+	jobchange .@job;
+	getitem .@reward,1;
+	equip .@reward;
+	equip 18730; // Academy reward is auto-equipped only during this onboarding script.
+	if (.@target$ == "archer") {
+		getitem 12004,1;
+		getitem 12009,1;
+		getitem 12008,1;
+		equip 12004;
+	}
+	terminal_academy_graduated = 1;
+	specialeffect2 EF_ANGEL2;
+	mes "[新生學院結業導師]";
+	mes "恭喜你正式成為" + .@name$ + "。";
+	mes "接下來會先前往伊斯魯得島，再由自動導航帶你到普隆德拉原野 08。";
+	close2;
+	warp "izlude",127,253;
+	end;
+}
+
+iz_ac01_a,60,67,3	duplicate(學院結業導師#terminal)	學院結業導師#terminal_a	4_F_01
+iz_ac01_b,60,67,3	duplicate(學院結業導師#terminal)	學院結業導師#terminal_b	4_F_01
+iz_ac01_c,60,67,3	duplicate(學院結業導師#terminal)	學院結業導師#terminal_c	4_F_01
+iz_ac01_d,60,67,3	duplicate(學院結業導師#terminal)	學院結業導師#terminal_d	4_F_01
+
+// Server-authoritative recovery for Novices who left the Renewal onboarding route.
+// The command only relocates an unfinished Novice. Quest rewards remain owned by
+// the original rAthena quest scripts and the terminal graduation NPC.
+-	script	#terminal_onboarding_recovery	-1,{
+OnInit:
+	bindatcmd("terminal_onboarding_resume",strnpcinfo(0)+"::OnResume",0,99);
+	bindatcmd("web_eden_return",strnpcinfo(0)+"::OnEdenReturn",0,99);
+	end;
+
+OnEdenReturn:
+	if (strcharinfo(3) != "moc_para01" || (countitem(6219) == 0 && countitem(22508) == 0)) {
+		dispmottomessage "目前無法使用返回服務。";
+		end;
+	}
+	warp "prt_fild08",170,375;
+	end;
+
+OnResume:
+	if (Class != Job_Novice || terminal_academy_graduated) {
+		dispbottom "新生訓練已結束，無法再次傳送或領取獎勵。";
+		end;
+	}
+	if (isbegin_quest(21001) != 2) {
+		dispbottom "正在返回沉船船艙，從「逃離沉船」繼續新生訓練。";
+		warp "iz_int",18,26;
+		end;
+	}
+	if (isbegin_quest(7471) != 2 || isbegin_quest(21008) != 2) {
+		dispbottom "正在返回漂流島，繼續初次相遇與第一次戰鬥。";
+		warp "int_land",85,107;
+		end;
+	}
+	if (isbegin_quest(7472) != 2 || isbegin_quest(7473) != 2) {
+		dispbottom "正在返回伊斯魯得島，繼續入學前引導。";
+		warp "izlude",196,209;
+		end;
+	}
+	if (isbegin_quest(4269) != 2) {
+		dispbottom "正在返回克里圖拉學院櫃檯完成報到。";
+		warp "iz_ac01",100,36;
+		end;
+	}
+	if (JobLevel < 10 || getskilllv("NV_BASIC") < 9) {
+		dispbottom "正在返回新生訓練場，繼續累積結業條件。";
+		warp "new_1-3",95,171;
+		end;
+	}
+	dispbottom "正在返回克里圖拉學院，辦理一轉結業。";
+	warp "iz_ac01",58,67;
+	end;
+}

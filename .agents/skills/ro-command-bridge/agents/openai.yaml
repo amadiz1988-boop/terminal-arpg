@@ -1,0 +1,4 @@
+interface:
+  display_name: "RO 指令橋接"
+  short_description: "研究並優先重用 rAthena 與 OpenKore 內建指令"
+  default_prompt: "盤點需求可重用的 rAthena 與 OpenKore 指令，提出安全橋接與驗證方案。"

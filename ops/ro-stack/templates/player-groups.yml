@@ -1,0 +1,8 @@
+Header:
+  Type: PLAYER_GROUP_DB
+  Version: 1
+
+Body:
+  - Id: 0
+    Commands:
+      resetstat: true

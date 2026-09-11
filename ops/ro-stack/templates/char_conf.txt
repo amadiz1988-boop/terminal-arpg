@@ -1,0 +1,8 @@
+userid: {{INTER_USER}}
+passwd: {{INTER_PASSWORD}}
+login_ip: 127.0.0.1
+login_port: {{LOGIN_PORT}}
+bind_ip: 127.0.0.1
+char_ip: 127.0.0.1
+char_port: {{CHARACTER_PORT}}
+pincode_enabled: no

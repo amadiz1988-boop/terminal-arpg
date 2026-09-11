@@ -1,0 +1,672 @@
+{
+  "authorization": "使用者於 2026-09-10 聲明已取得官方客戶端內容授權",
+  "clientExecutable": {
+    "bytes": 3980272,
+    "sha256": "41511e6294eabed6f174667539acd5dd0432de083a43b1869dda4846bb4c621c"
+  },
+  "archives": [
+    {
+      "name": "data.grf",
+      "bytes": 2043560050,
+      "sha256": "1c7d68f70714937abbd3741a6b3aea34a7ed9da63428941d5df453efacd1c0ad"
+    },
+    {
+      "name": "data0.grf",
+      "bytes": 2123919641,
+      "sha256": "913402ace1d3c67818b4f070650a07eb157a6d62df9e394d596d59b4c7e6678a"
+    },
+    {
+      "name": "event.grf",
+      "bytes": 5833135,
+      "sha256": "7fff4e0eececd10df9a9c4f83b70d78dc4dbb99c5ece64b117df7db8a2f85575"
+    }
+  ],
+  "imported": [
+    {
+      "kind": "bgm",
+      "key": "title",
+      "source": "BGM/01.mp3",
+      "output": "public/ro/client/bgm/01-title.mp3",
+      "sha256": "48dd8b61e3894aadb069f58bbfa00c3e59a41cc1e54c414717a2377b882b0423"
+    },
+    {
+      "kind": "bgm",
+      "key": "prontera",
+      "source": "BGM/08.mp3",
+      "output": "public/ro/client/bgm/08-prontera.mp3",
+      "sha256": "76bc2f2bff5fed6810b40a22f5baa50d7b5e6f2b60fc1e3c41b454e44d643484"
+    },
+    {
+      "kind": "bgm",
+      "key": "prt_fild08",
+      "source": "BGM/12.mp3",
+      "output": "public/ro/client/bgm/12-streamside.mp3",
+      "sha256": "3a86ea4926e169d4e5d41625ecc58d40d4a016776f83224376d590e86b0d594a"
+    },
+    {
+      "kind": "skin",
+      "key": "btn_close",
+      "source": "skin/default/btn_close.bmp",
+      "output": "public/ro/client/skin/btn_close.bmp",
+      "sha256": "ddb166f254a6f5b77087b9087a710cbf7d163a754e48213317b62f67028cc9dd"
+    },
+    {
+      "kind": "skin",
+      "key": "checkbox_0",
+      "source": "skin/default/checkbox_0.bmp",
+      "output": "public/ro/client/skin/checkbox_0.bmp",
+      "sha256": "5e8b2c99806788b8e9024d18a12c0306b7e6e97780d5b75b40c5d174ea4c4810"
+    },
+    {
+      "kind": "skin",
+      "key": "checkbox_1",
+      "source": "skin/default/checkbox_1.bmp",
+      "output": "public/ro/client/skin/checkbox_1.bmp",
+      "sha256": "17c810b4be9aac595b0b3c77789076215e4e6f0fca721072b9b877d089412f4d"
+    },
+    {
+      "kind": "paperdoll",
+      "key": "novice-male",
+      "source": "data0.grf:data/sprite/牢埃练/个烹/巢/檬焊磊_巢.act",
+      "output": "public/ro/client/paperdoll/novice-male.png",
+      "sha256": "0fec70c7e024e7a4b9a5feebe3ba6ab28fc0678c5b7e4b9afe0495fbe44783ce"
+    },
+    {
+      "kind": "paperdoll",
+      "key": "novice-female",
+      "source": "data0.grf:data/sprite/牢埃练/个烹/咯/檬焊磊_咯.act",
+      "output": "public/ro/client/paperdoll/novice-female.png",
+      "sha256": "b65abda8674a282e49f7bd44e6522e15484561a654e406994870a57fe6811188"
+    },
+    {
+      "kind": "item",
+      "key": "Red_Herb",
+      "source": "data.grf:data/texture/蜡历牢磐其捞胶/item/弧埃倾宏.bmp",
+      "output": "public/ro/client/items/Red_Herb.bmp",
+      "sha256": "066a8e038eabea1fcd61c1e5580bf09f939c170369f503fde57537c6a42d0009"
+    },
+    {
+      "kind": "item",
+      "key": "Green_Herb",
+      "source": "data.grf:data/texture/蜡历牢磐其捞胶/item/檬废倾宏.bmp",
+      "output": "public/ro/client/items/Green_Herb.bmp",
+      "sha256": "a02add37f4fb32d9f38bdb783dd7feed6c96d632dccf86ab24394cee6a2760e5"
+    },
+    {
+      "kind": "item",
+      "key": "Apple",
+      "source": "data.grf:data/texture/蜡历牢磐其捞胶/item/荤苞.bmp",
+      "output": "public/ro/client/items/Apple.bmp",
+      "sha256": "583ba279a5bfd3a4995a83643e3f36da2228eddd8366dd97ff659f17735d8637"
+    },
+    {
+      "kind": "item",
+      "key": "Carrot",
+      "source": "data.grf:data/texture/蜡历牢磐其捞胶/item/寸辟.bmp",
+      "output": "public/ro/client/items/Carrot.bmp",
+      "sha256": "975f575e4410f7f5e60890de63e7d5106cb713f05a6ea121e111a8a5f78c6332"
+    },
+    {
+      "kind": "item",
+      "key": "Wing_Of_Fly",
+      "source": "data.grf:data/texture/蜡历牢磐其捞胶/item/颇府狼朝俺.bmp",
+      "output": "public/ro/client/items/Wing_Of_Fly.bmp",
+      "sha256": "cd20b6f42f3e00ddd46569c98e36737a8ebd0cac43e152c1396bf4d35630b000"
+    },
+    {
+      "kind": "item",
+      "key": "Unripe_Apple",
+      "source": "data.grf:data/texture/蜡历牢磐其捞胶/item/代劳篮荤苞.bmp",
+      "output": "public/ro/client/items/Unripe_Apple.bmp",
+      "sha256": "41cb27b1d986d527a575a04afd3849f18221101bccb5dac455ded0c4a4cf5469"
+    },
+    {
+      "kind": "item",
+      "key": "Rainbow_Carrot",
+      "source": "data.grf:data/texture/蜡历牢磐其捞胶/item/公瘤俺寸辟.bmp",
+      "output": "public/ro/client/items/Rainbow_Carrot.bmp",
+      "sha256": "76767673a9a8dd68e7d36c14eaac420b7d0f8825e436cbc0256a30733f54e7af"
+    },
+    {
+      "kind": "item",
+      "key": "Clover",
+      "source": "data.grf:data/texture/蜡历牢磐其捞胶/item/努肺滚.bmp",
+      "output": "public/ro/client/items/Clover.bmp",
+      "sha256": "80cfb7966a0921b835330a8828e49f3b5da9d6ddd1ea4ab643c02a0d42908b0d"
+    },
+    {
+      "kind": "item",
+      "key": "Jellopy",
+      "source": "data.grf:data/texture/蜡历牢磐其捞胶/item/俩肺乔.bmp",
+      "output": "public/ro/client/items/Jellopy.bmp",
+      "sha256": "a589402fd3ceb87a4d561591dda843856b96e9418f891071e912a0da04220d87"
+    },
+    {
+      "kind": "item",
+      "key": "Fluff",
+      "source": "data.grf:data/texture/蜡历牢磐其捞胶/item/钾判.bmp",
+      "output": "public/ro/client/items/Fluff.bmp",
+      "sha256": "6b9bcc32199977243cd75dd75afd62dfa448417c1744cf3de3263ecef77cdf87"
+    },
+    {
+      "kind": "item",
+      "key": "Chrysalis",
+      "source": "data.grf:data/texture/蜡历牢磐其捞胶/item/锅单扁伯龙.bmp",
+      "output": "public/ro/client/items/Chrysalis.bmp",
+      "sha256": "d80d7e34c3c2cf665cf32e126c35dd7cbd00f4c36326e9acd90a534dea447f02"
+    },
+    {
+      "kind": "item",
+      "key": "Shell",
+      "source": "data.grf:data/texture/蜡历牢磐其捞胶/item/窜窜茄伯龙.bmp",
+      "output": "public/ro/client/items/Shell.bmp",
+      "sha256": "46f1f2a6f752769d48def2a1de0b781a7ef34e4ad14d8a6d154b9864567f616d"
+    },
+    {
+      "kind": "item",
+      "key": "Sticky_Mucus",
+      "source": "data.grf:data/texture/蜡历牢磐其捞胶/item/馋利馋利茄咀眉.bmp",
+      "output": "public/ro/client/items/Sticky_Mucus.bmp",
+      "sha256": "16bb12c9177002891de3a2ec3f3b48525bf821ed041c15afd9d4e64ab08a5bac"
+    },
+    {
+      "kind": "item",
+      "key": "Feather",
+      "source": "data.grf:data/texture/蜡历牢磐其捞胶/item/何靛矾款判.bmp",
+      "output": "public/ro/client/items/Feather.bmp",
+      "sha256": "0d3c64c8b52f44bbf8b9f1e8b16e9f8301bfb5435030d80984f574435c906ed4"
+    },
+    {
+      "kind": "item",
+      "key": "Iron_Ore",
+      "source": "data.grf:data/texture/蜡历牢磐其捞胶/item/枚堡籍.bmp",
+      "output": "public/ro/client/items/Iron_Ore.bmp",
+      "sha256": "ad47d830aad91ec9111f4bd2f2c9db2f260840b67e5d5569e20a9e5c2d2ccb97"
+    },
+    {
+      "kind": "item",
+      "key": "Phracon",
+      "source": "data.grf:data/texture/蜡历牢磐其捞胶/item/橇扼能.bmp",
+      "output": "public/ro/client/items/Phracon.bmp",
+      "sha256": "9245d82502c5ebde419f83e56b046b037333a9620552ee409740036328bf07ce"
+    },
+    {
+      "kind": "item",
+      "key": "Knife_",
+      "source": "data.grf:data/texture/蜡历牢磐其捞胶/item/唱捞橇.bmp",
+      "output": "public/ro/client/items/Knife_.bmp",
+      "sha256": "10bfb51706bf4cae41779a91489a588fbeb48b876825dcf12d0a907694a13779"
+    },
+    {
+      "kind": "item",
+      "key": "Sword_",
+      "source": "data.grf:data/texture/蜡历牢磐其捞胶/item/家靛.bmp",
+      "output": "public/ro/client/items/Sword_.bmp",
+      "sha256": "48c1e48f1fee27353be58cba05c2106b663cfda6be076fea09631bcbb290d9c0"
+    },
+    {
+      "kind": "item",
+      "key": "Club",
+      "source": "data.grf:data/texture/蜡历牢磐其捞胶/item/努反.bmp",
+      "output": "public/ro/client/items/Club.bmp",
+      "sha256": "6e39e51047e795132d9c74aeb0df54ae5d0b26e45d3f6e79d1c302c97ae151b0"
+    },
+    {
+      "kind": "item",
+      "key": "Club_",
+      "source": "data.grf:data/texture/蜡历牢磐其捞胶/item/努反.bmp",
+      "output": "public/ro/client/items/Club_.bmp",
+      "sha256": "6e39e51047e795132d9c74aeb0df54ae5d0b26e45d3f6e79d1c302c97ae151b0"
+    },
+    {
+      "kind": "item",
+      "key": "Guard_",
+      "source": "data.grf:data/texture/蜡历牢磐其捞胶/item/啊靛.bmp",
+      "output": "public/ro/client/items/Guard_.bmp",
+      "sha256": "ea28f7548afcfedce829ba41faeb9073a34559f2371ee3b787c257a5068ce64b"
+    },
+    {
+      "kind": "item",
+      "key": "Pierrot_Nose",
+      "source": "data.grf:data/texture/蜡历牢磐其捞胶/item/堡措内.bmp",
+      "output": "public/ro/client/items/Pierrot_Nose.bmp",
+      "sha256": "548ec97af404d0501152f5059bb519a6b8f630639db173f0a10e85bfdf47d8af"
+    },
+    {
+      "kind": "item",
+      "key": "Poring_Card",
+      "source": "data.grf:data/texture/蜡历牢磐其捞胶/cardbmp/器傅墨靛.bmp",
+      "output": "public/ro/client/items/Poring_Card.bmp",
+      "sha256": "ff97b80ef1ed4598dd5c4c0dbd8f2506a334292d008dc4c4408b9cda8184cb37"
+    },
+    {
+      "kind": "item",
+      "key": "Lunatic_Card",
+      "source": "data.grf:data/texture/蜡历牢磐其捞胶/cardbmp/风唱平墨靛.bmp",
+      "output": "public/ro/client/items/Lunatic_Card.bmp",
+      "sha256": "eb9f42e41065fb3b6104a69a3e885a09c3965c47333514dc0fb69fc88894df85"
+    },
+    {
+      "kind": "item",
+      "key": "Fabre_Card",
+      "source": "data.grf:data/texture/蜡历牢磐其捞胶/cardbmp/颇宏福墨靛.bmp",
+      "output": "public/ro/client/items/Fabre_Card.bmp",
+      "sha256": "94e61da25a591c6a386c5510e1d66e210e7f564fdc5ed55158aec01e909a7726"
+    },
+    {
+      "kind": "item",
+      "key": "Pupa_Card",
+      "source": "data.grf:data/texture/蜡历牢磐其捞胶/cardbmp/仟颇墨靛.bmp",
+      "output": "public/ro/client/items/Pupa_Card.bmp",
+      "sha256": "d63025f4e96d5e6bd6fe58c09156be25fdc1daa37fecb17bc44f5476a3ee4fb0"
+    },
+    {
+      "kind": "item",
+      "key": "Novice_Poring_Card",
+      "source": "data.grf:data/texture/蜡历牢磐其捞胶/cardbmp/器傅墨靛.bmp",
+      "output": "public/ro/client/items/Novice_Poring_Card.bmp",
+      "sha256": "ff97b80ef1ed4598dd5c4c0dbd8f2506a334292d008dc4c4408b9cda8184cb37"
+    },
+    {
+      "kind": "item",
+      "key": "N_Falchion",
+      "source": "data.grf:data/texture/蜡历牢磐其捞胶/item/迫矫柯.bmp",
+      "output": "public/ro/client/items/N_Falchion.bmp",
+      "sha256": "f042623c806fa5ad8ec5631d8de0bdb13603a4c499d1a111334bcd04241fc4a5"
+    },
+    {
+      "kind": "item",
+      "key": "N_Mace",
+      "source": "data.grf:data/texture/蜡历牢磐其捞胶/item/皋捞胶.bmp",
+      "output": "public/ro/client/items/N_Mace.bmp",
+      "sha256": "dd6d802ff370e0ad67f3b51f9714dca6b8af5a99100f239935a93338becaf664"
+    },
+    {
+      "kind": "item",
+      "key": "N_Rod",
+      "source": "data.grf:data/texture/蜡历牢磐其捞胶/item/吩靛.bmp",
+      "output": "public/ro/client/items/N_Rod.bmp",
+      "sha256": "76bceb2a394b44e3a9465c266bf6a694bb389f4a8293e426aa709f4db851bb0f"
+    },
+    {
+      "kind": "item",
+      "key": "N_Composite_Bow",
+      "source": "data.grf:data/texture/蜡历牢磐其捞胶/item/哪器瘤飘焊快.bmp",
+      "output": "public/ro/client/items/N_Composite_Bow.bmp",
+      "sha256": "a70e10b9d1406d7aa295cf96c4d5e177a6e4fc25090120a115fbf3904c740afb"
+    },
+    {
+      "kind": "item",
+      "key": "Arrow_Container",
+      "source": "data.grf:data/texture/蜡历牢磐其捞胶/item/拳混烹.bmp",
+      "output": "public/ro/client/items/Arrow_Container.bmp",
+      "sha256": "086724a30a71bb44437886115599f4cdf87771f5960df6d65f52ee0518fcd952"
+    },
+    {
+      "kind": "item",
+      "key": "Fire_Arrow_Container",
+      "source": "data.grf:data/texture/蜡历牢磐其捞胶/item/阂拳混烹.bmp",
+      "output": "public/ro/client/items/Fire_Arrow_Container.bmp",
+      "sha256": "835b7506efdad7c245608e72b96f8c2ba0cf21e89e2374aeb6df86e83c35701e"
+    },
+    {
+      "kind": "item",
+      "key": "Silver_Arrow_Container",
+      "source": "data.grf:data/texture/蜡历牢磐其捞胶/item/篮拳混烹.bmp",
+      "output": "public/ro/client/items/Silver_Arrow_Container.bmp",
+      "sha256": "dbde0d702dc64f84297e7acee7cbe0f3a7887b4e7e73585883128a3e8565c6fa"
+    },
+    {
+      "kind": "item",
+      "key": "Warp_Free_Ticket",
+      "source": "data.grf:data/texture/蜡历牢磐其捞胶/item/捻迄.bmp",
+      "output": "public/ro/client/items/Warp_Free_Ticket.bmp",
+      "sha256": "ce3e31bbcc3e74f678b56736e3417e11dcb6f6e7f8ba614ea757df3e389c45b3"
+    },
+    {
+      "kind": "item",
+      "key": "Novice_Potion",
+      "source": "data.grf:data/texture/유저인터페이스/item/빨간포션.bmp",
+      "output": "public/ro/client/items/Novice_Potion.bmp",
+      "sha256": "59a7c7dca7bdd39ec1d68bf7c5ce3f362db52a2c626a515f0ca4d749ff652e4f"
+    },
+    {
+      "kind": "item",
+      "key": "Novice_Guard",
+      "source": "data.grf:data/texture/유저인터페이스/item/초보자용쉴드.bmp",
+      "output": "public/ro/client/items/Novice_Guard.bmp",
+      "sha256": "a1de79f3814a93f8915374a38dffdd64acbc52f3fa1e9601cbdd4fe9a61a7da8"
+    },
+    {
+      "kind": "item",
+      "key": "Novice_Plate",
+      "source": "data.grf:data/texture/유저인터페이스/item/초보자용흉갑.bmp",
+      "output": "public/ro/client/items/Novice_Plate.bmp",
+      "sha256": "7b52a7e7f94704b1dedf42ea0cbff3445565cc26d5882685a26fc172afa640c9"
+    },
+    {
+      "kind": "item",
+      "key": "Novice_Hood",
+      "source": "data.grf:data/texture/유저인터페이스/item/초보자용망토.bmp",
+      "output": "public/ro/client/items/Novice_Hood.bmp",
+      "sha256": "696070790b80acc3e04fa552707afc9b225a6cc8679b0e3deaac915fa05358a7"
+    },
+    {
+      "kind": "item",
+      "key": "Novice_Boots",
+      "source": "data.grf:data/texture/유저인터페이스/item/초보자용슈즈.bmp",
+      "output": "public/ro/client/items/Novice_Boots.bmp",
+      "sha256": "fd1ea2db280ded42f919ac4207cc974797d9dca91445049ef7cf86b43abef5db"
+    },
+    {
+      "kind": "item",
+      "key": "Novice_Egg_Cap",
+      "source": "data.grf:data/texture/유저인터페이스/item/장식용알껍질.bmp",
+      "output": "public/ro/client/items/Novice_Egg_Cap.bmp",
+      "sha256": "dedaf03a92df11de26e40efff7a755e61ea84d3c1995bf71cb9e50f3a6aa2ebf"
+    },
+    {
+      "kind": "item",
+      "key": "Cryptura_Academy_Hat",
+      "source": "data.grf:data/texture/유저인터페이스/item/크리투라학원모자.bmp",
+      "output": "public/ro/client/items/Cryptura_Academy_Hat.bmp",
+      "sha256": "ed20ae57bfa5c4804cc59eb319bb6ae82aec55b5fe62bb8f28e1f937ea92bff2"
+    }
+  ],
+  "derived": [
+    {
+      "kind": "item-icon-png",
+      "key": "Apple",
+      "source": "public/ro/client/items/Apple.bmp",
+      "output": "public/ro/client/items/Apple.png",
+      "sha256": "8a06dd1f5dedcbf551721f789fdc50c012f769a80cd8f42352204e7c83d36b9f"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "Arrow_Container",
+      "source": "public/ro/client/items/Arrow_Container.bmp",
+      "output": "public/ro/client/items/Arrow_Container.png",
+      "sha256": "366e4788f8722e6acae0d7b10ac5ce8cacfc7d45185456f598823f3a93f748c8"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "Carrot",
+      "source": "public/ro/client/items/Carrot.bmp",
+      "output": "public/ro/client/items/Carrot.png",
+      "sha256": "048db74937d2dc269431e8a1b32d70d480cf2d783f227132071daed94e12e503"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "Chrysalis",
+      "source": "public/ro/client/items/Chrysalis.bmp",
+      "output": "public/ro/client/items/Chrysalis.png",
+      "sha256": "ae932b47dc4c0029c7286901ac5a98de1b443a01952ec0ae9c7b0b2f4610cad3"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "Clover",
+      "source": "public/ro/client/items/Clover.bmp",
+      "output": "public/ro/client/items/Clover.png",
+      "sha256": "59a4cf3d1c64d0e7a60950115a7e481ca651fb80bb64c893c985e19a76402fd1"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "Club",
+      "source": "public/ro/client/items/Club.bmp",
+      "output": "public/ro/client/items/Club.png",
+      "sha256": "a32717b191eab3e76e0b3087afa3df0f24e993d19f77f5dd4bb8e498c365f6c5"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "Club_",
+      "source": "public/ro/client/items/Club_.bmp",
+      "output": "public/ro/client/items/Club_.png",
+      "sha256": "a32717b191eab3e76e0b3087afa3df0f24e993d19f77f5dd4bb8e498c365f6c5"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "Cryptura_Academy_Hat",
+      "source": "public/ro/client/items/Cryptura_Academy_Hat.bmp",
+      "output": "public/ro/client/items/Cryptura_Academy_Hat.png",
+      "sha256": "abb8627784e19f53df47cf56bd91e6c0a9c33189f2934b760b1f2e240f65f1db"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "Fabre_Card",
+      "source": "public/ro/client/items/Fabre_Card.bmp",
+      "output": "public/ro/client/items/Fabre_Card.png",
+      "sha256": "8be5db9209afa7fc4fc688448f2cf2a78ff0e1259ed5b88b691e11601f90ba8a"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "Feather",
+      "source": "public/ro/client/items/Feather.bmp",
+      "output": "public/ro/client/items/Feather.png",
+      "sha256": "fc39a81b28cf76ed5c07c3c58f982a3348dc0985a22a4a0c924b44d0649e0ae7"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "Fire_Arrow_Container",
+      "source": "public/ro/client/items/Fire_Arrow_Container.bmp",
+      "output": "public/ro/client/items/Fire_Arrow_Container.png",
+      "sha256": "8ac824c72fc2b1bf76f532f492dadf334c88ae8d1d14af584fca9a0e286c1e33"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "Fluff",
+      "source": "public/ro/client/items/Fluff.bmp",
+      "output": "public/ro/client/items/Fluff.png",
+      "sha256": "0ee440e0c8ec63c5b81397fffa29724f1e06f156333bd496a1af7b743aee2505"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "Green_Herb",
+      "source": "public/ro/client/items/Green_Herb.bmp",
+      "output": "public/ro/client/items/Green_Herb.png",
+      "sha256": "4058e112f71480c602d56d5924a46f044ce33ec209f769d97309e17c0ed552e3"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "Guard_",
+      "source": "public/ro/client/items/Guard_.bmp",
+      "output": "public/ro/client/items/Guard_.png",
+      "sha256": "94d8edcbb974b5ae09e22fb6f990ce9054ddc2ab7d92f382edb80ee77f617292"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "Iron_Ore",
+      "source": "public/ro/client/items/Iron_Ore.bmp",
+      "output": "public/ro/client/items/Iron_Ore.png",
+      "sha256": "b4cb8a2e7d2678dfe498451d28df319fa58a4ccfd2e5e341e8b6e77f0784b966"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "Jellopy",
+      "source": "public/ro/client/items/Jellopy.bmp",
+      "output": "public/ro/client/items/Jellopy.png",
+      "sha256": "a60334d7c20e7377c1e42bf5e04d4dce3b445043c82bb6402c01e8639edebcf7"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "Knife_",
+      "source": "public/ro/client/items/Knife_.bmp",
+      "output": "public/ro/client/items/Knife_.png",
+      "sha256": "c8215ff5ef135c09a5c51a96e449f7d886199f45fae578598fb5c3b708fd07a3"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "Lunatic_Card",
+      "source": "public/ro/client/items/Lunatic_Card.bmp",
+      "output": "public/ro/client/items/Lunatic_Card.png",
+      "sha256": "dbc1a2681351a2eeec895b7b858222ce998e8d55c687cc76ea142bc1b397932a"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "Novice_Boots",
+      "source": "public/ro/client/items/Novice_Boots.bmp",
+      "output": "public/ro/client/items/Novice_Boots.png",
+      "sha256": "8002a0fca8474d17913d7ea984a4146e518a3effd9a83a767efd2343c8381653"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "Novice_Egg_Cap",
+      "source": "public/ro/client/items/Novice_Egg_Cap.bmp",
+      "output": "public/ro/client/items/Novice_Egg_Cap.png",
+      "sha256": "4a45c1fae5a963ea66a0bdb01cbd831c008f2f912ec1814d0d491753d174b31d"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "Novice_Guard",
+      "source": "public/ro/client/items/Novice_Guard.bmp",
+      "output": "public/ro/client/items/Novice_Guard.png",
+      "sha256": "ea76a1234432b9d22c3f265b090587ba021b843ca0b3e8a155235389333b20a9"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "Novice_Hood",
+      "source": "public/ro/client/items/Novice_Hood.bmp",
+      "output": "public/ro/client/items/Novice_Hood.png",
+      "sha256": "01d04bc4bd8ddfc8d090a5e39c57004c828302641db7ea2c3c876dd9dac5da14"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "Novice_Plate",
+      "source": "public/ro/client/items/Novice_Plate.bmp",
+      "output": "public/ro/client/items/Novice_Plate.png",
+      "sha256": "f227283fad1beabc1423b4cd4d8c6282b3a12adde57c1a8e8977798a4c4632f6"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "Novice_Poring_Card",
+      "source": "public/ro/client/items/Novice_Poring_Card.bmp",
+      "output": "public/ro/client/items/Novice_Poring_Card.png",
+      "sha256": "a4f605abb0cc65b37d0a3b2cedb38d5941e77ff9f8e3633243f8e334a5920f3e"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "Novice_Potion",
+      "source": "public/ro/client/items/Novice_Potion.bmp",
+      "output": "public/ro/client/items/Novice_Potion.png",
+      "sha256": "49160844357375f0312005d68f5043c63e24f8536351ddef02a4ea1b39db20b2"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "N_Composite_Bow",
+      "source": "public/ro/client/items/N_Composite_Bow.bmp",
+      "output": "public/ro/client/items/N_Composite_Bow.png",
+      "sha256": "daff3ce3f6a48ee1ba2f829412b36e5d8a0fc00c8e3c6cf67ccfc5f842f8cd1d"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "N_Falchion",
+      "source": "public/ro/client/items/N_Falchion.bmp",
+      "output": "public/ro/client/items/N_Falchion.png",
+      "sha256": "08a207ea9ef31ec0caae7142070e2c66b2c864bd089c19fb2884eea7b5306b22"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "N_Mace",
+      "source": "public/ro/client/items/N_Mace.bmp",
+      "output": "public/ro/client/items/N_Mace.png",
+      "sha256": "ee2f7017cf808762991a99b83e4ee5cd0b26335e0f171e94605700bce30b61ca"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "N_Rod",
+      "source": "public/ro/client/items/N_Rod.bmp",
+      "output": "public/ro/client/items/N_Rod.png",
+      "sha256": "483f32a958cce18e340a41096b86ebcfe716e55a57c8af671e5e126d4a7eb2f8"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "Phracon",
+      "source": "public/ro/client/items/Phracon.bmp",
+      "output": "public/ro/client/items/Phracon.png",
+      "sha256": "991391e6d32966481089fcccccc3e3c953da90bfaa26f6147f43e6dc6cf32bc5"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "Pierrot_Nose",
+      "source": "public/ro/client/items/Pierrot_Nose.bmp",
+      "output": "public/ro/client/items/Pierrot_Nose.png",
+      "sha256": "270d8194bf7c0998563f251799d09b86ceabead1e158f8c3d3c0f334caedea82"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "Poring_Card",
+      "source": "public/ro/client/items/Poring_Card.bmp",
+      "output": "public/ro/client/items/Poring_Card.png",
+      "sha256": "a4f605abb0cc65b37d0a3b2cedb38d5941e77ff9f8e3633243f8e334a5920f3e"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "Pupa_Card",
+      "source": "public/ro/client/items/Pupa_Card.bmp",
+      "output": "public/ro/client/items/Pupa_Card.png",
+      "sha256": "76f2b4f07d9a18583b4211910ed534349407785da041f7ccbce4c97d7fe1e3a1"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "Rainbow_Carrot",
+      "source": "public/ro/client/items/Rainbow_Carrot.bmp",
+      "output": "public/ro/client/items/Rainbow_Carrot.png",
+      "sha256": "fd9ddfef51b8a3ca61261608e0bc5c6f1a321c401cc68c08cca64b30812bfa3d"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "Red_Herb",
+      "source": "public/ro/client/items/Red_Herb.bmp",
+      "output": "public/ro/client/items/Red_Herb.png",
+      "sha256": "19c65dd794bcbca1a6d96cc7f12e2d7a0f030d2928ff71e9c7659c0153840f24"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "Shell",
+      "source": "public/ro/client/items/Shell.bmp",
+      "output": "public/ro/client/items/Shell.png",
+      "sha256": "971f23bb4b1fea0b65e5d7e3e6b6ac148d333cd318bc41783b27efbbf1769361"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "Silver_Arrow_Container",
+      "source": "public/ro/client/items/Silver_Arrow_Container.bmp",
+      "output": "public/ro/client/items/Silver_Arrow_Container.png",
+      "sha256": "b7a921c1b4204b0722e45c081fb2fe5333e434edad3493e249e82c8d84807823"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "Sticky_Mucus",
+      "source": "public/ro/client/items/Sticky_Mucus.bmp",
+      "output": "public/ro/client/items/Sticky_Mucus.png",
+      "sha256": "eb8c0a363572b8c68031d359685e1f6588081e91d4445150ed12b73608839c61"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "Sword_",
+      "source": "public/ro/client/items/Sword_.bmp",
+      "output": "public/ro/client/items/Sword_.png",
+      "sha256": "3f4bf7cfbdb372d38ac0b8b2cf5181a1d5f31dda92cb365647ff93ce7ad0e08d"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "Unripe_Apple",
+      "source": "public/ro/client/items/Unripe_Apple.bmp",
+      "output": "public/ro/client/items/Unripe_Apple.png",
+      "sha256": "0efc93d6393c706095a6f1614ef5f38052bb8d0a6e73412b79b6071eb94f6212"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "Warp_Free_Ticket",
+      "source": "public/ro/client/items/Warp_Free_Ticket.bmp",
+      "output": "public/ro/client/items/Warp_Free_Ticket.png",
+      "sha256": "a899111cc67b698173475c03b004ebfdcf6789d8c387e26aa6561c6e6aac28a4"
+    },
+    {
+      "kind": "item-icon-png",
+      "key": "Wing_Of_Fly",
+      "source": "public/ro/client/items/Wing_Of_Fly.bmp",
+      "output": "public/ro/client/items/Wing_Of_Fly.png",
+      "sha256": "5d1c05f426ee9564e10624f5dc2edfc719b40d393b1683693bcc16f1858a8a85"
+    }
+  ]
+}

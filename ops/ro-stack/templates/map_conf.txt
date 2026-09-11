@@ -1,0 +1,9 @@
+userid: {{INTER_USER}}
+passwd: {{INTER_PASSWORD}}
+char_ip: 127.0.0.1
+char_port: {{CHARACTER_PORT}}
+bind_ip: 127.0.0.1
+map_ip: 127.0.0.1
+map_port: {{MAP_PORT}}
+// Friends Alpha keeps the web status panel close to live server state.
+autosave_time: 30

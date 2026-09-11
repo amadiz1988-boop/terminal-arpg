@@ -1,0 +1,16 @@
+[Ghost Island RO Local]
+ip 127.0.0.1
+port {{LOGIN_PORT}}
+private 1
+master_version 0
+version 55
+serverType kRO_RagexeRE_2021_11_03
+serverEncoding UTF-8
+charBlockSize 247
+pinCode 0
+field_iz_int iz_int01
+field_iz_int01 iz_int01
+field_iz_int02 iz_int02
+field_iz_int03 iz_int03
+field_iz_int04 iz_int04
+addTableFolders kRO/Ragexe_2021_11_03;translated/kRO_english;kRO

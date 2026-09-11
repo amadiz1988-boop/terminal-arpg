@@ -37,7 +37,7 @@ export type WarpPortal = Readonly<{
 
 export const PRT_FILD08 = Object.freeze({
   id: 'prt_fild08',
-  fieldUrl: '/ro/maps/prt_fild08.fld2.bin',
+  fieldUrl: '/ro/maps/prt_fild08.fld2.gz',
   width: 400,
   height: 400,
   noviceEntry: { x: 170, y: 375 },

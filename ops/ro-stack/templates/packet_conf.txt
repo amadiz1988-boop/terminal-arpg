@@ -1,0 +1,4 @@
+// Login, character and map servers bind to localhost in this stack. Public
+// users reach only the rate-limited HTTP control layer, so internal workers do
+// not need public-IP DDoS classification.
+enable_ip_rules: no

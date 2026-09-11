@@ -1,0 +1,2 @@
+bind_ip: 127.0.0.1
+login_port: {{LOGIN_PORT}}

@@ -1,0 +1,415 @@
+﻿{
+    "sourceArchive":  "data0.grf",
+    "archiveSha256":  "913402ace1d3c67818b4f070650a07eb157a6d62df9e394d596d59b4c7e6678a",
+    "importedAt":  "2026-09-11",
+    "files":  [
+                  {
+                      "output":  "public/ro/client/sfx/official/_attack_dagger.wav",
+                      "source":  "data0.grf:data/wav/_attack_dagger.wav",
+                      "bytes":  4582,
+                      "sha256":  "9f75af63360c3e8a9724d7a4ef58aed89c9e6c86980efe0539a217f0b8e3301b"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/_hit_dagger.wav",
+                      "source":  "data0.grf:data/wav/_hit_dagger.wav",
+                      "bytes":  13956,
+                      "sha256":  "4aad76270e549dec2100d2601503d1b2de6dae01e22ccbce3dbf739d62d48a6f"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/_attack_sword.wav",
+                      "source":  "data0.grf:data/wav/_attack_sword.wav",
+                      "bytes":  12488,
+                      "sha256":  "bec57134cafdcf88e266b2b474f69e9a1256359002c024131ea2ca11d4f2640c"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/_hit_sword.wav",
+                      "source":  "data0.grf:data/wav/_hit_sword.wav",
+                      "bytes":  24866,
+                      "sha256":  "1dfbdbd2f441b4dfda85282cc84b49407ea138f834d8a182ba1b15c9bcd98caa"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/_attack_mace.wav",
+                      "source":  "data0.grf:data/wav/_attack_mace.wav",
+                      "bytes":  10270,
+                      "sha256":  "593d598f6d19555e22cdb8e2362b81170d1e67f0e3c22b474202c1659689b596"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/_hit_mace.wav",
+                      "source":  "data0.grf:data/wav/_hit_mace.wav",
+                      "bytes":  16114,
+                      "sha256":  "54aef95af378a442c4b500f7b5535dfbe76c593ce6a614a48baa04637c47e72c"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/_attack_rod.wav",
+                      "source":  "data0.grf:data/wav/_attack_rod.wav",
+                      "bytes":  7966,
+                      "sha256":  "9eafe5072b043790fd9f684df66fdb138bef91200b47a233ce0cb25760017480"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/_hit_rod.wav",
+                      "source":  "data0.grf:data/wav/_hit_rod.wav",
+                      "bytes":  12576,
+                      "sha256":  "eae40a60273ca176bf22e0bcd253108c9ba6a01bc34a047be9d3d3a7b73db45d"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/_attack_bow.wav",
+                      "source":  "data0.grf:data/wav/_attack_bow.wav",
+                      "bytes":  18222,
+                      "sha256":  "3469e695dbef99bc2db7d676d70123888e057444c60fd5864a1ed02f1344c409"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/_hit_arrow.wav",
+                      "source":  "data0.grf:data/wav/_hit_arrow.wav",
+                      "bytes":  13360,
+                      "sha256":  "d3d1df59ef78251d4f4327a628c3f1a482ed1b70b072a4602fc8c2f3d5cacbe2"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/_attack_axe.wav",
+                      "source":  "data0.grf:data/wav/_attack_axe.wav",
+                      "bytes":  13954,
+                      "sha256":  "84c135b71b7d255fffc402e1a1e4249d8fe5ae32e4118cba6a4fcb193247d001"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/_hit_axe.wav",
+                      "source":  "data0.grf:data/wav/_hit_axe.wav",
+                      "bytes":  16114,
+                      "sha256":  "0aa9becf023ffb18355314e071871d7bcf3fba479329f46868171791c83d1c1d"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/_hit_fist1.wav",
+                      "source":  "data0.grf:data/wav/_hit_fist1.wav",
+                      "bytes":  11216,
+                      "sha256":  "9a188d3b22777d91b3e6e1460430fbe55e9f9bbe805d40944f18441e4bbff1a7"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/_hit_fist2.wav",
+                      "source":  "data0.grf:data/wav/_hit_fist2.wav",
+                      "bytes":  10608,
+                      "sha256":  "81b20afd4ffd0c6437e703ace45eb66403fae5702494978159c813617900f5c5"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/_hit_fist3.wav",
+                      "source":  "data0.grf:data/wav/_hit_fist3.wav",
+                      "bytes":  10400,
+                      "sha256":  "cd10e1fa4cb185280015c95db6d86df71fdb18104445693b758695302b0c3bbc"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/_hit_fist4.wav",
+                      "source":  "data0.grf:data/wav/_hit_fist4.wav",
+                      "bytes":  9200,
+                      "sha256":  "4cbe3ac2a13fa9e11e1faa5192e269ac18518b52edce8f128935c132ab32acec"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/poring_attack.wav",
+                      "source":  "data0.grf:data/wav/poring_attack.wav",
+                      "bytes":  9438,
+                      "sha256":  "8ce344cd0ca8f2cab2c3ff5b2275fb2e5e1ee8dd7a33b0f83e0b399897635907"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/poring_damage.wav",
+                      "source":  "data0.grf:data/wav/poring_damage.wav",
+                      "bytes":  11708,
+                      "sha256":  "0ef1ecc8602c650a7b0c9f185ecac7019c624ce046a7c11215d27f6c9e5451f8"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/poring_die.wav",
+                      "source":  "data0.grf:data/wav/poring_die.wav",
+                      "bytes":  31366,
+                      "sha256":  "a6885bf27a9a34655587a496ebebc95404e48f2bb6101dc6bd65c267b1235d6d"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/lunatic_attack.wav",
+                      "source":  "data0.grf:data/wav/lunatic_attack.wav",
+                      "bytes":  3790,
+                      "sha256":  "1e055bce42266118dff5ff55f3d51643b02875a3cf7eac6c403bdc2c6afdc1c9"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/lunatic_die.wav",
+                      "source":  "data0.grf:data/wav/lunatic_die.wav",
+                      "bytes":  8120,
+                      "sha256":  "f40381b96a61e07295100fda911d4ae712391013405b10f647b08540e2d29ab3"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/fabre_attack.wav",
+                      "source":  "data0.grf:data/wav/fabre_attack.wav",
+                      "bytes":  9810,
+                      "sha256":  "0d624630141e6be92509b75e6689c178d153f916a629126d1d4f9b76af7cc560"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/fabre_damage.wav",
+                      "source":  "data0.grf:data/wav/fabre_damage.wav",
+                      "bytes":  7518,
+                      "sha256":  "2e34917bbbef8f2c8af2de2c50caa2d957b59dc4cb09273e1dfefbd08df92d86"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/fabre_die.wav",
+                      "source":  "data0.grf:data/wav/fabre_die.wav",
+                      "bytes":  17316,
+                      "sha256":  "d77f6de2af77771ded312038aa0af4ff1ea724240ebe1db9890fdc2c599897c5"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/monster_insect.wav",
+                      "source":  "data0.grf:data/wav/monster_insect.wav",
+                      "bytes":  10988,
+                      "sha256":  "930e7b8ff71c04e8df990b3495df0e43dda8298dd4269efbb53f12ac3bdbfadf"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/monster_shell.wav",
+                      "source":  "data0.grf:data/wav/monster_shell.wav",
+                      "bytes":  11846,
+                      "sha256":  "0406a84fd0e39a5caf4a704e080895084249c8a2e527bcaf413629ff00e7317a"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/peco_egg_heartbeat.wav",
+                      "source":  "data0.grf:data/wav/peco_egg_heartbeat.wav",
+                      "bytes":  21044,
+                      "sha256":  "9a802ed317e8ee8974f1b5300470cac3823de2fb4d48ab3f5f9a63e19a412db4"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/pupa_die.wav",
+                      "source":  "data0.grf:data/wav/pupa_die.wav",
+                      "bytes":  20708,
+                      "sha256":  "ee4bb991d7cf75b53f5a01c234547d4a066b34be90d3f23b40d563babadb9927"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/damage_male.wav",
+                      "source":  "data0.grf:data/wav/damage_male.wav",
+                      "bytes":  17148,
+                      "sha256":  "31262171cd3970f1bcdb7bf4636a3e6a5b5b46615ba18d9b2d2cc58fca9e773e"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/die_male.wav",
+                      "source":  "data0.grf:data/wav/die_male.wav",
+                      "bytes":  21908,
+                      "sha256":  "56a5322b0c2a02e6051a466f46b1c4defda04e695d276417fb42ee7f4b510299"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/damage_novice_female.wav",
+                      "source":  "data0.grf:data/wav/damage_novice_female.wav",
+                      "bytes":  7856,
+                      "sha256":  "a15f4ff03ee023a93e930e7bde740d04cbf3c70d94c126bbee5b04edb692ac05"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/die_novice_female.wav",
+                      "source":  "data0.grf:data/wav/die_novice_female.wav",
+                      "bytes":  28076,
+                      "sha256":  "50ea12df4f2546883b552123cad2af1b5c584c47be07a795d02039cb292ad31b"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/damage_swordman_female.wav",
+                      "source":  "data0.grf:data/wav/damage_swordman_female.wav",
+                      "bytes":  14994,
+                      "sha256":  "b182841f69b599bb209411f5ff8adca9dbf4bfa8146de5c264c66c595fb9e89b"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/die_swordman_female.wav",
+                      "source":  "data0.grf:data/wav/die_swordman_female.wav",
+                      "bytes":  21980,
+                      "sha256":  "3b0e8481d55928404e52d65ae45eba8783cb4b3efa825328b692e3e2f422d71b"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/damage_magician_female.wav",
+                      "source":  "data0.grf:data/wav/damage_magician_female.wav",
+                      "bytes":  6582,
+                      "sha256":  "d0fd62629330cbca5afad5ac3ea8295cf3b5e9d805ce286013a039fa20ac44fe"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/die_magician_female.wav",
+                      "source":  "data0.grf:data/wav/die_magician_female.wav",
+                      "bytes":  26154,
+                      "sha256":  "481575a379e380a8022284a040862cbc40b1ad6e667c6455f6b5224708a2139f"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/damage_archer_female.wav",
+                      "source":  "data0.grf:data/wav/damage_archer_female.wav",
+                      "bytes":  18854,
+                      "sha256":  "28dd4436be627ee2ddfab8e7e634d0a267d06a12c56362003bbf219cd11b6b49"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/die_archer_female.wav",
+                      "source":  "data0.grf:data/wav/die_archer_female.wav",
+                      "bytes":  19058,
+                      "sha256":  "da6a351a34ac232f7dd029558e23e8a4fc9ba05639345886665cbc7d359d602b"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/damage_acolyte_female.wav",
+                      "source":  "data0.grf:data/wav/damage_acolyte_female.wav",
+                      "bytes":  20968,
+                      "sha256":  "7b188a7b0bb755a49a358f5fc219f56fb0b8252ceeb3e32e6dccc6ca4bb90ce6"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/die_acolyte_female.wav",
+                      "source":  "data0.grf:data/wav/die_acolyte_female.wav",
+                      "bytes":  20834,
+                      "sha256":  "98bc17a437a6d433856d9548842237459c1434d546878e0f0a2351e3b7c369f4"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/damage_merchant_female.wav",
+                      "source":  "data0.grf:data/wav/damage_merchant_female.wav",
+                      "bytes":  15352,
+                      "sha256":  "af1c0507a8969ecb2f1777fd54ab6e72ac2bf1e64f950f9a04e7864632b74f24"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/die_merchant_female.wav",
+                      "source":  "data0.grf:data/wav/die_merchant_female.wav",
+                      "bytes":  22982,
+                      "sha256":  "bcea4ee28ffb974de82bd569902b0784fe033630c403c697d62234640572a639"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/damage_thief_female.wav",
+                      "source":  "data0.grf:data/wav/damage_thief_female.wav",
+                      "bytes":  22086,
+                      "sha256":  "32d46ca4f4b2c54af6bea66fbda684b92306eb74abe54481ea82bc0a9bd45436"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/die_thief_female.wav",
+                      "source":  "data0.grf:data/wav/die_thief_female.wav",
+                      "bytes":  20244,
+                      "sha256":  "864e1db1c1daed318ed98381ef99bd9ed491a0246698f00fa9b8bdfbbc4ca6af"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/ui_confirm.wav",
+                      "source":  "data0.grf:data/wav/se_ding1.wav",
+                      "bytes":  100908,
+                      "sha256":  "b5b7a5e6c61faa216e3f1c49df0f5ef491ac28269848612c58ffa0ff53bb8e87"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/ui_cancel.wav",
+                      "source":  "data0.grf:data/wav/se_ding2.wav",
+                      "bytes":  26668,
+                      "sha256":  "a4e0af3aa45a94866a1db42050a51f3e3793a7f94d8855e60535d869fc5834dc"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/ui_tab.wav",
+                      "source":  "data0.grf:data/wav/se_turn_page01.wav",
+                      "bytes":  34158,
+                      "sha256":  "eb07f6bee635a18800574c07ef7890ac79c4052dd14476f03b15d6cfa26df661"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/ui_open.wav",
+                      "source":  "data0.grf:data/wav/se_top.wav",
+                      "bytes":  128254,
+                      "sha256":  "60054cba37ef873b90847758dbfc0de573abc4a852407b822a018dc29dd43e51"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/ui_close.wav",
+                      "source":  "data0.grf:data/wav/se_top2.wav",
+                      "bytes":  101228,
+                      "sha256":  "9f52bfd9d2c47698d6dff4328a0bcce878bc1fd37b0085d4378b656acf693e9b"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/item_pickup.wav",
+                      "source":  "data0.grf:data/wav/effect/itempokjuk.wav",
+                      "bytes":  29540,
+                      "sha256":  "0cc966ca19897bd12eea3f0a2d35b5fcc27264d3323b4977971e7538eaa99a02"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/item_drop.wav",
+                      "source":  "data0.grf:data/wav/effect/drop_effect_1.wav",
+                      "bytes":  79114,
+                      "sha256":  "b92895dcc2492192d19b03d70624e74f92f1e7059d5f83a95b5b0fce12f7a3d2"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/equip_item_01.wav",
+                      "source":  "data0.grf:data/wav/se_equip_item_01.wav",
+                      "bytes":  15344,
+                      "sha256":  "78328b224aef4ee90978223a2aea1b581375938e834491f6c5a368fe3a4fe9de"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/equip_item_02.wav",
+                      "source":  "data0.grf:data/wav/se_equip_item_02.wav",
+                      "bytes":  51190,
+                      "sha256":  "b3effd50ddab5fccc18660cff266f8a4cfa6c2b41fa313863b5b838438b8230d"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/equip_item_03.wav",
+                      "source":  "data0.grf:data/wav/se_equip_item_03.wav",
+                      "bytes":  53110,
+                      "sha256":  "fdaff8ed4919caf4f585ffa2317c48121d98ed17a7eef4f849d21ab3962c3911"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/equip_item_04.wav",
+                      "source":  "data0.grf:data/wav/se_equip_item_04.wav",
+                      "bytes":  77472,
+                      "sha256":  "27a268174dc1fea933ef150293cbbfc2eddb0f245eb1e498e38e47fffcc08f04"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/equip_item_05.wav",
+                      "source":  "data0.grf:data/wav/se_equip_item_05.wav",
+                      "bytes":  96702,
+                      "sha256":  "dbc9118680d77ebff3b65624e6484b7bbfb018c398b8ccfc68bc9d28b03c1f59"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/equip_item_06.wav",
+                      "source":  "data0.grf:data/wav/se_equip_item_06.wav",
+                      "bytes":  62666,
+                      "sha256":  "0b77e87207a6427f7ccaf2f2e6fd5c367c3cabecdc988648944b34c1f4446bf7"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/equip_item_07.wav",
+                      "source":  "data0.grf:data/wav/se_equip_item_07.wav",
+                      "bytes":  46776,
+                      "sha256":  "594496ca5a6e60fa69765428df29b49b3498fea1e6925846f104d9284bd33ce2"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/item_drink_potion.wav",
+                      "source":  "data0.grf:data/wav/se_drink_potion.wav",
+                      "bytes":  44972,
+                      "sha256":  "1f612d46f582580408b8c89086a4121a983c4f55b335ce8e2e79fb06765cc841"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/fly_wing.wav",
+                      "source":  "data0.grf:data/wav/effect/ef_teleportation.wav",
+                      "bytes":  54828,
+                      "sha256":  "7527a65b58ba61ddc664c9b1da5c03f2058417a6ef1036b6cef6d24c26ff5ffd"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/warp.wav",
+                      "source":  "data0.grf:data/wav/effect/warp.wav",
+                      "bytes":  251012,
+                      "sha256":  "d74f63cb03879178d647ee3a3982a93b7ee949083e20e6bc3e8c7ea5715cbe08"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/portal.wav",
+                      "source":  "data0.grf:data/wav/effect/ef_portal.wav",
+                      "bytes":  84656,
+                      "sha256":  "fe87f49897cc025485dbb86feeac2b8d4c03a84e9dba6651afaef81d0dea1cfe"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/heal.wav",
+                      "source":  "data0.grf:data/wav/effect/ef_healsp.wav",
+                      "bytes":  14212,
+                      "sha256":  "84fa7af00c70cf3cb65a2e548fbbd6c0740780c602294f746e63328feac4baa8"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/level_up.wav",
+                      "source":  "data0.grf:data/wav/levelup.wav",
+                      "bytes":  84650,
+                      "sha256":  "9a6e4d634aa7a9c19bcf37a0331bdb80d88fac67b60c992a49c412688074369b"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/job_level_up.wav",
+                      "source":  "data0.grf:data/wav/effect/st_job_level_up.wav",
+                      "bytes":  78252,
+                      "sha256":  "630a7bfac8c346a9e16da645b02be705948c509257d6d1baa772c1d5432c4369"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/success.wav",
+                      "source":  "data0.grf:data/wav/effect/p_success.wav",
+                      "bytes":  82884,
+                      "sha256":  "9a549b56cd8da8c13ed985615c9013f067e45956bc64aaadbc4a0684eb9966f1"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/failure.wav",
+                      "source":  "data0.grf:data/wav/effect/p_failed.wav",
+                      "bytes":  78852,
+                      "sha256":  "4f4e1798cdb09b5dd303e602acaa026ab725f7a41effe9370f88e6fe60fa0821"
+                  },
+                  {
+                      "output":  "public/ro/client/sfx/official/get_coin.wav",
+                      "source":  "data0.grf:data/wav/se_get_coin.wav",
+                      "bytes":  23048,
+                      "sha256":  "76556613211c5c8e002bf8595e021a510780969c66efc833a3cebce1d394d9b4"
+                  }
+              ]
+}
