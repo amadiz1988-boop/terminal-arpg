@@ -1,89 +1,85 @@
-# RO OpenKore-like Architecture
+# RO Renewal 與自動冒險架構
 
-產品責任分界與NPC服務流程以 `docs/RO_AUTOMATION_PRODUCT_CONSTITUTION.md` 為最高層契約。世界服務產生唯一權威事件，小地圖、終端、角色介面及NPC視窗只能讀取狀態或提交命令，不能自行模擬結果。
+產品責任分界與 NPC 服務流程以 `docs/RO_AUTOMATION_PRODUCT_CONSTITUTION.md` 為最高層契約。世界服務產生唯一權威事件，小地圖、戰鬥終端、角色介面與 NPC 視窗只能讀取狀態或提交命令，不能自行模擬結果。
 
-延伸規格：
-
-* [核心公式與內容架構](./CORE_FORMULA_ARCHITECTURE.md)
-* [ARPG 玩家循環研究](./ARPG_PLAYER_LOOP_RESEARCH.md)
-* [Alpha 0.5 實玩驗收](./PLAYTEST_ALPHA_0.5.md)
+本架構只採用 RO Renewal、rAthena、OpenKore 與 Gravity RO 的資料和規則。版本、來源與取捨記錄在 `docs/RO_SOURCE_BASELINE.md`、`docs/DESIGN_SOURCE_POLICY.md` 及各 RO 審查文件中。
 
 ## Architecture goal
 
-Every release extends one deterministic RO world simulation. UI, content imports and persistence may change independently without rewriting movement, AI, combat or inventory rules.
+每個版本都延伸同一個可重現的 RO 世界服務。介面、內容匯入與持久化可以獨立演進，移動、戰鬥、道具、任務與轉職規則維持單一權威實作。
 
 ## Dependency direction
 
 ```text
-UI → Application commands → Domain engines → Content data
+UI → Application commands → RO domain services → RO content data
                          ↓
                     Persistence port
 ```
 
-Dependencies only point inward. Domain engines contain pure TypeScript and never import React, timers, browser APIs or storage.
+依賴只向內。RO 領域服務使用純 TypeScript，不匯入 React、瀏覽器 API 或畫面計時器。
 
 ## Modules
 
 | Module | Owns | Must not own |
 | --- | --- | --- |
-| `game/content` | Versioned RO jobs, skills, items, monsters, maps and NPC data | Runtime state |
-| `game/world` | Grid, actors, ground items, portals and world clock | UI timing |
-| `game/ai` | OpenKore-like task queue, target selection and policies | React state |
-| `game/combat` | Hit, flee, damage, ASPD, cast, delay, elements and status | Map rendering |
-| `game/inventory` | Weight, equipment, stack, use, drop, trade and storage | Combat timing |
-| `game/simulation` | Deterministic tick orchestration and event stream | Rendering delays |
-| `game/progression` | Base/Job EXP, stats, skills and job changes | Authentication |
-| `game/player` | Character, inventory and automation policy aggregate | Presentation state |
-| `app` | Commands, autosave and session lifecycle | Damage or loot rules |
-| `components` | Rendering and player input | Random drops or rule mutation |
+| `game/ro/content` | Renewal 職業、技能、道具、怪物、地圖、NPC 與任務資料 | 執行期狀態 |
+| `game/ro/core` | RO 世界共用型別、事件識別與可重現亂數 | UI 狀態 |
+| `game/ro/formulas` | Base/Job 經驗、能力值、命中、傷害、ASPD、重量與轉職門檻 | 畫面排版 |
+| `game/ro/world` | 地圖格線、角色、怪物、掉落物、傳送點與世界時鐘 | React 狀態 |
+| `game/ro/automation` | OpenKore 風格掛機策略、任務佇列、撿取、補給、回城與卡路脫離 | 畫面事件 |
+| `game/ro/combat` | 普攻、技能、屬性、狀態、攻擊延遲與戰鬥事件 | 地圖繪製 |
+| `game/ro/inventory` | 道具堆疊、重量、裝備、使用、丟棄、交易與倉庫 | 戰鬥計時 |
+| `game/ro/progression` | Base/Job 經驗、能力點、技能點、任務進度與轉職 | 身分驗證 |
+| `game/server` | 權威命令、連線同步、帳號角色持久化與防濫用限制 | 客戶端自行結算 |
+| `app` | 頁面組合、命令提交、即時訂閱、音效與 session 生命週期 | 傷害、掉落或轉職公式 |
+| `components/game` | RO 風格視窗、戰鬥終端、任務日誌、裝備紙娃娃與玩家輸入 | 隨機掉落或規則變更 |
 
 ## Stable contracts
 
-All simulations accept a seed and return a result plus domain events. Runs remain reproducible and testable.
+所有世界運算接受種子與目前狀態，回傳更新後狀態及領域事件。事件由 UI 以時間戳和分類呈現，戰鬥數字、任務日誌與小地圖都從同一事件流取得。
 
 ```ts
-advanceWorld(state: WorldState, ticks: number): WorldState
-resolveStats(character: CharacterState): ResolvedStats
-stepAi(state: WorldState, policy: AutomationPolicy): AiDecision
-applyCommand(state: GameState, command: GameCommand): GameState
+advanceRoWorld(state: RoWorldState, ticks: number): RoWorldState
+resolveRoStats(character: RoCharacterState): ResolvedRoStats
+stepRoAutomation(state: RoWorldState, policy: RoAutomationPolicy): RoDecision
+applyRoCommand(state: RoGameState, command: RoGameCommand): RoGameState
 ```
 
-Content uses IDs and versioned data. Saved characters store IDs and rolled values, never React objects or display text.
+內容使用可追蹤 ID 與版本化資料。角色存檔只保存 ID、數值與任務狀態，不保存 React 物件或顯示文字。
 
 ## Server authority path
 
-Alpha runs locally for fast playtesting. Friends Alpha moves map simulation, loot generation, inventory writes and progression to server commands. The client receives validated results and renders events. Domain types and UI commands stay unchanged.
+開發測試可使用本機 RO 服務。公開測試時，伺服器負責地圖移動、碰撞、戰鬥、掉落、重量、裝備、任務、轉職與經驗值；客戶端只提交命令並渲染伺服器驗證後的狀態和事件。所有命令具備角色、版本、請求序號與冪等鍵，避免前端先扣除後被舊資料覆蓋。
 
 ## Rules that prevent rewrites
 
-1. No movement, AI, combat, loot or progression formula inside a component.
-2. No content definition inside an engine.
-3. Character sheet, combat and terminal use the same resolved state.
-4. Every numeric rule cites the pinned source file and version.
-5. Every engine feature ships with deterministic tests before UI wiring.
-6. Save schema changes require a version and migration.
-7. Each task names its owning module and acceptance test.
+1. 移動、掛機、戰鬥、掉落、重量、任務、經驗與轉職公式不可放在 React 元件。
+2. 內容定義不可放在運算引擎，所有數值規則要標示 RO 來源與版本。
+3. 角色、裝備、戰鬥終端、任務日誌與小地圖必須讀取同一份已驗證狀態。
+4. 隨機結果必須帶種子，事件必須能重播，存檔格式變更必須提供遷移。
+5. 每個功能先完成領域測試，再接上玩家介面與實機尺寸驗收。
+6. 發現舊時代或非 RO 規則時先停用並查核來源，確認新版 Renewal 系統後才新增實作。
 
-## Planned folders
+## Repository layout
 
 ```text
 game/
-  content/       versioned game data
-  core/          IDs, random seed, shared domain types
-  world/         grid, actors, portals and ground items
-  ai/            task queue and automation policies
-  combat/        combat resolution
-  inventory/     equipment, weight, item use and storage
-  simulation/    tick orchestration and event stream
-  progression/   Base/Job EXP, stats, skills and job changes
-  player/        character and automation aggregate
-app/             pages and application composition
-components/game/ terminal and control panels
-tests/game/      deterministic engine tests
+  ro/
+    content/       Renewal 職業、技能、道具、怪物、地圖與 NPC
+    core/           RO 共用型別、事件與可重現亂數
+    formulas/      能力、傷害、經驗、重量與轉職公式
+    world/         地圖、角色、怪物、掉落物與傳送點
+    automation/    掛機、任務佇列、撿取、補給與卡路脫離
+    combat/        戰鬥解析與事件
+    inventory/     裝備、道具、重量、倉庫與交易
+    progression/   經驗、能力點、技能點、任務與轉職
+  server/          權威命令、同步、持久化與防濫用
+app/               頁面與應用程式組合
+components/game/  RO 風格視窗與玩家輸入
+tests/game/        領域、伺服器與介面契約測試
+docs/              RO 來源、規格、審查與發行紀錄
 ```
 
-## Architecture gate
+## Release gate
 
-A release is blocked when domain logic exists in React, a numeric rule lacks a source, a random outcome lacks a seed, or a saved-state change lacks migration coverage.
-
-Friends Alpha 另加一個遊玩閘門：每個候選版本需通過至少 30 分鐘等價的固定種子測試，再以真實手機尺寸操作核心流程。自動評分只檢查機械密度，人工評分必須扣除內容廣度、理解成本與操作問題。
+發行前必須通過 `npm run test:release`，包含領域測試、lint、build、手機尺寸 UI 驗收、RO 繁中道具檢查、掛機停止與重量邊界檢查。公開網址、提交 SHA、測試結果與 UI 驗收報告必須一併記錄，未通過不得宣稱完成公開發行。

@@ -1,3 +1,4 @@
+/** Deterministic random source used by the RO world and replay tests. */
 export function createRandom(seed: number) {
   let value = seed >>> 0;
   return () => {

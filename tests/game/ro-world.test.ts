@@ -1,7 +1,7 @@
 import { gunzipSync } from 'node:zlib';
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { createRandom } from '../../game/core/random';
+import { createRandom } from '../../game/ro/core/random';
 import {
   PRT_FILD08,
   PRT_FILD08_MONSTER_COUNT,

@@ -1,4 +1,4 @@
-import { createRandom } from '../../core/random';
+import { createRandom } from '../core/random';
 import { PRT_FILD08, type MonsterSpawn } from '../content/prt-fild08';
 import { fieldOffset, isWalkable, type RoField } from './fld2';
 
