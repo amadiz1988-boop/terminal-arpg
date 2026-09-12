@@ -7,7 +7,9 @@
 3. 主機保持開機、連線與喚醒狀態。
 4. 將該 HTTPS 網址傳給測試玩家。
 
-啟動腳本同時啟用 15 秒本機 watchdog。Dashboard 或 Quick Tunnel 程序中斷時會自動重啟；若 Tunnel 重建，新的臨時網址會寫入 `.local/ro-stack/dashboard/tunnel-state.json`。
+啟動腳本同時啟用 15 秒本機 watchdog。Dashboard 或 Quick Tunnel 程序中斷時會自動重啟；rAthena 每 30 秒檢查一次，連續兩次失敗後自動恢復，兩次恢復至少間隔 120 秒。若 Tunnel 重建，新的臨時網址會寫入 `.local/ro-stack/dashboard/tunnel-state.json`。
+
+進行預定維護前，先執行 `powershell.exe -NoProfile -ExecutionPolicy Bypass -File ops\ro-stack\demo-watchdog.ps1 pause`。維護完成後執行相同指令並將最後一個參數改為 `resume`。暫停只關閉 rAthena 自動恢復，Dashboard 與 Tunnel 仍會持續監看。
 
 ## 玩家流程
 
