@@ -399,7 +399,7 @@ try {
   await evaluate("document.querySelector('[data-tab=mapInfo]').click()");
   for (let attempt = 0; attempt < 80; attempt += 1) {
     const loaded = await evaluate(
-      "document.querySelectorAll('#mapMonsterList .monster-entry').length === 5 && document.querySelectorAll('#mapMonsterList .drop-entry').length === 40",
+      "document.querySelectorAll('#mapMonsterList .monster-entry').length === 10 && document.querySelectorAll('#mapMonsterList .drop-entry').length === 80",
     );
     if (loaded) break;
     await new Promise((resolve) => setTimeout(resolve, 100));
@@ -570,10 +570,10 @@ try {
     audioUi.soundVisible &&
     audioUi.soundUpdated &&
     mapInfoUi.title === '普隆德拉原野 08' &&
-    mapInfoUi.total === '5 種／271 隻' &&
-    mapInfoUi.monsterCount === 5 &&
-    mapInfoUi.dropCount === 40 &&
-    mapInfoUi.descriptions === 40 &&
+    mapInfoUi.total === '10 種／276 隻' &&
+    mapInfoUi.monsterCount === 10 &&
+    mapInfoUi.dropCount === 80 &&
+    mapInfoUi.descriptions === 80 &&
     mapInfoUi.iconsLoaded === mapInfoUi.iconCount &&
     mapInfoUi.cardExpanded &&
     skillUi.count === 4 &&

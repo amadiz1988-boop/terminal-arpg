@@ -60,6 +60,7 @@
     "test:character-showcase": "node scripts/test-character-showcase.mjs",
     "test:class-rankings": "node scripts/test-class-rankings.mjs",
     "test:minimap-terrain": "node scripts/test-minimap-terrain.mjs",
+    "test:map-info": "node scripts/test-map-info-sync.mjs",
     "test:map-bgm": "node scripts/test-map-bgm.mjs",
     "test:foldable-windows-ui": "node scripts/test-foldable-windows-ui.mjs"
   },

@@ -1,0 +1,30 @@
+{
+  "id": "int_land03",
+  "name": "int_land03",
+  "totalMonsters": 40,
+  "monsters": [
+    {
+      "id": 2401,
+      "aegisName": "G_PORING",
+      "name": "Poring",
+      "count": 40,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 1,
+      "hp": 55,
+      "baseExp": 0,
+      "jobExp": 0,
+      "attackMin": 1,
+      "attackMax": 1,
+      "defense": 2,
+      "magicDefense": 5,
+      "size": "中型",
+      "race": "植物",
+      "element": "水 1",
+      "sourceFiles": [
+        "npc/re/mobs/int_land.txt"
+      ],
+      "drops": []
+    }
+  ]
+}

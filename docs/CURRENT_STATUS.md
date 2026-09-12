@@ -1,5 +1,13 @@
 # 目前狀態
 
+## 2026-09-13 地圖情報隨目前地圖更新
+
+- 問題原因有兩項：地圖情報只在玩家點擊分頁時載入一次；查不到目前地圖時會回退顯示資料檔中的第一張地圖，造成跨圖後仍顯示南門情報。
+- 事件輪詢取得新地圖後，地圖情報會同步切換標題、怪物種類、固定生成總量與怪物清單。缺少已查核資料時會顯示目前 map ID 與「無資料」，不再顯示其他地圖內容。
+- `assets:map-info` 現依鎖定版 rAthena Renewal 實際啟用的 `npc/re/scripts_main.conf` import 鏈，為 53 張目前玩家流程地圖產生索引與獨立詳細檔。詳細檔只在玩家開啟地圖情報時按目前地圖載入。
+- 實際資料確認 `moc_fild11` 為 4 種、318 隻，`pay_dun00` 為 7 種、125 隻；城鎮或沒有固定生成資料的地圖顯示 0 種、0 隻。
+- 390×844 瀏覽器測試已驗證 `moc_fild11` 切換至 `pay_dun00` 後內容同步更新、兩張詳細檔分開請求、無水平溢出及瀏覽器例外為 0，結果為 `MAP_INFO_SYNC_PASS`。
+
 ## 2026-09-13 常駐 Pet Companion 原型
 
 - 現行 `127.0.0.1:8788` Dashboard 已加入單一常駐 Pet Companion；切換能力、技能、裝備、道具、地圖情報、掛機與戰鬥終端時沿用同一 DOM 實體，不會隨 panel 重新建立。
@@ -10,8 +18,8 @@
 
 ## 2026-09-12 Git 版本管理狀態
 
-- Repository 已啟用 Git，現行分支為 `main`，遠端為 `origin`：`https://github.com/amadiz1988-boop/terminal-arpg.git`。
-- 目前 `HEAD` 為 `265c1f7`，`main...origin/main` 未顯示領先或落後。
+- Repository 已啟用 Git，穩定分支為 `main`，遠端為 `origin`：`https://github.com/amadiz1988-boop/terminal-arpg.git`。
+- 目前開發分支為 `recovery/2026-09-13-working-tree`；`main` 的 `HEAD` 為 `265c1f7`。
 - 2026-09-13 已建立並推送 `recovery/2026-09-13-working-tree`，提交 `da9ba6a` 保存 64 個程式、測試、設定與文件檔案。
 - 救援分支與遠端差異為 `0 / 0`。`main` 保持在 `265c1f7`，待功能切片驗證後再整合。
 - 尚未追蹤的 1,012 個檔案包含 1,009 個 Gravity BGM／紙娃娃衍生素材，以及 3 個隔離的 Persistent Agent 文件、patch 與 SQL。素材需完成授權與來源確認，Persistent Agent 需維持獨立範圍。

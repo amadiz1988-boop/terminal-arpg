@@ -1,0 +1,247 @@
+{
+  "id": "moc_pryd01",
+  "name": "夢羅克金字塔 1樓",
+  "totalMonsters": 100,
+  "monsters": [
+    {
+      "id": 1005,
+      "aegisName": "FARMILIAR",
+      "name": "吸血蝙蝠",
+      "count": 72,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 24,
+      "hp": 330,
+      "baseExp": 200,
+      "jobExp": 152,
+      "attackMin": 17,
+      "attackMax": 9,
+      "defense": 26,
+      "magicDefense": 5,
+      "size": "小型",
+      "race": "動物",
+      "element": "暗 1",
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/moc_pryd.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 913,
+          "aegisName": "Tooth_Of_Bat",
+          "name": "蝙蝠牙",
+          "ratePerTenThousand": 2750,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "怪物吸血蝙蝠尖銳的牙齒,可以用來做衣服或裝飾用。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 1105,
+          "aegisName": "Falchion_",
+          "name": "圓月刀",
+          "ratePerTenThousand": 10,
+          "type": "武器",
+          "weight": 60,
+          "attack": 39,
+          "defense": 0,
+          "slots": 4,
+          "description": "有著圓刃的刀。\n系列: 劍  攻擊: 39\n重量: 60\n武器等級: 1\n要求等級: 2\n裝備: 初學者/劍士系列/商人系列/盜賊系列可以裝備"
+        },
+        {
+          "itemId": 2209,
+          "aegisName": "Ribbon_",
+          "name": "紫蝶髮帶",
+          "ratePerTenThousand": 8,
+          "type": "防具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 1,
+          "slots": 1,
+          "description": "用布條做成的蝴蝶髮帶,主要是給女性使用。\nMDEF+3。\n系列: 頭具  防禦: 1\n位置: 上  重量: 10\n裝備: 全職業"
+        },
+        {
+          "itemId": 601,
+          "aegisName": "Wing_Of_Fly",
+          "name": "蒼蠅翅膀",
+          "ratePerTenThousand": 500,
+          "type": "延遲消耗品",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "將蒼蠅的翅膀剪下可以用來製作具有魔法力量的物品,可在地圖上移動至任意的位置上。\n\n重量: 0"
+        },
+        {
+          "itemId": 514,
+          "aegisName": "Grape",
+          "name": "葡萄",
+          "ratePerTenThousand": 50,
+          "type": "恢復道具",
+          "weight": 2,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "清新且味道酸的水果,可恢復少量SP。\n\n重量: 2"
+        },
+        {
+          "itemId": 507,
+          "aegisName": "Red_Herb",
+          "name": "紅色藥草",
+          "ratePerTenThousand": 350,
+          "type": "恢復道具",
+          "weight": 3,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在治療傷處上有一定功效的珍貴藥草,可恢復少量的HP。\n\n重量: 3"
+        },
+        {
+          "itemId": 645,
+          "aegisName": "Center_Potion",
+          "name": "集中藥水",
+          "ratePerTenThousand": 25,
+          "type": "消耗品",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "含有可讓敏捷能力+成份的藥水,服用時, 可讓攻擊速度上升。\n所有職業都可以使用。\n重量: 10"
+        },
+        {
+          "itemId": 4020,
+          "aegisName": "Farmiliar_Card",
+          "name": "吸血蝙蝠卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "攻擊敵人時,有5%的機率使敵人陷入黑暗狀態。\nATK+5。\n系列: 卡片\n裝置: 武器\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1031,
+      "aegisName": "POPORING",
+      "name": "波波利",
+      "count": 28,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 30,
+      "hp": 489,
+      "baseExp": 229,
+      "jobExp": 181,
+      "attackMin": 31,
+      "attackMax": 20,
+      "defense": 36,
+      "magicDefense": 17,
+      "size": "中型",
+      "race": "植物",
+      "element": "毒 1",
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/moc_pryd.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 938,
+          "aegisName": "Sticky_Mucus",
+          "name": "粘稠液體",
+          "ratePerTenThousand": 6000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "不知名的黏稠液體,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 910,
+          "aegisName": "Garlet",
+          "name": "加勒結晶",
+          "ratePerTenThousand": 1000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從一部份怪物身上得來的結晶,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 511,
+          "aegisName": "Green_Herb",
+          "name": "綠色藥草",
+          "ratePerTenThousand": 1000,
+          "type": "恢復道具",
+          "weight": 3,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可中和所有毒性的珍貴藥草,具有治療的功效解毒。\n\n重量: 3"
+        },
+        {
+          "itemId": 514,
+          "aegisName": "Grape",
+          "name": "葡萄",
+          "ratePerTenThousand": 200,
+          "type": "恢復道具",
+          "weight": 2,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "清新且味道酸的水果,可恢復少量SP。\n\n重量: 2"
+        },
+        {
+          "itemId": 601,
+          "aegisName": "Wing_Of_Fly",
+          "name": "蒼蠅翅膀",
+          "ratePerTenThousand": 500,
+          "type": "延遲消耗品",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "將蒼蠅的翅膀剪下可以用來製作具有魔法力量的物品,可在地圖上移動至任意的位置上。\n\n重量: 0"
+        },
+        {
+          "itemId": 1207,
+          "aegisName": "Main_Gauche",
+          "name": "笨拙短劍",
+          "ratePerTenThousand": 20,
+          "type": "武器",
+          "weight": 60,
+          "attack": 43,
+          "defense": 0,
+          "slots": 3,
+          "description": "以多功能使用為訴求,所製造出來的短劍\n系列: 短劍  攻擊: 43\n重量: 60\n武器等級: 1\n要求等級: 無\n裝備: 初學者/劍士系列/魔法師系列/弓箭手系列/商人系列/盜賊系列/悟靈士/忍者"
+        },
+        {
+          "itemId": 512,
+          "aegisName": "Apple",
+          "name": "蘋果",
+          "ratePerTenThousand": 125,
+          "type": "恢復道具",
+          "weight": 2,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "清爽香甜的水果,可恢復少量的HP。\n\n重量: 2"
+        },
+        {
+          "itemId": 4033,
+          "aegisName": "Poporing_Card",
+          "name": "波波利卡片",
+          "ratePerTenThousand": 10,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可使用[解毒]Lv.1技能。\n系列: 卡片\n裝置: 飾品\n重量: 1"
+        }
+      ]
+    }
+  ]
+}

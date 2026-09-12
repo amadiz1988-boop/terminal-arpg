@@ -1,18 +1,33 @@
-import { readFile, writeFile, mkdir } from 'node:fs/promises';
-import { join } from 'node:path';
+import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
+import { extname, join } from 'node:path';
 
 const root = process.cwd();
 const rathena = join(root, '.local', 'ro-stack', 'rathena');
 const openkore = join(root, '.local', 'ro-stack', 'openkore');
-const targetMap = 'prt_fild08';
+const mapRoot = join(root, 'public', 'ro', 'maps');
+const outputRoot = join(root, 'public', 'ro', 'data');
+const detailRoot = join(outputRoot, 'map-info');
+const preferredMapNames = {
+  prt_fild08: '普隆德拉原野 08',
+  moc_fild11: '蘇克拉特沙漠 11',
+  pay_dun00: '斐揚洞穴 1樓',
+};
 const monsterNames = {
+  1001: '蠍子',
   1002: '波利',
+  1005: '吸血蝙蝠',
   1007: '綠棉蟲',
   1008: '蛹',
+  1009: '禿鷹',
+  1015: '殭屍',
+  1031: '波波利',
   1063: '瘋兔',
+  1076: '骷髏',
+  1078: '紅色植物',
+  1084: '黑菇',
+  1107: '沙漠幼狼',
   2398: '小波利',
 };
-const mapNames = { prt_fild08: '普隆德拉原野 08' };
 const elementNames = {
   Neutral: '無', Water: '水', Earth: '地', Fire: '火', Wind: '風',
   Poison: '毒', Holy: '聖', Dark: '暗', Ghost: '念', Undead: '不死',
@@ -65,13 +80,13 @@ function parseYamlRecords(text, includeDrops = false) {
   return records;
 }
 
-function parseTwNames(text) {
-  const names = new Map();
+function parseHashTable(text) {
+  const values = new Map();
   for (const line of text.split(/\r?\n/)) {
     const match = line.match(/^(\d+)#(.*?)#\s*$/);
-    if (match) names.set(Number(match[1]), match[2]);
+    if (match) values.set(Number(match[1]), match[2]);
   }
-  return names;
+  return values;
 }
 
 function parseTwDescriptions(text) {
@@ -94,35 +109,108 @@ function parseTwDescriptions(text) {
   return descriptions;
 }
 
-const [spawnText, mobText, twNameText, twDescriptionText] =
+function parseMapNames(text) {
+  const values = new Map();
+  for (const line of text.split(/\r?\n/)) {
+    const match = line.match(/^([^.#]+)\.rsw#(.*?)#/);
+    if (match && !values.has(match[1])) values.set(match[1], match[2].trim());
+  }
+  return values;
+}
+
+async function activeRenewalScripts() {
+  const scripts = new Set();
+  const visited = new Set();
+  async function visit(relativePath) {
+    const normalized = relativePath.replaceAll('\\', '/');
+    if (visited.has(normalized)) return;
+    visited.add(normalized);
+    const text = await readFile(join(rathena, ...normalized.split('/')), 'utf8');
+    for (const raw of text.split(/\r?\n/)) {
+      const line = raw.trim();
+      if (!line || line.startsWith('//')) continue;
+      const match = line.match(/^(?:npc|import):\s*(\S+)/);
+      if (!match) continue;
+      const target = match[1].replaceAll('\\', '/');
+      if (extname(target) === '.conf') await visit(target);
+      else if (extname(target) === '.txt') scripts.add(target);
+    }
+  }
+  await visit('npc/re/scripts_main.conf');
+  return [...scripts];
+}
+
+const publicMaps = [
+  ...(await readdir(mapRoot))
+    .filter((name) => name.endsWith('.fld2.gz'))
+    .map((name) => name.slice(0, -'.fld2.gz'.length)),
+  // Current Eden equipment routes use runtime terrain fallbacks for these maps.
+  'moc_fild11',
+  'pay_dun00',
+].filter((mapId, index, maps) => maps.indexOf(mapId) === index).sort();
+const publicMapSet = new Set(publicMaps);
+const [mobText, twNameText, twDescriptionText, twMapText, scriptPaths] =
   await Promise.all([
-    readFile(join(rathena, 'npc', 're', 'mobs', 'fields', 'prontera.txt'), 'utf8'),
     readFile(join(rathena, 'db', 're', 'mob_db.yml'), 'utf8'),
     readFile(join(openkore, 'tables', 'twRO', 'items.txt'), 'utf8'),
     readFile(join(openkore, 'tables', 'twRO', 'itemsdescriptions.txt'), 'utf8'),
+    readFile(join(openkore, 'tables', 'twRO', 'maps.txt'), 'utf8'),
+    activeRenewalScripts(),
   ]);
-const itemTexts = await Promise.all(
-  ['item_db_equip.yml', 'item_db_etc.yml', 'item_db_usable.yml'].map((name) =>
-    readFile(join(rathena, 'db', 're', name), 'utf8'),
+const [itemTexts, scriptTexts] = await Promise.all([
+  Promise.all(
+    ['item_db_equip.yml', 'item_db_etc.yml', 'item_db_usable.yml'].map((name) =>
+      readFile(join(rathena, 'db', 're', name), 'utf8'),
+    ),
   ),
-);
+  Promise.all(
+    scriptPaths.map(async (path) => [
+      path,
+      await readFile(join(rathena, ...path.split('/')), 'utf8'),
+    ]),
+  ),
+]);
 const mobById = new Map(parseYamlRecords(mobText, true).map((mob) => [mob.Id, mob]));
 const items = itemTexts.flatMap((text) => parseYamlRecords(text));
 const itemByAegis = new Map(items.map((item) => [item.AegisName, item]));
-const twNames = parseTwNames(twNameText);
+const twNames = parseHashTable(twNameText);
 const twDescriptions = parseTwDescriptions(twDescriptionText);
-const spawns = new Map();
-for (const line of spawnText.split(/\r?\n/)) {
-  const match = line.match(/^([^,]+),[^\t]*\tmonster\t[^\t]+\t(\d+),(\d+),(\d+)(?:,(\d+))?/);
-  if (!match || match[1] !== targetMap) continue;
-  const mobId = Number(match[2]);
-  const entry = spawns.get(mobId) ?? { count: 0, delays: [] };
-  entry.count += Number(match[3]);
-  entry.delays.push(Number(match[4]), Number(match[5] ?? match[4]));
-  spawns.set(mobId, entry);
+const twMapNames = parseMapNames(twMapText);
+const spawnsByMap = new Map(publicMaps.map((mapId) => [mapId, new Map()]));
+
+for (const [sourcePath, text] of scriptTexts) {
+  for (const line of text.split(/\r?\n/)) {
+    const match = line.match(
+      /^([^,\s]+),[^\t]*\tmonster\t[^\t]+\t(\d+),(\d+)(?:,(\d+))?(?:,(\d+))?/,
+    );
+    if (!match || !publicMapSet.has(match[1])) continue;
+    const mapSpawns = spawnsByMap.get(match[1]);
+    const mobId = Number(match[2]);
+    const entry = mapSpawns.get(mobId) ?? {
+      count: 0,
+      delays: [],
+      sources: new Set(),
+    };
+    entry.count += Number(match[3]);
+    entry.delays.push(Number(match[4] ?? 0), Number(match[5] ?? match[4] ?? 0));
+    entry.sources.add(sourcePath);
+    mapSpawns.set(mobId, entry);
+  }
 }
 
-const monsters = [...spawns.entries()].map(([mobId, spawn]) => {
+function displayMapName(mapId) {
+  const base = mapId
+    .replace(/_[a-d]$/, '')
+    .replace(/0[1-4]$/, '');
+  return (
+    preferredMapNames[mapId] ??
+    twMapNames.get(mapId) ??
+    twMapNames.get(base) ??
+    mapId
+  );
+}
+
+function monsterRecord(mobId, spawn) {
   const mob = mobById.get(mobId);
   if (!mob) throw new Error(`找不到怪物 ${mobId}`);
   return {
@@ -132,17 +220,18 @@ const monsters = [...spawns.entries()].map(([mobId, spawn]) => {
     count: spawn.count,
     respawnMinMs: Math.min(...spawn.delays),
     respawnMaxMs: Math.max(...spawn.delays),
-    level: mob.Level,
-    hp: mob.Hp,
-    baseExp: mob.BaseExp,
-    jobExp: mob.JobExp,
-    attackMin: mob.Attack,
-    attackMax: mob.Attack2 ?? mob.Attack,
+    level: Number(mob.Level ?? 0),
+    hp: Number(mob.Hp ?? 0),
+    baseExp: Number(mob.BaseExp ?? 0),
+    jobExp: Number(mob.JobExp ?? 0),
+    attackMin: Number(mob.Attack ?? 0),
+    attackMax: Number(mob.Attack2 ?? mob.Attack ?? 0),
     defense: mob.Defense ?? 0,
     magicDefense: mob.MagicDefense ?? 0,
     size: sizeNames[mob.Size] ?? mob.Size,
     race: raceNames[mob.Race] ?? mob.Race,
     element: `${elementNames[mob.Element] ?? mob.Element} ${mob.ElementLevel ?? 1}`,
+    sourceFiles: [...spawn.sources].sort(),
     drops: mob.Drops.map((drop) => {
       const item = itemByAegis.get(drop.Item);
       if (!item) throw new Error(`找不到道具 ${drop.Item}`);
@@ -160,24 +249,45 @@ const monsters = [...spawns.entries()].map(([mobId, spawn]) => {
       };
     }),
   };
-});
+}
 
-const output = {
+await mkdir(detailRoot, { recursive: true });
+const index = {
   generatedAt: new Date().toISOString(),
   sources: {
     ruleset: 'Renewal',
     locale: 'zh-Hant',
+    scripts: 'active npc/re/scripts_main.conf imports',
   },
-  maps: {
-    [targetMap]: {
-      id: targetMap,
-      name: mapNames[targetMap],
-      totalMonsters: monsters.reduce((sum, monster) => sum + monster.count, 0),
-      monsters,
-    },
-  },
+  maps: {},
 };
-const outputDir = join(root, 'public', 'ro', 'data');
-await mkdir(outputDir, { recursive: true });
-await writeFile(join(outputDir, 'map-info.json'), `${JSON.stringify(output, null, 2)}\n`);
-console.log(`${targetMap}: ${output.maps[targetMap].totalMonsters} 隻，${monsters.length} 種怪物`);
+for (const mapId of publicMaps) {
+  const monsters = [...spawnsByMap.get(mapId).entries()]
+    .map(([mobId, spawn]) => monsterRecord(mobId, spawn))
+    .sort((a, b) => a.level - b.level || a.id - b.id);
+  const detail = {
+    id: mapId,
+    name: displayMapName(mapId),
+    totalMonsters: monsters.reduce((sum, monster) => sum + monster.count, 0),
+    monsters,
+  };
+  const detailPath = `/ro/data/map-info/${mapId}.json`;
+  index.maps[mapId] = {
+    id: detail.id,
+    name: detail.name,
+    totalMonsters: detail.totalMonsters,
+    monsterTypes: detail.monsters.length,
+    detail: detailPath,
+  };
+  await writeFile(
+    join(detailRoot, `${mapId}.json`),
+    `${JSON.stringify(detail, null, 2)}\n`,
+  );
+}
+await writeFile(
+  join(outputRoot, 'map-info.json'),
+  `${JSON.stringify(index, null, 2)}\n`,
+);
+console.log(
+  `RO_MAP_INFO_BUILT maps=${publicMaps.length} monsters=${Object.values(index.maps).reduce((sum, map) => sum + map.totalMonsters, 0)}`,
+);

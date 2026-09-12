@@ -1,601 +1,381 @@
 {
-  "generatedAt": "2026-09-11T11:51:59.860Z",
+  "generatedAt": "2026-09-12T16:30:19.199Z",
   "sources": {
     "ruleset": "Renewal",
-    "locale": "zh-Hant"
+    "locale": "zh-Hant",
+    "scripts": "active npc/re/scripts_main.conf imports"
   },
   "maps": {
+    "gef_fild00": {
+      "id": "gef_fild00",
+      "name": "吉芬原野",
+      "totalMonsters": 238,
+      "monsterTypes": 6,
+      "detail": "/ro/data/map-info/gef_fild00.json"
+    },
+    "geffen": {
+      "id": "geffen",
+      "name": "魔法之都 吉芬",
+      "totalMonsters": 0,
+      "monsterTypes": 0,
+      "detail": "/ro/data/map-info/geffen.json"
+    },
+    "geffen_in": {
+      "id": "geffen_in",
+      "name": "吉芬內部",
+      "totalMonsters": 0,
+      "monsterTypes": 0,
+      "detail": "/ro/data/map-info/geffen_in.json"
+    },
+    "int_land": {
+      "id": "int_land",
+      "name": "int_land",
+      "totalMonsters": 40,
+      "monsterTypes": 1,
+      "detail": "/ro/data/map-info/int_land.json"
+    },
+    "int_land01": {
+      "id": "int_land01",
+      "name": "int_land01",
+      "totalMonsters": 40,
+      "monsterTypes": 1,
+      "detail": "/ro/data/map-info/int_land01.json"
+    },
+    "int_land02": {
+      "id": "int_land02",
+      "name": "int_land02",
+      "totalMonsters": 40,
+      "monsterTypes": 1,
+      "detail": "/ro/data/map-info/int_land02.json"
+    },
+    "int_land03": {
+      "id": "int_land03",
+      "name": "int_land03",
+      "totalMonsters": 40,
+      "monsterTypes": 1,
+      "detail": "/ro/data/map-info/int_land03.json"
+    },
+    "int_land04": {
+      "id": "int_land04",
+      "name": "int_land04",
+      "totalMonsters": 40,
+      "monsterTypes": 1,
+      "detail": "/ro/data/map-info/int_land04.json"
+    },
+    "iz_ac01": {
+      "id": "iz_ac01",
+      "name": "克里圖拉學院1樓",
+      "totalMonsters": 4,
+      "monsterTypes": 2,
+      "detail": "/ro/data/map-info/iz_ac01.json"
+    },
+    "iz_ac01_a": {
+      "id": "iz_ac01_a",
+      "name": "魔法學院1樓",
+      "totalMonsters": 4,
+      "monsterTypes": 2,
+      "detail": "/ro/data/map-info/iz_ac01_a.json"
+    },
+    "iz_ac01_b": {
+      "id": "iz_ac01_b",
+      "name": "魔法學院1樓",
+      "totalMonsters": 4,
+      "monsterTypes": 2,
+      "detail": "/ro/data/map-info/iz_ac01_b.json"
+    },
+    "iz_ac01_c": {
+      "id": "iz_ac01_c",
+      "name": "魔法學院1樓",
+      "totalMonsters": 4,
+      "monsterTypes": 2,
+      "detail": "/ro/data/map-info/iz_ac01_c.json"
+    },
+    "iz_ac01_d": {
+      "id": "iz_ac01_d",
+      "name": "魔法學院1樓",
+      "totalMonsters": 4,
+      "monsterTypes": 2,
+      "detail": "/ro/data/map-info/iz_ac01_d.json"
+    },
+    "iz_ac02": {
+      "id": "iz_ac02",
+      "name": "克里圖拉學院2樓",
+      "totalMonsters": 0,
+      "monsterTypes": 0,
+      "detail": "/ro/data/map-info/iz_ac02.json"
+    },
+    "iz_ac02_a": {
+      "id": "iz_ac02_a",
+      "name": "魔法學院2樓",
+      "totalMonsters": 0,
+      "monsterTypes": 0,
+      "detail": "/ro/data/map-info/iz_ac02_a.json"
+    },
+    "iz_ac02_b": {
+      "id": "iz_ac02_b",
+      "name": "魔法學院2樓",
+      "totalMonsters": 0,
+      "monsterTypes": 0,
+      "detail": "/ro/data/map-info/iz_ac02_b.json"
+    },
+    "iz_ac02_c": {
+      "id": "iz_ac02_c",
+      "name": "魔法學院2樓",
+      "totalMonsters": 0,
+      "monsterTypes": 0,
+      "detail": "/ro/data/map-info/iz_ac02_c.json"
+    },
+    "iz_ac02_d": {
+      "id": "iz_ac02_d",
+      "name": "魔法學院2樓",
+      "totalMonsters": 0,
+      "monsterTypes": 0,
+      "detail": "/ro/data/map-info/iz_ac02_d.json"
+    },
+    "iz_int": {
+      "id": "iz_int",
+      "name": "介紹地圖",
+      "totalMonsters": 0,
+      "monsterTypes": 0,
+      "detail": "/ro/data/map-info/iz_int.json"
+    },
+    "iz_int01": {
+      "id": "iz_int01",
+      "name": "介紹地圖",
+      "totalMonsters": 0,
+      "monsterTypes": 0,
+      "detail": "/ro/data/map-info/iz_int01.json"
+    },
+    "iz_int02": {
+      "id": "iz_int02",
+      "name": "介紹地圖",
+      "totalMonsters": 0,
+      "monsterTypes": 0,
+      "detail": "/ro/data/map-info/iz_int02.json"
+    },
+    "iz_int03": {
+      "id": "iz_int03",
+      "name": "介紹地圖",
+      "totalMonsters": 0,
+      "monsterTypes": 0,
+      "detail": "/ro/data/map-info/iz_int03.json"
+    },
+    "iz_int04": {
+      "id": "iz_int04",
+      "name": "介紹地圖",
+      "totalMonsters": 0,
+      "monsterTypes": 0,
+      "detail": "/ro/data/map-info/iz_int04.json"
+    },
+    "izlude": {
+      "id": "izlude",
+      "name": "衛星都市 依斯魯得島",
+      "totalMonsters": 0,
+      "monsterTypes": 0,
+      "detail": "/ro/data/map-info/izlude.json"
+    },
+    "izlude_a": {
+      "id": "izlude_a",
+      "name": "衛星都市 依斯魯得島",
+      "totalMonsters": 0,
+      "monsterTypes": 0,
+      "detail": "/ro/data/map-info/izlude_a.json"
+    },
+    "izlude_b": {
+      "id": "izlude_b",
+      "name": "衛星都市 依斯魯得島",
+      "totalMonsters": 0,
+      "monsterTypes": 0,
+      "detail": "/ro/data/map-info/izlude_b.json"
+    },
+    "izlude_c": {
+      "id": "izlude_c",
+      "name": "衛星都市 依斯魯得島",
+      "totalMonsters": 0,
+      "monsterTypes": 0,
+      "detail": "/ro/data/map-info/izlude_c.json"
+    },
+    "izlude_d": {
+      "id": "izlude_d",
+      "name": "衛星都市 依斯魯得島",
+      "totalMonsters": 0,
+      "monsterTypes": 0,
+      "detail": "/ro/data/map-info/izlude_d.json"
+    },
+    "izlude_in": {
+      "id": "izlude_in",
+      "name": "依斯魯得島內部",
+      "totalMonsters": 0,
+      "monsterTypes": 0,
+      "detail": "/ro/data/map-info/izlude_in.json"
+    },
+    "mjolnir_06": {
+      "id": "mjolnir_06",
+      "name": "妙勒妙勒尼山脈南區",
+      "totalMonsters": 213,
+      "monsterTypes": 6,
+      "detail": "/ro/data/map-info/mjolnir_06.json"
+    },
+    "mjolnir_07": {
+      "id": "mjolnir_07",
+      "name": "妙勒妙勒尼山脈南區",
+      "totalMonsters": 243,
+      "monsterTypes": 7,
+      "detail": "/ro/data/map-info/mjolnir_07.json"
+    },
+    "mjolnir_09": {
+      "id": "mjolnir_09",
+      "name": "妙勒妙勒尼山脈 南邊山麓",
+      "totalMonsters": 240,
+      "monsterTypes": 5,
+      "detail": "/ro/data/map-info/mjolnir_09.json"
+    },
+    "moc_fild01": {
+      "id": "moc_fild01",
+      "name": "蘇克拉特沙漠",
+      "totalMonsters": 339,
+      "monsterTypes": 5,
+      "detail": "/ro/data/map-info/moc_fild01.json"
+    },
+    "moc_fild02": {
+      "id": "moc_fild02",
+      "name": "蘇克拉特沙漠",
+      "totalMonsters": 238,
+      "monsterTypes": 6,
+      "detail": "/ro/data/map-info/moc_fild02.json"
+    },
+    "moc_fild11": {
+      "id": "moc_fild11",
+      "name": "蘇克拉特沙漠 11",
+      "totalMonsters": 318,
+      "monsterTypes": 4,
+      "detail": "/ro/data/map-info/moc_fild11.json"
+    },
+    "moc_fild19": {
+      "id": "moc_fild19",
+      "name": "蘇克拉特沙漠",
+      "totalMonsters": 0,
+      "monsterTypes": 0,
+      "detail": "/ro/data/map-info/moc_fild19.json"
+    },
+    "moc_para01": {
+      "id": "moc_para01",
+      "name": "夢羅克伊甸園內部",
+      "totalMonsters": 0,
+      "monsterTypes": 0,
+      "detail": "/ro/data/map-info/moc_para01.json"
+    },
+    "moc_pryd01": {
+      "id": "moc_pryd01",
+      "name": "夢羅克金字塔 1樓",
+      "totalMonsters": 100,
+      "monsterTypes": 2,
+      "detail": "/ro/data/map-info/moc_pryd01.json"
+    },
+    "moc_prydb1": {
+      "id": "moc_prydb1",
+      "name": "盜賊公會",
+      "totalMonsters": 0,
+      "monsterTypes": 0,
+      "detail": "/ro/data/map-info/moc_prydb1.json"
+    },
+    "moc_ruins": {
+      "id": "moc_ruins",
+      "name": "沙漠之都 夢羅克",
+      "totalMonsters": 0,
+      "monsterTypes": 0,
+      "detail": "/ro/data/map-info/moc_ruins.json"
+    },
+    "morocc": {
+      "id": "morocc",
+      "name": "沙漠之都 夢羅克",
+      "totalMonsters": 0,
+      "monsterTypes": 0,
+      "detail": "/ro/data/map-info/morocc.json"
+    },
+    "new_1-3": {
+      "id": "new_1-3",
+      "name": "新手修練場",
+      "totalMonsters": 32,
+      "monsterTypes": 2,
+      "detail": "/ro/data/map-info/new_1-3.json"
+    },
+    "pay_arche": {
+      "id": "pay_arche",
+      "name": "斐揚 弓箭手村",
+      "totalMonsters": 0,
+      "monsterTypes": 0,
+      "detail": "/ro/data/map-info/pay_arche.json"
+    },
+    "pay_dun00": {
+      "id": "pay_dun00",
+      "name": "斐揚洞穴 1樓",
+      "totalMonsters": 125,
+      "monsterTypes": 7,
+      "detail": "/ro/data/map-info/pay_dun00.json"
+    },
+    "pay_fild04": {
+      "id": "pay_fild04",
+      "name": "蘇克拉特沙漠",
+      "totalMonsters": 222,
+      "monsterTypes": 11,
+      "detail": "/ro/data/map-info/pay_fild04.json"
+    },
+    "pay_gld": {
+      "id": "pay_gld",
+      "name": "青林湖",
+      "totalMonsters": 0,
+      "monsterTypes": 0,
+      "detail": "/ro/data/map-info/pay_gld.json"
+    },
+    "payon": {
+      "id": "payon",
+      "name": "山岳之都 斐揚",
+      "totalMonsters": 0,
+      "monsterTypes": 0,
+      "detail": "/ro/data/map-info/payon.json"
+    },
+    "payon_in02": {
+      "id": "payon_in02",
+      "name": "斐揚內部",
+      "totalMonsters": 0,
+      "monsterTypes": 0,
+      "detail": "/ro/data/map-info/payon_in02.json"
+    },
+    "prontera": {
+      "id": "prontera",
+      "name": "盧恩 米德加茲王國  首都普隆德拉",
+      "totalMonsters": 0,
+      "monsterTypes": 0,
+      "detail": "/ro/data/map-info/prontera.json"
+    },
+    "prt_church": {
+      "id": "prt_church",
+      "name": "普隆德拉教堂內部",
+      "totalMonsters": 0,
+      "monsterTypes": 0,
+      "detail": "/ro/data/map-info/prt_church.json"
+    },
+    "prt_fild00": {
+      "id": "prt_fild00",
+      "name": "普隆德拉原野",
+      "totalMonsters": 268,
+      "monsterTypes": 6,
+      "detail": "/ro/data/map-info/prt_fild00.json"
+    },
+    "prt_fild05": {
+      "id": "prt_fild05",
+      "name": "普隆德拉原野",
+      "totalMonsters": 292,
+      "monsterTypes": 6,
+      "detail": "/ro/data/map-info/prt_fild05.json"
+    },
     "prt_fild08": {
       "id": "prt_fild08",
       "name": "普隆德拉原野 08",
-      "totalMonsters": 271,
-      "monsters": [
-        {
-          "id": 1002,
-          "aegisName": "PORING",
-          "name": "波利",
-          "count": 87,
-          "respawnMinMs": 5000,
-          "respawnMaxMs": 15000,
-          "level": 1,
-          "hp": 55,
-          "baseExp": 150,
-          "jobExp": 40,
-          "attackMin": 1,
-          "attackMax": 1,
-          "defense": 2,
-          "magicDefense": 5,
-          "size": "中型",
-          "race": "植物",
-          "element": "水 1",
-          "drops": [
-            {
-              "itemId": 909,
-              "aegisName": "Jellopy",
-              "name": "傑勒比結晶",
-              "ratePerTenThousand": 7000,
-              "type": "其他",
-              "weight": 1,
-              "attack": 0,
-              "defense": 0,
-              "slots": 0,
-              "description": "從一部份怪物身上得來的結晶,可向收集商購買。\n\n重量: 1"
-            },
-            {
-              "itemId": 1202,
-              "aegisName": "Knife_",
-              "name": "短劍",
-              "ratePerTenThousand": 100,
-              "type": "武器",
-              "weight": 40,
-              "attack": 17,
-              "defense": 0,
-              "slots": 4,
-              "description": "為了方便任何人使用所製作出來的短劍\n系列: 短劍  攻擊: 17\n重量: 40\n武器等級: 1\n要求等級: 無\n裝備: 初學者/劍士系列/魔法師系列/弓箭手系列/商人系列/盜賊系列/悟靈士/忍者"
-            },
-            {
-              "itemId": 938,
-              "aegisName": "Sticky_Mucus",
-              "name": "粘稠液體",
-              "ratePerTenThousand": 400,
-              "type": "其他",
-              "weight": 1,
-              "attack": 0,
-              "defense": 0,
-              "slots": 0,
-              "description": "不知名的黏稠液體,可向收集商購買。\n\n重量: 1"
-            },
-            {
-              "itemId": 512,
-              "aegisName": "Apple",
-              "name": "蘋果",
-              "ratePerTenThousand": 1000,
-              "type": "恢復道具",
-              "weight": 2,
-              "attack": 0,
-              "defense": 0,
-              "slots": 0,
-              "description": "清爽香甜的水果,可恢復少量的HP。\n\n重量: 2"
-            },
-            {
-              "itemId": 601,
-              "aegisName": "Wing_Of_Fly",
-              "name": "蒼蠅翅膀",
-              "ratePerTenThousand": 500,
-              "type": "延遲消耗品",
-              "weight": 5,
-              "attack": 0,
-              "defense": 0,
-              "slots": 0,
-              "description": "將蒼蠅的翅膀剪下可以用來製作具有魔法力量的物品,可在地圖上移動至任意的位置上。\n\n重量: 0"
-            },
-            {
-              "itemId": 512,
-              "aegisName": "Apple",
-              "name": "蘋果",
-              "ratePerTenThousand": 150,
-              "type": "恢復道具",
-              "weight": 2,
-              "attack": 0,
-              "defense": 0,
-              "slots": 0,
-              "description": "清爽香甜的水果,可恢復少量的HP。\n\n重量: 2"
-            },
-            {
-              "itemId": 619,
-              "aegisName": "Unripe_Apple",
-              "name": "青澀蘋果",
-              "ratePerTenThousand": 20,
-              "type": "消耗品",
-              "weight": 5,
-              "attack": 0,
-              "defense": 0,
-              "slots": 0,
-              "description": "尚未熟透就掉落的蘋果。是怪物波利最喜愛的食物。\n種類: 認養寵物之物品\n重量: 5"
-            },
-            {
-              "itemId": 4001,
-              "aegisName": "Poring_Card",
-              "name": "波利卡片",
-              "ratePerTenThousand": 20,
-              "type": "卡片",
-              "weight": 1,
-              "attack": 0,
-              "defense": 0,
-              "slots": 0,
-              "description": "LUK+2。\n完全迴避+1。\n系列: 卡片\n裝置: 鎧甲\n重量: 1"
-            }
-          ]
-        },
-        {
-          "id": 1063,
-          "aegisName": "LUNATIC",
-          "name": "瘋兔",
-          "count": 67,
-          "respawnMinMs": 5000,
-          "respawnMaxMs": 15000,
-          "level": 3,
-          "hp": 48,
-          "baseExp": 150,
-          "jobExp": 50,
-          "attackMin": 1,
-          "attackMax": 1,
-          "defense": 18,
-          "magicDefense": 0,
-          "size": "小型",
-          "race": "動物",
-          "element": "無 3",
-          "drops": [
-            {
-              "itemId": 705,
-              "aegisName": "Clover",
-              "name": "三葉幸運草",
-              "ratePerTenThousand": 7000,
-              "type": "其他",
-              "weight": 1,
-              "attack": 0,
-              "defense": 0,
-              "slots": 0,
-              "description": "有著三片心型葉子的植物,6至7月間會開著白色的花,有時候還可以找到有四片葉子的,這類的植物名為幸運草,傳說它會為人帶來好運。\n\n重量: 1"
-            },
-            {
-              "itemId": 949,
-              "aegisName": "Feather",
-              "name": "柔毛",
-              "ratePerTenThousand": 3000,
-              "type": "其他",
-              "weight": 1,
-              "attack": 0,
-              "defense": 0,
-              "slots": 0,
-              "description": "相當柔軟的毛,可用來製作高級衣物。可向收集商購買。\n\n重量: 1"
-            },
-            {
-              "itemId": 2262,
-              "aegisName": "Pierrot_Nose",
-              "name": "小丑鼻子",
-              "ratePerTenThousand": 4,
-              "type": "防具",
-              "weight": 10,
-              "attack": 0,
-              "defense": 0,
-              "slots": 0,
-              "description": "小丑戴在鼻子上的飾品。\n系列: 頭具  防禦: 0\n位置: 下  重量: 10\n裝備: 全職業"
-            },
-            {
-              "itemId": 1102,
-              "aegisName": "Sword_",
-              "name": "長劍",
-              "ratePerTenThousand": 100,
-              "type": "武器",
-              "weight": 50,
-              "attack": 25,
-              "defense": 0,
-              "slots": 4,
-              "description": "看起來任何人都可使用的劍,但服事不能使用。\n系列: 劍  攻擊: 25\n重量: 50\n武器等級: 1\n要求等級: 2\n裝備: 初學者/劍士系列/商人系列/盜賊系列可以裝備"
-            },
-            {
-              "itemId": 601,
-              "aegisName": "Wing_Of_Fly",
-              "name": "蒼蠅翅膀",
-              "ratePerTenThousand": 500,
-              "type": "延遲消耗品",
-              "weight": 5,
-              "attack": 0,
-              "defense": 0,
-              "slots": 0,
-              "description": "將蒼蠅的翅膀剪下可以用來製作具有魔法力量的物品,可在地圖上移動至任意的位置上。\n\n重量: 0"
-            },
-            {
-              "itemId": 515,
-              "aegisName": "Carrot",
-              "name": "紅蘿蔔",
-              "ratePerTenThousand": 3000,
-              "type": "恢復道具",
-              "weight": 2,
-              "attack": 0,
-              "defense": 0,
-              "slots": 0,
-              "description": "紅色的蔬菜。味道香甜,常被拿來作菜食用 可恢復少量的HP。\n\n重量: 2"
-            },
-            {
-              "itemId": 622,
-              "aegisName": "Rainbow_Carrot",
-              "name": "彩色紅蘿蔔",
-              "ratePerTenThousand": 20,
-              "type": "消耗品",
-              "weight": 5,
-              "attack": 0,
-              "defense": 0,
-              "slots": 0,
-              "description": "有五種彩虹光芒顏色的紅蘿蔔, 隱隱約約的香氣實在誘人, 是怪物瘋兔最喜愛的食物。\n活動怪、小兵怪則無法認養。\n種類: 認養寵物物品\n重量: 5"
-            },
-            {
-              "itemId": 4006,
-              "aegisName": "Lunatic_Card",
-              "name": "瘋兔卡片",
-              "ratePerTenThousand": 20,
-              "type": "卡片",
-              "weight": 1,
-              "attack": 0,
-              "defense": 0,
-              "slots": 0,
-              "description": "LUK+1。\n必殺攻擊+1。\n完全迴避+1。\n系列: 卡片\n裝置: 武器\n重量: 1"
-            }
-          ]
-        },
-        {
-          "id": 1007,
-          "aegisName": "FABRE",
-          "name": "綠棉蟲",
-          "count": 77,
-          "respawnMinMs": 5000,
-          "respawnMaxMs": 15000,
-          "level": 6,
-          "hp": 59,
-          "baseExp": 158,
-          "jobExp": 65,
-          "attackMin": 1,
-          "attackMax": 3,
-          "defense": 24,
-          "magicDefense": 0,
-          "size": "小型",
-          "race": "昆蟲",
-          "element": "地 1",
-          "drops": [
-            {
-              "itemId": 914,
-              "aegisName": "Fluff",
-              "name": "毛",
-              "ratePerTenThousand": 7000,
-              "type": "其他",
-              "weight": 1,
-              "attack": 0,
-              "defense": 0,
-              "slots": 0,
-              "description": "小型怪身上的毛,可以用來做衣服的原料,可向收集商購買。\n\n重量: 1"
-            },
-            {
-              "itemId": 949,
-              "aegisName": "Feather",
-              "name": "柔毛",
-              "ratePerTenThousand": 1000,
-              "type": "其他",
-              "weight": 1,
-              "attack": 0,
-              "defense": 0,
-              "slots": 0,
-              "description": "相當柔軟的毛,可用來製作高級衣物。可向收集商購買。\n\n重量: 1"
-            },
-            {
-              "itemId": 1502,
-              "aegisName": "Club_",
-              "name": "木錘",
-              "ratePerTenThousand": 80,
-              "type": "武器",
-              "weight": 70,
-              "attack": 23,
-              "defense": 0,
-              "slots": 4,
-              "description": "木製的鈍器,任何人都方便使用。\n系列: 鈍器  攻擊: 23\n重量: 70\n武器等級: 1\n要求等級: 2\n裝備: 初學者/劍士系列/服事系列/商人系列"
-            },
-            {
-              "itemId": 601,
-              "aegisName": "Wing_Of_Fly",
-              "name": "蒼蠅翅膀",
-              "ratePerTenThousand": 500,
-              "type": "延遲消耗品",
-              "weight": 5,
-              "attack": 0,
-              "defense": 0,
-              "slots": 0,
-              "description": "將蒼蠅的翅膀剪下可以用來製作具有魔法力量的物品,可在地圖上移動至任意的位置上。\n\n重量: 0"
-            },
-            {
-              "itemId": 511,
-              "aegisName": "Green_Herb",
-              "name": "綠色藥草",
-              "ratePerTenThousand": 3000,
-              "type": "恢復道具",
-              "weight": 3,
-              "attack": 0,
-              "defense": 0,
-              "slots": 0,
-              "description": "可中和所有毒性的珍貴藥草,具有治療的功效解毒。\n\n重量: 3"
-            },
-            {
-              "itemId": 705,
-              "aegisName": "Clover",
-              "name": "三葉幸運草",
-              "ratePerTenThousand": 1000,
-              "type": "其他",
-              "weight": 1,
-              "attack": 0,
-              "defense": 0,
-              "slots": 0,
-              "description": "有著三片心型葉子的植物,6至7月間會開著白色的花,有時候還可以找到有四片葉子的,這類的植物名為幸運草,傳說它會為人帶來好運。\n\n重量: 1"
-            },
-            {
-              "itemId": 1501,
-              "aegisName": "Club",
-              "name": "木錘",
-              "ratePerTenThousand": 200,
-              "type": "武器",
-              "weight": 70,
-              "attack": 23,
-              "defense": 0,
-              "slots": 3,
-              "description": "木製的鈍器,任何人都方便使用。\n系列: 鈍器  攻擊: 23\n重量: 70\n武器等級: 1\n要求等級: 2\n裝備: 初學者/劍士系列/服事系列/商人系列"
-            },
-            {
-              "itemId": 4002,
-              "aegisName": "Fabre_Card",
-              "name": "綠棉蟲卡片",
-              "ratePerTenThousand": 20,
-              "type": "卡片",
-              "weight": 1,
-              "attack": 0,
-              "defense": 0,
-              "slots": 0,
-              "description": "VIT+1。\nMHP+100\n系列: 卡片\n裝置: 武器\n重量: 1"
-            }
-          ]
-        },
-        {
-          "id": 1008,
-          "aegisName": "PUPA",
-          "name": "蛹",
-          "count": 20,
-          "respawnMinMs": 10000,
-          "respawnMaxMs": 10000,
-          "level": 4,
-          "hp": 51,
-          "baseExp": 157,
-          "jobExp": 55,
-          "attackMin": 1,
-          "attackMax": 3,
-          "defense": 24,
-          "magicDefense": 2,
-          "size": "小型",
-          "race": "昆蟲",
-          "element": "地 1",
-          "drops": [
-            {
-              "itemId": 1010,
-              "aegisName": "Phracon",
-              "name": "強化武器金屬-級數一",
-              "ratePerTenThousand": 600,
-              "type": "其他",
-              "weight": 20,
-              "attack": 0,
-              "defense": 0,
-              "slots": 0,
-              "description": "用來強化武器在製作武器所使用的金屬,可以強化等級一的武器。\n\n重量: 20"
-            },
-            {
-              "itemId": 915,
-              "aegisName": "Chrysalis",
-              "name": "蛹殼",
-              "ratePerTenThousand": 7000,
-              "type": "其他",
-              "weight": 1,
-              "attack": 0,
-              "defense": 0,
-              "slots": 0,
-              "description": "從怪物身上得來的堅硬的外殼,可向收集商購買。\n\n重量: 1"
-            },
-            {
-              "itemId": 938,
-              "aegisName": "Sticky_Mucus",
-              "name": "粘稠液體",
-              "ratePerTenThousand": 700,
-              "type": "其他",
-              "weight": 1,
-              "attack": 0,
-              "defense": 0,
-              "slots": 0,
-              "description": "不知名的黏稠液體,可向收集商購買。\n\n重量: 1"
-            },
-            {
-              "itemId": 2102,
-              "aegisName": "Guard_",
-              "name": "鐵盾",
-              "ratePerTenThousand": 20,
-              "type": "防具",
-              "weight": 30,
-              "attack": 0,
-              "defense": 20,
-              "slots": 1,
-              "description": "可以抵擋敵人攻擊的簡易道具。\n系列: 盾牌  防禦: 20\n重量: 30\n裝備: 全職業"
-            },
-            {
-              "itemId": 935,
-              "aegisName": "Shell",
-              "name": "堅硬外殼",
-              "ratePerTenThousand": 1000,
-              "type": "其他",
-              "weight": 1,
-              "attack": 0,
-              "defense": 0,
-              "slots": 0,
-              "description": "怪物身上堅硬的外殼,可向收集商購買。\n\n重量: 1"
-            },
-            {
-              "itemId": 601,
-              "aegisName": "Wing_Of_Fly",
-              "name": "蒼蠅翅膀",
-              "ratePerTenThousand": 500,
-              "type": "延遲消耗品",
-              "weight": 5,
-              "attack": 0,
-              "defense": 0,
-              "slots": 0,
-              "description": "將蒼蠅的翅膀剪下可以用來製作具有魔法力量的物品,可在地圖上移動至任意的位置上。\n\n重量: 0"
-            },
-            {
-              "itemId": 1002,
-              "aegisName": "Iron_Ore",
-              "name": "鐵礦石",
-              "ratePerTenThousand": 500,
-              "type": "其他",
-              "weight": 15,
-              "attack": 0,
-              "defense": 0,
-              "slots": 0,
-              "description": "含有鐵成分的礦石,提煉的話可得到鐵。\n\n重量: 15"
-            },
-            {
-              "itemId": 4003,
-              "aegisName": "Pupa_Card",
-              "name": "蟲蛹卡片",
-              "ratePerTenThousand": 1,
-              "type": "卡片",
-              "weight": 1,
-              "attack": 0,
-              "defense": 0,
-              "slots": 0,
-              "description": "MHP+700\n系列: 卡片\n裝置: 鎧甲\n重量: 1"
-            }
-          ]
-        },
-        {
-          "id": 2398,
-          "aegisName": "LITTLE_PORING",
-          "name": "小波利",
-          "count": 20,
-          "respawnMinMs": 10000,
-          "respawnMaxMs": 10000,
-          "level": 1,
-          "hp": 40,
-          "baseExp": 18,
-          "jobExp": 10,
-          "attackMin": 1,
-          "attackMax": 1,
-          "defense": 2,
-          "magicDefense": 5,
-          "size": "小型",
-          "race": "植物",
-          "element": "水 1",
-          "drops": [
-            {
-              "itemId": 909,
-              "aegisName": "Jellopy",
-              "name": "傑勒比結晶",
-              "ratePerTenThousand": 9000,
-              "type": "其他",
-              "weight": 1,
-              "attack": 0,
-              "defense": 0,
-              "slots": 0,
-              "description": "從一部份怪物身上得來的結晶,可向收集商購買。\n\n重量: 1"
-            },
-            {
-              "itemId": 1202,
-              "aegisName": "Knife_",
-              "name": "短劍",
-              "ratePerTenThousand": 100,
-              "type": "武器",
-              "weight": 40,
-              "attack": 17,
-              "defense": 0,
-              "slots": 4,
-              "description": "為了方便任何人使用所製作出來的短劍\n系列: 短劍  攻擊: 17\n重量: 40\n武器等級: 1\n要求等級: 無\n裝備: 初學者/劍士系列/魔法師系列/弓箭手系列/商人系列/盜賊系列/悟靈士/忍者"
-            },
-            {
-              "itemId": 938,
-              "aegisName": "Sticky_Mucus",
-              "name": "粘稠液體",
-              "ratePerTenThousand": 1000,
-              "type": "其他",
-              "weight": 1,
-              "attack": 0,
-              "defense": 0,
-              "slots": 0,
-              "description": "不知名的黏稠液體,可向收集商購買。\n\n重量: 1"
-            },
-            {
-              "itemId": 512,
-              "aegisName": "Apple",
-              "name": "蘋果",
-              "ratePerTenThousand": 5000,
-              "type": "恢復道具",
-              "weight": 2,
-              "attack": 0,
-              "defense": 0,
-              "slots": 0,
-              "description": "清爽香甜的水果,可恢復少量的HP。\n\n重量: 2"
-            },
-            {
-              "itemId": 507,
-              "aegisName": "Red_Herb",
-              "name": "紅色藥草",
-              "ratePerTenThousand": 1000,
-              "type": "恢復道具",
-              "weight": 3,
-              "attack": 0,
-              "defense": 0,
-              "slots": 0,
-              "description": "在治療傷處上有一定功效的珍貴藥草,可恢復少量的HP。\n\n重量: 3"
-            },
-            {
-              "itemId": 512,
-              "aegisName": "Apple",
-              "name": "蘋果",
-              "ratePerTenThousand": 500,
-              "type": "恢復道具",
-              "weight": 2,
-              "attack": 0,
-              "defense": 0,
-              "slots": 0,
-              "description": "清爽香甜的水果,可恢復少量的HP。\n\n重量: 2"
-            },
-            {
-              "itemId": 507,
-              "aegisName": "Red_Herb",
-              "name": "紅色藥草",
-              "ratePerTenThousand": 1000,
-              "type": "恢復道具",
-              "weight": 3,
-              "attack": 0,
-              "defense": 0,
-              "slots": 0,
-              "description": "在治療傷處上有一定功效的珍貴藥草,可恢復少量的HP。\n\n重量: 3"
-            },
-            {
-              "itemId": 4545,
-              "aegisName": "Novice_Poring_Card",
-              "name": "寶貝波利卡片",
-              "ratePerTenThousand": 100,
-              "type": "卡片",
-              "weight": 1,
-              "attack": 0,
-              "defense": 0,
-              "slots": 0,
-              "description": "LUK+1.\n與克里圖拉學院帽一起裝備時,ATK+5、MATK+5。\n系列: 卡片\n裝備: 頭具\n重量: 1"
-            }
-          ]
-        }
-      ]
+      "totalMonsters": 276,
+      "monsterTypes": 10,
+      "detail": "/ro/data/map-info/prt_fild08.json"
     }
   }
 }

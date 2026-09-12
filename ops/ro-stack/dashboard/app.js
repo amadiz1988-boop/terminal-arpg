@@ -480,6 +480,10 @@ let authenticated = false,
   mapFieldName = '',
   mapFieldError = '',
   mapInfoData = null,
+  mapInfoCache = new Map(),
+  mapInfoRenderedId = '',
+  mapInfoLoadingId = '',
+  mapInfoRequestId = 0,
   skillTreeData = null,
   lastSkillTreeSignature = '',
   supplyCycleSettings = null,
@@ -2503,6 +2507,7 @@ function renderMinimap(live) {
   if (!live) return;
   ensureMap(live.map);
   updateMinimapTargets(live);
+  syncMapInfoToLive(live);
 }
 async function pollEvents() {
   if (!authenticated) return;
@@ -3193,11 +3198,24 @@ function percentage(rate) {
   const value = Number(rate) / 100;
   return `${Number.isInteger(value) ? value : value.toFixed(2).replace(/0+$/, '').replace(/\.$/, '')}%`;
 }
-function renderMapInfo(mapId = 'prt_fild08') {
-  const map =
-    mapInfoData?.maps?.[mapId] ?? Object.values(mapInfoData?.maps ?? {})[0];
+function currentMapInfoId() {
+  return (
+    minimapLive?.map ??
+    lastState?.derived?.map ??
+    lastState?.character?.map ??
+    ''
+  );
+}
+function renderMapInfo(mapId, map = mapInfoCache.get(mapId)) {
+  const summary = mapInfoData?.maps?.[mapId];
+  mapInfoRenderedId = mapId;
+  $('#mapInfoTitle').textContent =
+    summary?.name ?? mapNames[mapId] ?? mapId ?? '地圖情報';
   if (!map) {
     $('#mapInfoTotal').textContent = '無資料';
+    $('#mapInfoSource').textContent = mapId
+      ? `目前地圖 ${mapId} 尚無已查核的固定怪物資料`
+      : '角色地圖尚未同步';
     $('#mapMonsterList').replaceChildren();
     return;
   }
@@ -3205,7 +3223,7 @@ function renderMapInfo(mapId = 'prt_fild08') {
   $('#mapInfoTotal').textContent =
     `${map.monsters.length} 種／${map.totalMonsters} 隻`;
   $('#mapInfoSource').textContent =
-    '怪物、重生、掉落與物品說明均採用遊戲伺服器資料';
+    '怪物、重生與掉落採用啟用中的 rAthena Renewal 腳本及資料庫';
   $('#mapMonsterList').replaceChildren(
     ...map.monsters.map((monster) => {
       const details = document.createElement('details');
@@ -3282,7 +3300,7 @@ function renderMapInfo(mapId = 'prt_fild08') {
     }),
   );
 }
-async function loadMapInfo() {
+async function loadMapInfo(mapId = currentMapInfoId()) {
   if (!mapInfoData) {
     const response = await fetch('/ro/data/map-info.json', {
       cache: 'no-store',
@@ -3290,8 +3308,47 @@ async function loadMapInfo() {
     if (!response.ok) throw new Error('地圖情報讀取失敗');
     mapInfoData = await response.json();
   }
-  renderMapInfo(lastState?.character?.map);
+  const targetMap = mapId || currentMapInfoId();
+  const summary = mapInfoData?.maps?.[targetMap];
+  if (!summary) {
+    renderMapInfo(targetMap);
+    return;
+  }
+  if (mapInfoCache.has(targetMap)) {
+    renderMapInfo(targetMap);
+    return;
+  }
+  const requestId = ++mapInfoRequestId;
+  mapInfoLoadingId = targetMap;
+  $('#mapInfoTitle').textContent = summary.name ?? mapNames[targetMap] ?? targetMap;
+  $('#mapInfoTotal').textContent = '讀取中';
+  $('#mapInfoSource').textContent = `正在讀取 ${targetMap} 地圖資料`;
+  try {
+    const response = await fetch(summary.detail, { cache: 'no-store' });
+    if (!response.ok) throw new Error('地圖詳細情報讀取失敗');
+    const map = await response.json();
+    mapInfoCache.set(targetMap, map);
+    if (requestId === mapInfoRequestId) renderMapInfo(targetMap, map);
+  } finally {
+    if (mapInfoLoadingId === targetMap) mapInfoLoadingId = '';
+  }
   if (minimapLive) updateMinimapTargets(minimapLive);
+}
+function syncMapInfoToLive(live) {
+  if (
+    !live?.map ||
+    !mapInfoData ||
+    !$('#mapInfo').classList.contains('active') ||
+    live.map === mapInfoRenderedId ||
+    live.map === mapInfoLoadingId
+  )
+    return;
+  void loadMapInfo(live.map).catch((error) => {
+    if (live.map === currentMapInfoId()) {
+      renderMapInfo(live.map);
+      $('#mapInfoSource').textContent = error.message;
+    }
+  });
 }
 function renderInventoryList(target, category) {
   const filtered = inventoryItems.filter((item) => item.category === category);

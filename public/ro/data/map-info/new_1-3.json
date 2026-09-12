@@ -1,0 +1,247 @@
+{
+  "id": "new_1-3",
+  "name": "新手修練場",
+  "totalMonsters": 32,
+  "monsters": [
+    {
+      "id": 2398,
+      "aegisName": "LITTLE_PORING",
+      "name": "小波利",
+      "count": 30,
+      "respawnMinMs": 50000,
+      "respawnMaxMs": 50000,
+      "level": 1,
+      "hp": 40,
+      "baseExp": 18,
+      "jobExp": 10,
+      "attackMin": 1,
+      "attackMax": 1,
+      "defense": 2,
+      "magicDefense": 5,
+      "size": "小型",
+      "race": "植物",
+      "element": "水 1",
+      "sourceFiles": [
+        "npc/re/jobs/novice/academy.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 909,
+          "aegisName": "Jellopy",
+          "name": "傑勒比結晶",
+          "ratePerTenThousand": 9000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從一部份怪物身上得來的結晶,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 1202,
+          "aegisName": "Knife_",
+          "name": "短劍",
+          "ratePerTenThousand": 100,
+          "type": "武器",
+          "weight": 40,
+          "attack": 17,
+          "defense": 0,
+          "slots": 4,
+          "description": "為了方便任何人使用所製作出來的短劍\n系列: 短劍  攻擊: 17\n重量: 40\n武器等級: 1\n要求等級: 無\n裝備: 初學者/劍士系列/魔法師系列/弓箭手系列/商人系列/盜賊系列/悟靈士/忍者"
+        },
+        {
+          "itemId": 938,
+          "aegisName": "Sticky_Mucus",
+          "name": "粘稠液體",
+          "ratePerTenThousand": 1000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "不知名的黏稠液體,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 512,
+          "aegisName": "Apple",
+          "name": "蘋果",
+          "ratePerTenThousand": 5000,
+          "type": "恢復道具",
+          "weight": 2,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "清爽香甜的水果,可恢復少量的HP。\n\n重量: 2"
+        },
+        {
+          "itemId": 507,
+          "aegisName": "Red_Herb",
+          "name": "紅色藥草",
+          "ratePerTenThousand": 1000,
+          "type": "恢復道具",
+          "weight": 3,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在治療傷處上有一定功效的珍貴藥草,可恢復少量的HP。\n\n重量: 3"
+        },
+        {
+          "itemId": 512,
+          "aegisName": "Apple",
+          "name": "蘋果",
+          "ratePerTenThousand": 500,
+          "type": "恢復道具",
+          "weight": 2,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "清爽香甜的水果,可恢復少量的HP。\n\n重量: 2"
+        },
+        {
+          "itemId": 507,
+          "aegisName": "Red_Herb",
+          "name": "紅色藥草",
+          "ratePerTenThousand": 1000,
+          "type": "恢復道具",
+          "weight": 3,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在治療傷處上有一定功效的珍貴藥草,可恢復少量的HP。\n\n重量: 3"
+        },
+        {
+          "itemId": 4545,
+          "aegisName": "Novice_Poring_Card",
+          "name": "寶貝波利卡片",
+          "ratePerTenThousand": 100,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "LUK+1.\n與克里圖拉學院帽一起裝備時,ATK+5、MATK+5。\n系列: 卡片\n裝備: 頭具\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2776,
+      "aegisName": "C3_LITTLE_PORING",
+      "name": "Baby Poring Ringleader",
+      "count": 2,
+      "respawnMinMs": 180000,
+      "respawnMaxMs": 180000,
+      "level": 1,
+      "hp": 200,
+      "baseExp": 90,
+      "jobExp": 150,
+      "attackMin": 9,
+      "attackMax": 1,
+      "defense": 2,
+      "magicDefense": 5,
+      "size": "小型",
+      "race": "植物",
+      "element": "水 1",
+      "sourceFiles": [
+        "npc/re/mobs/championmobs.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 909,
+          "aegisName": "Jellopy",
+          "name": "傑勒比結晶",
+          "ratePerTenThousand": 10000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從一部份怪物身上得來的結晶,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 1202,
+          "aegisName": "Knife_",
+          "name": "短劍",
+          "ratePerTenThousand": 500,
+          "type": "武器",
+          "weight": 40,
+          "attack": 17,
+          "defense": 0,
+          "slots": 4,
+          "description": "為了方便任何人使用所製作出來的短劍\n系列: 短劍  攻擊: 17\n重量: 40\n武器等級: 1\n要求等級: 無\n裝備: 初學者/劍士系列/魔法師系列/弓箭手系列/商人系列/盜賊系列/悟靈士/忍者"
+        },
+        {
+          "itemId": 938,
+          "aegisName": "Sticky_Mucus",
+          "name": "粘稠液體",
+          "ratePerTenThousand": 5000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "不知名的黏稠液體,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 512,
+          "aegisName": "Apple",
+          "name": "蘋果",
+          "ratePerTenThousand": 10000,
+          "type": "恢復道具",
+          "weight": 2,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "清爽香甜的水果,可恢復少量的HP。\n\n重量: 2"
+        },
+        {
+          "itemId": 507,
+          "aegisName": "Red_Herb",
+          "name": "紅色藥草",
+          "ratePerTenThousand": 5000,
+          "type": "恢復道具",
+          "weight": 3,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在治療傷處上有一定功效的珍貴藥草,可恢復少量的HP。\n\n重量: 3"
+        },
+        {
+          "itemId": 512,
+          "aegisName": "Apple",
+          "name": "蘋果",
+          "ratePerTenThousand": 2500,
+          "type": "恢復道具",
+          "weight": 2,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "清爽香甜的水果,可恢復少量的HP。\n\n重量: 2"
+        },
+        {
+          "itemId": 507,
+          "aegisName": "Red_Herb",
+          "name": "紅色藥草",
+          "ratePerTenThousand": 5000,
+          "type": "恢復道具",
+          "weight": 3,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在治療傷處上有一定功效的珍貴藥草,可恢復少量的HP。\n\n重量: 3"
+        },
+        {
+          "itemId": 4545,
+          "aegisName": "Novice_Poring_Card",
+          "name": "寶貝波利卡片",
+          "ratePerTenThousand": 500,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "LUK+1.\n與克里圖拉學院帽一起裝備時,ATK+5、MATK+5。\n系列: 卡片\n裝備: 頭具\n重量: 1"
+        }
+      ]
+    }
+  ]
+}

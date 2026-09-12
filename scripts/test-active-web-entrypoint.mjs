@@ -22,7 +22,7 @@ assert.doesNotMatch(readme, /http:\/\/localhost:3000/);
 assert.match(agents, /8788 Dashboard 為唯一玩家入口/);
 assert.match(architecture, /rAthena 與 MariaDB 是角色、物品、任務與世界狀態的權威來源/);
 assert.match(architecture, /封存的 Vinext／D1 原型/);
-assert.match(currentStatus, /最新功能尚未形成提交，也尚未推送至遠端/);
+assert.match(currentStatus, /recovery\/2026-09-13-working-tree/);
 assert.match(todo, /Dashboard 發布閘門/);
 assert.doesNotMatch(legacyQa, /127\.0\.0\.1:3000/);
 

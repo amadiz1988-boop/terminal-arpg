@@ -1,0 +1,53 @@
+{
+  "id": "iz_ac01_b",
+  "name": "魔法學院1樓",
+  "totalMonsters": 4,
+  "monsters": [
+    {
+      "id": 2408,
+      "aegisName": "DUMMY_10",
+      "name": "Dummy 10",
+      "count": 2,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 10,
+      "hp": 99999999,
+      "baseExp": 0,
+      "jobExp": 0,
+      "attackMin": 0,
+      "attackMax": 0,
+      "defense": 0,
+      "magicDefense": 0,
+      "size": "中型",
+      "race": "無形",
+      "element": "無 1",
+      "sourceFiles": [
+        "npc/re/jobs/novice/academy.txt"
+      ],
+      "drops": []
+    },
+    {
+      "id": 2413,
+      "aegisName": "DUMMY_10_FIRE",
+      "name": "Dummy 10",
+      "count": 2,
+      "respawnMinMs": 0,
+      "respawnMaxMs": 5000,
+      "level": 10,
+      "hp": 99999999,
+      "baseExp": 0,
+      "jobExp": 0,
+      "attackMin": 0,
+      "attackMax": 0,
+      "defense": 0,
+      "magicDefense": 0,
+      "size": "中型",
+      "race": "無形",
+      "element": "火 1",
+      "sourceFiles": [
+        "npc/re/jobs/novice/academy.txt"
+      ],
+      "drops": []
+    }
+  ]
+}
