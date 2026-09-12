@@ -139,6 +139,19 @@ const damageFloatFontFamilies = Object.freeze({
   consolas: 'Consolas, monospace',
   system: 'system-ui, sans-serif',
 });
+const officialDamageRoot = '/ro/client/damage';
+const officialDamageSources = Object.freeze({
+  digits: Array.from(
+    { length: 10 },
+    (_, digit) => `${officialDamageRoot}/number-${digit}.png`,
+  ),
+  criticalDigits: Array.from(
+    { length: 10 },
+    (_, digit) => `${officialDamageRoot}/critical-number-${digit}.png`,
+  ),
+  criticalBackground: `${officialDamageRoot}/critical-bg.png`,
+  rays: [`${officialDamageRoot}/lens1.png`, `${officialDamageRoot}/lens2.png`],
+});
 const musicSources = {
   title: '/ro/client/bgm/01-title.mp3',
   prontera: '/ro/client/bgm/08-prontera.mp3',
@@ -371,6 +384,7 @@ let authenticated = false,
   lastLiveHp = null,
   damageFlashUntil = 0,
   damageFloatSequence = 0,
+  officialDamageAssetsReady = false,
   damageAccumulation = new Map(),
   currentMusic = 'title',
   currentCreateSex = 'M';
@@ -385,6 +399,105 @@ let audioPrefs = (() => {
   }
 })();
 const show = (el, on = true) => el.classList.toggle('hidden', !on);
+function preloadImage(source) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () =>
+      image.naturalWidth && image.naturalHeight
+        ? resolve(image)
+        : reject(new Error(`空白圖片：${source}`));
+    image.onerror = () => reject(new Error(`無法載入：${source}`));
+    image.src = source;
+  });
+}
+function decorateOfficialDamage(node) {
+  const text = node.dataset.damageText ?? node.textContent?.trim() ?? '';
+  node.dataset.damageText = text;
+  if (!officialDamageAssetsReady || !/^\d+$/.test(text)) return;
+  node.classList.add('has-official-digits');
+  node.setAttribute('aria-label', text);
+  const readable = document.createElement('span');
+  readable.className = 'damage-readable';
+  readable.textContent = text;
+  const digits = [...text].map((digit) => {
+    const image = document.createElement('img');
+    image.className = 'official-damage-digit';
+    image.src =
+      node.classList.contains('critical') || node.classList.contains('total')
+        ? officialDamageSources.criticalDigits[Number(digit)]
+        : officialDamageSources.digits[Number(digit)];
+    image.alt = '';
+    image.setAttribute('aria-hidden', 'true');
+    return image;
+  });
+  node.replaceChildren(readable, ...digits);
+  if (node.classList.contains('critical')) {
+    const background = document.createElement('img');
+    background.className = 'official-critical-background';
+    background.src = officialDamageSources.criticalBackground;
+    background.alt = '';
+    background.setAttribute('aria-hidden', 'true');
+    node.prepend(background);
+  }
+}
+function createOfficialHitRays(container, motion, delay = 0) {
+  if (!officialDamageAssetsReady) return;
+  const rays = document.createElement('span');
+  rays.className = 'official-hit-rays';
+  rays.style.left = `${motion.originX}px`;
+  rays.style.top = `${motion.originY}px`;
+  rays.style.setProperty('--hit-ray-delay', `${delay}ms`);
+  const angleRanges = [
+    [0, 35],
+    [50, 85],
+    [100, 135],
+    [150, 185],
+    [200, 235],
+    [255, 290],
+    [300, 335],
+    [340, 360],
+  ];
+  for (let index = 0; index < angleRanges.length; index += 1) {
+    const ray = document.createElement('img');
+    const [minimum, maximum] = angleRanges[index];
+    ray.src = officialDamageSources.rays[index % 2];
+    ray.alt = '';
+    ray.setAttribute('aria-hidden', 'true');
+    ray.style.setProperty(
+      '--hit-ray-angle',
+      `${minimum + Math.random() * (maximum - minimum)}deg`,
+    );
+    ray.style.setProperty(
+      '--hit-ray-duration',
+      `${200 + Math.round(Math.random() * 150)}ms`,
+    );
+    rays.append(ray);
+  }
+  container.append(rays);
+  setTimeout(() => rays.remove(), delay + 450);
+}
+async function loadOfficialDamageAssets() {
+  const status = $('#damageAssetStatus');
+  try {
+    await Promise.all(
+      [
+        ...officialDamageSources.digits,
+        ...officialDamageSources.criticalDigits,
+        officialDamageSources.criticalBackground,
+        ...officialDamageSources.rays,
+      ].map(preloadImage),
+    );
+    officialDamageAssetsReady = true;
+    document.documentElement.classList.add('official-damage-assets');
+    document
+      .querySelectorAll('.damage-preview, .damage-preview-reference')
+      .forEach(decorateOfficialDamage);
+    if (status) status.textContent = '原廠 숫자.spr／msg.spr／EF_HIT2 已啟用';
+    requestAnimationFrame(layoutDamageFloatPreview);
+  } catch {
+    if (status) status.textContent = '原廠傷害素材尚未匯入，目前保留相容顯示';
+  }
+}
 function setupFoldableWindows() {
   document.querySelectorAll('#game .window > .titlebar').forEach((titlebar) => {
     const windowElement = titlebar.parentElement;
@@ -1066,6 +1179,7 @@ function createDamageFloat(
   const node = document.createElement('span');
   node.className = `damage-float ${kind}`;
   node.textContent = text;
+  node.dataset.damageText = text;
   node.dataset.damageKind = kind;
   node.dataset.combatEventId = combatEventId;
   node.dataset.hitIndex = String(hitIndex);
@@ -1073,7 +1187,9 @@ function createDamageFloat(
   node.style.setProperty('--damage-delay', `${delay}ms`);
   node.style.visibility = 'hidden';
   layer.append(node);
-  applyDamageFloatMotion(node, layer, lane, sequence);
+  decorateOfficialDamage(node);
+  const motion = applyDamageFloatMotion(node, layer, lane, sequence);
+  if (kind === 'critical') createOfficialHitRays(layer, motion, delay);
   node.style.visibility = '';
   setTimeout(() => node.remove(), 1450 + delay);
 }
@@ -1946,9 +2062,11 @@ function renderJobChange(character, live) {
     show(button, !targetJob || button.dataset.jobRoute === targetJob);
     button.disabled = !eligible || Boolean(route);
   });
-  document.querySelectorAll('.first-job-choices .job-group-heading').forEach((heading) => {
-    show(heading, !targetJob);
-  });
+  document
+    .querySelectorAll('.first-job-choices .job-group-heading')
+    .forEach((heading) => {
+      show(heading, !targetJob);
+    });
   show($('#firstJobChoices'), classId === 0);
   show($('#jobRoutePanel'), Boolean(route));
   if (route) {
@@ -2503,9 +2621,7 @@ function renderEden(eden, character) {
     row.onclick = () => {
       document
         .querySelectorAll('.eden-milestone')
-        .forEach((entry) =>
-          entry.classList.toggle('selected', entry === row),
-        );
+        .forEach((entry) => entry.classList.toggle('selected', entry === row));
     };
     row.ondblclick = () => {
       if (milestone.id === 'member' && !member && milestone.status !== 'locked')
@@ -3412,6 +3528,7 @@ setInterval(() => {
 }, 1000);
 setupFoldableWindows();
 setupTaskSections();
+void loadOfficialDamageAssets();
 enter();
 function setItemActionNotice(message) {
   $('#itemNotice').textContent = message;

@@ -432,7 +432,7 @@ try {
         const rect=node.getBoundingClientRect();
         if(rect.bottom<0 || rect.top>innerHeight) return null;
         const style=getComputedStyle(node,'::before');
-        return {text:node.textContent,font:getComputedStyle(node).fontSize,background:style.backgroundImage,clipPath:style.clipPath,y:rect.y};
+        return {text:node.textContent,font:getComputedStyle(node).fontSize,background:style.backgroundImage,clipPath:style.clipPath,y:rect.y,official:document.documentElement.classList.contains('official-damage-assets'),digitCount:node.querySelectorAll('.official-damage-digit').length,backgroundAsset:node.querySelector('.official-critical-background')?.getAttribute('src')||'',rayCount:document.querySelectorAll('.official-hit-rays img').length};
       })()`),
     Boolean,
     45000,
@@ -558,8 +558,11 @@ try {
     arcMoved &&
     Number(total.text) > 0 &&
     Number(critical.text) > 0 &&
-    critical.background !== 'none' &&
-    critical.clipPath !== 'none' &&
+    (critical.official
+      ? critical.digitCount === 3 &&
+        critical.backgroundAsset.endsWith('/critical-bg.png') &&
+        critical.rayCount === 8
+      : critical.background !== 'none' && critical.clipPath !== 'none') &&
     attackAudio.some(
       (entry) => entry.started === true && Number(entry.volume) === 0.35,
     ) &&

@@ -252,9 +252,7 @@
     </section>
     <main id="game" class="desktop hidden">
       <header class="brand">
-        <div>
-          <b>鬼島傳說</b><small id="accountName">連線確認中</small>
-        </div>
+        <div><b>鬼島傳說</b><small id="accountName">連線確認中</small></div>
         <div>
           <span id="worldLamp" class="lamp">連線確認中</span
           ><button
@@ -279,16 +277,12 @@
             <div class="bar"><i id="hpBar" class="hp"></i></div>
             <label>SP <span id="spText">0 / 0</span></label>
             <div class="bar"><i id="spBar" class="sp"></i></div>
-            <label
-              >Base Lv. <span id="base">0</span></label
-            >
+            <label>Base Lv. <span id="base">0</span></label>
             <div class="bar exp-bar">
               <i id="baseBar" class="level"></i
               ><span id="baseExp">0 / 0 EXP</span>
             </div>
-            <label
-              >Job Lv. <span id="jobLevel">0</span></label
-            >
+            <label>Job Lv. <span id="jobLevel">0</span></label>
             <div class="bar exp-bar">
               <i id="jobBar" class="level"></i
               ><span id="jobExp">0 / 0 EXP</span>
@@ -551,7 +545,11 @@
           </div>
           <div class="task-categories" aria-label="任務分類">
             <section class="task-section" data-task-section="beginner">
-              <button class="task-section-title" type="button" aria-expanded="true">
+              <button
+                class="task-section-title"
+                type="button"
+                aria-expanded="true"
+              >
                 <span>新手任務</span>
                 <span class="task-section-fold" aria-hidden="true"></span>
               </button>
@@ -567,7 +565,11 @@
               </div>
             </section>
             <section class="task-section" data-task-section="eden">
-              <button class="task-section-title" type="button" aria-expanded="true">
+              <button
+                class="task-section-title"
+                type="button"
+                aria-expanded="true"
+              >
                 <span>伊甸園成長訓練</span>
                 <span id="edenSummary">資格確認中</span>
                 <span class="task-section-fold" aria-hidden="true"></span>
@@ -787,9 +789,7 @@
             <span id="mapInfoTitle">地圖情報</span
             ><span id="mapInfoTotal">讀取中</span>
           </div>
-          <div id="mapInfoSource" class="map-info-source">
-            正在讀取地圖資料
-          </div>
+          <div id="mapInfoSource" class="map-info-source">正在讀取地圖資料</div>
           <div id="mapMonsterList" class="map-monster-list"></div>
         </div>
       </section>
@@ -860,7 +860,9 @@
             ><label class="visual-select"
               >傷害字體
               <select id="damageFloatFont">
-                <option value="classic" selected>RO 經典</option>
+                <option value="classic" selected>
+                  RO 原廠 Sprite（備援：Tahoma）
+                </option>
                 <option value="traditional">繁體黑體</option>
                 <option value="arial">Arial</option>
                 <option value="consolas">Consolas</option>
@@ -932,7 +934,9 @@
               <span class="damage-preview critical">99</span>
             </div>
             <p>
-              小黑窗即為戰鬥終端可見範圍；圓點依序標示起點、最高點與終點。白色為單段傷害，金色為短時間累積傷害，暴擊使用星形底圖。
+              小黑窗即為戰鬥終端可見範圍；圓點依序標示起點、最高點與終點。原廠素材啟用時，數字不是系統字型，而是直接使用
+              RO 的逐字元 Sprite；暴擊同步使用原廠底圖與白色 EF_HIT2
+              放射動畫。<span id="damageAssetStatus">正在檢查原廠傷害素材</span>
             </p>
           </div>
         </div>

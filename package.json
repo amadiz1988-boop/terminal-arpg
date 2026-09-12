@@ -23,6 +23,7 @@
     "assets:openkore-fields": "node scripts/sync-openkore-fields-from-client.mjs",
     "assets:server-fields": "node scripts/sync-openkore-fields-from-rathena-cache.mjs",
     "assets:paperdolls": "node scripts/compose-ro-paperdolls.mjs",
+    "assets:damage": "node scripts/import-ro-damage-assets.mjs",
     "test:item-localization": "node scripts/test-item-localization.mjs",
     "test:multiplayer": "node scripts/test-multiplayer-demo.mjs",
     "test:realtime": "node scripts/test-dashboard-realtime.mjs",

@@ -24,6 +24,7 @@
 
 - 已直接套用：登入確認、創角確認、角色選擇確認／取消、聊天傳送、NPC 下一步／關閉、返回掛機、核取方塊、單選框及視窗背景。
 - 已匯入：Default Skin 101 個 BMP、42 種透明道具／卡片圖示、紙娃娃、地圖與音樂素材。
+- 傷害顯示已鎖定原廠資源：`data/sprite/이팩트/숫자.spr` 畫格 0–9、`msg.spr` 畫格 3（`critbg`），以及 `data/texture/effect/lens1.tga`／`lens2.tga`（`EF_HIT2`）。Web 端僅轉為透明 PNG，不以系統字型或 CSS 多邊形重畫；尚未匯入時會保留相容顯示並明確標示。
 - 待完成：所有功能視窗的九宮格邊框、分頁按下狀態、捲軸、裝備槽、技能按鈕與系統按鈕全面替換。
 - 已知缺件：`N_Main_Gauche` 與 `N_Battle_Axe` 的專用圖示尚未定位；盜賊新手短劍使用官方共用 `Knife_` 資源，商人專用戰斧維持缺件狀態。
 
@@ -35,3 +36,18 @@
 4. 390×844 玩家頁測試同時檢查名稱、圖示 HTTP 狀態、瀏覽器錯誤及橫向溢位。
 
 「全面使用官方素材」是持續執行的強制規範；完成狀態須以逐視窗玩家介面驗收為準。
+
+## 原廠傷害資產重建
+
+查核來源：
+
+- 使用者授權的 Gravity 台版客戶端 GRF（實際版本與 SHA-256 由 `public/ro/client/manifest.json` 鎖定）。
+- `roBrowserLegacy` `5787945be9ccc61b2f3d641a198ab3fd5d8e6583` 的 `src/Renderer/Effects/Damage.js` 與 `src/DB/Effects/EffectTable.js`：核對預設傷害 Sprite 路徑、`msg.spr` 畫格語意、暴擊 RGB 乘色及 `EF_HIT2` 八方向角度／時間參數。查核日期：2026-09-12。
+
+```powershell
+$env:RO_CLIENT_DIR = 'C:\Program Files (x86)\Gravity\RagnarokOnline'
+$env:GRFCL_EXE = '<GrfCL.exe 路徑>'
+npm run assets:damage
+```
+
+輸出位於 `public/ro/client/damage`，`manifest.json` 保存每個 Sprite 畫格、TGA 衍生 PNG、尺寸與 SHA-256。原始 GRF 不進入版本控制。
