@@ -6,7 +6,7 @@
 
 目前依賴順序：來源鎖版 → RO 資料轉換 → 格狀世界 → OpenKore AI → 戰鬥與掉落 → 補給與死亡 → 新生任務與轉職 → 社交與公開驗收。
 
-目前還原度：49 / 100。細項與證據記錄於 `docs/RO_RESTORATION_PROGRESS.md` 與 `docs/DEVELOPMENT_REVIEW_LOG.md`。
+目前還原度與證據只以 `docs/RO_RESTORATION_PROGRESS.md` 為準；本文件提供工作追蹤，不重複維護完成度數字。接手狀態見 `docs/CURRENT_STATUS.md`，可執行優先序見 `docs/TODO.md`。
 
 ## 目前追蹤
 

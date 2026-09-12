@@ -11,7 +11,7 @@ const jobIds = {
   Acolyte: 4,
   Merchant: 5,
   Thief: 6,
-  Taekwon: 21,
+  Taekwon: 4046,
   Supernovice: 23,
   Gunslinger: 24,
   Ninja: 25,
@@ -177,7 +177,7 @@ for (const line of (
         noDamage: false,
       };
     currentSkill = {
-      id: skillIds.get(handle) ?? null,
+      id: skillIds.get(handle) ?? metadata.id ?? null,
       handle,
       name: skillNames.get(handle) ?? handle,
       maxLevel: 1,

@@ -1,0 +1,5 @@
+// Ghost Island RO combat policy: ammunition must remain equipped, while
+// arrows and bullets are reusable after each normal or skill attack.
+arrow_decrement: 0
+ammo_unequip: yes
+ammo_check_weapon: yes

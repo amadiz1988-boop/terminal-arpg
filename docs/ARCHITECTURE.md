@@ -1,85 +1,86 @@
-# RO Renewal 與自動冒險架構
+# 實際 Repository 架構
 
-產品責任分界與 NPC 服務流程以 `docs/RO_AUTOMATION_PRODUCT_CONSTITUTION.md` 為最高層契約。世界服務產生唯一權威事件，小地圖、戰鬥終端、角色介面與 NPC 視窗只能讀取狀態或提交命令，不能自行模擬結果。
+本文件描述 2026-09-12 工作樹中的現行玩家流程。產品狀態見 [CURRENT_STATUS.md](CURRENT_STATUS.md)，優先工作見 [TODO.md](TODO.md)。
 
-本架構只採用 RO Renewal、rAthena、OpenKore 與 Gravity RO 的資料和規則。版本、來源與取捨記錄在 `docs/RO_SOURCE_BASELINE.md`、`docs/DESIGN_SOURCE_POLICY.md` 及各 RO 審查文件中。
+## 現行執行環境
 
-## Architecture goal
-
-每個版本都延伸同一個可重現的 RO 世界服務。介面、內容匯入與持久化可以獨立演進，移動、戰鬥、道具、任務與轉職規則維持單一權威實作。
-
-## Dependency direction
-
-```text
-UI → Application commands → RO domain services → RO content data
-                         ↓
-                    Persistence port
-```
-
-依賴只向內。RO 領域服務使用純 TypeScript，不匯入 React、瀏覽器 API 或畫面計時器。
-
-## Modules
-
-| Module | Owns | Must not own |
+| 層 | 現行實作 | 責任 |
 | --- | --- | --- |
-| `game/ro/content` | Renewal 職業、技能、道具、怪物、地圖、NPC 與任務資料 | 執行期狀態 |
-| `game/ro/core` | RO 世界共用型別、事件識別與可重現亂數 | UI 狀態 |
-| `game/ro/formulas` | Base/Job 經驗、能力值、命中、傷害、ASPD、重量與轉職門檻 | 畫面排版 |
-| `game/ro/world` | 地圖格線、角色、怪物、掉落物、傳送點與世界時鐘 | React 狀態 |
-| `game/ro/automation` | OpenKore 風格掛機策略、任務佇列、撿取、補給、回城與卡路脫離 | 畫面事件 |
-| `game/ro/combat` | 普攻、技能、屬性、狀態、攻擊延遲與戰鬥事件 | 地圖繪製 |
-| `game/ro/inventory` | 道具堆疊、重量、裝備、使用、丟棄、交易與倉庫 | 戰鬥計時 |
-| `game/ro/progression` | Base/Job 經驗、能力點、技能點、任務進度與轉職 | 身分驗證 |
-| `game/server` | 權威命令、連線同步、帳號角色持久化與防濫用限制 | 客戶端自行結算 |
-| `app` | 頁面組合、命令提交、即時訂閱、音效與 session 生命週期 | 傷害、掉落或轉職公式 |
-| `components/game` | RO 風格視窗、戰鬥終端、任務日誌、裝備紙娃娃與玩家輸入 | 隨機掉落或規則變更 |
+| 玩家入口 | `ops/ro-stack/dashboard.mjs`，預設 `127.0.0.1:8788` | 靜態檔案、JSON API、登入工作階段、角色擁有權與命令驗證 |
+| 玩家頁 | `ops/ro-stack/dashboard/index.html`、`app.js`、`styles.css` | 登入、創角、選角、狀態、戰鬥、任務、裝備、地圖、聊天與排行榜 |
+| 自動操作 | 每角色 OpenKore 程序、`openkore-instance.ps1` | 尋路、戰鬥、NPC 對話、補給及玩家核准的自動操作 |
+| 即時狀態 | `openkore-plugins/status-export/`、OpenKore log | 匯出角色、地圖、怪物、物品、任務與事件狀態 |
+| 世界服務 | 固定版 rAthena Login／Character／Map Server | Renewal 世界、NPC、任務、戰鬥結果與物品規則 |
+| 持久化 | MariaDB | rAthena 帳號、角色、物品、任務及 Dashboard 工作階段與偏好 |
+| 服務控制 | `ops/ro-stack/ro-stack.ps1`、`dashboard-service.ps1`、根目錄 `.cmd` | 啟動、停止、健康檢查與朋友測試 |
+| 公開測試入口 | Cloudflare outbound-only Tunnel → `127.0.0.1:8788` | 暫時 HTTPS 入口；Quick Tunnel 網址不是固定網域 |
+| 資產與轉換 | `public/ro/`、`scripts/`、`third_party/openkore/` | 地圖、紙娃娃、圖示、音效、BGM 與來源資料轉換 |
 
-## Stable contracts
+`.local/ro-stack/` 保存本機來源 checkout、執行檔、密碼、log 與程序狀態，不加入 Git。
 
-所有世界運算接受種子與目前狀態，回傳更新後狀態及領域事件。事件由 UI 以時間戳和分類呈現，戰鬥數字、任務日誌與小地圖都從同一事件流取得。
-
-```ts
-advanceRoWorld(state: RoWorldState, ticks: number): RoWorldState
-resolveRoStats(character: RoCharacterState): ResolvedRoStats
-stepRoAutomation(state: RoWorldState, policy: RoAutomationPolicy): RoDecision
-applyRoCommand(state: RoGameState, command: RoGameCommand): RoGameState
-```
-
-內容使用可追蹤 ID 與版本化資料。角色存檔只保存 ID、數值與任務狀態，不保存 React 物件或顯示文字。
-
-## Server authority path
-
-開發測試可使用本機 RO 服務。公開測試時，伺服器負責地圖移動、碰撞、戰鬥、掉落、重量、裝備、任務、轉職與經驗值；客戶端只提交命令並渲染伺服器驗證後的狀態和事件。所有命令具備角色、版本、請求序號與冪等鍵，避免前端先扣除後被舊資料覆蓋。
-
-## Rules that prevent rewrites
-
-1. 移動、掛機、戰鬥、掉落、重量、任務、經驗與轉職公式不可放在 React 元件。
-2. 內容定義不可放在運算引擎，所有數值規則要標示 RO 來源與版本。
-3. 角色、裝備、戰鬥終端、任務日誌與小地圖必須讀取同一份已驗證狀態。
-4. 隨機結果必須帶種子，事件必須能重播，存檔格式變更必須提供遷移。
-5. 每個功能先完成領域測試，再接上玩家介面與實機尺寸驗收。
-6. 發現舊時代或非 RO 規則時先停用並查核來源，確認新版 Renewal 系統後才新增實作。
-
-## Repository layout
+## 現行依賴方向
 
 ```text
-game/
-  ro/
-    content/       Renewal 職業、技能、道具、怪物、地圖與 NPC
-    core/           RO 共用型別、事件與可重現亂數
-    formulas/      能力、傷害、經驗、重量與轉職公式
-    world/         地圖、角色、怪物、掉落物與傳送點
-    automation/    掛機、任務佇列、撿取、補給與卡路脫離
-    combat/        戰鬥解析與事件
-    inventory/     裝備、道具、重量、倉庫與交易
-    progression/   經驗、能力點、技能點、任務與轉職
-  server/          權威命令、同步、持久化與防濫用
-app/               頁面與應用程式組合
-components/game/  RO 風格視窗與玩家輸入
-tests/game/        領域、伺服器與介面契約測試
-docs/              RO 來源、規格、審查與發行紀錄
+瀏覽器 Dashboard
+  │ HTTPS / JSON
+  ▼
+ops/ro-stack/dashboard.mjs
+  ├── MariaDB：帳號、角色、物品、任務、工作階段、偏好
+  ├── OpenKore 狀態與 log：即時角色、地圖、怪物、任務、事件
+  └── OpenKore 命令：掛機、尋路、NPC、補給、裝備、配點
+          │ RO 封包
+          ▼
+       rAthena
+          │ SQL
+          ▼
+       MariaDB
 ```
 
-## Release gate
+rAthena 與 MariaDB 是角色、物品、任務與世界狀態的權威來源。OpenKore 是角色自動操作執行器。Dashboard 顯示狀態並提交經伺服器驗證的操作。
 
-發行前必須通過 `npm run test:release`，包含領域測試、lint、build、手機尺寸 UI 驗收、RO 繁中道具檢查、掛機停止與重量邊界檢查。公開網址、提交 SHA、測試結果與 UI 驗收報告必須一併記錄，未通過不得宣稱完成公開發行。
+## 玩家流程
+
+1. `POST /api/account` 在 MariaDB 建立或驗證帳號，回傳 HttpOnly 工作階段 Cookie。
+2. `GET /api/session` 讀取帳號與已選角色；無角色時由 `POST /api/characters` 建立 rAthena 角色。
+3. Dashboard 為角色啟動專屬 OpenKore 程序。
+4. `GET /api/state` 合併 MariaDB 與 OpenKore 狀態輸出角色、裝備、道具、任務、補給及世界資訊。
+5. `GET /api/events` 增量輸出戰鬥與地圖事件；`GET /api/social` 輸出聊天事件。
+6. 配點、技能、裝備、任務、補給與掛機 API 只建立受驗證的操作，實際結果回到 rAthena、MariaDB 或 OpenKore 真實狀態。
+
+## 任務與自動化邊界
+
+- Dashboard 任務日誌只顯示、發起與引導。
+- rAthena quest state、MariaDB 角色狀態與 OpenKore `%questList` 提供真實任務狀態。
+- NPC script 發放任務獎勵，Dashboard 不直接發物品或改寫完成狀態。
+- 同一角色的命令由 Dashboard 與 OpenKore bridge 做最小互斥及擁有權驗證。
+
+## 來源與資產邊界
+
+- `game/ro/source.ts` 鎖定 rAthena Renewal `e985006171d2eb320ee512a653f4c83aea3d81b6` 與 OpenKore `51de1ddfc4449ae5217f6886de702f87ca934030`。
+- rAthena 規則依鎖定來源的 `src`、`db/re`、`npc` 與 `doc` 查核；OpenKore 行為依鎖定 checkout 查核。
+- `public/ro/` 是執行期資產，轉換方式與來源保留在 `scripts/`、`THIRD_PARTY_NOTICES.md` 與相關稽核文件。
+- 官方客戶端 GRF 維持唯讀，Repository 只保存已核准匯入的轉換素材。
+
+## 封存的 Vinext／D1 原型
+
+`app/`、`game/server/`、`game/ro/world/`、`db/` 與 Vinext 設定是早期瀏覽器模擬原型，程式碼仍供歷史追溯。`.openai/hosting.json` 已移至 `archive/legacy-vinext-demo/hosting.json` 並停用。
+
+- `http://localhost:3000/` 不再提供服務。
+- `npm run dev` 與 `npm start` 啟動 8788 Dashboard。
+- `npm run build`、`npm run qa:ui`、`npm run test:release` 會輸出 `LEGACY_WEB_ARCHIVED` 並停止。
+- 封存原型的 D1、`world_json`、固定 seed demo 與 `game-shell.tsx` 不得作為現行玩家資料或發布證據。
+
+## 不變條件
+
+1. rAthena／MariaDB 產生並保存正式角色與世界結果。
+2. OpenKore 只執行已核准的角色操作，Dashboard 不直接改角色座標、任務完成或獎勵。
+3. 每個 API 操作驗證工作階段、角色擁有權、輸入與命令範圍。
+4. 資料不足時保留 `【資料不足，無法確認】`，不把推導值寫成原作規則。
+5. 公開驗收同時涵蓋本機 8788 與當次公開 HTTPS 入口。
+
+## 目前架構缺口
+
+- 固定公開網域、Tunnel 斷線回復、監控與長時間多人運作尚未完成驗收。
+- 新 Dashboard 的綜合發布指令尚未建立，舊 Vinext `test:release` 已停用。
+- 完整職業、技能、地圖、NPC、補給、二轉與社交流程仍按 [CURRENT_STATUS.md](CURRENT_STATUS.md) 逐項驗收。
+- 工作樹含大量尚未提交變更，提交前需依功能切片整理並執行對應測試。

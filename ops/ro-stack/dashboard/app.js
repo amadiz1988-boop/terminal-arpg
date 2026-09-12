@@ -59,6 +59,7 @@ const jobNames = {
     5: '商人',
     6: '盜賊',
     21: '跆拳',
+    4046: '跆拳',
     23: '超級初心者',
     24: '神槍手',
     25: '忍者',
@@ -116,7 +117,7 @@ const jobNames = {
       transport: '新生快速引導',
     },
   },
-  allowedFirstJobIds = new Set([1, 2, 3, 4, 5, 6, 21, 23, 24, 25]),
+  allowedFirstJobIds = new Set([1, 2, 3, 4, 5, 6, 21, 23, 24, 25, 4046]),
   defaultAudio = {
     musicEnabled: true,
     soundEnabled: true,
@@ -124,7 +125,7 @@ const jobNames = {
     soundVolume: 35,
     damageFloatsEnabled: true,
     damageFloatSize: 14,
-    damageFloatScale: 50,
+    damageFloatScale: 500,
     damageFloatOpacity: 100,
     damageFloatWeight: 800,
     damageFloatFont: 'classic',
@@ -152,11 +153,78 @@ const officialDamageSources = Object.freeze({
   criticalBackground: `${officialDamageRoot}/critical-bg.png`,
   rays: [`${officialDamageRoot}/lens1.png`, `${officialDamageRoot}/lens2.png`],
 });
-const musicSources = {
-  title: '/ro/client/bgm/01-title.mp3',
-  prontera: '/ro/client/bgm/08-prontera.mp3',
-  prt_fild08: '/ro/client/bgm/12-streamside.mp3',
+const bgmTrack = (number) => {
+  const id = String(number).padStart(2, '0');
+  return `/ro/client/bgm/${
+    id === '01'
+      ? '01-title'
+      : id === '08'
+        ? '08-prontera'
+        : id === '12'
+          ? '12-streamside'
+          : id
+  }.mp3`;
 };
+// Gravity client data/mp3nametable.txt is the source of truth for map music.
+const musicSources = Object.freeze({
+  title: bgmTrack(1),
+  iz_int: bgmTrack(26),
+  iz_int01: bgmTrack(26),
+  iz_int02: bgmTrack(26),
+  iz_int03: bgmTrack(26),
+  iz_int04: bgmTrack(26),
+  // int_land variants have no entry in the locked client's table. A transition
+  // from iz_int therefore keeps track 26; a direct login starts them silently.
+  int_land: null,
+  int_land01: null,
+  int_land02: null,
+  int_land03: null,
+  int_land04: null,
+  'new_1-3': bgmTrack(30),
+  prontera: bgmTrack(8),
+  prt_in: bgmTrack(8),
+  prt_fild08: bgmTrack(12),
+  izlude: bgmTrack(26),
+  izlude_a: bgmTrack(26),
+  izlude_b: bgmTrack(26),
+  izlude_c: bgmTrack(26),
+  izlude_d: bgmTrack(26),
+  izlude_in: bgmTrack(26),
+  iz_ac01: bgmTrack(26),
+  iz_ac01_a: bgmTrack(26),
+  iz_ac01_b: bgmTrack(26),
+  iz_ac01_c: bgmTrack(26),
+  iz_ac01_d: bgmTrack(26),
+  iz_ac02: bgmTrack(26),
+  iz_ac02_a: bgmTrack(26),
+  iz_ac02_b: bgmTrack(26),
+  iz_ac02_c: bgmTrack(26),
+  iz_ac02_d: bgmTrack(26),
+  prt_church: bgmTrack(10),
+  prt_fild05: bgmTrack(12),
+  mjolnir_09: bgmTrack(31),
+  prt_fild00: bgmTrack(5),
+  mjolnir_07: bgmTrack(31),
+  mjolnir_06: bgmTrack(31),
+  gef_fild00: bgmTrack(25),
+  geffen: bgmTrack(13),
+  geffen_in: bgmTrack(13),
+  moc_fild01: bgmTrack(24),
+  moc_fild11: bgmTrack(37),
+  pay_fild04: bgmTrack(3),
+  moc_fild02: bgmTrack(3),
+  pay_gld: bgmTrack(66),
+  payon: bgmTrack(14),
+  pay_arche: bgmTrack(14),
+  payon_in02: bgmTrack(14),
+  pay_dun00: bgmTrack(20),
+  morocc: bgmTrack(11),
+  moc_para01: bgmTrack(11),
+  moc_fild19: bgmTrack(37),
+  moc_ruins: bgmTrack(52),
+  moc_pryd01: bgmTrack(22),
+  moc_prydb1: bgmTrack(22),
+});
 const officialCombatSoundRoot = '/ro/client/sfx/official';
 const combatSounds = {
   daggerAttack: `${officialCombatSoundRoot}/_attack_dagger.wav`,
@@ -283,7 +351,7 @@ const combatAudio = Object.fromEntries(
     key,
     Array.from({ length: 4 }, () => {
       const audio = new Audio(source);
-      audio.preload = 'auto';
+      audio.preload = 'none';
       audio.setAttribute('playsinline', '');
       return audio;
     }),
@@ -292,9 +360,9 @@ const combatAudio = Object.fromEntries(
 const combatAudioCursor = Object.fromEntries(
   Object.keys(combatSounds).map((key) => [key, 0]),
 );
-let combatAudioContext = null,
-  combatAudioLoading = null;
+let combatAudioContext = null;
 const combatAudioBuffers = new Map();
+const combatAudioBufferLoads = new Map();
 const emotions = [
   { id: 0, symbol: '❗', label: '驚嘆', source: '*!*' },
   { id: 1, symbol: '❓', label: '疑問', source: '*?*' },
@@ -324,7 +392,7 @@ const emotions = [
 ];
 const emotionBySource = new Map(emotions.map((entry) => [entry.source, entry]));
 const chatChannelDefs = Object.freeze({
-  all: { label: '全部訊息', send: 'public' },
+  all: { label: '全部訊息' },
   public: { label: '一般頻道' },
   private: { label: '密語頻道', target: true },
   party: { label: '隊伍頻道' },
@@ -338,19 +406,63 @@ const chatChannelDefs = Object.freeze({
   ally: { label: '同盟頻道' },
   system: { label: '系統訊息', readonly: true },
 });
+const chatChannelBadges = Object.freeze({
+  public: '一般',
+  private: '密語',
+  party: '隊伍',
+  guild: '公會',
+  clan: '家族',
+  battleground: '戰場',
+  map: '地圖',
+  global: '全服',
+  trade: '交易',
+  support: '支援',
+  ally: '同盟',
+  system: '系統',
+});
+const defaultVisibleChatChannels = Object.freeze([
+  'all',
+  'public',
+  'private',
+  'party',
+  'guild',
+  'system',
+]);
+const EVENT_POLL_INTERVAL_MS = 300,
+  SOCIAL_POLL_INTERVAL_MS = 1000,
+  STATE_POLL_INTERVAL_MS = 5000,
+  POLL_RETRY_MAX_MS = 5000;
 let authenticated = false,
   audioSaveTimer = null,
   sessionStartedAt = null,
   statePoll = null,
   eventTimer = null,
+  eventPollFailures = 0,
   eventCursor = null,
   eventLines = [],
   socialTimer = null,
+  socialPollFailures = 0,
   socialCursor = null,
   socialEvents = [],
   currentChatChannel = 'all',
+  currentChatSendChannel = 'public',
+  visibleChatChannels = (() => {
+    try {
+      const saved = JSON.parse(
+        localStorage.getItem('ro-chat-visible-channels') || 'null',
+      );
+      const valid = Array.isArray(saved)
+        ? saved.filter((channel) => chatChannelDefs[channel])
+        : [];
+      return new Set(valid.length ? valid : defaultVisibleChatChannels);
+    } catch {
+      return new Set(defaultVisibleChatChannels);
+    }
+  })(),
   chatReady = false,
   pendingChatRows = new Map(),
+  pendingTaskEvents = [],
+  taskCommandPendingUntil = 0,
   mediaRecorder = null,
   voiceStream = null,
   voiceChunks = [],
@@ -386,7 +498,7 @@ let authenticated = false,
   damageFloatSequence = 0,
   officialDamageAssetsReady = false,
   damageAccumulation = new Map(),
-  currentMusic = 'title',
+  currentMusic = musicSources.title,
   currentCreateSex = 'M';
 let audioPrefs = (() => {
   try {
@@ -556,6 +668,675 @@ const paperdollAsset = (sex, hair = 1) => {
   const style = Math.max(1, Math.min(42, Number(hair) || 1));
   return `/ro/client/paperdoll/novice-${sex === 'F' ? 'female' : 'male'}-hair-${style}.png`;
 };
+const showcaseJobKeys = Object.freeze({
+  0: 'novice',
+  1: 'swordsman',
+  2: 'mage',
+  3: 'archer',
+  4: 'acolyte',
+  5: 'merchant',
+  6: 'thief',
+  21: 'taekwon',
+  4046: 'taekwon',
+  23: 'supernovice',
+  24: 'gunslinger',
+  25: 'ninja',
+});
+const showcaseActionLabels = Object.freeze({
+  stand: '站立',
+  walk: '走路',
+  sit: '坐下',
+  attack: '攻擊',
+});
+const showcaseDirectionLabels = [
+  '正面',
+  '左前方',
+  '左側',
+  '左後方',
+  '背面',
+  '右後方',
+  '右側',
+  '右前方',
+];
+const showcaseCycleDuration = 10000;
+const showcaseManualPauseDuration = 60000;
+const showcasePreloads = new Map();
+const characterShowcase = {
+  manifest: null,
+  loading: null,
+  character: null,
+  action: 'stand',
+  direction: 0,
+  actionStartedAt: performance.now(),
+  nextCycleAt: performance.now() + showcaseCycleDuration,
+  dragging: false,
+  lastPointerX: 0,
+  lastUiSignature: '',
+  equipment: [],
+  assetsReady: false,
+  preloadGeneration: 0,
+  loadedSignature: '',
+};
+const rankingJobIds = Object.freeze([0, 1, 2, 3, 4, 5, 6, 21, 23, 24, 25, 4046]);
+const rankingState = {
+  classId: null,
+  loading: false,
+  loaded: false,
+  entries: [],
+  generatedAt: 0,
+};
+
+function showcaseAsset(layer, action) {
+  const hasBow = characterShowcase.equipment.some(
+    (item) =>
+      item.slot === 'rightHand' &&
+      /bow|弓/i.test(`${item.aegisName ?? ''} ${item.name ?? ''}`),
+  );
+  const actionKey = action === 'attack' && hasBow ? 'bowAttack' : action;
+  const entry = layer?.[actionKey] ?? layer?.[action] ?? layer?.stand;
+  return entry?.src ? entry : null;
+}
+
+function currentShowcaseLayers() {
+  const manifest = characterShowcase.manifest;
+  const c = characterShowcase.character;
+  if (!manifest || !c) return {};
+  const sex = c.sex === 'F' ? 'female' : 'male';
+  const jobKey = showcaseJobKeys[Number(c.classId)];
+  const hairStyle = Math.max(1, Math.min(42, Number(c.hair) || 1));
+  const headTop = characterShowcase.equipment.find(
+    (item) => item.slot === 'headTop',
+  );
+  const rightHand = characterShowcase.equipment.find(
+    (item) => item.slot === 'rightHand',
+  );
+  const hasBow = /bow|弓/i.test(
+    `${rightHand?.aegisName ?? ''} ${rightHand?.name ?? ''}`,
+  );
+  return {
+    body: manifest.body?.[`${jobKey}-${sex}`],
+    hair: manifest.hair?.[`${sex}-${hairStyle}`],
+    head: headTop
+      ? manifest.equipment?.headTop?.[String(headTop.itemId)]?.[sex]
+      : null,
+    weapon: hasBow
+      ? manifest.equipment?.weapon?.bow?.[`${jobKey}-${sex}`]
+      : null,
+  };
+}
+
+function preloadShowcaseSource(source) {
+  if (!source) return Promise.resolve();
+  if (!showcasePreloads.has(source)) {
+    showcasePreloads.set(
+      source,
+      new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = resolve;
+        image.onerror = reject;
+        image.src = source;
+      }),
+    );
+  }
+  return showcasePreloads.get(source);
+}
+
+async function preloadCharacterShowcase() {
+  const c = characterShowcase.character;
+  if (!characterShowcase.manifest || !c) return;
+  const signature = `${c.classId}|${c.sex}|${c.hair}|${characterShowcase.equipment.map((item) => `${item.slot}:${item.itemId}`).join(',')}`;
+  if (characterShowcase.loadedSignature === signature) {
+    characterShowcase.assetsReady = true;
+    return;
+  }
+  const generation = ++characterShowcase.preloadGeneration;
+  characterShowcase.assetsReady = false;
+  $('#paperdollStage')?.classList.add('showcase-fallback');
+  const sources = new Set();
+  for (const layer of Object.values(currentShowcaseLayers())) {
+    for (const actionName of Object.keys(showcaseActionLabels)) {
+      const asset = showcaseAsset(layer, actionName);
+      for (const source of [asset?.src, asset?.backSrc, asset?.frontSrc])
+        if (source) sources.add(source);
+    }
+  }
+  try {
+    await Promise.all([...sources].map(preloadShowcaseSource));
+    if (generation !== characterShowcase.preloadGeneration) return;
+    characterShowcase.loadedSignature = signature;
+    characterShowcase.assetsReady = true;
+    renderCharacterShowcase();
+  } catch {
+    if (generation === characterShowcase.preloadGeneration)
+      characterShowcase.assetsReady = false;
+  }
+}
+
+function layerAnchorOffset(asset, reference, direction, frame) {
+  const ownFrames = asset?.anchors?.[direction] ?? [];
+  const referenceFrames = reference?.anchors?.[direction] ?? [];
+  const own = ownFrames.length ? ownFrames[frame % ownFrames.length] : null;
+  const target = referenceFrames.length
+    ? referenceFrames[frame % referenceFrames.length]
+    : null;
+  return own && target
+    ? { x: target.offsetX - own.offsetX, y: target.offsetY - own.offsetY }
+    : { x: 0, y: 0 };
+}
+
+function paintShowcaseLayer(
+  element,
+  asset,
+  frame,
+  source = asset?.src,
+  anchorReference = null,
+) {
+  if (!element) return false;
+  if (!asset || !source) {
+    delete element.dataset.showcaseFrame;
+    element.style.backgroundImage = '';
+    element.style.transform = '';
+    return false;
+  }
+  const count = Math.max(
+    1,
+    Number(asset.frameCounts?.[characterShowcase.direction] ?? 1),
+  );
+  const safeFrame = Math.max(0, frame) % count;
+  const anchor = layerAnchorOffset(
+    asset,
+    anchorReference,
+    characterShowcase.direction,
+    safeFrame,
+  );
+  const frameKey = `${source}|${characterShowcase.direction}|${safeFrame}|${anchor.x}|${anchor.y}`;
+  if (element.dataset.showcaseFrame !== frameKey) {
+    element.dataset.showcaseFrame = frameKey;
+    element.style.backgroundImage = `url("${source}")`;
+    element.style.backgroundPosition = `${-safeFrame * 96}px ${-characterShowcase.direction * 160}px`;
+    element.style.transform = `translate(${anchor.x}px, ${anchor.y}px)`;
+  }
+  return true;
+}
+
+function renderCharacterShowcase(now = performance.now()) {
+  const stage = $('#paperdollStage');
+  const manifest = characterShowcase.manifest;
+  const c = characterShowcase.character;
+  if (!stage || !manifest || !c) return;
+  if (!characterShowcase.assetsReady) {
+    stage.classList.add('showcase-fallback');
+    return;
+  }
+  const { body, hair, head, weapon } = currentShowcaseLayers();
+  const bodyAsset = showcaseAsset(body, characterShowcase.action);
+  const bodyCount = Math.max(
+    1,
+    Number(bodyAsset?.frameCounts?.[characterShowcase.direction] ?? 1),
+  );
+  const frame = ['stand', 'sit'].includes(characterShowcase.action)
+    ? 0
+    : Math.floor(
+        (now - characterShowcase.actionStartedAt) /
+          Math.max(25, Number(bodyAsset?.delay ?? 100)),
+      ) % bodyCount;
+  const bodyReady = paintShowcaseLayer(
+    $('#paperdollBodyLayer'),
+    bodyAsset,
+    frame,
+  );
+  const hairAsset = showcaseAsset(hair, characterShowcase.action);
+  paintShowcaseLayer(
+    $('#paperdollHairBackLayer'),
+    hairAsset,
+    frame,
+    hairAsset?.backSrc,
+    bodyAsset,
+  );
+  const hairReady = paintShowcaseLayer(
+    $('#paperdollHairFrontLayer'),
+    hairAsset,
+    frame,
+    hairAsset?.frontSrc,
+    bodyAsset,
+  );
+  const headAsset = showcaseAsset(head, characterShowcase.action);
+  paintShowcaseLayer(
+    $('#paperdollHeadBackLayer'),
+    headAsset,
+    frame,
+    headAsset?.backSrc,
+    bodyAsset,
+  );
+  paintShowcaseLayer(
+    $('#paperdollHeadFrontLayer'),
+    headAsset,
+    frame,
+    headAsset?.frontSrc,
+    bodyAsset,
+  );
+  const weaponAsset = showcaseAsset(weapon, characterShowcase.action);
+  paintShowcaseLayer(
+    $('#paperdollWeaponBackLayer'),
+    weaponAsset,
+    frame,
+    weaponAsset?.backSrc,
+    bodyAsset,
+  );
+  paintShowcaseLayer(
+    $('#paperdollWeaponFrontLayer'),
+    weaponAsset,
+    frame,
+    weaponAsset?.frontSrc,
+    bodyAsset,
+  );
+  stage.classList.toggle('showcase-fallback', !(bodyReady && hairReady));
+  const uiSignature = `${c.name}|${characterShowcase.action}|${characterShowcase.direction}`;
+  if (characterShowcase.lastUiSignature !== uiSignature) {
+    characterShowcase.lastUiSignature = uiSignature;
+    stage.setAttribute(
+      'aria-label',
+      `${c.name}，${showcaseActionLabels[characterShowcase.action]}，${showcaseDirectionLabels[characterShowcase.direction]}。可左右拖曳旋轉角色。`,
+    );
+    document.querySelectorAll('[data-showcase-action]').forEach((button) => {
+      button.classList.toggle(
+        'active',
+        button.dataset.showcaseAction === characterShowcase.action,
+      );
+    });
+  }
+}
+
+function selectShowcaseAction(action, hold = showcaseCycleDuration) {
+  if (!showcaseActionLabels[action]) return;
+  const now = performance.now();
+  characterShowcase.action = action;
+  characterShowcase.actionStartedAt = now;
+  characterShowcase.nextCycleAt = now + hold;
+  renderCharacterShowcase(now);
+}
+
+function rotateShowcase(step) {
+  const remaining = Math.max(
+    0,
+    characterShowcase.nextCycleAt - performance.now(),
+  );
+  characterShowcase.direction =
+    (characterShowcase.direction + step + 8) % 8;
+  selectShowcaseAction('stand', remaining);
+}
+
+async function loadCharacterShowcase() {
+  if (characterShowcase.manifest) return characterShowcase.manifest;
+  if (!characterShowcase.loading) {
+    characterShowcase.loading = fetch('/ro/client/showcase/manifest.json', {
+      cache: 'no-store',
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error('角色展示素材讀取失敗');
+        return response.json();
+      })
+      .then((manifest) => {
+        characterShowcase.manifest = manifest;
+        void preloadCharacterShowcase();
+        return manifest;
+      })
+      .catch(() => null);
+  }
+  return characterShowcase.loading;
+}
+
+function setupCharacterShowcase() {
+  const stage = $('#paperdollStage');
+  if (!stage) return;
+  stage.addEventListener('pointerdown', (event) => {
+    if (event.target.closest('button, input, label')) return;
+    characterShowcase.dragging = true;
+    characterShowcase.lastPointerX = event.clientX;
+    stage.classList.add('dragging');
+    stage.setPointerCapture(event.pointerId);
+    const remaining = Math.max(
+      0,
+      characterShowcase.nextCycleAt - performance.now(),
+    );
+    selectShowcaseAction('stand', remaining);
+  });
+  stage.addEventListener('pointermove', (event) => {
+    if (!characterShowcase.dragging) return;
+    const delta = event.clientX - characterShowcase.lastPointerX;
+    if (Math.abs(delta) < 18) return;
+    rotateShowcase(delta > 0 ? 1 : -1);
+    characterShowcase.lastPointerX = event.clientX;
+  });
+  const stopDragging = () => {
+    characterShowcase.dragging = false;
+    stage.classList.remove('dragging');
+  };
+  stage.addEventListener('pointerup', stopDragging);
+  stage.addEventListener('pointercancel', stopDragging);
+  stage.addEventListener('keydown', (event) => {
+    if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+    event.preventDefault();
+    rotateShowcase(event.key === 'ArrowRight' ? 1 : -1);
+  });
+  $('#paperdollRotateLeft')?.addEventListener('click', () =>
+    rotateShowcase(-1),
+  );
+  $('#paperdollRotateRight')?.addEventListener('click', () =>
+    rotateShowcase(1),
+  );
+  document.querySelectorAll('[data-showcase-action]').forEach((button) => {
+    button.addEventListener('click', () =>
+      selectShowcaseAction(
+        button.dataset.showcaseAction,
+        showcaseManualPauseDuration,
+      ),
+    );
+  });
+  const equipmentVisible = $('#paperdollEquipmentVisible');
+  const storedEquipmentVisibility = localStorage.getItem(
+    'ro-showcase-equipment-visible',
+  );
+  equipmentVisible.checked = storedEquipmentVisibility !== '0';
+  stage.classList.toggle(
+    'hide-showcase-equipment',
+    !equipmentVisible.checked,
+  );
+  equipmentVisible.addEventListener('change', () => {
+    stage.classList.toggle(
+      'hide-showcase-equipment',
+      !equipmentVisible.checked,
+    );
+    localStorage.setItem(
+      'ro-showcase-equipment-visible',
+      equipmentVisible.checked ? '1' : '0',
+    );
+  });
+  const cycle = ['stand', 'sit', 'stand', 'walk', 'attack'];
+  let cycleIndex = 0;
+  const animate = (now) => {
+    if (!characterShowcase.dragging && now >= characterShowcase.nextCycleAt) {
+      cycleIndex = (cycleIndex + 1) % cycle.length;
+      selectShowcaseAction(cycle[cycleIndex], showcaseCycleDuration);
+    }
+    renderCharacterShowcase(now);
+    requestAnimationFrame(animate);
+  };
+  requestAnimationFrame(animate);
+  void loadCharacterShowcase();
+}
+
+function rankingLayerAsset(entry, action) {
+  const manifest = characterShowcase.manifest;
+  if (!manifest) return {};
+  const sex = entry.appearance?.sex === 'F' ? 'female' : 'male';
+  const jobKey = showcaseJobKeys[Number(entry.classId)];
+  const hair = Math.max(1, Math.min(42, Number(entry.appearance?.hair) || 1));
+  return {
+    body: manifest.body?.[`${jobKey}-${sex}`]?.[action],
+    hair: manifest.hair?.[`${sex}-${hair}`]?.[action],
+  };
+}
+
+function paintRankingLayer(
+  element,
+  asset,
+  direction,
+  frame,
+  source = asset?.src,
+  anchorReference = null,
+) {
+  if (!element || !source) {
+    if (element) {
+      element.style.backgroundImage = '';
+      element.style.transform = '';
+    }
+    return false;
+  }
+  const count = Math.max(1, Number(asset.frameCounts?.[direction] ?? 1));
+  const safeFrame = Math.min(count - 1, Math.max(0, frame % count));
+  element.style.backgroundImage = `url("${source}")`;
+  element.style.backgroundPosition = `${-safeFrame * 96}px ${-direction * 160}px`;
+  const anchor = layerAnchorOffset(
+    asset,
+    anchorReference,
+    direction,
+    safeFrame,
+  );
+  element.style.transform = `translate(${anchor.x}px, ${anchor.y}px)`;
+  return true;
+}
+
+function paintRankingCharacter(card, entry, action, now) {
+  const direction = Number(card.dataset.direction ?? 0);
+  const layers = rankingLayerAsset(entry, action);
+  const frame = ['stand', 'sit'].includes(action)
+    ? 0
+    : Math.floor(now / Math.max(25, Number(layers.body?.delay ?? 100)));
+  const bodyReady = paintRankingLayer(
+    card.querySelector('.ranking-body-layer'),
+    layers.body,
+    direction,
+    frame,
+  );
+  paintRankingLayer(
+    card.querySelector('.ranking-hair-back-layer'),
+    layers.hair,
+    direction,
+    frame,
+    layers.hair?.backSrc,
+    layers.body,
+  );
+  const hairReady = paintRankingLayer(
+    card.querySelector('.ranking-hair-front-layer'),
+    layers.hair,
+    direction,
+    frame,
+    layers.hair?.frontSrc ?? layers.hair?.src,
+    layers.body,
+  );
+  card.classList.toggle(
+    'ranking-appearance-unavailable',
+    !(bodyReady && hairReady),
+  );
+  card.dataset.action = action;
+}
+
+function rotateRankingCard(card, entry, step) {
+  const direction = (Number(card.dataset.direction ?? 0) + step + 8) % 8;
+  card.dataset.direction = String(direction);
+  const viewport = card.querySelector('.ranking-character-viewport');
+  if (viewport)
+    viewport.setAttribute(
+      'aria-label',
+      `${entry.name}的角色外觀，${showcaseDirectionLabels[direction]}，可左右拖曳旋轉`,
+    );
+  paintRankingCharacter(
+    card,
+    entry,
+    card.dataset.action || 'stand',
+    performance.now(),
+  );
+}
+
+function setupRankingCardRotation(viewport, card, entry) {
+  let gesture = null;
+  viewport.tabIndex = 0;
+  viewport.title = '左右拖曳旋轉，共八個方向';
+  viewport.addEventListener('pointerdown', (event) => {
+    gesture = { pointerId: event.pointerId, x: event.clientX };
+    viewport.classList.add('dragging');
+    try {
+      viewport.setPointerCapture(event.pointerId);
+    } catch {}
+  });
+  viewport.addEventListener('pointermove', (event) => {
+    if (!gesture || gesture.pointerId !== event.pointerId) return;
+    const delta = event.clientX - gesture.x;
+    if (Math.abs(delta) < 18) return;
+    event.preventDefault();
+    rotateRankingCard(card, entry, delta > 0 ? 1 : -1);
+    gesture.x = event.clientX;
+  });
+  const stopRotation = () => {
+    gesture = null;
+    viewport.classList.remove('dragging');
+  };
+  viewport.addEventListener('pointerup', stopRotation);
+  viewport.addEventListener('pointercancel', stopRotation);
+  viewport.addEventListener('keydown', (event) => {
+    if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+    event.preventDefault();
+    rotateRankingCard(card, entry, event.key === 'ArrowRight' ? 1 : -1);
+  });
+}
+
+function rankingCard(entry) {
+  const card = document.createElement('article');
+  card.className = `ranking-card rank-${entry.rank}${entry.rank <= 3 ? ' animated' : ' compact'}`;
+  card.dataset.rank = String(entry.rank);
+  card.dataset.direction = String(
+    entry.rank === 2 ? 1 : entry.rank === 3 ? 7 : 0,
+  );
+  const medal = document.createElement('b');
+  medal.className = 'ranking-medal';
+  medal.textContent = `第 ${entry.rank} 名`;
+  const viewport = document.createElement('div');
+  viewport.className = 'ranking-character-viewport';
+  viewport.setAttribute(
+    'aria-label',
+    `${entry.name}的角色外觀，${showcaseDirectionLabels[Number(card.dataset.direction)]}，可左右拖曳旋轉`,
+  );
+  const sprite = document.createElement('div');
+  sprite.className = 'ranking-character-sprite';
+  const hairBack = document.createElement('span');
+  hairBack.className =
+    'ranking-character-layer ranking-hair-back-layer';
+  const body = document.createElement('span');
+  body.className = 'ranking-character-layer ranking-body-layer';
+  const hairFront = document.createElement('span');
+  hairFront.className =
+    'ranking-character-layer ranking-hair-front-layer';
+  const unavailable = document.createElement('span');
+  unavailable.className = 'ranking-character-unavailable';
+  unavailable.textContent = '職業外觀製作中';
+  sprite.append(hairBack, body, hairFront);
+  viewport.append(sprite, unavailable);
+  const name = document.createElement('strong');
+  name.textContent = entry.name;
+  const levels = document.createElement('small');
+  levels.textContent = `${jobNames[entry.classId] ?? `職業 ${entry.classId}`}　Base ${entry.baseLevel} / Job ${entry.jobLevel}`;
+  card.append(medal, viewport, name, levels);
+  setupRankingCardRotation(viewport, card, entry);
+  paintRankingCharacter(card, entry, 'stand', 0);
+  return card;
+}
+
+function renderRanking() {
+  const podium = $('#rankingPodium');
+  const rows = $('#rankingRows');
+  podium.replaceChildren(...rankingState.entries.slice(0, 10).map(rankingCard));
+  rows.replaceChildren();
+  for (const entry of rankingState.entries.slice(10)) {
+    const row = document.createElement('tr');
+    for (const value of [
+      entry.rank,
+      entry.name,
+      jobNames[entry.classId] ?? `職業 ${entry.classId}`,
+      `Lv. ${entry.baseLevel}`,
+      `Lv. ${entry.jobLevel}`,
+    ]) {
+      const cell = document.createElement('td');
+      cell.textContent = String(value);
+      row.append(cell);
+    }
+    rows.append(row);
+  }
+  if (!rankingState.entries.length) {
+    const empty = document.createElement('p');
+    empty.className = 'ranking-empty';
+    empty.textContent = '這個職業目前還沒有上榜角色。';
+    podium.append(empty);
+  } else if (rankingState.entries.length <= 10) {
+    const row = document.createElement('tr');
+    const cell = document.createElement('td');
+    cell.colSpan = 5;
+    cell.textContent = '第11名後目前沒有角色';
+    row.append(cell);
+    rows.append(row);
+  }
+  $('#rankingUpdated').textContent = new Date(
+    rankingState.generatedAt,
+  ).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
+  $('#rankingStatus').textContent = `共 ${rankingState.entries.length} 名，資料快取60秒`;
+}
+
+async function loadRanking() {
+  if (rankingState.loading) return;
+  const classId = Number($('#rankingJob').value);
+  rankingState.loading = true;
+  $('#rankingRefresh').disabled = true;
+  $('#rankingStatus').textContent = '正在讀取排行榜';
+  try {
+    await loadCharacterShowcase();
+    const query = new URLSearchParams({ classId: String(classId) });
+    const data = await api(`/api/rankings?${query}`);
+    rankingState.classId = classId;
+    rankingState.loaded = true;
+    rankingState.entries = data.ranking.entries;
+    rankingState.generatedAt = data.ranking.generatedAt;
+    renderRanking();
+  } catch (error) {
+    $('#rankingStatus').textContent = error.message;
+  } finally {
+    rankingState.loading = false;
+    $('#rankingRefresh').disabled = false;
+  }
+}
+
+function setupRankings() {
+  const select = $('#rankingJob');
+  for (const classId of rankingJobIds) {
+    const option = document.createElement('option');
+    option.value = String(classId);
+    option.textContent = jobNames[classId];
+    select.append(option);
+  }
+  select.addEventListener('change', () => void loadRanking());
+  $('#rankingRefresh').addEventListener('click', () => void loadRanking());
+  const actionTimeline = [
+    ['stand', 6000],
+    ['walk', 3500],
+    ['stand', 4500],
+    ['sit', 2500],
+    ['stand', 4500],
+    ['attack', 1200],
+  ];
+  const actionCycle = actionTimeline.reduce(
+    (total, [, duration]) => total + duration,
+    0,
+  );
+  const actionAt = (now, rank) => {
+    let elapsed = (now + (rank - 1) * 900) % actionCycle;
+    for (const [action, duration] of actionTimeline) {
+      if (elapsed < duration) return action;
+      elapsed -= duration;
+    }
+    return 'stand';
+  };
+  const animate = (now) => {
+    if ($('#rankings').classList.contains('active')) {
+      document.querySelectorAll('.ranking-card.animated').forEach((card) => {
+        const entry = rankingState.entries[Number(card.dataset.rank) - 1];
+        if (!entry) return;
+        const action = actionAt(now, entry.rank);
+        paintRankingCharacter(card, entry, action, now);
+      });
+    }
+    requestAnimationFrame(animate);
+  };
+  requestAnimationFrame(animate);
+}
 const duration = (s) => {
   if (!s) return '00:00:00';
   const n = Math.max(0, Math.floor((Date.now() - s) / 1000));
@@ -596,6 +1377,10 @@ function syncAudioControls() {
   $('#damageFloatPositionYValue').textContent =
     `${audioPrefs.damageFloatPositionY}%`;
   $('#damageFloatArcValue').textContent = `${audioPrefs.damageFloatArc}%`;
+  $('#damagePreviewResizeHandle').setAttribute(
+    'aria-valuenow',
+    String(audioPrefs.damageFloatScale),
+  );
   for (const node of [$('#damageFloatLayer'), $('#damageFloatPreview')]) {
     node.style.setProperty('--damage-float-size', `${damageSize}px`);
     node.style.setProperty(
@@ -725,65 +1510,143 @@ function layoutDamageFloatPreview() {
     const reference = preview.querySelector('.damage-preview-reference');
     reference.style.left = `${guideMotion.originX}px`;
     reference.style.top = `${guideMotion.originY}px`;
+    const handle = $('#damagePreviewResizeHandle'),
+      previewRect = preview.getBoundingClientRect(),
+      referenceRect = reference.getBoundingClientRect();
+    handle.style.left = `${Math.min(preview.clientWidth - 16, referenceRect.right - previewRect.left + 9)}px`;
+    handle.style.top = `${Math.min(preview.clientHeight - 16, referenceRect.bottom - previewRect.top + 9)}px`;
   }
   void preview.offsetWidth;
   samples.forEach((sample) => sample.classList.add('preview-running'));
 }
-function prepareCombatAudio() {
-  if (!combatAudioContext || combatAudioLoading) return combatAudioLoading;
-  combatAudioLoading = Promise.all(
-    Object.entries(combatSounds).map(async ([key, source]) => {
-      const response = await fetch(source, { cache: 'force-cache' });
-      if (!response.ok) throw new Error(`音效讀取失敗：${key}`);
-      const buffer = await combatAudioContext.decodeAudioData(
-        await response.arrayBuffer(),
-      );
-      combatAudioBuffers.set(key, buffer);
-    }),
-  ).catch((error) => {
-    combatAudioLoading = null;
-    console.warn('戰鬥音效解碼失敗，改用媒體播放', error);
+let damagePreviewGesture = null;
+function clampDamagePreviewValue(value, minimum, maximum) {
+  return Math.min(maximum, Math.max(minimum, value));
+}
+function updateDamagePreviewGesture(event) {
+  const preview = $('#damageFloatPreview'),
+    gesture = damagePreviewGesture;
+  if (!gesture || gesture.pointerId !== event.pointerId) return;
+  if (gesture.mode === 'position') {
+    const rect = preview.getBoundingClientRect();
+    setAudio({
+      damageFloatPositionX: Math.round(
+        clampDamagePreviewValue(((event.clientX - rect.left) / rect.width) * 100, 0, 100),
+      ),
+      damageFloatPositionY: Math.round(
+        clampDamagePreviewValue(((event.clientY - rect.top) / rect.height) * 100, 0, 100),
+      ),
+    });
+    return;
+  }
+  const distance =
+      ((event.clientX - gesture.startX) + (event.clientY - gesture.startY)) / 2,
+    scale = Math.round(
+      clampDamagePreviewValue(gesture.startScale + distance * (100 / 28), 10, 1000) /
+        10,
+    ) * 10;
+  setAudio({ damageFloatScale: scale });
+}
+function stopDamagePreviewGesture(event) {
+  if (!damagePreviewGesture || damagePreviewGesture.pointerId !== event.pointerId)
+    return;
+  damagePreviewGesture = null;
+  $('#damageFloatPreview').classList.remove('is-direct-editing');
+}
+$('#damageFloatPreview').addEventListener('pointerdown', (event) => {
+  const position = event.target.closest('.damage-preview-reference'),
+    resize = event.target.closest('#damagePreviewResizeHandle');
+  if (!position && !resize) return;
+  event.preventDefault();
+  const preview = $('#damageFloatPreview');
+  damagePreviewGesture = {
+    pointerId: event.pointerId,
+    mode: resize ? 'size' : 'position',
+    startX: event.clientX,
+    startY: event.clientY,
+    startScale: audioPrefs.damageFloatScale,
+  };
+  preview.classList.add('is-direct-editing');
+  preview.setPointerCapture(event.pointerId);
+  updateDamagePreviewGesture(event);
+});
+$('#damageFloatPreview').addEventListener('pointermove', updateDamagePreviewGesture);
+for (const type of ['pointerup', 'pointercancel'])
+  $('#damageFloatPreview').addEventListener(type, stopDamagePreviewGesture);
+$('#damagePreviewPositionHandle').addEventListener('keydown', (event) => {
+  const patch = {};
+  if (event.key === 'ArrowLeft') patch.damageFloatPositionX = audioPrefs.damageFloatPositionX - 1;
+  else if (event.key === 'ArrowRight')
+    patch.damageFloatPositionX = audioPrefs.damageFloatPositionX + 1;
+  else if (event.key === 'ArrowUp')
+    patch.damageFloatPositionY = audioPrefs.damageFloatPositionY - 1;
+  else if (event.key === 'ArrowDown')
+    patch.damageFloatPositionY = audioPrefs.damageFloatPositionY + 1;
+  else return;
+  event.preventDefault();
+  for (const key of Object.keys(patch))
+    patch[key] = clampDamagePreviewValue(patch[key], 0, 100);
+  setAudio(patch);
+});
+$('#damagePreviewResizeHandle').addEventListener('keydown', (event) => {
+  if (!['ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowUp'].includes(event.key))
+    return;
+  event.preventDefault();
+  const direction = ['ArrowDown', 'ArrowLeft'].includes(event.key) ? -1 : 1;
+  setAudio({
+    damageFloatScale: clampDamagePreviewValue(
+      audioPrefs.damageFloatScale + direction * 10,
+      10,
+      1000,
+    ),
   });
-  return combatAudioLoading;
+});
+function prepareCombatAudio(key) {
+  if (!combatAudioContext || !combatSounds[key] || combatAudioBuffers.has(key))
+    return Promise.resolve();
+  if (combatAudioBufferLoads.has(key)) return combatAudioBufferLoads.get(key);
+  const loading = fetch(combatSounds[key], { cache: 'force-cache' })
+    .then((response) => {
+      if (!response.ok) throw new Error(`音效讀取失敗：${key}`);
+      return response.arrayBuffer();
+    })
+    .then((bytes) => combatAudioContext.decodeAudioData(bytes))
+    .then((buffer) => combatAudioBuffers.set(key, buffer))
+    .catch((error) => console.warn('戰鬥音效解碼失敗，改用媒體播放', error))
+    .finally(() => combatAudioBufferLoads.delete(key));
+  combatAudioBufferLoads.set(key, loading);
+  return loading;
 }
 function unlockAudio(fromUserGesture = false) {
   if (audioPrefs.musicEnabled && audioPrefs.musicVolume > 0)
     $('#bgm')
       .play()
       .catch(() => {});
+  if (!fromUserGesture || $('#game').classList.contains('hidden')) return;
   const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-  if (AudioContextClass && (fromUserGesture || combatAudioContext)) {
+  if (AudioContextClass) {
     combatAudioContext ||= new AudioContextClass();
-    const resume =
-      combatAudioContext.state === 'suspended'
-        ? combatAudioContext.resume()
-        : Promise.resolve();
-    void resume.then(prepareCombatAudio).catch(() => {});
-  }
-  for (const pool of Object.values(combatAudio)) {
-    for (const sound of pool) {
-      if (sound.dataset.unlocked === '1') continue;
-      sound.muted = true;
-      sound
-        .play()
-        .then(() => {
-          sound.pause();
-          sound.currentTime = 0;
-          sound.muted = false;
-          sound.dataset.unlocked = '1';
-        })
-        .catch(() => {
-          sound.muted = false;
-        });
-    }
+    if (combatAudioContext.state === 'suspended')
+      void combatAudioContext.resume().catch(() => {});
   }
 }
 function setMusicContext(context) {
-  const key = musicSources[context] ? context : 'title';
-  if (key === currentMusic) return;
-  currentMusic = key;
   const bgm = $('#bgm');
-  bgm.src = musicSources[key];
+  const source = musicSources[context];
+  if (!source) {
+    // The original table has maps without an explicit track. Preserve a real
+    // map track across a transition, while preventing the login theme from
+    // leaking into a directly loaded gameplay map.
+    if (currentMusic !== musicSources.title) return;
+    currentMusic = null;
+    bgm.pause();
+    bgm.removeAttribute('src');
+    bgm.load();
+    return;
+  }
+  if (source === currentMusic) return;
+  currentMusic = source;
+  bgm.src = source;
   bgm.load();
   unlockAudio();
 }
@@ -810,6 +1673,8 @@ function playCombatSound(
         Math.min(1, (audioPrefs.soundVolume / 100) * gainScale),
       ),
       buffer = combatAudioBuffers.get(key);
+    if (combatAudioContext?.state === 'running' && !buffer)
+      void prepareCombatAudio(key);
     if (
       combatAudioContext &&
       combatAudioContext.state === 'running' &&
@@ -1304,6 +2169,9 @@ function socialNode(entry) {
   });
   const sender = document.createElement('b');
   sender.textContent = entry.sender;
+  const badge = document.createElement('small');
+  badge.className = 'chat-channel-badge';
+  badge.textContent = chatChannelBadges[channel] ?? '一般';
   const message = document.createElement('span');
   if (entry.type === 'voice') {
     row.classList.add('voice');
@@ -1324,8 +2192,14 @@ function socialNode(entry) {
   } else {
     message.textContent = entry.message;
   }
-  row.append(time, sender, message);
+  row.append(time, badge, sender, message);
   return row;
+}
+function isInternalChatEvent(entry) {
+  return (
+    entry?.type === 'chat' &&
+    /^@web_[a-z0-9_]+(?:\s.*)?$/iu.test(String(entry.message ?? '').trim())
+  );
 }
 function pendingChatKey(channel, target, message) {
   return `${channel}\u0000${target || ''}\u0000${message}`;
@@ -1334,8 +2208,9 @@ function applyChatFilter() {
   const feed = $('#chatFeed');
   feed.querySelectorAll('.chat-line').forEach((row) => {
     row.hidden =
-      currentChatChannel !== 'all' &&
-      row.dataset.chatChannel !== currentChatChannel;
+      !visibleChatChannels.has(row.dataset.chatChannel) ||
+      (currentChatChannel !== 'all' &&
+        row.dataset.chatChannel !== currentChatChannel);
   });
   const visible = [...feed.querySelectorAll('.chat-line')].some(
     (row) => !row.hidden,
@@ -1350,6 +2225,7 @@ function applyChatFilter() {
 }
 function renderSocialDelta(events, reset = false) {
   const feed = $('#chatFeed');
+  events = events.filter((entry) => !isInternalChatEvent(entry));
   if (reset) {
     feed.replaceChildren();
     socialEvents = [];
@@ -1390,13 +2266,23 @@ async function pollSocial() {
       data = await api(`/api/social${query}`);
     socialCursor = data.cursor;
     renderSocialDelta(data.events, data.reset);
+    socialPollFailures = 0;
   } catch (error) {
+    socialPollFailures += 1;
     if (!/登入/.test(error.message))
       $('#chatStatus').textContent = '對話重新連線中';
   }
   socialTimer = setTimeout(
     pollSocial,
-    Math.max(0, 350 - (performance.now() - pollStartedAt)),
+    socialPollFailures
+      ? Math.min(
+          POLL_RETRY_MAX_MS,
+          SOCIAL_POLL_INTERVAL_MS * 2 ** Math.min(socialPollFailures, 3),
+        )
+      : Math.max(
+          0,
+          SOCIAL_POLL_INTERVAL_MS - (performance.now() - pollStartedAt),
+        ),
   );
 }
 function parseFld2(bytes) {
@@ -1416,7 +2302,7 @@ async function ensureMap(name) {
   try {
     const response = await fetch(
       '/ro/maps/' + encodeURIComponent(name) + '.fld2.bin?v=2',
-      { cache: 'no-store' },
+      { cache: 'default' },
     );
     if (!response.ok) throw new Error();
     mapField = parseFld2(new Uint8Array(await response.arrayBuffer()));
@@ -1468,15 +2354,21 @@ function updateMinimapTrack(key, x, y, now) {
 }
 function updateMinimapTargets(live) {
   const now = performance.now(),
+    monsters = live.monsters ?? [],
+    players = live.players ?? [],
+    mapMonsterCount = Number(
+      live.mapMonsterCount ?? mapInfoData?.maps?.[live.map]?.totalMonsters ?? 0,
+    ),
+    mapPlayerCount = Number(live.mapPlayerCount ?? 0),
     nextKeys = new Set(['self']);
   if (minimapLive?.map && minimapLive.map !== live.map) minimapTracks.clear();
   updateMinimapTrack('self', live.playerX, live.playerY, now);
-  for (const monster of live.monsters ?? []) {
+  for (const monster of monsters) {
     const key = `monster:${monster.id}`;
     nextKeys.add(key);
     updateMinimapTrack(key, monster.x, monster.y, now);
   }
-  for (const player of live.players ?? []) {
+  for (const player of players) {
     const key = `player:${player.id}`;
     nextKeys.add(key);
     updateMinimapTrack(key, player.x, player.y, now);
@@ -1486,9 +2378,15 @@ function updateMinimapTargets(live) {
   minimapLive = live;
   if (lastLiveHp !== null && live.hp < lastLiveHp) damageFlashUntil = now + 180;
   lastLiveHp = live.hp;
+  $('#mapMonsterCount').textContent = String(
+    Number.isFinite(mapMonsterCount) ? mapMonsterCount : 0,
+  );
+  $('#mapPlayerCount').textContent = String(
+    Number.isFinite(mapPlayerCount) ? mapPlayerCount : 0,
+  );
   $('#mapPosition').textContent = mapFieldError
     ? `${mapNames[live.map] ?? live.map} · ${mapFieldError}`
-    : `${mapNames[live.map] ?? live.map} (${live.playerX}, ${live.playerY}) · 視野怪物 ${(live.monsters ?? []).length}`;
+    : `${mapNames[live.map] ?? live.map} (${live.playerX}, ${live.playerY}) · 視野怪物 ${monsters.length}`;
   if (!minimapFrame) minimapFrame = requestAnimationFrame(paintMinimap);
 }
 function syncMinimapCanvas(canvas) {
@@ -1621,13 +2519,23 @@ async function pollEvents() {
       renderJobChange(lastState.character, data.live);
       renderTaskActionLog(data.live);
     }
+    eventPollFailures = 0;
   } catch (error) {
+    eventPollFailures += 1;
     if (/登入/.test(error.message)) return;
     $('#logLatency').textContent = '重新連線中';
   }
   eventTimer = setTimeout(
     pollEvents,
-    Math.max(0, 150 - (performance.now() - pollStartedAt)),
+    eventPollFailures
+      ? Math.min(
+          POLL_RETRY_MAX_MS,
+          EVENT_POLL_INTERVAL_MS * 2 ** Math.min(eventPollFailures, 4),
+        )
+      : Math.max(
+          0,
+          EVENT_POLL_INTERVAL_MS - (performance.now() - pollStartedAt),
+        ),
   );
 }
 
@@ -2119,10 +3027,14 @@ function setEquipment(c, items = []) {
   if (!c) return;
   const job = jobNames[c.classId] ?? `職業 ${c.classId}`;
   $('#paperdollBody').src = paperdollAsset(c.sex, c.hair);
+  characterShowcase.character = c;
+  characterShowcase.equipment = items;
+  void preloadCharacterShowcase();
   $('#paperdollName').textContent = c.name;
   $('#appearanceMeta').textContent =
     `${job} · ${c.sex === 'F' ? '女性' : '男性'}`;
-  $('#paperdollDetails').textContent = `髮型 ${c.hair} · 髮色 ${c.hairColor}`;
+  $('#paperdollDetails').textContent =
+    `已裝備 ${items.length} 件 · 髮型 ${c.hair} · 髮色 ${c.hairColor}`;
   document.querySelectorAll('.equip-slot').forEach((slot) => {
     slot.classList.remove('equipped');
     delete slot.dataset.binId;
@@ -2379,6 +3291,7 @@ async function loadMapInfo() {
     mapInfoData = await response.json();
   }
   renderMapInfo(lastState?.character?.map);
+  if (minimapLive) updateMinimapTargets(minimapLive);
 }
 function renderInventoryList(target, category) {
   const filtered = inventoryItems.filter((item) => item.category === category);
@@ -2455,7 +3368,12 @@ const questStatusNames = Object.freeze({
 function renderTaskActionLog(live) {
   const detail = $('#questDetail');
   if (!detail) return;
-  const events = Array.isArray(live?.taskEvents) ? live.taskEvents : [];
+  const now = Date.now();
+  pendingTaskEvents = pendingTaskEvents.filter((event) => now - event.at < 15000);
+  const events = [
+    ...(Array.isArray(live?.taskEvents) ? live.taskEvents : []),
+    ...pendingTaskEvents,
+  ].sort((left, right) => Number(left.at) - Number(right.at));
   const missions = Array.isArray(live?.questMissions) ? live.questMissions : [];
   const rows = [];
   if (missions.length) {
@@ -2523,6 +3441,14 @@ function renderTaskActionLog(live) {
   detail.replaceChildren(...rows);
   detail.scrollTop = detail.scrollHeight;
 }
+function taskInProgress(live = lastState?.derived) {
+  return Boolean(
+    live?.onboarding?.active ||
+      live?.edenJourney?.active ||
+      Number(live?.edenJourney?.resumePending) > 0 ||
+      Date.now() < taskCommandPendingUntil,
+  );
+}
 function renderOnboarding(onboarding, character, running, live) {
   const quests = onboarding?.quests ?? [];
   const complete = Boolean(onboarding?.complete);
@@ -2540,7 +3466,9 @@ function renderOnboarding(onboarding, character, running, live) {
       : '一轉已完成，正在前往普隆德拉原野 08。'
     : migratedFirstJob
       ? '此角色已完成一轉，新手任務已標記完成。'
-      : `目前位置：${mapNames[character?.map] ?? character?.map ?? '同步中'}。雙擊未完成任務即可從目前進度繼續。`;
+      : character?.targetJob === 'supernovice' && Number(character?.classId) === 0
+        ? `目前位置：${mapNames[character?.map] ?? character?.map ?? '同步中'}。超級初心者未滿 Base Lv.45 時，雙擊「一轉結業」前往練功；達標後再次雙擊即可返回學院。`
+        : `目前位置：${mapNames[character?.map] ?? character?.map ?? '同步中'}。雙擊未完成任務即可從目前進度繼續。`;
   if (!quests.length) {
     const empty = document.createElement('p');
     empty.textContent = '正在讀取任務資料';
@@ -2551,11 +3479,20 @@ function renderOnboarding(onboarding, character, running, live) {
     const button = document.createElement('button');
     const title = document.createElement('span');
     const status = document.createElement('small');
+    const superNoviceGraduation =
+      quest.id === 'graduation' &&
+      character?.targetJob === 'supernovice' &&
+      Number(character?.classId) === 0 &&
+      index === currentIndex;
     button.type = 'button';
-    button.className = `quest-entry ${quest.status}`;
+    button.className = `quest-entry ${superNoviceGraduation ? 'active' : quest.status}`;
     button.setAttribute('role', 'listitem');
     title.textContent = quest.title;
-    status.textContent = questStatusNames[quest.status] ?? '未開始';
+    status.textContent = superNoviceGraduation
+      ? Number(character?.baseLevel) < 45
+        ? `練功中 Base ${Number(character?.baseLevel)} / 45`
+        : '可返回學院'
+      : questStatusNames[quest.status] ?? '未開始';
     button.append(title, status);
     button.onclick = () => {
       document
@@ -2580,7 +3517,11 @@ function renderEden(eden, character) {
     active = Boolean(journey?.active),
     eligible = allowedFirstJobIds.has(Number(character?.classId));
   $('#edenSummary').textContent = active
-    ? '自動入團中'
+    ? journey?.taskId === 'equipment12'
+      ? 'Lv.12 裝備訓練中'
+      : journey?.taskId === 'equipment26'
+        ? 'Lv.26 裝備訓練中'
+        : '自動入團中'
     : member
       ? `成員・訓練進度 ${Number(eden?.trainingStage ?? 0)}`
       : eligible
@@ -2591,11 +3532,31 @@ function renderEden(eden, character) {
     enter_headquarters: '正在使用原生伊甸園傳送服務。',
     route_secretary: '已進入伊甸園總部，正在尋找秘書 Lime Evenor。',
     register_member: '正在填寫伊甸園成員資料並領取徽章。',
+    equipment_accept: '正在與 Instructor Boya 對話並接取原生任務 7128。',
+    equipment_route_field: '正在前往夢羅克南東方綠洲 moc_fild11。',
+    equipment_dog: '正在與 Talking Dog 對話並同步下一個原生任務。',
+    equipment_hunt_condor: '正在擊殺 Condor，進度以 OpenKore 任務資料同步。',
+    equipment_hunt_wolf:
+      '正在擊殺 Baby Desert Wolf，進度以 OpenKore 任務資料同步。',
+    equipment_hunt_scorpion:
+      '正在擊殺 Scorpion，進度以 OpenKore 任務資料同步。',
+    equipment_report_boya: '條件完成，正在返回 Instructor Boya 回報。',
+    equipment_reward: '正在向 Administrator Michael 領取第一套裝備。',
+    equipment26_accept: '正在與 Instructor Boya 對話並接取原生任務 7138。',
+    equipment26_route_field: '正在前往斐揚洞穴一樓 pay_dun00。',
+    equipment26_karl: '正在與 Eden Member Karl 對話並同步任務階段。',
+    equipment26_hunt_skeleton: '正在擊殺 Skeleton，任務目標為 15 隻。',
+    equipment26_hunt_poporing: '正在擊殺 Poporing，任務目標為 10 隻。',
+    equipment26_report_boya: '幽靈洞穴訓練完成，正在返回 Instructor Boya。',
+    equipment26_reward: '正在向 Administrator Michael 領取第二套裝備。',
+    equipment_returning_hunt: '裝備已領取，正在返回普隆德拉原野 08。',
+    equipment_complete: '任務完成，第一套伊甸園裝備已存入角色道具欄。',
     returning_hunt: '已取得伊甸園徽章，正在返回普隆德拉原野 08。',
     complete: '入團已完成，角色已返回普隆德拉原野 08 並恢復掛機。',
   };
-  $('#edenNotice').textContent =
-    active || journey?.completed
+  $('#edenNotice').textContent = journey?.error
+    ? `任務停止：${journey.error}`
+    : active || journey?.completed
       ? (phaseNotices[journey?.phase] ?? '正在同步伊甸園任務狀態。')
       : member
         ? `已取得伊甸園徽章。Base Lv.${Number(character?.baseLevel ?? 0)} 可依序進行 Lv.12、26、40 裝備訓練。`
@@ -2606,26 +3567,39 @@ function renderEden(eden, character) {
     const row = document.createElement('button'),
       title = document.createElement('span'),
       level = document.createElement('small'),
+      objective = document.createElement('small'),
+      nextAction = document.createElement('small'),
+      report = document.createElement('small'),
+      reward = document.createElement('small'),
       status = document.createElement('b');
     row.type = 'button';
     row.className = `eden-milestone ${milestone.status}`;
     row.setAttribute('role', 'listitem');
-    row.disabled = active || milestone.status === 'locked';
+    row.disabled = active;
     title.textContent = milestone.title;
     level.textContent =
       milestone.id === 'member'
         ? '原生 NPC 入團'
-        : `Base Lv.${milestone.minimumLevel}`;
+        : `Base Lv.${milestone.minimumLevel}${milestone.id === 'equipment12' ? ' 至 19' : milestone.id === 'equipment26' ? ' 至 32' : ''}`;
+    const progress = milestone.progress;
+    objective.className = 'eden-milestone-detail';
+    objective.textContent = `目標：${milestone.currentObjective || '等待解鎖'}${progress ? `　${Number(progress.count)} / ${Number(progress.goal)}` : ''}`;
+    nextAction.className = 'eden-milestone-detail';
+    nextAction.textContent = `下一步：${milestone.nextAction || '等待任務資料'}`;
+    report.className = 'eden-milestone-detail';
+    report.textContent = `回報：${milestone.canReport ? '可回報' : '尚未達成'}`;
+    reward.className = 'eden-milestone-reward';
+    reward.textContent = `獎勵：${(milestone.reward ?? []).map((item) => item.name).join('、') || '尚未接入'}`;
     status.textContent = questStatusNames[milestone.status] ?? '未開始';
-    row.append(title, level, status);
+    row.append(title, level, objective, nextAction, report, reward, status);
     row.onclick = () => {
       document
         .querySelectorAll('.eden-milestone')
         .forEach((entry) => entry.classList.toggle('selected', entry === row));
     };
     row.ondblclick = () => {
-      if (milestone.id === 'member' && !member && milestone.status !== 'locked')
-        enrollEden();
+      if (milestone.status === 'complete') return;
+      runEdenTask(milestone.id);
     };
     return row;
   });
@@ -2674,9 +3648,17 @@ async function refresh() {
     sessionStartedAt = state.startedAt;
     currentRunning = state.running;
     $('#accountName').textContent = `帳號：${state.account.username}`;
-    $('#status').textContent = state.running ? '掛機中' : '已停止';
-    $('#start').disabled = state.running;
-    $('#stop').disabled = !state.running;
+    const activeTask = taskInProgress(state.derived);
+    $('#status').textContent = activeTask
+      ? '任務進行中'
+      : state.running
+        ? '掛機中'
+        : '已停止';
+    $('#start').disabled = activeTask || state.running;
+    $('#stop').disabled = activeTask || !state.running;
+    $('#automationNotice').textContent = activeTask
+      ? '目前正在執行任務，完成後會自動恢復掛機。'
+      : '';
     $('#kills').textContent = state.kills;
     $('#deaths').textContent = state.deaths;
     $('#baseExpGained').textContent = state.baseExpGained.toLocaleString();
@@ -2726,53 +3708,39 @@ async function enter() {
     show($('#characterForm'), false);
     show($('#characterSelectForm'), false);
     syncAudioControls();
+    $('#loginSubmit').disabled = false;
+    $('#authError').textContent = '';
     return;
   }
   await loadAccountAudio();
-  if (!session.account.characterName) {
+  if (!session.account.characterId || !session.account.characterName) {
     setMusicContext('title');
-    currentCreateSex = 'M';
-    document.querySelector('[name=createSex][value=M]').checked = true;
-    show($('#auth'));
-    show($('#loginForm'), false);
-    show($('#characterForm'));
-    show($('#characterSelectForm'), false);
-    $('#createPaperdoll').src = paperdollAsset(
-      currentCreateSex,
-      $('#hair').value,
-    );
-    return;
-  }
-  setMusicContext('title');
-  let state = await api('/api/state');
-  for (
-    let attempt = 0;
-    !state.character && !state.needsCharacter && attempt < 8;
-    attempt += 1
-  ) {
-    await new Promise((resolve) => setTimeout(resolve, 120));
-    state = await api('/api/state');
-  }
-  lastState = state;
-  const character = state.character;
-  if (!character) {
     currentCreateSex = session.account.sex === 'F' ? 'F' : 'M';
     document.querySelector(
       `[name=createSex][value=${currentCreateSex}]`,
     ).checked = true;
-    $('#createPaperdoll').src = paperdollAsset(
-      currentCreateSex,
-      $('#hair').value,
-    );
-    $('#characterError').textContent = state.needsCharacter
-      ? '請先建立角色'
-      : '角色資料同步中，請重新整理後再試';
     show($('#auth'));
     show($('#loginForm'), false);
     show($('#characterForm'));
     show($('#characterSelectForm'), false);
+    $('#createPaperdoll').src = paperdollAsset(
+      currentCreateSex,
+      $('#hair').value,
+    );
+    $('#characterError').textContent = '請先建立角色';
     return;
   }
+  setMusicContext('title');
+  const character = {
+    charId: session.account.characterId,
+    name: session.account.characterName,
+    classId: session.account.classId,
+    sex: session.account.sex,
+    hair: session.account.hair,
+    hairColor: session.account.hairColor,
+    baseLevel: session.account.baseLevel,
+    jobLevel: session.account.jobLevel,
+  };
   $('#selectPaperdoll').src = paperdollAsset(character.sex, character.hair);
   $('#selectCharacterName').textContent = character.name;
   $('#selectCharacterMeta').textContent =
@@ -2786,8 +3754,10 @@ async function enter() {
 async function enterGame() {
   show($('#auth'), false);
   show($('#game'));
+  void loadOfficialDamageAssets();
   chatReady = false;
   selectChatChannel(currentChatChannel);
+  selectChatSendChannel(currentChatSendChannel);
   await refresh();
   await Promise.all([loadMapInfo(), loadSkillTrees()]);
   clearInterval(statePoll);
@@ -2795,13 +3765,22 @@ async function enterGame() {
   clearTimeout(socialTimer);
   eventCursor = null;
   socialCursor = null;
-  statePoll = setInterval(refresh, 1500);
+  eventPollFailures = 0;
+  socialPollFailures = 0;
+  statePoll = setInterval(refresh, STATE_POLL_INTERVAL_MS);
   pollEvents();
   await pollSocial();
   chatReady = true;
   selectChatChannel(currentChatChannel);
+  selectChatSendChannel(currentChatSendChannel);
 }
 async function act(action) {
+  if (taskInProgress()) {
+    $('#status').textContent = '任務進行中';
+    $('#automationNotice').textContent =
+      '目前正在執行任務，完成後會自動恢復掛機。';
+    return;
+  }
   $('#start').disabled = $('#stop').disabled = true;
   $('#status').textContent = '處理中';
   try {
@@ -2815,7 +3794,7 @@ async function act(action) {
   }
   setTimeout(refresh, 500);
 }
-async function resumeOnboarding(questId = '') {
+async function resumeOnboarding(questId) {
   $('#questNotice').textContent = '正在核對任務進度與正確返回地點';
   try {
     await api('/api/onboarding/resume', {
@@ -2825,24 +3804,72 @@ async function resumeOnboarding(questId = '') {
     });
     $('#questNotice').textContent = '已送出恢復請求，正在返回未完成的新生任務';
   } catch (error) {
-    $('#questNotice').textContent = error.message;
+    const messages = {
+      not_available: '此任務目前無法執行',
+      prerequisite_incomplete: '請先完成前置任務',
+      already_completed: '此任務已完成',
+    };
+    $('#questNotice').textContent = messages[error.message] ?? error.message;
   }
   setTimeout(refresh, 300);
 }
-async function enrollEden() {
-  $('#edenNotice').textContent = '正在啟動角色並核對伊甸園成員資格';
+async function runEdenTask(taskId) {
+  const startedAt = Date.now();
+  const taskNames = {
+    member: '加入伊甸園',
+    equipment12: 'Lv.12 裝備訓練',
+    equipment26: 'Lv.26 裝備訓練',
+  };
+  taskCommandPendingUntil = startedAt + 30000;
+  pendingTaskEvents.push({
+    at: startedAt,
+    type: 'action',
+    title: `${taskNames[taskId] ?? '伊甸園任務'}指令已送出`,
+    detail: '正在接管角色並核對第一個移動目標。',
+    target: '任務自動流程',
+    map: lastState?.character?.map ?? '',
+  });
+  renderTaskActionLog(lastState?.derived);
+  $('#status').textContent = '任務啟動中';
+  $('#start').disabled = $('#stop').disabled = true;
+  $('#automationNotice').textContent = '任務指令已送出，正在開始執行。';
+  $('#edenNotice').textContent = '正在核對伊甸園原生任務狀態';
   try {
-    await api('/api/eden/enroll', { method: 'POST' });
-    $('#edenNotice').textContent = '已開始前往普隆德拉伊甸園傳送員';
+    await api('/api/eden/task', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ taskId }),
+    });
+    $('#edenNotice').textContent =
+      taskId === 'equipment12'
+        ? '已開始第一套伊甸園裝備任務'
+        : taskId === 'equipment26'
+          ? '已開始第二套伊甸園裝備任務'
+          : '已開始前往普隆德拉伊甸園傳送員';
   } catch (error) {
-    $('#edenNotice').textContent = error.message;
+    taskCommandPendingUntil = 0;
+    pendingTaskEvents = pendingTaskEvents.filter((event) => event.at !== startedAt);
+    renderTaskActionLog(lastState?.derived);
+    const messages = {
+      not_available: '此伊甸園任務目前無法執行',
+      prerequisite_incomplete: '請先完成前置條件',
+      already_completed: '此任務已完成，無法重複領取',
+      route_failed: '任務尋路失敗',
+      npc_failed: 'NPC 對話失敗',
+      target_unresolved: '無法解析任務怪物目標',
+      inventory_full: '道具欄至少需要四個空位',
+      command_rejected: '已有任務正在執行，這次操作已拒絕',
+    };
+    $('#edenNotice').textContent = messages[error.message] ?? error.message;
   }
   setTimeout(refresh, 300);
 }
 
 $('#loginForm').onsubmit = async (event) => {
   event.preventDefault();
-  $('#authError').textContent = '登入中';
+  const submit = $('#loginSubmit');
+  submit.disabled = true;
+  $('#authError').textContent = '正在連線，首次登入會建立帳號';
   try {
     await api('/api/account', {
       method: 'POST',
@@ -2856,6 +3883,8 @@ $('#loginForm').onsubmit = async (event) => {
     await enter();
   } catch (error) {
     $('#authError').textContent = error.message;
+  } finally {
+    submit.disabled = false;
   }
 };
 $('#characterForm').onsubmit = async (event) => {
@@ -2979,39 +4008,93 @@ function selectChatChannel(channel) {
   const definition = chatChannelDefs[channel];
   if (!definition) return;
   currentChatChannel = channel;
-  $('#chatChannel').textContent = definition.label;
-  document.querySelectorAll('[data-chat-channel]').forEach((button) => {
+  $('#chatChannel').textContent = `檢視：${definition.label}`;
+  document
+    .querySelectorAll('#chatChannels [data-chat-channel]')
+    .forEach((button) => {
     const selected = button.dataset.chatChannel === channel;
     button.classList.toggle('active', selected);
     button.setAttribute('aria-selected', String(selected));
-  });
+    });
+  applyChatFilter();
+}
+function selectChatSendChannel(channel) {
+  const definition = chatChannelDefs[channel];
+  if (!definition || channel === 'all' || definition.readonly) return;
+  currentChatSendChannel = channel;
+  $('#chatSendChannel').value = channel;
   show($('#chatRecipientRow'), Boolean(definition.target));
-  const readonly = Boolean(definition.readonly),
-    disabled = readonly || !chatReady,
-    input = $('#chatInput'),
-    sendChannel = definition.send || channel;
+  const disabled = !chatReady,
+    input = $('#chatInput');
   input.disabled = disabled;
   $('#chatSend').disabled = disabled;
-  $('#emotionToggle').disabled =
-    disabled || !['all', 'public'].includes(channel);
-  $('#voiceRecord').disabled = disabled || sendChannel !== 'public';
-  input.placeholder = readonly
-    ? '系統訊息僅供查看'
-    : definition.target
-      ? '輸入密語內容'
-      : `輸入${definition.label}訊息`;
-  $('#chatStatus').textContent = readonly
-    ? '系統訊息由遊戲伺服器送出。'
-    : sendChannel === 'public'
-      ? '文字由遊戲伺服器回送；錄音最長 30 秒、最大 1 MB。'
-      : '文字由遊戲伺服器頻道收發。';
-  applyChatFilter();
-  if (!readonly) input.focus();
+  $('#emotionToggle').disabled = disabled || channel !== 'public';
+  $('#voiceRecord').disabled = disabled || channel !== 'public';
+  input.placeholder = definition.target
+    ? '輸入密語內容'
+    : `輸入${definition.label}訊息`;
+  $('#chatStatus').textContent =
+    channel === 'public'
+      ? '一般文字會送給附近玩家；錄音送給同地圖玩家，最長 30 秒。'
+      : '文字由遊戲伺服器指定頻道收發。';
+  input.focus();
 }
+function renderChatChannelSettings() {
+  const panel = $('#chatChannelSettings');
+  panel.replaceChildren(
+    ...Object.entries(chatChannelDefs).map(([channel, definition]) => {
+      const label = document.createElement('label'),
+        input = document.createElement('input'),
+        text = document.createElement('span');
+      input.type = 'checkbox';
+      input.checked = visibleChatChannels.has(channel);
+      input.dataset.chatVisibility = channel;
+      input.setAttribute('aria-label', `顯示${definition.label}`);
+      text.textContent = definition.label.replace('頻道', '');
+      label.append(input, text);
+      return label;
+    }),
+  );
+  document
+    .querySelectorAll('#chatChannels [data-chat-channel]')
+    .forEach((button) => {
+      button.hidden = !visibleChatChannels.has(button.dataset.chatChannel);
+    });
+  applyChatFilter();
+}
+renderChatChannelSettings();
+if (!visibleChatChannels.has(currentChatChannel))
+  currentChatChannel = [...visibleChatChannels][0];
+$('#chatFilterToggle').onclick = () => {
+  const panel = $('#chatChannelSettings'),
+    opening = panel.classList.contains('hidden');
+  show(panel, opening);
+  $('#chatFilterToggle').setAttribute('aria-expanded', String(opening));
+};
+$('#chatChannelSettings').onchange = (event) => {
+  const input = event.target.closest('[data-chat-visibility]');
+  if (!input) return;
+  const channel = input.dataset.chatVisibility;
+  if (input.checked) visibleChatChannels.add(channel);
+  else if (visibleChatChannels.size === 1) {
+    input.checked = true;
+    $('#chatStatus').textContent = '至少保留一個顯示分頁';
+    return;
+  } else visibleChatChannels.delete(channel);
+  localStorage.setItem(
+    'ro-chat-visible-channels',
+    JSON.stringify([...visibleChatChannels]),
+  );
+  renderChatChannelSettings();
+  if (!visibleChatChannels.has(currentChatChannel))
+    selectChatChannel([...visibleChatChannels][0]);
+};
 $('#chatChannels').onclick = (event) => {
   const button = event.target.closest('[data-chat-channel]');
   if (button) selectChatChannel(button.dataset.chatChannel);
 };
+$('#chatSendChannel').onchange = (event) =>
+  selectChatSendChannel(event.target.value);
 $('#chatForm').onsubmit = async (event) => {
   event.preventDefault();
   if (!chatReady) {
@@ -3020,8 +4103,8 @@ $('#chatForm').onsubmit = async (event) => {
   }
   const input = $('#chatInput'),
     message = input.value.trim(),
-    definition = chatChannelDefs[currentChatChannel],
-    channel = definition?.send || currentChatChannel,
+    definition = chatChannelDefs[currentChatSendChannel],
+    channel = currentChatSendChannel,
     target = definition?.target ? $('#chatRecipient').value.trim() : '';
   if (!message) return;
   if (definition?.readonly) return;
@@ -3123,7 +4206,7 @@ async function startVoiceRecording() {
     } catch (error) {
       $('#chatStatus').textContent = error.message;
     } finally {
-      $('#voiceRecord').disabled = false;
+      selectChatSendChannel(currentChatSendChannel);
     }
   };
   voiceStartedAt = Date.now();
@@ -3188,6 +4271,14 @@ document.querySelectorAll('[data-tab]').forEach((button) =>
       void loadSkillTrees().catch((error) => {
         $('#skillNotice').textContent = error.message;
       });
+    if (button.dataset.tab === 'rankings' && !rankingState.loaded) {
+      const currentClassId = Number(
+        lastState?.derived?.jobId ?? lastState?.character?.classId ?? 0,
+      );
+      if (rankingJobIds.includes(currentClassId))
+        $('#rankingJob').value = String(currentClassId);
+      void loadRanking();
+    }
   }),
 );
 document.addEventListener('click', (event) => {
@@ -3219,6 +4310,8 @@ document.querySelectorAll('[data-inventory]').forEach((button) =>
 );
 let statHoldDelay = null,
   statHoldTimer = null,
+  statHoldStartedAt = 0,
+  statHoldToken = 0,
   statRequestBusy = false,
   resetArmedUntil = 0;
 async function waitForState(predicate, timeoutMs = 4000) {
@@ -3287,18 +4380,34 @@ async function addStatusPoint(stat) {
   }
 }
 function stopStatHold() {
+  statHoldToken += 1;
   clearTimeout(statHoldDelay);
-  clearInterval(statHoldTimer);
+  clearTimeout(statHoldTimer);
   statHoldDelay = statHoldTimer = null;
+}
+function statHoldInterval(elapsedMs) {
+  return Math.max(65, 220 - elapsedMs * 0.04);
+}
+async function continueStatHold(stat, token) {
+  if (token !== statHoldToken) return;
+  await addStatusPoint(stat);
+  if (token !== statHoldToken) return;
+  statHoldTimer = setTimeout(
+    () => continueStatHold(stat, token),
+    statHoldInterval(performance.now() - statHoldStartedAt),
+  );
 }
 $('#stats').addEventListener('pointerdown', (event) => {
   const button = event.target.closest('[data-stat]');
   if (!button || button.disabled) return;
   event.preventDefault();
+  stopStatHold();
   const stat = button.dataset.stat;
+  const token = statHoldToken;
   addStatusPoint(stat);
   statHoldDelay = setTimeout(() => {
-    statHoldTimer = setInterval(() => addStatusPoint(stat), 110);
+    statHoldStartedAt = performance.now();
+    continueStatHold(stat, token);
   }, 380);
 });
 for (const type of ['pointerup', 'pointercancel', 'pointerleave'])
@@ -3528,8 +4637,13 @@ setInterval(() => {
 }, 1000);
 setupFoldableWindows();
 setupTaskSections();
-void loadOfficialDamageAssets();
-enter();
+setupCharacterShowcase();
+setupRankings();
+enter().catch((error) => {
+  $('#loginServerStatus').textContent = '無法連線';
+  $('#authError').textContent = error.message;
+  $('#loginSubmit').disabled = false;
+});
 function setItemActionNotice(message) {
   $('#itemNotice').textContent = message;
   $('#equipmentItemNotice').textContent = message;

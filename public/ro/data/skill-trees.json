@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-11T17:07:36.239Z",
+  "generatedAt": "2026-09-12T15:19:16.896Z",
   "sources": {
     "ruleset": "Renewal",
     "locale": "zh-Hant"
@@ -1906,7 +1906,7 @@
           }
         },
         {
-          "id": null,
+          "id": 2535,
           "handle": "ALL_BUYING_STORE",
           "name": "開設購買商店(BUYING STORE)",
           "maxLevel": 1,
@@ -1936,7 +1936,7 @@
           }
         },
         {
-          "id": null,
+          "id": 2544,
           "handle": "MC_CARTDECORATE",
           "name": "改裝手推車II",
           "maxLevel": 1,
@@ -2234,516 +2234,6 @@
           "resources": {
             "spCostByLevel": [
               2
-            ],
-            "zenyCostByLevel": [],
-            "weapons": [],
-            "ammo": [],
-            "ammoAmount": 0
-          }
-        }
-      ]
-    },
-    "21": {
-      "id": 21,
-      "key": "Taekwon",
-      "name": "跆拳",
-      "skills": [
-        {
-          "id": 411,
-          "handle": "TK_RUN",
-          "name": "跑步",
-          "maxLevel": 10,
-          "excluded": false,
-          "requires": [],
-          "description": "跑步\nMAX Lv : 10\n系列 : 移動及被動\n內容 : 當在7等級以上跑步時候，在沒有裝備武器的狀態下突然從跑步的狀態停止時，\n會得到 STR以 150秒間上升的爆發力效果.當裝備武器時爆發力狀態會解除，\n還有當跑步技能每升1級在沒有裝備武器下的腳踢威力是以+10的增加\n [Lv 1] 施法時間 6秒，消耗SP 100\n [Lv 2] 施法時間 5秒，消耗SP 90\n [Lv 3] 施法時間 4秒，消耗SP 80\n [Lv 4] 施法時間 3秒，消耗SP 70\n [Lv 5] 施法時間 2秒，消耗SP 60\n [Lv 6] 施法時間 1秒，消耗SP 50\n [Lv 7] 施法時間 0秒，消耗SP 40\n [Lv 8] 施法時間 0秒，消耗SP 30\n [Lv 9] 施法時間 0秒，消耗SP 20\n[Lv 10] 施法時間 0秒，消耗SP 10",
-          "englishName": "Running",
-          "type": "Misc",
-          "targetType": "Self",
-          "range": 0,
-          "automationMode": null,
-          "automationStatus": null,
-          "resources": {
-            "spCostByLevel": [
-              100,
-              90,
-              80,
-              70,
-              60,
-              50,
-              40,
-              30,
-              20,
-              10
-            ],
-            "zenyCostByLevel": [],
-            "weapons": [],
-            "ammo": [],
-            "ammoAmount": 0
-          }
-        },
-        {
-          "id": 412,
-          "handle": "TK_READYSTORM",
-          "name": "迴旋準備",
-          "maxLevel": 1,
-          "excluded": false,
-          "requires": [
-            {
-              "handle": "TK_STORMKICK",
-              "name": "迴旋踢",
-              "level": 1
-            }
-          ],
-          "description": "迴旋準備\nMAX Lv : 1\n習得條件 : 迴旋踢 1系列 : 準備\n內容 : 用攻擊打中敵人時，有15%的機率做迴旋準備的姿態\n悟靈士不能使用\n[Lv 1] 施法時間 0秒，消耗SP 1",
-          "englishName": "Tornado Stance",
-          "type": "Weapon",
-          "targetType": "Self",
-          "range": 0,
-          "automationMode": null,
-          "automationStatus": null,
-          "resources": {
-            "spCostByLevel": [
-              1
-            ],
-            "zenyCostByLevel": [],
-            "weapons": [],
-            "ammo": [],
-            "ammoAmount": 0
-          }
-        },
-        {
-          "id": 413,
-          "handle": "TK_STORMKICK",
-          "name": "迴旋踢",
-          "maxLevel": 7,
-          "excluded": false,
-          "requires": [],
-          "description": "迴旋踢\nMAX Lv : 7\n系列 : 攻擊\n內容 : 只能在迴旋準備姿態時才能使用\n對自己周圍 5x5格內的敵人做攻擊\n[Lv 1] 消耗SP 14，180%\n[Lv 2] 消耗SP 12，200%\n[Lv 3] 消耗SP 10，220%\n[Lv 4] 消耗SP 8，240%\n[Lv 5] 消耗SP 6，260%\n[Lv 6] 消耗SP 4，280%\n[Lv 7] 消耗SP 2，300%",
-          "englishName": "Tornado Kick",
-          "type": "Weapon",
-          "targetType": "Self",
-          "range": -2,
-          "automationMode": "attackSelf",
-          "automationStatus": null,
-          "resources": {
-            "spCostByLevel": [
-              14,
-              12,
-              10,
-              8,
-              6,
-              4,
-              2
-            ],
-            "zenyCostByLevel": [],
-            "weapons": [],
-            "ammo": [],
-            "ammoAmount": 0
-          }
-        },
-        {
-          "id": 414,
-          "handle": "TK_READYDOWN",
-          "name": "砸踢準備",
-          "maxLevel": 1,
-          "excluded": false,
-          "requires": [
-            {
-              "handle": "TK_DOWNKICK",
-              "name": "砸踢",
-              "level": 1
-            }
-          ],
-          "description": "砸踢準備\nMAX Lv : 1\n習得條件 : 砸踢 1\n系列 : 準備\n內容 : 用攻擊打中敵人時，有15%的機率做砸踢準備的姿態\n悟靈士不能使用\n[Lv 1] 施法時間 0秒，消耗SP 1",
-          "englishName": "Heel Drop Stance",
-          "type": "Weapon",
-          "targetType": "Self",
-          "range": 0,
-          "automationMode": null,
-          "automationStatus": null,
-          "resources": {
-            "spCostByLevel": [
-              1
-            ],
-            "zenyCostByLevel": [],
-            "weapons": [],
-            "ammo": [],
-            "ammoAmount": 0
-          }
-        },
-        {
-          "id": 415,
-          "handle": "TK_DOWNKICK",
-          "name": "砸踢",
-          "maxLevel": 7,
-          "excluded": false,
-          "requires": [],
-          "description": "砸踢\nMAX Lv : 7\n系列 : 攻擊\n內容 : 只能在砸踢準備姿態時才能使用\n給予敵人傷害力，有3秒鐘得到昏眩\n[Lv 1] 消耗SP 14，180%\n[Lv 2] 消耗SP 12，200%\n[Lv 3] 消耗SP 10，220%\n[Lv 4] 消耗SP 8，240%\n[Lv 5] 消耗SP 6，260%\n[Lv 6] 消耗SP 4，280%\n[Lv 7] 消耗SP 2，300%",
-          "englishName": "Heel Drop",
-          "type": "Weapon",
-          "targetType": "Self",
-          "range": -2,
-          "automationMode": null,
-          "automationStatus": null,
-          "resources": {
-            "spCostByLevel": [
-              14,
-              12,
-              10,
-              8,
-              6,
-              4,
-              2
-            ],
-            "zenyCostByLevel": [],
-            "weapons": [],
-            "ammo": [],
-            "ammoAmount": 0
-          }
-        },
-        {
-          "id": 416,
-          "handle": "TK_READYTURN",
-          "name": "踢準備",
-          "maxLevel": 1,
-          "excluded": false,
-          "requires": [
-            {
-              "handle": "TK_TURNKICK",
-              "name": "轉身踢",
-              "level": 1
-            }
-          ],
-          "description": "踢準備\nMAX Lv : 1\n習得條件 : 轉身踢 1\n系列 : 準備\n內容 : 用攻擊打中敵人時，有15%的機率做踢準備的姿態\n悟靈士不能使用\n[Lv 1] 施法時間 0秒，消耗SP 1",
-          "englishName": "Roundhouse Stance",
-          "type": "Weapon",
-          "targetType": "Self",
-          "range": 0,
-          "automationMode": null,
-          "automationStatus": null,
-          "resources": {
-            "spCostByLevel": [
-              1
-            ],
-            "zenyCostByLevel": [],
-            "weapons": [],
-            "ammo": [],
-            "ammoAmount": 0
-          }
-        },
-        {
-          "id": 417,
-          "handle": "TK_TURNKICK",
-          "name": "轉身踢",
-          "maxLevel": 7,
-          "excluded": false,
-          "requires": [],
-          "description": "轉身踢\nMAX Lv : 7\n系列 : 攻擊\n內容 : 只能在踢準備姿態時才能使用\n給予敵人傷害力，在敵人附近的其它敵人不給予傷害力只讓他們彈出後得到昏眩\n[Lv 1] 消耗SP 14，220%\n[Lv 2] 消耗SP 12，250%\n[Lv 3] 消耗SP 10，280%\n[Lv 4] 消耗SP 8，310%\n[Lv 5] 消耗SP 6，340%\n[Lv 6] 消耗SP 4，370%\n[Lv 7] 消耗SP 2，400%",
-          "englishName": "Roundhouse Kick",
-          "type": "Weapon",
-          "targetType": "Self",
-          "range": -2,
-          "automationMode": "attackSelf",
-          "automationStatus": null,
-          "resources": {
-            "spCostByLevel": [
-              14,
-              12,
-              10,
-              8,
-              6,
-              4,
-              2
-            ],
-            "zenyCostByLevel": [],
-            "weapons": [],
-            "ammo": [],
-            "ammoAmount": 0
-          }
-        },
-        {
-          "id": 418,
-          "handle": "TK_READYCOUNTER",
-          "name": "還擊準備",
-          "maxLevel": 1,
-          "excluded": false,
-          "requires": [
-            {
-              "handle": "TK_COUNTER",
-              "name": "還擊踢",
-              "level": 1
-            }
-          ],
-          "description": "還擊準備\nMAX Lv : 1\n習得條件 : 還擊踢 1\n系列 : 準備\n內容 : 用攻擊打中敵人時，有20%的機率做還擊準備的姿態\n悟靈士不能使用\n[Lv 1] : 施法時間 0秒，消耗SP 1",
-          "englishName": "Counter Kick Stance",
-          "type": "Weapon",
-          "targetType": "Self",
-          "range": 0,
-          "automationMode": null,
-          "automationStatus": null,
-          "resources": {
-            "spCostByLevel": [
-              1
-            ],
-            "zenyCostByLevel": [],
-            "weapons": [],
-            "ammo": [],
-            "ammoAmount": 0
-          }
-        },
-        {
-          "id": 419,
-          "handle": "TK_COUNTER",
-          "name": "還擊踢",
-          "maxLevel": 7,
-          "excluded": false,
-          "requires": [],
-          "description": "還擊踢\nMAX Lv : 7\n系列 : 攻擊\n內容 : 只能在還擊準備姿態時才能使用\n還擊踢100%給予敵人打擊\n[Lv 1] 消耗SP 14，220%\n[Lv 2] 消耗SP 12，250%\n[Lv 3] 消耗SP 10，280%\n[Lv 4] 消耗SP 8，310%\n[Lv 5] 消耗SP 6，340%\n[Lv 6] 消耗SP 4，370%\n[Lv 7] 消耗SP 2，400%",
-          "englishName": "Counter Kick",
-          "type": "Weapon",
-          "targetType": "Self",
-          "range": -2,
-          "automationMode": null,
-          "automationStatus": null,
-          "resources": {
-            "spCostByLevel": [
-              14,
-              12,
-              10,
-              8,
-              6,
-              4,
-              2
-            ],
-            "zenyCostByLevel": [],
-            "weapons": [],
-            "ammo": [],
-            "ammoAmount": 0
-          }
-        },
-        {
-          "id": 420,
-          "handle": "TK_DODGE",
-          "name": "落法",
-          "maxLevel": 1,
-          "excluded": false,
-          "requires": [
-            {
-              "handle": "TK_JUMPKICK",
-              "name": "飛腳踢",
-              "level": 7
-            }
-          ],
-          "description": "落法\nMAX Lv : 1\n習得條件 : 飛腳踢 7\n系列 : 準備\n內容 : 對敵人的遠距離攻擊，以 20%的機率完美的防禦後做落法，\n當爆發力狀態時，對遠距離攻擊和以外的攻擊也有所反應\n[Lv 1] 施法時間 0秒，消耗SP 1",
-          "englishName": "Tumbling",
-          "type": "Weapon",
-          "targetType": "Self",
-          "range": 0,
-          "automationMode": null,
-          "automationStatus": null,
-          "resources": {
-            "spCostByLevel": [
-              1
-            ],
-            "zenyCostByLevel": [],
-            "weapons": [],
-            "ammo": [],
-            "ammoAmount": 0
-          }
-        },
-        {
-          "id": 421,
-          "handle": "TK_JUMPKICK",
-          "name": "飛腳踢",
-          "maxLevel": 7,
-          "excluded": false,
-          "requires": [],
-          "description": "飛腳踢\nMAX Lv : 7\n系列 : 攻擊\n內容 : 對遠距離的敵人迅速的飛過去做攻擊\n在落法的狀態時使用的話，攻擊的威力受玩家等級的影響而增加\n悟靈士不能使用，把對象有關的跆拳系列和大部份的狀態給轟掉，\n(所有靈魂狀態、單手劍攻擊速度增加、 所有速度激發、凱阿希、凱易特、菠色克藥水)\n不過對於自由保護技能所保護者的狀態時，是不能給轟掉的，\n在跑步時使用飛腳踢時，會受角色等級的影響威力因此而上升，\n在跑步時使用飛腳踢在爆發力狀態時，威力會更上升\n[Lv 1] 消耗SP 70，40%\n[Lv 2] 消耗SP 60，50%\n[Lv 3] 消耗SP 50，60%\n[Lv 4] 消耗SP 40，70%\n[Lv 5] 消耗SP 30，80%\n[Lv 6] 消耗SP 20，90%\n[Lv 7] 消耗SP 10，100%",
-          "englishName": "Flying Kick",
-          "type": "Weapon",
-          "targetType": "Attack",
-          "range": 9,
-          "automationMode": "attack",
-          "automationStatus": null,
-          "resources": {
-            "spCostByLevel": [
-              70,
-              60,
-              50,
-              40,
-              30,
-              20,
-              10
-            ],
-            "zenyCostByLevel": [],
-            "weapons": [],
-            "ammo": [],
-            "ammoAmount": 0
-          }
-        },
-        {
-          "id": 422,
-          "handle": "TK_HPTIME",
-          "name": "平安的休息",
-          "maxLevel": 10,
-          "excluded": false,
-          "requires": [],
-          "description": "平安的休息\nMAX Lv : 10\n系列 : 被動\n內容 : 當做坐下時旁邊有跆拳系列角色時HP會恢復，VIT的恢復量也受到影響\n輸入/doridori的話，恢復量+30 \n [Lv 1] HP恢復量 : 30\n [Lv 2] HP恢復量 : 60\n [Lv 3] HP恢復量 : 90\n [Lv 4] HP恢復量 : 120\n [Lv 5] HP恢復量 : 150\n [Lv 6] HP恢復量 : 180\n [Lv 7] HP恢復量 : 210\n [Lv 8] HP恢復量 : 240\n [Lv 9] HP恢復量 : 270\n[Lv 10] HP恢復量 : 300",
-          "englishName": "Peaceful Break",
-          "type": "",
-          "targetType": "Passive",
-          "range": 0,
-          "automationMode": null,
-          "automationStatus": null,
-          "resources": {
-            "spCostByLevel": [],
-            "zenyCostByLevel": [],
-            "weapons": [],
-            "ammo": [],
-            "ammoAmount": 0
-          }
-        },
-        {
-          "id": 423,
-          "handle": "TK_SPTIME",
-          "name": "快樂的休息",
-          "maxLevel": 10,
-          "excluded": false,
-          "requires": [],
-          "description": "快樂的休息\nMAX Lv : 10\n系列 : 被動\n內容 : 當做坐下時旁邊有跆拳系列角色時SP會恢復，\nMax SP的恢復量也受到影響，\n在快樂的休息中使用/doridori來提升恢復量時，有30分鐘變成 [快樂的狀態]，\n在快樂的狀態時使用地震術的咒文書時，\nSP會消耗10，以較底的機率會消耗掉地震術的咒文書，\n1等級時以 10%的機率會消耗掉，10等級時只以 1%的機率來消耗掉地震術的咒文書.\n輸入/doridori的話，恢復量+3\n [Lv 1] SP恢復量 : 3\n [Lv 2] SP恢復量 : 6\n [Lv 3] SP恢復量 : 9\n [Lv 4] SP恢復量 : 12\n [Lv 5] SP恢復量 : 15\n [Lv 6] SP恢復量 : 18\n [Lv 7] SP恢復量 : 21\n [Lv 8] SP恢復量 : 24\n [Lv 9] SP恢復量 : 27\n[Lv 10] SP恢復量 : 30",
-          "englishName": "Happy Break",
-          "type": "",
-          "targetType": "Passive",
-          "range": 0,
-          "automationMode": null,
-          "automationStatus": null,
-          "resources": {
-            "spCostByLevel": [],
-            "zenyCostByLevel": [],
-            "weapons": [],
-            "ammo": [],
-            "ammoAmount": 0
-          }
-        },
-        {
-          "id": 424,
-          "handle": "TK_POWER",
-          "name": "加油",
-          "maxLevel": 5,
-          "excluded": false,
-          "requires": [],
-          "description": "加油\nMAX Lv : 5\n系列 : 被動\n內容 : 依據同一張地圖上組隊員的人數而增加攻擊力\n普通攻擊是 (100 x 增加量%) + 100%傷害力給予敵人\n當使用500%威力技能使用時， (100 x 增加量%) + 500%的傷害力給予敵人\n[Lv 1] 對單人給予 2%\n[Lv 2] 對單人給予 4%\n[Lv 3] 對單人給予 6%\n[Lv 4] 對單人給予 8%\n[Lv 5] 對單人給予 10%",
-          "englishName": "Kihop",
-          "type": "Weapon",
-          "targetType": "Passive",
-          "range": 0,
-          "automationMode": null,
-          "automationStatus": null,
-          "resources": {
-            "spCostByLevel": [],
-            "zenyCostByLevel": [],
-            "weapons": [],
-            "ammo": [],
-            "ammoAmount": 0
-          }
-        },
-        {
-          "id": 425,
-          "handle": "TK_SEVENWIND",
-          "name": "溫暖的風",
-          "maxLevel": 7,
-          "excluded": false,
-          "requires": [
-            {
-              "handle": "TK_HPTIME",
-              "name": "平安的休息",
-              "level": 5
-            },
-            {
-              "handle": "TK_SPTIME",
-              "name": "快樂的休息",
-              "level": 5
-            },
-            {
-              "handle": "TK_POWER",
-              "name": "加油",
-              "level": 5
-            }
-          ],
-          "description": "溫暖的風\nMAX Lv : 7\n習得條件 : 平安的休息 5, 快樂的休息 5, 加油 5\n系列 : 輔助\n內容 : 5分鐘攻擊時引起屬性的風，把攻擊改變為該屬性\n[Lv 1] 地 (消耗SP:20)\n[Lv 2] 風 (消耗SP:20)\n[Lv 3] 水 (消耗SP:20)\n[Lv 4] 火 (消耗SP:20)\n[Lv 5] 念 (消耗SP:50)\n[Lv 6] 暗 (消耗SP:50)\n[Lv 7] 聖 (消耗SP:50)",
-          "englishName": "Mild Wind",
-          "type": "Weapon",
-          "targetType": "Self",
-          "range": 0,
-          "automationMode": null,
-          "automationStatus": null,
-          "resources": {
-            "spCostByLevel": [
-              20,
-              20,
-              20,
-              20,
-              50,
-              50,
-              50
-            ],
-            "zenyCostByLevel": [],
-            "weapons": [],
-            "ammo": [],
-            "ammoAmount": 0
-          }
-        },
-        {
-          "id": 426,
-          "handle": "TK_HIGHJUMP",
-          "name": "跳高",
-          "maxLevel": 5,
-          "excluded": false,
-          "requires": [],
-          "description": "跳高\nMAX Lv : 5\n系列 : 移動\n內容 : 用跳高來移動位置\n當落地地點不是封閉區域或落地地點沒有人時，像牆壁這樣的障礙物都可以跳過去的，\n除了攻城地圖外在不能使用蒼蠅翅膀的地圖上不能被移動使用的，\n當習得跳高技能時，公會技能的緊急呼叫詠唱時間會增加 2倍\n[Lv 1] 施法時間 5秒，移動空格數 2\n[Lv 2] 施法時間 4秒，移動空格數 4\n[Lv 3] 施法時間 3秒，移動空格數 6\n[Lv 4] 施法時間 2秒，移動空格數 8\n[Lv 5] 施法時間 1秒，移動空格數 10",
-          "englishName": "Taekwon Jump",
-          "type": "Weapon",
-          "targetType": "Self",
-          "range": 0,
-          "automationMode": null,
-          "automationStatus": null,
-          "resources": {
-            "spCostByLevel": [
-              50,
-              50,
-              50,
-              50,
-              50
-            ],
-            "zenyCostByLevel": [],
-            "weapons": [],
-            "ammo": [],
-            "ammoAmount": 0
-          }
-        },
-        {
-          "id": 493,
-          "handle": "TK_MISSION",
-          "name": "太拳任務",
-          "maxLevel": 1,
-          "excluded": false,
-          "requires": [
-            {
-              "handle": "TK_POWER",
-              "name": "加油",
-              "level": 5
-            }
-          ],
-          "description": "太拳任務\nMAX Lv : 1\n習得條件 : 加油 5\n系列 : 排行榜 (/taekwon)\n內容 : 轉職成拳聖或悟靈士就不能使用\n使用這技能時，把現在目標的魔物名字顯示出來，\n抓到要攻擊的魔物100隻時會得到1 point，\n目標魔物隨機的鎖定其它魔物 (中Boss，Boss級除外) 0%時，使用太拳任務時，以較低的機率目標會變換\n當太拳排行榜在 (10位以內時) 迴旋踢，轉身踢，砸踢，還擊踢\n使用後可以直接連續到其它技能\n例如 : 迴旋踢 -> 轉身踢 -> 砸踢 \n還有等級90以上的跆拳榜首，MAX HP和 MAX SP 會增加到 3倍，可以使用所有跆拳少年的技能.",
-          "englishName": "Taekwon Mission",
-          "type": "",
-          "targetType": "Self",
-          "range": 0,
-          "automationMode": null,
-          "automationStatus": null,
-          "resources": {
-            "spCostByLevel": [
-              10
             ],
             "zenyCostByLevel": [],
             "weapons": [],
@@ -4356,7 +3846,7 @@
           }
         },
         {
-          "id": null,
+          "id": 2535,
           "handle": "ALL_BUYING_STORE",
           "name": "開設購買商店(BUYING STORE)",
           "maxLevel": 1,
@@ -4386,7 +3876,7 @@
           }
         },
         {
-          "id": null,
+          "id": 2544,
           "handle": "MC_CARTDECORATE",
           "name": "改裝手推車II",
           "maxLevel": 1,
@@ -6083,6 +5573,516 @@
               90,
               95,
               100
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        }
+      ]
+    },
+    "4046": {
+      "id": 4046,
+      "key": "Taekwon",
+      "name": "跆拳",
+      "skills": [
+        {
+          "id": 411,
+          "handle": "TK_RUN",
+          "name": "跑步",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [],
+          "description": "跑步\nMAX Lv : 10\n系列 : 移動及被動\n內容 : 當在7等級以上跑步時候，在沒有裝備武器的狀態下突然從跑步的狀態停止時，\n會得到 STR以 150秒間上升的爆發力效果.當裝備武器時爆發力狀態會解除，\n還有當跑步技能每升1級在沒有裝備武器下的腳踢威力是以+10的增加\n [Lv 1] 施法時間 6秒，消耗SP 100\n [Lv 2] 施法時間 5秒，消耗SP 90\n [Lv 3] 施法時間 4秒，消耗SP 80\n [Lv 4] 施法時間 3秒，消耗SP 70\n [Lv 5] 施法時間 2秒，消耗SP 60\n [Lv 6] 施法時間 1秒，消耗SP 50\n [Lv 7] 施法時間 0秒，消耗SP 40\n [Lv 8] 施法時間 0秒，消耗SP 30\n [Lv 9] 施法時間 0秒，消耗SP 20\n[Lv 10] 施法時間 0秒，消耗SP 10",
+          "englishName": "Running",
+          "type": "Misc",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              100,
+              90,
+              80,
+              70,
+              60,
+              50,
+              40,
+              30,
+              20,
+              10
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 412,
+          "handle": "TK_READYSTORM",
+          "name": "迴旋準備",
+          "maxLevel": 1,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "TK_STORMKICK",
+              "name": "迴旋踢",
+              "level": 1
+            }
+          ],
+          "description": "迴旋準備\nMAX Lv : 1\n習得條件 : 迴旋踢 1系列 : 準備\n內容 : 用攻擊打中敵人時，有15%的機率做迴旋準備的姿態\n悟靈士不能使用\n[Lv 1] 施法時間 0秒，消耗SP 1",
+          "englishName": "Tornado Stance",
+          "type": "Weapon",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              1
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 413,
+          "handle": "TK_STORMKICK",
+          "name": "迴旋踢",
+          "maxLevel": 7,
+          "excluded": false,
+          "requires": [],
+          "description": "迴旋踢\nMAX Lv : 7\n系列 : 攻擊\n內容 : 只能在迴旋準備姿態時才能使用\n對自己周圍 5x5格內的敵人做攻擊\n[Lv 1] 消耗SP 14，180%\n[Lv 2] 消耗SP 12，200%\n[Lv 3] 消耗SP 10，220%\n[Lv 4] 消耗SP 8，240%\n[Lv 5] 消耗SP 6，260%\n[Lv 6] 消耗SP 4，280%\n[Lv 7] 消耗SP 2，300%",
+          "englishName": "Tornado Kick",
+          "type": "Weapon",
+          "targetType": "Self",
+          "range": -2,
+          "automationMode": "attackSelf",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              14,
+              12,
+              10,
+              8,
+              6,
+              4,
+              2
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 414,
+          "handle": "TK_READYDOWN",
+          "name": "砸踢準備",
+          "maxLevel": 1,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "TK_DOWNKICK",
+              "name": "砸踢",
+              "level": 1
+            }
+          ],
+          "description": "砸踢準備\nMAX Lv : 1\n習得條件 : 砸踢 1\n系列 : 準備\n內容 : 用攻擊打中敵人時，有15%的機率做砸踢準備的姿態\n悟靈士不能使用\n[Lv 1] 施法時間 0秒，消耗SP 1",
+          "englishName": "Heel Drop Stance",
+          "type": "Weapon",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              1
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 415,
+          "handle": "TK_DOWNKICK",
+          "name": "砸踢",
+          "maxLevel": 7,
+          "excluded": false,
+          "requires": [],
+          "description": "砸踢\nMAX Lv : 7\n系列 : 攻擊\n內容 : 只能在砸踢準備姿態時才能使用\n給予敵人傷害力，有3秒鐘得到昏眩\n[Lv 1] 消耗SP 14，180%\n[Lv 2] 消耗SP 12，200%\n[Lv 3] 消耗SP 10，220%\n[Lv 4] 消耗SP 8，240%\n[Lv 5] 消耗SP 6，260%\n[Lv 6] 消耗SP 4，280%\n[Lv 7] 消耗SP 2，300%",
+          "englishName": "Heel Drop",
+          "type": "Weapon",
+          "targetType": "Self",
+          "range": -2,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              14,
+              12,
+              10,
+              8,
+              6,
+              4,
+              2
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 416,
+          "handle": "TK_READYTURN",
+          "name": "踢準備",
+          "maxLevel": 1,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "TK_TURNKICK",
+              "name": "轉身踢",
+              "level": 1
+            }
+          ],
+          "description": "踢準備\nMAX Lv : 1\n習得條件 : 轉身踢 1\n系列 : 準備\n內容 : 用攻擊打中敵人時，有15%的機率做踢準備的姿態\n悟靈士不能使用\n[Lv 1] 施法時間 0秒，消耗SP 1",
+          "englishName": "Roundhouse Stance",
+          "type": "Weapon",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              1
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 417,
+          "handle": "TK_TURNKICK",
+          "name": "轉身踢",
+          "maxLevel": 7,
+          "excluded": false,
+          "requires": [],
+          "description": "轉身踢\nMAX Lv : 7\n系列 : 攻擊\n內容 : 只能在踢準備姿態時才能使用\n給予敵人傷害力，在敵人附近的其它敵人不給予傷害力只讓他們彈出後得到昏眩\n[Lv 1] 消耗SP 14，220%\n[Lv 2] 消耗SP 12，250%\n[Lv 3] 消耗SP 10，280%\n[Lv 4] 消耗SP 8，310%\n[Lv 5] 消耗SP 6，340%\n[Lv 6] 消耗SP 4，370%\n[Lv 7] 消耗SP 2，400%",
+          "englishName": "Roundhouse Kick",
+          "type": "Weapon",
+          "targetType": "Self",
+          "range": -2,
+          "automationMode": "attackSelf",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              14,
+              12,
+              10,
+              8,
+              6,
+              4,
+              2
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 418,
+          "handle": "TK_READYCOUNTER",
+          "name": "還擊準備",
+          "maxLevel": 1,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "TK_COUNTER",
+              "name": "還擊踢",
+              "level": 1
+            }
+          ],
+          "description": "還擊準備\nMAX Lv : 1\n習得條件 : 還擊踢 1\n系列 : 準備\n內容 : 用攻擊打中敵人時，有20%的機率做還擊準備的姿態\n悟靈士不能使用\n[Lv 1] : 施法時間 0秒，消耗SP 1",
+          "englishName": "Counter Kick Stance",
+          "type": "Weapon",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              1
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 419,
+          "handle": "TK_COUNTER",
+          "name": "還擊踢",
+          "maxLevel": 7,
+          "excluded": false,
+          "requires": [],
+          "description": "還擊踢\nMAX Lv : 7\n系列 : 攻擊\n內容 : 只能在還擊準備姿態時才能使用\n還擊踢100%給予敵人打擊\n[Lv 1] 消耗SP 14，220%\n[Lv 2] 消耗SP 12，250%\n[Lv 3] 消耗SP 10，280%\n[Lv 4] 消耗SP 8，310%\n[Lv 5] 消耗SP 6，340%\n[Lv 6] 消耗SP 4，370%\n[Lv 7] 消耗SP 2，400%",
+          "englishName": "Counter Kick",
+          "type": "Weapon",
+          "targetType": "Self",
+          "range": -2,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              14,
+              12,
+              10,
+              8,
+              6,
+              4,
+              2
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 420,
+          "handle": "TK_DODGE",
+          "name": "落法",
+          "maxLevel": 1,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "TK_JUMPKICK",
+              "name": "飛腳踢",
+              "level": 7
+            }
+          ],
+          "description": "落法\nMAX Lv : 1\n習得條件 : 飛腳踢 7\n系列 : 準備\n內容 : 對敵人的遠距離攻擊，以 20%的機率完美的防禦後做落法，\n當爆發力狀態時，對遠距離攻擊和以外的攻擊也有所反應\n[Lv 1] 施法時間 0秒，消耗SP 1",
+          "englishName": "Tumbling",
+          "type": "Weapon",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              1
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 421,
+          "handle": "TK_JUMPKICK",
+          "name": "飛腳踢",
+          "maxLevel": 7,
+          "excluded": false,
+          "requires": [],
+          "description": "飛腳踢\nMAX Lv : 7\n系列 : 攻擊\n內容 : 對遠距離的敵人迅速的飛過去做攻擊\n在落法的狀態時使用的話，攻擊的威力受玩家等級的影響而增加\n悟靈士不能使用，把對象有關的跆拳系列和大部份的狀態給轟掉，\n(所有靈魂狀態、單手劍攻擊速度增加、 所有速度激發、凱阿希、凱易特、菠色克藥水)\n不過對於自由保護技能所保護者的狀態時，是不能給轟掉的，\n在跑步時使用飛腳踢時，會受角色等級的影響威力因此而上升，\n在跑步時使用飛腳踢在爆發力狀態時，威力會更上升\n[Lv 1] 消耗SP 70，40%\n[Lv 2] 消耗SP 60，50%\n[Lv 3] 消耗SP 50，60%\n[Lv 4] 消耗SP 40，70%\n[Lv 5] 消耗SP 30，80%\n[Lv 6] 消耗SP 20，90%\n[Lv 7] 消耗SP 10，100%",
+          "englishName": "Flying Kick",
+          "type": "Weapon",
+          "targetType": "Attack",
+          "range": 9,
+          "automationMode": "attack",
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              70,
+              60,
+              50,
+              40,
+              30,
+              20,
+              10
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 422,
+          "handle": "TK_HPTIME",
+          "name": "平安的休息",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [],
+          "description": "平安的休息\nMAX Lv : 10\n系列 : 被動\n內容 : 當做坐下時旁邊有跆拳系列角色時HP會恢復，VIT的恢復量也受到影響\n輸入/doridori的話，恢復量+30 \n [Lv 1] HP恢復量 : 30\n [Lv 2] HP恢復量 : 60\n [Lv 3] HP恢復量 : 90\n [Lv 4] HP恢復量 : 120\n [Lv 5] HP恢復量 : 150\n [Lv 6] HP恢復量 : 180\n [Lv 7] HP恢復量 : 210\n [Lv 8] HP恢復量 : 240\n [Lv 9] HP恢復量 : 270\n[Lv 10] HP恢復量 : 300",
+          "englishName": "Peaceful Break",
+          "type": "",
+          "targetType": "Passive",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 423,
+          "handle": "TK_SPTIME",
+          "name": "快樂的休息",
+          "maxLevel": 10,
+          "excluded": false,
+          "requires": [],
+          "description": "快樂的休息\nMAX Lv : 10\n系列 : 被動\n內容 : 當做坐下時旁邊有跆拳系列角色時SP會恢復，\nMax SP的恢復量也受到影響，\n在快樂的休息中使用/doridori來提升恢復量時，有30分鐘變成 [快樂的狀態]，\n在快樂的狀態時使用地震術的咒文書時，\nSP會消耗10，以較底的機率會消耗掉地震術的咒文書，\n1等級時以 10%的機率會消耗掉，10等級時只以 1%的機率來消耗掉地震術的咒文書.\n輸入/doridori的話，恢復量+3\n [Lv 1] SP恢復量 : 3\n [Lv 2] SP恢復量 : 6\n [Lv 3] SP恢復量 : 9\n [Lv 4] SP恢復量 : 12\n [Lv 5] SP恢復量 : 15\n [Lv 6] SP恢復量 : 18\n [Lv 7] SP恢復量 : 21\n [Lv 8] SP恢復量 : 24\n [Lv 9] SP恢復量 : 27\n[Lv 10] SP恢復量 : 30",
+          "englishName": "Happy Break",
+          "type": "",
+          "targetType": "Passive",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 424,
+          "handle": "TK_POWER",
+          "name": "加油",
+          "maxLevel": 5,
+          "excluded": false,
+          "requires": [],
+          "description": "加油\nMAX Lv : 5\n系列 : 被動\n內容 : 依據同一張地圖上組隊員的人數而增加攻擊力\n普通攻擊是 (100 x 增加量%) + 100%傷害力給予敵人\n當使用500%威力技能使用時， (100 x 增加量%) + 500%的傷害力給予敵人\n[Lv 1] 對單人給予 2%\n[Lv 2] 對單人給予 4%\n[Lv 3] 對單人給予 6%\n[Lv 4] 對單人給予 8%\n[Lv 5] 對單人給予 10%",
+          "englishName": "Kihop",
+          "type": "Weapon",
+          "targetType": "Passive",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 425,
+          "handle": "TK_SEVENWIND",
+          "name": "溫暖的風",
+          "maxLevel": 7,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "TK_HPTIME",
+              "name": "平安的休息",
+              "level": 5
+            },
+            {
+              "handle": "TK_SPTIME",
+              "name": "快樂的休息",
+              "level": 5
+            },
+            {
+              "handle": "TK_POWER",
+              "name": "加油",
+              "level": 5
+            }
+          ],
+          "description": "溫暖的風\nMAX Lv : 7\n習得條件 : 平安的休息 5, 快樂的休息 5, 加油 5\n系列 : 輔助\n內容 : 5分鐘攻擊時引起屬性的風，把攻擊改變為該屬性\n[Lv 1] 地 (消耗SP:20)\n[Lv 2] 風 (消耗SP:20)\n[Lv 3] 水 (消耗SP:20)\n[Lv 4] 火 (消耗SP:20)\n[Lv 5] 念 (消耗SP:50)\n[Lv 6] 暗 (消耗SP:50)\n[Lv 7] 聖 (消耗SP:50)",
+          "englishName": "Mild Wind",
+          "type": "Weapon",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              20,
+              20,
+              20,
+              20,
+              50,
+              50,
+              50
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 426,
+          "handle": "TK_HIGHJUMP",
+          "name": "跳高",
+          "maxLevel": 5,
+          "excluded": false,
+          "requires": [],
+          "description": "跳高\nMAX Lv : 5\n系列 : 移動\n內容 : 用跳高來移動位置\n當落地地點不是封閉區域或落地地點沒有人時，像牆壁這樣的障礙物都可以跳過去的，\n除了攻城地圖外在不能使用蒼蠅翅膀的地圖上不能被移動使用的，\n當習得跳高技能時，公會技能的緊急呼叫詠唱時間會增加 2倍\n[Lv 1] 施法時間 5秒，移動空格數 2\n[Lv 2] 施法時間 4秒，移動空格數 4\n[Lv 3] 施法時間 3秒，移動空格數 6\n[Lv 4] 施法時間 2秒，移動空格數 8\n[Lv 5] 施法時間 1秒，移動空格數 10",
+          "englishName": "Taekwon Jump",
+          "type": "Weapon",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              50,
+              50,
+              50,
+              50,
+              50
+            ],
+            "zenyCostByLevel": [],
+            "weapons": [],
+            "ammo": [],
+            "ammoAmount": 0
+          }
+        },
+        {
+          "id": 493,
+          "handle": "TK_MISSION",
+          "name": "太拳任務",
+          "maxLevel": 1,
+          "excluded": false,
+          "requires": [
+            {
+              "handle": "TK_POWER",
+              "name": "加油",
+              "level": 5
+            }
+          ],
+          "description": "太拳任務\nMAX Lv : 1\n習得條件 : 加油 5\n系列 : 排行榜 (/taekwon)\n內容 : 轉職成拳聖或悟靈士就不能使用\n使用這技能時，把現在目標的魔物名字顯示出來，\n抓到要攻擊的魔物100隻時會得到1 point，\n目標魔物隨機的鎖定其它魔物 (中Boss，Boss級除外) 0%時，使用太拳任務時，以較低的機率目標會變換\n當太拳排行榜在 (10位以內時) 迴旋踢，轉身踢，砸踢，還擊踢\n使用後可以直接連續到其它技能\n例如 : 迴旋踢 -> 轉身踢 -> 砸踢 \n還有等級90以上的跆拳榜首，MAX HP和 MAX SP 會增加到 3倍，可以使用所有跆拳少年的技能.",
+          "englishName": "Taekwon Mission",
+          "type": "",
+          "targetType": "Self",
+          "range": 0,
+          "automationMode": null,
+          "automationStatus": null,
+          "resources": {
+            "spCostByLevel": [
+              10
             ],
             "zenyCostByLevel": [],
             "weapons": [],

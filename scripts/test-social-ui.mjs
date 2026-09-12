@@ -343,6 +343,15 @@ try {
       mapHeight: mapField?.height ?? 0,
       aspectMatches: Boolean(mapField) && Math.abs(canvas.height/canvas.width-mapField.height/mapField.width)<0.01,
       mapStatus: document.querySelector('#mapPosition').textContent,
+      mapLegend: {
+        monsterCount: Number(document.querySelector('#mapMonsterCount')?.textContent ?? -1),
+        playerCount: Number(document.querySelector('#mapPlayerCount')?.textContent ?? -1),
+        mapMonsterTotal: Number(
+          mapInfoData?.maps?.[minimapLive?.map]?.totalMonsters ?? -1,
+        ),
+        mapPlayerTotal: Number(minimapLive?.mapPlayerCount ?? -1),
+        staticLabels: document.querySelector('.map-legend')?.textContent ?? '',
+      },
       paperdollHasHair:/novice-(male|female)-hair-\\d+\\.png$/.test(new URL(paperdoll.src).pathname) && paperdoll.complete && paperdoll.naturalWidth>0,
       paperdollSource:new URL(paperdoll.src).pathname,
     };
@@ -580,6 +589,10 @@ try {
     desktopMap.canvasWidth >= desktopMap.wrapWidth - 13 &&
     desktopMap.aspectMatches &&
     desktopMap.rightGap <= 7 &&
+    layout.mapLegend.monsterCount === layout.mapLegend.mapMonsterTotal &&
+    layout.mapLegend.playerCount === layout.mapLegend.mapPlayerTotal &&
+    layout.mapLegend.staticLabels.includes('你') &&
+    layout.mapLegend.staticLabels.includes('交戰') &&
     (liveMotion.observed || (smoothing.duration >= 260 && smoothing.middleX > 10 && smoothing.middleX < 11)) &&
     Object.values(sfxState.counts).some((count) => count > 0) &&
     interactions.statConfirmed &&

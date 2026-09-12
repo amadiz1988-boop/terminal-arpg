@@ -30,6 +30,7 @@ import {
 } from 'node:path';
 import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
+import { gzipSync, gunzipSync, inflateSync } from 'node:zlib';
 
 const execFileAsync = promisify(execFile);
 const scryptAsync = promisify(scrypt);
@@ -79,8 +80,15 @@ const sessionCache = new Map();
 const socialRateLimits = new Map();
 const preferenceCache = new Map();
 const statusSnapshotCache = new Map();
+const mapPlayerCountCache = new Map();
+const taskCommandLocks = new Map();
+const mapFieldResponseCache = new Map();
+const rankingCache = new Map();
+let rathenaMapCachePromise = null;
 let publicHealthCache = { at: 0, value: null, pending: null };
 const mutationMethods = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
+const rankingClassIds = new Set([0, 1, 2, 3, 4, 5, 6, 21, 23, 24, 25, 4046]);
+const rankingCacheDurationMs = 60000;
 const securityHeaders = Object.freeze({
   'content-security-policy':
     "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; media-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'",
@@ -142,6 +150,12 @@ const mariaFolder = (await readdir('C:\\Program Files'))
   .reverse()[0];
 if (!mariaFolder) throw new Error('MariaDB client unavailable');
 const maria = join('C:\\Program Files', mariaFolder, 'bin', 'mariadb.exe');
+const databaseHost = process.env.RO_DB_HOST ?? '127.0.0.1';
+const databasePort = Number(process.env.RO_DB_PORT ?? 3307);
+const databaseUser = process.env.RO_DB_USER ?? 'rathena_local';
+const databaseName = process.env.RO_DB_NAME ?? 'ragnarok';
+const databasePassword =
+  process.env.RO_DB_PASSWORD ?? secrets.databasePassword;
 
 function escapeSql(value) {
   return String(value).replaceAll('\\', '\\\\').replaceAll("'", "''");
@@ -153,19 +167,19 @@ async function executeSql(statement) {
       '--ssl=OFF',
       '--protocol=tcp',
       '-h',
-      '127.0.0.1',
+      databaseHost,
       '-P',
-      '3307',
+      String(databasePort),
       '-u',
-      'rathena_local',
+      databaseUser,
       '-N',
       '-B',
-      'ragnarok',
+      databaseName,
       '--execute',
       statement,
     ],
     {
-      env: { ...process.env, MYSQL_PWD: secrets.databasePassword },
+      env: { ...process.env, MYSQL_PWD: databasePassword },
       windowsHide: true,
       maxBuffer: 1024 * 1024,
     },
@@ -177,6 +191,122 @@ async function sql(statement) {
   const task = databaseQueue.then(() => executeSql(statement));
   databaseQueue = task.catch(() => {});
   return await task;
+}
+
+const ownershipActions = new Set([
+  'claim_agent',
+  'release_agent',
+  'start_farm',
+  'stop',
+]);
+const commandIdPattern =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function parseOwnershipCommandRow(output) {
+  if (!output) return null;
+  const row = output.split('\t');
+  return {
+    commandId: row[0],
+    charId: Number(row[1]),
+    action: row[2],
+    expectedRevision: Number(row[3]),
+    status: row[4],
+    reasonCode: row[5] || null,
+    resultingRevision: row[6] ? Number(row[6]) : null,
+    acceptedAt: row[7] || null,
+    confirmedAt: row[8] || null,
+  };
+}
+
+async function getOwnershipStatus(account, charId) {
+  if (Number(account.characterId) !== charId)
+    throw new HttpError(403, 'ownership_conflict');
+  const output = await sql(
+    `SELECT char_id,account_id,control_owner,ownership_state,agent_enabled,agent_mode,revision,COALESCE(last_command_id,''),COALESCE(last_error_code,''),updated_at,COALESCE(task_type,''),COALESCE(task_phase,''),COALESCE(target_map,''),COALESCE(target_rules,'') FROM persistent_agent_state WHERE char_id=${charId} AND account_id=${Number(account.accountId)} LIMIT 1;`,
+  );
+  if (!output) throw new HttpError(404, 'ownership_not_found');
+  const row = output.split('\t');
+  return {
+    charId: Number(row[0]),
+    accountId: Number(row[1]),
+    owner: row[2],
+    ownershipState: row[3],
+    agentEnabled: row[4] === '1',
+    agentMode: row[5],
+    revision: Number(row[6]),
+    lastCommandId: row[7] || null,
+    lastErrorCode: row[8] || null,
+    updatedAt: row[9],
+    taskType: row[10] || null,
+    taskPhase: row[11] || null,
+    targetMap: row[12] || null,
+    targetRules: row[13] ? JSON.parse(row[13]) : null,
+  };
+}
+
+async function getOwnershipCommand(account, charId, commandId) {
+  if (
+    Number(account.characterId) !== charId ||
+    !commandIdPattern.test(commandId)
+  )
+    throw new HttpError(403, 'ownership_conflict');
+  const output = await sql(
+    `SELECT c.command_id,c.char_id,c.action,c.expected_revision,c.command_status,COALESCE(c.reason_code,''),COALESCE(c.resulting_revision,''),COALESCE(c.accepted_at,''),COALESCE(c.confirmed_at,'') FROM persistent_agent_command c JOIN persistent_agent_state s ON s.char_id=c.char_id WHERE c.command_id='${escapeSql(commandId)}' AND c.char_id=${charId} AND s.account_id=${Number(account.accountId)} LIMIT 1;`,
+  );
+  const command = parseOwnershipCommandRow(output);
+  if (!command) throw new HttpError(404, 'command_not_found');
+  return command;
+}
+
+async function queueOwnershipCommand(account, charId, body) {
+  if (Number(account.characterId) !== charId)
+    throw new HttpError(403, 'ownership_conflict');
+  const action = String(body.action ?? '');
+  if (!ownershipActions.has(action))
+    throw new HttpError(422, 'invalid_transition');
+  const expectedRevision = Number(body.expectedRevision);
+  if (!Number.isSafeInteger(expectedRevision) || expectedRevision < 0)
+    throw new HttpError(422, 'stale_revision');
+  const commandId = String(body.commandId ?? randomUUID()).toLowerCase();
+  if (!commandIdPattern.test(commandId))
+    throw new HttpError(422, 'invalid_command_id');
+  let payloadObject = {};
+  if (action === 'start_farm') {
+    const targetMap = String(body.targetMap ?? '');
+    const mobId = Number(body.mobId);
+    if (!/^[a-z0-9_]{1,31}$/.test(targetMap) || !Number.isSafeInteger(mobId) || mobId <= 0)
+      throw new HttpError(422, 'invalid_transition');
+    const skillEnabled = body.skillEnabled === true;
+    const skillId = Number(body.skillId ?? 0);
+    if (skillEnabled && (!Number.isSafeInteger(skillId) || skillId <= 0 || skillId > 65535))
+      throw new HttpError(422, 'invalid_transition');
+    payloadObject = {
+      targetMap,
+      mobId,
+      lootEnabled: body.lootEnabled === true,
+      skillEnabled,
+      skillId: skillEnabled ? skillId : 0,
+      survivalEnabled: body.survivalEnabled === true,
+      deathRecoveryEnabled: body.deathRecoveryEnabled === true,
+    };
+  }
+  const payload = JSON.stringify(payloadObject);
+  const payloadHash = createHash('sha256')
+    .update(`${action}\0${charId}\0${expectedRevision}\0${payload}`)
+    .digest('hex');
+  await sql(
+    `INSERT IGNORE INTO persistent_agent_command (command_id,char_id,action,payload,payload_hash,expected_revision,command_status,requested_at) VALUES ('${escapeSql(commandId)}',${charId},'${action}','${payload}','${payloadHash}',${expectedRevision},'QUEUED',CURRENT_TIMESTAMP(3));`,
+  );
+  const command = await getOwnershipCommand(account, charId, commandId);
+  const expectedMatch =
+    command.action === action &&
+    command.expectedRevision === expectedRevision;
+  const storedHash = await sql(
+    `SELECT payload_hash FROM persistent_agent_command WHERE command_id='${escapeSql(commandId)}' LIMIT 1;`,
+  );
+  if (!expectedMatch || storedHash !== payloadHash)
+    throw new HttpError(409, 'idempotency_conflict');
+  return command;
 }
 
 await sql(`CREATE TABLE IF NOT EXISTS web_sessions (
@@ -219,6 +349,9 @@ VALUES ('registration',${Date.now()});`);
 await sql(`INSERT IGNORE INTO web_account_flags (account_id,is_test,updated_at)
 SELECT account_id,1,${Date.now()} FROM login
 WHERE userid REGEXP '^(jobtest_|gate2_)';`);
+await sql(`ALTER TABLE \`char\`
+  ADD INDEX IF NOT EXISTS ranking_class_level_idx
+  (\`class\`,base_level,job_level,base_exp,job_exp,char_id);`);
 await sql(`CREATE TABLE IF NOT EXISTS web_preferences (
   account_id INT UNSIGNED NOT NULL PRIMARY KEY,
   music_enabled TINYINT(1) UNSIGNED NOT NULL DEFAULT 1,
@@ -227,7 +360,7 @@ await sql(`CREATE TABLE IF NOT EXISTS web_preferences (
   sound_volume TINYINT UNSIGNED NOT NULL DEFAULT 35,
   damage_floats_enabled TINYINT(1) UNSIGNED NOT NULL DEFAULT 1,
   damage_float_size TINYINT UNSIGNED NOT NULL DEFAULT 14,
-  damage_float_scale SMALLINT UNSIGNED NOT NULL DEFAULT 50,
+  damage_float_scale SMALLINT UNSIGNED NOT NULL DEFAULT 500,
   damage_float_opacity TINYINT UNSIGNED NOT NULL DEFAULT 100,
   damage_float_weight SMALLINT UNSIGNED NOT NULL DEFAULT 800,
   damage_float_font VARCHAR(16) NOT NULL DEFAULT 'classic',
@@ -239,13 +372,15 @@ await sql(`CREATE TABLE IF NOT EXISTS web_preferences (
 await sql(`ALTER TABLE web_preferences
   ADD COLUMN IF NOT EXISTS damage_floats_enabled TINYINT(1) UNSIGNED NOT NULL DEFAULT 1 AFTER sound_volume,
   ADD COLUMN IF NOT EXISTS damage_float_size TINYINT UNSIGNED NOT NULL DEFAULT 14 AFTER damage_floats_enabled,
-  ADD COLUMN IF NOT EXISTS damage_float_scale SMALLINT UNSIGNED NOT NULL DEFAULT 50 AFTER damage_float_size,
+  ADD COLUMN IF NOT EXISTS damage_float_scale SMALLINT UNSIGNED NOT NULL DEFAULT 500 AFTER damage_float_size,
   ADD COLUMN IF NOT EXISTS damage_float_opacity TINYINT UNSIGNED NOT NULL DEFAULT 100 AFTER damage_float_scale,
   ADD COLUMN IF NOT EXISTS damage_float_weight SMALLINT UNSIGNED NOT NULL DEFAULT 800 AFTER damage_float_opacity,
   ADD COLUMN IF NOT EXISTS damage_float_font VARCHAR(16) NOT NULL DEFAULT 'classic' AFTER damage_float_weight,
   ADD COLUMN IF NOT EXISTS damage_float_position_x TINYINT UNSIGNED NOT NULL DEFAULT 72 AFTER damage_float_font,
   ADD COLUMN IF NOT EXISTS damage_float_position_y TINYINT UNSIGNED NOT NULL DEFAULT 72 AFTER damage_float_position_x,
   ADD COLUMN IF NOT EXISTS damage_float_arc SMALLINT UNSIGNED NOT NULL DEFAULT 100 AFTER damage_float_position_y;`);
+await sql(`ALTER TABLE web_preferences
+  MODIFY COLUMN damage_float_scale SMALLINT UNSIGNED NOT NULL DEFAULT 500;`);
 await sql(`CREATE TABLE IF NOT EXISTS web_character_grants (
   char_id INT UNSIGNED NOT NULL,
   grant_key VARCHAR(64) NOT NULL,
@@ -458,6 +593,25 @@ function publicErrorMessage(error) {
     '請先完成新生訓練',
     '角色連線逾時',
     '新生訓練已結束',
+    'not_available',
+    'prerequisite_incomplete',
+    'already_completed',
+    'route_failed',
+    'npc_failed',
+    'target_unresolved',
+    'inventory_full',
+    'command_rejected',
+    'ownership_conflict',
+    'stale_revision',
+    'already_owned',
+    'invalid_transition',
+    'active_client',
+    'active_openkore',
+    'agent_not_owner',
+    'idempotency_conflict',
+    'invalid_command_id',
+    'ownership_not_found',
+    'command_not_found',
     '登入嘗試過多',
     '新帳號建立過於頻繁',
     '帳號服務忙碌',
@@ -533,7 +687,7 @@ async function sessionAccount(request) {
     cached = sessionCache.get(hash);
   if (cached && cached.expiresAt > now) return cached.account;
   const output =
-    await sql(`SELECT l.account_id,l.userid,l.sex,c.char_id,c.name,c.char_num,c.hair,c.hair_color,s.expires_at,j.value
+    await sql(`SELECT l.account_id,l.userid,l.sex,c.char_id,c.name,c.char_num,c.hair,c.hair_color,s.expires_at,j.value,c.class,c.base_level,c.job_level
     FROM web_sessions s JOIN login l ON l.account_id=s.account_id
     LEFT JOIN \`char\` c ON c.account_id=l.account_id AND c.char_num=0
     LEFT JOIN char_reg_str j ON j.char_id=c.char_id AND j.\`key\`='terminal_target_job$' AND j.\`index\`=0
@@ -544,12 +698,15 @@ async function sessionAccount(request) {
     accountId: Number(row[0]),
     username: row[1],
     sex: row[2],
-    characterId: row[3] ? Number(row[3]) : null,
-    characterName: row[4] || null,
+    characterId: row[3] && row[3] !== 'NULL' ? Number(row[3]) : null,
+    characterName: row[4] && row[4] !== 'NULL' ? row[4] : null,
     characterSlot: Number(row[5] ?? 0),
     hair: Number(row[6] ?? 0),
     hairColor: Number(row[7] ?? 0),
     targetJob: row[9] && row[9] !== 'NULL' ? row[9] : null,
+    classId: Number(row[10] ?? 0),
+    baseLevel: Number(row[11] ?? 1),
+    jobLevel: Number(row[12] ?? 1),
   };
   sessionCache.set(hash, { account, expiresAt: Number(row[8]) });
   return account;
@@ -717,6 +874,39 @@ async function currentStatusSnapshot(id) {
   return cached && Date.now() - Number(cached.updatedAt) < 5000 ? cached : null;
 }
 
+async function queryMapPlayerCount(mapName) {
+  const map = String(mapName ?? '').trim();
+  if (!map) return 0;
+  const now = Date.now();
+  const cached = mapPlayerCountCache.get(map);
+  if (cached && now - cached.at < 1000) return cached.value;
+  if (cached?.pending) return await cached.pending;
+  const pending = sql(
+    `SELECT COUNT(*) FROM \`char\` WHERE online=1 AND last_map='${escapeSql(map)}';`,
+  )
+    .then((output) => Number(output || 0))
+    .then((value) => {
+      mapPlayerCountCache.set(map, { at: Date.now(), value, pending: null });
+      return value;
+    })
+    .catch(() => {
+      const value = mapPlayerCountCache.get(map)?.value ?? 0;
+      mapPlayerCountCache.set(map, { at: Date.now(), value, pending: null });
+      return value;
+    });
+  mapPlayerCountCache.set(map, {
+    at: cached?.at ?? 0,
+    value: cached?.value ?? 0,
+    pending,
+  });
+  return await pending;
+}
+
+async function withMapPlayerCount(live) {
+  if (!live) return live;
+  return { ...live, mapPlayerCount: await queryMapPlayerCount(live.map) };
+}
+
 function relevantLogLines(text) {
   return text
     .split(/\r?\n/)
@@ -794,6 +984,52 @@ async function queryCharacter(accountId) {
   };
 }
 
+async function queryClassRanking(classId) {
+  const normalizedClassId = Number(classId);
+  if (!rankingClassIds.has(normalizedClassId))
+    throw new HttpError(400, '尚未開放此職業排行榜');
+  const now = Date.now();
+  const cached = rankingCache.get(normalizedClassId);
+  if (cached && now - cached.generatedAt < rankingCacheDurationMs)
+    return cached;
+  const output = await sql(
+    `SELECT c.name,c.class,c.base_level,c.job_level,c.sex,c.hair,c.hair_color,c.clothes_color,c.body
+    FROM \`char\` c
+    JOIN login l ON l.account_id=c.account_id
+    JOIN web_accounts w ON w.account_id=c.account_id
+    LEFT JOIN web_account_flags f ON f.account_id=c.account_id
+    WHERE c.class=${normalizedClassId}
+      AND c.delete_date=0
+      AND l.state=0
+      AND l.group_id=0
+      AND COALESCE(f.is_test,0)=0
+    ORDER BY c.base_level DESC,c.job_level DESC,c.base_exp DESC,c.job_exp DESC,c.char_id ASC
+    LIMIT 100;`,
+  );
+  const entries = output
+    ? output.split(/\r?\n/).map((line, index) => {
+        const row = line.split('\t');
+        return {
+          rank: index + 1,
+          name: row[0],
+          classId: Number(row[1]),
+          baseLevel: Number(row[2]),
+          jobLevel: Number(row[3]),
+          appearance: {
+            sex: row[4] === 'F' ? 'F' : 'M',
+            hair: Number(row[5] ?? 1),
+            hairColor: Number(row[6] ?? 0),
+            clothesColor: Number(row[7] ?? 0),
+            body: Number(row[8] ?? 0),
+          },
+        };
+      })
+    : [];
+  const result = { classId: normalizedClassId, generatedAt: now, entries };
+  rankingCache.set(normalizedClassId, result);
+  return result;
+}
+
 const renewalNoviceQuests = Object.freeze([
   { id: 21001, title: '逃離沉船', place: '沉船船艙' },
   { id: 7471, title: '初次相遇', place: '漂流島' },
@@ -811,7 +1047,9 @@ async function queryOnboardingProgress(charId) {
     sql(
       `SELECT value FROM char_reg_num WHERE char_id=${Number(charId)} AND \`key\`='terminal_academy_graduated' AND \`index\`=0 LIMIT 1;`,
     ),
-    sql(`SELECT \`class\` FROM \`char\` WHERE char_id=${Number(charId)} LIMIT 1;`),
+    sql(
+      `SELECT \`class\` FROM \`char\` WHERE char_id=${Number(charId)} LIMIT 1;`,
+    ),
   ]);
   const alreadyFirstJob = Number(classOutput || 0) > 0;
   const rows = new Map(
@@ -859,42 +1097,262 @@ async function queryOnboardingProgress(charId) {
   };
 }
 
+const edenEquipment12Quests = Object.freeze({
+  7128: {
+    objective: '前往夢羅克南東方綠洲',
+    nextAction: '與 Talking Dog 對話',
+  },
+  7129: { mobId: 1009, mobName: 'Condor', goal: 10 },
+  7130: { mobId: 1107, mobName: 'Baby Desert Wolf', goal: 10 },
+  7131: { mobId: 1001, mobName: 'Scorpion', goal: 5 },
+  7132: { objective: '沙漠訓練完成', nextAction: '返回 Instructor Boya 回報' },
+});
+const edenEquipment12Rewards = Object.freeze([
+  { itemId: 5583, name: 'Eden Team Hat I' },
+  { itemId: 2560, name: 'Eden Team Manteau I' },
+  { itemId: 2456, name: 'Eden Team Boots I' },
+  { itemId: 15009, name: 'Eden Team Uniform I' },
+]);
+const edenEquipment26Quests = Object.freeze({
+  7138: {
+    objective: '前往斐揚洞穴入口',
+    nextAction: '與 Eden Member Karl 對話',
+  },
+  7139: { mobId: 1076, mobName: 'Skeleton', goal: 15 },
+  7140: { mobId: 1031, mobName: 'Poporing', goal: 10 },
+  7141: {
+    objective: '幽靈洞穴訓練完成',
+    nextAction: '返回 Instructor Boya 回報',
+  },
+});
+const edenEquipment26Rewards = Object.freeze([
+  { itemId: 1747, name: 'Eden Bow I' },
+  { itemId: 2457, name: 'Eden Team Boots II' },
+  { itemId: 15010, name: 'Eden Team Uniform II' },
+]);
 const edenMilestones = Object.freeze([
-  { id: 'member', title: '加入伊甸園', minimumLevel: 1 },
-  { id: 'equipment12', title: 'Lv.12 裝備訓練', minimumLevel: 12 },
-  { id: 'equipment26', title: 'Lv.26 裝備訓練', minimumLevel: 26 },
-  { id: 'equipment40', title: 'Lv.40 裝備訓練', minimumLevel: 40 },
+  { id: 'member', title: '加入伊甸園', minimumLevel: 1, implemented: true },
+  {
+    id: 'equipment12',
+    title: 'Lv.12 裝備訓練',
+    minimumLevel: 12,
+    implemented: true,
+  },
+  {
+    id: 'equipment26',
+    title: 'Lv.26 裝備訓練',
+    minimumLevel: 26,
+    implemented: true,
+  },
+  {
+    id: 'equipment40',
+    title: 'Lv.40 裝備訓練',
+    minimumLevel: 40,
+    implemented: false,
+  },
 ]);
 
 async function queryEdenProgress(charId, baseLevel = 0) {
-  const [markOutput, progressOutput] = await Promise.all([
+  const [
+    markOutput,
+    progressOutput,
+    equipmentRecordOutput,
+    questOutput,
+    rewardOutput,
+  ] = await Promise.all([
     sql(
       `SELECT COALESCE(SUM(amount),0) FROM inventory WHERE char_id=${Number(charId)} AND nameid IN (6219,22508);`,
     ),
     sql(
       `SELECT value FROM char_reg_num WHERE char_id=${Number(charId)} AND \`key\`='para_suv01' AND \`index\`=0 LIMIT 1;`,
     ),
+    sql(
+      `SELECT value FROM char_reg_num WHERE char_id=${Number(charId)} AND \`key\`='para_suv02' AND \`index\`=0 LIMIT 1;`,
+    ),
+    sql(
+      `SELECT quest_id,state,count1,count2,count3 FROM quest WHERE char_id=${Number(charId)} AND quest_id IN (7128,7129,7130,7131,7132,7138,7139,7140,7141);`,
+    ),
+    sql(
+      `SELECT nameid,SUM(amount) FROM inventory WHERE char_id=${Number(charId)} AND nameid IN (${[...edenEquipment12Rewards, ...edenEquipment26Rewards].map((item) => item.itemId).join(',')}) GROUP BY nameid;`,
+    ),
   ]);
   const member = Number(markOutput || 0) > 0;
   const trainingStage = Number(progressOutput || 0);
+  const equipmentRecord = Number(equipmentRecordOutput || 0);
+  const questStates = new Map(
+    questOutput
+      ? questOutput.split(/\r?\n/).map((line) => {
+          const [questId, state, count1, count2, count3] = line
+            .split('\t')
+            .map(Number);
+          return [questId, { state, counts: [count1, count2, count3] }];
+        })
+      : [],
+  );
+  const rewardAmounts = new Map(
+    rewardOutput
+      ? rewardOutput.split(/\r?\n/).map((line) => line.split('\t').map(Number))
+      : [],
+  );
+  const reward = edenEquipment12Rewards.map((item) => ({
+    ...item,
+    name: localizedItemName(item.itemId, item.name),
+    amount: Number(rewardAmounts.get(item.itemId) || 0),
+  }));
+  const reward26 = edenEquipment26Rewards.map((item) => ({
+    ...item,
+    name: localizedItemName(item.itemId, item.name),
+    amount: Number(rewardAmounts.get(item.itemId) || 0),
+  }));
+  const currentQuestId = [7128, 7129, 7130, 7131, 7132].find((questId) =>
+    questStates.has(questId),
+  );
+  const questDefinition = edenEquipment12Quests[currentQuestId];
+  const dbProgress = questDefinition?.mobId
+    ? {
+        mobId: questDefinition.mobId,
+        mobName: questDefinition.mobName,
+        count: Number(questStates.get(currentQuestId)?.counts?.[0] || 0),
+        goal: questDefinition.goal,
+        source: 'MariaDB quest',
+      }
+    : null;
+  const rewardComplete = reward.every((item) => item.amount > 0);
+  const rewardComplete26 = reward26.slice(1).every((item) => item.amount > 0);
   const completionStages = Object.freeze({
     member: member,
-    equipment12: trainingStage >= 12,
+    equipment12:
+      trainingStage === 12 || equipmentRecord === 1 || rewardComplete,
     equipment26: trainingStage >= 23,
     equipment40: trainingStage >= 38,
   });
-  const milestones = edenMilestones.map((milestone) => ({
-    ...milestone,
-    status: completionStages[milestone.id]
-      ? 'complete'
-      : member && Number(baseLevel) >= milestone.minimumLevel
-        ? 'available'
-        : 'locked',
-  }));
+  const milestones = edenMilestones.map((milestone) => {
+    if (milestone.id === 'member')
+      return {
+        ...milestone,
+        status: member ? 'complete' : 'available',
+        currentObjective: member
+          ? '已取得伊甸園徽章'
+          : '向 Secretary Lime Evenor 辦理入團',
+        nextAction: member ? '可進行裝備訓練' : '雙擊後自動前往伊甸園總部',
+        canReport: false,
+        reward: [
+          { itemId: 22508, name: localizedItemName(22508, 'Eden Group Mark') },
+        ],
+      };
+    if (milestone.id === 'equipment40')
+      return {
+        ...milestone,
+        status: completionStages[milestone.id] ? 'complete' : 'locked',
+        currentObjective: completionStages[milestone.id]
+          ? '已完成'
+          : '此階段尚未接入自動流程',
+        nextAction: completionStages[milestone.id] ? '無' : '等待後續版本開放',
+        canReport: false,
+        reward: [],
+      };
+
+    const isEquipment26 = milestone.id === 'equipment26';
+    const definitions = isEquipment26
+      ? edenEquipment26Quests
+      : edenEquipment12Quests;
+    const questIds = isEquipment26
+      ? [7138, 7139, 7140, 7141]
+      : [7128, 7129, 7130, 7131, 7132];
+    const milestoneQuestId = questIds.find((questId) =>
+      questStates.has(questId),
+    );
+    const milestoneQuest = definitions[milestoneQuestId];
+    const milestoneProgress = milestoneQuest?.mobId
+      ? {
+          mobId: milestoneQuest.mobId,
+          mobName: milestoneQuest.mobName,
+          count: Number(questStates.get(milestoneQuestId)?.counts?.[0] || 0),
+          goal: milestoneQuest.goal,
+          source: 'MariaDB quest',
+        }
+      : null;
+    const milestoneComplete = isEquipment26
+      ? completionStages.equipment26 || rewardComplete26
+      : completionStages.equipment12 || rewardComplete;
+    let status = 'locked';
+    if (milestoneComplete) status = 'complete';
+    else if (isEquipment26 && trainingStage >= 13 && trainingStage < 23)
+      status = 'active';
+    else if (!isEquipment26 && trainingStage > 0 && trainingStage < 12)
+      status = 'active';
+    else if (isEquipment26 && Number(baseLevel) >= 26 && Number(baseLevel) < 33)
+      status = 'available';
+    else if (
+      !isEquipment26 &&
+      Number(baseLevel) >= 12 &&
+      Number(baseLevel) < 20
+    )
+      status = 'available';
+    let currentObjective = isEquipment26
+      ? 'Base Lv.26 後可進行幽靈洞穴訓練'
+      : 'Base Lv.12 後可進行沙漠訓練';
+    let nextAction = member
+      ? '向 Instructor Boya 接取任務'
+      : '先加入伊甸園，再向 Instructor Boya 接取任務';
+    let canReport = false;
+    if (milestoneComplete) {
+      currentObjective = isEquipment26
+        ? '第二套伊甸園裝備已領取'
+        : '第一套伊甸園裝備已領取';
+      nextAction = '無';
+    } else if (!isEquipment26 && trainingStage >= 13) {
+      currentObjective = '已進入 Lv.26 訓練，第一套裝備未曾領取';
+      nextAction = '完成 Lv.26 訓練並領取第二套裝備';
+    } else if (
+      (!isEquipment26 && trainingStage === 11) ||
+      (isEquipment26 && trainingStage === 22)
+    ) {
+      currentObjective = '訓練回報完成，裝備待領取';
+      nextAction = '向 Administrator Michael 領取裝備';
+      canReport = true;
+    } else if (milestoneQuestId && milestoneQuest) {
+      currentObjective = milestoneQuest.mobId
+        ? `擊殺 ${milestoneQuest.mobName}`
+        : milestoneQuest.objective;
+      nextAction = milestoneQuest.mobId
+        ? milestoneProgress.count >= milestoneProgress.goal
+          ? isEquipment26
+            ? '返回 Eden Member Karl 回報'
+            : '返回 Talking Dog 回報'
+          : isEquipment26
+            ? '前往 pay_dun00 完成擊殺'
+            : '前往 moc_fild11 完成擊殺'
+        : milestoneQuest.nextAction;
+      canReport =
+        milestoneQuestId === (isEquipment26 ? 7141 : 7132) ||
+        Boolean(
+          milestoneProgress &&
+          milestoneProgress.count >= milestoneProgress.goal,
+        );
+    }
+    return {
+      ...milestone,
+      status,
+      questId: milestoneQuestId || (isEquipment26 ? 7138 : 7128),
+      questState: milestoneQuestId
+        ? (questStates.get(milestoneQuestId)?.state ?? null)
+        : null,
+      currentObjective,
+      progress: milestoneProgress,
+      nextAction,
+      canReport,
+      reward: isEquipment26 ? reward26 : reward,
+    };
+  });
   return {
     source: '遊戲伺服器伊甸園資料',
     member,
     trainingStage,
+    equipmentRecord,
+    rewardComplete,
+    rewardComplete26,
+    questStates: Object.fromEntries(questStates),
     milestones,
   };
 }
@@ -1253,7 +1711,7 @@ const allowedFirstJobs = new Set([
   'gunslinger',
   'ninja',
 ]);
-const allowedFirstJobIds = new Set([1, 2, 3, 4, 5, 6, 21, 23, 24, 25]);
+const allowedFirstJobIds = new Set([1, 2, 3, 4, 5, 6, 21, 23, 24, 25, 4046]);
 const renewalStartPoints = Object.freeze([
   { map: 'iz_int', x: 18, y: 26 },
   { map: 'iz_int01', x: 18, y: 26 },
@@ -1428,13 +1886,24 @@ async function queueJobChangeAction(account, input) {
     return await queueCharacterCommand(account, 'job_resume', '1');
   throw new Error('無效的轉職操作');
 }
-async function queueOnboardingResume(account) {
+async function queueOnboardingResume(account, questId) {
   if (!account.characterId) throw new Error('請先建立角色');
   const [character, progress] = await Promise.all([
     queryCharacter(account.accountId),
     queryOnboardingProgress(account.characterId),
   ]);
   if (!character) throw new Error('找不到角色');
+  const questIndex = progress.quests.findIndex(
+    (entry) => String(entry.id) === String(questId),
+  );
+  if (questIndex < 0) throw new HttpError(409, 'not_available');
+  if (progress.quests[questIndex].status === 'complete')
+    throw new HttpError(409, 'already_completed');
+  const currentQuestIndex = progress.quests.findIndex(
+    (entry) => entry.status !== 'complete',
+  );
+  if (questIndex !== currentQuestIndex)
+    throw new HttpError(409, 'prerequisite_incomplete');
   if (Number(character.classId) !== 0 || progress.graduated)
     throw new Error('新生訓練已結束，無法再次傳送或領取獎勵');
 
@@ -1489,6 +1958,108 @@ async function queueEdenEnrollment(account) {
   }
   throw new Error('角色連線逾時，請再試一次');
 }
+
+function claimTaskCommandLock(accountId) {
+  const key = Number(accountId),
+    now = Date.now(),
+    activeUntil = Number(taskCommandLocks.get(key) || 0);
+  if (activeUntil > now) throw new HttpError(409, 'command_rejected');
+  taskCommandLocks.set(key, now + 5000);
+  return () => taskCommandLocks.delete(key);
+}
+
+async function queueEdenTask(account, taskId) {
+  if (!account.characterId) throw new Error('請先建立角色');
+  const releaseLock = claimTaskCommandLock(account.accountId);
+  let queued = false;
+  try {
+    if (!edenMilestones.some((milestone) => milestone.id === taskId))
+      throw new HttpError(409, 'not_available');
+    if (!['member', 'equipment12', 'equipment26'].includes(taskId))
+      throw new HttpError(409, 'not_available');
+
+    const character = await queryCharacter(account.accountId);
+    if (!character) throw new Error('找不到角色');
+    const progress = await queryEdenProgress(
+      account.characterId,
+      character.baseLevel,
+    );
+    if (taskId === 'member') {
+      if (progress.member) throw new HttpError(409, 'already_completed');
+      queued = true;
+      return await queueEdenEnrollment(account);
+    }
+
+    const isEquipment26 = taskId === 'equipment26';
+    if (
+      (isEquipment26 &&
+        (progress.rewardComplete26 || progress.trainingStage >= 23)) ||
+      (!isEquipment26 &&
+        (progress.rewardComplete || progress.trainingStage >= 12))
+    )
+      throw new HttpError(409, 'already_completed');
+    if (!allowedFirstJobIds.has(Number(character.classId)))
+      throw new HttpError(409, 'prerequisite_incomplete');
+    if (Number(character.baseLevel) < (isEquipment26 ? 26 : 12))
+      throw new HttpError(409, 'prerequisite_incomplete');
+    if (
+      !isEquipment26 &&
+      progress.trainingStage === 0 &&
+      Number(character.baseLevel) >= 20
+    )
+      throw new HttpError(409, 'not_available');
+    if (
+      (isEquipment26 &&
+        ![0, 12, 13, 14, 15, 16, 22].includes(progress.trainingStage)) ||
+      (!isEquipment26 &&
+        ![0, 1, 2, 3, 4, 5, 11].includes(progress.trainingStage))
+    )
+      throw new HttpError(409, 'not_available');
+
+    const inventoryOutput = await sql(
+      `SELECT c.inventory_slots,COUNT(i.id) FROM \`char\` c LEFT JOIN inventory i ON i.char_id=c.char_id WHERE c.char_id=${Number(account.characterId)} GROUP BY c.char_id,c.inventory_slots;`,
+    );
+    const [inventorySlots, inventoryCount] = inventoryOutput
+      .split('\t')
+      .map(Number);
+    const requiredSlots = isEquipment26
+      ? edenEquipment26Rewards.length
+      : edenEquipment12Rewards.length;
+    if (inventorySlots - inventoryCount < requiredSlots)
+      throw new HttpError(409, 'inventory_full');
+
+    await setAutomationIntent(account.accountId, true);
+    const id = instanceId(account.accountId);
+    const session = await currentLog(id);
+    if (!session.running) await startWorker(account);
+
+    const deadline = Date.now() + 25_000;
+    while (Date.now() < deadline) {
+      const [live, worker] = await Promise.all([
+        currentStatusSnapshot(id),
+        currentLog(id),
+      ]);
+      if (worker.running && live) {
+        if (live.onboarding?.active || live.edenJourney?.active)
+          throw new HttpError(409, 'command_rejected');
+        queued = true;
+        return await queueCharacterCommand(
+          account,
+          isEquipment26 ? 'eden_equipment26' : 'eden_equipment12',
+          String(
+            isEquipment26 && progress.trainingStage === 12
+              ? 0
+              : progress.trainingStage,
+          ),
+        );
+      }
+      await new Promise((resolve) => setTimeout(resolve, 250));
+    }
+    throw new Error('角色連線逾時，請再試一次');
+  } finally {
+    if (!queued) releaseLock();
+  }
+}
 async function readSocialEvents(id, fallbackSender = '') {
   let text = '';
   try {
@@ -1516,7 +2087,11 @@ async function readSocialEvents(id, fallbackSender = '') {
         ['chat', 'emotion', 'voice', 'system', 'error'].includes(entry.type) &&
         typeof entry.sender === 'string' &&
         (entry.type !== 'emotion' || entry.sender !== '未知角色') &&
-        typeof entry.message === 'string',
+        typeof entry.message === 'string' &&
+        !(
+          entry.type === 'chat' &&
+          /^@web_[a-z0-9_]+(?:\s.*)?$/iu.test(entry.message.trim())
+        ),
     );
 }
 
@@ -1549,7 +2124,7 @@ async function queueCharacterCommand(account, action, argument) {
 
 const supplyCycleDefaults = Object.freeze({
   enabled: false,
-  returnWeight: 68,
+  returnWeight: 75,
   store: true,
   sell: true,
   buy: true,
@@ -1557,6 +2132,7 @@ const supplyCycleDefaults = Object.freeze({
   redPotionMax: 100,
   rules: [],
 });
+const redPotionNpcPrice = 10;
 const supplyRuleActions = new Set([
   'default',
   'ignore',
@@ -1662,12 +2238,12 @@ async function saveSupplyCycle(account, input) {
 \tisMarket 0
 \tstandpoint
 \tdistance 3
-\tprice
+\tprice ${redPotionNpcPrice}
 \tminAmount ${settings.redPotionMin}
 \tmaxAmount ${settings.redPotionMax}
 \tbatchSize ${settings.redPotionMax}
 \tonlyIdentified 0
-\tzeny
+\tzeny >= ${redPotionNpcPrice}
 \tminDistance
 \tmaxDistance
 \tdisabled ${settings.enabled && settings.buy ? 0 : 1}
@@ -1901,6 +2477,13 @@ async function ensureWorker(account) {
   const id = instanceId(account.accountId),
     folder = join(instancesRoot, id);
   const credentials = await accountCredentials(account.accountId);
+  const character = await queryCharacter(account.accountId);
+  const recommendedMap =
+    Number(character?.baseLevel) >= 26
+      ? 'pay_dun00'
+      : Number(character?.baseLevel) >= 12
+        ? 'moc_fild11'
+        : 'prt_fild08';
   await execFileAsync(
     'powershell.exe',
     [
@@ -1919,7 +2502,7 @@ async function ensureWorker(account) {
       '-CharacterSlot',
       '0',
       '-LockMap',
-      'prt_fild08',
+      recommendedMap,
     ],
     { cwd: root, windowsHide: true },
   );
@@ -1999,7 +2582,7 @@ const defaultPreferences = Object.freeze({
   soundVolume: 35,
   damageFloatsEnabled: true,
   damageFloatSize: 14,
-  damageFloatScale: 50,
+  damageFloatScale: 500,
   damageFloatOpacity: 100,
   damageFloatWeight: 800,
   damageFloatFont: 'classic',
@@ -2148,6 +2731,137 @@ function safeTarget(base, pathname) {
   const rel = relative(base, target);
   return !rel.startsWith('..') && !isAbsolute(rel) ? target : null;
 }
+
+function validFld2(bytes) {
+  if (bytes.length < 4) return false;
+  const width = bytes.readUInt16LE(0);
+  const height = bytes.readUInt16LE(2);
+  return width > 0 && height > 0 && bytes.length === width * height + 4;
+}
+
+function parseRathenaMapCache(bytes) {
+  const maps = new Map();
+  if (bytes.length < 8) return maps;
+  const mapCount = bytes.readUInt16LE(4);
+  let offset = 8;
+  for (let index = 0; index < mapCount; index += 1) {
+    if (offset + 20 > bytes.length) break;
+    const name = bytes
+      .subarray(offset, offset + 12)
+      .toString('ascii')
+      .replace(/\0.*$/, '');
+    const width = bytes.readInt16LE(offset + 12);
+    const height = bytes.readInt16LE(offset + 14);
+    const compressedLength = bytes.readInt32LE(offset + 16);
+    const compressedStart = offset + 20;
+    const compressedEnd = compressedStart + compressedLength;
+    if (
+      !name ||
+      width <= 0 ||
+      height <= 0 ||
+      compressedLength <= 0 ||
+      compressedEnd > bytes.length
+    )
+      break;
+    maps.set(name, {
+      width,
+      height,
+      compressed: bytes.subarray(compressedStart, compressedEnd),
+    });
+    offset = compressedEnd;
+  }
+  return maps;
+}
+
+async function loadRathenaMapCache() {
+  if (!rathenaMapCachePromise) {
+    rathenaMapCachePromise = (async () => {
+      const maps = new Map();
+      for (const path of [
+        join(runtime, 'rathena', 'db', 'import', 'map_cache.dat'),
+        join(runtime, 'rathena', 'db', 're', 'map_cache.dat'),
+        join(runtime, 'rathena', 'db', 'map_cache.dat'),
+      ]) {
+        try {
+          for (const [name, map] of parseRathenaMapCache(
+            await readFile(path),
+          )) {
+            if (!maps.has(name)) maps.set(name, map);
+          }
+        } catch {
+          // An optional cache may be absent; continue to the next source.
+        }
+      }
+      return maps;
+    })();
+  }
+  return await rathenaMapCachePromise;
+}
+
+async function runtimeMapField(mapName) {
+  if (mapFieldResponseCache.has(mapName))
+    return mapFieldResponseCache.get(mapName);
+
+  const fieldsRoot = join(runtime, 'openkore', 'fields');
+  const target = safeTarget(fieldsRoot, `${mapName}.fld2.gz`);
+  if (target) {
+    try {
+      const content = await readFile(target);
+      if (validFld2(gunzipSync(content))) {
+        const result = { content, source: 'openkore-runtime' };
+        mapFieldResponseCache.set(mapName, result);
+        return result;
+      }
+    } catch {
+      // Missing or invalid OpenKore fields fall through to the server cache.
+    }
+  }
+
+  const map = (await loadRathenaMapCache()).get(mapName);
+  if (!map) return null;
+  try {
+    const rawCells = inflateSync(map.compressed);
+    if (rawCells.length !== map.width * map.height) return null;
+    const fld2 = Buffer.alloc(rawCells.length + 4);
+    fld2.writeUInt16LE(map.width, 0);
+    fld2.writeUInt16LE(map.height, 2);
+    const fld2CellByGatType = Uint8Array.from([1, 0, 4, 5, 6, 10, 8]);
+    for (let index = 0; index < rawCells.length; index += 1)
+      fld2[index + 4] = fld2CellByGatType[rawCells[index]] ?? 0;
+    const result = {
+      content: gzipSync(fld2, { level: 9 }),
+      source: 'rathena-cache',
+    };
+    mapFieldResponseCache.set(mapName, result);
+    return result;
+  } catch {
+    return null;
+  }
+}
+
+async function serveRuntimeMapField(pathname, response) {
+  const match = pathname.match(/^\/ro\/maps\/([^/]+)\.fld2\.bin$/i);
+  if (!match) return false;
+  let mapName;
+  try {
+    mapName = decodeURIComponent(match[1]);
+  } catch {
+    return false;
+  }
+  if (!/^[a-z0-9_@-]{1,24}$/i.test(mapName)) return false;
+  const field = await runtimeMapField(mapName);
+  if (!field) return false;
+  response.writeHead(200, {
+    'content-type': 'application/octet-stream',
+    'content-encoding': 'gzip',
+    'content-length': field.content.length,
+    'cache-control': 'public, max-age=3600',
+    'x-ro-map-source': field.source,
+    ...securityHeaders,
+  });
+  response.end(field.content);
+  return true;
+}
 async function serveFile(pathname, response) {
   const isPublic = pathname.startsWith('/ro/'),
     base = isPublic ? publicRoot : webRoot,
@@ -2172,7 +2886,7 @@ async function serveFile(pathname, response) {
     response.end(content);
     return true;
   } catch {
-    return false;
+    return await serveRuntimeMapField(pathname, response);
   }
 }
 async function serveVoice(voiceId, response) {
@@ -2275,11 +2989,49 @@ createServer(async (request, response) => {
               accountId: account.accountId,
               username: account.username,
               sex: account.sex,
+              characterId: account.characterId,
               characterName: account.characterName,
+              classId: account.classId,
+              hair: account.hair,
+              hairColor: account.hairColor,
+              baseLevel: account.baseLevel,
+              jobLevel: account.jobLevel,
             }
           : null,
       });
     if (!account) return json(response, 401, { error: '請先登入' });
+    const ownershipStatusMatch = url.pathname.match(
+      /^\/api\/ro\/agents\/(\d+)\/ownership$/,
+    );
+    if (ownershipStatusMatch && request.method === 'GET') {
+      const charId = Number(ownershipStatusMatch[1]);
+      return json(response, 200, {
+        ownership: await getOwnershipStatus(account, charId),
+      });
+    }
+    const ownershipCommandsMatch = url.pathname.match(
+      /^\/api\/ro\/agents\/(\d+)\/ownership\/commands$/,
+    );
+    if (ownershipCommandsMatch && request.method === 'POST') {
+      const charId = Number(ownershipCommandsMatch[1]);
+      const body = await requestBody(request);
+      return json(response, 202, {
+        command: await queueOwnershipCommand(account, charId, body),
+      });
+    }
+    const ownershipCommandMatch = url.pathname.match(
+      /^\/api\/ro\/agents\/(\d+)\/ownership\/commands\/([0-9a-f-]+)$/i,
+    );
+    if (ownershipCommandMatch && request.method === 'GET') {
+      const charId = Number(ownershipCommandMatch[1]);
+      return json(response, 200, {
+        command: await getOwnershipCommand(
+          account,
+          charId,
+          ownershipCommandMatch[2].toLowerCase(),
+        ),
+      });
+    }
     if (url.pathname === '/api/preferences' && request.method === 'GET')
       return json(response, 200, {
         preferences: await queryPreferences(account.accountId),
@@ -2329,13 +3081,13 @@ createServer(async (request, response) => {
       const id = instanceId(account.accountId),
         [session, derived, world, onboarding, edenProgress, supplyCycle] =
           await Promise.all([
-          currentLog(id),
-          currentStatusSnapshot(id),
-          publicWorldHealth(),
-          queryOnboardingProgress(account.characterId),
-          queryEdenProgress(account.characterId),
-          readSupplyCycle(account),
-        ]),
+            currentLog(id),
+            currentStatusSnapshot(id),
+            publicWorldHealth(),
+            queryOnboardingProgress(account.characterId),
+            queryEdenProgress(account.characterId),
+            readSupplyCycle(account),
+          ]),
         storedCharacter = derived
           ? null
           : await queryCharacter(account.accountId),
@@ -2407,12 +3159,49 @@ createServer(async (request, response) => {
           status:
             milestone.status === 'complete'
               ? 'complete'
-              : edenProgress.member &&
-                  Number(character?.baseLevel ?? 0) >= milestone.minimumLevel
-                ? 'available'
-                : 'locked',
+              : derived?.edenJourney?.active &&
+                  derived.edenJourney.taskId === milestone.id
+                ? 'active'
+                : (milestone.id === 'equipment12' &&
+                      Number(edenProgress.trainingStage) === 0 &&
+                      Number(character?.baseLevel ?? 0) >= 12 &&
+                      Number(character?.baseLevel ?? 0) < 20) ||
+                    (milestone.id === 'equipment26' &&
+                      [0, 12].includes(Number(edenProgress.trainingStage)) &&
+                      Number(character?.baseLevel ?? 0) >= 26 &&
+                      Number(character?.baseLevel ?? 0) < 33)
+                  ? 'available'
+                  : milestone.status,
+          progress: ['equipment12', 'equipment26'].includes(milestone.id)
+            ? ((derived?.questMissions ?? []).find((mission) =>
+                (milestone.id === 'equipment26'
+                  ? [7139, 7140]
+                  : [7129, 7130, 7131]
+                ).includes(Number(mission.questId)),
+              ) ?? milestone.progress)
+            : milestone.progress,
         })),
       };
+      const equipment12 = eden.milestones.find(
+        (milestone) => milestone.id === 'equipment12',
+      );
+      if (
+        equipment12?.progress &&
+        Number(equipment12.progress.count) >= Number(equipment12.progress.goal)
+      ) {
+        equipment12.canReport = true;
+        equipment12.nextAction = '返回 Talking Dog 回報';
+      }
+      const equipment26 = eden.milestones.find(
+        (milestone) => milestone.id === 'equipment26',
+      );
+      if (
+        equipment26?.progress &&
+        Number(equipment26.progress.count) >= Number(equipment26.progress.goal)
+      ) {
+        equipment26.canReport = true;
+        equipment26.nextAction = '返回 Eden Member Karl 回報';
+      }
       return json(response, 200, {
         account: { username: account.username },
         running: session.running,
@@ -2428,12 +3217,19 @@ createServer(async (request, response) => {
         ...parsed,
       });
     }
+    if (url.pathname === '/api/rankings' && request.method === 'GET') {
+      const classId = Number(url.searchParams.get('classId'));
+      return json(response, 200, {
+        ranking: await queryClassRanking(classId),
+      });
+    }
     if (url.pathname === '/api/events') {
       const id = instanceId(account.accountId),
-        [session, live] = await Promise.all([
+        [session, rawLive] = await Promise.all([
           currentLog(id),
           currentStatusSnapshot(id),
         ]),
+        live = await withMapPlayerCount(rawLive),
         lines = relevantLogLines(session.text),
         requested = url.searchParams.has('cursor')
           ? Number(url.searchParams.get('cursor'))
@@ -2531,10 +3327,27 @@ createServer(async (request, response) => {
       const body = await requestBody(request);
       return json(response, 202, await queueJobChangeAction(account, body));
     }
-    if (url.pathname === '/api/onboarding/resume' && request.method === 'POST')
-      return json(response, 202, await queueOnboardingResume(account));
+    if (
+      url.pathname === '/api/onboarding/resume' &&
+      request.method === 'POST'
+    ) {
+      const body = await requestBody(request);
+      return json(
+        response,
+        202,
+        await queueOnboardingResume(account, body.questId),
+      );
+    }
     if (url.pathname === '/api/eden/enroll' && request.method === 'POST')
       return json(response, 202, await queueEdenEnrollment(account));
+    if (url.pathname === '/api/eden/task' && request.method === 'POST') {
+      const body = await requestBody(request);
+      return json(
+        response,
+        202,
+        await queueEdenTask(account, String(body.taskId ?? '')),
+      );
+    }
     if (url.pathname === '/api/status-reset' && request.method === 'POST')
       return json(response, 202, await resetStatusPoints(account));
     if (url.pathname === '/api/item-action' && request.method === 'POST') {

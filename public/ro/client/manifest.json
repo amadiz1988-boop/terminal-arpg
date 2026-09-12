@@ -23,27 +23,6 @@
   ],
   "imported": [
     {
-      "kind": "bgm",
-      "key": "title",
-      "source": "BGM/01.mp3",
-      "output": "public/ro/client/bgm/01-title.mp3",
-      "sha256": "48dd8b61e3894aadb069f58bbfa00c3e59a41cc1e54c414717a2377b882b0423"
-    },
-    {
-      "kind": "bgm",
-      "key": "prontera",
-      "source": "BGM/08.mp3",
-      "output": "public/ro/client/bgm/08-prontera.mp3",
-      "sha256": "76bc2f2bff5fed6810b40a22f5baa50d7b5e6f2b60fc1e3c41b454e44d643484"
-    },
-    {
-      "kind": "bgm",
-      "key": "prt_fild08",
-      "source": "BGM/12.mp3",
-      "output": "public/ro/client/bgm/12-streamside.mp3",
-      "sha256": "3a86ea4926e169d4e5d41625ecc58d40d4a016776f83224376d590e86b0d594a"
-    },
-    {
       "kind": "skin",
       "key": "btn_close",
       "source": "skin/default/btn_close.bmp",
@@ -371,6 +350,139 @@
       "source": "data.grf:data/texture/유저인터페이스/item/크리투라학원모자.bmp",
       "output": "public/ro/client/items/Cryptura_Academy_Hat.bmp",
       "sha256": "ed20ae57bfa5c4804cc59eb319bb6ae82aec55b5fe62bb8f28e1f937ea92bff2"
+    },
+    {
+      "kind": "bgm",
+      "key": "title",
+      "source": "BGM/01.mp3",
+      "output": "public/ro/client/bgm/01-title.mp3",
+      "sha256": "48dd8b61e3894aadb069f58bbfa00c3e59a41cc1e54c414717a2377b882b0423"
+    },
+    {
+      "kind": "bgm",
+      "key": "payon_fields",
+      "source": "BGM/03.mp3",
+      "output": "public/ro/client/bgm/03.mp3",
+      "sha256": "c9b7cc675b879c598df3664f3dd20fcb2d87fbfe4f53dfdd20e919880f430d1d"
+    },
+    {
+      "kind": "bgm",
+      "key": "prontera_fields",
+      "source": "BGM/05.mp3",
+      "output": "public/ro/client/bgm/05.mp3",
+      "sha256": "bdc431cf7260d7768a19db5fd4c952f2d48dfed1e75a114a3912e5524c4f89e2"
+    },
+    {
+      "kind": "bgm",
+      "key": "prontera",
+      "source": "BGM/08.mp3",
+      "output": "public/ro/client/bgm/08-prontera.mp3",
+      "sha256": "76bc2f2bff5fed6810b40a22f5baa50d7b5e6f2b60fc1e3c41b454e44d643484"
+    },
+    {
+      "kind": "bgm",
+      "key": "prontera_church",
+      "source": "BGM/10.mp3",
+      "output": "public/ro/client/bgm/10.mp3",
+      "sha256": "5ce5fdffdeff9cc0f727593b7553928bcb04e7ae078f0d07255842d5e0a8e67f"
+    },
+    {
+      "kind": "bgm",
+      "key": "morocc",
+      "source": "BGM/11.mp3",
+      "output": "public/ro/client/bgm/11.mp3",
+      "sha256": "b9fa6349116bd00b82617fed65b2b2dd683fd3b58fcb8529199aea8442887a47"
+    },
+    {
+      "kind": "bgm",
+      "key": "prt_fild08",
+      "source": "BGM/12.mp3",
+      "output": "public/ro/client/bgm/12-streamside.mp3",
+      "sha256": "3a86ea4926e169d4e5d41625ecc58d40d4a016776f83224376d590e86b0d594a"
+    },
+    {
+      "kind": "bgm",
+      "key": "geffen",
+      "source": "BGM/13.mp3",
+      "output": "public/ro/client/bgm/13.mp3",
+      "sha256": "8dbbebd113c3cfea755af1d436fe0f4124ba6609b71225cfc27e99aba625d759"
+    },
+    {
+      "kind": "bgm",
+      "key": "payon",
+      "source": "BGM/14.mp3",
+      "output": "public/ro/client/bgm/14.mp3",
+      "sha256": "ac890ec26131350bf55d7ae542dc541d46641f8107bd6004f810dcc9ace4e9d2"
+    },
+    {
+      "kind": "bgm",
+      "key": "payon_dungeon",
+      "source": "BGM/20.mp3",
+      "output": "public/ro/client/bgm/20.mp3",
+      "sha256": "7462c885a89ccc1ba87589503f46f6c2d364fd5742db99ecb4f2c1051260e606"
+    },
+    {
+      "kind": "bgm",
+      "key": "pyramid",
+      "source": "BGM/22.mp3",
+      "output": "public/ro/client/bgm/22.mp3",
+      "sha256": "b8029d21d294724da631b0d99b38a9f76d2c0fd9814d02155868b54382777041"
+    },
+    {
+      "kind": "bgm",
+      "key": "morocc_field",
+      "source": "BGM/24.mp3",
+      "output": "public/ro/client/bgm/24.mp3",
+      "sha256": "9c06361e05254c56df802fb9f040f68c30e078d47fac428ef27f26ef26e50f69"
+    },
+    {
+      "kind": "bgm",
+      "key": "geffen_field",
+      "source": "BGM/25.mp3",
+      "output": "public/ro/client/bgm/25.mp3",
+      "sha256": "46378c5767e1cbe3bca5160a891b5a33c32a04c230d20f784cdbd7da02ad977b"
+    },
+    {
+      "kind": "bgm",
+      "key": "izlude_academy",
+      "source": "BGM/26.mp3",
+      "output": "public/ro/client/bgm/26.mp3",
+      "sha256": "9d33538ec839d2230124234ead16f73a87fbbcb07959f1579067a3fc5a20bb79"
+    },
+    {
+      "kind": "bgm",
+      "key": "training_ground",
+      "source": "BGM/30.mp3",
+      "output": "public/ro/client/bgm/30.mp3",
+      "sha256": "343adb0c3a84b6fc32e5e7b96ca4907acbcf3c9a6e1e0c1ddbce6336d7bc6b9d"
+    },
+    {
+      "kind": "bgm",
+      "key": "mjolnir",
+      "source": "BGM/31.mp3",
+      "output": "public/ro/client/bgm/31.mp3",
+      "sha256": "5d245ef38724b7524d95168234dfbcf784bca31e0c9859f2e2be719b350d8a8d"
+    },
+    {
+      "kind": "bgm",
+      "key": "morocc_ruins_field",
+      "source": "BGM/37.mp3",
+      "output": "public/ro/client/bgm/37.mp3",
+      "sha256": "da8194e0f315a4f19511c271beb3408e8da5c58440434757159ea95b66f69a46"
+    },
+    {
+      "kind": "bgm",
+      "key": "morocc_ruins",
+      "source": "BGM/52.mp3",
+      "output": "public/ro/client/bgm/52.mp3",
+      "sha256": "b5989d442725f930001e5156b20f841a438a1afd4252647039803d9dfb8d3c75"
+    },
+    {
+      "kind": "bgm",
+      "key": "payon_guild",
+      "source": "BGM/66.mp3",
+      "output": "public/ro/client/bgm/66.mp3",
+      "sha256": "10793e754482596e8b4fcfbed4aeae236c9824fa770167bb40fcce35415aa9ba"
     }
   ],
   "derived": [

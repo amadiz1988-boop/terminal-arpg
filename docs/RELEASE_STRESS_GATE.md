@@ -21,8 +21,6 @@
 
 ## 發布指令
 
-```bash
-npm run test:release
-```
+舊 Vinext `npm run test:release` 已停用並回覆 `LEGACY_WEB_ARCHIVED`。Dashboard 的綜合發布指令尚未建立。
 
-成功條件：輸出 `RELEASE_GATE_PASS`，並取得公開 HTTPS 玩家頁的流程證據。
+在替代指令完成前，以上八項需逐項執行並保存提交 SHA、結果與公開 HTTPS 玩家頁證據；狀態固定記錄為 `未通過發布門檻`。

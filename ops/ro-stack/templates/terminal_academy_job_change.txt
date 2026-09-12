@@ -44,8 +44,18 @@ iz_ac01,60,67,3	script	學院結業導師#terminal	4_F_01,{
 		if (BaseLevel < 45) {
 			mes "[新生學院結業導師]";
 			mes "超級初心者需要 Base Lv.45。";
-			close;
+			mes "我先送你前往目前等級的推薦地圖練功。達到 Base Lv.45 後，雙擊任務日誌的「一轉結業」即可返回。";
+			terminal_supernovice_training = 1;
+			close2;
+			if (BaseLevel >= 26)
+				warp "pay_dun00",73,78;
+			else if (BaseLevel >= 12)
+				warp "moc_fild11",180,253;
+			else
+				warp "prt_fild08",170,375;
+			end;
 		}
+		terminal_supernovice_training = 0;
 		.@job = Job_Super_Novice;
 		.@reward = 1208; // Main Gauche [4]
 		.@name$ = "超級初心者";
@@ -89,9 +99,14 @@ iz_ac01,60,67,3	script	學院結業導師#terminal	4_F_01,{
 		getitem 569,300; // Novice_Potion
 	}
 
-	// All first-job starter weapons require Base Lv.4. This only repairs
-	// accelerated onboarding fixtures that reached Job Lv.10 unusually early.
-	while (BaseLevel < 4)
+	// Accelerated onboarding can reach Job Lv.10 before the starter weapon's
+	// equip level. Raise only to the selected reward's exact minimum level.
+	.@minimum_base = 4;
+	if (.@target$ == "gunslinger")
+		.@minimum_base = 10; // Six Shooter [2]
+	else if (.@target$ == "ninja")
+		.@minimum_base = 12; // Asura [2]
+	while (BaseLevel < .@minimum_base)
 		getexp NextBaseExp - BaseExp,0;
 	jobchange .@job;
 	if (.@reward > 0) {
@@ -132,9 +147,33 @@ iz_ac01_d,60,67,3	duplicate(學院結業導師#terminal)	學院結業導師#term
 // the original rAthena quest scripts and the terminal graduation NPC.
 -	script	#terminal_onboarding_recovery	-1,{
 OnInit:
-	bindatcmd("terminal_onboarding_resume",strnpcinfo(0)+"::OnResume",0,100);
-	bindatcmd("web_eden_return",strnpcinfo(0)+"::OnEdenReturn",0,100);
-	bindatcmd("terminal_archer_repair",strnpcinfo(0)+"::OnArcherRepair",0,100);
+	bindatcmd("terminal_onboarding_resume",strnpcinfo(3)+"::OnResume",0,100);
+	bindatcmd("web_eden_return",strnpcinfo(3)+"::OnEdenReturn",0,100);
+	bindatcmd("terminal_archer_repair",strnpcinfo(3)+"::OnArcherRepair",0,100);
+	bindatcmd("terminal_expanded_repair",strnpcinfo(3)+"::OnExpandedRepair",0,100);
+	end;
+
+OnPCLoadMapEvent:
+	.@map$ = strcharinfo(3);
+	if (.@map$ == "prt_fild08" && BaseLevel < 12) {
+		.@save_map$ = "prontera";
+		.@save_x = 150;
+		.@save_y = 33;
+	} else if (.@map$ == "moc_fild11" && BaseLevel >= 12 && BaseLevel < 26) {
+		.@save_map$ = "morocc";
+		.@save_x = 156;
+		.@save_y = 46;
+	} else if (.@map$ == "pay_dun00" && BaseLevel >= 26) {
+		.@save_map$ = "pay_arche";
+		.@save_x = 49;
+		.@save_y = 144;
+	} else {
+		end;
+	}
+	if (getsavepoint(0) == .@save_map$ && getsavepoint(1) == .@save_x && getsavepoint(2) == .@save_y)
+		end;
+	savepoint .@save_map$,.@save_x,.@save_y,1,1;
+	dispbottom "已將儲存點同步至推薦練功地圖附近城鎮。";
 	end;
 
 OnArcherRepair:
@@ -151,6 +190,31 @@ OnArcherRepair:
 	terminal_archer_repaired = 1;
 	if (strcharinfo(3) == "izlude")
 		warp "prt_fild08",170,375;
+	end;
+
+OnExpandedRepair:
+	if (Class == Job_Gunslinger && terminal_target_job$ == "gunslinger") {
+		while (BaseLevel < 10)
+			getexp NextBaseExp - BaseExp,0;
+		if (countitem(13101))
+			equip 13101;
+		if (countitem(13200))
+			equip 13200;
+		terminal_expanded_repaired = 1;
+		dispbottom "神槍手起始裝備已完成同步。";
+		end;
+	}
+	if (Class == Job_Ninja && terminal_target_job$ == "ninja") {
+		while (BaseLevel < 12)
+			getexp NextBaseExp - BaseExp,0;
+		if (countitem(13010))
+			equip 13010;
+		if (countitem(13250))
+			equip 13250;
+		terminal_expanded_repaired = 1;
+		dispbottom "忍者起始裝備已完成同步。";
+		end;
+	}
 	end;
 
 OnEdenReturn:
@@ -191,7 +255,24 @@ OnResume:
 		warp "new_1-3",95,171;
 		end;
 	}
+	if (terminal_target_job$ == "supernovice" && BaseLevel < 45) {
+		terminal_supernovice_training = 1;
+		dispbottom "超級初心者需要 Base Lv.45，正在前往目前等級的推薦地圖練功。";
+		if (BaseLevel >= 26)
+			warp "pay_dun00",73,78;
+		else if (BaseLevel >= 12)
+			warp "moc_fild11",180,253;
+		else
+			warp "prt_fild08",170,375;
+		end;
+	}
+	if (terminal_target_job$ == "supernovice")
+		terminal_supernovice_training = 0;
 	dispbottom "正在返回克里圖拉學院，辦理一轉結業。";
 	warp "iz_ac01",58,67;
 	end;
 }
+
+prt_fild08	mapflag	loadevent
+moc_fild11	mapflag	loadevent
+pay_dun00	mapflag	loadevent

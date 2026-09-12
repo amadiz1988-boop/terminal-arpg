@@ -12,4 +12,23 @@
   LoginPort = 6901
   CharacterPort = 6122
   MapPort = 5122
+  PersistentAgentEnabled = $false
+  PersistentAgentAccountAllowlist = @()
+  PersistentAgentPollMilliseconds = 1000
+  PersistentAgentFarmMapAllowlist = @()
+  PersistentAgentFarmMobAllowlist = @()
+  PersistentAgentLootEnabled = $false
+  PersistentAgentSkillEnabled = $false
+  PersistentAgentSkillAllowlist = @()
+  PersistentAgentSurvivalEnabled = $false
+  PersistentAgentHpThresholdPercent = 30
+  PersistentAgentHpSafePercent = 60
+  PersistentAgentSpThresholdPercent = 20
+  PersistentAgentSpSafePercent = 40
+  PersistentAgentHpItemAllowlist = @()
+  PersistentAgentSpItemAllowlist = @()
+  PersistentAgentRecoverySkillAllowlist = @()
+  PersistentAgentDeathRecoveryEnabled = $false
+  PersistentAgentRespawnDelayMilliseconds = 2000
+  PersistentAgentRespawnMaxAttempts = 3
 }

@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#566d8b" />
     <title>鬼島傳說｜冒險掛機</title>
     <link rel="icon" href="/ro/client/paperdoll/novice-male.png" />
-    <link rel="stylesheet" href="/styles.css?v=r044-foldable-windows" />
+    <link rel="stylesheet" href="/styles.css?v=r050-pet-companion" />
   </head>
   <body>
     <section id="auth" class="auth">
@@ -68,13 +68,18 @@
           </div>
           <div class="login-actions">
             <button
+              id="loginSubmit"
               class="primary official-skin-button official-ok"
               type="submit"
+              aria-label="登入或建立帳號"
+              disabled
             >
-              確定
+              登入／建立帳號
             </button>
           </div>
-          <strong id="authError"></strong>
+          <strong id="authError" aria-live="polite"
+            >正在載入登入功能</strong
+          >
         </div>
       </form>
       <form id="characterForm" class="window auth-card hidden">
@@ -265,7 +270,7 @@
           ><button id="logout" class="logout">登出</button>
         </div>
       </header>
-      <section class="window">
+      <section class="window" data-pet-anchor="character-summary">
         <div class="titlebar"><span>基本訊息視窗</span><span>●</span></div>
         <div class="basic">
           <div class="identity">
@@ -295,7 +300,7 @@
       </section>
       <section class="window social-window" aria-label="玩家對話欄">
         <div class="titlebar">
-          <span>對話欄</span><span id="chatChannel">全部訊息</span>
+          <span>對話欄</span><span id="chatChannel">檢視：全部訊息</span>
         </div>
         <div
           id="chatChannels"
@@ -346,6 +351,35 @@
             系統
           </button>
         </div>
+        <div class="chat-toolbar">
+          <label for="chatSendChannel">發言目標</label>
+          <select id="chatSendChannel" aria-label="選擇發言頻道">
+            <option value="public">一般（附近）</option>
+            <option value="private">密語</option>
+            <option value="party">隊伍</option>
+            <option value="guild">公會</option>
+            <option value="clan">家族</option>
+            <option value="battleground">戰場</option>
+            <option value="map">地圖</option>
+            <option value="global">全服</option>
+            <option value="trade">交易</option>
+            <option value="support">支援</option>
+            <option value="ally">同盟</option>
+          </select>
+          <button
+            id="chatFilterToggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="chatChannelSettings"
+          >
+            顯示設定
+          </button>
+        </div>
+        <div
+          id="chatChannelSettings"
+          class="chat-channel-settings hidden"
+          aria-label="顯示頻道設定"
+        ></div>
         <div id="chatFeed" class="chat-feed" aria-live="polite">
           <p class="chat-empty">正在連接對話頻道...</p>
         </div>
@@ -410,9 +444,10 @@
         ><button data-tab="equipment">裝備</button
         ><button data-tab="inventory">道具</button
         ><button data-tab="mapInfo">地圖情報</button
+        ><button data-tab="rankings">排行榜</button
         ><button data-tab="system">系統</button>
       </nav>
-      <section id="hunt" class="panel active">
+      <section id="hunt" class="panel active" data-pet-anchor="automation">
         <div class="window">
           <div class="titlebar">
             <span>自動戰鬥控制</span><span id="status">讀取中</span>
@@ -421,6 +456,7 @@
             <button id="start" class="primary">開始掛機</button
             ><button id="stop">停止掛機</button>
           </div>
+          <p id="automationNotice" class="notice"></p>
           <div class="session-grid">
             <div><span>掛機時間</span><b id="duration">00:00:00</b></div>
             <div><span>擊倒怪物</span><b id="kills">0</b></div>
@@ -430,7 +466,7 @@
             <div><span>死亡次數</span><b id="deaths">0</b></div>
           </div>
         </div>
-        <div class="window map-window">
+        <div class="window map-window" data-pet-anchor="map">
           <div class="titlebar">
             <span>即時小地圖</span><span id="mapPosition">等待角色位置</span>
           </div>
@@ -442,9 +478,9 @@
               aria-label="即時小地圖"
             ></canvas>
             <div class="map-legend">
-              <span class="you">■ 你</span><span class="monster">● 怪物</span
+              <span class="you">■ 你</span><span class="monster">● 怪物 <b id="mapMonsterCount">0</b></span
               ><span class="engaged">● 交戰</span
-              ><span class="player">■ 玩家</span>
+              ><span class="player">■ 玩家 <b id="mapPlayerCount">0</b></span>
             </div>
           </div>
         </div>
@@ -472,7 +508,7 @@
                     type="number"
                     min="40"
                     max="88"
-                    value="68"
+                    value="75"
                   />%</span
                 >
               </label>
@@ -510,7 +546,7 @@
               </label>
             </div>
             <p class="supply-route">
-              南門卡普拉存倉 → 普隆德拉道具商販售與補給 → 自動返回原掛機地圖
+              普隆德拉道具商販售與補給 → 南門卡普拉存倉 → 自動返回原掛機地圖
             </p>
             <details class="supply-rules">
               <summary>逐項拾取、丟棄、販售與存倉規則</summary>
@@ -526,7 +562,7 @@
             </p>
           </form>
         </div>
-        <section class="window combat-window">
+        <section class="window combat-window" data-pet-anchor="combat-log">
           <div class="titlebar">
             <span>戰鬥終端</span><span id="logLatency">即時</span>
           </div>
@@ -538,7 +574,7 @@
           ></div>
         </section>
       </section>
-      <section id="quests" class="panel">
+      <section id="quests" class="panel" data-pet-anchor="quests">
         <div class="window quest-window">
           <div class="titlebar">
             <span>任務日誌</span><span id="questSummary">新生訓練</span>
@@ -604,7 +640,7 @@
           </p>
         </div>
       </section>
-      <section id="character" class="panel">
+      <section id="character" class="panel" data-pet-anchor="status">
         <div class="window">
           <div class="titlebar">
             <span>人物能力屬性狀態欄</span
@@ -631,7 +667,7 @@
           </div>
         </div>
       </section>
-      <section id="skills" class="panel">
+      <section id="skills" class="panel" data-pet-anchor="skills">
         <div class="window">
           <div class="titlebar">
             <span>技能欄</span><span id="skillPoints">Skill Point 0</span>
@@ -705,7 +741,7 @@
           </p>
         </div>
       </section>
-      <section id="equipment" class="panel">
+      <section id="equipment" class="panel" data-pet-anchor="equipment">
         <div class="window equipment-window">
           <div class="titlebar">
             <span>裝備欄</span><span id="appearanceMeta">初心者</span>
@@ -728,11 +764,45 @@
                 <span>披肩</span><b>未裝備</b>
               </div>
             </div>
-            <div class="paperdoll-stage">
-              <img id="paperdollBody" alt="角色紙娃娃" /><strong
-                id="paperdollName"
-                >讀取中</strong
-              ><small id="paperdollDetails">外觀讀取中</small>
+            <div
+              id="paperdollStage"
+              class="paperdoll-stage"
+              tabindex="0"
+              aria-label="角色展示台，可左右拖曳旋轉角色"
+            >
+              <div class="paperdoll-viewport" aria-hidden="true">
+                <div id="paperdollSprite" class="paperdoll-sprite">
+                  <span id="paperdollHeadBackLayer" class="paperdoll-layer paperdoll-equipment-layer"></span>
+                  <span id="paperdollWeaponBackLayer" class="paperdoll-layer paperdoll-equipment-layer"></span>
+                  <span id="paperdollHairBackLayer" class="paperdoll-layer"></span>
+                  <span id="paperdollBodyLayer" class="paperdoll-layer"></span>
+                  <span id="paperdollWeaponFrontLayer" class="paperdoll-layer paperdoll-equipment-layer"></span>
+                  <span id="paperdollHairFrontLayer" class="paperdoll-layer"></span>
+                  <span id="paperdollHeadFrontLayer" class="paperdoll-layer paperdoll-equipment-layer"></span>
+                </div>
+                <img id="paperdollBody" class="paperdoll-fallback" alt="角色紙娃娃" />
+              </div>
+              <div class="paperdoll-rotation-controls" aria-label="八方向旋轉">
+                <button id="paperdollRotateLeft" type="button" aria-label="向左旋轉">
+                  <img src="/ro/client/showcase/ui/rotate-left.png" alt="" />
+                </button>
+                <button id="paperdollRotateRight" type="button" aria-label="向右旋轉">
+                  <img src="/ro/client/showcase/ui/rotate-right.png" alt="" />
+                </button>
+              </div>
+              <div class="paperdoll-actions" aria-label="展示動作">
+                <button type="button" data-showcase-action="stand" class="active">站立</button>
+                <button type="button" data-showcase-action="walk">走路</button>
+                <button type="button" data-showcase-action="sit">坐下</button>
+                <button type="button" data-showcase-action="attack">攻擊</button>
+              </div>
+              <label class="paperdoll-equipment-toggle">
+                <input id="paperdollEquipmentVisible" type="checkbox" checked />
+                顯示裝備外觀
+              </label>
+              <strong id="paperdollName">讀取中</strong>
+              <small id="paperdollDetails">外觀讀取中</small>
+              <small id="paperdollHint" class="paperdoll-hint">左右拖曳可旋轉一圈</small>
             </div>
             <div class="equip-column">
               <div class="equip-slot" data-slot="armor">
@@ -766,7 +836,7 @@
           </p>
         </div>
       </section>
-      <section id="inventory" class="panel">
+      <section id="inventory" class="panel" data-pet-anchor="inventory">
         <div class="window">
           <div class="titlebar">
             <span>道具欄</span><span id="inventoryTotal">0 種</span>
@@ -783,7 +853,7 @@
           </p>
         </div>
       </section>
-      <section id="mapInfo" class="panel">
+      <section id="mapInfo" class="panel" data-pet-anchor="map-info">
         <div class="window">
           <div class="titlebar">
             <span id="mapInfoTitle">地圖情報</span
@@ -793,7 +863,47 @@
           <div id="mapMonsterList" class="map-monster-list"></div>
         </div>
       </section>
-      <section id="system" class="panel">
+      <section id="rankings" class="panel" data-pet-anchor="rankings">
+        <div class="window ranking-window">
+          <div class="titlebar">
+            <span>職業等級排行榜</span><span id="rankingUpdated">尚未載入</span>
+          </div>
+          <div class="ranking-controls">
+            <label for="rankingJob">職業</label>
+            <select id="rankingJob" aria-label="選擇排行榜職業"></select>
+            <button id="rankingRefresh" type="button">重新整理</button>
+          </div>
+          <p id="rankingStatus" class="notice">
+            開啟排行榜後才會讀取資料，每個職業最多顯示100名。
+          </p>
+          <p class="ranking-rotation-hint">
+            左右拖曳角色可查看八個方向
+          </p>
+          <div
+            id="rankingPodium"
+            class="ranking-podium"
+            aria-label="前三名角色展示"
+          ></div>
+          <div class="ranking-table-scroll">
+            <table class="ranking-table">
+              <thead>
+                <tr>
+                  <th>名次</th>
+                  <th>角色名稱</th>
+                  <th>職業</th>
+                  <th>人物等級</th>
+                  <th>職業等級</th>
+                </tr>
+              </thead>
+              <tbody id="rankingRows"></tbody>
+            </table>
+          </div>
+          <p class="notice">
+            排名依人物等級、職業等級與隱藏經驗進度計算；不公開裝備、能力、技能與所在地圖。
+          </p>
+        </div>
+      </section>
+      <section id="system" class="panel" data-pet-anchor="system">
         <div class="window">
           <div class="titlebar"><span>聲音設定</span><span>帳號共用</span></div>
           <div class="audio-settings">
@@ -835,8 +945,8 @@
                 min="10"
                 max="1000"
                 step="10"
-                value="50"
-              /><output id="damageFloatScaleValue">50%</output></label
+                value="500"
+              /><output id="damageFloatScaleValue">500%</output></label
             ><label
               >透明度
               <input
@@ -926,15 +1036,30 @@
                 data-preview-marker="end"
                 aria-hidden="true"
               ></span>
-              <span class="damage-preview-reference" aria-hidden="true"
+              <span
+                id="damagePreviewPositionHandle"
+                class="damage-preview-reference"
+                role="button"
+                tabindex="0"
+                aria-label="拖曳調整傷害位置"
                 >60</span
               >
+              <span
+                id="damagePreviewResizeHandle"
+                class="damage-preview-resize-handle"
+                role="slider"
+                tabindex="0"
+                aria-label="拖曳調整傷害大小"
+                aria-valuemin="10"
+                aria-valuemax="1000"
+                aria-valuenow="50"
+              ></span>
               <span class="damage-preview segment">60</span>
               <span class="damage-preview total">120</span>
               <span class="damage-preview critical">99</span>
             </div>
             <p>
-              小黑窗即為戰鬥終端可見範圍；圓點依序標示起點、最高點與終點。原廠素材啟用時，數字不是系統字型，而是直接使用
+              小黑窗即為戰鬥終端可見範圍；拖曳灰色數字可改變位置，拖曳右下角把手可改變大小，滑軌會同步更新。圓點依序標示起點、最高點與終點。原廠素材啟用時，數字不是系統字型，而是直接使用
               RO 的逐字元 Sprite；暴擊同步使用原廠底圖與白色 EF_HIT2
               放射動畫。<span id="damageAssetStatus">正在檢查原廠傷害素材</span>
             </p>
@@ -947,6 +1072,22 @@
           <div class="service-grid" id="services"></div>
         </div>
       </section>
+      <div id="petCompanion" class="pet-companion-layer" aria-live="polite">
+        <span class="pet-reaction-message" hidden></span>
+        <button
+          class="pet-companion"
+          type="button"
+          data-animation="idle"
+          data-facing="right"
+          data-resting="false"
+          aria-label="和妙蛙種子互動"
+        >
+          <span class="pet-facing" aria-hidden="true">
+            <span class="pet-symbol">🌱</span>
+          </span>
+          <span class="pet-state" aria-hidden="true"></span>
+        </button>
+      </div>
     </main>
     <audio
       id="bgm"
@@ -954,6 +1095,11 @@
       loop
       preload="metadata"
     ></audio>
-    <script src="/app.js?v=r046-official-ui-audio" defer></script>
+    <script
+      src="/app.js?v=r060-paperdoll-anchors"
+      defer
+      fetchpriority="high"
+    ></script>
+    <script src="/pet-companion.js?v=r002" defer></script>
   </body>
 </html>

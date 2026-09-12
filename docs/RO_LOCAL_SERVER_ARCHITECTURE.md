@@ -34,19 +34,19 @@ MariaDB
 
 rAthena 與 MariaDB 是角色、物品、地圖與世界狀態的唯一權威來源。OpenKore 是角色自動操作執行器。瀏覽器只提交玩家設定並呈現伺服器事件。
 
-現有 D1 原型帳號資料不得直接成為正式角色權威資料。正式銜接時由控制平面建立 rAthena 帳號，D1 僅保留網站工作階段或移除，避免雙重帳號來源。
+Vinext／D1 原型已退出現行架構。控制平面直接建立及驗證 rAthena／MariaDB 帳號，工作階段與偏好也保存在 MariaDB。
 
 ## 本機與未來雲端的對齊方式
 
 | 層 | 本機 | 未來雲端 |
 | --- | --- | --- |
-| Web UI | 本機預覽或 Sites | Sites |
+| Web UI | 8788 Dashboard | `【資料不足，無法確認】` |
 | 控制平面 | Windows Node 服務 | Linux VM Node 服務 |
 | 掛機執行器 | OpenKore 子程序 | OpenKore 容器或受管程序 |
 | RO 世界 | rAthena Windows 程序 | rAthena Linux 服務 |
 | 資料庫 | MariaDB 本機服務 | 受管 MariaDB 或專用資料庫主機 |
 
-控制平面 API 契約維持一致，搬到雲端時只更換程序驅動器、資料庫連線與密碼來源。
+雲端目標尚未鎖定。任何搬遷需保留控制平面 API 契約，並重新驗證程序驅動器、資料庫連線與密碼來源。
 
 ## 對外入口與固定公網 IP
 

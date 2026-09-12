@@ -3,6 +3,12 @@ import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
+const qaUrl = process.env.QA_URL;
+if (!qaUrl)
+  throw new Error(
+    'LEGACY_WEB_ARCHIVED: QA_URL is required for this archived Vinext test.',
+  );
+
 const chrome = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 const profile = mkdtempSync(join(tmpdir(), 'ro-idle-ui-'));
 const debugPort = 19456;
@@ -87,7 +93,7 @@ try {
     mobile: true,
   });
   await call('Page.navigate', {
-    url: process.env.QA_URL ?? 'http://127.0.0.1:3000/',
+    url: qaUrl,
   });
   if (
     !(await waitUntil(

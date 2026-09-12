@@ -110,8 +110,24 @@ const imported = [];
 try {
   for (const [key, sourceName, outputName] of [
     ['title', '01.mp3', '01-title.mp3'],
+    ['payon_fields', '03.mp3', '03.mp3'],
+    ['prontera_fields', '05.mp3', '05.mp3'],
     ['prontera', '08.mp3', '08-prontera.mp3'],
+    ['prontera_church', '10.mp3', '10.mp3'],
+    ['morocc', '11.mp3', '11.mp3'],
     ['prt_fild08', '12.mp3', '12-streamside.mp3'],
+    ['geffen', '13.mp3', '13.mp3'],
+    ['payon', '14.mp3', '14.mp3'],
+    ['payon_dungeon', '20.mp3', '20.mp3'],
+    ['pyramid', '22.mp3', '22.mp3'],
+    ['morocc_field', '24.mp3', '24.mp3'],
+    ['geffen_field', '25.mp3', '25.mp3'],
+    ['izlude_academy', '26.mp3', '26.mp3'],
+    ['training_ground', '30.mp3', '30.mp3'],
+    ['mjolnir', '31.mp3', '31.mp3'],
+    ['morocc_ruins_field', '37.mp3', '37.mp3'],
+    ['morocc_ruins', '52.mp3', '52.mp3'],
+    ['payon_guild', '66.mp3', '66.mp3'],
   ]) {
     const bgmSource = join(client, 'BGM', sourceName);
     const bgmTarget = join(output, 'bgm', outputName);

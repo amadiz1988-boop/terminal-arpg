@@ -38,3 +38,4 @@ next-env.d.ts
 /work/
 /tmp/
 /.local/
+/ops/ro-stack/runtime-evidence-*/

@@ -1,6 +1,10 @@
 import { readFile } from 'node:fs/promises';
 import { performance } from 'node:perf_hooks';
 
+const dashboardClient=await readFile('ops/ro-stack/dashboard/app.js','utf8');
+if(!dashboardClient.includes('EVENT_POLL_INTERVAL_MS = 300'))throw new Error('event polling load limit missing');
+if(!dashboardClient.includes('POLL_RETRY_MAX_MS = 5000'))throw new Error('poll retry backoff missing');
+
 const origin=process.env.RO_DEMO_ORIGIN??'http://127.0.0.1:8788';
 const fixture=JSON.parse(await readFile('.local/ro-stack/multiplayer-test-v2-credentials.json','utf8'));
 const sessions=await Promise.all([1,2,3].map(async index=>{
@@ -23,4 +27,4 @@ for(let round=0;round<20;round++){
 timings.sort((a,b)=>a-b);
 const p95=timings[Math.ceil(timings.length*.95)-1],maximum=timings.at(-1),average=timings.reduce((sum,value)=>sum+value,0)/timings.length;
 if(p95>150)throw new Error(`event API p95 ${p95.toFixed(1)}ms exceeded 150ms`);
-console.log(JSON.stringify({result:'REALTIME_EVENT_PASS',requests:timings.length,averageMs:Number(average.toFixed(1)),p95Ms:Number(p95.toFixed(1)),maxMs:Number(maximum.toFixed(1)),clientPollMs:150},null,2));
+console.log(JSON.stringify({result:'REALTIME_EVENT_PASS',requests:timings.length,averageMs:Number(average.toFixed(1)),p95Ms:Number(p95.toFixed(1)),maxMs:Number(maximum.toFixed(1)),clientPollMs:300,retryMaxMs:5000},null,2));
