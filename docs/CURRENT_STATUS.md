@@ -12,8 +12,10 @@
 
 - Repository 已啟用 Git，現行分支為 `main`，遠端為 `origin`：`https://github.com/amadiz1988-boop/terminal-arpg.git`。
 - 目前 `HEAD` 為 `265c1f7`，`main...origin/main` 未顯示領先或落後。
-- `git status --porcelain=v1 --untracked-files=all` 目前列出 35 個已修改檔案、1 個已刪除檔案及 1,042 個未追蹤檔案；這些最新功能尚未形成提交，也尚未推送至遠端。
-- 後續需按功能切片整理、測試、提交與推送。提交前不得把目前工作樹等同於可回復的 Git 版本。
+- 2026-09-13 已建立並推送 `recovery/2026-09-13-working-tree`，提交 `da9ba6a` 保存 64 個程式、測試、設定與文件檔案。
+- 救援分支與遠端差異為 `0 / 0`。`main` 保持在 `265c1f7`，待功能切片驗證後再整合。
+- 尚未追蹤的 1,012 個檔案包含 1,009 個 Gravity BGM／紙娃娃衍生素材，以及 3 個隔離的 Persistent Agent 文件、patch 與 SQL。素材需完成授權與來源確認，Persistent Agent 需維持獨立範圍。
+- 後續持續開發，每個可驗證功能完成後立即建立小提交並推送，避免再次累積大型工作樹。
 
 ## 2026-09-12 Vinext／D1 舊版網頁封存
 
