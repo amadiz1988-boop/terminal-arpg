@@ -1,0 +1,223 @@
+{
+  "authorization": "使用者於 2026-09-10 聲明已取得官方客戶端內容授權",
+  "sourceVersion": "本機 Gravity RagnarokOnline 客戶端；SHA-256 見 public/ro/client/manifest.json",
+  "verifiedAt": "2026-09-12T12:12:55.798Z",
+  "sourceStatus": "verified",
+  "implementationNotes": "숫자.spr 畫格 0-9 為傷害數字；msg.spr 畫格 3 為 critbg；lens1/lens2 為 EF_HIT2 八方向放射貼圖。",
+  "imported": [
+    {
+      "kind": "damage-number",
+      "key": "0",
+      "source": "GRF:data/sprite/이팩트/숫자.spr#frame-0",
+      "output": "public/ro/client/damage/number-0.png",
+      "width": 8,
+      "height": 11,
+      "sha256": "2e5ee029f3d509c88ef59da1539a25a776b773b82a69437be5daf8bc8f4b9e30"
+    },
+    {
+      "kind": "critical-damage-number",
+      "key": "0",
+      "source": "GRF:data/sprite/이팩트/숫자.spr#frame-0; RGB×(0.9,0.9,0.15)",
+      "output": "public/ro/client/damage/critical-number-0.png",
+      "width": 8,
+      "height": 11,
+      "sha256": "acc2997a72cb99de01c44ef702976d5d3393abe53dacbeea4d9d365eb0cda956"
+    },
+    {
+      "kind": "damage-number",
+      "key": "1",
+      "source": "GRF:data/sprite/이팩트/숫자.spr#frame-1",
+      "output": "public/ro/client/damage/number-1.png",
+      "width": 6,
+      "height": 11,
+      "sha256": "11ae6a818941fbf175b71b7dfa1b4031a43c636e61dbbf96bef4ebb4ccfba00a"
+    },
+    {
+      "kind": "critical-damage-number",
+      "key": "1",
+      "source": "GRF:data/sprite/이팩트/숫자.spr#frame-1; RGB×(0.9,0.9,0.15)",
+      "output": "public/ro/client/damage/critical-number-1.png",
+      "width": 6,
+      "height": 11,
+      "sha256": "c1faf6f02624acf14559fe9403a34faa7268cf9233bffef77f3e2699baf16848"
+    },
+    {
+      "kind": "damage-number",
+      "key": "2",
+      "source": "GRF:data/sprite/이팩트/숫자.spr#frame-2",
+      "output": "public/ro/client/damage/number-2.png",
+      "width": 8,
+      "height": 11,
+      "sha256": "0f0a91570dcd57be3fe32683d4777f7dfad66a51fbcaea79329df0c7788c5d2a"
+    },
+    {
+      "kind": "critical-damage-number",
+      "key": "2",
+      "source": "GRF:data/sprite/이팩트/숫자.spr#frame-2; RGB×(0.9,0.9,0.15)",
+      "output": "public/ro/client/damage/critical-number-2.png",
+      "width": 8,
+      "height": 11,
+      "sha256": "5504b248622107211d70a537e9f9874d73ac0915ffc68206d068a188e085c83f"
+    },
+    {
+      "kind": "damage-number",
+      "key": "3",
+      "source": "GRF:data/sprite/이팩트/숫자.spr#frame-3",
+      "output": "public/ro/client/damage/number-3.png",
+      "width": 10,
+      "height": 13,
+      "sha256": "2d1489ec7e00ae1ecdccf542c096d0c22964b7032d20274d43b9f62e33508415"
+    },
+    {
+      "kind": "critical-damage-number",
+      "key": "3",
+      "source": "GRF:data/sprite/이팩트/숫자.spr#frame-3; RGB×(0.9,0.9,0.15)",
+      "output": "public/ro/client/damage/critical-number-3.png",
+      "width": 10,
+      "height": 13,
+      "sha256": "36dfc1dae1debf8ae7a21d9e183ff631d588f5732d647d39cb129e7eec23f64b"
+    },
+    {
+      "kind": "damage-number",
+      "key": "4",
+      "source": "GRF:data/sprite/이팩트/숫자.spr#frame-4",
+      "output": "public/ro/client/damage/number-4.png",
+      "width": 10,
+      "height": 13,
+      "sha256": "ccb6d5d5774a272907c6c586cd7f85e1a52093b14a7b173540a7b06b348cac53"
+    },
+    {
+      "kind": "critical-damage-number",
+      "key": "4",
+      "source": "GRF:data/sprite/이팩트/숫자.spr#frame-4; RGB×(0.9,0.9,0.15)",
+      "output": "public/ro/client/damage/critical-number-4.png",
+      "width": 10,
+      "height": 13,
+      "sha256": "7657da748fcfc89780032e5cc5d6b729116970400a43351de3eb7aa201c7ccfa"
+    },
+    {
+      "kind": "damage-number",
+      "key": "5",
+      "source": "GRF:data/sprite/이팩트/숫자.spr#frame-5",
+      "output": "public/ro/client/damage/number-5.png",
+      "width": 10,
+      "height": 13,
+      "sha256": "97062fb554ed5d916b4e6b9e97c849079ef8bb17cab1550b316e514c6f94d9f1"
+    },
+    {
+      "kind": "critical-damage-number",
+      "key": "5",
+      "source": "GRF:data/sprite/이팩트/숫자.spr#frame-5; RGB×(0.9,0.9,0.15)",
+      "output": "public/ro/client/damage/critical-number-5.png",
+      "width": 10,
+      "height": 13,
+      "sha256": "ab424c29fdfb19b462b3fa270a7477962a6bf78f2d350f25ec289381a58ce251"
+    },
+    {
+      "kind": "damage-number",
+      "key": "6",
+      "source": "GRF:data/sprite/이팩트/숫자.spr#frame-6",
+      "output": "public/ro/client/damage/number-6.png",
+      "width": 10,
+      "height": 13,
+      "sha256": "a73fd5a00df2deaa7958e3122cd8fcca9663ea02ee9b32ba499b9333a8c09857"
+    },
+    {
+      "kind": "critical-damage-number",
+      "key": "6",
+      "source": "GRF:data/sprite/이팩트/숫자.spr#frame-6; RGB×(0.9,0.9,0.15)",
+      "output": "public/ro/client/damage/critical-number-6.png",
+      "width": 10,
+      "height": 13,
+      "sha256": "e3a34fa90849111aaa56cf33b87fc023f2c46e4f9577f9b0897c3b893dc76fb2"
+    },
+    {
+      "kind": "damage-number",
+      "key": "7",
+      "source": "GRF:data/sprite/이팩트/숫자.spr#frame-7",
+      "output": "public/ro/client/damage/number-7.png",
+      "width": 10,
+      "height": 13,
+      "sha256": "06786cb7a252620713846af99bead1a4772c7748c37d7cf11a388f00a5d5f48c"
+    },
+    {
+      "kind": "critical-damage-number",
+      "key": "7",
+      "source": "GRF:data/sprite/이팩트/숫자.spr#frame-7; RGB×(0.9,0.9,0.15)",
+      "output": "public/ro/client/damage/critical-number-7.png",
+      "width": 10,
+      "height": 13,
+      "sha256": "930ef036982d43ecb9aa3b4a3220374585f8e388e3c451aba924b8fe9e4d8b67"
+    },
+    {
+      "kind": "damage-number",
+      "key": "8",
+      "source": "GRF:data/sprite/이팩트/숫자.spr#frame-8",
+      "output": "public/ro/client/damage/number-8.png",
+      "width": 10,
+      "height": 13,
+      "sha256": "9f76b1d10d96aedcb9742afe57d4d8f0350c132db39129f6880cc3e81ef160d1"
+    },
+    {
+      "kind": "critical-damage-number",
+      "key": "8",
+      "source": "GRF:data/sprite/이팩트/숫자.spr#frame-8; RGB×(0.9,0.9,0.15)",
+      "output": "public/ro/client/damage/critical-number-8.png",
+      "width": 10,
+      "height": 13,
+      "sha256": "659c09ed08e556a0470f8a9c227906d22077b9712ddccb94e5fc2387abfb47fa"
+    },
+    {
+      "kind": "damage-number",
+      "key": "9",
+      "source": "GRF:data/sprite/이팩트/숫자.spr#frame-9",
+      "output": "public/ro/client/damage/number-9.png",
+      "width": 10,
+      "height": 13,
+      "sha256": "f5163486e433b007e0ae9a0d61db3480d3e104a84fd53fcf0e8ea5e209c0f85b"
+    },
+    {
+      "kind": "critical-damage-number",
+      "key": "9",
+      "source": "GRF:data/sprite/이팩트/숫자.spr#frame-9; RGB×(0.9,0.9,0.15)",
+      "output": "public/ro/client/damage/critical-number-9.png",
+      "width": 10,
+      "height": 13,
+      "sha256": "3a0f78f5d28e7c4e24dc24e05e7181052ea1f6650048e71856c074b6a49f4a18"
+    },
+    {
+      "kind": "damage-message",
+      "key": "critbg",
+      "source": "GRF:data/sprite/이팩트/msg.spr#frame-3; RGB×(0.66,0.66,0.66)",
+      "output": "public/ro/client/damage/critical-bg.png",
+      "width": 70,
+      "height": 60,
+      "sha256": "682505d30f10a11a8e3e1419dae1a68937db13737653dd30b9294399e4723f95"
+    },
+    {
+      "kind": "hit-effect",
+      "key": "lens1",
+      "source": "GRF:data/texture/effect/lens1.tga",
+      "output": "public/ro/client/damage/lens1.png",
+      "width": 32,
+      "height": 128,
+      "sha256": "7a2e19c7819d7e167fa83b5c6542155a97e6772efa9738330fa4b458bc286ae3"
+    },
+    {
+      "kind": "hit-effect",
+      "key": "lens2",
+      "source": "GRF:data/texture/effect/lens2.tga",
+      "output": "public/ro/client/damage/lens2.png",
+      "width": 32,
+      "height": 128,
+      "sha256": "fbae4a1629c61fec1dd0e1ad2c8bfd3a5a114606650d170c308d219036690748"
+    },
+    {
+      "kind": "hit-effect-audio",
+      "key": "ef_hit2",
+      "source": "GRF:data/wav/effect/ef_hit2.wav",
+      "output": "public/ro/client/damage/ef_hit2.wav",
+      "sha256": "7049b49b7a39fd612b5927259ea1e2a1f8443a84cc543a19e9c75e02aa00a688"
+    }
+  ]
+}
