@@ -2,6 +2,10 @@
 
 本文件是每個 Work／Codex 工作的第一份上下文。專案目前以 `ops/ro-stack/dashboard.mjs` 提供的 8788 Dashboard 為唯一玩家入口，rAthena Renewal、OpenKore 與 MariaDB 為現行服務。Vinext 瀏覽器 demo 與 D1 API 原型只保留為封存程式碼，接手時依 `docs/CURRENT_STATUS.md` 判斷實際執行環境。
 
+執行 substantial Repository 工作前，先依 `.agents/skills/task-model-router/SKILL.md` 判斷建議模型、推理強度與速度，並在施工前提醒使用者。該 Skill 只負責建議，不得改變任務 scope，也不得自行宣稱已切換模型。
+
+執行大型功能驗證、Integration、Vertical Slice、Restart、Quest、Agent 或長時間自動化測試前，必須讀取 `.agents/skills/nearest-valid-test-state/SKILL.md`。除非任務明確要求 Full End-to-End Regression，測試必須從距離被測功能最近、合法、可重現且不污染正式資料的已知狀態開始。不得為取得後段測試資格，重跑與本輪目標無直接關係的練等、農素材、onboarding、一轉、長距離導航或已驗證任務鏈。
+
 ## 新工作讀取順序
 
 開始任何修改前，依序讀取：
@@ -117,5 +121,6 @@ git diff --check
 - `project-handoff`：新 Work／Codex 接手時建立最小必要上下文。
 - `implement-feature`：依最小修改範圍實作、測試並更新現況。
 - `debug-bug`：依錯誤證據定位、最小修正、回歸測試並記錄結果。
+- `nearest-valid-test-state`：大型測試先定義被測功能與合法起點，優先使用 fixture／checkpoint，限制高成本前置與 Full E2E。
 
 使用方式可直接在任務中指定 `$project-handoff`、`$implement-feature` 或 `$debug-bug`，也可由符合描述的工作按需觸發。這些 Skill 不取代本文件的驗證、來源與修改邊界規則。
