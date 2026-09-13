@@ -42,6 +42,8 @@ rAthena 與 MariaDB 是角色、物品、任務與世界狀態的權威來源。
 
 獨立 Ops Agent 只監聽 `127.0.0.1:8790`，以標準契約彙整程序、listener、HTTP、資料庫、service link、heartbeat 與 ownership 證據。獨立 Named Tunnel 提供 `https://admin.g8land.com`，所有管理資料均受 scrypt 密碼驗證與 HMAC session 保護。其生命週期與 8788 Dashboard 分離；管理頁與 incident snapshot 只讀取相同契約，控制動作尚未開放。
 
+玩家公開入口由 `player-web-service.ps1`、`player-web-tunnel.ps1`、`player-web-watchdog.ps1` 與 `player-web-autostart.ps1` 獨立維護。SYSTEM 排程提供開機及每分鐘補啟，watchdog 提供 15 秒存活檢查與連續 4 次連線失敗門檻。這組腳本只管理 Dashboard 與玩家 Named Tunnel，沒有 rAthena、MariaDB 或 OpenKore 控制權。
+
 ## 玩家流程
 
 1. `POST /api/account` 在 MariaDB 建立或驗證帳號，回傳 HttpOnly 工作階段 Cookie。
@@ -85,6 +87,7 @@ rAthena 與 MariaDB 是角色、物品、任務與世界狀態的權威來源。
 ## 目前架構缺口
 
 - 管理入口由 SYSTEM 排程在 Windows 開機時啟動，並每分鐘執行一次冪等自我修復；程序 watchdog 提供 15 秒執行期恢復。兩層機制都只管理 Ops Agent 與專用 Tunnel。
+- 玩家入口由另一個 SYSTEM 排程與 watchdog 維護，生命週期與管理入口、遊戲服務及玩家執行器隔離。
 - 新 Dashboard 的綜合發布指令尚未建立，舊 Vinext `test:release` 已停用。
 - 完整職業、技能、地圖、NPC、補給、二轉與社交流程仍按 [CURRENT_STATUS.md](CURRENT_STATUS.md) 逐項驗收。
 - 工作樹含大量尚未提交變更，提交前需依功能切片整理並執行對應測試。

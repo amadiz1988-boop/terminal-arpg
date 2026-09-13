@@ -9,7 +9,7 @@
 | 狀態 | 任務 | 完成條件 |
 | --- | --- | --- |
 | done | 建立接手文件組 | `AGENTS.md`、`docs/ARCHITECTURE.md`、`docs/CURRENT_STATUS.md`、`docs/GAME_DESIGN.md`、`docs/TODO.md`、README 導覽互相連結，且描述符合實際檔案 |
-| todo | 固定公開入口 | 以 8788 Dashboard 為來源服務，完成固定網域、Tunnel 斷線行為、健康檢查與回復證據；通過公開手機流程後才標記完成 |
+| done | 固定公開入口 | `play.g8land.com` Named Tunnel 已由獨立 SYSTEM 排程與 watchdog 維護；受控斷線自動恢復、公開健康檢查與遊戲 PID 不變證據已完成 |
 | done | 管理後台外網唯讀入口 | `https://admin.g8land.com` 使用獨立 Named Tunnel、登入保護、限流、手機版與 watchdog；未登入 API 拒絕，控制權限維持關閉 |
 | done | 管理後台 Windows 自動復原 | SYSTEM 開機觸發加每分鐘冪等檢查，三個管理程序同時離線後仍可重新啟動；不操作遊戲服務與玩家執行器 |
 | done | D1 舊原型退出現行架構 | MariaDB、rAthena 與 OpenKore 為現行權威狀態；Vinext／D1 原型、Sites 設定與 3000 埠已封存並有自動阻擋 |

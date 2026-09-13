@@ -83,7 +83,11 @@
     "test:ops-agent:mobile": "node scripts/test-ops-agent-mobile-ui.mjs",
     "test:ops-agent:auth": "node scripts/test-ops-agent-auth.mjs",
     "test:ops-agent:public": "node scripts/test-ops-agent-public-access.mjs",
-    "test:ops-agent:autostart": "node scripts/test-ops-agent-autostart.mjs"
+    "test:ops-agent:autostart": "node scripts/test-ops-agent-autostart.mjs",
+    "player-web:autostart:install": "powershell -NoProfile -ExecutionPolicy Bypass -File ops/ro-stack/player-web-autostart.ps1 install",
+    "player-web:autostart:health": "powershell -NoProfile -ExecutionPolicy Bypass -File ops/ro-stack/player-web-autostart.ps1 health",
+    "player-web:autostart:uninstall": "powershell -NoProfile -ExecutionPolicy Bypass -File ops/ro-stack/player-web-autostart.ps1 uninstall",
+    "test:player-web:autostart": "node scripts/test-player-web-autostart.mjs"
   },
   "dependencies": {
     "@base-ui/react": "1.7.0",

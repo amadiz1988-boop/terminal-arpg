@@ -333,6 +333,14 @@
 - 新增「顯示裝備外觀」本機偏好開關。rAthena item 5583 的 `View: 465` 對應目前 Gravity 客戶端 `ACCESSORY_PARADE_CAP = 465` 與男女頭飾 ACT／SPR；弓箭手裝備名稱或 Aegis 名稱含 Bow／弓時使用男女通用弓圖層，攻擊動作改用原廠弓攻擊群組。
 - 官方裝備頁的 `Open equipment` 勾選用途是允許其他玩家查看裝備資訊，來源為 iRO Wiki Basic Game Control；本專案的「顯示裝備外觀」是角色展示台的本機顯示選項。Eden Uniform II、Boots II、Manteau I 在鎖定版 rAthena item DB 沒有 `View` 欄位，本輪不產生身體外觀圖層。
 - `npm run assets:showcase` 產出 4 組身體、84 組髮型與男女帽子／弓共 4 組裝備外觀；`npm run test:character-showcase`、`npm run test:eden-equipment`、`npm run build` 與差異格式檢查通過。本輪未進行公開發布。
+
+## 2026-09-13 玩家外網入口自動復原
+
+- `https://play.g8land.com` 的 Named Tunnel 曾於 16:18 後退出，舊 Dashboard watchdog 同時停止，公開入口回傳 HTTP 530；本機 `127.0.0.1:8788/api/health` 與遊戲三項服務仍健康。
+- 新增獨立玩家入口自癒服務，只管理 Dashboard 與 `play.g8land.com` Cloudflare Tunnel。Dashboard 使用 loopback `/api/health` 判斷存活，避免遊戲服務異常時誤重啟玩家網站。
+- Windows SYSTEM 排程於開機及每分鐘執行冪等補啟，背景 watchdog 每 15 秒檢查；程序消失時立即補啟，連線異常須連續 4 次才重啟，降低短暫網路波動造成的反覆切換。
+- 受控終止玩家 Tunnel 後，公開 `/api/health` 曾回傳 502；隔離 watchdog 實測於 18.8 秒內將 Tunnel PID 由 21132 更新為 46604 並恢復 HTTP 200，login、character、map PID 與啟動時間全程不變。
+- 瀏覽器實測 `https://play.g8land.com/` 顯示「鬼島傳說｜冒險掛機」及「伺服器正常」。`npm run test:player-web:autostart`、四份 PowerShell 語法解析與差異格式檢查通過。
 # 2026-09-12 任務與補給循環隔離
 
 - 實機重現角色 `賴清德` 執行伊甸園 Lv.12 裝備任務時，74.6% 負重高於玩家設定的55%門檻；一般補給在每次擊殺後介入，累計12次往返普隆德拉，且8 Zeny低於40 Zeny開倉門檻，任務只推進至 Baby Desert Wolf 3 / 10。
