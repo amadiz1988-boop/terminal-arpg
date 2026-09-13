@@ -9,6 +9,69 @@ description: 在大型 Repository 執行功能驗證、Integration、Vertical Sl
 
 此 Skill 只調整測試起點與範圍，不降低可信度、不跳過當前被測功能，也不擴大修改或操作權限。
 
+## Representative Evidence / Test Acceleration Rule
+
+固定原則：「可以加速環境，不可以偽造結果。」
+
+測試加速只可用於隔離測試帳號、fixture、PoC、regression 與 production-like 測試環境。正式玩家或 production gameplay 一律禁止。
+
+### Representative Evidence Gate
+
+加速前必須先保存至少一份真實 runtime evidence，證明與被加速重複條件相同的核心機制閉環有效。證據必須來自真實 authority，不接受 UI local state、mock success、手動改寫後的狀態或文字聲明。
+
+例如擊殺任務，必須先真實完成：
+
+```text
+target selection
+→ movement
+→ combat
+→ kill attribution
+→ rAthena 真實 quest progress 增加
+```
+
+只有這條鏈路已取得證據，後續同種怪物的純刷新等待才可加速。若核心機制、目標類型、authority 或被測邊界改變，必須重新取得 representative evidence。
+
+### 允許的環境加速
+
+- 生成測試怪物：已證明至少一次同種目標的完整擊殺與任務進度鏈後，可在隔離環境於角色附近生成剩餘同種怪物。Agent 仍必須自行找怪、移動、攻擊與擊殺，rAthena 仍必須自行增加 quest progress。
+- 測試角色等級加速：已證明真實 EXP 與 Job EXP 正常增加後，可為進入下一測試門檻調整隔離角色等級。必須記錄加速前後數值與原因，不將結果當成養成效率或 leveling persistence 證據。
+- 測試資源補充：已證明對應的 item consumption、loot 或 inventory 流程後，可為後續非資源型測試補充 fixture 資源。補充必須標記 fixture，使用行為仍走原生 item use，且不將補充當成 gameplay reward 或 loot evidence。
+- Fixture cooldown／timer 縮短：只限自訂 fixture，不修改正式 RO rule 的 production 數值。
+- 大量重複操作：核心行為已有 representative evidence 後，可縮短不具新增測試價值的純等待，但不得省略仍處於本輪驗證邊界內的系統動作。
+
+### 禁止的結果偽造
+
+- 直接修改 quest count、以 SQL 直接改 quest state 或直接標記 quest complete。
+- 直接發放正式 quest reward。
+- 直接改 Inventory 並將其當成 loot evidence，或直接改 Zeny 並將其當成 shop／service evidence。
+- 直接改 HP／SP 並將其當成 recovery evidence。
+- 跳過當前被測的 NPC script、Navigation、ownership collision、restart recovery 或 reward confirmation。
+- 偽造 restart recovery、reward confirmation 或任何 authority event。
+- 將 fixture、PoC 或 isolated representative 結果稱為 production PASS。
+
+Fixture 可以保存已由真實系統建立的前置 Quest State checkpoint，但不可在當前被測 Quest 中直接改寫 count、state、completion 或 reward。
+
+### Evidence 記錄
+
+每次使用加速都必須在 runtime evidence、`RESULTS.md` 或 Roadmap 中寫入：
+
+- `TEST ACCELERATION`
+- 加速原因。
+- 加速前已取得的真實證據。
+- 加速的環境條件。
+- 仍由真實系統產生的結果。
+- 對 production validity 的影響。
+
+### 固定判斷案例
+
+1. 等怪刷新五分鐘，已有一次真實 kill 與 progress evidence：`ALLOW test spawn`。
+2. 任務尚未真實擊殺任何目標怪：`DENY progress acceleration`。
+3. 已證明真實 EXP gain：`ALLOW test-only level acceleration`，不納入養成效率證據。
+4. 尚未驗證 loot：`DENY inventory grant as loot PASS`。
+5. 正式玩家或 production gameplay：`DENY test acceleration`。
+
+Eden Course A 例子：Scorpion `0/5 → 1/5` 必須已透過真實 target selection、movement、combat、kill attribution 與 rAthena quest progress 取得證據。滿足後可以 test-only spawn 剩餘四隻 Scorpion，由 Agent 自行完成擊殺並由 rAthena 將進度推至 `5/5`；不可直接把 quest count 改為 5。
+
 ## 執行前必填
 
 先明確列出：
@@ -19,6 +82,7 @@ description: 在大型 Repository 執行功能驗證、Integration、Vertical Sl
 - 必要前置條件。
 - 本輪不需重新驗證的已完成功能。
 - 使用的 fixture、checkpoint、snapshot、known-good character 或 isolated DB state。
+- Representative Evidence Gate 是否滿足，以及本輪是否使用 Test Acceleration。
 - 是否需要超過 1 分鐘的等待型操作。
 
 若等待本身不屬於本輪被測功能，先尋找同等可信的 fixture、checkpoint、known-good state、snapshot 或 deterministic reset。存在較短路徑時，採用較短路徑。
@@ -52,7 +116,7 @@ Full E2E 不作為每次 feature 修改後的預設循環。
 
 ## Fixture 與 Checkpoint
 
-已穩定且已驗證的前置系統優先建立或沿用 reusable fixture。Fixture 可包含固定隔離測試身份、職業、Base／Job Level、技能、Inventory、Zeny、Quest State、位置、補給、死亡或 Trial 狀態。
+已穩定且已驗證的前置系統優先建立或沿用 reusable fixture。Fixture 可包含固定隔離測試身份、職業、Base／Job Level、技能、Inventory、Zeny、已由真實系統建立的前置 Quest State checkpoint、位置、補給、死亡或 Trial 狀態。
 
 Fixture 必須：
 
@@ -128,5 +192,6 @@ Component
 - 使用的 fixture 或 checkpoint。
 - 是否重跑高成本前置及原因。
 - 是否建立可重用 checkpoint。
+- 是否使用 Test Acceleration；若有，附上 Representative Evidence Gate 與完整 evidence 記錄。
 - Targeted regression 結果。
 - 是否執行 Full E2E及其依據。

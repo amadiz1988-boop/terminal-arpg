@@ -19,6 +19,7 @@ description: 在 terminal-arpg 開始 substantial Repository 工作前，依複�
 1. 先檢查 Astra 閘門，再檢查 Sol High 條件；其餘使用預設值。
 2. 根因已確認且只剩明確 patch 時，即使前輪使用 High 或 Astra，也提醒可降回 Sol Medium。
 3. 最後依速度規則決定 `1x` 或 `1.5x`。模型升級不得擴大任務範圍。
+4. 涉及隔離測試、PoC、runtime regression、fixture 或長時間重複條件時，同時讀取 `.agents/skills/nearest-valid-test-state/SKILL.md` 的 Representative Evidence Gate。模型或速度建議不構成測試加速授權。
 
 ## 預設：GPT-5.6 Sol / Medium / 1x
 
