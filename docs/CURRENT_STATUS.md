@@ -22,7 +22,7 @@
 - Windows Native Provider 讀取現行 stack config、受管 process state、listener、Dashboard local health、Cloudflare public health、MariaDB read-only query、rAthena service-link log marker、OpenKore heartbeat 與 MariaDB ownership authority。實際連接埠取自 `stack.config.psd1`。
 - 每項網路、HTTP、程序與資料庫檢查都有 timeout；低權限無法取得程序資訊時回 `unknown`。API 固定移除秘密、完整路徑及命令列，POST、PUT、PATCH、DELETE 均回 `405 READ_ONLY`。
 - `ops-agent-service.ps1` 只管理 Ops Agent 自身，不操作 Dashboard、Tunnel、MariaDB、rAthena、OpenKore 或角色 ownership。可用 `npm run ops:agent:start|health|stop` 管理本機程序。
-- Component fixture 驗證全健康、Dashboard 停止、PID 證據不足、provider ownership、唯讀能力及 mutation rejection；真實唯讀冒煙測試成功回傳 7 個服務與 51 個具有 MariaDB ownership 結果的角色。公開 Tunnel 在第一次取樣回 `HEALTHCHECK_FAILED`，隨後獨立 HTTPS 查核回 HTTP 200，因此這一筆只保留為當次瞬時取樣。
+- Component fixture 驗證全健康、Dashboard 停止、PID 證據不足、provider ownership、唯讀能力及 mutation rejection；真實唯讀冒煙測試成功回傳 7 個服務與 51 個具有 MariaDB ownership 結果的角色。冒煙測試發現 PowerShell Tunnel state 含 UTF-8 BOM，初版會誤判公開入口；解析器加入 BOM regression 後，Ops Agent 與獨立 HTTPS 查核均回健康。
 - Phase 1 沒有啟動常駐 Ops Agent、沒有重啟任何現行服務，也沒有對正式角色或 MariaDB 寫入。外網管理認證、incident snapshot、手機管理頁與控制按鈕仍未建立。
 
 ## 2026-09-13 地圖情報隨目前地圖更新

@@ -24,7 +24,8 @@ export function evidence(type, status, reasonCode, summary, now = Date.now) {
 
 export async function readJson(path) {
   try {
-    return JSON.parse(await readFile(path, 'utf8'));
+    const text = await readFile(path, 'utf8');
+    return JSON.parse(text.replace(/^\uFEFF/, ''));
   } catch (error) {
     if (error?.code === 'ENOENT') return null;
     throw error;

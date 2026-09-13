@@ -9,6 +9,7 @@ import {
   collectCharacters,
   collectServices,
 } from '../ops/ro-stack/ops-agent/provider.mjs';
+import { readJson } from '../ops/ro-stack/ops-agent/probes.mjs';
 import { createOpsAgentServer } from '../ops/ro-stack/ops-agent/server.mjs';
 
 const root = await mkdtemp(join(tmpdir(), 'ops-agent-test-'));
@@ -45,6 +46,15 @@ try {
     publicUrl: 'https://example.test',
     startedAt: nowValue - 40000,
   });
+  await writeFile(
+    join(runtimeRoot, 'dashboard', 'bom-state.json'),
+    `\uFEFF${JSON.stringify({ ok: true })}`,
+    'utf8',
+  );
+  assert.equal(
+    (await readJson(join(runtimeRoot, 'dashboard', 'bom-state.json'))).ok,
+    true,
+  );
   await json(join(runtimeRoot, 'instances', 'player_2000001', 'state.json'), {
     pid: 106,
     startedAt: nowValue - 30000,
