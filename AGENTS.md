@@ -6,6 +6,18 @@
 
 執行大型功能驗證、Integration、Vertical Slice、Restart、Quest、Agent 或長時間自動化測試前，必須讀取 `.agents/skills/nearest-valid-test-state/SKILL.md`。除非任務明確要求 Full End-to-End Regression，測試必須從距離被測功能最近、合法、可重現且不污染正式資料的已知狀態開始。不得為取得後段測試資格，重跑與本輪目標無直接關係的練等、農素材、onboarding、一轉、長距離導航或已驗證任務鏈。
 
+### Representative Evidence / Test Acceleration Rule
+
+固定原則：「可以加速環境，不可以偽造結果。」測試加速只限隔離測試帳號、fixture、PoC、regression 或 production-like 測試環境；正式玩家與 production gameplay 全數禁止。
+
+啟用加速前，必須先以真實 runtime evidence 完成至少一次與被加速重複條件相同的核心機制閉環。例如擊殺任務必須先證明 target selection → movement → combat → kill attribution → rAthena 真實 quest progress 增加，後續才可在隔離環境生成剩餘同種測試怪物。Agent 仍必須自行尋找、移動、戰鬥與擊殺，任務進度仍由 rAthena 原生機制產生。EXP／Job EXP、測試資源、fixture cooldown／timer 與重複純等待也適用相同閥門。
+
+禁止直接修改 quest count、以 SQL 改 quest state、直接標記 quest complete、直接發放正式 quest reward，或將手動改寫 Inventory、Zeny、HP／SP 當成 loot、shop／service、recovery evidence。不得跳過當前被測的 NPC script、Navigation、ownership collision、restart recovery 或 reward confirmation，也不得將 fixture 結果稱為 production PASS。
+
+每次使用測試加速，必須在 runtime evidence、`RESULTS.md` 或 Roadmap 標記 `TEST ACCELERATION`，並記錄加速原因、加速前真實證據、被調整的環境條件、仍由真實系統產生的結果，以及對 production validity 的影響。完整決策與範例見 `.agents/skills/nearest-valid-test-state/SKILL.md`。
+
+修改 Quest、NPC、補給、回程、掛機地圖或其他自動導航前，必須讀取 `.agents/skills/navigation-stall-safety/SKILL.md`。所有導航步驟都要以地圖變更、座標變更、有效 NPC 對話或任務階段推進判定進度；相同動作不得高頻重送，重試不得刷新自身停滯計時，並必須具備有限重試、已查核替代路線及恢復一般自動操作的終止狀態。
+
 ## 新工作讀取順序
 
 開始任何修改前，依序讀取：
@@ -122,5 +134,6 @@ git diff --check
 - `implement-feature`：依最小修改範圍實作、測試並更新現況。
 - `debug-bug`：依錯誤證據定位、最小修正、回歸測試並記錄結果。
 - `nearest-valid-test-state`：大型測試先定義被測功能與合法起點，優先使用 fixture／checkpoint，限制高成本前置與 Full E2E。
+- `navigation-stall-safety`：任務、NPC、補給與掛機導航必須有可觀察進度、有限重試、替代路線及安全終止。
 
 使用方式可直接在任務中指定 `$project-handoff`、`$implement-feature` 或 `$debug-bug`，也可由符合描述的工作按需觸發。這些 Skill 不取代本文件的驗證、來源與修改邊界規則。
