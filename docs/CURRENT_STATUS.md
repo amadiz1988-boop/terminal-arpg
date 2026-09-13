@@ -1,12 +1,22 @@
 # 目前狀態
 
+## 2026-09-13 管理後台固定外網入口與登入保護
+
+- 固定 HTTPS 入口為 `https://admin.g8land.com`。獨立 Cloudflare Named Tunnel `g8land-admin` 只轉送至 loopback `127.0.0.1:8790`，不改動玩家入口或 rAthena、OpenKore、MariaDB。
+- 所有管理頁、JavaScript 與 `/api/v1/*` 均要求管理員登入；未登入 API 回 `401 AUTH_REQUIRED`。登入密碼以 scrypt 雜湊保存，session cookie 使用 HMAC、HttpOnly、SameSite Strict，經 HTTPS 時加上 Secure，效期 12 小時。
+- 登入失敗同時套用來源與全域十分鐘限流；回應包含 HSTS、CSP、no-referrer、noindex、Permissions-Policy 與 nosniff。憑證檔不保存明文密碼，Windows ACL 僅允許 Administrator 與 SYSTEM。
+- 新增獨立 Ops Agent Tunnel 與 15 秒 watchdog；watchdog 只恢復 Ops Agent 及其 Tunnel，連續兩次健康檢查失敗才重啟 Ops Agent，不操作玩家 Dashboard 或遊戲服務。
+- 公開 Integration 驗證通過：未登入首頁顯示登入頁、未登入 API 為 401、正確登入為 200、登入後 evidence API 為 200，八項服務全數 healthy。玩家公開 Dashboard 同時維持 HTTP 200。
+- 角色 Runtime 已區分 `active`、`stopped`、`unknown`。歷史或已停止程序不再被 `STALE_HEARTBEAT` 誤列為警示；公開驗證結果為 51 筆角色紀錄、16 個執行中、35 個已停止、0 個需處理警示。
+- 管理頁優先顯示角色名稱、白話原因與處理建議；帳號 ID、provider、lifecycle 與原始錯誤碼收進「進階資訊」。已停止紀錄預設隱藏，可由管理者手動展開。
+- `OPS_AGENT_AUTH_PASS`、`OPS_AGENT_CONTRACT_PASS`、`OPS_AGENT_READONLY_PASS`、`OPS_AGENT_INCIDENTS_PASS` 與 390×844 `OPS_AGENT_MOBILE_UI_PASS` 全數通過。控制 API 仍保持關閉。
+
 ## 2026-09-13 Ops Agent 手機管理頁
 
-- `http://127.0.0.1:8790/` 新增獨立管理頁，390×844 為主要版型。畫面顯示整體健康、7 類服務、角色 runtime、事故時間線、reason code、heartbeat、PID、Port 與逐項 evidence。
+- `http://127.0.0.1:8790/` 新增獨立管理頁，390×844 為主要版型。畫面顯示整體健康、8 類服務、角色 runtime、事故時間線與逐項 evidence。
 - 管理頁只讀取版本化 Ops Agent API，不解析 OpenKore log、命令目錄或 Persistent Agent 內部格式。角色搜尋支援帳號 ID、角色 ID、地圖及 provider；異常角色優先排列。
-- 所有互動均可用 tap 操作，主要按鈕及 evidence summary 觸控高度至少 44px。Chrome 以 390×844 驗證 7 個服務卡、角色卡、事故詳情、零水平 overflow、零前端 runtime error，結果為 `OPS_AGENT_MOBILE_UI_PASS`。
-- HTTP 回應加入同源 CSP、`nosniff`、`no-store`；頁面沒有啟動、停止、重啟、kill、claim 或 release 控制。Ops Agent 仍只綁定 loopback，未開放外網管理入口。
-- Phase 2 本機唯讀 Gate 已完成。管理者認證、CSRF、rate limit、獨立私有外網入口及 Phase 3 安全控制仍待後續功能切片。
+- 所有互動均可用 tap 操作，主要按鈕及 evidence summary 觸控高度至少 44px。Chrome 以 390×844 驗證 8 個服務卡、角色卡、事故詳情、零水平 overflow、零前端 runtime error，結果為 `OPS_AGENT_MOBILE_UI_PASS`。
+- Phase 2 本機與公開唯讀 Gate 已完成。Phase 3 安全控制仍待後續功能切片。
 
 ## 2026-09-13 Ops Agent Incident Snapshot
 
@@ -22,8 +32,8 @@
 - Windows Native Provider 讀取現行 stack config、受管 process state、listener、Dashboard local health、Cloudflare public health、MariaDB read-only query、rAthena service-link log marker、OpenKore heartbeat 與 MariaDB ownership authority。實際連接埠取自 `stack.config.psd1`。
 - 每項網路、HTTP、程序與資料庫檢查都有 timeout；低權限無法取得程序資訊時回 `unknown`。API 固定移除秘密、完整路徑及命令列，POST、PUT、PATCH、DELETE 均回 `405 READ_ONLY`。
 - `ops-agent-service.ps1` 只管理 Ops Agent 自身，不操作 Dashboard、Tunnel、MariaDB、rAthena、OpenKore 或角色 ownership。可用 `npm run ops:agent:start|health|stop` 管理本機程序。
-- Component fixture 驗證全健康、Dashboard 停止、PID 證據不足、provider ownership、唯讀能力及 mutation rejection；真實唯讀冒煙測試成功回傳 7 個服務與 51 個具有 MariaDB ownership 結果的角色。冒煙測試發現 PowerShell Tunnel state 含 UTF-8 BOM，初版會誤判公開入口；解析器加入 BOM regression 後，Ops Agent 與獨立 HTTPS 查核均回健康。
-- Phase 1 沒有啟動常駐 Ops Agent、沒有重啟任何現行服務，也沒有對正式角色或 MariaDB 寫入。外網管理認證、incident snapshot、手機管理頁與控制按鈕仍未建立。
+- Component fixture 驗證全健康、Dashboard 停止、PID 證據不足、provider ownership、唯讀能力及 mutation rejection；真實唯讀冒煙測試成功回傳 8 個服務與 51 個具有 MariaDB ownership 結果的角色。冒煙測試發現 PowerShell Tunnel state 含 UTF-8 BOM，解析器加入 BOM regression 後公開入口查核回健康。
+- Phase 1 與 Phase 2 已啟動常駐 Ops Agent、獨立管理 Tunnel 與 watchdog。沒有重啟玩家 Dashboard、rAthena、OpenKore 或 MariaDB，也沒有對正式角色或 MariaDB 寫入。控制按鈕仍未建立。
 
 ## 2026-09-13 地圖情報隨目前地圖更新
 

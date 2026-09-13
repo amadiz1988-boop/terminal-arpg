@@ -23,6 +23,7 @@ export type RuntimeProvider =
   | 'server-agent'
   | 'client'
   | 'unknown';
+export type RuntimeLifecycle = 'active' | 'stopped' | 'unknown';
 export type ControlOwner = 'OPENKORE' | 'SERVER_AGENT' | 'CLIENT';
 export type OwnershipState =
   | 'OPENKORE'
@@ -114,9 +115,11 @@ export interface CharacterRuntimeStatus {
   schemaVersion: 1;
   accountId: number;
   characterId: number;
+  characterName: string;
   owner: ControlOwner;
   ownershipState: OwnershipState;
   provider: RuntimeProvider;
+  lifecycle: RuntimeLifecycle;
   mode: string | null;
   map: string | null;
   lastHeartbeatAt: string | null;
@@ -159,6 +162,7 @@ export const ServiceState: Readonly<Record<string, ServiceState>>;
 export const EvidenceType: Readonly<Record<string, EvidenceType>>;
 export const EvidenceStatus: Readonly<Record<string, EvidenceStatus>>;
 export const RuntimeProvider: Readonly<Record<string, RuntimeProvider>>;
+export const RuntimeLifecycle: Readonly<Record<string, RuntimeLifecycle>>;
 export const ControlOwner: Readonly<Record<ControlOwner, ControlOwner>>;
 export const OwnershipState: Readonly<Record<OwnershipState, OwnershipState>>;
 export const OpsCapability: Readonly<Record<string, OpsCapability>>;

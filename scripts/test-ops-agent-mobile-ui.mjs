@@ -97,6 +97,13 @@ try {
     pid: 105,
     publicUrl: 'https://example.test',
   });
+  await json(join(runtimeRoot, 'ops-agent', 'tunnel-state.json'), {
+    pid: 107,
+    publicUrl: 'https://admin.example.test',
+  });
+  await json(join(runtimeRoot, 'instances', 'player_2000001', 'state.json'), {
+    pid: 106,
+  });
   await json(join(runtimeRoot, 'instances', 'player_2000001', 'status.json'), {
     name: 'MobileFixture',
     map: 'prt_fild08',
@@ -207,7 +214,7 @@ try {
   });
   await waitFor(
     () => evaluate("document.querySelectorAll('.service-card').length"),
-    (value) => value === 7,
+    (value) => value === 8,
   );
   const result = await evaluate(`(() => ({
     title: document.querySelector('h1')?.textContent,
@@ -218,11 +225,11 @@ try {
     pageWidth: document.documentElement.scrollWidth,
     viewportWidth: innerWidth,
     refreshHeight: document.querySelector('#refreshButton').getBoundingClientRect().height,
-    forbiddenControls: [...document.querySelectorAll('button')].filter((button) => /啟動|停止|重啟|kill|claim|release/i.test(button.textContent)).length,
+    forbiddenControls: document.querySelectorAll('[data-ops-action]').length,
   }))()`);
   assert.equal(result.title, '伺服器管理後台');
   assert.equal(result.readonly, '唯讀監控');
-  assert.equal(result.serviceCount, 7);
+  assert.equal(result.serviceCount, 8);
   assert.equal(result.characterCount, 1);
   assert.equal(result.incidentCount, 1);
   assert.ok(result.pageWidth <= result.viewportWidth);

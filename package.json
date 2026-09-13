@@ -12,6 +12,14 @@
     "ops:agent:start": "powershell -NoProfile -ExecutionPolicy Bypass -File ops/ro-stack/ops-agent-service.ps1 start",
     "ops:agent:health": "powershell -NoProfile -ExecutionPolicy Bypass -File ops/ro-stack/ops-agent-service.ps1 health",
     "ops:agent:stop": "powershell -NoProfile -ExecutionPolicy Bypass -File ops/ro-stack/ops-agent-service.ps1 stop",
+    "ops:agent:auth:init": "node ops/ro-stack/ops-agent/setup-auth.mjs initialize",
+    "ops:agent:auth:rotate": "node ops/ro-stack/ops-agent/setup-auth.mjs rotate",
+    "ops:agent:tunnel:start": "powershell -NoProfile -ExecutionPolicy Bypass -File ops/ro-stack/ops-agent-tunnel.ps1 start",
+    "ops:agent:tunnel:health": "powershell -NoProfile -ExecutionPolicy Bypass -File ops/ro-stack/ops-agent-tunnel.ps1 health",
+    "ops:agent:tunnel:stop": "powershell -NoProfile -ExecutionPolicy Bypass -File ops/ro-stack/ops-agent-tunnel.ps1 stop",
+    "ops:agent:watchdog:start": "powershell -NoProfile -ExecutionPolicy Bypass -File ops/ro-stack/ops-agent-watchdog.ps1 start",
+    "ops:agent:watchdog:health": "powershell -NoProfile -ExecutionPolicy Bypass -File ops/ro-stack/ops-agent-watchdog.ps1 health",
+    "ops:agent:watchdog:stop": "powershell -NoProfile -ExecutionPolicy Bypass -File ops/ro-stack/ops-agent-watchdog.ps1 stop",
     "test": "vitest run",
     "qa:ui": "node scripts/legacy-web-disabled.mjs qa:ui",
     "test:release": "node scripts/legacy-web-disabled.mjs test:release",
@@ -69,7 +77,9 @@
     "test:ops-agent:contract": "node scripts/test-ops-agent-contract.mjs",
     "test:ops-agent:readonly": "node scripts/test-ops-agent-readonly.mjs",
     "test:ops-agent:incidents": "node scripts/test-ops-agent-incidents.mjs",
-    "test:ops-agent:mobile": "node scripts/test-ops-agent-mobile-ui.mjs"
+    "test:ops-agent:mobile": "node scripts/test-ops-agent-mobile-ui.mjs",
+    "test:ops-agent:auth": "node scripts/test-ops-agent-auth.mjs",
+    "test:ops-agent:public": "node scripts/test-ops-agent-public-access.mjs"
   },
   "dependencies": {
     "@base-ui/react": "1.7.0",

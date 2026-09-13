@@ -67,6 +67,11 @@ export async function loadOpsAgentConfig(overrides = {}) {
     characterPort: validPort(stack.CharacterPort, 6122),
     mapPort: validPort(stack.MapPort, 5122),
     dashboardPort: validPort(overrides.dashboardPort, 8788),
+    authFile: resolve(
+      overrides.authFile ??
+        process.env.OPS_AGENT_AUTH_FILE ??
+        join(runtimeRoot, 'ops-agent', 'auth.json'),
+    ),
   });
 }
 

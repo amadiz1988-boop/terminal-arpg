@@ -41,6 +41,12 @@ export const RuntimeProvider = Object.freeze({
   UNKNOWN: 'unknown',
 });
 
+export const RuntimeLifecycle = Object.freeze({
+  ACTIVE: 'active',
+  STOPPED: 'stopped',
+  UNKNOWN: 'unknown',
+});
+
 export const ControlOwner = Object.freeze({
   OPENKORE: 'OPENKORE',
   SERVER_AGENT: 'SERVER_AGENT',
@@ -167,6 +173,13 @@ function assertSummary(value) {
   if (value == null) return null;
   if (typeof value !== 'string' || value.length > 512) {
     throw new TypeError('evidence.summary is invalid');
+  }
+  return value;
+}
+
+function assertDisplayName(value, label) {
+  if (typeof value !== 'string' || value.length < 1 || value.length > 64) {
+    throw new TypeError(`${label} is invalid`);
   }
   return value;
 }
@@ -312,6 +325,10 @@ export function assertCharacterRuntimeStatus(value) {
       'runtimeStatus.characterId',
       { minimum: 1 },
     ),
+    characterName: assertDisplayName(
+      status.characterName,
+      'runtimeStatus.characterName',
+    ),
     owner,
     ownershipState: assertEnum(
       status.ownershipState,
@@ -319,6 +336,11 @@ export function assertCharacterRuntimeStatus(value) {
       'runtimeStatus.ownershipState',
     ),
     provider,
+    lifecycle: assertEnum(
+      status.lifecycle,
+      RuntimeLifecycle,
+      'runtimeStatus.lifecycle',
+    ),
     mode: assertNullableIdentifier(status.mode, 'runtimeStatus.mode'),
     map,
     lastHeartbeatAt: assertTimestamp(

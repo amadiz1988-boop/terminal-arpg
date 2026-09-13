@@ -10,6 +10,16 @@ $projectRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 $runtime = Join-Path $projectRoot '.local\ro-stack\ops-agent'
 $statePath = Join-Path $runtime 'state.json'
 $scriptPath = Join-Path $PSScriptRoot 'ops-agent\server.mjs'
+$effectiveRuntimeRoot = if ($env:OPS_AGENT_RUNTIME_ROOT) {
+  (Resolve-Path -LiteralPath $env:OPS_AGENT_RUNTIME_ROOT).Path
+} else {
+  Join-Path $projectRoot '.local\ro-stack'
+}
+$authPath = if ($env:OPS_AGENT_AUTH_FILE) {
+  $env:OPS_AGENT_AUTH_FILE
+} else {
+  Join-Path $effectiveRuntimeRoot 'ops-agent\auth.json'
+}
 $port = if ($env:OPS_AGENT_PORT) { [int]$env:OPS_AGENT_PORT } else { 8790 }
 if (-not $env:OPS_AGENT_PORT -and (Test-Path -LiteralPath $statePath)) {
   try {
@@ -37,7 +47,12 @@ if ($Action -eq 'health') {
     $loopbackOnly = $listeners.Count -gt 0 -and @(
       $listeners | Where-Object { $_.LocalAddress -notin @('127.0.0.1', '::1') }
     ).Count -eq 0
-    if ($health.ok -and $health.mode -eq 'read-only' -and $loopbackOnly) {
+    if (
+      $health.ok -and
+      $health.mode -eq 'read-only' -and
+      $health.access -eq 'authenticated' -and
+      $loopbackOnly
+    ) {
       Write-Host 'OPS_AGENT_HEALTHY'
       exit 0
     }
@@ -57,6 +72,10 @@ if ($Action -eq 'stop') {
 if (Get-OpsAgentProcess) {
   Write-Host 'Ops Agent already running.'
   exit 0
+}
+
+if (-not (Test-Path -LiteralPath $authPath)) {
+  throw 'Ops Agent authentication is not initialized. Run npm run ops:agent:auth:init first.'
 }
 
 New-Item -ItemType Directory -Force -Path $runtime | Out-Null

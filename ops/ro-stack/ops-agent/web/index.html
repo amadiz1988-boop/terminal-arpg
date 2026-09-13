@@ -15,7 +15,10 @@
         <p class="eyebrow">GHOST ISLAND OPERATIONS</p>
         <h1>伺服器管理後台</h1>
       </div>
-      <span class="readonly-badge">唯讀監控</span>
+      <div class="header-actions">
+        <span class="readonly-badge">唯讀監控</span>
+        <button id="logoutButton" class="text-button" type="button">登出</button>
+      </div>
     </header>
 
     <main>
@@ -30,8 +33,8 @@
       <section class="summary-grid" aria-label="狀態摘要">
         <article><span>正常服務</span><strong id="healthyCount">0</strong></article>
         <article><span>異常服務</span><strong id="issueCount">0</strong></article>
-        <article><span>角色 Runtime</span><strong id="characterCount">0</strong></article>
-        <article><span>角色警示</span><strong id="characterIssueCount">0</strong></article>
+        <article><span>執行中角色</span><strong id="activeCharacterCount">0</strong></article>
+        <article><span>需處理警示</span><strong id="characterIssueCount">0</strong></article>
       </section>
 
       <section class="panel">
@@ -44,12 +47,17 @@
 
       <section class="panel">
         <div class="section-heading character-heading">
-          <div><p class="eyebrow">RUNTIME</p><h2>角色執行狀態</h2></div>
+          <div>
+            <p class="eyebrow">RUNTIME</p>
+            <h2>角色執行狀態</h2>
+            <span class="section-note" id="characterRecordSummary"></span>
+          </div>
           <label class="search-field">
             <span class="sr-only">搜尋帳號或角色編號</span>
             <input id="characterSearch" inputmode="numeric" placeholder="搜尋 ID 或地圖" />
           </label>
         </div>
+        <button class="secondary-button" id="toggleStoppedButton" type="button">顯示已停止紀錄</button>
         <p class="empty-state hidden" id="characterEmpty">目前沒有可顯示的角色資料。</p>
         <div class="character-list" id="characterList"></div>
       </section>
@@ -65,7 +73,7 @@
       </section>
 
       <p class="footer-note">
-        此頁只顯示證據，不提供啟動、停止、重啟或角色控制。最後更新：<span id="lastUpdated">尚未更新</span>
+        此頁提供唯讀診斷與處理建議，不會直接操作伺服器或角色。最後更新：<span id="lastUpdated">尚未更新</span>
       </p>
     </main>
   </body>

@@ -9,6 +9,7 @@ import {
   OwnershipState,
   ReasonCode,
   RuntimeProvider,
+  RuntimeLifecycle,
   ServiceProvider,
   ServiceState,
   assertCharacterRuntimeStatus,
@@ -188,10 +189,13 @@ export async function collectServices(config, options = {}) {
     queryMariaDb: options.queryMariaDb ?? queryMariaDb,
     tailContains: options.tailContains ?? tailContains,
   };
-  const [stackState, dashboardState, tunnelState] = await Promise.all([
+  const [stackState, dashboardState, tunnelState, adminTunnelState] = await Promise.all([
     readJson(join(config.runtimeRoot, 'state.json')).catch(() => null),
     readJson(join(config.runtimeRoot, 'dashboard', 'state.json')).catch(() => null),
     readJson(join(config.runtimeRoot, 'dashboard', 'tunnel-state.json')).catch(
+      () => null,
+    ),
+    readJson(join(config.runtimeRoot, 'ops-agent', 'tunnel-state.json')).catch(
       () => null,
     ),
   ]);
@@ -322,6 +326,59 @@ export async function collectServices(config, options = {}) {
     stoppedWhenProcessMissing: true,
   });
 
+  let adminPublicHealthUrl = null;
+  try {
+    const candidate = new URL(adminTunnelState?.publicUrl ?? '');
+    if (candidate.protocol === 'https:' && !candidate.username && !candidate.password) {
+      candidate.pathname = '/health';
+      candidate.search = '';
+      candidate.hash = '';
+      adminPublicHealthUrl = candidate.href;
+    }
+  } catch {}
+  const [adminTunnelProcess, adminTunnelHttp] = await Promise.all([
+    adminTunnelState
+      ? dependencies.probeProcess(
+          { ...adminTunnelState, expectedName: 'cloudflared.exe' },
+          { timeoutMs: config.timeoutMs },
+        )
+      : Promise.resolve({ state: 'unknown' }),
+    adminPublicHealthUrl
+      ? dependencies.probeHttp(adminPublicHealthUrl, { timeoutMs: config.timeoutMs })
+      : Promise.resolve({ ok: false }),
+  ]);
+  const adminTunnel = serviceStatus({
+    serviceId: 'ops-admin-tunnel',
+    pid:
+      adminTunnelProcess.state === 'running' ? adminTunnelProcess.pid : null,
+    startedAt:
+      adminTunnelProcess.startedAt ?? epochToIso(adminTunnelState?.startedAt),
+    lastHeartbeatAt: adminTunnelHttp.ok ? new Date(now()).toISOString() : null,
+    evidence: [
+      evidence(
+        EvidenceType.PROCESS,
+        probeStatus(adminTunnelProcess),
+        adminTunnelProcess.state === 'running'
+          ? null
+          : adminTunnelProcess.state === 'unknown'
+            ? ReasonCode.EVIDENCE_INSUFFICIENT
+            : ReasonCode.PROCESS_NOT_FOUND,
+        safeProcessSummary(adminTunnelProcess, 'cloudflared'),
+        now,
+      ),
+      makeEvidence(
+        EvidenceType.HTTP,
+        adminTunnelHttp.ok,
+        reasonForProbe(adminTunnelHttp, ReasonCode.HEALTHCHECK_FAILED),
+        adminTunnelHttp.ok
+          ? `admin public health returned HTTP ${adminTunnelHttp.status}`
+          : 'admin public health unavailable',
+        now,
+      ),
+    ],
+    stoppedWhenProcessMissing: true,
+  });
+
   const databaseResult = await Promise.allSettled([
     dependencies.probeTcp(config.mariaDbPort, { timeoutMs: config.timeoutMs }),
     dependencies.queryMariaDb(config, 'SELECT 1;'),
@@ -398,7 +455,16 @@ export async function collectServices(config, options = {}) {
     ),
   ]);
 
-  return [opsAgent, dashboard, tunnel, database, login, character, map];
+  return [
+    opsAgent,
+    adminTunnel,
+    dashboard,
+    tunnel,
+    database,
+    login,
+    character,
+    map,
+  ];
 }
 
 function providerForOwner(owner) {
@@ -465,6 +531,7 @@ async function countCommandQueue(path) {
 export async function collectCharacters(config, options = {}) {
   const now = options.now ?? Date.now;
   const query = options.queryMariaDb ?? queryMariaDb;
+  const processProbe = options.probeProcess ?? probeProcess;
   const instances = await instanceDirectories(config.runtimeRoot);
   if (!instances.length) return { characters: [], warnings: [] };
   const accountIds = instances.map((instance) => instance.accountId).join(',');
@@ -486,9 +553,10 @@ export async function collectCharacters(config, options = {}) {
   const characters = [];
   const warnings = [];
   for (const instance of instances) {
-    const status = await readJson(join(instance.path, 'status.json')).catch(
-      () => null,
-    );
+    const [status, trackedState] = await Promise.all([
+      readJson(join(instance.path, 'status.json')).catch(() => null),
+      readJson(join(instance.path, 'state.json')).catch(() => null),
+    ]);
     const accountCharacters = ownershipRows.get(instance.accountId) ?? [];
     const ownership =
       accountCharacters.find((row) => row.characterName === status?.name) ??
@@ -497,14 +565,31 @@ export async function collectCharacters(config, options = {}) {
       warnings.push(`OWNERSHIP_MISSING:${instance.accountId}`);
       continue;
     }
+    const processResult = trackedState
+      ? await processProbe(
+          { ...trackedState, expectedName: 'start.exe' },
+          { timeoutMs: config.timeoutMs },
+        )
+      : { state: 'missing' };
+    const lifecycle =
+      processResult.state === 'running'
+        ? RuntimeLifecycle.ACTIVE
+        : processResult.state === 'unknown'
+          ? RuntimeLifecycle.UNKNOWN
+          : RuntimeLifecycle.STOPPED;
     const heartbeat = epochToIso(status?.updatedAt);
     const stale =
       !heartbeat || now() - Number(status.updatedAt) > config.staleHeartbeatMs;
-    const ownershipConflict = ownership.owner === ControlOwner.SERVER_AGENT && !stale;
+    const ownershipConflict =
+      lifecycle === RuntimeLifecycle.ACTIVE &&
+      ownership.owner === ControlOwner.SERVER_AGENT &&
+      !stale;
     const lastErrorCode = ownershipConflict
       ? ReasonCode.OWNERSHIP_CONFLICT
-      : stale
+      : lifecycle === RuntimeLifecycle.ACTIVE && stale
         ? ReasonCode.STALE_HEARTBEAT
+        : lifecycle === RuntimeLifecycle.UNKNOWN
+          ? ReasonCode.EVIDENCE_INSUFFICIENT
         : null;
     const mode = ownership.owner === ControlOwner.OPENKORE ? null : ownership.mode;
     characters.push(
@@ -512,9 +597,11 @@ export async function collectCharacters(config, options = {}) {
         schemaVersion: OPS_API_VERSION,
         accountId: ownership.accountId,
         characterId: ownership.characterId,
+        characterName: ownership.characterName,
         owner: ownership.owner,
         ownershipState: ownership.ownershipState,
         provider: providerForOwner(ownership.owner),
+        lifecycle,
         mode,
         map: status?.map ?? null,
         lastHeartbeatAt: heartbeat,
@@ -540,6 +627,15 @@ export function summarizeServices(services, characters) {
   return {
     serviceCounts,
     characterCount: characters.length,
+    activeCharacterCount: characters.filter(
+      (character) => character.lifecycle === RuntimeLifecycle.ACTIVE,
+    ).length,
+    stoppedCharacterCount: characters.filter(
+      (character) => character.lifecycle === RuntimeLifecycle.STOPPED,
+    ).length,
+    attentionCharacterCount: characters.filter(
+      (character) => character.lastErrorCode != null,
+    ).length,
     staleCharacterCount: characters.filter(
       (character) => character.lastErrorCode === ReasonCode.STALE_HEARTBEAT,
     ).length,

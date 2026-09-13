@@ -46,6 +46,11 @@ try {
     publicUrl: 'https://example.test',
     startedAt: nowValue - 40000,
   });
+  await json(join(runtimeRoot, 'ops-agent', 'tunnel-state.json'), {
+    pid: 107,
+    publicUrl: 'https://admin.example.test',
+    startedAt: nowValue - 35000,
+  });
   await writeFile(
     join(runtimeRoot, 'dashboard', 'bom-state.json'),
     `\uFEFF${JSON.stringify({ ok: true })}`,
@@ -63,6 +68,11 @@ try {
     name: 'Fixture',
     map: 'prt_fild08',
     updatedAt: nowValue - 1000,
+  });
+  await json(join(runtimeRoot, 'instances', 'player_2000002', 'status.json'), {
+    name: 'StoppedFixture',
+    map: 'payon',
+    updatedAt: nowValue - 86400000,
   });
 
   const config = await loadOpsAgentConfig({
@@ -84,12 +94,15 @@ try {
     queryMariaDb: async (_config, sql) =>
       sql === 'SELECT 1;'
         ? '1'
-        : '2000001\t1500001\tFixture\tOPENKORE\tOPENKORE\t\t0\t',
+        : [
+            '2000001\t1500001\tFixture\tOPENKORE\tOPENKORE\t\t0\t',
+            '2000002\t1500002\tStoppedFixture\tOPENKORE\tOPENKORE\t\t0\t',
+          ].join('\n'),
     tailContains: async () => true,
   };
 
   const services = await collectServices(config, passing);
-  assert.equal(services.length, 7);
+  assert.equal(services.length, 8);
   assert.equal(services.every((service) => service.state === 'healthy'), true);
   assert.equal(
     JSON.stringify(services).includes('databasePassword'),
@@ -97,8 +110,13 @@ try {
   );
 
   const characters = await collectCharacters(config, passing);
-  assert.equal(characters.characters.length, 1);
+  assert.equal(characters.characters.length, 2);
   assert.equal(characters.characters[0].owner, 'OPENKORE');
+  assert.equal(characters.characters[0].characterName, 'Fixture');
+  assert.equal(characters.characters[0].lifecycle, 'active');
+  assert.equal(characters.characters[1].characterName, 'StoppedFixture');
+  assert.equal(characters.characters[1].lifecycle, 'stopped');
+  assert.equal(characters.characters[1].lastErrorCode, null);
   assert.equal(characters.characters[0].actionAllowed, false);
   assert.deepEqual(characters.characters[0].capabilities, {
     readStatus: true,
@@ -183,8 +201,8 @@ try {
     const response = await fetch(`${base}/api/v1/evidence`);
     const body = await response.json();
     assert.equal(response.status, 200);
-    assert.equal(body.services.length, 7);
-    assert.equal(body.characters.length, 1);
+    assert.equal(body.services.length, 8);
+    assert.equal(body.characters.length, 2);
 
     for (const method of ['POST', 'PUT', 'PATCH', 'DELETE']) {
       const mutation = await fetch(`${base}/api/v1/services`, { method });

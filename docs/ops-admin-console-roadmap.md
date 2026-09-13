@@ -281,7 +281,7 @@ Gate：
 
 ### Phase 2：Incident Snapshot 與手機管理頁
 
-狀態：`IMPLEMENTED / LOCAL READ-ONLY GATE PASS`
+狀態：`IMPLEMENTED / PUBLIC AUTHENTICATED READ-ONLY GATE PASS`
 
 範圍：
 
@@ -289,6 +289,8 @@ Gate：
 - 建立以 390×844 為主要尺寸的管理頁。
 - 顯示 stack 摘要、服務、角色 runtime、事故時間線與最近錯誤。
 - 沒有 start、stop、restart 或 kill 控制。
+- 固定入口 `https://admin.g8land.com` 使用獨立 Named Tunnel；管理頁與 API 要求 scrypt 密碼登入及 HMAC session。
+- 角色清單區分執行中、已停止與證據不足，歷史程序不計入 stale heartbeat 警示。
 
 Gate：
 
@@ -459,4 +461,4 @@ Docker 與 Portainer 標記 `production-ready` 前，另需具備：
 
 ## 13. 立即下一步
 
-Phase 0 Admin API contract、Phase 1 獨立唯讀 Ops Agent及 Phase 2 incident snapshot／390×844 管理頁已完成。下一個功能切片先完成管理者認證、CSRF、rate limit 與私有外網入口設計審查，再進入 Phase 3 Windows Native 安全控制。審查通過前維持零 mutation API。
+Phase 0 Admin API contract、Phase 1 獨立唯讀 Ops Agent 與 Phase 2 incident snapshot、390×844 管理頁、固定外網入口、管理者認證及 rate limit 已完成。下一個功能切片進入 Phase 3 Windows Native 安全控制；控制 Gate 通過前維持零 mutation API。

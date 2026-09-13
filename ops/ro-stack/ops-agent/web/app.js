@@ -11,12 +11,25 @@ const stateLabels = {
 
 const serviceLabels = {
   'ops-agent': '管理監控服務',
+  'ops-admin-tunnel': '管理後台外網入口',
   dashboard: '玩家 Dashboard',
   'cloudflare-tunnel': 'Cloudflare 公開入口',
   mariadb: 'MariaDB',
   'login-server': '登入伺服器',
   'char-server': '角色伺服器',
   'map-server': '地圖伺服器',
+};
+
+const reasonLabels = {
+  STALE_HEARTBEAT: '角色程式仍在運行，但已停止回報狀態',
+  OWNERSHIP_CONFLICT: '角色同時被兩個執行器控制',
+  EVIDENCE_INSUFFICIENT: '無法確認角色程式是否仍在運行',
+};
+
+const recommendationLabels = {
+  STALE_HEARTBEAT: '先查看最近事故；持續超過一分鐘時再重新啟動該角色執行器。',
+  OWNERSHIP_CONFLICT: '暫停操作並解除重複控制，避免角色重複登入。',
+  EVIDENCE_INSUFFICIENT: '重新更新一次；狀態仍不明時查看主機程序。',
 };
 
 const nodes = Object.fromEntries(
@@ -26,8 +39,11 @@ const nodes = Object.fromEntries(
     'refreshButton',
     'healthyCount',
     'issueCount',
-    'characterCount',
+    'activeCharacterCount',
     'characterIssueCount',
+    'characterRecordSummary',
+    'toggleStoppedButton',
+    'logoutButton',
     'serviceObservedAt',
     'serviceList',
     'characterSearch',
@@ -41,6 +57,7 @@ const nodes = Object.fromEntries(
 );
 
 let characters = [];
+let showStopped = false;
 
 function element(tag, className, text) {
   const node = document.createElement(tag);
@@ -66,6 +83,10 @@ function formatTime(value) {
 
 async function getJson(path) {
   const response = await fetch(path, { cache: 'no-store' });
+  if (response.status === 401) {
+    location.replace('/');
+    throw new Error('AUTH_REQUIRED');
+  }
   if (!response.ok) throw new Error(`${path} HTTP ${response.status}`);
   return await response.json();
 }
@@ -117,13 +138,21 @@ function renderServices(services) {
 function renderCharacters() {
   const query = nodes.characterSearch.value.trim().toLowerCase();
   const visible = characters
+    .filter((character) => showStopped || character.lifecycle !== 'stopped')
     .filter((character) =>
-      [character.accountId, character.characterId, character.map, character.provider]
+      [
+        character.accountId,
+        character.characterId,
+        character.characterName,
+        character.map,
+        character.provider,
+      ]
         .filter((value) => value != null)
         .some((value) => String(value).toLowerCase().includes(query)),
     )
     .sort((left, right) =>
       Number(right.lastErrorCode != null) - Number(left.lastErrorCode != null) ||
+      Number(right.lifecycle === 'active') - Number(left.lifecycle === 'active') ||
       left.accountId - right.accountId,
     );
   nodes.characterList.replaceChildren();
@@ -133,20 +162,49 @@ function renderCharacters() {
     card.dataset.issue = String(character.lastErrorCode != null);
     const row = element('div', 'card-row');
     row.append(
-      element('span', 'character-id', `角色 #${character.characterId}`),
-      stateBadge(character.lastErrorCode ? 'degraded' : 'healthy'),
+      element('span', 'character-id', character.characterName),
+      stateBadge(
+        character.lifecycle === 'stopped'
+          ? 'stopped'
+          : character.lastErrorCode
+            ? 'degraded'
+            : character.lifecycle === 'unknown'
+              ? 'unknown'
+              : 'healthy',
+      ),
     );
     const meta = element('div', 'meta');
     meta.append(
-      element('span', '', `帳號 ${character.accountId}`),
-      element('span', '', `執行器 ${character.provider}`),
-      element('span', 'character-map', character.map ?? '地圖無資料'),
-      element('span', '', `心跳 ${formatTime(character.lastHeartbeatAt)}`),
+      element('span', '', `角色編號 ${character.characterId}`),
+      element('span', 'character-map', `最後位置 ${character.map ?? '尚無資料'}`),
+      element('span', '', `最後回報 ${formatTime(character.lastHeartbeatAt)}`),
     );
     card.append(row, meta);
     if (character.lastErrorCode) {
-      card.append(element('p', 'reason', `原因：${character.lastErrorCode}`));
+      card.append(
+        element(
+          'p',
+          'reason',
+          reasonLabels[character.lastErrorCode] ?? '角色狀態需要人工確認',
+        ),
+        element(
+          'p',
+          'recommendation',
+          `建議：${recommendationLabels[character.lastErrorCode] ?? '查看事故紀錄與進階資訊。'}`,
+        ),
+      );
     }
+    const details = document.createElement('details');
+    details.append(element('summary', '', '進階資訊'));
+    const list = element('ul', 'evidence-list');
+    list.append(
+      element('li', '', `帳號 ${character.accountId}`),
+      element('li', '', `執行器 ${character.provider}`),
+      element('li', '', `技術狀態 ${character.lifecycle}`),
+      element('li', '', `錯誤碼 ${character.lastErrorCode ?? '無'}`),
+    );
+    details.append(list);
+    card.append(details);
     nodes.characterList.append(card);
   }
 }
@@ -217,8 +275,15 @@ async function refresh() {
     ).length;
     nodes.healthyCount.textContent = String(healthy);
     nodes.issueCount.textContent = String(issueCount);
-    nodes.characterCount.textContent = String(evidence.characters.length);
+    const activeCharacters = evidence.characters.filter(
+      (character) => character.lifecycle === 'active',
+    ).length;
+    const stoppedCharacters = evidence.characters.filter(
+      (character) => character.lifecycle === 'stopped',
+    ).length;
+    nodes.activeCharacterCount.textContent = String(activeCharacters);
     nodes.characterIssueCount.textContent = String(characterIssues);
+    nodes.characterRecordSummary.textContent = `共 ${evidence.characters.length} 筆紀錄，其中 ${stoppedCharacters} 筆已停止`;
     nodes.healthBanner.dataset.state = issueCount ? 'issue' : 'healthy';
     nodes.overallStatus.textContent = issueCount
       ? `${issueCount} 個服務需要注意`
@@ -239,5 +304,16 @@ async function refresh() {
 
 nodes.refreshButton.addEventListener('click', refresh);
 nodes.characterSearch.addEventListener('input', renderCharacters);
+nodes.toggleStoppedButton.addEventListener('click', () => {
+  showStopped = !showStopped;
+  nodes.toggleStoppedButton.textContent = showStopped
+    ? '隱藏已停止紀錄'
+    : '顯示已停止紀錄';
+  renderCharacters();
+});
+nodes.logoutButton.addEventListener('click', async () => {
+  await fetch('/auth/logout', { method: 'POST' });
+  location.replace('/');
+});
 await refresh();
 setInterval(refresh, 15000);
