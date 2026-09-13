@@ -9,6 +9,9 @@
     "dev": "powershell -NoProfile -ExecutionPolicy Bypass -File ops/ro-stack/dashboard-service.ps1 start",
     "build": "node scripts/legacy-web-disabled.mjs build",
     "start": "powershell -NoProfile -ExecutionPolicy Bypass -File ops/ro-stack/dashboard-service.ps1 start",
+    "ops:agent:start": "powershell -NoProfile -ExecutionPolicy Bypass -File ops/ro-stack/ops-agent-service.ps1 start",
+    "ops:agent:health": "powershell -NoProfile -ExecutionPolicy Bypass -File ops/ro-stack/ops-agent-service.ps1 health",
+    "ops:agent:stop": "powershell -NoProfile -ExecutionPolicy Bypass -File ops/ro-stack/ops-agent-service.ps1 stop",
     "test": "vitest run",
     "qa:ui": "node scripts/legacy-web-disabled.mjs qa:ui",
     "test:release": "node scripts/legacy-web-disabled.mjs test:release",
@@ -62,7 +65,9 @@
     "test:minimap-terrain": "node scripts/test-minimap-terrain.mjs",
     "test:map-info": "node scripts/test-map-info-sync.mjs",
     "test:map-bgm": "node scripts/test-map-bgm.mjs",
-    "test:foldable-windows-ui": "node scripts/test-foldable-windows-ui.mjs"
+    "test:foldable-windows-ui": "node scripts/test-foldable-windows-ui.mjs",
+    "test:ops-agent:contract": "node scripts/test-ops-agent-contract.mjs",
+    "test:ops-agent:readonly": "node scripts/test-ops-agent-readonly.mjs"
   },
   "dependencies": {
     "@base-ui/react": "1.7.0",

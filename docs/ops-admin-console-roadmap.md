@@ -263,6 +263,8 @@ map-server 停止或重啟前必須：
 
 ### Phase 1：獨立唯讀 Ops Agent
 
+狀態：`IMPLEMENTED / LOCAL READ-ONLY GATE PASS`
+
 範圍：
 
 - 建立與 Dashboard 分離的本機程序。
@@ -455,4 +457,4 @@ Docker 與 Portainer 標記 `production-ready` 前，另需具備：
 
 ## 13. 立即下一步
 
-下一個功能切片固定為 Phase 1 的 Admin API contract，只建立 schema、reason codes 與 contract tests。完成並審查契約後，再建立唯讀 Ops Agent。此順序可避免管理 UI、OpenKore 與未來 Persistent Agent 各自形成第二套狀態模型。
+Phase 0 Admin API contract 與 Phase 1 獨立唯讀 Ops Agent 已完成。下一個功能切片固定為 Phase 2 的 incident snapshot store、retention、redaction 與四類故障 fixture；通過後再接 390×844 手機管理頁。Phase 3 前維持零 mutation API。

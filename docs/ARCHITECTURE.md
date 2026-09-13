@@ -13,6 +13,7 @@
 | 世界服務 | 固定版 rAthena Login／Character／Map Server | Renewal 世界、NPC、任務、戰鬥結果與物品規則 |
 | 持久化 | MariaDB | rAthena 帳號、角色、物品、任務及 Dashboard 工作階段與偏好 |
 | 服務控制 | `ops/ro-stack/ro-stack.ps1`、`dashboard-service.ps1`、根目錄 `.cmd` | 啟動、停止、健康檢查與朋友測試 |
+| 管理觀測 | `ops/ro-stack/ops-agent/`、`ops-agent-service.ps1` | 與玩家 Dashboard 分離的 loopback 唯讀服務、角色與證據 API；目前不接受管理動作 |
 | 公開測試入口 | Cloudflare outbound-only Tunnel → `127.0.0.1:8788` | 暫時 HTTPS 入口；Quick Tunnel 網址不是固定網域 |
 | 資產與轉換 | `public/ro/`、`scripts/`、`third_party/openkore/` | 地圖、紙娃娃、圖示、音效、BGM 與來源資料轉換 |
 
@@ -37,6 +38,8 @@ ops/ro-stack/dashboard.mjs
 ```
 
 rAthena 與 MariaDB 是角色、物品、任務與世界狀態的權威來源。OpenKore 是角色自動操作執行器。Dashboard 顯示狀態並提交經伺服器驗證的操作。
+
+獨立 Ops Agent 預設只監聽 `127.0.0.1:8790`，以標準契約彙整程序、listener、HTTP、資料庫、service link、heartbeat 與 ownership 證據。其生命週期與 8788 Dashboard 分離；Phase 1 全部 API 為唯讀，未建立公開入口或控制動作。
 
 ## 玩家流程
 
