@@ -1,0 +1,561 @@
+diff --git a/src/map/persistent_agent.cpp b/src/map/persistent_agent.cpp
+index 15bc063..25af153 100644
+--- a/src/map/persistent_agent.cpp
++++ b/src/map/persistent_agent.cpp
+@@ -282,6 +282,7 @@ struct PersistentAgentRuntime {
+ 	std::string quest_objective_map;
+ 	std::string quest_rules;
+ 	std::string quest_sequence_id;
++	t_tick quest_sequence_started_tick = 0;
+ 	std::string quest_navigation_sequence_id;
+ 	std::vector<QuestSequenceStep> quest_sequence_steps;
+ 	std::unordered_map<t_itemid, uint32> quest_sequence_item_baseline;
+@@ -297,6 +298,7 @@ struct PersistentAgentRuntime {
+ 
+ std::unordered_map<uint32, PersistentAgentRuntime> runtimes;
+ std::unordered_set<uint32> allowlist;
++std::unordered_set<uint32> character_allowlist;
+ std::unordered_set<std::string> farm_map_allowlist;
+ std::unordered_set<int32> farm_mob_allowlist;
+ std::unordered_set<std::string> navigation_map_allowlist;
+@@ -474,6 +476,16 @@ void load_config() {
+ 				allowlist.insert(account_id);
+ 		}
+ 	}
++	const char* character_allowlist_value = getenv("PERSISTENT_AGENT_CID_ALLOWLIST");
++	if (character_allowlist_value != nullptr) {
++		std::stringstream values(character_allowlist_value);
++		std::string value;
++		while (std::getline(values, value, ',')) {
++			const uint32 char_id = static_cast<uint32>(strtoul(value.c_str(), nullptr, 10));
++			if (char_id != 0)
++				character_allowlist.insert(char_id);
++		}
++	}
+ 	const char* map_value = getenv("PERSISTENT_AGENT_FARM_MAPS");
+ 	if (map_value != nullptr) {
+ 		std::stringstream values(map_value);
+@@ -600,6 +612,42 @@ void load_config() {
+ 	}
+ }
+ 
++bool configured_identity_allowlisted(uint32 account_id, uint32 char_id) {
++	return allowlist.count(account_id) != 0 || character_allowlist.count(char_id) != 0;
++}
++
++bool rollout_permitted(uint32 account_id, uint32 char_id, bool require_eden_course_a,
++	const char*& reason, uint64& policy_revision) {
++	if (!configured_identity_allowlisted(account_id, char_id)) {
++		reason = "ROLLOUT_NOT_ALLOWLISTED";
++		return false;
++	}
++	PersistentAgentRolloutPolicy policy;
++	if (!persistent_agent_state_load_rollout_policy(account_id, char_id, policy)) {
++		reason = "ROLLOUT_SCHEMA_UNAVAILABLE";
++		return false;
++	}
++	policy_revision = policy.revision;
++	if (policy.emergency_disabled) {
++		reason = "EMERGENCY_DISABLED";
++		return false;
++	}
++	if (!policy.global_enabled) {
++		reason = "ROLLOUT_DISABLED";
++		return false;
++	}
++	if (!policy.identity_allowlisted) {
++		reason = "ROLLOUT_NOT_ALLOWLISTED";
++		return false;
++	}
++	if (require_eden_course_a && !policy.eden_course_a_enabled) {
++		reason = "EDEN_COURSE_A_DISABLED";
++		return false;
++	}
++	reason = nullptr;
++	return true;
++}
++
+ bool parse_farm_payload(const std::string& text, std::string& target_map, int32& mob_id, bool& loot_enabled,
+ 	bool& skill_enabled, uint16& skill_id, bool& survival_enabled, bool& death_recovery_enabled) {
+ 	try {
+@@ -1722,15 +1770,25 @@ bool activate_navigation_runtime(PersistentAgentRuntime& runtime, const std::str
+ 	uint32 start_step = 0;
+ 	if (restored) {
+ 		bool found = false;
++		int32 nearest_distance = INT32_MAX;
+ 		for (uint32 i = 0; i < route.size(); ++i) {
+-			if (route[i].map == current_map) {
++			if (route[i].map != current_map)
++				continue;
++			const int32 candidate_distance = distance_xy(runtime.sd->x, runtime.sd->y,
++				route[i].x, route[i].y);
++			if (!found || candidate_distance < nearest_distance ||
++				(candidate_distance == nearest_distance && i > start_step)) {
+ 				start_step = i;
++				nearest_distance = candidate_distance;
+ 				found = true;
+-				break;
+ 			}
+ 		}
+ 		if (!found)
+ 			return false;
++		ShowStatus("PersistentAgent: NAVIGATION_RESTORE_RESUME cid=%u map=%s x=%d y=%d step=%u/%u target=(%d,%d) distance=%d.\n",
++			runtime.record.char_id, current_map.c_str(), runtime.sd->x, runtime.sd->y, start_step,
++			static_cast<uint32>(route.size()), route[start_step].x, route[start_step].y,
++			nearest_distance);
+ 	} else if (route.front().map != current_map) {
+ 		return false;
+ 	}
+@@ -2120,6 +2168,8 @@ bool activate_quest_sequence_runtime(PersistentAgentRuntime& runtime, const std:
+ 	runtime.quest_sequence_active = true;
+ 	runtime.quest_task_id = request.task_id;
+ 	runtime.quest_sequence_id = request.sequence_id;
++	if (!restored)
++		runtime.quest_sequence_started_tick = gettick();
+ 	runtime.quest_sequence_steps = std::move(request.steps);
+ 	runtime.quest_sequence_item_baseline = std::move(request.item_baseline);
+ 	runtime.quest_sequence_base_exp_baseline = request.base_exp_baseline;
+@@ -2136,9 +2196,11 @@ bool activate_quest_sequence_runtime(PersistentAgentRuntime& runtime, const std:
+ 	const uint32 saved_step = step;
+ 	if (step > runtime.quest_sequence_steps.size())
+ 		return false;
+-	if (restored) {
++	if (restored && !restoring_navigation) {
+ 		// Native quest and inventory state are authoritative.  Checkpoints already
+-		// completed by the server allow a safe forward-only recovery.
++		// completed by the server allow a safe forward-only recovery.  An active
++		// navigation phase is already a durable checkpoint; scanning past it can
++		// land on dialog-only steps whose script VM frame was intentionally dropped.
+ 		uint32 recovered = step;
+ 		for (uint32 i = step; i < runtime.quest_sequence_steps.size(); ++i)
+ 			if (quest_sequence_checkpoint_matches(runtime, runtime.quest_sequence_steps[i]))
+@@ -2184,6 +2234,11 @@ void fail_quest(PersistentAgentRuntime& runtime, const char* reason) {
+ 	}
+ 	pc_makesavestatus(runtime.sd);
+ 	chrif_save(runtime.sd, CSAVE_NORMAL | CSAVE_INVENTORY | CSAVE_CART);
++	persistent_agent_state_record_rollout_event(runtime.record.account_id, runtime.record.char_id,
++		"QUEST_FAILURE", reason, runtime.quest_command_id);
++	if (reason != nullptr && strstr(reason, "REWARD") != nullptr)
++		persistent_agent_state_record_rollout_event(runtime.record.account_id, runtime.record.char_id,
++			"REWARD_CONFIRMATION_FAILED", reason, runtime.quest_command_id);
+ 	ShowWarning("PersistentAgent: QUEST_FAILED cid=%u task=%" PRIu64 " quest=%d phase=%s reason=%s entity=1 revision=%" PRIu64 ".\n",
+ 		runtime.record.char_id, runtime.quest_task_id, runtime.quest_id, quest_phase_name(phase),
+ 		reason, runtime.record.revision);
+@@ -2398,6 +2453,8 @@ void complete_navigation(PersistentAgentRuntime& runtime, uint64 token) {
+ 
+ void quarantine(PersistentAgentRuntime& runtime, const char* reason) {
+ 	persistent_agent_state_mark_quarantined(runtime.record, reason);
++	persistent_agent_state_record_rollout_event(runtime.record.account_id, runtime.record.char_id,
++		"QUARANTINED", reason);
+ 	ShowError("PersistentAgent: QUARANTINED aid=%u cid=%u reason=%s.\n",
+ 		runtime.record.account_id, runtime.record.char_id, reason);
+ }
+@@ -2420,6 +2477,8 @@ bool attach(PersistentAgentRuntime& runtime) {
+ 		}
+ 		ShowStatus("PersistentAgent: OWNERSHIP_CONFIRMED command=%s action=claim_agent aid=%u cid=%u revision=%" PRIu64 ".\n",
+ 			runtime.claim_command_id.c_str(), runtime.record.account_id, runtime.record.char_id, runtime.record.revision);
++		persistent_agent_state_record_rollout_event(runtime.record.account_id, runtime.record.char_id,
++			"AGENT_ACTIVE", nullptr, runtime.claim_command_id);
+ 		runtime.claim_command_id.clear();
+ 	}
+ 	if (runtime.record.agent_mode == "AUTO_FARM") {
+@@ -2532,7 +2591,8 @@ bool request_load(PersistentAgentRecord record, const std::string& claim_command
+ 		ShowWarning("PersistentAgent: duplicate CID load rejected cid=%u.\n", record.char_id);
+ 		return false;
+ 	}
+-	if (!record.character_exists || record.account_id == 0 || !allowlist.count(record.account_id)) {
++	if (!record.character_exists || record.account_id == 0 ||
++		!configured_identity_allowlisted(record.account_id, record.char_id)) {
+ 		quarantine(stored, record.character_exists ? "ACCOUNT_NOT_ALLOWLISTED" : "CHARACTER_NOT_FOUND");
+ 		return false;
+ 	}
+@@ -2540,11 +2600,15 @@ bool request_load(PersistentAgentRecord record, const std::string& claim_command
+ 		quarantine(stored, "DUPLICATE_OWNERSHIP");
+ 		return false;
+ 	}
++	const bool recovered_clean_shutdown = stored.record.runtime_state == "CLEAN_SHUTDOWN";
+ 	bool reclaimed_stale_online = false;
+ 	if (!persistent_agent_state_acquire_runtime(stored.record, runtime_instance_id, reclaimed_stale_online)) {
+ 		quarantine(stored, "DUPLICATE_OWNERSHIP");
+ 		return false;
+ 	}
++	if (recovered_clean_shutdown)
++		persistent_agent_state_record_rollout_event(stored.record.account_id, stored.record.char_id,
++			"RESTART_RECOVERY", nullptr);
+ 	if (reclaimed_stale_online)
+ 		ShowStatus("PersistentAgent: CLEAN_SHUTDOWN_RECLAIMED aid=%u cid=%u instance=%s revision=%" PRIu64 ".\n",
+ 			stored.record.account_id, stored.record.char_id, runtime_instance_id.c_str(), stored.record.revision);
+@@ -2568,6 +2632,10 @@ bool request_load(PersistentAgentRecord record, const std::string& claim_command
+ 
+ void reject_command(const PersistentAgentCommand& command, PersistentOwnershipResult result, uint64 revision) {
+ 	persistent_agent_state_reject_command(command, result, revision);
++	if (result == PersistentOwnershipResult::OWNERSHIP_CONFLICT || result == PersistentOwnershipResult::ACTIVE_CLIENT ||
++		result == PersistentOwnershipResult::ACTIVE_OPENKORE)
++		persistent_agent_state_record_rollout_event(0, command.char_id, "OWNERSHIP_CONFLICT",
++			persistent_agent_ownership_reason(result), command.command_id);
+ 	ShowWarning("PersistentAgent: OWNERSHIP_REJECTED command=%s action=%s cid=%u reason=%s revision=%" PRIu64 ".\n",
+ 		command.command_id.c_str(), command.action.c_str(), command.char_id,
+ 		persistent_agent_ownership_reason(result), revision);
+@@ -2585,7 +2653,17 @@ void process_claim(const PersistentAgentCommand& command) {
+ 		reject_command(command, PersistentOwnershipResult::INVALID_TRANSITION, 0);
+ 		return;
+ 	}
+-	if (!before.character_exists || !allowlist.count(before.account_id)) {
++	const char* rollout_reason = nullptr;
++	uint64 policy_revision = 0;
++	if (!before.character_exists || !rollout_permitted(before.account_id, before.char_id, false,
++		rollout_reason, policy_revision)) {
++		const char* reason = before.character_exists ? rollout_reason : "CHARACTER_NOT_FOUND";
++		reject_command_reason(command, reason, before.revision);
++		persistent_agent_state_record_rollout_event(before.account_id, before.char_id,
++			"ROLLOUT_REJECTED", reason, command.command_id);
++		return;
++	}
++	if (!configured_identity_allowlisted(before.account_id, before.char_id)) {
+ 		reject_command(command, PersistentOwnershipResult::OWNERSHIP_CONFLICT, before.revision);
+ 		return;
+ 	}
+@@ -2965,6 +3043,15 @@ void process_start_quest_sequence(const PersistentAgentCommand& command) {
+ 		reject_command_reason(command, "QUEST_SEQUENCE_INVALID", runtime.record.revision);
+ 		return;
+ 	}
++	const char* rollout_reason = nullptr;
++	uint64 policy_revision = 0;
++	if (!rollout_permitted(runtime.record.account_id, runtime.record.char_id,
++		request.sequence_id == "eden_course_a_v1", rollout_reason, policy_revision)) {
++		reject_command_reason(command, rollout_reason, runtime.record.revision);
++		persistent_agent_state_record_rollout_event(runtime.record.account_id, runtime.record.char_id,
++			"ROLLOUT_REJECTED", rollout_reason, command.command_id);
++		return;
++	}
+ 	for (const QuestSequenceStep& step : request.steps) {
+ 		if (step.type != QuestSequenceStepType::CONFIRM_REWARD || step.rewards.empty())
+ 			continue;
+@@ -3006,6 +3093,9 @@ void process_start_quest_sequence(const PersistentAgentCommand& command) {
+ 		stop_quest_runtime(runtime, true);
+ 		quarantine(runtime, "QUEST_SEQUENCE_START_CONFIRM_FAILED");
+ 	}
++	else if (request.sequence_id == "eden_course_a_v1")
++		persistent_agent_state_record_rollout_event(runtime.record.account_id, runtime.record.char_id,
++			"COURSE_A_STARTED", nullptr, command.command_id);
+ }
+ 
+ void process_stop_farm(const PersistentAgentCommand& command) {
+@@ -3254,6 +3344,12 @@ void complete_quest_sequence(PersistentAgentRuntime& runtime) {
+ 		quarantine(runtime, "QUEST_SEQUENCE_COMPLETE_STATE_CAS_FAILED");
+ 		return;
+ 	}
++	if (sequence_id == "eden_course_a_v1") {
++		const uint64 duration_ms = runtime.quest_sequence_started_tick == 0 ? 0 :
++			static_cast<uint64>(DIFF_TICK(gettick(), runtime.quest_sequence_started_tick));
++		persistent_agent_state_record_rollout_event(runtime.record.account_id, runtime.record.char_id,
++			"COURSE_A_COMPLETED", nullptr, runtime.quest_command_id, duration_ms);
++	}
+ 	ShowStatus("PersistentAgent: QUEST_SEQUENCE_COMPLETE cid=%u task=%" PRIu64 " sequence=%s steps=%u base_exp=%" PRIu64 " job_exp=%" PRIu64 " zeny=%d mode=PERSISTENT_IDLE fd=%d entity=1 revision=%" PRIu64 ".\n",
+ 		runtime.record.char_id, task_id, sequence_id.c_str(), steps, sd->status.base_exp,
+ 		sd->status.job_exp, sd->status.zeny, sd->fd, runtime.record.revision);
+@@ -4329,6 +4425,22 @@ static TIMER_FUNC(persistent_agent_poll) {
+ 			++it;
+ 			continue;
+ 		}
++		const char* rollout_reason = nullptr;
++		uint64 policy_revision = 0;
++		const bool eden_course_a = runtime.record.agent_mode == "AUTO_QUEST" &&
++			runtime.record.target_rules.find("\"sequenceId\":\"eden_course_a_v1\"") != std::string::npos;
++		if (!rollout_permitted(runtime.record.account_id, runtime.record.char_id, eden_course_a,
++			rollout_reason, policy_revision)) {
++			persistent_agent_state_record_rollout_event(runtime.record.account_id, runtime.record.char_id,
++				rollout_reason != nullptr && strcmp(rollout_reason, "EMERGENCY_DISABLED") == 0
++					? "EMERGENCY_DISABLE_TRIGGERED" : "ROLLOUT_REVOKED",
++				rollout_reason);
++			ShowWarning("PersistentAgent: ROLLOUT_RELEASE aid=%u cid=%u reason=%s policy_revision=%" PRIu64 ".\n",
++				runtime.record.account_id, runtime.record.char_id, rollout_reason, policy_revision);
++			release(runtime);
++			++it;
++			continue;
++		}
+ 		PersistentAgentRecord current;
+ 		if (!persistent_agent_state_load(runtime.record.char_id, current)) {
+ 			quarantine(runtime, "STATE_READ_FAILED");
+@@ -4353,7 +4465,7 @@ void persistent_agent_on_char_server_ready(bool first_ready) {
+ 		ShowStatus("PersistentAgent: disabled.\n");
+ 		return;
+ 	}
+-	if (allowlist.empty()) {
++	if (allowlist.empty() && character_allowlist.empty()) {
+ 		ShowError("PersistentAgent: enabled with an empty allowlist; module disabled.\n");
+ 		enabled = false;
+ 		return;
+diff --git a/src/map/persistent_agent_state.cpp b/src/map/persistent_agent_state.cpp
+index 5c9424f..91f6144 100644
+--- a/src/map/persistent_agent_state.cpp
++++ b/src/map/persistent_agent_state.cpp
+@@ -111,13 +111,14 @@ bool update_revision(PersistentAgentRecord& record, const char* assignments) {
+ bool persistent_agent_state_schema_ready() {
+ 	if (Sql_Query(mmysql_handle,
+ 		"SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() "
+-		"AND table_name IN ('persistent_agent_state','persistent_agent_command')") == SQL_ERROR) {
++		"AND table_name IN ('persistent_agent_state','persistent_agent_command','persistent_agent_rollout_policy',"
++		"'persistent_agent_rollout_allowlist','persistent_agent_rollout_event')") == SQL_ERROR) {
+ 		Sql_ShowDebug(mmysql_handle);
+ 		return false;
+ 	}
+ 	bool ready = false;
+ 	if (Sql_NextRow(mmysql_handle) == SQL_SUCCESS)
+-		ready = sql_u64(0) == 2;
++		ready = sql_u64(0) == 5;
+ 	Sql_FreeResult(mmysql_handle);
+ 	if (!ready)
+ 		return false;
+@@ -144,6 +145,51 @@ bool persistent_agent_state_schema_ready() {
+ 	return ready;
+ }
+ 
++bool persistent_agent_state_load_rollout_policy(uint32 account_id, uint32 char_id,
++	PersistentAgentRolloutPolicy& policy) {
++	if (Sql_Query(mmysql_handle,
++		"SELECT p.`global_enabled`,p.`eden_course_a_enabled`,p.`emergency_disabled`,p.`revision`,"
++		"EXISTS(SELECT 1 FROM `persistent_agent_rollout_allowlist` a WHERE a.`enabled`=1 "
++		"AND a.`course_key`='eden_course_a_v1' AND (a.`account_id`='%u' OR a.`char_id`='%u')) "
++		"FROM `persistent_agent_rollout_policy` p WHERE p.`policy_id`=1 LIMIT 1",
++		account_id, char_id) == SQL_ERROR) {
++		Sql_ShowDebug(mmysql_handle);
++		return false;
++	}
++	const bool found = Sql_NextRow(mmysql_handle) == SQL_SUCCESS;
++	if (found) {
++		policy.global_enabled = sql_u64(0) != 0;
++		policy.eden_course_a_enabled = sql_u64(1) != 0;
++		policy.emergency_disabled = sql_u64(2) != 0;
++		policy.revision = sql_u64(3);
++		policy.identity_allowlisted = sql_u64(4) != 0;
++	}
++	Sql_FreeResult(mmysql_handle);
++	return found;
++}
++
++bool persistent_agent_state_record_rollout_event(uint32 account_id, uint32 char_id,
++	const char* event_type, const char* error_code, const std::string& command_id, uint64 duration_ms) {
++	if (event_type == nullptr || event_type[0] == '\0')
++		return false;
++	const std::string event = escape_sql(std::string(event_type, strnlen(event_type, 48)));
++	const std::string error = error_code == nullptr ? std::string()
++		: escape_sql(std::string(error_code, strnlen(error_code, 64)));
++	const std::string command = escape_sql(command_id);
++	const std::string error_sql = error.empty() ? "NULL" : "'" + error + "'";
++	const std::string command_sql = command.empty() ? "NULL" : "'" + command + "'";
++	const std::string duration_sql = duration_ms == 0 ? "NULL" : std::to_string(duration_ms);
++	if (Sql_Query(mmysql_handle,
++		"INSERT INTO `persistent_agent_rollout_event` "
++		"(`account_id`,`char_id`,`event_type`,`error_code`,`command_id`,`duration_ms`) "
++		"VALUES ('%u','%u','%s',%s,%s,%s)", account_id, char_id, event.c_str(),
++		error_sql.c_str(), command_sql.c_str(), duration_sql.c_str()) == SQL_ERROR) {
++		Sql_ShowDebug(mmysql_handle);
++		return false;
++	}
++	return true;
++}
++
+ bool persistent_agent_state_create_runtime_instance(std::string& instance_id) {
+ 	if (Sql_QueryStr(mmysql_handle, "SELECT UUID()") == SQL_ERROR) {
+ 		Sql_ShowDebug(mmysql_handle);
+diff --git a/src/map/persistent_agent_state.hpp b/src/map/persistent_agent_state.hpp
+index 633cb05..f4e483d 100644
+--- a/src/map/persistent_agent_state.hpp
++++ b/src/map/persistent_agent_state.hpp
+@@ -38,6 +38,14 @@ struct PersistentAgentCommand {
+ 	uint64 expected_revision = 0;
+ };
+ 
++struct PersistentAgentRolloutPolicy {
++	bool global_enabled = false;
++	bool eden_course_a_enabled = false;
++	bool emergency_disabled = false;
++	bool identity_allowlisted = false;
++	uint64 revision = 0;
++};
++
+ enum class PersistentOwnershipResult : uint8 {
+ 	SUCCESS,
+ 	STORAGE_ERROR,
+@@ -52,6 +60,11 @@ enum class PersistentOwnershipResult : uint8 {
+ };
+ 
+ bool persistent_agent_state_schema_ready();
++bool persistent_agent_state_load_rollout_policy(uint32 account_id, uint32 char_id,
++	PersistentAgentRolloutPolicy& policy);
++bool persistent_agent_state_record_rollout_event(uint32 account_id, uint32 char_id,
++	const char* event_type, const char* error_code = nullptr, const std::string& command_id = std::string(),
++	uint64 duration_ms = 0);
+ bool persistent_agent_state_create_runtime_instance(std::string& instance_id);
+ bool persistent_agent_state_load_enabled(std::vector<PersistentAgentRecord>& records);
+ bool persistent_agent_state_load(uint32 char_id, PersistentAgentRecord& record);
+diff --git a/src/map/persistent_agent.cpp b/src/map/persistent_agent.cpp
+--- a/src/map/persistent_agent.cpp
++++ b/src/map/persistent_agent.cpp
+@@ -319,8 +319,9 @@ std::vector<uint16> recovery_skill_allowlist;
+ bool configured = false;
+ bool enabled = false;
+ bool shutting_down = false;
+ bool timer_registered = false;
++bool char_server_available = false;
+ bool loot_capability_enabled = false;
+ bool skill_capability_enabled = false;
+ bool survival_capability_enabled = false;
+ bool death_recovery_capability_enabled = false;
+@@ -3225,8 +3226,12 @@ void process_commands() {
+ 
+ static TIMER_FUNC(persistent_agent_npc_tick) {
+ 	if (shutting_down)
+ 		return 0;
++	if (!char_server_available) {
++		add_timer(gettick() + 250, persistent_agent_npc_tick, 0, 0);
++		return 0;
++	}
+ 	for (auto& pair : runtimes) {
+ 		PersistentAgentRuntime& runtime = pair.second;
+ 		map_session_data* sd = runtime.sd;
+ 		if (!runtime.npc_active)
+@@ -3683,8 +3688,12 @@ void process_quest_sequence_step(PersistentAgentRuntime& runtime) {
+ 
+ static TIMER_FUNC(persistent_agent_quest_tick) {
+ 	if (shutting_down)
+ 		return 0;
++	if (!char_server_available) {
++		add_timer(gettick() + 250, persistent_agent_quest_tick, 0, 0);
++		return 0;
++	}
+ 	for (auto& pair : runtimes) {
+ 		PersistentAgentRuntime& runtime = pair.second;
+ 		map_session_data* sd = runtime.sd;
+ 		if (!runtime.quest_active)
+@@ -3936,8 +3945,12 @@ static TIMER_FUNC(persistent_agent_quest_tick) {
+ 
+ static TIMER_FUNC(persistent_agent_service_tick) {
+ 	if (shutting_down)
+ 		return 0;
++	if (!char_server_available) {
++		add_timer(gettick() + 250, persistent_agent_service_tick, 0, 0);
++		return 0;
++	}
+ 	for (auto& pair : runtimes) {
+ 		PersistentAgentRuntime& runtime = pair.second;
+ 		map_session_data* sd = runtime.sd;
+ 		if (!runtime.service_active)
+@@ -4049,8 +4062,12 @@ static TIMER_FUNC(persistent_agent_service_tick) {
+ 
+ static TIMER_FUNC(persistent_agent_navigation_tick) {
+ 	if (shutting_down)
+ 		return 0;
++	if (!char_server_available) {
++		add_timer(gettick() + 250, persistent_agent_navigation_tick, 0, 0);
++		return 0;
++	}
+ 	for (auto& pair : runtimes) {
+ 		PersistentAgentRuntime& runtime = pair.second;
+ 		map_session_data* sd = runtime.sd;
+ 		if (!runtime.navigation_active)
+@@ -4172,8 +4189,12 @@ static TIMER_FUNC(persistent_agent_navigation_tick) {
+ 
+ static TIMER_FUNC(persistent_agent_farm_tick) {
+ 	if (shutting_down)
+ 		return 0;
++	if (!char_server_available) {
++		add_timer(gettick() + 200, persistent_agent_farm_tick, 0, 0);
++		return 0;
++	}
+ 	for (auto& pair : runtimes) {
+ 		PersistentAgentRuntime& runtime = pair.second;
+ 		map_session_data* sd = runtime.sd;
+ 		if (!runtime.farm_active)
+@@ -4404,8 +4425,12 @@ static TIMER_FUNC(persistent_agent_farm_tick) {
+ 
+ static TIMER_FUNC(persistent_agent_poll) {
+ 	if (shutting_down)
+ 		return 0;
++	if (!char_server_available) {
++		add_timer(gettick() + poll_ms, persistent_agent_poll, 0, 0);
++		return 0;
++	}
+ 	process_commands();
+ 	for (auto it = runtimes.begin(); it != runtimes.end();) {
+ 		PersistentAgentRuntime& runtime = it->second;
+ 		if (runtime.releasing) {
+@@ -4491,8 +4516,39 @@ void persistent_agent_on_char_server_ready(bool first_ready) {
+ 		ShowError("PersistentAgent: runtime instance creation failed; module disabled.\n");
+ 		enabled = false;
+ 		return;
+ 	}
++	const bool reconnecting = !first_ready && !char_server_available;
++	char_server_available = true;
++	if (reconnecting) {
++		for (auto& pair : runtimes) {
++			PersistentAgentRuntime& runtime = pair.second;
++			map_session_data* sd = runtime.sd;
++			if (!runtime.resident || runtime.releasing || sd == nullptr)
++				continue;
++			PersistentAgentRecord current;
++			if (!persistent_agent_state_load(runtime.record.char_id, current) ||
++				current.control_owner != "SERVER_AGENT" || current.ownership_state != "SERVER_AGENT" ||
++				current.runtime_state != "ACTIVE" || current.runtime_instance_id != runtime_instance_id ||
++				current.revision != runtime.record.revision) {
++				quarantine(runtime, "CHAR_RECONNECT_RECONCILE_FAILED");
++				continue;
++			}
++			chrif_char_online(sd);
++			pc_makesavestatus(sd);
++			chrif_save(sd, CSAVE_NORMAL | CSAVE_INVENTORY | CSAVE_CART);
++			runtime.navigation_started_tick = gettick();
++			runtime.navigation_last_progress_tick = gettick();
++			runtime.npc_started_tick = gettick();
++			runtime.npc_last_progress_tick = gettick();
++			runtime.service_started_tick = gettick();
++			runtime.service_last_progress_tick = gettick();
++			runtime.quest_phase_started_tick = gettick();
++			ShowStatus("PersistentAgent: CHAR_RECONNECT_RECONCILED aid=%u cid=%u owner=SERVER_AGENT mode=%s revision=%" PRIu64 " entity=1 save_replayed=1.\n",
++				runtime.record.account_id, runtime.record.char_id, runtime.record.agent_mode.c_str(),
++				runtime.record.revision);
++		}
++	}
+ 	if (!timer_registered) {
+ 		add_timer_func_list(persistent_agent_poll, "persistent_agent_poll");
+ 		add_timer_func_list(persistent_agent_farm_tick, "persistent_agent_farm_tick");
+ 		add_timer_func_list(persistent_agent_navigation_tick, "persistent_agent_navigation_tick");
+@@ -4529,10 +4585,35 @@ void persistent_agent_on_auth_complete(map_session_data* sd) {
+ 		sd->status.account_id, sd->status.char_id, sd->fd);
+ }
+ 
+ void persistent_agent_on_char_server_disconnect() {
+-	if (enabled)
+-		ShowWarning("PersistentAgent: char-server disconnected; lifecycle mutations paused.\n");
++	if (!enabled || !char_server_available)
++		return;
++	char_server_available = false;
++	for (auto& pair : runtimes) {
++		PersistentAgentRuntime& runtime = pair.second;
++		map_session_data* sd = runtime.sd;
++		if (!runtime.resident || runtime.releasing || sd == nullptr)
++			continue;
++		const uint64 old_navigation_token = runtime.navigation_token;
++		unit_stop_attack(sd);
++		unit_stop_walking(sd, USW_ALL);
++		unit_skillcastcancel(sd, 0);
++		runtime.navigation_walk_started = false;
++		runtime.npc_walk_started = false;
++		runtime.service_walk_started = false;
++		runtime.quest_walk_started = false;
++		if (runtime.navigation_active) {
++			runtime.navigation_token++;
++			if (runtime.quest_navigation_active)
++				runtime.quest_navigation_token = runtime.navigation_token;
++		}
++		ShowWarning("PersistentAgent: CHAR_DISCONNECT_SAFE_PAUSED aid=%u cid=%u mode=%s revision=%" PRIu64
++			" token=%" PRIu64 "->%" PRIu64 " entity=1.\n", runtime.record.account_id,
++			runtime.record.char_id, runtime.record.agent_mode.c_str(), runtime.record.revision,
++			old_navigation_token, runtime.navigation_token);
++	}
++	ShowWarning("PersistentAgent: char-server disconnected; commands, movement, combat, NPC and quest mutations paused.\n");
+ }
+ 
+ void persistent_agent_prepare_shutdown() {
+ 	if (shutting_down)
