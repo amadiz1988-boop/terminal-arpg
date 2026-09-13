@@ -281,7 +281,7 @@ Gate：
 
 ### Phase 2：Incident Snapshot 與手機管理頁
 
-狀態：`IN PROGRESS / INCIDENT SNAPSHOT GATE PASS / MOBILE UI PENDING`
+狀態：`IMPLEMENTED / LOCAL READ-ONLY GATE PASS`
 
 範圍：
 
@@ -459,4 +459,4 @@ Docker 與 Portainer 標記 `production-ready` 前，另需具備：
 
 ## 13. 立即下一步
 
-Phase 0 Admin API contract、Phase 1 獨立唯讀 Ops Agent及 Phase 2 incident snapshot 已完成。下一個功能切片固定為 390×844 手機管理頁，顯示 stack 摘要、服務、角色 runtime、事故時間線與最近錯誤。Phase 3 前維持零 mutation API。
+Phase 0 Admin API contract、Phase 1 獨立唯讀 Ops Agent及 Phase 2 incident snapshot／390×844 管理頁已完成。下一個功能切片先完成管理者認證、CSRF、rate limit 與私有外網入口設計審查，再進入 Phase 3 Windows Native 安全控制。審查通過前維持零 mutation API。

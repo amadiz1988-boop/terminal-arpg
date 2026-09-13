@@ -141,11 +141,20 @@ try {
     assert.ok(await monitor.tick());
   }
 
+  nowValue += 1000;
+  current = {
+    services: [service('dashboard')],
+    characters: [character()],
+  };
+  assert.ok(await monitor.tick());
+
   const snapshots = await store.list();
-  assert.equal(snapshots.length, 4);
-  const latest = await store.read(snapshots[0].snapshotId);
-  assert.equal(latest.redacted, true);
-  const serialized = JSON.stringify(latest);
+  assert.equal(snapshots.length, 5);
+  const redacted = await store.read(
+    snapshots.find((snapshot) => snapshot.serviceIssueCount > 0).snapshotId,
+  );
+  assert.equal(redacted.redacted, true);
+  const serialized = JSON.stringify(redacted);
   for (const secret of ['abc', 'def', 'ghi', 'jkl', 'Bearer']) {
     assert.equal(serialized.includes(secret), false);
   }
@@ -191,7 +200,7 @@ try {
     const listResponse = await fetch(`${base}/api/v1/incidents`);
     const listBody = await listResponse.json();
     assert.equal(listResponse.status, 200);
-    assert.equal(listBody.incidents.length, 4);
+    assert.equal(listBody.incidents.length, 5);
     const detailResponse = await fetch(
       `${base}/api/v1/incidents/${listBody.incidents[0].snapshotId}`,
     );

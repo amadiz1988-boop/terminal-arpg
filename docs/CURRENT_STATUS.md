@@ -1,12 +1,20 @@
 # 目前狀態
 
+## 2026-09-13 Ops Agent 手機管理頁
+
+- `http://127.0.0.1:8790/` 新增獨立管理頁，390×844 為主要版型。畫面顯示整體健康、7 類服務、角色 runtime、事故時間線、reason code、heartbeat、PID、Port 與逐項 evidence。
+- 管理頁只讀取版本化 Ops Agent API，不解析 OpenKore log、命令目錄或 Persistent Agent 內部格式。角色搜尋支援帳號 ID、角色 ID、地圖及 provider；異常角色優先排列。
+- 所有互動均可用 tap 操作，主要按鈕及 evidence summary 觸控高度至少 44px。Chrome 以 390×844 驗證 7 個服務卡、角色卡、事故詳情、零水平 overflow、零前端 runtime error，結果為 `OPS_AGENT_MOBILE_UI_PASS`。
+- HTTP 回應加入同源 CSP、`nosniff`、`no-store`；頁面沒有啟動、停止、重啟、kill、claim 或 release 控制。Ops Agent 仍只綁定 loopback，未開放外網管理入口。
+- Phase 2 本機唯讀 Gate 已完成。管理者認證、CSRF、rate limit、獨立私有外網入口及 Phase 3 安全控制仍待後續功能切片。
+
 ## 2026-09-13 Ops Agent Incident Snapshot
 
-- 新增健康轉換監視器。服務從 healthy 轉為 degraded、unreachable、stopped、unknown，或角色出現 stale heartbeat／ownership conflict 時，會建立版本化 incident snapshot；相同問題簽章維持不變時不重複寫入。
+- 新增健康轉換監視器。服務從 healthy 轉為 degraded、unreachable、stopped、unknown，或角色出現 stale heartbeat／ownership conflict 時，會建立版本化 incident snapshot；恢復正常時也會保存結案快照，相同問題簽章維持不變時不重複寫入。
 - Snapshot 以原子檔案寫入 `.local/ro-stack/ops-agent/incidents/`，最多保留 100 份及 30 天。`GET /api/v1/incidents` 提供摘要，`GET /api/v1/incidents/:id` 提供已遮罩詳情；路徑 ID 有 allowlist 驗證。
 - 保存前先套用既有 `IncidentSnapshot` contract，再遮罩 Authorization、password、token、cookie、session、secret 與 DSN 密碼。Snapshot 不包含完整命令列、資料庫連線字串或原始聊天內容。
 - Fixture 已覆蓋 Dashboard、Tunnel、MariaDB 與單一 OpenKore heartbeat 四類故障、重複狀態去重、敏感資料遮罩、保留上限、路徑穿越拒絕與唯讀 API。`OPS_AGENT_INCIDENTS_PASS`。
-- 本切片仍無 start、stop、restart、kill、claim 或 release API。390×844 手機管理頁尚待下一個提交。
+- 本切片仍無 start、stop、restart、kill、claim 或 release API。
 
 ## 2026-09-13 獨立唯讀 Ops Agent Phase 1
 

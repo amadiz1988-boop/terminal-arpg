@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#101922" />
+    <title>鬼島傳說管理後台</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="/app.js" type="module"></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">GHOST ISLAND OPERATIONS</p>
+        <h1>伺服器管理後台</h1>
+      </div>
+      <span class="readonly-badge">唯讀監控</span>
+    </header>
+
+    <main>
+      <section class="health-banner" id="healthBanner" aria-live="polite">
+        <div>
+          <span class="status-dot" aria-hidden="true"></span>
+          <strong id="overallStatus">正在讀取服務狀態</strong>
+        </div>
+        <button id="refreshButton" type="button">立即更新</button>
+      </section>
+
+      <section class="summary-grid" aria-label="狀態摘要">
+        <article><span>正常服務</span><strong id="healthyCount">0</strong></article>
+        <article><span>異常服務</span><strong id="issueCount">0</strong></article>
+        <article><span>角色 Runtime</span><strong id="characterCount">0</strong></article>
+        <article><span>角色警示</span><strong id="characterIssueCount">0</strong></article>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading">
+          <div><p class="eyebrow">STACK</p><h2>服務狀態</h2></div>
+          <span id="serviceObservedAt">尚未更新</span>
+        </div>
+        <div class="service-list" id="serviceList"></div>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading character-heading">
+          <div><p class="eyebrow">RUNTIME</p><h2>角色執行狀態</h2></div>
+          <label class="search-field">
+            <span class="sr-only">搜尋帳號或角色編號</span>
+            <input id="characterSearch" inputmode="numeric" placeholder="搜尋 ID 或地圖" />
+          </label>
+        </div>
+        <p class="empty-state hidden" id="characterEmpty">目前沒有可顯示的角色資料。</p>
+        <div class="character-list" id="characterList"></div>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading">
+          <div><p class="eyebrow">INCIDENTS</p><h2>事故時間線</h2></div>
+          <span>最近 100 份</span>
+        </div>
+        <p class="empty-state hidden" id="incidentEmpty">尚未建立事故快照。</p>
+        <div class="incident-list" id="incidentList"></div>
+        <article class="incident-detail hidden" id="incidentDetail" aria-live="polite"></article>
+      </section>
+
+      <p class="footer-note">
+        此頁只顯示證據，不提供啟動、停止、重啟或角色控制。最後更新：<span id="lastUpdated">尚未更新</span>
+      </p>
+    </main>
+  </body>
+</html>

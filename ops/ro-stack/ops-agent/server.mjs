@@ -1,6 +1,7 @@
 import http from 'node:http';
-import { join } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { readFile } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { OPS_API_VERSION } from './contracts.mjs';
 import { loadOpsAgentConfig } from './config.mjs';
@@ -12,6 +13,12 @@ import {
 } from './provider.mjs';
 
 const startedAt = Date.now();
+const webRoot = join(dirname(fileURLToPath(import.meta.url)), 'web');
+const staticFiles = Object.freeze({
+  '/': ['index.html', 'text/html; charset=utf-8'],
+  '/app.js': ['app.js', 'text/javascript; charset=utf-8'],
+  '/styles.css': ['styles.css', 'text/css; charset=utf-8'],
+});
 
 function writeJson(response, statusCode, value, headers = {}) {
   const body = JSON.stringify(value);
@@ -38,6 +45,24 @@ function methodRejected(response) {
   );
 }
 
+async function writeStatic(response, pathname) {
+  const target = staticFiles[pathname];
+  if (!target) return false;
+  const body = await readFile(join(webRoot, target[0]));
+  response.writeHead(200, {
+    'Cache-Control': 'no-store',
+    'Content-Type': target[1],
+    'Content-Length': body.length,
+    'Content-Security-Policy':
+      "default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'none'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'",
+    'Referrer-Policy': 'no-referrer',
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'DENY',
+  });
+  response.end(body);
+  return true;
+}
+
 export function createOpsAgentServer(config, options = {}) {
   const collectorOptions = options.collectorOptions ?? {};
   const incidentStore = options.incidentStore ?? null;
@@ -48,6 +73,7 @@ export function createOpsAgentServer(config, options = {}) {
         methodRejected(response);
         return;
       }
+      if (await writeStatic(response, url.pathname)) return;
       if (url.pathname === '/health') {
         writeJson(response, 200, {
           ok: true,
@@ -126,7 +152,7 @@ export function createOpsAgentServer(config, options = {}) {
         services,
         ...characterResult,
       });
-    } catch (error) {
+    } catch {
       writeJson(response, 500, {
         ok: false,
         error: 'OPS_AGENT_CHECK_FAILED',

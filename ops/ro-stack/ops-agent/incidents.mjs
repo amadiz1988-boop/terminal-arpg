@@ -164,6 +164,7 @@ export function createIncidentMonitor({
     throw new TypeError('Incident monitor dependencies are required');
   }
   let lastSignature = null;
+  let lastHadIssues = false;
   let timer = null;
   let running = false;
 
@@ -177,8 +178,10 @@ export function createIncidentMonitor({
         services.some((service) => service.state !== ServiceState.HEALTHY) ||
         characters.some((character) => character.lastErrorCode != null);
       const changed = signature !== lastSignature;
+      const shouldWrite = changed && (hasIssues || lastHadIssues);
       lastSignature = signature;
-      return hasIssues && changed
+      lastHadIssues = hasIssues;
+      return shouldWrite
         ? await store.write({ services, characters })
         : null;
     } finally {
