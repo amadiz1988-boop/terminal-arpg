@@ -21,6 +21,7 @@
     "assets:maps": "node scripts/import-openkore-fields.mjs",
     "assets:map-info": "node scripts/build-ro-map-info.mjs",
     "assets:skills": "node scripts/build-ro-skill-trees.mjs",
+    "test:job-quest-skills": "node scripts/test-job-quest-skill-autogrant.mjs",
     "assets:openkore-fields": "node scripts/sync-openkore-fields-from-client.mjs",
     "assets:server-fields": "node scripts/sync-openkore-fields-from-rathena-cache.mjs",
     "assets:paperdolls": "node scripts/compose-ro-paperdolls.mjs",

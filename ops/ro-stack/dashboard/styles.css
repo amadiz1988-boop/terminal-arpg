@@ -1127,7 +1127,8 @@ button {
 .event.system {
   color: #9aaba0;
 }
-.skill-passive-state {
+.skill-passive-state,
+.skill-quest-granted {
   display: block;
   width: fit-content;
   margin-top: 4px;

@@ -2846,6 +2846,12 @@ function renderSkillTree(character, derived) {
       button.title = button.disabled ? '目前無法提升' : `提升${skill.name}`;
       if (skill.handle === 'NV_BASIC') button.id = 'addBasicSkill';
       entry.append(information, current, button);
+      if (skill.quest && level > 0) {
+        const granted = document.createElement('span');
+        granted.className = 'skill-quest-granted';
+        granted.textContent = '轉職自動取得';
+        information.append(granted);
+      }
       if (level > 0 && skill.automationMode) {
         const mode =
             skill.automationMode === 'selfRecovery'

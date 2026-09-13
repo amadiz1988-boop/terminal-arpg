@@ -3,6 +3,7 @@
 
 iz_ac01,60,67,3	script	學院結業導師#terminal	4_F_01,{
 	if (Class != Job_Novice) {
+		callfunc "F_TerminalGrantJobQuestSkills";
 		mes "[新生學院結業導師]";
 		mes "你已完成第一次轉職，我會送你前往普隆德拉原野 08。";
 		close2;
@@ -109,6 +110,7 @@ iz_ac01,60,67,3	script	學院結業導師#terminal	4_F_01,{
 	while (BaseLevel < .@minimum_base)
 		getexp NextBaseExp - BaseExp,0;
 	jobchange .@job;
+	callfunc "F_TerminalGrantJobQuestSkills";
 	if (.@reward > 0) {
 		getitem .@reward,1;
 		equip .@reward;
@@ -151,6 +153,10 @@ OnInit:
 	bindatcmd("web_eden_return",strnpcinfo(3)+"::OnEdenReturn",0,100);
 	bindatcmd("terminal_archer_repair",strnpcinfo(3)+"::OnArcherRepair",0,100);
 	bindatcmd("terminal_expanded_repair",strnpcinfo(3)+"::OnExpandedRepair",0,100);
+	end;
+
+OnPCLoginEvent:
+	callfunc "F_TerminalGrantJobQuestSkills";
 	end;
 
 OnPCLoadMapEvent:

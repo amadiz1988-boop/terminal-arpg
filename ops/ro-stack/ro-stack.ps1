@@ -179,6 +179,28 @@ function Setup-Stack {
     if ($LASTEXITCODE -ne 0) { throw "The Persistent Agent source patch is neither applicable nor already applied: $reverseCheck" }
   }
 
+  $firstJobQuestSkillNpcPatch = Join-Path $scriptRoot 'patches\first-job-quest-skill-npc-guards.patch'
+  if (-not (Test-Path $firstJobQuestSkillNpcPatch)) { throw 'The first-job Quest Skill NPC guard patch was not found.' }
+  $firstJobQuestSkillNpcPatchCheck = & git -C $rathenaRoot apply --check --whitespace=nowarn $firstJobQuestSkillNpcPatch 2>&1
+  if ($LASTEXITCODE -eq 0) {
+    & git -C $rathenaRoot apply --whitespace=nowarn $firstJobQuestSkillNpcPatch
+    if ($LASTEXITCODE -ne 0) { throw 'The first-job Quest Skill NPC guard patch could not be applied.' }
+  } else {
+    $firstJobQuestSkillNpcPatchReverseCheck = & git -C $rathenaRoot apply --reverse --check --whitespace=nowarn $firstJobQuestSkillNpcPatch 2>&1
+    if ($LASTEXITCODE -ne 0) { throw "The first-job Quest Skill NPC guard patch is neither applicable nor already applied: $firstJobQuestSkillNpcPatchReverseCheck" }
+  }
+
+  $allJobQuestSkillPatch = Join-Path $scriptRoot 'patches\all-job-quest-skill-autogrant.patch'
+  if (-not (Test-Path $allJobQuestSkillPatch)) { throw 'The all-job Quest Skill auto-grant patch was not found.' }
+  $allJobQuestSkillPatchCheck = & git -C $rathenaRoot apply --check --whitespace=nowarn $allJobQuestSkillPatch 2>&1
+  if ($LASTEXITCODE -eq 0) {
+    & git -C $rathenaRoot apply --whitespace=nowarn $allJobQuestSkillPatch
+    if ($LASTEXITCODE -ne 0) { throw 'The all-job Quest Skill auto-grant patch could not be applied.' }
+  } else {
+    $allJobQuestSkillPatchReverseCheck = & git -C $rathenaRoot apply --reverse --check --whitespace=nowarn $allJobQuestSkillPatch 2>&1
+    if ($LASTEXITCODE -ne 0) { throw "The all-job Quest Skill auto-grant patch is neither applicable nor already applied: $allJobQuestSkillPatchReverseCheck" }
+  }
+
   $requiredBinaries = @('login-server.exe', 'char-server.exe', 'map-server.exe') |
     ForEach-Object { Join-Path $rathenaRoot $_ }
   $missingBinaries = @($requiredBinaries | Where-Object { -not (Test-Path -LiteralPath $_) })

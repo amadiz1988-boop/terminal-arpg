@@ -1,0 +1,199 @@
+diff --git a/npc/other/Global_Functions.txt b/npc/other/Global_Functions.txt
+index 4e4a2c3..b9666f6 100644
+--- a/npc/other/Global_Functions.txt
++++ b/npc/other/Global_Functions.txt
+@@ -140,10 +140,162 @@ function	script	F_ClearGarbage	{
+ //////////////////////////////////////////////////////////////////////////////////
+ function	script	Job_Change	{
+ 	jobchange getarg(0),Upper;
++	callfunc "F_TerminalGrantJobQuestSkills";
+ //	logmes "CLASS CHANGE: " +strcharinfo(0)+ " become a "+jobname(Class);
+ 	return;
+ }
+ 
++// Grants every Quest/Platinum Skill that belongs to the character's current
++// player job tree. This wrapper is safe to call after job change and on login.
++function	script	F_TerminalGrantJobQuestSkills	{
++	callfunc "F_TerminalGrantNoviceQuestSkills";
++	callfunc "F_TerminalGrantFirstJobQuestSkills";
++	callfunc "F_TerminalGrantSecondJobQuestSkills";
++	return;
++}
++
++// Play Dead is intentionally a normal permanent Novice skill. It is removed by
++// rAthena's skill-tree recalculation after leaving the Novice job tree.
++function	script	F_TerminalGrantNoviceQuestSkills	{
++	if (BaseJob != Job_Novice)
++		return 0;
++	if (!getskilllv("NV_FIRSTAID")) skill "NV_FIRSTAID",1,SKILL_PERM;
++	if (!getskilllv("NV_TRICKDEAD")) skill "NV_TRICKDEAD",1,SKILL_PERM;
++	t_novice_questskill_v = getskilllv("NV_FIRSTAID") && getskilllv("NV_TRICKDEAD");
++	return t_novice_questskill_v;
++}
++
++// Grants only first-job Quest/Platinum Skills. BaseClass also covers existing
++// second/third, reborn, and baby characters from the same first-job lineage.
++function	script	F_TerminalGrantFirstJobQuestSkills	{
++	.@eligible = 1;
++	.@complete = 0;
++	if (BaseJob == Job_Super_Novice || BaseClass == Job_Super_Novice ||
++		Class == Job_Super_Novice || Class == Job_Super_Baby ||
++		Class == Job_Super_Novice_E || Class == Job_Super_Baby_E ||
++		Class == Job_Hyper_Novice) {
++		if (!getskilllv("ALL_BUYING_STORE")) skill "ALL_BUYING_STORE",1,SKILL_PERM_GRANT;
++		if (!getskilllv("MC_CARTDECORATE")) skill "MC_CARTDECORATE",1,SKILL_PERM_GRANT;
++		.@complete = getskilllv("ALL_BUYING_STORE") && getskilllv("MC_CARTDECORATE");
++	} else switch (BaseClass) {
++	case Job_Swordman:
++		if (!getskilllv("SM_MOVINGRECOVERY")) skill "SM_MOVINGRECOVERY",1,SKILL_PERM_GRANT;
++		if (!getskilllv("SM_FATALBLOW")) skill "SM_FATALBLOW",1,SKILL_PERM_GRANT;
++		if (!getskilllv("SM_AUTOBERSERK")) skill "SM_AUTOBERSERK",1,SKILL_PERM_GRANT;
++		.@complete = getskilllv("SM_MOVINGRECOVERY") && getskilllv("SM_FATALBLOW") && getskilllv("SM_AUTOBERSERK");
++		break;
++	case Job_Mage:
++		if (!getskilllv("MG_ENERGYCOAT")) skill "MG_ENERGYCOAT",1,SKILL_PERM_GRANT;
++		.@complete = getskilllv("MG_ENERGYCOAT");
++		break;
++	case Job_Archer:
++		if (!getskilllv("AC_MAKINGARROW")) skill "AC_MAKINGARROW",1,SKILL_PERM_GRANT;
++		if (!getskilllv("AC_CHARGEARROW")) skill "AC_CHARGEARROW",1,SKILL_PERM_GRANT;
++		.@complete = getskilllv("AC_MAKINGARROW") && getskilllv("AC_CHARGEARROW");
++		break;
++	case Job_Acolyte:
++		if (!getskilllv("AL_HOLYLIGHT")) skill "AL_HOLYLIGHT",1,SKILL_PERM_GRANT;
++		.@complete = getskilllv("AL_HOLYLIGHT");
++		break;
++	case Job_Merchant:
++		if (!getskilllv("MC_CARTREVOLUTION")) skill "MC_CARTREVOLUTION",1,SKILL_PERM_GRANT;
++		if (!getskilllv("MC_CHANGECART")) skill "MC_CHANGECART",1,SKILL_PERM_GRANT;
++		if (!getskilllv("MC_LOUD")) skill "MC_LOUD",1,SKILL_PERM_GRANT;
++		if (!getskilllv("ALL_BUYING_STORE")) skill "ALL_BUYING_STORE",1,SKILL_PERM_GRANT;
++		if (!getskilllv("MC_CARTDECORATE")) skill "MC_CARTDECORATE",1,SKILL_PERM_GRANT;
++		.@complete = getskilllv("MC_CARTREVOLUTION") && getskilllv("MC_CHANGECART") && getskilllv("MC_LOUD") && getskilllv("ALL_BUYING_STORE") && getskilllv("MC_CARTDECORATE");
++		break;
++	case Job_Thief:
++		if (!getskilllv("TF_SPRINKLESAND")) skill "TF_SPRINKLESAND",1,SKILL_PERM_GRANT;
++		if (!getskilllv("TF_BACKSLIDING")) skill "TF_BACKSLIDING",1,SKILL_PERM_GRANT;
++		if (!getskilllv("TF_PICKSTONE")) skill "TF_PICKSTONE",1,SKILL_PERM_GRANT;
++		if (!getskilllv("TF_THROWSTONE")) skill "TF_THROWSTONE",1,SKILL_PERM_GRANT;
++		.@complete = getskilllv("TF_SPRINKLESAND") && getskilllv("TF_BACKSLIDING") && getskilllv("TF_PICKSTONE") && getskilllv("TF_THROWSTONE");
++		break;
++	default:
++		.@eligible = 0;
++		break;
++	}
++	if (.@eligible)
++		t_firstjob_questskill_v = .@complete;
++	return .@complete;
++}
++
++// Grants the Quest/Platinum Skills declared in the active Renewal second-job
++// skill tree. BaseJob normalizes reborn, baby, third, and fourth descendants to
++// their underlying second-job branch.
++function	script	F_TerminalGrantSecondJobQuestSkills	{
++	.@eligible = 1;
++	.@complete = 0;
++	switch (BaseJob) {
++	case Job_Knight:
++		if (!getskilllv("KN_CHARGEATK")) skill "KN_CHARGEATK",1,SKILL_PERM_GRANT;
++		.@complete = getskilllv("KN_CHARGEATK");
++		break;
++	case Job_Crusader:
++		if (!getskilllv("CR_SHRINK")) skill "CR_SHRINK",1,SKILL_PERM_GRANT;
++		.@complete = getskilllv("CR_SHRINK");
++		break;
++	case Job_Assassin:
++		if (!getskilllv("AS_SONICACCEL")) skill "AS_SONICACCEL",1,SKILL_PERM_GRANT;
++		if (!getskilllv("AS_VENOMKNIFE")) skill "AS_VENOMKNIFE",1,SKILL_PERM_GRANT;
++		.@complete = getskilllv("AS_SONICACCEL") && getskilllv("AS_VENOMKNIFE");
++		break;
++	case Job_Rogue:
++		if (!getskilllv("RG_CLOSECONFINE")) skill "RG_CLOSECONFINE",1,SKILL_PERM_GRANT;
++		.@complete = getskilllv("RG_CLOSECONFINE");
++		break;
++	case Job_Wizard:
++		if (!getskilllv("WZ_SIGHTBLASTER")) skill "WZ_SIGHTBLASTER",1,SKILL_PERM_GRANT;
++		.@complete = getskilllv("WZ_SIGHTBLASTER");
++		break;
++	case Job_Sage:
++		if (!getskilllv("SA_CREATECON")) skill "SA_CREATECON",1,SKILL_PERM_GRANT;
++		if (!getskilllv("SA_ELEMENTWATER")) skill "SA_ELEMENTWATER",1,SKILL_PERM_GRANT;
++		if (!getskilllv("SA_ELEMENTGROUND")) skill "SA_ELEMENTGROUND",1,SKILL_PERM_GRANT;
++		if (!getskilllv("SA_ELEMENTFIRE")) skill "SA_ELEMENTFIRE",1,SKILL_PERM_GRANT;
++		if (!getskilllv("SA_ELEMENTWIND")) skill "SA_ELEMENTWIND",1,SKILL_PERM_GRANT;
++		.@complete = getskilllv("SA_CREATECON") && getskilllv("SA_ELEMENTWATER") && getskilllv("SA_ELEMENTGROUND") && getskilllv("SA_ELEMENTFIRE") && getskilllv("SA_ELEMENTWIND");
++		break;
++	case Job_Hunter:
++		if (!getskilllv("HT_PHANTASMIC")) skill "HT_PHANTASMIC",1,SKILL_PERM_GRANT;
++		.@complete = getskilllv("HT_PHANTASMIC");
++		break;
++	case Job_Bard:
++		if (!getskilllv("BA_PANGVOICE")) skill "BA_PANGVOICE",1,SKILL_PERM_GRANT;
++		.@complete = getskilllv("BA_PANGVOICE");
++		break;
++	case Job_Dancer:
++		if (!getskilllv("DC_WINKCHARM")) skill "DC_WINKCHARM",1,SKILL_PERM_GRANT;
++		.@complete = getskilllv("DC_WINKCHARM");
++		break;
++	case Job_Blacksmith:
++		if (!getskilllv("BS_UNFAIRLYTRICK")) skill "BS_UNFAIRLYTRICK",1,SKILL_PERM_GRANT;
++		if (!getskilllv("BS_GREED")) skill "BS_GREED",1,SKILL_PERM_GRANT;
++		.@complete = getskilllv("BS_UNFAIRLYTRICK") && getskilllv("BS_GREED");
++		break;
++	case Job_Alchemist:
++		if (!getskilllv("AM_BIOETHICS")) skill "AM_BIOETHICS",1,SKILL_PERM_GRANT;
++		.@complete = getskilllv("AM_BIOETHICS");
++		break;
++	case Job_Priest:
++		if (!getskilllv("PR_REDEMPTIO")) skill "PR_REDEMPTIO",1,SKILL_PERM_GRANT;
++		.@complete = getskilllv("PR_REDEMPTIO");
++		break;
++	case Job_Monk:
++		if (!getskilllv("MO_KITRANSLATION")) skill "MO_KITRANSLATION",1,SKILL_PERM_GRANT;
++		if (!getskilllv("MO_BALKYOUNG")) skill "MO_BALKYOUNG",1,SKILL_PERM_GRANT;
++		.@complete = getskilllv("MO_KITRANSLATION") && getskilllv("MO_BALKYOUNG");
++		break;
++	default:
++		.@eligible = 0;
++		break;
++	}
++	if (.@eligible)
++		t_secondjob_questskill_v = .@complete;
++	return .@complete;
++}
++
+ 
+ //////////////////////////////////////////////////////////////////////////////////
+ // Functions used to spiff up dialoges [Lupus]
+diff --git a/npc/quests/skills/thief_skills.txt b/npc/quests/skills/thief_skills.txt
+index b7a1d19..0cfb574 100644
+--- a/npc/quests/skills/thief_skills.txt
++++ b/npc/quests/skills/thief_skills.txt
+@@ -18,6 +18,11 @@
+ 
+ moc_prydb1,154,128,4	script	Alcouskou	118,{
+ 	if (BaseClass == Job_Thief) {
++		if (getskilllv("TF_SPRINKLESAND") && getskilllv("TF_BACKSLIDING") && getskilllv("TF_PICKSTONE") && getskilllv("TF_THROWSTONE")) {
++			mes "[Alcouskou]";
++			mes "你已經掌握這些技能。";
++			close;
++		}
+ 		mes "[Alcouskou]";
+ 		mes "As you live life you will encounter";
+ 		mes "many things. Sometimes you will";
+diff --git a/npc/re/quests/skills/merchant_skills.txt b/npc/re/quests/skills/merchant_skills.txt
+index 5796105..a46136a 100644
+--- a/npc/re/quests/skills/merchant_skills.txt
++++ b/npc/re/quests/skills/merchant_skills.txt
+@@ -9,6 +9,11 @@
+ 
+ alberta,47,37,5	script	Cart Remodel Expert	4_M_REPAIR,{
+ 	.@max_skill_lvl = 1;
++	if (getskilllv("MC_CARTDECORATE")) {
++		mes "[Jason]";
++		mes "你已經掌握這項技能。";
++		close;
++	}
+ 	if (cart_remodel == 0) {
+ 		mes "[Jason]";
+ 		mes "The original pushcart is beautiful!";
