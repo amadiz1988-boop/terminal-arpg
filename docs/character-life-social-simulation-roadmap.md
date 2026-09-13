@@ -139,6 +139,91 @@ WEB 不只顯示 Lv / EXP，應提供「今天的冒險」摘要。
 
 WEB 應讓玩家理解「角色在世界裡生活」，而不是只看到自動掛機數字。
 
+## One Active Character / Permanent Release
+
+產品方向：玩家同一時間只能控制一名現役角色，但「放棄角色」不等於刪除角色資料。
+
+角色被玩家放棄後：
+- ownership 永久從 PLAYER_OWNED 轉為 FREE_AGENT / WORLD_OWNED。
+- 玩家帳號釋放 active character slot，可建立下一名角色。
+- 舊角色保留等級、裝備、背包、任務歷史、朋友、公會、戀愛、名聲與世界紀錄。
+- 舊角色繼續由 Life Director / Social Director / Persistent Agent 自主生活。
+- 原玩家永遠不得重新 claim、恢復控制或把該角色重新綁回帳號。
+- 此操作必須是不可逆決策，WEB 不應使用一般「刪除角色」語意。
+
+建議玩家文案方向：
+> 放棄控制權後，此角色不會被刪除，而會成為世界中的自由居民。你未來可能再次遇見他，但永遠無法重新取得控制權。
+
+設計目的：避免玩家把放棄角色當作廉價 reroll 工具，並讓每一段角色人生對世界留下永久後果。
+
+## Karma / Fate System
+
+玩家放棄角色後，帳號與該 FREE_AGENT 之間保留不可逆的因果關係。新創角色不是單純與舊角色毫無關係，而可能因過往因果，以新的角度再次產生交集。
+
+建議將「帳號」視為跨世代的 Soul / Player Identity，角色則是每一世的具體人生。
+
+可追蹤的因果欄位：
+- abandonment_karma：被放棄本身造成的因果影響
+- memory_strength：舊角色對過往關係的記憶強度
+- resentment：怨念 / 負向記憶
+- gratitude：感激
+- attachment：依戀
+- fate_affinity：未來再次交集的傾向
+
+因果值不應直接硬寫劇情，而應影響行為傾向與事件機率，例如：
+- 更容易在同地圖活動
+- 更容易再次遇見
+- 更容易主動搭話
+- 更容易組隊或拒絕組隊
+- 更容易成為朋友、競爭者、導師、敵人或公會夥伴
+- 更容易對新角色產生特殊熟悉感或情緒反應
+
+核心原則：
+> 角色可以被玩家放棄，但世界不會忘記。
+
+## Past Character Re-encounter
+
+被放棄的角色成為 FREE_AGENT 後，未來可從不同角度出現在同一玩家的新角色人生中。
+
+可能關係：
+- 偶遇的陌生人
+- 練功夥伴
+- 固定隊友
+- 前輩 / 導師
+- 公會夥伴
+- 公會對手
+- 競爭者
+- 敵對角色
+- 好友
+- 戀人
+
+重要設定：
+- 玩家知道這是自己曾經控制過的角色。
+- 新角色在世界觀內不必天然知道這段「前世」關係。
+- 舊角色也不需要用超自然方式理解前世，而是由記憶、因果與真實新互動逐步形成新關係。
+- 舊角色一旦自由，其後人生不再由原玩家決定。
+
+這會形成一種特殊的情感體驗：玩家可能在多年後，用新角色再次遇見自己曾經放棄的人，而對方已擁有新的朋友、公會、人生甚至伴侶。
+
+## Romance Across Generations
+
+舊 FREE_AGENT 與同帳號後續新角色之間，允許自然發展成戀愛關係。
+
+不得設定成「因果值高就自動戀愛」。因果只能提高再次交集、特殊關注與關係成長的機率。
+
+真正 ROMANTIC transition 仍必須遵守一般 mutual relationship gate：
+- 雙向 affinity
+- 雙向 trust
+- shared activity
+- private interaction / party
+- romance eligibility
+- 既有伴侶與互斥規則
+
+因此可能出現：
+> 玩家曾經放棄的角色，在成為自由人後，若干時間後與玩家的新角色再次相遇、一起冒險，最後自然成為戀人。
+
+這是未來產品極具辨識度的情境之一。
+
 ## Aging / Death / Generations
 
 長期方向：角色會成長、老化，最終可能死亡。
@@ -157,6 +242,24 @@ WEB 應讓玩家理解「角色在世界裡生活」，而不是只看到自動�
 核心方向：
 > 死亡 = 世代交替，而不是單純懲罰或清空帳號資產。
 
+## Account Soul / Generational Model
+
+長期可將資料概念分成：
+
+Account Soul
+├─ Generation 1 Character → FREE_AGENT / deceased
+├─ Generation 2 Character
+├─ Generation 3 Character
+└─ Karma / Fate Graph
+   ├─ past characters
+   ├─ friends
+   ├─ guild relations
+   ├─ lovers
+   ├─ rivals
+   └─ descendants
+
+同一時間玩家只直接控制一名現役角色，但世界中可同時存在該玩家過往世代留下的 FREE_AGENT 角色。
+
 ## Emergent Society Vision
 
 最終可能形成：
@@ -169,6 +272,8 @@ WEB 應讓玩家理解「角色在世界裡生活」，而不是只看到自動�
 → 好友
 → 戀愛關係
 → 家族 / 世代
+→ FREE_AGENT 舊角色
+→ 因果與跨世代再次相遇
 
 目標不是做 scripted NPC 劇情，而是讓大量 Persistent Characters 在同一個 RO 世界中，透過真實活動形成 emergent social graph。
 
@@ -188,10 +293,20 @@ WEB 應讓玩家理解「角色在世界裡生活」，而不是只看到自動�
 9. Mutual relationship progression
 10. Romance
 11. Life Director
-12. Aging / Death / Generational systems
+12. One Active Character / Permanent Release
+13. FREE_AGENT ownership
+14. Karma / Fate Graph
+15. Cross-generation re-encounter
+16. Aging / Death / Generational systems
 
-## Key Principle
+## Key Principles
 
-角色所有重要生活與社交結果，應由可追溯的真實遊戲事件推導，而不是直接由隨機劇情生成。
+1. 角色所有重要生活與社交結果，應由可追溯的真實遊戲事件推導，而不是直接由隨機劇情生成。
+2. 玩家負責影響人生，而不是逐步操控人生。
+3. 放棄角色是永久且不可逆的 ownership 轉移，不是刪除資料。
+4. FREE_AGENT 後續人生不再屬於原玩家。
+5. 因果影響相遇與行為傾向，但不能直接硬寫關係結果。
+6. 戀愛、友誼、敵對都必須由雙方後續真實互動累積。
+7. 世界必須保留玩家過去選擇造成的長期後果。
 
 這份文件目前是未來產品方向紀錄，不代表已進入 Production Implementation。
