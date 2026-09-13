@@ -7,14 +7,14 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $projectRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
-$runtime = Join-Path $projectRoot '.local\ro-stack\ops-agent'
-$statePath = Join-Path $runtime 'state.json'
 $scriptPath = Join-Path $PSScriptRoot 'ops-agent\server.mjs'
 $effectiveRuntimeRoot = if ($env:OPS_AGENT_RUNTIME_ROOT) {
   (Resolve-Path -LiteralPath $env:OPS_AGENT_RUNTIME_ROOT).Path
 } else {
   Join-Path $projectRoot '.local\ro-stack'
 }
+$runtime = Join-Path $effectiveRuntimeRoot 'ops-agent'
+$statePath = Join-Path $runtime 'state.json'
 $authPath = if ($env:OPS_AGENT_AUTH_FILE) {
   $env:OPS_AGENT_AUTH_FILE
 } else {

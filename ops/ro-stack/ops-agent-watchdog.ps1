@@ -7,7 +7,12 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $projectRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
-$runtime = Join-Path $projectRoot '.local\ro-stack\ops-agent-watchdog'
+$runtimeRoot = if ($env:OPS_AGENT_RUNTIME_ROOT) {
+  (Resolve-Path -LiteralPath $env:OPS_AGENT_RUNTIME_ROOT).Path
+} else {
+  Join-Path $projectRoot '.local\ro-stack'
+}
+$runtime = Join-Path $runtimeRoot 'ops-agent-watchdog'
 $statePath = Join-Path $runtime 'state.json'
 $logPath = Join-Path $runtime 'watchdog.log'
 $serviceScript = Join-Path $PSScriptRoot 'ops-agent-service.ps1'

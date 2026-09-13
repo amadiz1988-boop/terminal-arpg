@@ -6,6 +6,7 @@
 - 所有管理頁、JavaScript 與 `/api/v1/*` 均要求管理員登入；未登入 API 回 `401 AUTH_REQUIRED`。登入密碼以 scrypt 雜湊保存，session cookie 使用 HMAC、HttpOnly、SameSite Strict，經 HTTPS 時加上 Secure，效期 12 小時。
 - 登入失敗同時套用來源與全域十分鐘限流；回應包含 HSTS、CSP、no-referrer、noindex、Permissions-Policy 與 nosniff。憑證檔不保存明文密碼，Windows ACL 僅允許 Administrator 與 SYSTEM。
 - 新增獨立 Ops Agent Tunnel 與 15 秒 watchdog；watchdog 只恢復 Ops Agent 及其 Tunnel，連續兩次健康檢查失敗才重啟 Ops Agent，不操作玩家 Dashboard 或遊戲服務。
+- 新增 Windows SYSTEM 自動啟動與每分鐘自我修復排程；Watchdog 本身退出或主機重開後，排程可重新啟動 Ops Agent、專用 Tunnel 與 Watchdog，範圍不含玩家 Dashboard、rAthena、OpenKore 或 MariaDB。
 - 公開 Integration 驗證通過：未登入首頁顯示登入頁、未登入 API 為 401、正確登入為 200、登入後 evidence API 為 200，八項服務全數 healthy。玩家公開 Dashboard 同時維持 HTTP 200。
 - 角色 Runtime 已區分 `active`、`stopped`、`unknown`。歷史或已停止程序不再被 `STALE_HEARTBEAT` 誤列為警示；公開驗證結果為 51 筆角色紀錄、16 個執行中、35 個已停止、0 個需處理警示。
 - 管理頁優先顯示角色名稱、白話原因與處理建議；帳號 ID、provider、lifecycle 與原始錯誤碼收進「進階資訊」。已停止紀錄預設隱藏，可由管理者手動展開。

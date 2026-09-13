@@ -84,7 +84,7 @@ rAthena 與 MariaDB 是角色、物品、任務與世界狀態的權威來源。
 
 ## 目前架構缺口
 
-- 管理入口的 Windows 開機自動啟動與長時間外網運作尚未完成驗收；目前由程序 watchdog 提供執行期恢復。
+- 管理入口由 SYSTEM 排程在 Windows 開機時啟動，並每分鐘執行一次冪等自我修復；程序 watchdog 提供 15 秒執行期恢復。兩層機制都只管理 Ops Agent 與專用 Tunnel。
 - 新 Dashboard 的綜合發布指令尚未建立，舊 Vinext `test:release` 已停用。
 - 完整職業、技能、地圖、NPC、補給、二轉與社交流程仍按 [CURRENT_STATUS.md](CURRENT_STATUS.md) 逐項驗收。
 - 工作樹含大量尚未提交變更，提交前需依功能切片整理並執行對應測試。

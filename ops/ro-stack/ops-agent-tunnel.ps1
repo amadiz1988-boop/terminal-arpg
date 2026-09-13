@@ -97,7 +97,14 @@ New-Item -ItemType Directory -Force -Path $runtime | Out-Null
 $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
 $stdout = Join-Path $runtime "$stamp-admin-tunnel.out.log"
 $stderr = Join-Path $runtime "$stamp-admin-tunnel.err.log"
-$cloudflared = (Get-Command cloudflared -ErrorAction Stop).Source
+$cloudflared = if (
+  $env:OPS_AGENT_CLOUDFLARED_PATH -and
+  (Test-Path -LiteralPath $env:OPS_AGENT_CLOUDFLARED_PATH -PathType Leaf)
+) {
+  (Resolve-Path -LiteralPath $env:OPS_AGENT_CLOUDFLARED_PATH).Path
+} else {
+  (Get-Command cloudflared -ErrorAction Stop).Source
+}
 $mode = 'quick'
 if ($config) {
   $mode = 'named'
