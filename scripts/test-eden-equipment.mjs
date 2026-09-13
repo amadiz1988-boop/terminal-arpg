@@ -160,6 +160,23 @@ assert.match(
   plugin,
   /sendTalkCancel\(\$talk\{ID\}\)[\s\S]*equip_eden_rewards\(\)/,
 );
+assert.match(
+  plugin,
+  /sub process_job_resume \{[\s\S]*?if \(time - \$job_resume_started_at >= 600\.0\)[\s\S]*?fail_job_resume\('route_timeout'\)/,
+);
+assert.match(plugin, /\$job_resume_recovery_attempts >= 4[\s\S]*?fail_job_resume\('route_stuck'\)/);
+assert.match(plugin, /time - \$last_job_resume_retry >= 8\.0[\s\S]*?eden_return_to_hunt_step\(\)/);
+assert.doesNotMatch(plugin, /last_job_resume_retry >= \(\$field->baseName eq 'moc_para01' \? 0\.45 : 1\.5\)/);
+assert.match(plugin, /sub eden_return_kafra_destination \{[\s\S]*?return 4 if \$map =~ \/\^pay_\//);
+assert.match(
+  plugin,
+  /sub eden_return_to_hunt_step \{[\s\S]*?number_or_zero\(\$char->\{lv\}\) <= 40[\s\S]*?nearby_npc_at\('moc_para01', 35, 23, 5\)[\s\S]*?sendTalk\(\$npc->\{ID\}\)/,
+);
+assert.match(plugin, /\$eden_return_kafra_attempts >= 2[\s\S]*?fail_job_resume\('eden_kafra_failed'\)/);
+assert.doesNotMatch(
+  plugin,
+  /sub process_job_resume \{[\s\S]*?if \(\$field->baseName eq 'moc_para01'\) \{\s*Commands::run\('move moc_para01 30 10 0'\)/,
+);
 for (const token of [
   'OnPCLoadMapEvent:',
   '.@map$ == "prt_fild08" && BaseLevel < 12',

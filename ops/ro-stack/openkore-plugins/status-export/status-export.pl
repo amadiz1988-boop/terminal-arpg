@@ -20,10 +20,14 @@ my $last_write = 0;
 my $job_route_key = '';
 my $dialog_cancel_until = 0;
 my $last_dialog_cancel = 0;
+my $dialog_cancel_started_at = 0;
 my $job_resume_pending = 0;
 my $job_resume_after = 0;
 my $last_job_route_retry = 0;
 my $last_job_resume_retry = 0;
+my $job_resume_started_at = 0;
+my $job_resume_dialog_started_at = 0;
+my $job_resume_recovery_attempts = 0;
 my $last_job_respawn = 0;
 my $onboarding_active = 0;
 my $onboarding_completed = 0;
@@ -61,6 +65,12 @@ my $eden_route_stuck_count = 0;
 my $eden_npc_failures = 0;
 my $eden_return_started_at = 0;
 my $eden_exit_recovery_attempted = 0;
+my $eden_return_kafra_dialog_owned = 0;
+my $eden_return_kafra_dialog_seen = 0;
+my $eden_return_kafra_dialog_started_at = 0;
+my $eden_return_kafra_select_step = 0;
+my $eden_return_kafra_choice = 0;
+my $eden_return_kafra_attempts = 0;
 my $eden_supply_active = 0;
 my $eden_supply_started_at = 0;
 my $eden_supply_original_attack;
@@ -1638,13 +1648,51 @@ sub process_expanded_onboarding_repair {
 
 sub process_dialog_cancel {
   return if !$dialog_cancel_until;
-  if (time > $dialog_cancel_until || !$talk{ID}) {
-    $dialog_cancel_until = 0 if !$talk{ID};
+  if (!$talk{ID}) {
+    $dialog_cancel_until = 0;
+    $dialog_cancel_started_at = 0;
     return;
   }
+  $dialog_cancel_started_at = time if !$dialog_cancel_started_at;
+  if (time - $dialog_cancel_started_at >= 15.0) {
+    $dialog_cancel_until = 0;
+    $dialog_cancel_started_at = 0;
+    fail_job_resume('dialog_timeout') if $job_resume_pending;
+    return;
+  }
+  $dialog_cancel_until = time + 3 if time > $dialog_cancel_until;
   return if time - $last_dialog_cancel < 0.35;
   $messageSender->sendTalkCancel($talk{ID});
   $last_dialog_cancel = time;
+}
+
+sub reset_eden_return_kafra {
+  $eden_return_kafra_dialog_owned = 0;
+  $eden_return_kafra_dialog_seen = 0;
+  $eden_return_kafra_dialog_started_at = 0;
+  $eden_return_kafra_select_step = 0;
+  $eden_return_kafra_choice = 0;
+}
+
+sub fail_job_resume {
+  my ($reason) = @_;
+  AI::clear();
+  Commands::run('ai auto');
+  $job_resume_pending = 0;
+  $job_resume_after = 0;
+  $job_resume_started_at = 0;
+  $job_resume_dialog_started_at = 0;
+  $job_resume_recovery_attempts = 0;
+  reset_eden_return_kafra();
+  $eden_return_kafra_attempts = 0;
+  $eden_error = $reason if $eden_completed;
+  append_task_event(
+    'error',
+    '返回掛機地圖已停止',
+    "回程防護已停止重試：$reason。角色已恢復目前地圖的自動操作。",
+    $field ? $field->baseName : '',
+    join('|', 'job_resume_failed', $reason, int(time))
+  );
 }
 
 sub eden_exit_step {
@@ -1653,8 +1701,82 @@ sub eden_exit_step {
   $eden_last_action = time;
 }
 
+sub eden_return_kafra_destination {
+  my ($map) = @_;
+  return 1 if $map eq 'prt_fild05';
+  return 2 if $map eq 'prt_fild07';
+  return 3 if $map eq 'prt_fild04';
+  return 4 if $map =~ /^pay_/;
+  return 5 if $map =~ /^(?:moc_|iz_)/;
+  return 0;
+}
+
+sub process_eden_return_kafra_dialog {
+  return 0 if !$eden_return_kafra_dialog_owned;
+  if (!$talk{ID}) {
+    if ($eden_return_kafra_dialog_seen) {
+      reset_eden_return_kafra();
+      return 0;
+    }
+    if (time - $eden_return_kafra_dialog_started_at >= 15.0) {
+      reset_eden_return_kafra();
+      $eden_return_kafra_attempts++;
+      return 0;
+    }
+    return 1;
+  }
+  $eden_return_kafra_dialog_seen = 1;
+  return 1 if !eden_action_ready(0.35);
+  my $stage = $ai_v{'npc_talk'}{'talk'} || '';
+  if ($stage eq 'next') {
+    $messageSender->sendTalkContinue($talk{ID});
+  } elsif ($stage eq 'select' && $talk{responses}) {
+    my $choice = $eden_return_kafra_select_step == 0
+      ? $eden_return_kafra_choice : 1;
+    $messageSender->sendTalkResponse($talk{ID}, $choice);
+    $eden_return_kafra_select_step++;
+  } elsif ($stage eq 'close') {
+    $messageSender->sendTalkCancel($talk{ID});
+    reset_eden_return_kafra();
+    $eden_return_kafra_attempts++;
+  } else {
+    return 1;
+  }
+  $eden_last_action = time;
+  return 1;
+}
+
 sub eden_return_to_hunt_step {
   return if !AI::isIdle() || !eden_action_ready(1.5);
+  my ($target_map) = @{ job_resume_target() };
+  my $choice = eden_return_kafra_destination($target_map);
+  if (number_or_zero($char->{lv}) <= 40 && $choice) {
+    if ($eden_return_kafra_attempts >= 2) {
+      fail_job_resume('eden_kafra_failed');
+      return;
+    }
+    my $npc = nearby_npc_at('moc_para01', 35, 23, 5);
+    if (!$npc) {
+      Commands::run('move moc_para01 35 23 5');
+      $eden_last_action = time;
+      return;
+    }
+    $eden_return_kafra_dialog_owned = 1;
+    $eden_return_kafra_dialog_seen = 0;
+    $eden_return_kafra_dialog_started_at = time;
+    $eden_return_kafra_select_step = 0;
+    $eden_return_kafra_choice = $choice;
+    $messageSender->sendTalk($npc->{ID});
+    append_task_event(
+      'action',
+      '使用伊甸園卡普拉回程',
+      '伊甸園總部禁止使用蝴蝶翅膀，正在使用館內免費傳送服務。',
+      $target_map,
+      join('|', 'eden_return_kafra', $target_map, $eden_return_kafra_attempts + 1)
+    );
+    $eden_last_action = time;
+    return;
+  }
   Commands::run('move moc_para01 30 10 0');
   $eden_last_action = time;
 }
@@ -1663,9 +1785,24 @@ sub process_job_resume {
   return if !$job_resume_pending || !$field || !$char;
   return if time < $job_resume_after;
   return if !$char->inventory->isReady();
+  $job_resume_started_at = time if !$job_resume_started_at;
+  if (time - $job_resume_started_at >= 600.0) {
+    fail_job_resume('route_timeout');
+    return;
+  }
+  return if process_eden_return_kafra_dialog();
+  if ($talk{ID}) {
+    $job_resume_dialog_started_at = time if !$job_resume_dialog_started_at;
+    if (($ai_v{'npc_talk'}{'talk'} || '') eq 'close'
+      || time - $job_resume_dialog_started_at >= 15.0) {
+      $dialog_cancel_started_at = time if !$dialog_cancel_started_at;
+      $dialog_cancel_until = time + 3 if $dialog_cancel_until < time;
+    }
+    return;
+  }
+  $job_resume_dialog_started_at = 0;
   return if process_eden_supply();
   if ($job_resume_pending == 1) {
-    return if $talk{ID};
     Commands::run('ai manual');
     equip_eden_rewards()
       if $eden_completed
@@ -1700,31 +1837,44 @@ sub process_job_resume {
       }
       Commands::run('ai auto');
       $job_resume_pending = 0;
+      $job_resume_started_at = 0;
+      $job_resume_dialog_started_at = 0;
+      $job_resume_recovery_attempts = 0;
+      reset_eden_return_kafra();
+      $eden_return_kafra_attempts = 0;
       set_onboarding_phase('awaiting_map') if $onboarding_completed;
       set_eden_phase('complete') if $eden_completed && $eden_phase eq 'returning_hunt';
       set_eden_phase('equipment_complete')
         if $eden_completed && $eden_phase eq 'equipment_returning_hunt';
       return;
     }
-    if ($field->baseName eq 'moc_para01'
-      && $eden_return_started_at > 0
-      && time - $eden_return_started_at >= 8.0
-      && time - $last_position_changed_at >= 8.0
+    if (time - $last_position_changed_at >= 10.0
       && time - $last_job_resume_retry >= 8.0) {
+      if ($job_resume_recovery_attempts >= 4) {
+        fail_job_resume('route_stuck');
+        return;
+      }
       append_task_event(
         'recovery',
         '重新同步移動狀態',
-        '離開伊甸園總部時偵測到角色停滯，正在重新同步後繼續返回掛機地圖。',
+        '返回掛機地圖時偵測到角色停滯，正在清除舊路線並重新計算。',
         $map,
-        join('|', 'eden_exit_relog', int(time))
+        join('|', 'job_resume_retry', $field->baseName,
+          $job_resume_recovery_attempts + 1, int(time))
       );
       AI::clear();
-      Commands::run('move moc_para01 30 10 0');
+      if ($field->baseName eq 'moc_para01') {
+        eden_return_to_hunt_step();
+      } else {
+        Commands::run("move $map $x $y 10");
+      }
+      $job_resume_recovery_attempts++;
       $eden_exit_recovery_attempted++;
       $eden_last_action = time;
+      $last_job_resume_retry = time;
       return;
     }
-    if (time - $last_job_resume_retry >= ($field->baseName eq 'moc_para01' ? 0.45 : 1.5)) {
+    if (time - $last_job_resume_retry >= 8.0) {
       if ($field->baseName eq 'moc_para01') {
         eden_return_to_hunt_step();
       } else {
@@ -2279,6 +2429,10 @@ sub process_commands {
       }
     } elsif ($action eq 'job_resume' && $argument eq '1') {
       $messageSender->sendTalkCancel($talk{ID}) if $talk{ID};
+      if ($talk{ID}) {
+        $dialog_cancel_started_at = time;
+        $dialog_cancel_until = time + 3;
+      }
       Commands::run('ai manual');
       AI::clear();
       configModify('lockMap', '', 1) if ($config{lockMap} || '') ne '';
@@ -2287,6 +2441,11 @@ sub process_commands {
       $job_resume_pending = 1;
       $job_resume_after = time + 0.5;
       $last_job_resume_retry = 0;
+      $job_resume_started_at = time;
+      $job_resume_dialog_started_at = 0;
+      $job_resume_recovery_attempts = 0;
+      reset_eden_return_kafra();
+      $eden_return_kafra_attempts = 0;
       $eden_return_started_at = time;
       $ok = 1;
       $message = '已開始前往等級推薦掛機地圖';
@@ -2327,15 +2486,6 @@ sub process_commands {
       $dialog_cancel_until = time + 3;
       $ok = 1;
       $message = '已關閉 NPC 對話';
-    } elsif ($action eq 'job_resume' && $argument eq '1') {
-      $messageSender->sendTalkCancel($talk{ID}) if $talk{ID};
-      $dialog_cancel_until = time + 3 if $talk{ID};
-      $job_resume_pending = 1;
-      $job_resume_after = time + 2;
-      $last_job_resume_retry = 0;
-      $job_route_key = '';
-      $ok = 1;
-      $message = '已恢復原掛機設定';
     } elsif ($action eq 'test_onboarding_accelerate' && $argument eq '10') {
       my $username = $config{username} || '';
       my $job_level = number_or_zero($char->{lv_job});
