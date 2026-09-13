@@ -17,6 +17,8 @@ $statePath = Join-Path $runtime 'state.json'
 $logPath = Join-Path $runtime 'watchdog.log'
 $serviceScript = Join-Path $PSScriptRoot 'ops-agent-service.ps1'
 $tunnelScript = Join-Path $PSScriptRoot 'ops-agent-tunnel.ps1'
+$serviceFailureThreshold = 4
+$tunnelFailureThreshold = 4
 
 function Get-WatchdogProcess {
   if (-not (Test-Path -LiteralPath $statePath)) { return $null }
@@ -65,10 +67,17 @@ if ($Action -eq 'start') {
 }
 
 $serviceFailures = 0
+$tunnelFailures = 0
 while ($true) {
-  & $serviceScript health *> $null
-  if ($LASTEXITCODE -eq 0) { $serviceFailures = 0 } else { $serviceFailures++ }
-  if ($serviceFailures -ge 2) {
+  $serviceHealth = & $serviceScript health 2>&1
+  if ($LASTEXITCODE -eq 0) {
+    if ($serviceFailures -gt 0) { Write-WatchdogLog 'ops-agent health recovered without restart' }
+    $serviceFailures = 0
+  } else {
+    $serviceFailures++
+    Write-WatchdogLog "ops-agent health failure $serviceFailures/$serviceFailureThreshold`: $($serviceHealth -join ' ')"
+  }
+  if ($serviceFailures -ge $serviceFailureThreshold) {
     $serviceFailures = 0
     Write-WatchdogLog 'ops-agent recovery started'
     try {
@@ -77,10 +86,21 @@ while ($true) {
     }
     catch { Write-WatchdogLog "ops-agent recovery failed: $($_.Exception.Message)" }
   }
-  & $tunnelScript health *> $null
-  if ($LASTEXITCODE -ne 0) {
+  $tunnelHealth = & $tunnelScript health 2>&1
+  if ($LASTEXITCODE -eq 0) {
+    if ($tunnelFailures -gt 0) { Write-WatchdogLog 'ops-agent tunnel health recovered without restart' }
+    $tunnelFailures = 0
+  } else {
+    $tunnelFailures++
+    Write-WatchdogLog "ops-agent tunnel health failure $tunnelFailures/$tunnelFailureThreshold`: $($tunnelHealth -join ' ')"
+  }
+  if ($tunnelFailures -ge $tunnelFailureThreshold) {
+    $tunnelFailures = 0
     Write-WatchdogLog 'ops-agent tunnel recovery started'
-    try { & $tunnelScript start *>> $logPath }
+    try {
+      & $tunnelScript stop *>> $logPath
+      & $tunnelScript start *>> $logPath
+    }
     catch { Write-WatchdogLog "ops-agent tunnel recovery failed: $($_.Exception.Message)" }
   }
   Start-Sleep -Seconds 15

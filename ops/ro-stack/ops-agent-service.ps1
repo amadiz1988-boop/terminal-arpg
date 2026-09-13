@@ -15,6 +15,7 @@ $effectiveRuntimeRoot = if ($env:OPS_AGENT_RUNTIME_ROOT) {
 }
 $runtime = Join-Path $effectiveRuntimeRoot 'ops-agent'
 $statePath = Join-Path $runtime 'state.json'
+$startMutexName = 'Global\TerminalARPGOpsAgentStart'
 $authPath = if ($env:OPS_AGENT_AUTH_FILE) {
   $env:OPS_AGENT_AUTH_FILE
 } else {
@@ -43,21 +44,18 @@ function Get-OpsAgentProcess {
 if ($Action -eq 'health') {
   try {
     $health = Invoke-RestMethod "http://127.0.0.1:$port/health" -TimeoutSec 3
-    $listeners = @(Get-NetTCPConnection -State Listen -LocalPort $port -ErrorAction Stop)
-    $loopbackOnly = $listeners.Count -gt 0 -and @(
-      $listeners | Where-Object { $_.LocalAddress -notin @('127.0.0.1', '::1') }
-    ).Count -eq 0
     if (
       $health.ok -and
       $health.mode -eq 'read-only' -and
-      $health.access -eq 'authenticated' -and
-      $loopbackOnly
+      $health.access -eq 'authenticated'
     ) {
       Write-Host 'OPS_AGENT_HEALTHY'
       exit 0
     }
-  } catch {}
-  Write-Host 'OPS_AGENT_UNHEALTHY'
+    Write-Host 'OPS_AGENT_UNHEALTHY contract-mismatch'
+  } catch {
+    Write-Host "OPS_AGENT_UNHEALTHY endpoint-unavailable $($_.Exception.Message)"
+  }
   exit 1
 }
 
@@ -69,41 +67,54 @@ if ($Action -eq 'stop') {
   exit 0
 }
 
-if (Get-OpsAgentProcess) {
-  Write-Host 'Ops Agent already running.'
-  exit 0
-}
-
-if (-not (Test-Path -LiteralPath $authPath)) {
-  throw 'Ops Agent authentication is not initialized. Run npm run ops:agent:auth:init first.'
-}
-
 New-Item -ItemType Directory -Force -Path $runtime | Out-Null
-$stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
-$stdout = Join-Path $runtime "$stamp.out.log"
-$stderr = Join-Path $runtime "$stamp.err.log"
-$process = Start-Process -FilePath 'node' -ArgumentList @($scriptPath) `
-  -WorkingDirectory $projectRoot -WindowStyle Hidden `
-  -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru
-@{
-  pid = $process.Id
-  port = $port
-  startedAt = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
-  stdout = $stdout
-  stderr = $stderr
-} | ConvertTo-Json | Set-Content -LiteralPath $statePath -Encoding utf8
-
-$deadline = (Get-Date).AddSeconds(10)
-do {
+$startMutex = [Threading.Mutex]::new($false, $startMutexName)
+$lockAcquired = $false
+try {
   try {
-    $health = Invoke-RestMethod "http://127.0.0.1:$port/health" -TimeoutSec 2
-    if ($health.ok) {
-      Write-Host "Ops Agent started: http://127.0.0.1:$port/"
-      exit 0
-    }
-  } catch {
-    Start-Sleep -Milliseconds 250
+    $lockAcquired = $startMutex.WaitOne([TimeSpan]::FromSeconds(35))
+  } catch [Threading.AbandonedMutexException] {
+    $lockAcquired = $true
   }
-} while ((Get-Date) -lt $deadline)
+  if (-not $lockAcquired) { throw 'Ops Agent start lock timed out.' }
 
-throw "Ops Agent startup timed out. See $stderr"
+  if (Get-OpsAgentProcess) {
+    Write-Host 'Ops Agent already running.'
+    exit 0
+  }
+  if (-not (Test-Path -LiteralPath $authPath)) {
+    throw 'Ops Agent authentication is not initialized. Run npm run ops:agent:auth:init first.'
+  }
+
+  $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
+  $stdout = Join-Path $runtime "$stamp.out.log"
+  $stderr = Join-Path $runtime "$stamp.err.log"
+  $process = Start-Process -FilePath 'node' -ArgumentList @($scriptPath) `
+    -WorkingDirectory $projectRoot -WindowStyle Hidden `
+    -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru
+  @{
+    pid = $process.Id
+    port = $port
+    startedAt = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
+    stdout = $stdout
+    stderr = $stderr
+  } | ConvertTo-Json | Set-Content -LiteralPath $statePath -Encoding utf8
+
+  $deadline = (Get-Date).AddSeconds(30)
+  do {
+    try {
+      $health = Invoke-RestMethod "http://127.0.0.1:$port/health" -TimeoutSec 2
+      if ($health.ok) {
+        Write-Host "Ops Agent started: http://127.0.0.1:$port/"
+        exit 0
+      }
+    } catch {
+      Start-Sleep -Milliseconds 250
+    }
+  } while ((Get-Date) -lt $deadline)
+
+  throw "Ops Agent startup timed out. See $stderr"
+} finally {
+  if ($lockAcquired) { $startMutex.ReleaseMutex() }
+  $startMutex.Dispose()
+}

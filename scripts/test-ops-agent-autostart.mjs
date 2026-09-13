@@ -28,7 +28,15 @@ assert.match(autostart, /Invoke-Component 'ops-agent-tunnel'/);
 assert.match(autostart, /Invoke-Component 'ops-agent-watchdog'/);
 assert.doesNotMatch(autostart, /rathena|openkore|dashboard-service|mariadb/i);
 assert.match(service, /Join-Path \$effectiveRuntimeRoot 'ops-agent'/);
+assert.doesNotMatch(service, /Get-NetTCPConnection/);
+assert.match(service, /Global\\TerminalARPGOpsAgentStart/);
+assert.match(service, /AddSeconds\(30\)/);
 assert.match(watchdog, /Join-Path \$runtimeRoot 'ops-agent-watchdog'/);
+assert.match(watchdog, /\$serviceFailureThreshold = 4/);
+assert.match(watchdog, /\$tunnelFailureThreshold = 4/);
+assert.match(watchdog, /health recovered without restart/);
 assert.match(tunnel, /OPS_AGENT_CLOUDFLARED_PATH/);
+assert.match(tunnel, /Global\\TerminalARPGOpsAgentTunnelStart/);
+assert.match(tunnel, /OPS_AGENT_TUNNEL_DEGRADED/);
 
 console.log('OPS_AGENT_AUTOSTART_PASS');

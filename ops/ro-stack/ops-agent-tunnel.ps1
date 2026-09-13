@@ -15,6 +15,7 @@ $runtimeRoot = if ($env:OPS_AGENT_RUNTIME_ROOT) {
 $runtime = Join-Path $runtimeRoot 'ops-agent'
 $statePath = Join-Path $runtime 'tunnel-state.json'
 $configPath = Join-Path $runtime 'tunnel-config.json'
+$startMutexName = 'Global\TerminalARPGOpsAgentTunnelStart'
 $port = if ($env:OPS_AGENT_PORT) { [int]$env:OPS_AGENT_PORT } else { 8790 }
 
 function Get-TunnelConfig {
@@ -78,22 +79,32 @@ if ($Action -eq 'health') {
   exit 0
 }
 
-$config = Get-TunnelConfig
-if ((Test-Path -LiteralPath $configPath) -and -not $config) {
-  throw "Named Ops Agent tunnel config is invalid: $configPath"
-}
-$existing = Get-TunnelProcess
-if ($existing) {
-  $state = Get-Content -LiteralPath $statePath -Raw | ConvertFrom-Json
-  if (Test-PublicHealth -PublicUrl ([string]$state.publicUrl)) {
-    Write-Host $state.publicUrl
-    exit 0
-  }
-  Stop-Process -Id $existing.ProcessId -Force
-  Remove-Item -LiteralPath $statePath -Force -ErrorAction SilentlyContinue
-}
-
 New-Item -ItemType Directory -Force -Path $runtime | Out-Null
+$startMutex = [Threading.Mutex]::new($false, $startMutexName)
+$lockAcquired = $false
+try {
+  try {
+    $lockAcquired = $startMutex.WaitOne([TimeSpan]::FromSeconds(55))
+  } catch [Threading.AbandonedMutexException] {
+    $lockAcquired = $true
+  }
+  if (-not $lockAcquired) { throw 'Ops Agent tunnel start lock timed out.' }
+
+  $config = Get-TunnelConfig
+  if ((Test-Path -LiteralPath $configPath) -and -not $config) {
+    throw "Named Ops Agent tunnel config is invalid: $configPath"
+  }
+  $existing = Get-TunnelProcess
+  if ($existing) {
+    $state = Get-Content -LiteralPath $statePath -Raw | ConvertFrom-Json
+    if (Test-PublicHealth -PublicUrl ([string]$state.publicUrl)) {
+      Write-Host $state.publicUrl
+      exit 0
+    }
+    Write-Host "OPS_AGENT_TUNNEL_DEGRADED $($state.publicUrl)"
+    exit 1
+  }
+
 $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
 $stdout = Join-Path $runtime "$stamp-admin-tunnel.out.log"
 $stderr = Join-Path $runtime "$stamp-admin-tunnel.err.log"
@@ -151,3 +162,7 @@ if (-not $publicUrl) {
   stderr = $stderr
 } | ConvertTo-Json | Set-Content -LiteralPath $statePath -Encoding utf8
 Write-Host $publicUrl
+} finally {
+  if ($lockAcquired) { $startMutex.ReleaseMutex() }
+  $startMutex.Dispose()
+}

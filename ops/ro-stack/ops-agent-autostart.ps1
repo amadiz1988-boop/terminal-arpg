@@ -69,9 +69,9 @@ function Start-Components {
   $config = Get-AutostartConfig
   Set-RuntimeEnvironment $config
   Write-AutostartLog 'self-heal cycle started'
+  Invoke-Component 'ops-agent-watchdog' $watchdogScript 'start'
   Invoke-Component 'ops-agent' $serviceScript 'start'
   Invoke-Component 'ops-agent-tunnel' $tunnelScript 'start'
-  Invoke-Component 'ops-agent-watchdog' $watchdogScript 'start'
   Write-AutostartLog 'self-heal cycle completed'
 }
 

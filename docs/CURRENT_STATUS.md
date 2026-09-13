@@ -5,7 +5,8 @@
 - 固定 HTTPS 入口為 `https://admin.g8land.com`。獨立 Cloudflare Named Tunnel `g8land-admin` 只轉送至 loopback `127.0.0.1:8790`，不改動玩家入口或 rAthena、OpenKore、MariaDB。
 - 所有管理頁、JavaScript 與 `/api/v1/*` 均要求管理員登入；未登入 API 回 `401 AUTH_REQUIRED`。登入密碼以 scrypt 雜湊保存，session cookie 使用 HMAC、HttpOnly、SameSite Strict，經 HTTPS 時加上 Secure，效期 12 小時。
 - 登入失敗同時套用來源與全域十分鐘限流；回應包含 HSTS、CSP、no-referrer、noindex、Permissions-Policy 與 nosniff。憑證檔不保存明文密碼，Windows ACL 僅允許 Administrator 與 SYSTEM。
-- 新增獨立 Ops Agent Tunnel 與 15 秒 watchdog；watchdog 只恢復 Ops Agent 及其 Tunnel，連續兩次健康檢查失敗才重啟 Ops Agent，不操作玩家 Dashboard 或遊戲服務。
+- 新增獨立 Ops Agent Tunnel 與 15 秒 watchdog；watchdog 只恢復 Ops Agent 及其 Tunnel，連續四次健康檢查失敗才執行恢復，不操作玩家 Dashboard 或遊戲服務。
+- 2026-09-13 17:38 Watchdog 連續收到兩次健康檢查失敗後停止 Ops Agent，重啟流程到 17:39 才完成，期間造成公開入口中斷。現在健康檢查直接驗證 loopback `/health` 契約，記錄每次失敗原因，啟動流程使用跨程序鎖，單次公開探測失敗不再重建 Tunnel。
 - 新增 Windows SYSTEM 自動啟動與每分鐘自我修復排程；Watchdog 本身退出或主機重開後，排程可重新啟動 Ops Agent、專用 Tunnel 與 Watchdog，範圍不含玩家 Dashboard、rAthena、OpenKore 或 MariaDB。
 - 公開 Integration 驗證通過：未登入首頁顯示登入頁、未登入 API 為 401、正確登入為 200、登入後 evidence API 為 200，八項服務全數 healthy。玩家公開 Dashboard 同時維持 HTTP 200。
 - 角色 Runtime 已區分 `active`、`stopped`、`unknown`。歷史或已停止程序不再被 `STALE_HEARTBEAT` 誤列為警示；公開驗證結果為 51 筆角色紀錄、16 個執行中、35 個已停止、0 個需處理警示。
