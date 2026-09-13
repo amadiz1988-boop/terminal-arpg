@@ -281,6 +281,8 @@ Gate：
 
 ### Phase 2：Incident Snapshot 與手機管理頁
 
+狀態：`IN PROGRESS / INCIDENT SNAPSHOT GATE PASS / MOBILE UI PENDING`
+
 範圍：
 
 - 建立 incident snapshot、reason code 與保留政策。
@@ -457,4 +459,4 @@ Docker 與 Portainer 標記 `production-ready` 前，另需具備：
 
 ## 13. 立即下一步
 
-Phase 0 Admin API contract 與 Phase 1 獨立唯讀 Ops Agent 已完成。下一個功能切片固定為 Phase 2 的 incident snapshot store、retention、redaction 與四類故障 fixture；通過後再接 390×844 手機管理頁。Phase 3 前維持零 mutation API。
+Phase 0 Admin API contract、Phase 1 獨立唯讀 Ops Agent及 Phase 2 incident snapshot 已完成。下一個功能切片固定為 390×844 手機管理頁，顯示 stack 摘要、服務、角色 runtime、事故時間線與最近錯誤。Phase 3 前維持零 mutation API。

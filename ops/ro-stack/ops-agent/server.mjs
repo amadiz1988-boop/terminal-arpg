@@ -1,8 +1,10 @@
 import http from 'node:http';
+import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 import { OPS_API_VERSION } from './contracts.mjs';
 import { loadOpsAgentConfig } from './config.mjs';
+import { createIncidentMonitor, createIncidentStore } from './incidents.mjs';
 import {
   collectCharacters,
   collectServices,
@@ -38,6 +40,7 @@ function methodRejected(response) {
 
 export function createOpsAgentServer(config, options = {}) {
   const collectorOptions = options.collectorOptions ?? {};
+  const incidentStore = options.incidentStore ?? null;
   return http.createServer(async (request, response) => {
     try {
       const url = new URL(request.url ?? '/', `http://${request.headers.host ?? 'localhost'}`);
@@ -56,6 +59,29 @@ export function createOpsAgentServer(config, options = {}) {
         return;
       }
 
+      const incidentMatch = url.pathname.match(
+        /^\/api\/v1\/incidents\/([A-Za-z0-9_.-]+)$/,
+      );
+      if (url.pathname === '/api/v1/incidents') {
+        const incidents = incidentStore ? await incidentStore.list() : [];
+        writeJson(response, 200, {
+          schemaVersion: OPS_API_VERSION,
+          observedAt: new Date().toISOString(),
+          incidents,
+        });
+        return;
+      }
+      if (incidentMatch) {
+        const incident = incidentStore
+          ? await incidentStore.read(incidentMatch[1])
+          : null;
+        if (!incident) {
+          writeJson(response, 404, { ok: false, error: 'INCIDENT_NOT_FOUND' });
+          return;
+        }
+        writeJson(response, 200, incident);
+        return;
+      }
       if (
         !['/api/v1/services', '/api/v1/characters', '/api/v1/evidence'].includes(
           url.pathname,
@@ -115,7 +141,21 @@ export async function startOpsAgent(overrides = {}) {
   if (!['127.0.0.1', '::1', 'localhost'].includes(config.host)) {
     throw new Error('Ops Agent Phase 1 must bind to loopback');
   }
-  const server = createOpsAgentServer(config);
+  const incidentStore = createIncidentStore({
+    directory: join(config.runtimeRoot, 'ops-agent', 'incidents'),
+  });
+  const monitor = createIncidentMonitor({
+    store: incidentStore,
+    collect: async () => {
+      const [services, characterResult] = await Promise.all([
+        collectServices(config, { startedAt }),
+        collectCharacters(config),
+      ]);
+      return { services, characters: characterResult.characters };
+    },
+  });
+  const server = createOpsAgentServer(config, { incidentStore });
+  server.once('close', () => monitor.stop());
   await new Promise((resolvePromise, reject) => {
     server.once('error', reject);
     server.listen(config.port, config.host, resolvePromise);
@@ -124,6 +164,7 @@ export async function startOpsAgent(overrides = {}) {
   console.log(
     `OPS_AGENT_READY http://${config.host}:${typeof address === 'object' ? address.port : config.port}`,
   );
+  monitor.start();
   return { server, config };
 }
 

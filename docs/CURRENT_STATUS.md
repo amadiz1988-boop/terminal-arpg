@@ -1,5 +1,13 @@
 # 目前狀態
 
+## 2026-09-13 Ops Agent Incident Snapshot
+
+- 新增健康轉換監視器。服務從 healthy 轉為 degraded、unreachable、stopped、unknown，或角色出現 stale heartbeat／ownership conflict 時，會建立版本化 incident snapshot；相同問題簽章維持不變時不重複寫入。
+- Snapshot 以原子檔案寫入 `.local/ro-stack/ops-agent/incidents/`，最多保留 100 份及 30 天。`GET /api/v1/incidents` 提供摘要，`GET /api/v1/incidents/:id` 提供已遮罩詳情；路徑 ID 有 allowlist 驗證。
+- 保存前先套用既有 `IncidentSnapshot` contract，再遮罩 Authorization、password、token、cookie、session、secret 與 DSN 密碼。Snapshot 不包含完整命令列、資料庫連線字串或原始聊天內容。
+- Fixture 已覆蓋 Dashboard、Tunnel、MariaDB 與單一 OpenKore heartbeat 四類故障、重複狀態去重、敏感資料遮罩、保留上限、路徑穿越拒絕與唯讀 API。`OPS_AGENT_INCIDENTS_PASS`。
+- 本切片仍無 start、stop、restart、kill、claim 或 release API。390×844 手機管理頁尚待下一個提交。
+
 ## 2026-09-13 獨立唯讀 Ops Agent Phase 1
 
 - 新增與玩家 Dashboard 分離的本機 Ops Agent，固定以 loopback `127.0.0.1:8790` 提供版本化唯讀 API：`/health`、`/api/v1/services`、`/api/v1/characters` 與 `/api/v1/evidence`。

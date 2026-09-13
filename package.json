@@ -67,7 +67,8 @@
     "test:map-bgm": "node scripts/test-map-bgm.mjs",
     "test:foldable-windows-ui": "node scripts/test-foldable-windows-ui.mjs",
     "test:ops-agent:contract": "node scripts/test-ops-agent-contract.mjs",
-    "test:ops-agent:readonly": "node scripts/test-ops-agent-readonly.mjs"
+    "test:ops-agent:readonly": "node scripts/test-ops-agent-readonly.mjs",
+    "test:ops-agent:incidents": "node scripts/test-ops-agent-incidents.mjs"
   },
   "dependencies": {
     "@base-ui/react": "1.7.0",
