@@ -25,6 +25,14 @@
 5. 玩家會走路、使用蒼蠅翅膀、回城、補給、使用 Kafra、找 NPC、換地圖、找怪、戰鬥、撿物或死亡後恢復時，主要驗收優先覆蓋同一條真實行為鏈。
 6. Diagnostic test 可以高度人工化，只用於定位底層問題，不能取代 Player-flow acceptance。
 
+## OpenKore Exit 驗收鐵律
+
+- Source presence 不等於能力完成。
+- 每項 OpenKore 能力依序使用 `SOURCE_ONLY` → `DIAGNOSTIC_PASS` → `PLAYER_FLOW_PASS` → `OPENKORE_REMOVED`。
+- 最終完成度以 Player-flow First 驗收。
+- 沒有 runtime evidence 不得標記 `READY`。
+- 完整狀態以 `docs/openkore-exit-source-of-truth.md` 為唯一 Source of Truth。
+
 修改 Quest、NPC、補給、回程、掛機地圖或其他自動導航前，必須讀取 `.agents/skills/navigation-stall-safety/SKILL.md`。所有導航步驟都要以地圖變更、座標變更、有效 NPC 對話或任務階段推進判定進度；相同動作不得高頻重送，重試不得刷新自身停滯計時，並必須具備有限重試、已查核替代路線及恢復一般自動操作的終止狀態。
 
 ## 新工作讀取順序
