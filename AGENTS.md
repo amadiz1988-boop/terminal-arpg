@@ -31,6 +31,39 @@ implementationNotes
 
 所有新功能先查核 rAthena 與 OpenKore 是否已有原生能力，再決定重用或補接。發現來源與現行 RO 規格衝突時，先停止該項目並建立稽核紀錄。
 
+## 測試 Fixture 與開發驗證鐵律
+
+所有工作線（A/B/C/D/E/G）在開發測試時，必須遵守 `docs/testing-fixture-policy.md`。
+
+固定原則：
+
+```text
+SETUP / PROVISION
+→ EXECUTE
+→ ASSERT
+→ CLEANUP
+```
+
+1. 在 `DEV_ISOLATED` 或明確 test-only fixture 中，可以合理使用測試 DB 修改、GM／管理指令、角色能力調整、裝備與補給、傳送、生成測試怪、allowlist 與 fixture provisioning，以快速建立穩定、可重現的前置條件。
+2. 不得為了「測試純粹」而讓無關條件反覆阻塞，例如角色太弱一直死亡、位置離目標太遠、附近隨機沒有怪、舊 ownership residue 沒清乾淨等。
+3. 每輪測試都要先界定 `TEST_OBJECTIVE / TEST_BOUNDARY / SETUP_ALLOWED / SETUP_FORBIDDEN / PASS_EVIDENCE / CLEANUP`。
+4. 前置條件可以人工建立，但本輪核心被測行為必須由真正系統執行；不得用 SQL、GM 指令或 mock 直接偽造 PASS。
+5. PASS 必須有 authority / runtime evidence；command 回傳成功本身不等於功能成功。
+6. FLOW fixture 與 BALANCE fixture 必須分開。流程驗證可以合理偏安全，避免平衡噪音阻塞功能測試。
+7. 重要 fixture 優先做成 provisioning/reset script 或 manifest，避免依賴人工記憶。
+8. Production 不適用 test shortcut。除非有明確正式操作批准，測試必須維持 `production_process_modified=0 / production_db_mutation=0 / production_player_modified=0`。
+
+遇到 blocker 時，固定依序排查：
+
+```text
+Fixture 問題
+→ Harness 問題
+→ Observation 問題
+→ 真正 Runtime / Product Bug
+```
+
+詳細規定以 `docs/testing-fixture-policy.md` 為準。
+
 ## 公開版本壓力測試鐵律
 
 任何公開版本都必須完整執行 `npm run test:release`，並取得 `RELEASE_GATE_PASS`。禁止用單元測試、建置成功或人工瀏覽其中一項代替完整發布門檻。
