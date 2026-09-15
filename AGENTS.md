@@ -16,6 +16,15 @@
 
 每次使用測試加速，必須在 runtime evidence、`RESULTS.md` 或 Roadmap 標記 `TEST ACCELERATION`，並記錄加速原因、加速前真實證據、被調整的環境條件、仍由真實系統產生的結果，以及對 production validity 的影響。完整決策與範例見 `.agents/skills/nearest-valid-test-state/SKILL.md`。
 
+## Player-flow First 測試鐵律
+
+1. 功能驗收優先使用真實玩家正常會採取的行為流程。
+2. 設計測試前，先回答三個問題：玩家正常會怎麼做？正式遊玩時的完整行為鏈是什麼？這次測試是否覆蓋該玩家流程？
+3. DB provisioning、GM／admin command、teleport、heal、item injection、deterministic monster spawn、固定座標與 `test-only allowlist` 可用於建立 fixture、加速測試、diagnostic test 與問題重現。人工化診斷結果不得直接作為完整功能驗收 PASS。
+4. 功能最終 PASS 必須由 Player-flow test 完成。
+5. 玩家會走路、使用蒼蠅翅膀、回城、補給、使用 Kafra、找 NPC、換地圖、找怪、戰鬥、撿物或死亡後恢復時，主要驗收優先覆蓋同一條真實行為鏈。
+6. Diagnostic test 可以高度人工化，只用於定位底層問題，不能取代 Player-flow acceptance。
+
 修改 Quest、NPC、補給、回程、掛機地圖或其他自動導航前，必須讀取 `.agents/skills/navigation-stall-safety/SKILL.md`。所有導航步驟都要以地圖變更、座標變更、有效 NPC 對話或任務階段推進判定進度；相同動作不得高頻重送，重試不得刷新自身停滯計時，並必須具備有限重試、已查核替代路線及恢復一般自動操作的終止狀態。
 
 ## 新工作讀取順序
