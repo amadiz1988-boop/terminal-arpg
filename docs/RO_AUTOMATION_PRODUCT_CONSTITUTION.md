@@ -1,5 +1,96 @@
 # RO 自動掛機版產品鐵律
 
+## 第一性原理優先
+
+### 目的與適用範圍
+
+本規範適用於架構、功能、測試、除錯、整合與生命週期決策。每次工作先定義真正不可替代的領域目標，再選擇實作方式，並以可重現的玩家流程與來源證據驗證。
+
+### 責任分層
+
+| 層 | 核心責任 | 判定依據 |
+| --- | --- | --- |
+| `Server Authority` | 裁定角色、世界、任務、物品、地圖、NPC、冷卻、擁有權與生命週期 | rAthena、MariaDB 與既有權威流程 |
+| `Controller` | 提出、排程與執行合法意圖 | Native Client、`SERVER_AGENT`、OpenKore 或其他受限 controller |
+| `Transport` | 傳遞意圖、回應與事件 | packet、命令、檔案、API 或內部 continuation |
+| `Presentation / UI` | 顯示權威狀態並收集玩家輸入 | Dashboard、Native Client UI 或其他呈現層 |
+| `Historical implementation` | 提供來源、相容性與差異稽核 | 舊版腳本、舊 client flow、舊 packet 或封存介面 |
+
+歷史實作、既有 Client、OpenKore、packet、UI、`status.json`、`.cmd` 與 `.result` 均先列為可替換依賴。遊戲規則必須回到 Server Authority 與不可破壞的 invariant 定義。
+
+### 固定思考流程
+
+#### STEP 1：DEFINE THE REAL GOAL
+
+先寫出領域結果與完成條件。例：目標是「讓角色完成合法隨機傳送」，再檢查各種控制器如何提出意圖。
+
+#### STEP 2：IDENTIFY AUTHORITY
+
+定位真正裁定結果的來源。蒼蠅翅膀的隨機傳送、地圖生命週期、物品扣除與限制由 rAthena authority 裁定。
+
+#### STEP 3：IDENTIFY ACCIDENTAL DEPENDENCIES
+
+逐項檢查 Client ACK、packet、OpenKore process、UI window、`status.json`、`.cmd` 與 `.result`。只有在它們承擔不可替代的領域規則時，才列為必要依賴；其餘依賴應降為 transport、controller 或 presentation 選項。
+
+#### STEP 4：PRESERVE INVARIANTS
+
+至少保留 ownership、execution epoch、inventory authority、map lifecycle、NPC script state、cooldown、distance 與 quest authority。任何縮短流程的方案都先驗證這些 invariant。
+
+#### STEP 5：CHOOSE THE SHORTEST REALISTIC TEST
+
+先設計符合真實玩家行為的最短可重現流程，再使用隔離 fixture 或 diagnostic test 定位底層問題。測試分類與證據標籤沿用 [Player-flow First Acceptance Policy](testing-fixture-policy.md)。
+
+#### STEP 6：ONLY THEN IMPLEMENT
+
+完成目標、authority、依賴與 invariant 審查後，才選擇最小實作範圍與回歸閘門。
+
+### OpenKore Exit 範例
+
+錯誤決策會從「OpenKore 原本怎麼做」開始，將整個流程複製到 Persistent Agent。第一性原理流程先定位 OpenKore 為 Controller，rAthena 為 Server Authority。Native Client 與 `SERVER_AGENT` 可以使用不同 Controller，共用同一套 Server Authority；Controller 只需提交合法意圖並接收權威結果。
+
+### Fly Wing 範例
+
+歷史路徑可能包含 item use、client skill、client response 與 random warp。真正不可替代的結果是 rAthena 裁定 random warp、map lifecycle、item validation、消耗時機與地圖限制。`SERVER_AGENT` 可驗證 intent，再以 server-side continuation 接入同一套 rAthena authority。執行時保留 item validation、map lifecycle 與實際座標結果，禁止跳過驗證、直接改座標、使用 `@warp` 或自製 teleport。
+
+### NPC 範例
+
+歷史 UI 路徑可呈現為點 NPC、顯示選單、玩家選項、packet 與 script resume。第一性原理模型是角色合法 TALK NPC、NPC script 進入 `WAIT`、Controller 提供 response、server script continuation 產生結果。Native Client 與 `SERVER_AGENT` 只是 response provider，NPC script state 與 quest mutation 仍由 Server Authority 裁定。
+
+### 與 Player-flow First 的關係
+
+第一性原理決定真正要驗證的結果、authority 與 invariant。Player-flow First 決定以玩家實際會採取的行為鏈驗證該結果。前者負責定義測試目標，後者負責證明玩家可完成流程；兩者必須同時成立。測試類型、fixture 邊界與結果標籤依 [testing-fixture-policy.md](testing-fixture-policy.md) 執行，OpenKore 退出狀態依 [openkore-exit-source-of-truth.md](openkore-exit-source-of-truth.md) 判定。
+
+### 第一性原理的使用邊界
+
+第一性原理流程不得用來：
+
+- 跳過 Server validation。
+- 任意改寫 DB。
+- 破壞既有遊戲規則。
+- 為了簡化而重寫全部系統。
+- 無視相容性需求。
+- 取代來源與 runtime 實證。
+
+目標是移除非必要假設，同時保留必要 invariant、相容性與實證門檻。
+
+### FIRST_PRINCIPLES_REVIEW
+
+大型架構或跨層變更開始前，先填寫：
+
+```text
+FIRST_PRINCIPLES_REVIEW
+
+REAL_GOAL:
+AUTHORITY:
+NON_NEGOTIABLE_INVARIANTS:
+HISTORICAL_ASSUMPTIONS:
+REMOVABLE_DEPENDENCIES:
+PLAYER_FLOW:
+MINIMAL_POC:
+PASS_EVIDENCE:
+STOP_CONDITIONS:
+```
+
 ## 原廠命令優先
 
 開發角色操作前，先依 [RO_COMMAND_REUSE_POLICY.md](RO_COMMAND_REUSE_POLICY.md) 與 `.agents/skills/ro-command-bridge` 查核 rAthena 與 OpenKore 內建指令、設定、任務、NPC、傳送與封包。玩家行為優先透過 OpenKore 指令交由 rAthena 驗證，NPC 與任務優先採用 rAthena 腳本命令。網頁層不得接受原始命令字串。

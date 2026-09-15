@@ -4,6 +4,29 @@
 
 執行 substantial Repository 工作前，先依 `.agents/skills/task-model-router/SKILL.md` 判斷建議模型、推理強度與速度，並在施工前提醒使用者。該 Skill 只負責建議，不得改變任務 scope，也不得自行宣稱已切換模型。
 
+## 第一性原理優先鐵律
+
+所有架構、功能、測試與除錯工作，先定義真正目標，再檢查現有實作與工具。
+
+固定區分以下責任層：
+
+- `Server Authority`：裁定世界、角色、任務、物品、地圖、NPC、冷卻、擁有權與生命週期。
+- `Controller`：提出並執行合法意圖，例如 Native Client、`SERVER_AGENT` 或 OpenKore。
+- `Transport`：傳遞意圖、回應與事件的封包、命令、檔案或 API。
+- `Presentation / UI`：呈現狀態與收集輸入。
+- `Historical implementation`：保留作來源與相容性參考的舊流程。
+
+Native Client、OpenKore、packet、UI、`status.json`、`.cmd` 與 `.result` 先視為可替換實作方式；遊戲規則由 Server Authority 與不可破壞的 invariant 定義。修改前固定回答：
+
+1. 真正的 authority 在哪裡？
+2. 哪些 invariant 不能破壞？
+3. 哪些部分只負責 transport？
+4. 哪些部分只負責 UI？
+5. 哪些部分屬於歷史相容層？
+6. 最短可驗證的玩家流程是什麼？
+
+優先重用既有 Server Authority，維持 `docs/testing-fixture-policy.md` 的 Player-flow First 驗收與 `docs/openkore-exit-source-of-truth.md` 的 OpenKore Exit 判定。完整思考流程、範例與決策模板集中於 [RO 自動掛機版產品鐵律](docs/RO_AUTOMATION_PRODUCT_CONSTITUTION.md#第一性原理優先)。
+
 執行大型功能驗證、Integration、Vertical Slice、Restart、Quest、Agent 或長時間自動化測試前，必須讀取 `.agents/skills/nearest-valid-test-state/SKILL.md`。除非任務明確要求 Full End-to-End Regression，測試必須從距離被測功能最近、合法、可重現且不污染正式資料的已知狀態開始。不得為取得後段測試資格，重跑與本輪目標無直接關係的練等、農素材、onboarding、一轉、長距離導航或已驗證任務鏈。
 
 ### Representative Evidence / Test Acceleration Rule
