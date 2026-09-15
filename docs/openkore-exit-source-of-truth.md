@@ -123,3 +123,54 @@ Target acquisition、attack、monster HP decrease、kill、character receives da
 目前 Gate 1A 未通過，Phase 11 只有靜態依賴矩陣，尚未執行 runtime 切換或移除驗證，現階段 OpenKore removal count 為 0。因此目前專案不具備 `PLAYER_FLOW_PASS` 或 `OPENKORE_REMOVED` 證據，OpenKore Exit 狀態維持未完成。
 
 本輪文件更新不包含 runtime 測試與程式修改。後續任何能力升級，都必須先補足對應 Gate 的 runtime evidence，再更新本矩陣。
+
+## Architecture Milestone: No-Client SERVER_AGENT Controller
+
+### Formal milestone
+
+`MILESTONE: SERVER_AGENT_NO_CLIENT_CONTROLLER_FEASIBILITY_PROVEN`
+
+日期：`2026-09-16`
+
+隔離實驗已由兩種 continuation 類型取得證據：
+
+1. Fly Wing 601：原生 item effect、random warp、server-side `attach_map_block()`、原生 `map_addblock()`，`sd->prev` 由無效狀態恢復有效，entity 維持 1。
+2. TEST_ONLY NPC：原生 `npc_click()`、`npc_scriptcont()`、`next`、`select`、script result 與 close 流程完成，`#test_result=2`。
+
+架構結論：
+
+`Native Client` 定位為 Controller、Transport、Presentation layer。rAthena Server Authority 持續負責 item validation、inventory、cooldown、map restriction、NPC script state、quest state、ownership、execution epoch 與 entity lifecycle。`SERVER_AGENT` 可作為無 Native RO Client 的 headless controller，透過 internal intent 與 server-side continuation 接入同一套 authority。
+
+Server-side continuation 的範圍是移除不存在的 client acknowledgement transport dependency，保留 server authority 與所有原生 invariant。
+
+### Status boundary
+
+| Status | Value |
+| --- | --- |
+| `ARCHITECTURE_FEASIBILITY` | `PROVEN` |
+| `ARCHITECTURE_POC_PASS` | `YES` |
+| `HIGH_COST_ARCHITECTURE` | `NO` |
+| `EXPERIMENTAL_IMPLEMENTATION` | `YES` |
+| `PRODUCTION_READY` | `NO` |
+| `OPENKORE_EXIT_GATE1A` | `NOT_PASS` |
+| `OPENKORE_REMOVED` | `NO` |
+
+完整 evidence 保存在 [server-agent-no-client-continuation-poc.md](experiments/server-agent-no-client-continuation-poc.md)。本里程碑只提升 architecture feasibility evidence，不提升 AUTO_FARM、Combat、Generic Item Use、NPC Quest、Kafra、Storage、Shop 或 Multi-map 的 capability completion status。
+
+### Next engineering step
+
+從真正 OpenKore Exit canonical base 建立乾淨 implementation lineage，只移植已證明的 headless map continuation、headless NPC continuation pattern 與明確的 `SERVER_AGENT` controller semantics。不得直接 merge experiment branch。
+
+後續回到 `GATE 1A PLAYER FLOW`：
+
+```text
+OpenKore=0
+→ farm
+→ no target
+→ Fly Wing
+→ warp
+→ reattach
+→ rescan
+→ target
+→ combat
+```

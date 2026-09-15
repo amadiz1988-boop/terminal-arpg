@@ -174,3 +174,23 @@ SHA-256：`6747605A531DDCC14F18DE28953F19DC727EA59AB6F1C734A82A467864F10086`
 - branch production semantic modification：`0`
 - high-cost architecture flag：`NO`
 - evidence package：`../.tmp-pa-iso-runtime/fh-map.out`、`../.tmp-pa-iso-runtime/npc-map.out`、隔離 driver 與隔離 checkout
+
+## Final Result
+
+`ARCHITECTURE_POC_PASS = YES`
+
+`PROMOTE_ARCHITECTURE_DIRECTION_RECOMMENDED = YES`
+
+`PROMOTE_EXPERIMENT_CODE_DIRECTLY = NO`
+
+Experiment branch：`experiment/server-agent-no-client-continuation-poc`
+
+Base SHA：`113f72ab80ff1fd4aeb4d0d1a81ed2f734f68669`
+
+Head SHA：`a5d7972b4525fa1dff75f56d11c446b2ac2b99f1`
+
+Tree SHA：`5c28bffa7e683a427517a98f01315abe99a8329e`
+
+Rollout patch SHA256：`F3B8776C247164D077D00A30A33542F8A274FC607871D5AA9EBB6658A6413C11`
+
+本結果只封存 architecture feasibility。`PLAYER_FLOW_PASS`、`OPENKORE_REMOVED` 與正式 production readiness 維持原狀。
