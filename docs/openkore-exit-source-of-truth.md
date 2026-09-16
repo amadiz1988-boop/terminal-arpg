@@ -2,6 +2,26 @@
 
 本文件是本專案唯一的 `OPENKORE EXIT CANONICAL STATUS DOCUMENT`。A、B、G 工作線與後續規模驗收，都必須依本文件判定 OpenKore 依賴是否真正退出。文件只整理已存在的來源與驗證證據，不修改 Persistent Agent、rAthena、OpenKore、Dashboard、資料庫結構或正式環境。
 
+## Persistent Agent Canonical Source Authority
+
+本專案只有一條 authoritative Persistent Agent source lineage。
+
+```
+PERSISTENT_AGENT_CANONICAL_SOURCE:
+C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\.tmp-gate1a-player-flow-v1
+PERSISTENT_AGENT_CANONICAL_BRANCH: canonical/persistent-agent-no-client-v1
+PERSISTENT_AGENT_CANONICAL_HEAD:   866f423af9b199a88e7eb7ae1cac0833b46487a8
+PERSISTENT_AGENT_LINEAGE:          3ffdad1 -> 5ed8f0d -> 866f423
+```
+
+- 未來 Persistent Agent source 變更只從上列 canonical worktree 開始。
+- 歷史 PA worktree（`.tmp-server-agent-no-client-controller-v1`、`.tmp-pa-lifecycle-consolidation-v1`）為 frozen read-only reference，不得刪除、不得作為來源權威。
+- `.tmp-pa-iso-runtime` 為 SHARED TEST/RUNTIME SUPPORT，不是 source authority，也不是 command-contract authority，亦不得承載 ownership／lifecycle implementation。
+- Command contract authority 版本化於 canonical PA source（`conf/persistent_agent_commands.json`、`src/map/persistent_agent_command_contract.hpp`），不位於 harness。
+- Binaries 與 runtime copies 永遠不是 source authority。
+- 舊 `ops/ro-stack/patches/persistent-agent.patch` 為 `STALE_REFERENCE`／derived artifact，非 canonical 來源，不得以它取代 canonical Git source。
+- 未位於 canonical PA worktree 而嘗試 PA source edit：STOP → 回報 `NON_CANONICAL_PA_WORKTREE`。
+
 ## 判定邊界
 
 來源中存在函式、isolated unit test 通過，或程式看起來支援，都不能單獨代表功能完成。每個能力固定使用下列四級狀態：
@@ -219,6 +239,8 @@ COMMAND_CONTRACT_HARDENING          = CLOSED
 | `HARNESS_SHA256` | `D103FE7232535132470C3339C118C6A8FDC4F3C7972C97D389F2C5C75919D437` |
 | `g1a-map.out` | `9983F31D441EF39E6C3A697AC078357C939ADCBBDC35326AFF4B239C5A9EE2C7` |
 | `g1a-run-B.stdout.txt` | `F40F3B76FC2DCDFE54EA2721A98E4F385CB7BBA015D2575EB844DC884117CF27` |
+
+後續 lineage 續行至 `866f423af9b199a88e7eb7ae1cac0833b46487a8`（command-contract hardening）。原 `Source branch` `candidate/gate1a-player-flow-v1` 已於 `2026-09-17` 更名為 `canonical/persistent-agent-no-client-v1`（同一 commit，歷史保留）；此 milestone 由 tag `milestone/gate1a-no-client-player-flow-pass-20260917` 固定指向 `5ed8f0d21ee138ddd37db4f7070a4decafeb84e5`。
 
 本輪只凍結已證明的 source patch 與既有 isolated binary，未重新建置、未部署 production binary。Source patch 只修改 `src/map/persistent_agent.cpp` 與 `src/map/persistent_agent_state.cpp`，未改動 damage 計算、mob HP 寫入、attack timing、target selection、native client／OpenKore 行為、`expected_revision` 或 execution epoch／stale callback 保護。
 

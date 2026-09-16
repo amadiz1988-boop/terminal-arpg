@@ -54,7 +54,7 @@ Do **not** search `C:\`, do **not** search sibling worktrees, do **not** guess a
 
 **搜尋範圍規則**：進入 ACTIVE_WORKTREE 後，所有 grep／glob／git／read／edit／build／test 預設只能在該 worktree。跨 worktree 操作只在 Source of Truth 明確引用或 Project Control 明確要求時，且必須使用 exact path。
 
-**Kilo 日常 workspace**：不應以 `C:\` 或整個 project root 開啟。應直接開 ACTIVE_WORKTREE（例如 Workline A → `.tmp-server-agent-no-client-controller-v1`，Workline C → `terminal-arpg-phase4a-canonical`）。
+**Kilo 日常 workspace**：不應以 `C:\` 或整個 project root 開啟。應直接開 ACTIVE_WORKTREE（例如 Workline B → `.tmp-gate1a-player-flow-v1`（Persistent Agent canonical），Workline C → `terminal-arpg-phase4a-canonical`）。
 
 ### Routing Extension — Shared Governance Exact-Path Access
 
@@ -160,6 +160,26 @@ AUTHORIZED_SUPPORT_ROOTS:
 ```
 
 The concrete paths may vary by task, but the header itself is mandatory for all new Kilo conversations.
+
+### Persistent Agent 單一來源權威
+
+Persistent Agent 只有一條 authoritative source lineage。此宣告取代其他 PA worktree、branch、patch artifact 與 runtime copy。
+
+```
+PERSISTENT_AGENT_CANONICAL_SOURCE:
+C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\.tmp-gate1a-player-flow-v1
+PERSISTENT_AGENT_CANONICAL_BRANCH: canonical/persistent-agent-no-client-v1
+PERSISTENT_AGENT_CANONICAL_HEAD:   866f423af9b199a88e7eb7ae1cac0833b46487a8
+PERSISTENT_AGENT_LINEAGE:          3ffdad1 -> 5ed8f0d -> 866f423
+```
+
+- Persistent Agent source 變更一律從上列 canonical worktree 開始。
+- `.tmp-server-agent-no-client-controller-v1`、`.tmp-pa-lifecycle-consolidation-v1` 為唯讀歷史 reference，不得刪除。
+- `.tmp-pa-iso-runtime` 為 shared test/runtime support，不是 source authority、不是 command-contract authority。
+- 舊 `persistent-agent.patch` 為 stale derived artifact，不得視為來源權威。
+- 在其他 PA worktree 嘗試 PA source edit：STOP → 回報 `NON_CANONICAL_PA_WORKTREE`。
+
+詳細分類見 `terminal-arpg/WORKSPACE_INDEX.md` 與 `docs/openkore-exit-source-of-truth.md`。
 
 ## 第一性原理優先鐵律
 

@@ -35,6 +35,11 @@ SHARED_GOVERNANCE_EXACT_PATHS:
 
 SHARED_SUPPORT_ROOTS:
   GATE1A_HARNESS: .tmp-pa-iso-runtime
+  # Classification: RUNTIME_SUPPORT / TEST_SUPPORT (no Git repository)
+  # SOURCE_AUTHORITY: NO
+  # May contain: scenario scripts, runtime binaries, evidence, fixtures.
+  # May NOT become: PA source authority, command-contract authority, or
+  #                 ownership/lifecycle implementation.
   # Purpose: isolated server startup, isolated DB/schema, fixture setup,
   #          formal command transport, runtime observation, cleanup.
   # Rules:
@@ -47,16 +52,60 @@ SHARED_SUPPORT_ROOTS:
 
 ---
 
+## Persistent Agent Canonical Source Authority
+
+Single authoritative Persistent Agent source lineage. This supersedes every
+other PA worktree, branch, patch artifact and runtime copy.
+
+```
+PERSISTENT_AGENT_CANONICAL_SOURCE:
+C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\.tmp-gate1a-player-flow-v1
+PERSISTENT_AGENT_CANONICAL_BRANCH: canonical/persistent-agent-no-client-v1
+PERSISTENT_AGENT_CANONICAL_HEAD:   866f423af9b199a88e7eb7ae1cac0833b46487a8
+PERSISTENT_AGENT_LINEAGE:          3ffdad1 -> 5ed8f0d -> 866f423
+PERSISTENT_AGENT_MILESTONE_REF:    milestone/gate1a-no-client-player-flow-pass-20260917
+PERSISTENT_AGENT_MILESTONE_TARGET: 5ed8f0d21ee138ddd37db4f7070a4decafeb84e5
+```
+
+Rules:
+
+- Future PA source changes start ONLY in the canonical worktree above.
+- Historical PA worktrees are read-only reference; do not delete them.
+- `.tmp-pa-iso-runtime` is shared test/runtime support only; it is NOT source authority.
+- Binaries and runtime copies are never source authority.
+- Patch artifacts are derived artifacts unless explicitly declared canonical.
+- A future agent located in any other PA worktree must STOP and report
+  `NON_CANONICAL_PA_WORKTREE` before attempting a PA source edit.
+
+PA root classification (frozen references; do not delete):
+
+| Root | Classification | Source authority |
+| --- | --- | --- |
+| `.tmp-gate1a-player-flow-v1` | CANONICAL | YES |
+| `.tmp-server-agent-no-client-controller-v1` | REFERENCE (ancestor snapshot `3ffdad1`) | NO |
+| `.tmp-pa-lifecycle-consolidation-v1` | REFERENCE (divergent historical `95376cc`) | NO |
+| `.tmp-pa-iso-runtime` | RUNTIME_SUPPORT (shared Gate1A harness, no Git) | NO |
+
+Legacy patch `terminal-arpg/ops/ro-stack/patches/persistent-agent.patch`
+= `STALE_REFERENCE` / derived artifact (last generated 2026-09-14, predates
+command-contract hardening `866f423`). Never use it as source authority over
+the canonical Git source.
+
+---
+
 ## A | Persistent Agent / OpenKore Exit
 
 ```
 WORKLINE:        A
-STATUS:          ACTIVE
+STATUS:          REFERENCE_ONLY
+ROLE:            HISTORICAL_PA_ANCESTOR_REFERENCE
 ACTIVE_WORKTREE: C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\.tmp-server-agent-no-client-controller-v1
-ACTIVE_BRANCH:   candidate/server-agent-no-client-controller-v1
-CANONICAL_HEAD:  verify on entry (git rev-parse HEAD)
+ACTIVE_BRANCH:   candidate/server-agent-no-client-controller-v1 (frozen)
+CANONICAL_HEAD:  3ffdad1420feadde1e4d96667d7a33136bddb3c5
+SOURCE_AUTHORITY: NO
 SOURCE_OF_TRUTH: terminal-arpg/docs/openkore-exit-source-of-truth.md
-LAST_VERIFIED:   2026-09-16
+LAST_VERIFIED:   2026-09-17
+DO_NOT_EDIT:     read-only reference; PA source edits belong to Workline B canonical worktree
 DO_NOT_SEARCH:   C:\ root, project root, other worktrees unless SoT explicitly references them
 ```
 
@@ -66,15 +115,18 @@ DO_NOT_SEARCH:   C:\ root, project root, other worktrees unless SoT explicitly r
 
 ```
 WORKLINE:        B
-STATUS:          GATE1A_CLOSED
+STATUS:          CANONICAL
+ROLE:            PERSISTENT_AGENT_CANONICAL_SOURCE
 ACTIVE_WORKTREE: C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\.tmp-gate1a-player-flow-v1
-ACTIVE_BRANCH:   candidate/gate1a-player-flow-v1
+ACTIVE_BRANCH:   canonical/persistent-agent-no-client-v1
 CANONICAL_HEAD:  866f423af9b199a88e7eb7ae1cac0833b46487a8
 PARENT:          5ed8f0d21ee138ddd37db4f7070a4decafeb84e5
+MILESTONE_REF:   milestone/gate1a-no-client-player-flow-pass-20260917 -> 5ed8f0d21ee138ddd37db4f7070a4decafeb84e5
 SOURCE_OF_TRUTH: terminal-arpg/docs/openkore-exit-source-of-truth.md
 LAST_VERIFIED:   2026-09-17
 SEARCH_SCOPE:    ACTIVE_WORKTREE_ONLY
 CROSS_WORKTREE_ALLOWED: NO
+NON_CANONICAL_EDIT: STOP -> report NON_CANONICAL_PA_WORKTREE
 ```
 
 ---
@@ -132,5 +184,8 @@ CROSS_WORKTREE_ALLOWED: NO
 
 Do NOT open `C:\` or `g-p-6a9bcb57afdc8191966436643af8acdf\` as daily coding workspace.
 Open the ACTIVE_WORKTREE directly. Examples:
-- Workline A → `.tmp-server-agent-no-client-controller-v1`
+- Workline B (Persistent Agent, canonical) → `.tmp-gate1a-player-flow-v1`
 - Workline C → `terminal-arpg-phase4a-canonical`
+
+Persistent Agent edits belong ONLY to Workline B's canonical worktree above.
+`.tmp-server-agent-no-client-controller-v1` is a frozen reference, not a workspace.
