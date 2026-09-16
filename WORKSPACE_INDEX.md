@@ -1,4 +1,4 @@
-# WORKSPACE_INDEX
+﻿# WORKSPACE_INDEX
 
 Authority document. Read this before any grep/glob/read/edit. Do not modify without Project Control.
 
@@ -30,6 +30,8 @@ CANONICAL_HEAD:  UNRESOLVED
 SOURCE_OF_TRUTH: UNRESOLVED
 LAST_VERIFIED:   2026-09-16
 DO_NOT_SEARCH:   Do not start work. Report ROUTING_STALE and stop.
+SEARCH_SCOPE:       N/A (ROUTING_STALE)
+CROSS_WORKTREE_ALLOWED: NO
 ```
 
 ---
@@ -60,6 +62,8 @@ CANONICAL_HEAD:  verify on resume
 SOURCE_OF_TRUTH: .tmp-ro-hud-phase1 internal docs
 LAST_VERIFIED:   2026-09-16
 DO_NOT_SEARCH:   Do not start work without explicit Project Control resume.
+SEARCH_SCOPE:       PAUSED (no search)
+CROSS_WORKTREE_ALLOWED: NO
 ```
 
 ---
@@ -75,6 +79,8 @@ CANONICAL_HEAD:  UNRESOLVED
 SOURCE_OF_TRUTH: UNRESOLVED
 LAST_VERIFIED:   2026-09-16
 DO_NOT_SEARCH:   Do not start work. Report ROUTING_STALE and stop.
+SEARCH_SCOPE:       N/A (ROUTING_STALE)
+CROSS_WORKTREE_ALLOWED: NO
 ```
 
 ---

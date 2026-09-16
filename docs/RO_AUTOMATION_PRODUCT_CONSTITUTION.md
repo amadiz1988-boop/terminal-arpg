@@ -250,7 +250,7 @@ RO 原廠介面是結構、像素、控制方式與資訊層級的基準。已�
 玩家流程：
 
 1. 停止掛機。
-2. 從道具欄使用蝴蝶翅膀，實際扣除一個道具並返回已記錄儲存點。
+2. 從道具欄使用永久蝴蝶翅膀並返回已記錄儲存點，道具數量維持不變。
 3. MapRoute計算到 `prt_in (63,60)` 的跨圖與室內路線。
 4. 小地圖逐格顯示移動，小黑窗顯示傳送、路線與抵達。
 5. 抵達後顯示忽克連對話框。
@@ -306,3 +306,113 @@ twRO官方流程也確認：與城鎮精煉師交談後開啟精煉介面，從�
 - twRO波利與掉落繁中名稱：https://ragnaplace.com/zh-t/twro/mob/1002
 
 影片內容目前無法由研究工具擷取，暫不把未核實的影片細節寫成規則。
+
+
+## Context Budget / Routing Report 鐵律
+
+### 目的
+
+防止 Agent 在大型 project root 或 sibling worktrees 做無界搜尋，避免 token / context 暴增、provider request 過大、model 次數快速消耗、Source of Truth 混亂與誤用錯誤 worktree / branch。
+
+### 任務開頭固定格式
+
+所有 repo 任務開頭必須聲明：
+
+```
+WORKLINE:
+WORKSPACE:
+EXPECTED_BRANCH:
+EXPECTED_HEAD_OR_PARENT:
+SOURCE_OF_TRUTH:
+TASK_TYPE:
+```
+
+Agent 必須驗證並回報：
+
+```
+WORKSPACE_ROOT:
+BRANCH:
+HEAD:
+ROUTING_MATCH: YES / NO
+```
+
+若 ROUTING_MATCH=NO：STOP → 回報 ROUTING_STALE，不得自行全域搜尋替代 worktree。
+
+### 搜尋範圍硬規則
+
+1. routing 完成後，grep / glob / read / git 預設只能在 ACTIVE_WORKTREE 內。
+2. 禁止從 C:\ 全域搜尋。
+3. 禁止從 project root 無界 grep。
+4. 禁止掃 sibling .tmp-* worktrees。
+5. 禁止 Get-ChildItem -Recurse 全專案。
+6. 禁止 glob **/* 全專案。
+7. 禁止大量無限制 Get-Content。
+   例外：任務明確授權 cross-worktree provenance lookup，且必須先聲明 WHY_CROSS_WORKTREE_SEARCH_REQUIRED。
+
+一個任務預設最多：1 個 ACTIVE_WORKTREE + 少量明確 Source of Truth 文件。
+
+### 異常門檻
+
+以下任一條件觸發時，Agent 必須解釋原因，不得默默繼續擴張；若非任務必要，STOP / 收斂搜尋範圍：
+
+- TOP_LEVEL_SEARCH_PATH_COUNT > 3
+- CROSS_WORKTREE_SEARCH_PERFORMED = YES
+- PROJECT_ROOT_SEARCH_PERFORMED = YES
+- UNBOUNDED_RECURSIVE_SEARCH_PERFORMED = YES
+
+### Bounded Tool Rule
+
+推薦固定模式：
+
+- read exact file/range
+- grep exact pattern
+- Select-Object -First N
+- git diff --stat
+- git diff --name-only
+- git status --porcelain --untracked-files=no
+
+所有可能卡住的 shell 命令必須設 bounded timeout。禁止無限等待。
+
+### Conversation Budget
+
+一個 Kilo 對話只處理一個 atomic goal。以下情況觸發 HANDOFF → NEW CONVERSATION：
+
+- milestone 完成
+- blocker 已定位
+- commit 完成
+- context 明顯膨脹
+- provider 出現 context/channel/400 類問題
+
+禁止同一對話長期混入：Git archaeology、UI、PA、NPC、Dashboard、deployment、不同 workline。
+
+### 固定 CONTEXT_REPORT 模板
+
+所有 repo 任務最後必須回報：
+
+```
+【CONTEXT_REPORT】
+
+WORKLINE:
+WORKSPACE_ROOT:
+BRANCH:
+HEAD:
+WORKSPACE_ROUTING_MATCH:
+
+INDEXED_SEARCHED_PATHS:
+TOP_LEVEL_SEARCH_PATH_COUNT:
+
+CROSS_WORKTREE_SEARCH_PERFORMED:
+PROJECT_ROOT_SEARCH_PERFORMED:
+C_DRIVE_SEARCH_PERFORMED:
+UNBOUNDED_RECURSIVE_SEARCH_PERFORMED:
+LARGE_OUTPUT_COMMAND_USED:
+
+SOURCE_OF_TRUTH_FILES_READ:
+
+CONTEXT_BUDGET_VIOLATION:
+YES / NO
+
+If YES:
+WHY:
+MITIGATION:
+```

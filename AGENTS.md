@@ -205,3 +205,156 @@ git diff --check
 - `ro-asset-index`：RO 道具、裝備、技能、怪物、NPC、地圖、紙娃娃、繁中名稱與原廠內容圖片的集中索引、來源驗證及 Web resolver。
 
 使用方式可直接在任務中指定 `$project-handoff`、`$implement-feature`、`$debug-bug` 或 `$ro-original-ui`，也可由符合描述的工作按需觸發。RO 原廠還原相關工作強制讀取 `ro-original-ui`。這些 Skill 不取代本文件的驗證、來源與修改邊界規則。
+
+
+## Context Budget / Routing Report 鐵律
+
+### 任務開始前強制 Routing 驗證
+
+所有 repo 任務開始前，Agent 必須完成：
+
+1. 讀 `terminal-arpg/WORKSPACE_INDEX.md`
+2. 解析 WORKLINE → 確認 `ACTIVE_WORKTREE`
+3. `cd` 到 `ACTIVE_WORKTREE`
+4. 驗證 `git branch --show-current` 與 `git rev-parse HEAD`
+
+回報以下格式後才可開始工作：
+
+```text
+WORKSPACE_ROOT:   <absolute path>
+BRANCH:           <branch name>
+HEAD:             <commit SHA>
+ROUTING_MATCH:    YES / NO
+```
+
+若 `ROUTING_MATCH=NO`：立即 `STOP → ROUTING_STALE`。禁止自行全域搜尋替代 worktree。
+
+---
+
+### 固定任務開頭格式
+
+每份核心工作指令建議包含：
+
+```text
+WORKLINE:
+WORKSPACE:
+EXPECTED_BRANCH:
+EXPECTED_HEAD_OR_PARENT:
+SOURCE_OF_TRUTH:
+TASK_TYPE:
+```
+
+---
+
+### 搜尋範圍鐵律
+
+進入 `ACTIVE_WORKTREE` 後，所有 grep／glob／read／git／edit／build／test 預設只能在該 worktree 內執行。
+
+**嚴格禁止（除非任務明確授權 cross-worktree provenance lookup）：**
+
+- 從 `C:\` 全域搜尋
+- 從 project root 無界 `grep`
+- 掃描 sibling `.tmp-*` worktrees
+- `Get-ChildItem -Recurse` 全專案
+- `glob **/*` 全專案
+- 大量無限制 `Get-Content`
+
+一個任務預設最多：
+
+```text
+1 個 ACTIVE_WORKTREE
++ 少量明確 Source of Truth 文件
+```
+
+---
+
+### 跨 Worktree 搜尋例外規則
+
+如需跨 worktree 搜尋，必須先聲明：
+
+```text
+WHY_CROSS_WORKTREE_SEARCH_REQUIRED: <原因>
+```
+
+未聲明不得執行。
+
+---
+
+### Bounded Tool 推薦模式
+
+```text
+read exact file/range
+grep exact pattern
+Select-Object -First N
+git diff --stat
+git diff --name-only
+git status --porcelain --untracked-files=no
+```
+
+所有可能卡住的 shell 命令必須設定 bounded timeout。禁止無限等待。
+
+---
+
+### 異常門檻
+
+以下任一條件成立，Agent 必須解釋原因、不得默默擴張；若非任務必要，立即 `STOP / 收斂搜尋範圍`：
+
+- `TOP_LEVEL_SEARCH_PATH_COUNT > 3`
+- `CROSS_WORKTREE_SEARCH_PERFORMED = YES`
+- `PROJECT_ROOT_SEARCH_PERFORMED = YES`
+- `UNBOUNDED_RECURSIVE_SEARCH_PERFORMED = YES`
+
+---
+
+### Conversation Budget（對話預算）
+
+一個 Kilo 對話只處理一個 atomic goal。
+
+當下列任一情況發生，執行 `HANDOFF → NEW CONVERSATION`：
+
+- milestone 完成
+- blocker 已定位
+- commit 完成
+- context 明顯膨脹
+- provider 出現 context／channel／400 類問題
+
+同一對話禁止長期混入：Git archaeology、UI、PA、NPC、Dashboard、deployment、不同 workline。
+
+---
+
+### 固定任務結尾 CONTEXT_REPORT 模板
+
+所有 repo 任務最後必須回報：
+
+```text
+【CONTEXT_REPORT】
+
+WORKLINE:
+WORKSPACE_ROOT:
+BRANCH:
+HEAD:
+WORKSPACE_ROUTING_MATCH:          YES / NO
+
+INDEXED_SEARCHED_PATHS:
+- <exact path 1>
+- <exact path 2>
+TOP_LEVEL_SEARCH_PATH_COUNT:      <number>
+
+CROSS_WORKTREE_SEARCH_PERFORMED:  YES / NO
+PROJECT_ROOT_SEARCH_PERFORMED:    YES / NO
+C_DRIVE_SEARCH_PERFORMED:         YES / NO
+UNBOUNDED_RECURSIVE_SEARCH_PERFORMED: YES / NO
+
+LARGE_OUTPUT_COMMAND_USED:        YES / NO
+If YES:
+  COMMAND:
+  WHY_REQUIRED:
+
+SOURCE_OF_TRUTH_FILES_READ:
+- <file 1>
+
+CONTEXT_BUDGET_VIOLATION:         YES / NO
+If YES:
+  WHY:
+  MITIGATION:
+```
