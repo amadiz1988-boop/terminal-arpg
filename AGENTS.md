@@ -4,6 +4,14 @@
 
 執行 substantial Repository 工作前，先依 `.agents/skills/task-model-router/SKILL.md` 判斷建議模型、推理強度與速度，並在施工前提醒使用者。該 Skill 只負責建議，不得改變任務 scope，也不得自行宣稱已切換模型。
 
+## Short-Term Product North Star
+
+SHORT-TERM PRODUCT NORTH STAR:
+Persistent Life V1 — offline SERVER_AGENT-controlled characters continue
+participating in the world and accumulate factual Event Ledger memories;
+LLM is narrator-only. Canonical definition:
+docs/RO_AUTOMATION_PRODUCT_CONSTITUTION.md
+
 ## Routing First 鐵律
 
 ### Routing Bootstrap — Canonical Path Derivation

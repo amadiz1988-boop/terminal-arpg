@@ -121,6 +121,206 @@ STOP_CONDITIONS:
 
 任何新增功能都先回答：原始 RO 中由哪一項資料、公式、NPC或介面承擔？OpenKore如何自動執行，玩家又需要做哪項養成決策？查無來源時標記 `【資料不足，無法確認】`，停止建立虛構規則。
 
+## Short-Term Product North Star — Persistent Life V1
+
+### 產品目標
+
+當玩家關閉 Web client，角色不因為失去 client 而停止存在於世界中。`SERVER_AGENT` 持續控制該角色，不需要 OpenKore，也不需要 Native Client。
+
+這是產品目標，不取代 `Server Authority`、`Player-flow First` 或 OpenKore Exit 架構。
+
+玩家不在線期間，角色可以：
+
+- 持續進行 server-authoritative 的正式戰鬥
+- 移動並參與世界
+- 與 NPC 互動
+- 加入或參與其他玩家的隊伍
+- 經歷有意義的世界事件
+- 累積「實際發生過什麼」的事實記憶
+
+玩家回來時，產品應該傳達：
+
+```text
+你不在的這段時間，角色真的生活過。
+```
+
+玩家應能：
+
+1. 看到離線期間發生的有意義事件
+2. 閱讀由這些事件產生的角色日記
+3. 檢視日記背後的事實時間軸
+4. 區分真實世界事件與生成的敘事文字
+
+### Authority 不變量
+
+```text
+rAthena / SERVER_AGENT = WORLD AUTHORITY
+Event Ledger           = FACTUAL MEMORY
+LLM                    = NARRATOR ONLY
+```
+
+LLM 不得成為以下事項的 authority：
+
+- combat outcomes
+- damage
+- drops
+- Zeny
+- inventory changes
+- quest state
+- party membership/result
+- NPC state
+- movement result
+- rewards
+- any authoritative game-state mutation
+
+LLM 只能把已記錄的事實轉換成面向玩家的敘事。
+
+### Event Ledger 原則
+
+Persistent Life 必須在生成敘事之前，先把有意義的事件記錄為結構化事實資料。
+
+概念性 event 欄位可包含：
+
+```text
+event_id
+character_id
+timestamp
+event_type
+map
+actors
+targets
+facts
+importance
+source
+```
+
+事件型別範例：
+
+```text
+PARTY_JOINED
+PARTY_MEMBER_LEFT
+NPC_TALK
+NPC_CHOICE
+QUEST_PROGRESS
+MONSTER_KILL
+RARE_DROP
+MAP_TRAVEL
+DEATH
+RECOVERY
+SIGNIFICANT_COMBAT_EVENT
+```
+
+本節只定義架構原則，不在這份 governance 任務中凍結資料庫 schema。
+
+### Diary 原則
+
+日記生成必須有根據。Pipeline：
+
+```text
+Authoritative World Events
+→ Event Ledger
+→ deterministic filtering / importance selection
+→ LLM narration
+→ Diary
+```
+
+每一則生成的日記條目都必須可追溯到其背後的 Event Ledger 事實紀錄。
+
+Narrator 可以加入：
+
+- tone
+- personality
+- phrasing
+- emotion as literary presentation
+
+但不得虛構：
+
+- 未真正發生的遭遇
+- 未真正發生的 NPC 互動
+- 未真正發生的隊伍關係
+- 未真正發生的 item／reward／drop
+- 未真正發生的 combat result
+
+### Persistent Life V1 Vertical Slice
+
+第一個 player-visible vertical slice：
+
+```text
+Player closes Web
+→ SERVER_AGENT assumes/continues control
+→ character remains active
+→ character joins or participates in a party
+→ character participates in real world activity
+→ character interacts with at least one NPC where appropriate
+→ meaningful events are written to Event Ledger
+→ player returns
+→ SERVER_AGENT performs safe handoff/release
+→ UI shows 「你不在的這段時間……」
+→ player sees a generated diary
+→ player can inspect the factual event timeline
+```
+
+這是短期產品里程碑。
+
+### 與 OpenKore Exit 的關係
+
+Persistent Life V1 必須建立在 `SERVER_AGENT` 上，且不得引入新的 OpenKore 依賴。
+
+但：
+
+```text
+OPENKORE_REMOVED
+```
+
+是 engineering milestone，而：
+
+```text
+PERSISTENT_LIFE_V1_PLAYER_VISIBLE
+```
+
+是短期產品里程碑。
+
+只要 Persistent Life 所需流程已經跑在 `SERVER_AGENT` 上，產品可見的 Persistent Life 工作不應被每一個 OpenKore 最終移除清理項目完全阻擋。
+
+### 目前交付順序
+
+```text
+Gate1A Player-flow CLOSED
+→ Command Contract Hardening
+→ PA Canonical Lineage Consolidation
+→ Persistent Life V1
+   - Offline Handoff
+   - Party
+   - NPC Interaction
+   - Event Ledger
+   - Diary Generation
+   - Return UX
+→ Persistent Life Player-flow Acceptance
+→ remaining OpenKore Exit gates / final removal
+```
+
+這是優先序指引，不是繞過安全或驗收閘門的授權。
+
+### 第一性原理完成判定
+
+Persistent Life V1 不因為以下任何一項而完成：
+
+- 跑過一次離線腳本
+- LLM 生成了文字
+- event table 有資料列
+
+只有真實 player-flow 證明下列閉環，才算完成：
+
+```text
+Player leaves
+→ character continues existing under SERVER_AGENT
+→ meaningful real events occur
+→ facts are recorded
+→ player returns
+→ control returns safely
+→ diary accurately reflects those facts
+```
+
 ## 操作責任分界
 
 ### 系統自動執行
