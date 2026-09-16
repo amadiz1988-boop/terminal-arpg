@@ -4,6 +4,36 @@ Authority document. Read this before any grep/glob/read/edit. Do not modify with
 
 ---
 
+## GLOBAL: Shared Roots
+
+```
+SHARED_GOVERNANCE_ROOT:   terminal-arpg
+SHARED_GOVERNANCE_ACCESS: READ_ONLY_EXACT_PATH
+
+# Agents in any runtime/source worktree may read the following canonical
+# governance paths directly.  This is NOT cross-worktree source discovery.
+# Do NOT search for alternate copies.  Do NOT copy files into the worktree.
+SHARED_GOVERNANCE_EXACT_PATHS:
+  - terminal-arpg/AGENTS.md
+  - terminal-arpg/WORKSPACE_INDEX.md
+  - terminal-arpg/docs/RO_AUTOMATION_PRODUCT_CONSTITUTION.md
+  - terminal-arpg/docs/testing-fixture-policy.md
+  - terminal-arpg/docs/openkore-exit-source-of-truth.md
+
+SHARED_SUPPORT_ROOTS:
+  GATE1A_HARNESS: .tmp-pa-iso-runtime
+  # Purpose: isolated server startup, isolated DB/schema, fixture setup,
+  #          formal command transport, runtime observation, cleanup.
+  # Rules:
+  #   - access only when task explicitly requires the harness
+  #   - do NOT treat as alternate source worktree
+  #   - do NOT search sibling source worktrees from it
+  #   - do NOT copy harness into each active worktree
+  #   - runtime/source modifications still belong only to ACTIVE_WORKTREE
+```
+
+---
+
 ## A | Persistent Agent / OpenKore Exit
 
 ```
@@ -23,14 +53,14 @@ DO_NOT_SEARCH:   C:\ root, project root, other worktrees unless SoT explicitly r
 
 ```
 WORKLINE:        B
-STATUS:          ROUTING_REQUIRES_PROJECT_CONTROL
-ACTIVE_WORKTREE: UNRESOLVED
-ACTIVE_BRANCH:   UNRESOLVED
-CANONICAL_HEAD:  UNRESOLVED
-SOURCE_OF_TRUTH: UNRESOLVED
+STATUS:          ACTIVE_GATE1A
+ACTIVE_WORKTREE: C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\.tmp-gate1a-player-flow-v1
+ACTIVE_BRANCH:   candidate/gate1a-player-flow-v1
+CANONICAL_HEAD:  3ffdad1420feadde1e4d96667d7a33136bddb3c5
+PARENT:          3ffdad1420feadde1e4d96667d7a33136bddb3c5
+SOURCE_OF_TRUTH: terminal-arpg/docs/openkore-exit-source-of-truth.md
 LAST_VERIFIED:   2026-09-16
-DO_NOT_SEARCH:   Do not start work. Report ROUTING_STALE and stop.
-SEARCH_SCOPE:       N/A (ROUTING_STALE)
+SEARCH_SCOPE:    ACTIVE_WORKTREE_ONLY
 CROSS_WORKTREE_ALLOWED: NO
 ```
 

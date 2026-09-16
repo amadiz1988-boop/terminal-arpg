@@ -24,6 +24,55 @@
 
 **Kilo 日常 workspace**：不應以 `C:\` 或整個 project root 開啟。應直接開 ACTIVE_WORKTREE（例如 Workline A → `.tmp-server-agent-no-client-controller-v1`，Workline C → `terminal-arpg-phase4a-canonical`）。
 
+### Routing Extension — Shared Governance Exact-Path Access
+
+**SHARED_GOVERNANCE_ROOT**: `terminal-arpg`
+**SHARED_GOVERNANCE_ACCESS**: `READ_ONLY_EXACT_PATH`
+
+A runtime or source worktree does **not** need local copies of governance documents. Agents are explicitly allowed to read the following canonical paths directly:
+
+- `terminal-arpg/AGENTS.md`
+- `terminal-arpg/WORKSPACE_INDEX.md`
+- `terminal-arpg/docs/RO_AUTOMATION_PRODUCT_CONSTITUTION.md`
+- `terminal-arpg/docs/testing-fixture-policy.md`
+- `terminal-arpg/docs/openkore-exit-source-of-truth.md`
+
+Rules:
+- This exact-path read is **allowed** and is **not** cross-worktree source discovery.
+- Must **not** trigger project-root or global search.
+- Must **not** cause governance files to be copied into runtime worktrees.
+- If a governance file is missing locally: read the canonical shared path. Do **not** search for alternate copies.
+
+### Routing Extension — Shared Support / Harness Roots
+
+**SHARED_SUPPORT_ROOTS** are explicit support resources, not source-of-truth worktrees.
+
+**SHARED_GATE1A_HARNESS_ROOT**: `.tmp-pa-iso-runtime`
+
+Purpose: isolated server startup, isolated DB/schema, fixture setup, formal command transport, runtime observation, cleanup.
+
+Rules:
+- Access only when the task explicitly requires the harness.
+- Do **not** treat as an alternate source worktree.
+- Do **not** search sibling source worktrees from it.
+- Do **not** copy the harness into each active worktree.
+- Runtime/source modifications still belong only to `ACTIVE_WORKTREE`.
+
+### Routing Extension — Logical Workline Semantics
+
+A / B / C / D / E are **logical worklines**. They are **not** persistent Kilo windows or sessions.
+
+Expected workflow per atomic task:
+
+```
+new atomic task
+→ declare WORKLINE
+→ read WORKSPACE_INDEX
+→ route to ACTIVE_WORKTREE
+→ work
+→ handoff / close conversation
+```
+
 ## 第一性原理優先鐵律
 
 所有架構、功能、測試與除錯工作，先定義真正目標，再檢查現有實作與工具。
