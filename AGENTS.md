@@ -4,6 +4,26 @@
 
 執行 substantial Repository 工作前，先依 `.agents/skills/task-model-router/SKILL.md` 判斷建議模型、推理強度與速度，並在施工前提醒使用者。該 Skill 只負責建議，不得改變任務 scope，也不得自行宣稱已切換模型。
 
+## Routing First 鐵律
+
+任何 Agent 工作開始前：
+
+1. 先讀 `WORKSPACE_INDEX.md`（位於 `terminal-arpg/WORKSPACE_INDEX.md`）
+2. 找到自己的 WORKLINE
+3. `cd` 到 `ACTIVE_WORKTREE`
+4. 驗證：branch（`git branch --show-current`）與 HEAD（`git rev-parse HEAD`）
+5. 確認符合索引後才可開始 grep／glob／read／edit
+
+若 branch 或 HEAD 與索引不一致：
+
+回報 `ROUTING_STALE` 並 **STOP**。
+
+**禁止**：因 routing 不一致就自行從 `C:\` 或 Project Root 全域搜尋所有 worktree。
+
+**搜尋範圍規則**：進入 ACTIVE_WORKTREE 後，所有 grep／glob／git／read／edit／build／test 預設只能在該 worktree。跨 worktree 操作只在 Source of Truth 明確引用或 Project Control 明確要求時，且必須使用 exact path。
+
+**Kilo 日常 workspace**：不應以 `C:\` 或整個 project root 開啟。應直接開 ACTIVE_WORKTREE（例如 Workline A → `.tmp-server-agent-no-client-controller-v1`，Workline C → `terminal-arpg-phase4a-canonical`）。
+
 ## 第一性原理優先鐵律
 
 所有架構、功能、測試與除錯工作，先定義真正目標，再檢查現有實作與工具。
@@ -93,6 +113,12 @@ Native Client、OpenKore、packet、UI、`status.json`、`.cmd` 與 `.result` �
 
 每項新增或修改的規則，依序查核鎖定版 rAthena `src`、`db/re`、`npc`、`doc`，再查鎖定版 OpenKore、Gravity 官方資料與可重現的 RO 遊戲內行為。每筆正式資料保存來源網址或本機來源、版本、日期、原始效果與實作對照。
 
+凡涉及 RO UI、音效、Sprite、按鈕、視窗或 Icon 的原廠還原工作，必須先完整讀取 `.agents/skills/ro-original-ui/SKILL.md`，再依該 Skill 的來源、驗收與 provenance 規則施工。
+
+凡涉及 RO 道具、裝備、技能、怪物、NPC、地圖、紙娃娃、繁中名稱或原廠圖片，或使用者要求「原廠」、「正確圖片」、「原廠圖示」、「繁中名稱」、「RO原版」時，必須先完整讀取 `.agents/skills/ro-asset-index/SKILL.md`，並透過集中索引與共用 resolver 取得名稱及資產。
+
+**「原廠還原任務中，未經來源驗證的視覺資產，視同不存在。」**
+
 來源資料至少保留以下欄位，欄位名稱可依資料格式映射：
 
 ```text
@@ -175,5 +201,7 @@ git diff --check
 - `debug-bug`：依錯誤證據定位、最小修正、回歸測試並記錄結果。
 - `nearest-valid-test-state`：大型測試先定義被測功能與合法起點，優先使用 fixture／checkpoint，限制高成本前置與 Full E2E。
 - `navigation-stall-safety`：任務、NPC、補給與掛機導航必須有可觀察進度、有限重試、替代路線及安全終止。
+- `ro-original-ui`：RO 原廠 UI／UX、視覺資產、音效、Sprite、按鈕、視窗與 Icon 還原時，執行 Original Asset First、來源驗證、視覺比較與 provenance 登錄。
+- `ro-asset-index`：RO 道具、裝備、技能、怪物、NPC、地圖、紙娃娃、繁中名稱與原廠內容圖片的集中索引、來源驗證及 Web resolver。
 
-使用方式可直接在任務中指定 `$project-handoff`、`$implement-feature` 或 `$debug-bug`，也可由符合描述的工作按需觸發。這些 Skill 不取代本文件的驗證、來源與修改邊界規則。
+使用方式可直接在任務中指定 `$project-handoff`、`$implement-feature`、`$debug-bug` 或 `$ro-original-ui`，也可由符合描述的工作按需觸發。RO 原廠還原相關工作強制讀取 `ro-original-ui`。這些 Skill 不取代本文件的驗證、來源與修改邊界規則。
