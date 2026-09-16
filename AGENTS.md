@@ -6,9 +6,33 @@
 
 ## Routing First 鐵律
 
+### Routing Bootstrap — Canonical Path Derivation
+
+每個新對話開始前，必須依序 **derive** 下列三個路徑，不得猜測或相對定位：
+
+```
+Step 1 — Resolve PROJECT_CONTAINER_ROOT
+  The directory that contains the terminal-arpg folder.
+  Example: C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf
+
+Step 2 — Derive SHARED_GOVERNANCE_ROOT
+  SHARED_GOVERNANCE_ROOT = <PROJECT_CONTAINER_ROOT>\terminal-arpg
+
+Step 3 — Derive WORKSPACE_INDEX_PATH
+  WORKSPACE_INDEX_PATH = <SHARED_GOVERNANCE_ROOT>\WORKSPACE_INDEX.md
+```
+
+**Missing-path STOP rule**: If `WORKSPACE_INDEX_PATH` does not exist at the derived exact path:
+
+```
+STOP → report SHARED_GOVERNANCE_ROOT_INVALID
+```
+
+Do **not** search `C:\`, do **not** search sibling worktrees, do **not** guess an alternate location.
+
 任何 Agent 工作開始前：
 
-1. 先讀 `WORKSPACE_INDEX.md`（位於 `terminal-arpg/WORKSPACE_INDEX.md`）
+1. 執行上述 Bootstrap 取得 `WORKSPACE_INDEX_PATH`，以 exact path 讀取
 2. 找到自己的 WORKLINE
 3. `cd` 到 `ACTIVE_WORKTREE`
 4. 驗證：branch（`git branch --show-current`）與 HEAD（`git rev-parse HEAD`）

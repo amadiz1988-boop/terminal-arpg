@@ -2,6 +2,19 @@
 
 Authority document. Read this before any grep/glob/read/edit. Do not modify without Project Control.
 
+## Bootstrap Path Resolution
+
+```
+PROJECT_CONTAINER_ROOT: resolve from working directory or environment context
+SHARED_GOVERNANCE_ROOT: <PROJECT_CONTAINER_ROOT>\terminal-arpg
+WORKSPACE_INDEX_PATH:   <SHARED_GOVERNANCE_ROOT>\WORKSPACE_INDEX.md  ← this file
+```
+
+Rules:
+- Agents MUST derive WORKSPACE_INDEX_PATH from PROJECT_CONTAINER_ROOT. Do NOT guess a relative path.
+- Do NOT search C:\, project root, or sibling worktrees if the path is not immediately known.
+- If WORKSPACE_INDEX_PATH does not exist at the derived path: STOP → report SHARED_GOVERNANCE_ROOT_INVALID.
+
 ---
 
 ## GLOBAL: Shared Roots
