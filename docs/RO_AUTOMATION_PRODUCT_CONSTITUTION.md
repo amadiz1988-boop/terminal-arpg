@@ -1,4 +1,4 @@
-# RO 自動掛機版產品鐵律
+﻿# RO 自動掛機版產品鐵律
 
 ## 第一性原理優先
 
@@ -307,6 +307,155 @@ twRO官方流程也確認：與城鎮精煉師交談後開啟精煉介面，從�
 
 影片內容目前無法由研究工具擷取，暫不把未核實的影片細節寫成規則。
 
+
+## Execution Budget / No-Progress Circuit Breaker
+
+### 目的
+
+補充現有 FIRST PRINCIPLES、PLAYER-FLOW、ROUTING FIRST 與 CONTEXT BUDGET 治理框架中尚缺的一個維度：
+
+即使 Agent 已在正確 worktree、搜尋範圍也正確，仍必須有明確的停止條件，防止無進展的重複搜尋、無限推理與非法捷徑。
+
+### 治理概念對照
+
+| 概念 | 定義 | 完整文件 |
+| --- | --- | --- |
+| FIRST PRINCIPLES | WHAT actually matters | [第一性原理優先](#第一性原理優先) |
+| PLAYER-FLOW | HOW the feature is accepted | [testing-fixture-policy.md](testing-fixture-policy.md) |
+| ROUTING | WHERE the Agent works | [Routing First 鐵律 in AGENTS.md](../AGENTS.md) |
+| CONTEXT BUDGET | HOW MUCH the Agent may inspect | [Context Budget / Routing Report 鐵律](#context-budget--routing-report-鐵律) |
+| EXECUTION BUDGET | HOW LONG / HOW MANY attempts | 本節 |
+| CIRCUIT BREAKER | WHEN the Agent must stop | 本節 |
+
+### 硬限制
+
+#### MAX_EQUIVALENT_DISCOVERY_ATTEMPTS = 3
+
+對同一目的（找同一 symbol、source file、invocation path、config，或重複近似的 grep / glob），最多執行 3 次等價嘗試。
+
+第 3 次仍無 materially new evidence：
+
+```
+DISCOVERY_STALLED → STOP
+```
+
+不得執行第 4 次等價搜尋。
+
+#### NO_NEW_EVIDENCE_LIMIT = 5 分鐘
+
+針對同一 blocker，連續 5 分鐘未取得新的實質證據（未新增 exact file/line、caller/callee、runtime state、reproducible result、failing boundary 或 provenance evidence），必須停止。
+
+禁止以「再想一下」、「再找一下」、「再 grep 一次」延長工作。
+
+#### MAX_BLOCKER_INVESTIGATION_TIME = 15 分鐘
+
+單一 blocker / hypothesis 的調查上限。到達上限後必須回報以下之一：
+
+- `ROOT_CAUSE_CONFIRMED`
+- `NEEDS_MODEL_ESCALATION`
+- `NEEDS_PROJECT_CONTROL_DECISION`
+- `INSUFFICIENT_EVIDENCE`
+
+不得自行無限延長調查。
+
+#### MAX_DISCOVERY_TOOL_CALLS_PER_BLOCKER = 10
+
+只計算 discovery 類工具呼叫：grep、glob、find、用於定位的 read、git archaeology、directory enumeration。
+
+達到 10 次時必須 checkpoint：
+
+```
+NEW_EVIDENCE_FOUND: YES / NO
+```
+
+若 NO → STOP。
+若 YES → 必須明確說明 `NEW_EVIDENCE: <what changed the hypothesis>` 才能繼續。
+
+### Search Loop Self-Detection
+
+若 Agent 對同一目標連續三次出現本質相同的意圖（如「I need to find...」、「Let me locate...」、「I need to search...」）：
+
+```
+SEARCH_LOOP_DETECTED = YES → 立即停止該 discovery 路線
+```
+
+優先重用已取得的最佳 evidence，禁止換關鍵字重複搜尋同一件事。
+
+### Silent / Opaque Work Circuit Breaker
+
+若 `NO_OBSERVABLE_PROGRESS >= 5 分鐘`，且並非正在執行有明確 timeout 的 build、test 或 server readiness wait：
+
+```
+STOP / CHECKPOINT
+```
+
+所有合法長命令必須有 bounded timeout。禁止黑箱「thinking」數十分鐘。
+
+### Invalid Acceptance Shortcut
+
+若 Agent 發現自己打算「直接修改正在被驗證的結果以繞過正式 runtime path」，必須立即 STOP，並依既有 [Player-flow / Fixture Policy](testing-fixture-policy.md) 判斷，回報：
+
+```
+INVALID_ACCEPTANCE_SHORTCUT_PROPOSED = YES
+```
+
+例如：驗證 claim_agent 時，不得直接寫 ownership state 來宣告 PASS。允許與禁止內容以既有 Fixture Policy 為準。
+
+### Model Escalation（平台無關）
+
+永久治理規則中禁止寫死特定模型名稱。一律使用：
+
+```
+MODEL_ESCALATION_RECOMMENDED = YES
+```
+
+典型觸發條件：lifecycle ambiguity、race / ownership、cross-subsystem state corruption、server authority boundary 不清、continuation architecture 未解、Execution Budget 已耗盡仍無 root cause。
+
+由 Project Control 決定當下升級哪個模型。
+
+### EXECUTION_REPORT 模板
+
+所有較複雜 repo / runtime 任務在 CONTEXT_REPORT 後附加：
+
+```
+【EXECUTION_REPORT】
+
+BLOCKERS_ENCOUNTERED:
+
+MAX_EQUIVALENT_DISCOVERY_ATTEMPTS_USED:
+
+DISCOVERY_TOOL_CALL_COUNT:
+
+LONGEST_BLOCKER_MINUTES:
+
+NO_NEW_EVIDENCE_TRIGGERED:
+YES / NO
+
+SEARCH_LOOP_DETECTED:
+YES / NO
+
+INVALID_ACCEPTANCE_SHORTCUT_PROPOSED:
+YES / NO
+
+MODEL_ESCALATION_RECOMMENDED:
+YES / NO
+
+BOUNDED_TIMEOUT_VIOLATION:
+YES / NO
+
+EXECUTION_BUDGET_VIOLATION:
+YES / NO
+```
+
+若全部 NO，不需要額外長篇解釋。
+
+### 事故範例（Anonymized）
+
+**BAD:**
+same SERVER_AGENT source discovery → repeated equivalent searches → no material new evidence → ~52 minutes → attempted acceptance shortcut
+
+**EXPECTED:**
+third equivalent search without new evidence → `DISCOVERY_STALLED` → STOP → return evidence to Project Control
 
 ## Context Budget / Routing Report 鐵律
 

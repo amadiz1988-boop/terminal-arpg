@@ -1,4 +1,4 @@
-# 鬼島傳說工作規則
+﻿# 鬼島傳說工作規則
 
 本文件是每個 Work／Codex 工作的第一份上下文。專案目前以 `ops/ro-stack/dashboard.mjs` 提供的 8788 Dashboard 為唯一玩家入口，rAthena Renewal、OpenKore 與 MariaDB 為現行服務。Vinext 瀏覽器 demo 與 D1 API 原型只保留為封存程式碼，接手時依 `docs/CURRENT_STATUS.md` 判斷實際執行環境。
 
@@ -206,6 +206,18 @@ git diff --check
 
 使用方式可直接在任務中指定 `$project-handoff`、`$implement-feature`、`$debug-bug` 或 `$ro-original-ui`，也可由符合描述的工作按需觸發。RO 原廠還原相關工作強制讀取 `ro-original-ui`。這些 Skill 不取代本文件的驗證、來源與修改邊界規則。
 
+
+## Execution Budget / No-Progress Circuit Breaker
+
+- equivalent discovery attempts <= 3 -> 3rd attempt with no new evidence: `DISCOVERY_STALLED`, STOP
+- no new evidence for 5 min on same blocker -> STOP
+- single blocker investigation <= 15 min -> then checkpoint/stop, report one of: `ROOT_CAUSE_CONFIRMED` / `NEEDS_MODEL_ESCALATION` / `NEEDS_PROJECT_CONTROL_DECISION` / `INSUFFICIENT_EVIDENCE`
+- discovery tool calls (grep/glob/find/read-for-location/git-archaeology) <= 10 per blocker -> checkpoint: `NEW_EVIDENCE_FOUND YES/NO`
+- repeated-search loop self-detection: 3 consecutive equivalent intent -> `SEARCH_LOOP_DETECTED`, STOP
+- silent/opaque work >= 5 min without observable progress -> STOP; all shell commands must have bounded timeout
+- stuck -> return evidence to Project Control, do not self-expand scope or attempt invalid acceptance shortcut
+
+Complete definitions: [RO Automation Product Constitution](docs/RO_AUTOMATION_PRODUCT_CONSTITUTION.md#execution-budget--no-progress-circuit-breaker)
 
 ## Context Budget / Routing Report 鐵律
 
