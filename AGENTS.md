@@ -97,6 +97,62 @@ new atomic task
 → handoff / close conversation
 ```
 
+### Kilo New-Conversation Absolute Path Rule
+
+For every task intended to start in a **new Kilo conversation**, the handoff prompt MUST include exact absolute paths for:
+
+1. `CANONICAL_PROJECT_ROOT`
+2. `SHARED_GOVERNANCE_ROOT`
+3. `AGENTS.md` (absolute path)
+4. `WORKSPACE_INDEX.md` (absolute path)
+5. the task's `ACTIVE_WORKTREE`
+6. any authorized shared harness/support root required by the task
+
+**Placeholders MUST NOT be used** in a new-conversation execution prompt when the actual path is already known:
+
+```
+<PROJECT_CONTAINER_ROOT>      ← FORBIDDEN in execution prompt
+<SHARED_GOVERNANCE_ROOT>      ← FORBIDDEN in execution prompt
+<ACTIVE_WORKTREE>             ← FORBIDDEN in execution prompt
+```
+
+A new Kilo conversation **MUST NOT** rediscover these locations by:
+
+- searching `C:\`
+- recursively searching `C:\Users`
+- globbing for `terminal-arpg`
+- guessing the repository root
+
+**If an exact path supplied by Project Control does not exist:**
+
+```
+STOP → report EXACT_ROUTING_PATH_INVALID
+```
+
+Do **not** fall back to global path discovery.
+
+**Required header format for new-conversation prompts:**
+
+```text
+CANONICAL_PROJECT_ROOT:
+C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf
+
+SHARED_GOVERNANCE_ROOT:
+C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\terminal-arpg
+
+READ EXACTLY:
+C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\terminal-arpg\AGENTS.md
+C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\terminal-arpg\WORKSPACE_INDEX.md
+
+ACTIVE_WORKTREE:
+<absolute task worktree path>
+
+AUTHORIZED_SUPPORT_ROOTS:
+<absolute paths if any>
+```
+
+The concrete paths may vary by task, but the header itself is mandatory for all new Kilo conversations.
+
 ## 第一性原理優先鐵律
 
 所有架構、功能、測試與除錯工作，先定義真正目標，再檢查現有實作與工具。
