@@ -198,7 +198,7 @@ SERVER_AGENT_NO_CLIENT_ARCHITECTURE = PROVEN
 GATE1A_PLAYER_FLOW                  = PASS
 OPENKORE_REMOVED                    = NO
 PRODUCTION_READY                    = NO
-NEXT_TECH_DEBT                      = COMMAND_CONTRACT_HARDENING
+COMMAND_CONTRACT_HARDENING          = CLOSED
 ```
 
 `ARCHITECTURE_FEASIBILITY = PROVEN` 與 `GATE1A_PLAYER_FLOW = PASS` 只代表 no-client 玩家戰鬥閉環成立；`OPENKORE_REMOVED = NO`、`PRODUCTION_READY = NO`，不得宣稱完整 OpenKore Exit。
@@ -238,6 +238,22 @@ NEXT_TECH_DEBT                      = COMMAND_CONTRACT_HARDENING
 - Soak／regression：穩定性與 OpenKore=0 長時間驗證。
 - Final OpenKore removal gate：`status.json`／`.cmd`／`.result`／worker／start.exe 正式路徑移除。
 
-### P0.5 technical debt：`COMMAND_CONTRACT_HARDENING`
+### P0.5 technical debt：`COMMAND_CONTRACT_HARDENING` = CLOSED（`2026-09-17`）
 
-`start_farm` schema drift 曾允許 `map`／`mob_id` 欄位，而非 `targetMap`／`mobId`，並被誤分類為 `invalid_transition`。未來 recurrence barrier：單一 command contract Source of Truth、command builders、pre-enqueue validation、`INVALID_PAYLOAD` 與 `INVALID_TRANSITION` 明確區分、contract tests。本輪不實作。
+`start_farm` schema drift 曾允許 `map`／`mob_id` 欄位，而非 `targetMap`／`mobId`，並被誤分類為 `invalid_transition`。
+
+Recurrence barrier 已實作於 command contract hardening：
+
+- 單一 command contract Source of Truth：`conf/persistent_agent_commands.json`（19 actions；payload shape、required／optional fields、JSON types、validation metadata）。
+- Server consumer：`src/map/persistent_agent_command_contract.hpp`。Dispatch 前先做 payload pre-validation；payload 類別（`invalid_payload`／`missing_required_field`／`invalid_field_type`／`unknown_field`）與 lifecycle 類別（`invalid_transition`／`stale_revision`／`ownership_conflict`／…）為 disjoint taxonomy，payload failure 不再可能被標成 `invalid_transition`。
+- Admitted-action SQL 改由 contract 產生（`pa_contract::admitted_actions_sql()`），新增 command 只有一個註冊點。
+- Harness／builder consumer：`tools/pa-command-contract/PaCommandContract.psm1`；Gate1A harness 不再手寫 `start_farm` JSON。
+- Contract tests：C++ matrix `33/33`、PowerShell conformance `200/200`。
+
+Runtime taxonomy proof（isolated runtime，非 production、非 Gate1A combat；`map-server` SHA256 `761F574C591821E639F8BF8BA637B356D09121EFFC95D2EE3D8D5D558F8EF7C6`）：
+
+- malformed payload `{"map":"pay_dun00","mob_id":1076}` → `reason_code=invalid_payload`（`class=missing_required_field`，`missing=targetMap,mobId`），未產生 `invalid_transition`。
+- 合法 payload + 未 claim lifecycle → `invalid_transition`。
+- 合法 payload + stale `expected_revision` → `stale_revision`。
+
+`SOURCE_COMMIT`：`866f423af9b199a88e7eb7ae1cac0833b46487a8`（parent `5ed8f0d21ee138ddd37db4f7070a4decafeb84e5`，tree `a180b3f00a8344d836e782f69542d1ccb8c16fcf`）。Production server 仍為 authority；contract layer 不重複 ownership transition、combat behavior、runtime lifecycle decisions 或 revision CAS。

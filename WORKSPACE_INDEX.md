@@ -69,10 +69,10 @@ WORKLINE:        B
 STATUS:          GATE1A_CLOSED
 ACTIVE_WORKTREE: C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\.tmp-gate1a-player-flow-v1
 ACTIVE_BRANCH:   candidate/gate1a-player-flow-v1
-CANONICAL_HEAD:  5ed8f0d21ee138ddd37db4f7070a4decafeb84e5
-PARENT:          3ffdad1420feadde1e4d96667d7a33136bddb3c5
+CANONICAL_HEAD:  866f423af9b199a88e7eb7ae1cac0833b46487a8
+PARENT:          5ed8f0d21ee138ddd37db4f7070a4decafeb84e5
 SOURCE_OF_TRUTH: terminal-arpg/docs/openkore-exit-source-of-truth.md
-LAST_VERIFIED:   2026-09-16
+LAST_VERIFIED:   2026-09-17
 SEARCH_SCOPE:    ACTIVE_WORKTREE_ONLY
 CROSS_WORKTREE_ALLOWED: NO
 ```
