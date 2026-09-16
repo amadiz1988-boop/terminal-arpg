@@ -61,8 +61,8 @@ other PA worktree, branch, patch artifact and runtime copy.
 PERSISTENT_AGENT_CANONICAL_SOURCE:
 C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\.tmp-gate1a-player-flow-v1
 PERSISTENT_AGENT_CANONICAL_BRANCH: canonical/persistent-agent-no-client-v1
-PERSISTENT_AGENT_CANONICAL_HEAD:   866f423af9b199a88e7eb7ae1cac0833b46487a8
-PERSISTENT_AGENT_LINEAGE:          3ffdad1 -> 5ed8f0d -> 866f423
+PERSISTENT_AGENT_CANONICAL_HEAD:   ea5b99524712ff15381c6a0aebe305c28cb9160f
+PERSISTENT_AGENT_LINEAGE:          3ffdad1 -> 5ed8f0d -> 866f423 -> ea5b995
 PERSISTENT_AGENT_MILESTONE_REF:    milestone/gate1a-no-client-player-flow-pass-20260917
 PERSISTENT_AGENT_MILESTONE_TARGET: 5ed8f0d21ee138ddd37db4f7070a4decafeb84e5
 ```
@@ -119,8 +119,8 @@ STATUS:          CANONICAL
 ROLE:            PERSISTENT_AGENT_CANONICAL_SOURCE
 ACTIVE_WORKTREE: C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\.tmp-gate1a-player-flow-v1
 ACTIVE_BRANCH:   canonical/persistent-agent-no-client-v1
-CANONICAL_HEAD:  866f423af9b199a88e7eb7ae1cac0833b46487a8
-PARENT:          5ed8f0d21ee138ddd37db4f7070a4decafeb84e5
+CANONICAL_HEAD:  ea5b99524712ff15381c6a0aebe305c28cb9160f
+PARENT:          866f423af9b199a88e7eb7ae1cac0833b46487a8
 MILESTONE_REF:   milestone/gate1a-no-client-player-flow-pass-20260917 -> 5ed8f0d21ee138ddd37db4f7070a4decafeb84e5
 SOURCE_OF_TRUTH: terminal-arpg/docs/openkore-exit-source-of-truth.md
 LAST_VERIFIED:   2026-09-17

@@ -10,8 +10,8 @@
 PERSISTENT_AGENT_CANONICAL_SOURCE:
 C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\.tmp-gate1a-player-flow-v1
 PERSISTENT_AGENT_CANONICAL_BRANCH: canonical/persistent-agent-no-client-v1
-PERSISTENT_AGENT_CANONICAL_HEAD:   866f423af9b199a88e7eb7ae1cac0833b46487a8
-PERSISTENT_AGENT_LINEAGE:          3ffdad1 -> 5ed8f0d -> 866f423
+PERSISTENT_AGENT_CANONICAL_HEAD:   ea5b99524712ff15381c6a0aebe305c28cb9160f
+PERSISTENT_AGENT_LINEAGE:          3ffdad1 -> 5ed8f0d -> 866f423 -> ea5b995
 ```
 
 - 未來 Persistent Agent source 變更只從上列 canonical worktree 開始。
@@ -279,3 +279,121 @@ Runtime taxonomy proof（isolated runtime，非 production、非 Gate1A combat�
 - 合法 payload + stale `expected_revision` → `stale_revision`。
 
 `SOURCE_COMMIT`：`866f423af9b199a88e7eb7ae1cac0833b46487a8`（parent `5ed8f0d21ee138ddd37db4f7070a4decafeb84e5`，tree `a180b3f00a8344d836e782f69542d1ccb8c16fcf`）。Production server 仍為 authority；contract layer 不重複 ownership transition、combat behavior、runtime lifecycle decisions 或 revision CAS。
+
+## Persistent Life V1 Foundation Closure（`2026-09-17`）
+
+本節凍結已驗收的 Persistent Life foundation。Party、LLM Diary 尚未實作，本次不宣稱完成。
+
+### Closure status
+
+```text
+PERSISTENT_LIFE_FOUNDATION_FUNCTIONAL = PASS
+PERSISTENT_LIFE_PHASE10               = PASS
+PERSISTENT_LIFE_FOUNDATION_CLOSED     = YES
+OPENKORE_REMOVED                      = NO
+PRODUCTION_READY                      = NO
+```
+
+### Product routing
+
+```text
+NEXT_PRODUCT_SLICE           = OFFLINE_PARTY
+PRIMARY_ENGINEERING_PRIORITY = OPENKORE_EXIT
+```
+
+Persistent Life 不得取代 OpenKore Exit P0。
+
+### Frozen PA source provenance
+
+| Item | Value |
+| --- | --- |
+| PA source worktree | `.tmp-gate1a-player-flow-v1` |
+| PA source branch | `canonical/persistent-agent-no-client-v1` |
+| PA commit | `ea5b99524712ff15381c6a0aebe305c28cb9160f` |
+| PA parent | `866f423af9b199a88e7eb7ae1cac0833b46487a8` |
+| PA tree hash | `fbfba5bbe3e15aad2a059b07eb52e3da605f6261` |
+| Commit scope | `src/map/persistent_agent.cpp`、`persistent_agent_state.cpp`、`persistent_agent_state.hpp`（236 insertions） |
+
+PA commit 只包含 Persistent Life Event Ledger 與 session lifecycle 讀寫；未新增 event type 以外的 controller、未變更 PA ownership semantics、未觸碰 production。
+
+### Migration provenance
+
+| Item | Value |
+| --- | --- |
+| Migration | `ops/ro-stack/sql/005-persistent-life.sql` |
+| SHA256 | `DEAE1C92921C493103C92958DEE2E061A0B7CF177A74FF289655C89BC49FE4B8` |
+| Additive | YES（僅 `CREATE TABLE IF NOT EXISTS`） |
+| Idempotent | YES（重複套用不變更結構） |
+| Scope | 只建立／更新 `persistent_life_session`、`persistent_life_event` |
+| Existing game tables modified | NO |
+| ACTIVE reconcile | 只將 `persistent_life_session` 的 `ACTIVE` 收斂為 `INTERRUPTED` |
+
+### Authoritative isolated evidence
+
+| Item | Value |
+| --- | --- |
+| Authoritative isolated DB | `test_pr3b_isolated` |
+| Session | `cfe13d07-b1f8-11f1-9996-7c5079dfe165` |
+| Status / event_count | `COMPLETED` / `5` |
+| Ordered events | `SESSION_STARTED` → `MONSTER_KILL` → `LOOT_ACQUIRED` → `MAP_CHANGED` → `SESSION_ENDED` |
+| Final ownership | `OPENKORE` / `OPENKORE` / `INACTIVE` / `entity=0` / `ownership_leak=0` |
+
+### SAME_DB_E2E
+
+```text
+SAME_DB_E2E = NOT_PROVEN
+reason = dashboard.mjs 無 read-only 模式。指向任一 DB 時，啟動階段會無條件
+         CREATE web_* 表、INSERT web_account_activity、ALTER TABLE `char`
+         加 index，並 CREATE／ALTER web_preferences（dashboard.mjs:1381-1499）；
+         login 需要 web_* 表，而 authoritative isolated DB 不含這些表；
+         seen 端點亦會 UPDATE seen_at。因此將臨時 Dashboard 指向
+         test_pr3b_isolated 會變更 authoritative DB。
+         依任務範圍未進行 redesign。
+```
+
+前次 Phase 10 API／browser 驗收已以 verbatim clone DB 證明 API／UI 整合；本輪不重跑世界流程。
+
+### Runtime dependency recurrence barrier
+
+```text
+FILE   = .tmp-pa-iso-runtime/Assert-PaRuntimeDependencies.ps1
+SHA256 = 825C27481841FB42B10A86EFF265B2FA46326954330FFA95D0EC0652E3FAD956
+```
+
+`g1a-life-run.ps1` 在啟動 login／char／map server 之前呼叫此 helper。缺少
+`conf/persistent_agent_commands.json`、`npc/re/scripts_main.conf`、`conf/import/*` 或
+server binaries 任一項時，立即以 `RUNTIME_DEPENDENCY_MISSING <path>` 失敗，不再啟動
+一個沒有 NPC／script tree 的世界。已驗證：`candidate-v1-life` 通過；缺
+`npc/re/scripts_main.conf` 的 fixture 立即失敗。
+
+### Frozen evidence SHA256
+
+| Artifact | SHA256 |
+| --- | --- |
+| `g1a-life-run.stdout.txt` | `8245FC5D5A38D631B48BFFD542AE0B2F183169D02D52FC36ECC1966B591A8F77` |
+| `g1a-life-run2.stdout.txt` | `683DC58B79029485D19927166CD9B02E11FDC1366001EC648CFB6853C8FE06FC` |
+| `g1a-map.out` | `809C66E671DAD24D909C7F61BAE7EA7C2DC28D7DED0B382B1F528C00FECF3457` |
+| `phase10-acceptance.stdout.txt` | `C4AA9B9CDA45F88F546638BD470E7C7FA046D97193C2F59E255C69DC5AEFD2A7` |
+| `phase10-api-acceptance.mjs` | `A79A90CA3F0EF13C78F36CBB2AFAE8BF67148DB981D075B7AC9DF26A08E2BA7A` |
+| `phase10-return-ux-acceptance.mjs` | `8D28807740173F95E9CD6D1836C38C5F00C6B3169B7C02A4EDB7AC6B2F2C0262` |
+| `g1a-postcheck.sql` | `4CA468E933069F3F2C7E8EBE959913C3C96F0D2AFE66D9285ADA5630830149FB` |
+| `g1a-postcheck2.sql` | `91A9A1A3E196A9EEF34B95957377D918E77D3A3091AFEE0CDC0D5DFD5D022723` |
+| `g1a-life-run.ps1`（barrier 後） | `190DDB9B6A5E60126200B23B7D85E5B09FF362D21BDFDE66B8814D66959F77AC` |
+
+Evidence 保留原位，未移動或刪除。
+
+### Web/API source commit caveat
+
+```text
+WEB_COMMIT = NOT_CREATED（BLOCKED）
+reason = terminal-arpg working tree 中，Persistent Life Web/API 變更與大量無關
+         uncommitted 工作在相同檔案、相同 diff hunk 內交錯：dashboard.mjs
+         +3459/-285、app.js +3863/-277、index.html +354/-120、styles.css
+         +1082/-60、ro-stack.ps1 +198/-4、package.json +76。依路徑提交會納入
+         無關 Admin／Ops／Observatory／experiment 變更；逐 hunk 隔離亦不連貫，
+         因 PL UI 的整合點 enterGame 只存在於無關的重寫版本。未建立含無關內容
+         的提交；待 Project Control 提供乾淨 base 後再凍結 Web/API 來源。
+```
+
+`ops/ro-stack/sql/005-persistent-life.sql` 與 `scripts/test-persistent-life-foundation.mjs`
+為本 foundation 的新增檔案；其餘 Web/API 變更尚待上述乾淨 base 凍結。
