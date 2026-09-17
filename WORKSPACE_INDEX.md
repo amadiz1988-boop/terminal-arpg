@@ -32,6 +32,7 @@ SHARED_GOVERNANCE_EXACT_PATHS:
   - terminal-arpg/docs/RO_AUTOMATION_PRODUCT_CONSTITUTION.md
   - terminal-arpg/docs/testing-fixture-policy.md
   - terminal-arpg/docs/openkore-exit-source-of-truth.md
+  - terminal-arpg/docs/PROJECT_ROADMAP.md
 
 SHARED_SUPPORT_ROOTS:
   GATE1A_HARNESS: .tmp-pa-iso-runtime
@@ -49,6 +50,23 @@ SHARED_SUPPORT_ROOTS:
   #   - do NOT copy harness into each active worktree
   #   - runtime/source modifications still belong only to ACTIVE_WORKTREE
 ```
+
+---
+
+## Canonical Project Roadmap
+
+```text
+Canonical Project Roadmap: docs/PROJECT_ROADMAP.md
+Detailed future roadmap:   docs/roadmap/
+```
+
+- `docs/PROJECT_ROADMAP.md` is the single top-level planning index and the
+  authority for roadmap ordering, planning states and `IMPLEMENTATION_AUTHORIZED`.
+- `docs/roadmap/` holds detailed future systems (PL1 Diary V1, PL2 Social PA V1)
+  referenced from that index.
+- Current engineering priority remains OpenKore Exit, tracked in
+  `terminal-arpg/docs/openkore-exit-source-of-truth.md`.
+- Do NOT duplicate the roadmap text into worktrees; read the canonical path.
 
 ---
 

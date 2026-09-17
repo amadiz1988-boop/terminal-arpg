@@ -12,6 +12,10 @@ participating in the world and accumulate factual Event Ledger memories;
 LLM is narrator-only. Canonical definition:
 docs/RO_AUTOMATION_PRODUCT_CONSTITUTION.md
 
+Roadmap / future work index（規劃狀態與 `IMPLEMENTATION_AUTHORIZED` 的唯一依據）：
+docs/PROJECT_ROADMAP.md；詳細未來系統：docs/roadmap/。
+`PLANNED` 不代表已授權實作。
+
 ## Routing First 鐵律
 
 ### Routing Bootstrap — Canonical Path Derivation
@@ -309,6 +313,7 @@ Canonical schema、decision taxonomy、failure codes 與 evaluator 只在
 | 封存網站原型 | `app/`、`game/server/`、`db/`、`archive/legacy-vinext-demo/`；不得作為現行入口或正式角色狀態來源 |
 | 官方素材與產出資料 | `public/ro/`、`scripts/`、`THIRD_PARTY_NOTICES.md` |
 | 接手狀態與優先序 | `docs/CURRENT_STATUS.md`、`docs/TODO.md` |
+| Project Roadmap（長期方向、未來工作、授權狀態） | `docs/PROJECT_ROADMAP.md`、`docs/roadmap/` |
 
 文件可解釋程式，但不取代程式、測試或鎖定來源。現況文件若與程式不一致，先修正文件或建立稽核項目，再宣稱完成。
 

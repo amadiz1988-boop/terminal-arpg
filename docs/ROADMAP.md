@@ -1,5 +1,7 @@
 # RO OpenKore-like Roadmap
 
+> Legacy note: 本文件是早期 RO 掛機里程碑（R0–R5）細節，已被 `docs/PROJECT_ROADMAP.md` 取代為長期方向與未來工作的唯一頂層入口。新的規劃、狀態與 `IMPLEMENTATION_AUTHORIZED` 一律以 `docs/PROJECT_ROADMAP.md` 與 `docs/roadmap/` 為準；本文件保留作為歷史里程碑參照。
+
 這是長期方向與里程碑文件。可接手的當前狀態以 [CURRENT_STATUS.md](CURRENT_STATUS.md) 為準，單次任務以 [TODO.md](TODO.md) 為準；本文件的里程碑名稱不代表目前已完成。
 
 ## 北極星

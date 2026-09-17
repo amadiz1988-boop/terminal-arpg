@@ -1,5 +1,18 @@
 # 目前狀態
 
+## Future Roadmap
+
+長期方向與未來工作的唯一入口是 `docs/PROJECT_ROADMAP.md`；詳細未來系統置於 `docs/roadmap/`。以下僅為指標，不是現行實作狀態，且不代表已授權實作。
+
+| 項目 | 規劃狀態 | IMPLEMENTATION_AUTHORIZED |
+| --- | --- | --- |
+| OpenKore Exit（現行工程優先） | `ACTIVE` | YES（既有已授權工程線） |
+| `PL1-PERSISTENT-LIFE-DIARY`（Persistent Life Diary V1） | `PLANNED` | `NO` |
+| `PL2-PERSISTENT-SOCIAL-PA`（Persistent Social PA V1） | `PLANNED` | `NO` |
+
+- 現行工程優先序仍以 `docs/openkore-exit-source-of-truth.md` 為唯一依據。
+- 本節不描述實作細節；規劃內容見 `docs/PROJECT_ROADMAP.md`。
+
 ## 2026-09-17 UI1 玩家道具說明清理與紙娃娃攻擊同步
 
 - 玩家端道具說明不再顯示 `Item ID`、`原廠…` 來源／美術註記與通用「目前無法裝備」。內部 metadata（ItemID、asset role、provenance label）仍保留在 view model，GM／`?debugAssets`／`window.RO_ITEM_DEBUG` 可繼續查看；消耗品、材料、任務道具與 ETC 一律不顯示裝備限制，只有裝備類且有伺服器提供之自然語言限制時才顯示（例如「限定初心者／超級初心者使用」）。
