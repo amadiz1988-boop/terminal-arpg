@@ -238,6 +238,30 @@ Native Client、OpenKore、packet、UI、`status.json`、`.cmd` 與 `.result` �
 
 每次使用測試加速，必須在 runtime evidence、`RESULTS.md` 或 Roadmap 標記 `TEST ACCELERATION`，並記錄加速原因、加速前真實證據、被調整的環境條件、仍由真實系統產生的結果，以及對 production validity 的影響。完整決策與範例見 `.agents/skills/nearest-valid-test-state/SKILL.md`。
 
+## Pre-Implementation Reuse Gate 鐵律
+
+```text
+NO NEW FEATURE / SUBSYSTEM IMPLEMENTATION
+WITHOUT PRE_IMPLEMENTATION_REUSE_GATE = PASS
+```
+
+新增 `NEW_FEATURE`、`NEW_SUBSYSTEM`、`NEW_CAPABILITY`、
+`NEW_EXTERNAL_DEPENDENCY`、`NEW_MAJOR_ALGORITHM`、
+`REPLACEMENT_OF_EXISTING_SUBSYSTEM` 前，必須先完成
+`PRE_IMPLEMENTATION_REUSE_GATE`：先查現行專案與 legacy，再查
+`ops/research/external-reuse-registry.json`；OpenKore 相關能力先查
+`docs/openkore-harvest-registry.md`（`OPENKORE_REMOVED = NO` 期間 OpenKore
+為 incumbent legacy reference）；最後才查外部生態。
+
+`BUILD_NEW` 必須有 `whyNotReuse`。`BUG_FIX`、`TEST_ONLY`、`DOC_ONLY`、
+`PROVENANCE_ONLY`、`FORMAT_ONLY` 與一般 maintenance 不需要 gate；
+`KNOWN_IMPLEMENTATION_TASK` 以 `REUSE_GATE_INHERITED_FROM` 繼承 parent gate，
+不重跑同一份 audit。
+
+Canonical schema、decision taxonomy、failure codes 與 evaluator 只在
+`docs/pre-implementation-reuse-gate.md` 與
+`.agents/skills/external-ecosystem-reuse/SKILL.md` 定義；本節不複製 schema。
+
 ## Player-flow First 測試鐵律
 
 1. 功能驗收優先使用真實玩家正常會採取的行為流程。

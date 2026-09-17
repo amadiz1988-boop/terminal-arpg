@@ -5,6 +5,9 @@
 > 查核日：2026-09-14。最早建議刷新日：2026-12-14。
 >
 > production core modifications：0。
+>
+> 本 audit 是 gate 的研究輸入；實作前必須先有 `PRE_IMPLEMENTATION_REUSE_GATE = PASS`。
+> Canonical gate spec：`docs/pre-implementation-reuse-gate.md`。
 
 ## 1. 執行摘要
 

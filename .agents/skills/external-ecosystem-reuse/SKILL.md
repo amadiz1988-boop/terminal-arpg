@@ -1,6 +1,6 @@
 ---
 name: external-ecosystem-reuse
-description: 在 terminal-arpg 的 A、B、C 或 Future Life/Social 新需求需要外部元件、rAthena primitive、OpenKore 行為參考或技術選型時，先查持久化 registry，執行 freshness 與 license gate，僅在必要時做增量研究並維護研究紀錄。研究評估專用，不負責導入 dependency 或修改 production code。
+description: 在 terminal-arpg 的 A、B、C 或 Future Life/Social 新需求需要外部元件、rAthena primitive、OpenKore 行為參考或技術選型時，先查持久化 registry，執行 mandatory pre-implementation reuse gate、freshness 與 license gate，僅在必要時做增量研究並維護研究紀錄。研究評估專用，不負責導入 dependency 或修改 production code。
 ---
 
 # External Ecosystem Reuse
@@ -9,8 +9,37 @@ description: 在 terminal-arpg 的 A、B、C 或 Future Life/Social 新需求需
 
 - `ops/research/external-reuse-registry.json`：機器可讀的唯一候選 registry。
 - `docs/external-ecosystem-reuse-audit.md`：人類可讀的基線、理由、授權與工作線對照。
+- `docs/pre-implementation-reuse-gate.md`：`PRE_IMPLEMENTATION_REUSE_GATE` 的 canonical schema、decision taxonomy、failure codes 與 scope。
 
 預設模式固定為 `INCREMENTAL_RESEARCH_ONLY`。不得重新執行全量掃描。
+
+## Pre-Implementation Reuse Gate（強制 / fail-closed）
+
+任何 `NEW_FEATURE`、`NEW_SUBSYSTEM`、`NEW_CAPABILITY`、
+`NEW_EXTERNAL_DEPENDENCY`、`NEW_MAJOR_ALGORITHM`、
+`REPLACEMENT_OF_EXISTING_SUBSYSTEM` 在實作前，必須先有
+`PRE_IMPLEMENTATION_REUSE_GATE = PASS`。完整 schema、decision 定義與
+failure codes 只在 `docs/pre-implementation-reuse-gate.md`；本 Skill 只保留
+操作順序，不複製全文。
+
+固定原則：
+
+1. `CHECK BEFORE BUILD`
+2. `CHECK REGISTRY BEFORE RESEARCH`
+3. `CHECK PROJECT BEFORE ECOSYSTEM`
+4. `OPENKORE IS INCUMBENT UNTIL EXIT`
+5. `BUILD_NEW REQUIRES WHY_NOT_REUSE`
+6. `NEW RESEARCH MUST WRITE BACK TO REGISTRY`
+
+Deterministic evaluator：
+
+```powershell
+node .agents/skills/external-ecosystem-reuse/scripts/reuse-gate.mjs "<gate-record.json>"
+```
+
+`BUG_FIX`、`TEST_ONLY`、`DOC_ONLY`、`PROVENANCE_ONLY`、`FORMAT_ONLY`、
+`MAINTENANCE`／`TYPO_FIX` 不需要 gate。`KNOWN_IMPLEMENTATION_TASK` 以
+`REUSE_GATE_INHERITED_FROM` 繼承 parent gate，不重跑同一份 audit。
 
 ## 固定流程
 
@@ -156,6 +185,7 @@ OpenKore 只提供 behavior contract 與 acceptance criteria。Persistent Agent 
 只有以下全部成立才完成研究回合：
 
 ```text
+PRE_IMPLEMENTATION_REUSE_GATE = PASS
 REGISTRY_FIRST = PASS
 FRESHNESS_POLICY = PASS
 LICENSE_GATE = PASS

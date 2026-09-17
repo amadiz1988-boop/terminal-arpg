@@ -21,6 +21,30 @@
       "USER_EXPLICIT_REFRESH"
     ]
   },
+  "researchInvalidationRules": {
+    "UPSTREAM_VERSION_CHANGED": "Refresh only the affected entry.",
+    "PROJECT_REQUIREMENT_CHANGED": "Re-evaluate the reuse decision against the new requirement.",
+    "LICENSE_STATUS_UNRESOLVED": "Refresh license/provenance before any adoption.",
+    "INTEGRATION_IMMINENT": "Fresh verify immediately before dependency adoption.",
+    "EVIDENCE_TOO_SHALLOW": "Upgrade to primary-source evidence; do not adopt.",
+    "REGISTRY_TOO_OLD_FOR_FAST_MOVING_DEPENDENCY": "Refresh fast-moving OSS/dependency entries.",
+    "STABLE_ALGORITHM_NOTE": "Stable algorithms and rAthena primitives are evidence-based, not calendar-expired."
+  },
+  "preImplementationReuseGate": {
+    "authority": "docs/pre-implementation-reuse-gate.md",
+    "skill": ".agents/skills/external-ecosystem-reuse/SKILL.md",
+    "evaluator": ".agents/skills/external-ecosystem-reuse/scripts/reuse-gate.mjs",
+    "requiredFor": [
+      "NEW_FEATURE",
+      "NEW_SUBSYSTEM",
+      "NEW_CAPABILITY",
+      "NEW_EXTERNAL_DEPENDENCY",
+      "NEW_MAJOR_ALGORITHM",
+      "REPLACEMENT_OF_EXISTING_SUBSYSTEM"
+    ],
+    "registryWriteBackRequired": true,
+    "openKoreRemoved": "NO"
+  },
   "entries": [
     {
       "id": "ra-player-iterators",
