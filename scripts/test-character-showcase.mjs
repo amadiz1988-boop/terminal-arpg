@@ -51,7 +51,7 @@ async function assertActionSet(actions, names) {
       action.frameCounts,
     );
     for (const source of [action.src, action.backSrc].filter(Boolean)) {
-      assert.match(source, /\?v=[a-f0-9]{16}$/i, `${source} 需包含內容版本`);
+      assert.match(source, /\?v=[a-f0-9]{16}&b=\d+$/i, `${source} 需包含內容版本與建置世代`);
       const sourcePath = source.split('?', 1)[0];
       const path = join(repo, 'public', sourcePath.replace(/^\//, ''));
       assert(existsSync(path), `缺少 ${source}`);
