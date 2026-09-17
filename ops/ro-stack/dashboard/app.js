@@ -3071,17 +3071,17 @@ function localize(line) {
     .replace(/Calculating random route to: /, '[尋路] 計算路徑：')
     .replace(/Moving to /, '[移動] 前往 ')
     .replace(
-      /You are now attacking Monster (.+?)(?:\s+\((\d+)\))?(?=\s|$)/,
-      (_, name, mobId) => `[索敵] 鎖定 ${monsterDisplayName(name, mobId)}`,
+      /You are now attacking Monster (.+?)(?:\s+\(\d+\))?$/,
+      (_, name) => `[索敵] 鎖定 ${monsterDisplayName(name)}`,
     )
     .replace(
-      /You attack Monster (.+?)(?:\s+\((\d+)\))?(?=\s|$)/,
-      (_, name, mobId) => `[攻擊] 你攻擊 ${monsterDisplayName(name, mobId)}`,
+      /You attack Monster (.+?)(?:\s+\(\d+\))?(?=\s+\(Dmg:|$)/,
+      (_, name) => `[攻擊] 你攻擊 ${monsterDisplayName(name)}`,
     )
     .replace(
-      /You use (.+?) \(Lv: (\d+)\) on Monster (.+?)(?:\s+\((\d+)\))?(?=\s|$)/,
-      (_, skill, level, name, mobId) =>
-        `[主動技能] ${localizedSkillName(activeSkill?.[1] ?? skill)} Lv.${level} · 攻擊 ${monsterDisplayName(name, mobId)}`,
+      /You use (.+?) \(Lv: (\d+)\) on Monster (.+?)(?:\s+\(\d+\))?(?=\s+\(Dmg:|$)/,
+      (_, skill, level, name) =>
+        `[主動技能] ${localizedSkillName(activeSkill?.[1] ?? skill)} Lv.${level} · 攻擊 ${monsterDisplayName(name)}`,
     )
     .replace(/You use (.+?) on yourself \(Lv: (\d+)\)/, (_, skill, level) => {
       const definition = localizedSkillDefinition(selfSkill?.[1] ?? skill);
@@ -3095,8 +3095,8 @@ function localize(line) {
         `[主動技能] ${localizedSkillName(recoverySkill?.[1] ?? skill)} · 自身恢復 ${gained} HP`,
     )
     .replace(
-      /Monster (.+?)(?:\s+\((\d+)\))? attacks you/,
-      (_, name, mobId) => `[受傷] ${monsterDisplayName(name, mobId)} 攻擊你`,
+      /Monster (.+?)(?:\s+\(\d+\))? attacks you/,
+      (_, name) => `[受傷] ${monsterDisplayName(name)} 攻擊你`,
     )
     .replace(
       /You have gained ([-\d]+)\/([-\d]+).* Exp/,
@@ -3110,8 +3110,8 @@ function localize(line) {
       '[拾取] $1 × $2',
     )
     .replace(
-      /Target Monster (.+?)(?:\s+\((\d+)\))? died/,
-      (_, name, mobId) => `[擊倒] ${monsterDisplayName(name, mobId)}`,
+      /Target Monster (.+?)(?:\s+\(\d+\))? died/,
+      (_, name) => `[擊倒] ${monsterDisplayName(name)}`,
     )
     .replace(/You have died/, '[死亡] 你被擊倒')
     .replace(/Sending respawn\./, '[復活] 返回儲存點')

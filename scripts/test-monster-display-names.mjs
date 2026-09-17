@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { mkdtempSync, rmSync } from 'node:fs';
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
@@ -9,6 +9,7 @@ import {
   resolveMonsterAsset,
   resolveMonsterDisplayName,
 } from '../ops/ro-stack/ro-asset-resolver.mjs';
+import { parseMobDbNames } from '../.agents/skills/ro-asset-index/scripts/normalize-monster-names.mjs';
 
 const chromePath = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 const origin = process.env.RO_DEMO_ORIGIN ?? 'http://127.0.0.1:8788';
@@ -114,6 +115,48 @@ assert.ok(
   'canonical resolver must localize the dataset without falling back globally to English',
 );
 
+// ---- rAthena official Name aliasing (Baby Desert Wolf 1107) ----
+const mobDb = parseMobDbNames(await readFile('.local/ro-stack/rathena/db/re/mob_db.yml', 'utf8'));
+const mocFild11 = JSON.parse(await readFile('public/ro/data/map-info/moc_fild11.json', 'utf8'));
+const mocFild11Names = new Map(mocFild11.monsters.map((monster) => [monster.id, monster.name]));
+const babyMapInfo = resolveMonsterDisplayName({ mobId: 1107, name: mocFild11Names.get(1107) });
+assert.equal(mobDb.get(1107).name, 'Baby Desert Wolf');
+assert.equal(mocFild11Names.get(1107), babyMapInfo);
+assert.equal(babyMapInfo, '沙漠幼狼');
+assert.equal(resolveMonsterDisplayName('Baby Desert Wolf'), babyMapInfo);
+assert.equal(resolveMonsterDisplayName('Desert Wolf B'), babyMapInfo);
+assert.equal(resolveMonsterAsset({ mobId: 1107, name: 'Baby Desert Wolf' }).name, babyMapInfo);
+let aliasCoverageMissing = 0;
+for (const entry of indexEntries) {
+  const rathena = mobDb.get(Number(entry.mobId));
+  if (!rathena) continue;
+  const aliases = new Set([entry.enName, ...(entry.aliases ?? [])]);
+  if (!aliases.has(rathena.name)) aliasCoverageMissing += 1;
+}
+assert.equal(aliasCoverageMissing, 0, 'rAthena official Name must be an index alias');
+
+// ---- Bounded audit of observed combat monster names ----
+const observedAudit = { checked: 0, resolved: 0, identityGap: 0, gaps: [] };
+const rathenaNames = new Set([...mobDb.values()].map((entry) => entry.name));
+try {
+  const logFiles = (await readdir('.local/ro-stack/instances', { recursive: true })).filter((name) => name.endsWith('.out.log'));
+  const observed = new Set();
+  for (const rel of logFiles) {
+    const text = await readFile(join('.local/ro-stack/instances', rel), 'utf8').catch(() => '');
+    for (const line of text.split(/\r?\n/u)) {
+      const match = line.match(/Monster ([A-Za-z][A-Za-z'’. -]*?) \(\d+\)/u);
+      if (match) observed.add(match[1].trim());
+    }
+  }
+  for (const name of observed) {
+    observedAudit.checked += 1;
+    const resolved = resolveMonsterDisplayName(name);
+    if (/[\u3400-\u9fff]/u.test(resolved ?? '')) observedAudit.resolved += 1;
+    else if (rathenaNames.has(name)) observedAudit.identityGap += 1;
+    else observedAudit.gaps.push(name);
+  }
+} catch {}
+
 // ---- Execute the real production combat-line transform (no duplicated logic) ----
 function extractFunction(source, header) {
   const match = source.match(
@@ -148,6 +191,10 @@ const transformed = {
   hurt: localize('Monster Poring (1002) attacks you (Dmg: 3)'),
   kill: localize('Target Monster Lunatic (1063) died'),
   unknownKill: localize('Target Monster Nonexistent (999999) died'),
+  babyAcquire: localize('You are now attacking Monster Baby Desert Wolf (0)'),
+  babyHit: localize('You attack Monster Baby Desert Wolf (0) (Dmg: 158*2)'),
+  babyHurt: localize('Monster Baby Desert Wolf (1) attacks you (Dmg: 12)'),
+  babyKill: localize('Target Monster Baby Desert Wolf (2) died'),
 };
 assert.equal(transformed.acquired, '[索敵] 鎖定 波利');
 assert.equal(transformed.hit, '[攻擊] 你攻擊 波利 (傷害：5)');
@@ -155,6 +202,10 @@ assert.match(transformed.skillHit, /^\[主動技能\] Fire Bolt Lv\.3 · 攻擊 
 assert.equal(transformed.hurt, '[受傷] 波利 攻擊你 (傷害：3)');
 assert.equal(transformed.kill, '[擊倒] 瘋兔');
 assert.equal(transformed.unknownKill, '[擊倒] Nonexistent');
+assert.equal(transformed.babyAcquire, '[索敵] 鎖定 沙漠幼狼');
+assert.equal(transformed.babyHit, '[攻擊] 你攻擊 沙漠幼狼 (傷害：158*2)');
+assert.equal(transformed.babyHurt, '[受傷] 沙漠幼狼 攻擊你 (傷害：12)');
+assert.equal(transformed.babyKill, '[擊倒] 沙漠幼狼');
 for (const line of Object.values(transformed)) {
   assert.doesNotMatch(
     line,
