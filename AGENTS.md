@@ -169,8 +169,8 @@ Persistent Agent 只有一條 authoritative source lineage。此宣告取代其�
 PERSISTENT_AGENT_CANONICAL_SOURCE:
 C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\.tmp-gate1a-player-flow-v1
 PERSISTENT_AGENT_CANONICAL_BRANCH: canonical/persistent-agent-no-client-v1
-PERSISTENT_AGENT_CANONICAL_HEAD:   ea5b99524712ff15381c6a0aebe305c28cb9160f
-PERSISTENT_AGENT_LINEAGE:          3ffdad1 -> 5ed8f0d -> 866f423 -> ea5b995
+PERSISTENT_AGENT_CANONICAL_HEAD:   c41cc4c86fff3feb35da54fd4ebf7206cd09818d
+PERSISTENT_AGENT_LINEAGE:          3ffdad1 -> 5ed8f0d -> 866f423 -> ea5b995 -> c41cc4c
 ```
 
 - Persistent Agent source 變更一律從上列 canonical worktree 開始。
