@@ -531,7 +531,7 @@ W2_AUTONOMOUS_STATE   = PASS
 W3_SUPPLY_STATE       = PASS
 ```
 
-### W4 Handoff（本輪未實作）
+### W4 Handoff（已於 `2026-09-17` 完成，見 W1–W4 SERVER_AGENT Web Integration Closure）
 
 ```text
 NEXT_WEB_GATE = W4 — Multi-map Web Integration
@@ -555,6 +555,71 @@ Real-player regression cases（本輪不遷移）：
 
 - 阿修羅關東煮
 - 賴清德
+
+## W1–W4 SERVER_AGENT Web Integration Closure（`2026-09-17`）
+
+### Closure status model
+
+```text
+W1_CONTROL_CANARY           = PASS
+W2_AUTONOMOUS_STATE         = PASS
+W3_SUPPLY_STATE             = PASS
+W4_MULTI_MAP_WEB_FUNCTIONAL = PASS
+W4_DIRECT_DUNGEON_FLOOR     = PASS
+W1_W4_WEB_PROVENANCE        = CLOSED
+OPENKORE_REMOVED            = NO
+PRODUCTION_READY            = NO
+```
+
+本節只凍結已驗收的 W1–W4 Web 整合 source lineage；`OPENKORE_REMOVED = NO`、`PRODUCTION_READY = NO`，不得宣稱完整 OpenKore Exit。本輪未重跑 W1／W2／W3／W4 玩家流程、未部署 production、未遷移真實玩家。
+
+### Clean web lineage provenance
+
+| Item | Value |
+| --- | --- |
+| Closure worktree | `.tmp-web-server-agent-w4-closure` |
+| Closure branch | `closure/web-server-agent-w4-v1` |
+| Clean base | `e179a996e0dcddd217e87d1e4b94c62576fc8ab3`（`candidate/web-experience-phase4a` lineage，含 W1 前置 `ops/ro-stack/persistent-agent/rollout-gate.mjs`）|
+| W1 commit | `bfa9e6f`（controller／canary foundation）|
+| W2/W3 commit | `0d46f26`（live status → character projection）|
+| W4 commit | `9960141`（map relocation adapter ＋ deterministic map-route test）|
+| Test-infra commit | `728b0ea`（isolated runtime／DB target guard safety）|
+| Closure HEAD | `728b0eac9792b50ea5861dd95247ee23fe65bf90` |
+| Final tree hash | `3021dad0ac5f47a8120cbd073fc79172138317b4` |
+| Milestone tag | `milestone/web-w1-w4-server-agent-integration-pass-20260917` → `728b0ea` |
+| PA source change | 無（canonical PA 仍為 `ba0e4433b310e6932464700d93bd37175d71077b`）|
+
+Dirty web tree（`terminal-arpg` working tree）未作為 base：其 HEAD（`bf78c4d`）與 web lineage 分歧，且同檔同 hunk 內混入 Admin／Observatory／Persistent Life／pet／quest 等 1169 筆 WIP，無法以路徑提交或安全切分。W1–W4 以 accepted dirty tree 為來源、逐 change group 分類後重建於乾淨 base；`UNRELATED` 與 `AMBIGUOUS` hunk 未移植。
+
+### Accepted runtime evidence（本輪未重跑）
+
+| Item | Value |
+| --- | --- |
+| W1 contract test | `scripts/test-persistent-agent-web-canary.mjs` 26/26 PASS（frozen `2026-09-17 11:14`）|
+| W2/W3 runtime acceptance | `.tmp-pa-iso-runtime/w2w3-acceptance.stdout.txt` 50/50 PASS（`SHA256 B1D6A2CCB7E5D78E716593192E5BE001EA87B86FEC9D40A24E5EBFAD18CA0A66`）|
+| W4 runtime acceptance | `.tmp-pa-iso-runtime/w4-acceptance.stdout.txt` 31/31 PASS（`SHA256 744FFB069989556D8DDCBECAB128BCC0E08C30D1A86609ECCFEFF3DF50DCF5F9`）|
+| W4 TEST_B direct floor | `pay_dun01 → pay_dun00`、`hops=1`、`hubDetour=false`、route `[{pay_dun01,15,33,portalTo:pay_dun00},{pay_dun00,181,33}]` |
+| W4 runtime binary | `.tmp-pa-iso-runtime/candidate-w4/map-server.exe` `SHA256 F41725AF4B158A3D79D8B111826CC9C46DA7016ACED23EE29730773441A60427`（canonical PA `ba0e443`）|
+| Harness lease | `.tmp-pa-iso-runtime/CanaryRigLease.ps1` `SHA256 C50A16CC308E3B6B7AFCADA0DB13BB6C27A6962FF3167CBE87C89DDD170FC07B`（shared support root，非 source authority）|
+
+Deterministic／source-level 測試於 closure HEAD 重跑：`test-persistent-agent-web-canary` 26/26、`test-persistent-agent-web-map-route` 11/11（含 `HUB_DETOUR_USED = NO`、`BROWSER_ROUTE_KNOWLEDGE = NO`、`DUPLICATE_NAVIGATION_ENGINE = NO`）、`test-isolated-runtime-safety` 10/10、vitest 58/58、`test-active-web-entrypoint` PASS。
+
+### Browser / server boundary
+
+```text
+BROWSER_ROUTE_KNOWLEDGE    = NO
+DUPLICATE_NAVIGATION_ENGINE = NO
+```
+
+Browser 只送出 `mapId`；target resolution、route resolution、DIRECT／SERVICE policy 與 navigation orchestration 全部由 server（Dashboard ＋ rAthena Persistent Agent）擁有。
+
+### 未證明項／限制
+
+- `scripts/test-persistent-agent-web-relocation-runtime.mjs` 需要 isolated stack（browser ＋ isolated MariaDB ＋ map-server），本輪環境無此 fixture，未重跑；改以 frozen accepted runtime hash 作 provenance evidence。
+- W1／W2／W3 exercised 的 intermediate `dashboard.mjs`／`app.js` 快照未被 harness 保存（harness 直接執行 worktree `node ops/ro-stack/dashboard.mjs`），因此 committed region 與 accepted dirty tree 為 byte-identical，其對當時 runtime image 的等價性由凍結於驗收時間點的 contract test 與 mtime 順序支持，非逐 byte 對照。
+- W4 以 mtime 順序證明 exercised source：`dashboard.mjs` 最後寫入 `13:23:16`、`app.js` `13:06:01`、`map-route.mjs` `13:03:23`、runtime acceptance `13:48:40`；acceptance 後無 web source 寫入。
+
+NEXT: `AUTOMATED_PRODUCTION_CANARY`
 
 ## Persistent Life V1 Foundation Closure（`2026-09-17`）
 

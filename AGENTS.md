@@ -183,6 +183,26 @@ PERSISTENT_AGENT_MILESTONE_REF:    milestone/gate3-multimap-relocation-pass-2026
 
 詳細分類見 `terminal-arpg/WORKSPACE_INDEX.md` 與 `docs/openkore-exit-source-of-truth.md`。
 
+### Web／SERVER_AGENT W1–W4 Closure Source
+
+W1–W4 Web 整合已凍結為一條乾淨 source lineage。Web source 修改自此 lineage 開始，不得再把 `terminal-arpg` dirty web tree 當作實作來源。
+
+```
+WEB_SERVER_AGENT_W1_W4_CLOSURE_WORKTREE:
+C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\.tmp-web-server-agent-w4-closure
+CLOSURE_BRANCH: closure/web-server-agent-w4-v1
+CLOSURE_HEAD:   728b0eac9792b50ea5861dd95247ee23fe65bf90
+CLEAN_BASE:     e179a996e0dcddd217e87d1e4b94c62576fc8ab3
+MILESTONE_REF:  milestone/web-w1-w4-server-agent-integration-pass-20260917
+WEB_W1_W4_PROVENANCE: CLOSED
+NEXT:           AUTOMATED_PRODUCTION_CANARY
+```
+
+- W1／W2／W3／W4 已 PASS（W1_CONTROL_CANARY、W2_AUTONOMOUS_STATE、W3_SUPPLY_STATE、W4_MULTI_MAP_WEB_FUNCTIONAL、W4_DIRECT_DUNGEON_FLOOR）。
+- `OPENKORE_REMOVED = NO`、`PRODUCTION_READY = NO`；不得因本 closure 宣稱 OpenKore Exit 完成。
+- `terminal-arpg` dirty web tree 維持 `READ_ONLY` 參照；其 web source 未被 closure 修改。
+- 詳細 provenance、限制與 accepted runtime hash 見 `docs/openkore-exit-source-of-truth.md` 的 W1–W4 SERVER_AGENT Web Integration Closure 節。
+
 ## 第一性原理優先鐵律
 
 所有架構、功能、測試與除錯工作，先定義真正目標，再檢查現有實作與工具。

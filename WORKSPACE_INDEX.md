@@ -200,6 +200,30 @@ CROSS_WORKTREE_ALLOWED: NO
 
 ---
 
+## F | Web / SERVER_AGENT W1–W4 Closure
+
+```
+WORKLINE:        F
+STATUS:          CLOSED (W1/W2/W3/W4 PASS)
+ROLE:            WEB_SERVER_AGENT_W1_W4_PROVENANCE
+ACTIVE_WORKTREE: C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\.tmp-web-server-agent-w4-closure
+ACTIVE_BRANCH:   closure/web-server-agent-w4-v1
+CANONICAL_HEAD:  728b0eac9792b50ea5861dd95247ee23fe65bf90
+BASE:            e179a996e0dcddd217e87d1e4b94c62576fc8ab3 (candidate/web-experience-phase4a lineage)
+CLOSURE_COMMITS: bfa9e6f (W1) -> 0d46f26 (W2/W3) -> 9960141 (W4) -> 728b0ea (test infra)
+TREE_HASH:       3021dad0ac5f47a8120cbd073fc79172138317b4
+MILESTONE_REF:   milestone/web-w1-w4-server-agent-integration-pass-20260917 -> 728b0eac9792b50ea5861dd95247ee23fe65bf90
+SOURCE_OF_TRUTH: terminal-arpg/docs/openkore-exit-source-of-truth.md
+LAST_VERIFIED:   2026-09-17
+SEARCH_SCOPE:    ACTIVE_WORKTREE_ONLY
+CROSS_WORKTREE_ALLOWED: NO
+NOTE: Web closure lineage 為 W1–W4 web source 的唯一乾淨來源。`terminal-arpg` dirty web tree 仍為
+      READ_ONLY 參照（未作為 base、其 web source 未被本輪修改）；未來 web source 變更自此 closure lineage 開始。
+NEXT: AUTOMATED_PRODUCTION_CANARY
+```
+
+---
+
 ## Kilo Workspace Note
 
 Do NOT open `C:\` or `g-p-6a9bcb57afdc8191966436643af8acdf\` as daily coding workspace.
