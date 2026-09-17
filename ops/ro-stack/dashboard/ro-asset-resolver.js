@@ -88,6 +88,9 @@
     const assetStatus = entry.assetStatus ?? 'missing';
     return { ...entry, kind, name: entry.canonicalZhHant ?? entry.zhHantName ?? entry.enName ?? null, asset: assetFor(kind, entry), diagnosticCode: assetStatus === 'missing' ? 'MISSING_RO_ASSET' : null };
   }
+  function resolveMonsterDisplayName(query) {
+    return resolve('monsters', query)?.name ?? null;
+  }
   function resolveItem(query) {
     const runtimeName = typeof query === 'object'
       ? String(query.name ?? '').trim()
@@ -188,6 +191,7 @@
     resolveEquipmentAsset: (query) => resolve('equipment', query),
     resolveSkillAsset: (query) => resolve('skills', query),
     resolveMonsterAsset: (query) => resolve('monsters', query),
+    resolveMonsterDisplayName,
     resolveNpcAsset: (query) => resolve('npcs', query),
     resolveNpcAssetsForMap: (mapId) =>
       (state.npcsByMap.get(mapId) ?? []).map((npc) => resolve('npcs', npc.npcId)),

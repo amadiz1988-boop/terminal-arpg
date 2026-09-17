@@ -34,7 +34,7 @@ function loadDeferredScript(source) {
   return deferredScriptPromises.get(source);
 }
 async function loadCharacterSelectionAssets() {
-  await loadDeferredScript('/ro-asset-resolver.js?v=r002-equipment-priority');
+  await loadDeferredScript('/ro-asset-resolver.js?v=r003-monster-display-name');
   await window.roAssetResolver?.load();
 }
 let gameplayModulesPromise = null;
@@ -106,12 +106,6 @@ const mapNames = {
   'new_1-3': '新生訓練場',
 };
 const names = {
-  Poring: '波利',
-  Lunatic: '瘋兔',
-  Fabre: '綠棉蟲',
-  Pupa: '蛹',
-  Drops: '小波利',
-  'Little Poring': '小波利',
   Jellopy: '傑勒比結晶',
   'Sticky Mucus': '黏稠液體',
   Apple: '蘋果',
@@ -3034,6 +3028,16 @@ addEventListener(
   },
 );
 
+function monsterDisplayName(name, mobId) {
+  const numericId = Number(mobId);
+  const query =
+    Number.isFinite(numericId) && numericId > 0
+      ? { mobId: numericId, name: name ?? undefined }
+      : name;
+  if (!query) return name ?? null;
+  const resolved = window.roAssetResolver?.resolveMonsterDisplayName?.(query);
+  return resolved ?? name ?? null;
+}
 function localize(line) {
   const passiveProc = passiveProcName(line);
   const activeSkill = line.match(/You use (.+?) \(Lv: (\d+)\)/),
@@ -3066,12 +3070,18 @@ function localize(line) {
     .replace(/Auto-buy sequence completed\./, '[補給] 補給品購買完成')
     .replace(/Calculating random route to: /, '[尋路] 計算路徑：')
     .replace(/Moving to /, '[移動] 前往 ')
-    .replace(/You are now attacking Monster /, '[索敵] 鎖定 ')
-    .replace(/You attack Monster /, '[攻擊] 你攻擊 ')
     .replace(
-      /You use (.+?) \(Lv: (\d+)\) on Monster /,
-      (_, skill, level) =>
-        `[主動技能] ${localizedSkillName(activeSkill?.[1] ?? skill)} Lv.${level} · 攻擊 `,
+      /You are now attacking Monster (.+?)(?:\s+\((\d+)\))?(?=\s|$)/,
+      (_, name, mobId) => `[索敵] 鎖定 ${monsterDisplayName(name, mobId)}`,
+    )
+    .replace(
+      /You attack Monster (.+?)(?:\s+\((\d+)\))?(?=\s|$)/,
+      (_, name, mobId) => `[攻擊] 你攻擊 ${monsterDisplayName(name, mobId)}`,
+    )
+    .replace(
+      /You use (.+?) \(Lv: (\d+)\) on Monster (.+?)(?:\s+\((\d+)\))?(?=\s|$)/,
+      (_, skill, level, name, mobId) =>
+        `[主動技能] ${localizedSkillName(activeSkill?.[1] ?? skill)} Lv.${level} · 攻擊 ${monsterDisplayName(name, mobId)}`,
     )
     .replace(/You use (.+?) on yourself \(Lv: (\d+)\)/, (_, skill, level) => {
       const definition = localizedSkillDefinition(selfSkill?.[1] ?? skill);
@@ -3084,7 +3094,10 @@ function localize(line) {
       (_, skill, gained) =>
         `[主動技能] ${localizedSkillName(recoverySkill?.[1] ?? skill)} · 自身恢復 ${gained} HP`,
     )
-    .replace(/Monster (.+?) attacks you/, '[受傷] $1 攻擊你')
+    .replace(
+      /Monster (.+?)(?:\s+\((\d+)\))? attacks you/,
+      (_, name, mobId) => `[受傷] ${monsterDisplayName(name, mobId)} 攻擊你`,
+    )
     .replace(
       /You have gained ([-\d]+)\/([-\d]+).* Exp/,
       '[經驗] 人物 +$1，職業 +$2',
@@ -3096,7 +3109,10 @@ function localize(line) {
       /Item added to inventory: (.+?) \(\d+\) x (\d+).*/,
       '[拾取] $1 × $2',
     )
-    .replace(/Target Monster (.+?) died/, '[擊倒] $1')
+    .replace(
+      /Target Monster (.+?)(?:\s+\((\d+)\))? died/,
+      (_, name, mobId) => `[擊倒] ${monsterDisplayName(name, mobId)}`,
+    )
     .replace(/You have died/, '[死亡] 你被擊倒')
     .replace(/Sending respawn\./, '[復活] 返回儲存點')
     .replace(/\(Dmg: ([^)]+)\)/, '(傷害：$1)')
@@ -5574,7 +5590,7 @@ function renderTaskActionLog(live) {
       const objectiveTime = document.createElement('time');
       const objectiveMessage = document.createElement('span');
       objectiveTime.textContent = time.textContent;
-      objectiveMessage.textContent = `[討伐進度] ${objective.mobName}：${Number(objective.current)} / ${Number(objective.required)} 隻`;
+      objectiveMessage.textContent = `[討伐進度] ${monsterDisplayName(objective.mobName, objective.mobId)}：${Number(objective.current)} / ${Number(objective.required)} 隻`;
       row.append(objectiveTime, objectiveMessage);
       rows.push(row);
     }
@@ -5583,7 +5599,9 @@ function renderTaskActionLog(live) {
     for (const mission of missions) {
       const row = document.createElement('div');
       row.className = 'task-log-entry battle event';
-      const name = mission.mobName || `怪物 ${mission.mobId}`;
+      const name =
+        monsterDisplayName(mission.mobName, mission.mobId) ||
+        `怪物 ${mission.mobId}`;
       const time = document.createElement('time');
       const message = document.createElement('span');
       time.textContent = new Date().toLocaleTimeString('zh-TW', {
@@ -6502,7 +6520,7 @@ function renderEden(eden, character) {
       ? journal.mobObjectives
           .map(
             (entry) =>
-              `${entry.mobName} ${Number(entry.current)} / ${Number(entry.required)}`,
+              `${monsterDisplayName(entry.mobName, entry.mobId)} ${Number(entry.current)} / ${Number(entry.required)}`,
           )
           .join('　')
       : '';
