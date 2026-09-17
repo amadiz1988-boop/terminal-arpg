@@ -54,7 +54,7 @@ Do **not** search `C:\`, do **not** search sibling worktrees, do **not** guess a
 
 **搜尋範圍規則**：進入 ACTIVE_WORKTREE 後，所有 grep／glob／git／read／edit／build／test 預設只能在該 worktree。跨 worktree 操作只在 Source of Truth 明確引用或 Project Control 明確要求時，且必須使用 exact path。
 
-**Kilo 日常 workspace**：不應以 `C:\` 或整個 project root 開啟。應直接開 ACTIVE_WORKTREE（例如 Workline B → `.tmp-gate1a-player-flow-v1`（Persistent Agent canonical），Workline C → `terminal-arpg-phase4a-canonical`）。
+**Kilo 日常 workspace**：不應以 `C:\` 或整個 project root 開啟。應直接開 ACTIVE_WORKTREE（例如 Workline B → `.tmp-pa-gate3-live-status-integration-v1`（Persistent Agent canonical），Workline C → `terminal-arpg-phase4a-canonical`）。
 
 ### Routing Extension — Shared Governance Exact-Path Access
 
@@ -167,13 +167,15 @@ Persistent Agent 只有一條 authoritative source lineage。此宣告取代其�
 
 ```
 PERSISTENT_AGENT_CANONICAL_SOURCE:
-C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\.tmp-gate1a-player-flow-v1
-PERSISTENT_AGENT_CANONICAL_BRANCH: canonical/persistent-agent-no-client-v1
-PERSISTENT_AGENT_CANONICAL_HEAD:   a3cea54da3ae15b86a256dd23627af784b391056
-PERSISTENT_AGENT_LINEAGE:          3ffdad1 -> 5ed8f0d -> 866f423 -> ea5b995 -> c41cc4c -> a3cea54
+C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\.tmp-pa-gate3-live-status-integration-v1
+PERSISTENT_AGENT_CANONICAL_BRANCH: canonical/persistent-agent-gate3-v1
+PERSISTENT_AGENT_CANONICAL_HEAD:   ba0e4433b310e6932464700d93bd37175d71077b
+PERSISTENT_AGENT_LINEAGE:          3ffdad1 -> 5ed8f0d -> 866f423 -> ea5b995 -> c41cc4c -> a3cea54 -> 1fd30bd -> ba0e443
+PERSISTENT_AGENT_MILESTONE_REF:    milestone/gate3-multimap-relocation-pass-20260917 -> ba0e4433b310e6932464700d93bd37175d71077b
 ```
 
 - Persistent Agent source 變更一律從上列 canonical worktree 開始。
+- 舊 canonical worktree `.tmp-gate1a-player-flow-v1`（branch `canonical/persistent-agent-no-client-v1` @ `a3cea54`，工作樹 dirty）自 canonical advance 完成起降級為 `LEGACY_DIRTY_REFERENCE` / `SOURCE_AUTHORITY=NO`，唯讀保留；不得對它執行 reset／stash／clean／checkout／branch-switch／commit／delete。
 - `.tmp-server-agent-no-client-controller-v1`、`.tmp-pa-lifecycle-consolidation-v1` 為唯讀歷史 reference，不得刪除。
 - `.tmp-pa-iso-runtime` 為 shared test/runtime support，不是 source authority、不是 command-contract authority。
 - 舊 `persistent-agent.patch` 為 stale derived artifact，不得視為來源權威。

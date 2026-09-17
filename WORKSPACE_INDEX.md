@@ -59,22 +59,28 @@ other PA worktree, branch, patch artifact and runtime copy.
 
 ```
 PERSISTENT_AGENT_CANONICAL_SOURCE:
-C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\.tmp-gate1a-player-flow-v1
-PERSISTENT_AGENT_CANONICAL_BRANCH: canonical/persistent-agent-no-client-v1
-PERSISTENT_AGENT_CANONICAL_HEAD:   a3cea54da3ae15b86a256dd23627af784b391056
-PERSISTENT_AGENT_LINEAGE:          3ffdad1 -> 5ed8f0d -> 866f423 -> ea5b995 -> c41cc4c -> a3cea54
+C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\.tmp-pa-gate3-live-status-integration-v1
+PERSISTENT_AGENT_CANONICAL_BRANCH: canonical/persistent-agent-gate3-v1
+PERSISTENT_AGENT_CANONICAL_HEAD:   ba0e4433b310e6932464700d93bd37175d71077b
+PERSISTENT_AGENT_LINEAGE:          3ffdad1 -> 5ed8f0d -> 866f423 -> ea5b995 -> c41cc4c -> a3cea54 -> 1fd30bd -> ba0e443
 PERSISTENT_AGENT_MILESTONE_REF:    milestone/gate1a-no-client-player-flow-pass-20260917
 PERSISTENT_AGENT_MILESTONE_TARGET: 5ed8f0d21ee138ddd37db4f7070a4decafeb84e5
 PERSISTENT_AGENT_MILESTONE_REF_2:  milestone/gate1b-survival-death-recovery-pass-20260917
 PERSISTENT_AGENT_MILESTONE_TARGET_2: c41cc4c86fff3feb35da54fd4ebf7206cd09818d
 PERSISTENT_AGENT_MILESTONE_REF_3:  milestone/gate2-supply-replenishment-pass-20260917
 PERSISTENT_AGENT_MILESTONE_TARGET_3: a3cea54da3ae15b86a256dd23627af784b391056
+PERSISTENT_AGENT_MILESTONE_REF_4:  milestone/gate3-multimap-relocation-pass-20260917
+PERSISTENT_AGENT_MILESTONE_TARGET_4: ba0e4433b310e6932464700d93bd37175d71077b
 ```
 
 Rules:
 
 - Future PA source changes start ONLY in the canonical worktree above.
 - Historical PA worktrees are read-only reference; do not delete them.
+- `.tmp-gate1a-player-flow-v1` is now `LEGACY_DIRTY_REFERENCE` / `SOURCE_AUTHORITY=NO`:
+  its branch `canonical/persistent-agent-no-client-v1` remains frozen at `a3cea54`
+  with an uncommitted dirty worktree. Do NOT reset／stash／clean／checkout／
+  branch-switch／commit／delete it. It is no longer source authority.
 - `.tmp-pa-iso-runtime` is shared test/runtime support only; it is NOT source authority.
 - Binaries and runtime copies are never source authority.
 - Patch artifacts are derived artifacts unless explicitly declared canonical.
@@ -85,7 +91,8 @@ PA root classification (frozen references; do not delete):
 
 | Root | Classification | Source authority |
 | --- | --- | --- |
-| `.tmp-gate1a-player-flow-v1` | CANONICAL | YES |
+| `.tmp-pa-gate3-live-status-integration-v1` | CANONICAL (`canonical/persistent-agent-gate3-v1` @ `ba0e443`) | YES |
+| `.tmp-gate1a-player-flow-v1` | LEGACY_DIRTY_REFERENCE (branch `canonical/persistent-agent-no-client-v1` @ `a3cea54`, dirty worktree) | NO |
 | `.tmp-server-agent-no-client-controller-v1` | REFERENCE (ancestor snapshot `3ffdad1`) | NO |
 | `.tmp-pa-lifecycle-consolidation-v1` | REFERENCE (divergent historical `95376cc`) | NO |
 | `.tmp-pa-iso-runtime` | RUNTIME_SUPPORT (shared Gate1A harness, no Git) | NO |
@@ -121,17 +128,24 @@ DO_NOT_SEARCH:   C:\ root, project root, other worktrees unless SoT explicitly r
 WORKLINE:        B
 STATUS:          CANONICAL
 ROLE:            PERSISTENT_AGENT_CANONICAL_SOURCE
-ACTIVE_WORKTREE: C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\.tmp-gate1a-player-flow-v1
-ACTIVE_BRANCH:   canonical/persistent-agent-no-client-v1
-CANONICAL_HEAD:  a3cea54da3ae15b86a256dd23627af784b391056
-PARENT:          c41cc4c86fff3feb35da54fd4ebf7206cd09818d
+ACTIVE_WORKTREE: C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\.tmp-pa-gate3-live-status-integration-v1
+ACTIVE_BRANCH:   canonical/persistent-agent-gate3-v1
+CANONICAL_HEAD:  ba0e4433b310e6932464700d93bd37175d71077b
+PARENT:          1fd30bdd83fa90d6c25ebbabe88ccad13c08453a
+GRANDPARENT:     a3cea54da3ae15b86a256dd23627af784b391056
 MILESTONE_REF:   milestone/gate1a-no-client-player-flow-pass-20260917 -> 5ed8f0d21ee138ddd37db4f7070a4decafeb84e5
 MILESTONE_REF_2: milestone/gate1b-survival-death-recovery-pass-20260917 -> c41cc4c86fff3feb35da54fd4ebf7206cd09818d
 MILESTONE_REF_3: milestone/gate2-supply-replenishment-pass-20260917 -> a3cea54da3ae15b86a256dd23627af784b391056
+MILESTONE_REF_4: milestone/gate3-multimap-relocation-pass-20260917 -> ba0e4433b310e6932464700d93bd37175d71077b
 SOURCE_OF_TRUTH: terminal-arpg/docs/openkore-exit-source-of-truth.md
 LAST_VERIFIED:   2026-09-17
 SEARCH_SCOPE:    ACTIVE_WORKTREE_ONLY
 CROSS_WORKTREE_ALLOWED: NO
+LEGACY_DIRTY_REFERENCE:
+  PATH: C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\.tmp-gate1a-player-flow-v1
+  BRANCH: canonical/persistent-agent-no-client-v1 (frozen @ a3cea54, dirty)
+  SOURCE_AUTHORITY: NO
+  READ_ONLY: YES (no reset/stash/clean/checkout/branch-switch/commit/delete)
 NON_CANONICAL_EDIT: STOP -> report NON_CANONICAL_PA_WORKTREE
 ```
 
@@ -190,8 +204,10 @@ CROSS_WORKTREE_ALLOWED: NO
 
 Do NOT open `C:\` or `g-p-6a9bcb57afdc8191966436643af8acdf\` as daily coding workspace.
 Open the ACTIVE_WORKTREE directly. Examples:
-- Workline B (Persistent Agent, canonical) → `.tmp-gate1a-player-flow-v1`
+- Workline B (Persistent Agent, canonical) → `.tmp-pa-gate3-live-status-integration-v1`
 - Workline C → `terminal-arpg-phase4a-canonical`
 
 Persistent Agent edits belong ONLY to Workline B's canonical worktree above.
 `.tmp-server-agent-no-client-controller-v1` is a frozen reference, not a workspace.
+`.tmp-gate1a-player-flow-v1` is now `LEGACY_DIRTY_REFERENCE` (dirty worktree, no
+source authority); do not open it for PA edits or attempt to clean it.

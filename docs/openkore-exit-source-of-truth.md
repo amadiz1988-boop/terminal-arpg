@@ -8,13 +8,15 @@
 
 ```
 PERSISTENT_AGENT_CANONICAL_SOURCE:
-C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\.tmp-gate1a-player-flow-v1
-PERSISTENT_AGENT_CANONICAL_BRANCH: canonical/persistent-agent-no-client-v1
-PERSISTENT_AGENT_CANONICAL_HEAD:   a3cea54da3ae15b86a256dd23627af784b391056
-PERSISTENT_AGENT_LINEAGE:          3ffdad1 -> 5ed8f0d -> 866f423 -> ea5b995 -> c41cc4c -> a3cea54
+C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\.tmp-pa-gate3-live-status-integration-v1
+PERSISTENT_AGENT_CANONICAL_BRANCH: canonical/persistent-agent-gate3-v1
+PERSISTENT_AGENT_CANONICAL_HEAD:   ba0e4433b310e6932464700d93bd37175d71077b
+PERSISTENT_AGENT_LINEAGE:          3ffdad1 -> 5ed8f0d -> 866f423 -> ea5b995 -> c41cc4c -> a3cea54 -> 1fd30bd -> ba0e443
+PERSISTENT_AGENT_MILESTONE_REF:    milestone/gate3-multimap-relocation-pass-20260917 -> ba0e4433b310e6932464700d93bd37175d71077b
 ```
 
 - 未來 Persistent Agent source 變更只從上列 canonical worktree 開始。
+- 舊 canonical worktree `.tmp-gate1a-player-flow-v1`（branch `canonical/persistent-agent-no-client-v1` @ `a3cea54`）自 `2026-09-17` canonical advance 起為 `LEGACY_DIRTY_REFERENCE` / `SOURCE_AUTHORITY=NO`：其工作樹保持 dirty 且唯讀，不得 reset／stash／clean／checkout／branch-switch／commit／delete。
 - 歷史 PA worktree（`.tmp-server-agent-no-client-controller-v1`、`.tmp-pa-lifecycle-consolidation-v1`）為 frozen read-only reference，不得刪除、不得作為來源權威。
 - `.tmp-pa-iso-runtime` 為 SHARED TEST/RUNTIME SUPPORT，不是 source authority，也不是 command-contract authority，亦不得承載 ownership／lifecycle implementation。
 - Command contract authority 版本化於 canonical PA source（`conf/persistent_agent_commands.json`、`src/map/persistent_agent_command_contract.hpp`），不位於 harness。
@@ -65,7 +67,7 @@ OpenKore process=0
 
 目前 Gate 1A 已通過（`GATE1A_PLAYER_FLOW = PASS`，`2026-09-16`）。驗收 runtime 為 OpenKore process count = 0、`fd = 0` 的 `SERVER_AGENT` no-client 流程，完全不使用 Native RO Client。本輪以自然移動與自然 melee 完成 target → attack → monster HP decrease → kill → loot → post-kill continuation → formal stop → formal release，未以 Fly Wing 作為必要條件。前次記錄的 blocker `HEADLESS WARP RE-ATTACH` 不阻擋本輪自然玩家流程，仍列為 GATE 1B／GATE 3 後續範圍。
 
-後續固定順序為：GATE 1B Death／Respawn／Recovery（已於 `2026-09-17` PASS，見 Gate 1B Milestone Closure）、GATE 2 Supply Loop（已於 `2026-09-17` PASS，見 Gate 2 Milestone Closure）、GATE 3 Navigation／Multi-map、GATE 4 NPC／Quest、GATE 5 Web／Dashboard OpenKore File Removal、GATE 6 24h OpenKore=0 soak，最後才進入 100、300、1000 actors scale gates。前一 Gate 未通過時，不得依來源推定後續 Gate READY。
+後續固定順序為：GATE 1B Death／Respawn／Recovery（已於 `2026-09-17` PASS，見 Gate 1B Milestone Closure）、GATE 2 Supply Loop（已於 `2026-09-17` PASS，見 Gate 2 Milestone Closure）、GATE 3 Navigation／Multi-map（已於 `2026-09-17` PASS，見 Gate 3 Milestone Closure 與 W4 Handoff）、GATE 4 NPC／Quest、GATE 5 Web／Dashboard OpenKore File Removal、GATE 6 24h OpenKore=0 soak，最後才進入 100、300、1000 actors scale gates。前一 Gate 未通過時，不得依來源推定後續 Gate READY。
 
 ## 已確認證據
 
@@ -113,9 +115,9 @@ Character receives damage、character HP mutation、fd=0 potion recovery、death
 | 18 | Death detection | autoMoveOnDeath | rAthena death state | Gate 1B `REAL_DEATH`、`DEAD_ENTER hp=0 cycles=1 fd=0 entity=1` PASS | Gate 1B PASS | OpenKore death path 仍在 | `PLAYER_FLOW_PASS` | — | Gate 1B map log；`docs/persistent-server-agent-roadmap.md` Phase 4 |
 | 19 | Respawn | respawn route | rAthena save point | Gate 1B `RESPAWNING`／`RESPAWNED pay_dun00 x=21 y=183 hp=52/102 fd=0 entity=1` PASS | Gate 1B PASS | OpenKore recovery path 仍在 | `PLAYER_FLOW_PASS` | — | Gate 1B map log；`docs/persistent-server-agent-roadmap.md` Phase 4 |
 | 20 | Death recovery | recovery／resume | persistent state recovery | Gate 1B `POST_RESPAWN_FARM_RESUME`／`POST_RESPAWN_TARGET`／`POST_RESPAWN_ATTACK/HIT` PASS | Gate 1B PASS | OpenKore recovery path 仍在 | `PLAYER_FLOW_PASS` | — | Gate 1B map log；`docs/persistent-server-agent-roadmap.md` Phase 4／10 |
-| 21 | Same-map navigation | route movement | rAthena movement | isolated PoC only | 未完整 | OpenKore route | `SOURCE_ONLY` | 未完成 Gate 3 | `docs/persistent-server-agent-roadmap.md` Phase 5 |
-| 22 | Multi-map navigation | Task::MapRoute | rAthena warp／map attach | isolated PoC only | 未完整 | OpenKore multi-map path | `SOURCE_ONLY` | reattach／player flow | `docs/OPENKORE_FEATURE_AUDIT.md`; roadmap Phase 5 |
-| 23 | Route planning | Task::CalcMapRoute | native route data | isolated PoC only | 未完整 | OpenKore route planner | `SOURCE_ONLY` | 未完成 Gate 3 | `docs/OPENKORE_FEATURE_AUDIT.md` |
+| 21 | Same-map navigation | route movement | rAthena movement | Gate 3 cross-map relocation 起訖段與 farm map 內移動 PASS | Gate 3 PASS | OpenKore route | `PLAYER_FLOW_PASS` | — | Gate 3 Milestone Closure |
+| 22 | Multi-map navigation | Task::MapRoute | rAthena warp／map attach | Gate 3 Chain A farm↔service map、Chain B death-return→farm map PASS | Gate 3 PASS | OpenKore multi-map path | `PLAYER_FLOW_PASS` | — | Gate 3 Milestone Closure |
+| 23 | Route planning | Task::CalcMapRoute | native route data | Gate 3 cross-map relocation 使用 native route；native warp 至 `prt_fild07` PASS | Gate 3 PASS | OpenKore route planner | `PLAYER_FLOW_PASS` | — | Gate 3 Milestone Closure |
 | 24 | NPC talk | NPC approach／click | rAthena NPC handlers | isolated PoC only | 未完整 | OpenKore NPC path | `SOURCE_ONLY` | 正式玩家流程未驗證 | `docs/persistent-server-agent-roadmap.md` Phase 6 |
 | 25 | NPC dialog | next／menu／input | rAthena script state | isolated PoC only | 未完整 | OpenKore dialog path | `SOURCE_ONLY` | 正式腳本未驗證 | `docs/persistent-server-agent-roadmap.md` Phase 6 |
 | 26 | Quest progression | quest handler | rAthena quest state | isolated custom quest only | 未完整 | OpenKore quest path | `SOURCE_ONLY` | 正式任務 evidence 不足 | `docs/persistent-server-agent-roadmap.md` Phase 8 |
@@ -133,19 +135,20 @@ Character receives damage、character HP mutation、fd=0 potion recovery、death
 | 38 | OpenKore status.json removal | status export file | 尚未確認移除 | 【資料不足，無法確認】 | 【資料不足，無法確認】 | 未知 | `UNKNOWN` | Phase 11 僅 static，移除數 0 | `docs/persistent-server-agent-roadmap.md:75,96,159` |
 | 39 | OpenKore .cmd/.result removal | command／result files | 尚未確認移除 | 【資料不足，無法確認】 | 【資料不足，無法確認】 | 未知 | `UNKNOWN` | Phase 11 僅 static，移除數 0 | `docs/persistent-server-agent-roadmap.md:75,96,159` |
 | 40 | OpenKore worker/start.exe removal | worker process | 尚未確認移除 | 【資料不足，無法確認】 | 【資料不足，無法確認】 | 未知 | `UNKNOWN` | Phase 11 僅 static，移除數 0 | `docs/persistent-server-agent-roadmap.md:75,96,159` |
+| 41 | Live runtime status export | status.json file（client-side status） | server-side live runtime status export | `LIVE_STATUS_EXPORT` PASS（`1fd30bd`） | 未完整（Web wiring W1／W2／W3 PASS；W4 NEXT） | OpenKore status path 仍可被呼叫 | `PLAYER_FLOW_PASS` | — | Gate 3 Milestone Closure |
 
 ### Matrix count
 
 | Status | Count |
 | --- | ---: |
-| `SOURCE_ONLY` | 18 |
+| `SOURCE_ONLY` | 15 |
 | `DIAGNOSTIC_PASS` | 1 |
-| `PLAYER_FLOW_PASS` | 18 |
+| `PLAYER_FLOW_PASS` | 22 |
 | `OPENKORE_REMOVED` | 0 |
 | `UNKNOWN` | 3 |
-| **Total capabilities** | **40** |
+| **Total capabilities** | **41** |
 
-`PLAYER_FLOW_PASS`（18）：#1 Character claim／ownership、#2 fd=0 SERVER_AGENT entity、#3 AUTO_FARM start、#4 Mob scan、#5 Target selection、#6 Movement to target、#7 Normal attack、#9 Monster HP mutation、#16 Loot pickup 來自 `2026-09-16` Gate 1A；#10 Character receives damage、#11 Character HP mutation、#12 HP recovery／Red Potion、#18 Death detection、#19 Respawn、#20 Death recovery 來自 `2026-09-17` Gate 1B；#28 Shop buy、#33 Supply cycle、#34 Return to farm after supply 來自 `2026-09-17` Gate 2。全部為 no-client `SERVER_AGENT` PLAYER_FLOW_TEST。
+`PLAYER_FLOW_PASS`（22）：#1 Character claim／ownership、#2 fd=0 SERVER_AGENT entity、#3 AUTO_FARM start、#4 Mob scan、#5 Target selection、#6 Movement to target、#7 Normal attack、#9 Monster HP mutation、#16 Loot pickup 來自 `2026-09-16` Gate 1A；#10 Character receives damage、#11 Character HP mutation、#12 HP recovery／Red Potion、#18 Death detection、#19 Respawn、#20 Death recovery 來自 `2026-09-17` Gate 1B；#28 Shop buy、#33 Supply cycle、#34 Return to farm after supply 來自 `2026-09-17` Gate 2；#21 Same-map navigation、#22 Multi-map navigation、#23 Route planning、#41 Live runtime status export 來自 `2026-09-17` Gate 3。全部為 no-client `SERVER_AGENT` PLAYER_FLOW_TEST。
 
 ## Gate evidence policy
 
@@ -153,7 +156,7 @@ Character receives damage、character HP mutation、fd=0 potion recovery、death
 
 ## OpenKore Exit 判定
 
-Gate 1A、Gate 1B 與 Gate 2 皆已通過，共取得 18 項 `PLAYER_FLOW_PASS` 能力證據（皆為 no-client `SERVER_AGENT` runtime）。Phase 11 仍只有靜態依賴矩陣，尚未執行 runtime 切換或移除驗證，OpenKore removal count 仍為 0。因此專案已具備 `PLAYER_FLOW_PASS` 證據，但仍不具備 `OPENKORE_REMOVED` 證據，OpenKore Exit 狀態維持未完成。
+Gate 1A、Gate 1B、Gate 2 與 Gate 3 皆已通過，共取得 22 項 `PLAYER_FLOW_PASS` 能力證據（皆為 no-client `SERVER_AGENT` runtime）。Phase 11 仍只有靜態依賴矩陣，尚未執行 runtime 切換或移除驗證，OpenKore removal count 仍為 0。因此專案已具備 `PLAYER_FLOW_PASS` 證據，但仍不具備 `OPENKORE_REMOVED` 證據，OpenKore Exit 狀態維持未完成。
 
 本輪文件更新不包含 runtime 測試與程式修改。後續任何能力升級，都必須先補足對應 Gate 的 runtime evidence，再更新本矩陣。
 
@@ -191,6 +194,9 @@ Server-side continuation 的範圍是移除不存在的 client acknowledgement t
 | `OPENKORE_EXIT_GATE1B` | `PASS` |
 | `GATE2_SUPPLY` | `PASS` |
 | `GATE2_PLAYER_FLOW` | `PASS` |
+| `GATE3_MULTI_MAP_ROUND_TRIP` | `PASS` |
+| `GATE3_CROSS_MAP_DEATH_RECOVERY` | `PASS` |
+| `GATE3_PLAYER_FLOW` | `PASS` |
 | `OPENKORE_REMOVED` | `NO` |
 
 完整 evidence 保存在 [server-agent-no-client-continuation-poc.md](experiments/server-agent-no-client-continuation-poc.md)。本里程碑只提升 architecture feasibility evidence，不提升 AUTO_FARM、Combat、Generic Item Use、NPC Quest、Kafra、Storage、Shop 或 Multi-map 的 capability completion status。
@@ -427,6 +433,128 @@ AUTO_FARM
 - Supply 不在 production source 硬編 `prt_fild05`／`290,221`／`Tool Dealer#Extended_Prt`；該 NPC identity 來自 canonical server config 與 harness fixture。
 - Supply sub-state 在既有 AUTO_FARM 執行內 pause，不強制 `PERSISTENT_IDLE`、不動 ownership／lease epoch／revision／entity uniqueness。
 - 已知 deferred durability：supply sub-state 為 in-memory，crash 後可能回到 `AUTO_FARM` 再自行偵測低補給（self-heal）。`SUPPLY_TRANSACTION_DURABILITY = DEFERRED_TO_RESTART_PERSISTENCE_GATE`，本 Gate 不 redesign persistence。
+
+## Gate 3 Milestone Closure（`2026-09-17`）
+
+### Closure status model
+
+```text
+GATE3_MULTI_MAP_ROUND_TRIP       = PASS
+GATE3_CROSS_MAP_DEATH_RECOVERY   = PASS
+GATE3_PLAYER_FLOW                = PASS
+LIVE_STATUS_EXPORT               = PASS
+W1_CONTROL_CANARY                = PASS
+W2_AUTONOMOUS_STATE              = PASS
+W3_SUPPLY_STATE                  = PASS
+W4_MULTI_MAP_WEB                 = NEXT
+OPENKORE_REMOVED                 = NO
+PRODUCTION_READY                 = NO
+```
+
+Gate 3 只提升 no-client `SERVER_AGENT` 的 cross-map relocation 與 cross-map death recovery player-flow 證據；`OPENKORE_REMOVED = NO`、`PRODUCTION_READY = NO`，不得宣稱完整 OpenKore Exit。
+
+### Evidence summary（`TEST_TYPE: PLAYER_FLOW_TEST`）
+
+Chain A：
+
+```text
+farm
+→ supply low
+→ cross-map relocation
+→ service map
+→ authoritative shop buy
+→ return relocation
+→ farm map
+→ target
+→ attack/hit
+```
+
+PASS。
+
+Chain B：
+
+```text
+real death
+→ DEAD_ENTER
+→ RESPAWNING
+→ native pc_respawn
+→ RESPAWNED prt_fild05
+→ death-return relocation
+→ native warp to prt_fild07
+→ farm reached
+→ AUTO_FARM
+→ target
+→ attack/hit
+→ stop/release
+```
+
+PASS。
+
+- Final Chain B evidence：`quarantine = 0`、`ownership leak = 0`、`duplicate entity = 0`。
+- OpenKore process count = 0；`fd = 0` `SERVER_AGENT`，無 Native RO Client。
+- Live status export：`1fd30bd` 提供 server-side live runtime status export，`LIVE_STATUS_EXPORT = PASS`。
+- Accepted map-server SHA256：`F41725AF4B158A3D79D8B111826CC9C46DA7016ACED23EE29730773441A60427`。
+
+### Provenance
+
+| Item | Value |
+| --- | --- |
+| Canonical worktree | `.tmp-pa-gate3-live-status-integration-v1` |
+| Canonical branch | `canonical/persistent-agent-gate3-v1` |
+| `SOURCE_COMMIT` | `ba0e4433b310e6932464700d93bd37175d71077b` |
+| `SOURCE_PARENT` | `1fd30bdd83fa90d6c25ebbabe88ccad13c08453a` |
+| `SOURCE_GRANDPARENT` | `a3cea54da3ae15b86a256dd23627af784b391056` |
+| `SOURCE_TREE_HASH` | `e3d2f053ed03caf6c75d3fd052b579c2319480ec` |
+| Live-status commit | `1fd30bdd83fa90d6c25ebbabe88ccad13c08453a`（tree `9b4b231da8b4a076b0bedec0fac56a173fa89651`） |
+| Commit scope | `src/map/persistent_agent.cpp`、`src/map/persistent_agent_state.cpp`、`src/map/persistent_agent_state.hpp`（相對 `a3cea54` 為 +580 / -7） |
+| `MAP_SERVER_SHA256` | `F41725AF4B158A3D79D8B111826CC9C46DA7016ACED23EE29730773441A60427` |
+| Canonical lineage | `a3cea54 -> 1fd30bd -> ba0e443` |
+| Milestone tag | `milestone/gate3-multimap-relocation-pass-20260917` -> `ba0e4433b310e6932464700d93bd37175d71077b` |
+
+本輪 governance 只凍結已接受的 evidence：未重建、未重跑、未部署、未改 production binary。
+
+### What OpenKore has now lost
+
+就此已驗證流程，`SERVER_AGENT` 已證明可取代 OpenKore 的 cross-map navigation 與 cross-map death return：
+
+- cross-map relocation 到 service map 與返回 farm map（商店補給跨地圖）。
+- 死亡後由 native `pc_respawn` 回到 save map，再自主 cross-map 回到 farm map 續行 AUTO_FARM。
+- server-side live runtime status export 取代 client-side status 觀察（`LIVE_STATUS_EXPORT`）。
+
+本節只宣稱上述已驗證流程。**不**宣稱 OpenKore 其餘能力（NPC／Quest、storage／save point、restart／reconnect persistence、soak、`status.json`／`.cmd`／`.result`／worker 移除等）已被取代。
+
+### W1／W2／W3 Web wiring status
+
+```text
+W1_CONTROL_CANARY     = PASS
+W2_AUTONOMOUS_STATE   = PASS
+W3_SUPPLY_STATE       = PASS
+```
+
+### W4 Handoff（本輪未實作）
+
+```text
+NEXT_WEB_GATE = W4 — Multi-map Web Integration
+```
+
+Expected product flow：
+
+```text
+real player Web map selection
+→ SERVER_AGENT authoritative target
+→ multi-map relocation
+→ exact destination
+→ AUTO_FARM
+→ target
+→ attack/hit
+```
+
+另外必須驗證：在沒有 supply／service 需求時，同一 dungeon 的 floor transition 不得繞經不必要的 hub。
+
+Real-player regression cases（本輪不遷移）：
+
+- 阿修羅關東煮
+- 賴清德
 
 ## Persistent Life V1 Foundation Closure（`2026-09-17`）
 
