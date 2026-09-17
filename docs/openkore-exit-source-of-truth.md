@@ -10,8 +10,8 @@
 PERSISTENT_AGENT_CANONICAL_SOURCE:
 C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\.tmp-gate1a-player-flow-v1
 PERSISTENT_AGENT_CANONICAL_BRANCH: canonical/persistent-agent-no-client-v1
-PERSISTENT_AGENT_CANONICAL_HEAD:   c41cc4c86fff3feb35da54fd4ebf7206cd09818d
-PERSISTENT_AGENT_LINEAGE:          3ffdad1 -> 5ed8f0d -> 866f423 -> ea5b995 -> c41cc4c
+PERSISTENT_AGENT_CANONICAL_HEAD:   a3cea54da3ae15b86a256dd23627af784b391056
+PERSISTENT_AGENT_LINEAGE:          3ffdad1 -> 5ed8f0d -> 866f423 -> ea5b995 -> c41cc4c -> a3cea54
 ```
 
 - 未來 Persistent Agent source 變更只從上列 canonical worktree 開始。
@@ -65,7 +65,7 @@ OpenKore process=0
 
 目前 Gate 1A 已通過（`GATE1A_PLAYER_FLOW = PASS`，`2026-09-16`）。驗收 runtime 為 OpenKore process count = 0、`fd = 0` 的 `SERVER_AGENT` no-client 流程，完全不使用 Native RO Client。本輪以自然移動與自然 melee 完成 target → attack → monster HP decrease → kill → loot → post-kill continuation → formal stop → formal release，未以 Fly Wing 作為必要條件。前次記錄的 blocker `HEADLESS WARP RE-ATTACH` 不阻擋本輪自然玩家流程，仍列為 GATE 1B／GATE 3 後續範圍。
 
-後續固定順序為：GATE 1B Death／Respawn／Recovery（已於 `2026-09-17` PASS，見 Gate 1B Milestone Closure）、GATE 2 Supply Loop、GATE 3 Navigation／Multi-map、GATE 4 NPC／Quest、GATE 5 Web／Dashboard OpenKore File Removal、GATE 6 24h OpenKore=0 soak，最後才進入 100、300、1000 actors scale gates。前一 Gate 未通過時，不得依來源推定後續 Gate READY。
+後續固定順序為：GATE 1B Death／Respawn／Recovery（已於 `2026-09-17` PASS，見 Gate 1B Milestone Closure）、GATE 2 Supply Loop（已於 `2026-09-17` PASS，見 Gate 2 Milestone Closure）、GATE 3 Navigation／Multi-map、GATE 4 NPC／Quest、GATE 5 Web／Dashboard OpenKore File Removal、GATE 6 24h OpenKore=0 soak，最後才進入 100、300、1000 actors scale gates。前一 Gate 未通過時，不得依來源推定後續 Gate READY。
 
 ## 已確認證據
 
@@ -120,13 +120,13 @@ Character receives damage、character HP mutation、fd=0 potion recovery、death
 | 25 | NPC dialog | next／menu／input | rAthena script state | isolated PoC only | 未完整 | OpenKore dialog path | `SOURCE_ONLY` | 正式腳本未驗證 | `docs/persistent-server-agent-roadmap.md` Phase 6 |
 | 26 | Quest progression | quest handler | rAthena quest state | isolated custom quest only | 未完整 | OpenKore quest path | `SOURCE_ONLY` | 正式任務 evidence 不足 | `docs/persistent-server-agent-roadmap.md` Phase 8 |
 | 27 | Quest USE_ITEM | item quest action | rAthena quest／item | 尚無 | 未完整 | OpenKore item／quest path | `SOURCE_ONLY` | 未證明 | `docs/OPENKORE_FEATURE_AUDIT.md` |
-| 28 | Shop buy | buyAuto | rAthena shop | isolated PoC only | 未完整 | OpenKore shop path | `SOURCE_ONLY` | Supply Gate 2 | `docs/persistent-server-agent-roadmap.md` Phase 7 |
-| 29 | Shop sell | sellAuto | rAthena shop | isolated PoC only | 未完整 | OpenKore shop path | `SOURCE_ONLY` | Supply Gate 2 | `docs/persistent-server-agent-roadmap.md` Phase 7 |
-| 30 | Kafra storage deposit | storageAuto | rAthena storage | isolated PoC only | 未完整 | OpenKore storage path | `SOURCE_ONLY` | Supply Gate 2 | `docs/persistent-server-agent-roadmap.md` Phase 7 |
-| 31 | Kafra storage withdraw | getAuto | rAthena storage | isolated PoC only | 未完整 | OpenKore storage path | `SOURCE_ONLY` | Supply Gate 2 | `docs/persistent-server-agent-roadmap.md` Phase 7 |
-| 32 | Save point | Kafra／save | rAthena save point | isolated PoC only | 未完整 | OpenKore service path | `SOURCE_ONLY` | Supply Gate 2／3 | `docs/persistent-server-agent-roadmap.md` Phase 7 |
-| 33 | Supply cycle | buy／storage／replenish | server service state | 尚無完整 cycle evidence | 未完整 | OpenKore supply path | `SOURCE_ONLY` | GATE 2 未開始 | `docs/persistent-server-agent-roadmap.md` Phase 7 |
-| 34 | Return to farm after supply | route resume | persistent intent／navigation | 尚無完整 cycle evidence | 未完整 | OpenKore route resume | `SOURCE_ONLY` | GATE 2 未開始 | `docs/persistent-server-agent-roadmap.md` Phase 10 |
+| 28 | Shop buy | buyAuto | rAthena shop | Gate 2 SHOP_BUY PASS：item 501 `2 → 15`、Zeny `5000 → 4870`（requested 13／received 13） | Gate 2 PASS | OpenKore shop path | `PLAYER_FLOW_PASS` | — | Gate 2 Milestone Closure |
+| 29 | Shop sell | sellAuto | rAthena shop | isolated PoC only | 未完整 | OpenKore shop path | `SOURCE_ONLY` | 玩家流程未驗證（Gate 2 僅 buy） | `docs/persistent-server-agent-roadmap.md` Phase 7 |
+| 30 | Kafra storage deposit | storageAuto | rAthena storage | isolated PoC only | 未完整 | OpenKore storage path | `SOURCE_ONLY` | `STORAGE = NOT_REQUIRED_FOR_GATE2`；未驗證 | `docs/persistent-server-agent-roadmap.md` Phase 7 |
+| 31 | Kafra storage withdraw | getAuto | rAthena storage | isolated PoC only | 未完整 | OpenKore storage path | `SOURCE_ONLY` | `STORAGE = NOT_REQUIRED_FOR_GATE2`；未驗證 | `docs/persistent-server-agent-roadmap.md` Phase 7 |
+| 32 | Save point | Kafra／save | rAthena save point | isolated PoC only | 未完整 | OpenKore service path | `SOURCE_ONLY` | Gate 2 未涵蓋；未驗證 | `docs/persistent-server-agent-roadmap.md` Phase 7 |
+| 33 | Supply cycle | buy／storage／replenish | server service state | Gate 2 buy-based `SUPPLY_LOW → SHOP_BUY → SUPPLY_TARGET_REACHED → RETURN_TO_FARM` PASS | Gate 2 PASS | OpenKore supply path | `PLAYER_FLOW_PASS` | — | Gate 2 Milestone Closure |
+| 34 | Return to farm after supply | route resume | persistent intent／navigation | Gate 2 `RETURN_TO_FARM`／`POST_SUPPLY_TARGET`／`POST_SUPPLY_ATTACK` PASS | Gate 2 PASS | OpenKore route resume | `PLAYER_FLOW_PASS` | — | Gate 2 Milestone Closure |
 | 35 | Social send | partyAuto／social commands | server command boundary | 尚無 native player evidence | 未完整 | OpenKore social path | `SOURCE_ONLY` | Agent 禁用 | `docs/OPENKORE_FEATURE_AUDIT.md`; roadmap |
 | 36 | Dashboard automation start/stop | command／status bridge | Dashboard controller | isolated loopback PoC only | 未完整 | OpenKore bridge remains | `SOURCE_ONLY` | Exit path not removed | `docs/persistent-server-agent-roadmap.md` Phase 9／11 |
 | 37 | Dashboard grind target | target config | Dashboard target validation | 尚無 Exit evidence | 未完整 | OpenKore target config | `SOURCE_ONLY` | 未完成 Gate 5 | `docs/OPENKORE_FEATURE_AUDIT.md`; roadmap |
@@ -138,14 +138,14 @@ Character receives damage、character HP mutation、fd=0 potion recovery、death
 
 | Status | Count |
 | --- | ---: |
-| `SOURCE_ONLY` | 21 |
+| `SOURCE_ONLY` | 18 |
 | `DIAGNOSTIC_PASS` | 1 |
-| `PLAYER_FLOW_PASS` | 15 |
+| `PLAYER_FLOW_PASS` | 18 |
 | `OPENKORE_REMOVED` | 0 |
 | `UNKNOWN` | 3 |
 | **Total capabilities** | **40** |
 
-`PLAYER_FLOW_PASS`（15）：#1 Character claim／ownership、#2 fd=0 SERVER_AGENT entity、#3 AUTO_FARM start、#4 Mob scan、#5 Target selection、#6 Movement to target、#7 Normal attack、#9 Monster HP mutation、#16 Loot pickup 來自 `2026-09-16` Gate 1A；#10 Character receives damage、#11 Character HP mutation、#12 HP recovery／Red Potion、#18 Death detection、#19 Respawn、#20 Death recovery 來自 `2026-09-17` Gate 1B。全部為 no-client `SERVER_AGENT` PLAYER_FLOW_TEST。
+`PLAYER_FLOW_PASS`（18）：#1 Character claim／ownership、#2 fd=0 SERVER_AGENT entity、#3 AUTO_FARM start、#4 Mob scan、#5 Target selection、#6 Movement to target、#7 Normal attack、#9 Monster HP mutation、#16 Loot pickup 來自 `2026-09-16` Gate 1A；#10 Character receives damage、#11 Character HP mutation、#12 HP recovery／Red Potion、#18 Death detection、#19 Respawn、#20 Death recovery 來自 `2026-09-17` Gate 1B；#28 Shop buy、#33 Supply cycle、#34 Return to farm after supply 來自 `2026-09-17` Gate 2。全部為 no-client `SERVER_AGENT` PLAYER_FLOW_TEST。
 
 ## Gate evidence policy
 
@@ -153,7 +153,7 @@ Character receives damage、character HP mutation、fd=0 potion recovery、death
 
 ## OpenKore Exit 判定
 
-Gate 1A 與 Gate 1B 皆已通過，共取得 15 項 `PLAYER_FLOW_PASS` 能力證據（皆為 no-client `SERVER_AGENT` runtime）。Phase 11 仍只有靜態依賴矩陣，尚未執行 runtime 切換或移除驗證，OpenKore removal count 仍為 0。因此專案已具備 `PLAYER_FLOW_PASS` 證據，但仍不具備 `OPENKORE_REMOVED` 證據，OpenKore Exit 狀態維持未完成。
+Gate 1A、Gate 1B 與 Gate 2 皆已通過，共取得 18 項 `PLAYER_FLOW_PASS` 能力證據（皆為 no-client `SERVER_AGENT` runtime）。Phase 11 仍只有靜態依賴矩陣，尚未執行 runtime 切換或移除驗證，OpenKore removal count 仍為 0。因此專案已具備 `PLAYER_FLOW_PASS` 證據，但仍不具備 `OPENKORE_REMOVED` 證據，OpenKore Exit 狀態維持未完成。
 
 本輪文件更新不包含 runtime 測試與程式修改。後續任何能力升級，都必須先補足對應 Gate 的 runtime evidence，再更新本矩陣。
 
@@ -189,6 +189,8 @@ Server-side continuation 的範圍是移除不存在的 client acknowledgement t
 | `OPENKORE_EXIT_GATE1A` | `PASS` |
 | `GATE1B_PLAYER_FLOW` | `PASS` |
 | `OPENKORE_EXIT_GATE1B` | `PASS` |
+| `GATE2_SUPPLY` | `PASS` |
+| `GATE2_PLAYER_FLOW` | `PASS` |
 | `OPENKORE_REMOVED` | `NO` |
 
 完整 evidence 保存在 [server-agent-no-client-continuation-poc.md](experiments/server-agent-no-client-continuation-poc.md)。本里程碑只提升 architecture feasibility evidence，不提升 AUTO_FARM、Combat、Generic Item Use、NPC Quest、Kafra、Storage、Shop 或 Multi-map 的 capability completion status。
@@ -356,6 +358,75 @@ real inbound damage
 - post-respawn farming recovery（既有 AUTO_FARM lifecycle 續行）
 
 本節只宣稱上述已驗證流程。**不**宣稱 OpenKore 其餘能力（navigation／multi-map、supply／shop／storage、NPC／Quest、restart／reconnect persistence、soak、`status.json`／`.cmd`／`.result`／worker 移除等）已被取代。
+
+## Gate 2 Milestone Closure（`2026-09-17`）
+
+### Closure status model
+
+```text
+GATE2_SUPPLY                = PASS
+GATE2_PLAYER_FLOW           = PASS
+STORAGE                     = NOT_REQUIRED_FOR_GATE2
+SUPPLY_TRANSACTION_DURABILITY = DEFERRED_TO_RESTART_PERSISTENCE_GATE
+OPENKORE_REMOVED            = NO
+PRODUCTION_READY            = NO
+```
+
+Gate 2 只提升 no-client `SERVER_AGENT` 的 autonomous supply replenishment player-flow 證據；`OPENKORE_REMOVED = NO`、`PRODUCTION_READY = NO`，不得宣稱完整 OpenKore Exit。Storage／Kafra storage deposit／withdraw 本輪 `NOT_REQUIRED_FOR_GATE2`，其 capability 狀態維持 `SOURCE_ONLY`，不得宣稱 Player-flow PASS。
+
+### Evidence summary（`TEST_TYPE: PLAYER_FLOW_TEST`）
+
+```text
+AUTO_FARM
+→ SUPPLY_LOW
+→ FARM_PAUSED_FOR_SUPPLY
+→ authoritative SHOP BUY（npc_buysellsel → npc_buylist）
+→ inventory increase（2 → 15）
+→ Zeny decrease（5000 → 4870）
+→ SUPPLY_TARGET_REACHED
+→ RETURN_TO_FARM
+→ POST_SUPPLY_TARGET
+→ POST_SUPPLY_ATTACK／HIT
+→ STOP_FARM
+→ RELEASE_AGENT
+```
+
+- OpenKore process count = 0；`fd = 0` `SERVER_AGENT`，無 Native RO Client。
+- `CLAIM_AGENT` = PASS；`START_FARM` = PASS。
+- Supply policy：`item=501`、`amount=2`、`min=5`、`target=15`；`SUPPLY_LOW`、`SUPPLY_MODE_ENTER`（`buy=13`）、`FARM_PAUSED_FOR_SUPPLY` = PASS。
+- Service identity：`Tool Dealer#Extended_Prt`、`prt_fild05`、`290,221`，由 canonical server config 解析（`feature.barter=on` 改變 active server NPC）。
+- `NPC_SERVICE_INTERACTION` = PASS；`SHOP_BUY` = PASS：item 501、requested 13、received 13、inventory `2 → 15`、Zeny `5000 → 4870`；`STORAGE = NOT_REQUIRED`。
+- `SUPPLY_TARGET_REACHED`、`RETURN_TO_FARM`、`POST_SUPPLY_TARGET`、`POST_SUPPLY_ATTACK`／`POST_SUPPLY_HIT` = PASS。
+- Formal stop／release：`STOP_FARM` = PASS；`RELEASE_AGENT` = PASS。
+- 最終狀態：`OPENKORE`／`OPENKORE`／`INACTIVE`、`entity=0`、`ownership_leak=0`、`dup_entity=0`、`quarantine=0`。
+
+### Provenance
+
+| Item | Value |
+| --- | --- |
+| Source worktree | `.tmp-gate1a-player-flow-v1` |
+| Source branch | `canonical/persistent-agent-no-client-v1` |
+| `SOURCE_COMMIT` | `a3cea54da3ae15b86a256dd23627af784b391056` |
+| `SOURCE_PARENT` | `c41cc4c86fff3feb35da54fd4ebf7206cd09818d` |
+| `SOURCE_TREE_HASH` | `553a1d766170971854c74b833419515c192a3232` |
+| Commit scope | `src/map/persistent_agent.cpp`（+219 / -0） |
+| `BUILD_CONFIGURATION` | `Release\|x64` |
+| `MAP_SERVER_SHA256` | `DB23EFF8C66A8FBF14B5941AE7B38C7DA74184736CAEE22292FC31F807640E8C` |
+| Runtime binary path | `.tmp-pa-iso-runtime\candidate-v1-g2\map-server.exe` |
+| Harness | `.tmp-pa-iso-runtime\g2-run.ps1` |
+| `HARNESS_SHA256` | `A8ED6607215FAD88573118BEEC82BAF5D50EC84620CE30EE99750705A07E49DC` |
+| `g2-run-final.stdout.txt` | `A9EAC21972B78F8219F5049B8D8E284F9C8662DC0715A344C68453198A4C822A` |
+| `g2-run.stdout.txt` | `D42DD047D540D30D08BD25A95F8A756538C5FBC5B101CC402EC193BE8CA731FE` |
+| `g2-map.out` | `0164D14F538E81512FCFFCEC7516E5566A8CB3046FAF97018F768D5135B1E9CE` |
+| Milestone tag | `milestone/gate2-supply-replenishment-pass-20260917` |
+
+### Architecture review
+
+- 未新增第二套 shop／service 系統：supply 只決定補給時機，實際購買沿用既有 `execute_service` → `npc_buysellsel` → `npc_buylist`，由 rAthena 負責 item／quantity／price／Zeny／inventory 驗證與 mutation。`handle_supply` 不重寫 pricing、inventory mutation、Zeny mutation、NPC shop rules 或 capacity rules。
+- Supply policy 全部由 server 端 explicit config 擁有（`PERSISTENT_AGENT_SUPPLY_ENABLED／ITEM／MIN／TARGET／NPC／GRACE_MS／MAX_RETRIES`）；invalid policy 以 `SUPPLY_CONFIG_INVALID` fail fast 並停用，不會靜默進入 runtime。
+- Supply 不在 production source 硬編 `prt_fild05`／`290,221`／`Tool Dealer#Extended_Prt`；該 NPC identity 來自 canonical server config 與 harness fixture。
+- Supply sub-state 在既有 AUTO_FARM 執行內 pause，不強制 `PERSISTENT_IDLE`、不動 ownership／lease epoch／revision／entity uniqueness。
+- 已知 deferred durability：supply sub-state 為 in-memory，crash 後可能回到 `AUTO_FARM` 再自行偵測低補給（self-heal）。`SUPPLY_TRANSACTION_DURABILITY = DEFERRED_TO_RESTART_PERSISTENCE_GATE`，本 Gate 不 redesign persistence。
 
 ## Persistent Life V1 Foundation Closure（`2026-09-17`）
 

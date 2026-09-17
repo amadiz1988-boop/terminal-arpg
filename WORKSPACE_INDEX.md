@@ -61,12 +61,14 @@ other PA worktree, branch, patch artifact and runtime copy.
 PERSISTENT_AGENT_CANONICAL_SOURCE:
 C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\.tmp-gate1a-player-flow-v1
 PERSISTENT_AGENT_CANONICAL_BRANCH: canonical/persistent-agent-no-client-v1
-PERSISTENT_AGENT_CANONICAL_HEAD:   c41cc4c86fff3feb35da54fd4ebf7206cd09818d
-PERSISTENT_AGENT_LINEAGE:          3ffdad1 -> 5ed8f0d -> 866f423 -> ea5b995 -> c41cc4c
+PERSISTENT_AGENT_CANONICAL_HEAD:   a3cea54da3ae15b86a256dd23627af784b391056
+PERSISTENT_AGENT_LINEAGE:          3ffdad1 -> 5ed8f0d -> 866f423 -> ea5b995 -> c41cc4c -> a3cea54
 PERSISTENT_AGENT_MILESTONE_REF:    milestone/gate1a-no-client-player-flow-pass-20260917
 PERSISTENT_AGENT_MILESTONE_TARGET: 5ed8f0d21ee138ddd37db4f7070a4decafeb84e5
 PERSISTENT_AGENT_MILESTONE_REF_2:  milestone/gate1b-survival-death-recovery-pass-20260917
 PERSISTENT_AGENT_MILESTONE_TARGET_2: c41cc4c86fff3feb35da54fd4ebf7206cd09818d
+PERSISTENT_AGENT_MILESTONE_REF_3:  milestone/gate2-supply-replenishment-pass-20260917
+PERSISTENT_AGENT_MILESTONE_TARGET_3: a3cea54da3ae15b86a256dd23627af784b391056
 ```
 
 Rules:
@@ -121,10 +123,11 @@ STATUS:          CANONICAL
 ROLE:            PERSISTENT_AGENT_CANONICAL_SOURCE
 ACTIVE_WORKTREE: C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\.tmp-gate1a-player-flow-v1
 ACTIVE_BRANCH:   canonical/persistent-agent-no-client-v1
-CANONICAL_HEAD:  c41cc4c86fff3feb35da54fd4ebf7206cd09818d
-PARENT:          ea5b99524712ff15381c6a0aebe305c28cb9160f
+CANONICAL_HEAD:  a3cea54da3ae15b86a256dd23627af784b391056
+PARENT:          c41cc4c86fff3feb35da54fd4ebf7206cd09818d
 MILESTONE_REF:   milestone/gate1a-no-client-player-flow-pass-20260917 -> 5ed8f0d21ee138ddd37db4f7070a4decafeb84e5
 MILESTONE_REF_2: milestone/gate1b-survival-death-recovery-pass-20260917 -> c41cc4c86fff3feb35da54fd4ebf7206cd09818d
+MILESTONE_REF_3: milestone/gate2-supply-replenishment-pass-20260917 -> a3cea54da3ae15b86a256dd23627af784b391056
 SOURCE_OF_TRUTH: terminal-arpg/docs/openkore-exit-source-of-truth.md
 LAST_VERIFIED:   2026-09-17
 SEARCH_SCOPE:    ACTIVE_WORKTREE_ONLY
