@@ -10,6 +10,7 @@ import { basename, join } from 'node:path';
 import { tmpdir } from 'node:os';
 import sharp from 'sharp';
 import { decodeAct, decodeSpr } from './lib/ro-client-image.mjs';
+import { stampShowcaseAssetHashes } from './lib/ro-showcase-versioning.mjs';
 
 const repo = process.cwd();
 const normalizedBodyRoot = join(repo, 'tmp', 'ro-showcase-bodies');
@@ -22,12 +23,6 @@ const bodyRoot =
 const hairRoot =
   process.env.RO_HAIR_SPRITE_ROOT ??
   join(tmpdir(), 'rohairall', 'data', 'sprite', '牢埃练', '赣府烹');
-const headgearRoot =
-  process.env.RO_HEADGEAR_SPRITE_ROOT ??
-  join(repo, 'tmp', 'data', 'sprite', '厩技荤府');
-const archerWeaponRoot =
-  process.env.RO_ARCHER_WEAPON_SPRITE_ROOT ??
-  join(repo, 'tmp', 'data', 'sprite', '牢埃练', '泵荐');
 const clientSkinRoot =
   process.env.RO_CLIENT_SKIN_ROOT ??
   'C:\\Program Files (x86)\\Gravity\\RagnarokOnline\\skin\\default';
@@ -40,9 +35,34 @@ const groups = {
   stand: 0,
   walk: 8,
   sit: 16,
-  attack: 40,
+  attack: 32,
   bowAttack: 80,
 };
+// Scoped incremental rebuild. Defaults reproduce the original full build.
+//   RO_SHOWCASE_SCOPE=body,hair,controls   (default: all three)
+//   RO_SHOWCASE_ACTIONS=attack             (default: every action group)
+//   RO_SHOWCASE_PRESERVE_MANIFEST=1        (keep existing manifest + equipment)
+const outputManifestPath = join(repo, 'public', 'ro', 'client', 'showcase', 'manifest.json');
+const showcaseScope = new Set(
+  String(process.env.RO_SHOWCASE_SCOPE ?? 'body,hair,controls')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean),
+);
+const showcaseActionFilter = process.env.RO_SHOWCASE_ACTIONS
+  ? new Set(
+      String(process.env.RO_SHOWCASE_ACTIONS)
+        .split(',')
+        .map((value) => value.trim())
+        .filter(Boolean),
+    )
+  : null;
+const preserveManifest = process.env.RO_SHOWCASE_PRESERVE_MANIFEST === '1';
+const buildActions = Object.fromEntries(
+  Object.entries(groups).filter(
+    ([name]) => !showcaseActionFilter || showcaseActionFilter.has(name),
+  ),
+);
 const normalizedBodies = {
   novice: 'novice',
   swordsman: 'swordsman',
@@ -231,26 +251,27 @@ async function importControlArrow(sourceName, targetName) {
 
 if (!existsSync(bodyRoot)) throw new Error(`找不到身體素材：${bodyRoot}`);
 if (!existsSync(hairRoot)) throw new Error(`找不到髮型素材：${hairRoot}`);
-if (!existsSync(headgearRoot))
-  throw new Error(`找不到頭飾素材：${headgearRoot}`);
-if (!existsSync(archerWeaponRoot))
-  throw new Error(`找不到弓箭手武器素材：${archerWeaponRoot}`);
 
-rmSync(outputRoot, { recursive: true, force: true });
+if (!preserveManifest) rmSync(outputRoot, { recursive: true, force: true });
+mkdirSync(outputRoot, { recursive: true });
+const previousManifest =
+  preserveManifest && existsSync(outputManifestPath)
+    ? JSON.parse(readFileSync(outputManifestPath, 'utf8'))
+    : null;
 const manifest = {
   frameWidth,
   frameHeight,
   originX,
   originY,
-  body: {},
-  hair: {},
-  equipment: { headTop: { 5583: {} }, weapon: { bow: {} } },
-  controls: {},
+  body: previousManifest?.body ?? {},
+  hair: previousManifest?.hair ?? {},
+  equipment: previousManifest?.equipment ?? {},
+  controls: previousManifest?.controls ?? {},
 };
 
 async function buildSplitActions(pair, targetDir, key) {
   const output = {};
-  for (const [actionName, actionIndex] of Object.entries(groups)) {
+  for (const [actionName, actionIndex] of Object.entries(buildActions)) {
     const back = await buildSheet(
       pair,
       targetDir,
@@ -275,72 +296,62 @@ async function buildSplitActions(pair, targetDir, key) {
   }
   return output;
 }
-for (const [job, sourceName] of Object.entries(bodies)) {
-  for (const [sex, suffix] of Object.entries(bodySexes)) {
-    const actPath = findAct(
-      join(bodyRoot, suffix),
-      normalizedBodyLayout ? sourceName : `${sourceName}_${suffix}`,
-    );
-    if (!actPath) throw new Error(`找不到 ${job} ${sex} ACT/SPR`);
-    const key = `${job}-${sex}`;
-    manifest.body[key] = {};
-    for (const [actionName, actionIndex] of Object.entries(groups))
-      manifest.body[key][actionName] = await buildSheet(
-        sourcePair(actPath),
-        join(outputRoot, 'body'),
-        key,
-        actionName,
-        actionIndex,
+if (showcaseScope.has('body'))
+  for (const [job, sourceName] of Object.entries(bodies)) {
+    for (const [sex, suffix] of Object.entries(bodySexes)) {
+      const actPath = findAct(
+        join(bodyRoot, suffix),
+        normalizedBodyLayout ? sourceName : `${sourceName}_${suffix}`,
       );
+      if (!actPath) throw new Error(`找不到 ${job} ${sex} ACT/SPR`);
+      const key = `${job}-${sex}`;
+      manifest.body[key] ??= {};
+      for (const [actionName, actionIndex] of Object.entries(buildActions))
+        manifest.body[key][actionName] = await buildSheet(
+          sourcePair(actPath),
+          join(outputRoot, 'body'),
+          key,
+          actionName,
+          actionIndex,
+        );
+    }
   }
-}
 
-for (const [sex, suffix] of Object.entries(sexes)) {
-  const sexRoot = join(hairRoot, suffix);
-  for (let style = 1; style <= 42; style += 1) {
-    const actPath = findAct(sexRoot, `${style}_${suffix}`);
-    if (!actPath) throw new Error(`找不到 ${sex} 髮型 ${style}`);
-    const key = `${sex}-${style}`;
-    manifest.hair[key] = await buildSplitActions(
-      sourcePair(actPath),
-      join(outputRoot, 'hair'),
-      key,
-    );
+if (showcaseScope.has('hair'))
+  for (const [sex, suffix] of Object.entries(sexes)) {
+    const sexRoot = join(hairRoot, suffix);
+    for (let style = 1; style <= 42; style += 1) {
+      const actPath = findAct(sexRoot, `${style}_${suffix}`);
+      if (!actPath) throw new Error(`找不到 ${sex} 髮型 ${style}`);
+      const key = `${sex}-${style}`;
+      manifest.hair[key] = {
+        ...(manifest.hair[key] ?? {}),
+        ...(await buildSplitActions(
+          sourcePair(actPath),
+          join(outputRoot, 'hair'),
+          key,
+        )),
+      };
+    }
   }
-}
 
-for (const [sex, suffix] of Object.entries(sexes)) {
-  const headAct = findAct(join(headgearRoot, suffix), `${suffix}_欺饭捞靛葛磊`);
-  if (!headAct) throw new Error(`找不到 ${sex} 伊甸園帽外觀`);
-  manifest.equipment.headTop[5583][sex] = await buildSplitActions(
-    sourcePair(headAct),
-    join(outputRoot, 'equipment'),
-    `eden-hat-${sex}`,
+if (showcaseScope.has('controls')) {
+  manifest.controls.rotateLeft = await importControlArrow(
+    'sysbox_arr_l.bmp',
+    'rotate-left.png',
   );
-
-  const bowAct = findAct(archerWeaponRoot, `泵荐_${suffix}_劝`);
-  if (!bowAct) throw new Error(`找不到 ${sex} 弓箭手弓外觀`);
-  manifest.equipment.weapon.bow[`archer-${sex}`] = await buildSplitActions(
-    sourcePair(bowAct),
-    join(outputRoot, 'equipment'),
-    `archer-${sex}-bow`,
+  manifest.controls.rotateRight = await importControlArrow(
+    'sysbox_arr_r.bmp',
+    'rotate-right.png',
   );
 }
-
-manifest.controls.rotateLeft = await importControlArrow(
-  'sysbox_arr_l.bmp',
-  'rotate-left.png',
-);
-manifest.controls.rotateRight = await importControlArrow(
-  'sysbox_arr_r.bmp',
-  'rotate-right.png',
-);
 
 mkdirSync(outputRoot, { recursive: true });
+stampShowcaseAssetHashes(manifest, repo);
 writeFileSync(
   join(outputRoot, 'manifest.json'),
   `${JSON.stringify(manifest, null, 2)}\n`,
 );
 console.log(
-  `角色展示台完成：${Object.keys(manifest.body).length} 組身體、${Object.keys(manifest.hair).length} 組髮型、4 組裝備外觀。`,
+  `角色展示台完成：${Object.keys(manifest.body).length} 組身體、${Object.keys(manifest.hair).length} 組髮型；scope=${[...showcaseScope].join('+')} actions=${Object.keys(buildActions).join('+') || 'none'}；裝備由中央紙娃娃建置流程接續產生。`,
 );

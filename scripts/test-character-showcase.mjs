@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import sharp from 'sharp';
@@ -18,6 +19,8 @@ const html = readFileSync(
 
 assert.equal(manifest.frameWidth, 96);
 assert.equal(manifest.frameHeight, 160);
+assert.equal(manifest.assetVersioning?.strategy, 'per-file-sha256-query');
+assert.equal(manifest.assetVersioning?.hashPrefixLength, 16);
 const showcaseJobs = [
   'novice',
   'swordsman',
@@ -48,11 +51,21 @@ async function assertActionSet(actions, names) {
       action.frameCounts,
     );
     for (const source of [action.src, action.backSrc].filter(Boolean)) {
-      const path = join(repo, 'public', source.replace(/^\//, ''));
+      assert.match(source, /\?v=[a-f0-9]{16}$/i, `${source} 需包含內容版本`);
+      const sourcePath = source.split('?', 1)[0];
+      const path = join(repo, 'public', sourcePath.replace(/^\//, ''));
       assert(existsSync(path), `缺少 ${source}`);
       const metadata = await sharp(path).metadata();
       assert.equal(metadata.width, action.columns * manifest.frameWidth);
       assert.equal(metadata.height, 8 * manifest.frameHeight);
+      const actualHash = createHash('sha256').update(readFileSync(path)).digest('hex');
+      assert.equal(
+        new URL(source, 'https://showcase.invalid').searchParams.get('v'),
+        actualHash.slice(0, 16),
+        `${source} 內容版本 hash`,
+      );
+      if (source === action.src && action.outputSha256)
+        assert.equal(actualHash, action.outputSha256, `${source} 輸出 hash`);
     }
   }
 }
@@ -72,7 +85,7 @@ for (const job of showcaseJobs) {
   for (const sex of ['male', 'female']) {
     const source = manifest.body[`${job}-${sex}`].stand.src;
     const stats = await sharp(
-      join(repo, 'public', source.replace(/^\//, '')),
+      join(repo, 'public', source.split('?', 1)[0].replace(/^\//, '')),
     )
       .ensureAlpha()
       .stats();
@@ -81,13 +94,51 @@ for (const job of showcaseJobs) {
 }
 for (const actions of Object.values(manifest.equipment.headTop[5583]))
   await assertActionSet(actions, ['stand', 'walk', 'sit', 'bowAttack']);
+for (const actions of Object.values(manifest.equipment.headTop[2254]))
+  await assertActionSet(actions, ['stand', 'walk', 'sit', 'attack', 'bowAttack']);
+for (const actions of Object.values(manifest.equipment.headLow[2270]))
+  await assertActionSet(actions, ['stand', 'walk', 'sit', 'attack', 'bowAttack']);
+assert.equal(Object.keys(manifest.equipment.headgearByView).length, 28);
+for (const entry of Object.values(manifest.equipment.headgearByView)) {
+  assert(['headTop', 'headMid', 'headLow'].includes(entry.slot));
+  for (const sex of ['male', 'female'])
+    await assertActionSet(entry[sex], ['stand', 'walk', 'sit', 'attack', 'bowAttack']);
+}
+assert.deepEqual(
+  manifest.equipment.headTop[5015],
+  manifest.equipment.headTop[5055],
+  '共用 View 101 的兩個 ItemID 必須使用相同原廠紙娃娃資產',
+);
+assert.deepEqual(
+  manifest.equipment.headTop[2207],
+  {
+    male: manifest.equipment.headgearByView[4].male,
+    female: manifest.equipment.headgearByView[4].female,
+  },
+  '未穿戴的花朵頭飾仍須由 View ID 索引覆蓋',
+);
 for (const actions of Object.values(manifest.equipment.weapon.bow))
   await assertActionSet(actions, ['stand', 'walk', 'sit', 'bowAttack']);
+for (const weaponType of [
+  'dagger', 'sword', 'twoHandSword', 'spear', 'twoHandSpear', 'axe',
+  'twoHandAxe', 'club', 'rod', 'revolver', 'item1117', 'item1361',
+  'item1460', 'item1461', 'item1613',
+]) {
+  assert(Object.keys(manifest.equipment.weapon[weaponType]).length > 0);
+  for (const actions of Object.values(manifest.equipment.weapon[weaponType]))
+    await assertActionSet(actions, ['stand', 'walk', 'sit', 'attack']);
+}
+assert.equal(Object.keys(manifest.equipment.shield.guard).length, 22);
+for (const [shieldType, expectedPairs] of Object.entries({ guard: 22, buckler: 12, shield: 2, mirrorShield: 2 })) {
+  assert.equal(Object.keys(manifest.equipment.shield[shieldType]).length, expectedPairs);
+  for (const actions of Object.values(manifest.equipment.shield[shieldType]))
+    await assertActionSet(actions, ['stand', 'walk', 'sit', 'attack']);
+}
 const edenHatStats = await sharp(
   join(
     repo,
     'public',
-    manifest.equipment.headTop[5583].male.stand.frontSrc.replace(/^\//, ''),
+    manifest.equipment.headTop[5583].male.stand.frontSrc.split('?', 1)[0].replace(/^\//, ''),
   ),
 )
   .ensureAlpha()
@@ -96,7 +147,7 @@ const bowStats = await sharp(
   join(
     repo,
     'public',
-    manifest.equipment.weapon.bow['archer-male'].bowAttack.frontSrc.replace(
+    manifest.equipment.weapon.bow['archer-male'].bowAttack.frontSrc.split('?', 1)[0].replace(
       /^\//,
       '',
     ),
@@ -106,6 +157,24 @@ const bowStats = await sharp(
   .stats();
 assert(edenHatStats.channels[3].max > 0, '伊甸園帽圖層不得為空');
 assert(bowStats.channels[3].max > 0, '弓攻擊圖層不得為空');
+const xiaomeiqinBody = manifest.body['swordsman-female'].attack;
+const xiaomeiqinHair = manifest.hair['female-1'].attack;
+const xiaomeiqinHat = manifest.equipment.headgearByView[465].female.attack;
+assert.deepEqual(xiaomeiqinHat.frameCounts, xiaomeiqinBody.frameCounts);
+assert.deepEqual(xiaomeiqinHat.frameCounts, xiaomeiqinHair.frameCounts);
+assert.deepEqual(xiaomeiqinHat.anchors, xiaomeiqinBody.anchors);
+assert.deepEqual(xiaomeiqinHat.anchors, xiaomeiqinHair.anchors);
+assert.equal(xiaomeiqinHat.delay, xiaomeiqinBody.delay);
+for (const [slot, itemId, name] of [['headTop', 2254, '天使髮圈'], ['headLow', 2270, '草葉']]) {
+  for (const sex of ['male', 'female']) {
+    const action = manifest.equipment[slot][itemId][sex].walk;
+    const source = action.frontSrc ?? action.src;
+    const stats = await sharp(join(repo, 'public', source.split('?', 1)[0].replace(/^\//, '')))
+      .ensureAlpha()
+      .stats();
+    assert(stats.channels[3].max > 0, `${name} ${sex} 移動圖層不得為空`);
+  }
+}
 for (const source of Object.values(manifest.controls)) {
   const path = join(repo, 'public', source.replace(/^\//, ''));
   assert(existsSync(path), `缺少 ${source}`);
@@ -123,16 +192,22 @@ assert.equal(archerAct.actions.length, 104);
 assert.equal(archerAct.actions.slice(0, 8).length, 8);
 assert.equal(archerAct.actions.slice(8, 16).length, 8);
 assert.equal(archerAct.actions.slice(16, 24).length, 8);
-assert.equal(archerAct.actions.slice(40, 48).length, 8);
+assert.equal(archerAct.actions.slice(32, 40).length, 8);
 
 assert.match(html, /id="paperdollHairBackLayer"/);
+assert.match(html, /id="paperdollShieldBackLayer"/);
 assert.match(html, /id="paperdollBodyLayer"/);
+assert.match(html, /id="paperdollShieldFrontLayer"/);
 assert.match(html, /id="paperdollHairFrontLayer"/);
+assert.match(html, /id="paperdollHeadMidBackLayer"/);
+assert.match(html, /id="paperdollHeadLowBackLayer"/);
+assert.match(html, /id="paperdollHeadLowFrontLayer"/);
+assert.match(html, /id="paperdollHeadMidFrontLayer"/);
 assert.match(html, /id="paperdollEquipmentVisible"/);
 assert.match(html, /id="paperdollRotateLeft"/);
 assert.match(html, /id="paperdollRotateRight"/);
 assert.match(html, /左右拖曳角色可查看八個方向/);
-assert.equal((html.match(/paperdoll-equipment-layer/g) ?? []).length, 4);
+assert.equal((html.match(/paperdoll-equipment-layer/g) ?? []).length, 10);
 assert.equal((html.match(/data-showcase-action=/g) ?? []).length, 4);
 assert.match(
   app,
@@ -151,6 +226,10 @@ assert.match(app, /#paperdollRotateRight/);
 assert.match(app, /\['stand', 'sit'\]\.includes\(characterShowcase\.action\)/);
 assert.match(app, /preloadCharacterShowcase/);
 assert.match(app, /ro-showcase-equipment-visible/);
+assert.match(app, /\[1, 'headLow'\]/);
+assert.match(app, /\[4, 'garment'\]/);
+assert.match(app, /ranking-head-low-front-layer/);
+assert.match(app, /ranking-head-mid-front-layer/);
 assert.match(app, /\(characterShowcase\.direction \+ step \+ 8\) % 8/);
 for (const [classId, job] of [
   [0, 'novice'],
