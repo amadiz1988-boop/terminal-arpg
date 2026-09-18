@@ -1,9 +1,5192 @@
 {
-  "generatedAt": "2026-09-12T16:30:19.199Z",
+  "generatedAt": "2026-09-18T10:44:27.193Z",
   "sources": {
     "ruleset": "Renewal",
     "locale": "zh-Hant",
-    "scripts": "active npc/re/scripts_main.conf imports"
+    "scripts": "active npc/re/scripts_main.conf imports",
+    "worldMap": "authorized Gravity data.grf worldviewdata_table.lub coordinates"
+  },
+  "worldMap": {
+    "image": "/ro/client/world-map/world-map.webp",
+    "width": 1280,
+    "height": 1024,
+    "regions": [
+      {
+        "regionId": "region-1",
+        "mapId": "hu_fild01",
+        "mapIds": [
+          "hu_fild01"
+        ],
+        "availableMapIds": [],
+        "name": "達納托斯塔台前",
+        "position": {
+          "x1": 695,
+          "y1": 0,
+          "x2": 752,
+          "y2": 57
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-2",
+        "mapId": "hu_fild02",
+        "mapIds": [
+          "hu_fild02"
+        ],
+        "availableMapIds": [],
+        "name": "毀葛原野",
+        "position": {
+          "x1": 753,
+          "y1": 0,
+          "x2": 811,
+          "y2": 57
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-3",
+        "mapId": "hugel",
+        "mapIds": [
+          "hugel"
+        ],
+        "availableMapIds": [],
+        "name": "田園都市 毀葛",
+        "position": {
+          "x1": 871,
+          "y1": 0,
+          "x2": 927,
+          "y2": 57
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-4",
+        "mapId": "tha_t01",
+        "mapIds": [
+          "tha_t01",
+          "tha_t02",
+          "tha_t03",
+          "tha_t04",
+          "tha_t05",
+          "tha_t06",
+          "tha_t07",
+          "tha_t08",
+          "tha_t09",
+          "tha_t10",
+          "tha_t11",
+          "tha_t12"
+        ],
+        "availableMapIds": [],
+        "name": "達納托斯塔台下層部 博物館入口",
+        "position": {
+          "x1": 552,
+          "y1": 3,
+          "x2": 646,
+          "y2": 37
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-5",
+        "mapId": "abyss_01",
+        "mapIds": [
+          "abyss_01",
+          "abyss_02",
+          "abyss_03",
+          "abyss_04"
+        ],
+        "availableMapIds": [],
+        "name": "毀葛深淵湖水 地下洞穴 1樓",
+        "position": {
+          "x1": 945,
+          "y1": 10,
+          "x2": 1024,
+          "y2": 44
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-6",
+        "mapId": "mag_dun01",
+        "mapIds": [
+          "mag_dun01",
+          "mag_dun02",
+          "mag_dun03"
+        ],
+        "availableMapIds": [],
+        "name": "朱諾 諾可羅德 1樓",
+        "position": {
+          "x1": 465,
+          "y1": 45,
+          "x2": 533,
+          "y2": 79
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-7",
+        "mapId": "juperos_01",
+        "mapIds": [
+          "juperos_01",
+          "juperos_02",
+          "jupe_core",
+          "ver_eju",
+          "ver_tunn",
+          "verus03",
+          "verus04"
+        ],
+        "availableMapIds": [],
+        "name": "優配擂斯廢墟外部",
+        "position": {
+          "x1": 984,
+          "y1": 48,
+          "x2": 1045,
+          "y2": 82
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-8",
+        "mapId": "ein_fild01",
+        "mapIds": [
+          "ein_fild01"
+        ],
+        "availableMapIds": [],
+        "name": "艾音布羅克原野",
+        "position": {
+          "x1": 576,
+          "y1": 58,
+          "x2": 635,
+          "y2": 116
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-9",
+        "mapId": "yuno_fild06",
+        "mapIds": [
+          "yuno_fild06"
+        ],
+        "availableMapIds": [],
+        "name": "爾邁斯 瀑雷德",
+        "position": {
+          "x1": 707,
+          "y1": 58,
+          "x2": 752,
+          "y2": 116
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-10",
+        "mapId": "hu_fild04",
+        "mapIds": [
+          "hu_fild04"
+        ],
+        "availableMapIds": [],
+        "name": "毀葛原野",
+        "position": {
+          "x1": 753,
+          "y1": 58,
+          "x2": 811,
+          "y2": 116
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-11",
+        "mapId": "hu_fild05",
+        "mapIds": [
+          "hu_fild05"
+        ],
+        "availableMapIds": [],
+        "name": "毀葛深淵湖水",
+        "position": {
+          "x1": 812,
+          "y1": 58,
+          "x2": 870,
+          "y2": 116
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-12",
+        "mapId": "hu_fild06",
+        "mapIds": [
+          "hu_fild06"
+        ],
+        "availableMapIds": [],
+        "name": "毀葛原野",
+        "position": {
+          "x1": 871,
+          "y1": 58,
+          "x2": 927,
+          "y2": 116
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-13",
+        "mapId": "gon_dun01",
+        "mapIds": [
+          "gon_dun01"
+        ],
+        "availableMapIds": [],
+        "name": "崑崙西王母神殿",
+        "position": {
+          "x1": 790,
+          "y1": 70,
+          "x2": 884,
+          "y2": 104
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-14",
+        "mapId": "yuno",
+        "mapIds": [
+          "yuno"
+        ],
+        "availableMapIds": [],
+        "name": "秀發茲發德共和國首都朱諾",
+        "position": {
+          "x1": 644,
+          "y1": 80,
+          "x2": 706,
+          "y2": 136
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-15",
+        "mapId": "jor_twig",
+        "mapIds": [
+          "jor_twig"
+        ],
+        "availableMapIds": [],
+        "name": "jor_twig",
+        "position": {
+          "x1": 296,
+          "y1": 87,
+          "x2": 412,
+          "y2": 203
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-16",
+        "mapId": "gon_dun02",
+        "mapIds": [
+          "gon_dun02"
+        ],
+        "availableMapIds": [],
+        "name": "崑崙神仙的圍棋臺",
+        "position": {
+          "x1": 1031,
+          "y1": 102,
+          "x2": 1115,
+          "y2": 185
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-17",
+        "mapId": "odin_past",
+        "mapIds": [
+          "odin_past"
+        ],
+        "availableMapIds": [],
+        "name": "古代奧丁神殿",
+        "position": {
+          "x1": 1146,
+          "y1": 109,
+          "x2": 1236,
+          "y2": 145
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-18",
+        "mapId": "mosk_dun02",
+        "mapIds": [
+          "mosk_dun02"
+        ],
+        "availableMapIds": [],
+        "name": "莫斯科森林深處",
+        "position": {
+          "x1": 209,
+          "y1": 113,
+          "x2": 292,
+          "y2": 197
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-19",
+        "mapId": "bra_fild01",
+        "mapIds": [
+          "bra_fild01"
+        ],
+        "availableMapIds": [],
+        "name": "巴西原野",
+        "position": {
+          "x1": 1000,
+          "y1": 113,
+          "x2": 1084,
+          "y2": 197
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-20",
+        "mapId": "ra_fild01",
+        "mapIds": [
+          "ra_fild01"
+        ],
+        "availableMapIds": [],
+        "name": "拉赫 阿巫敦拉草原",
+        "position": {
+          "x1": 283,
+          "y1": 117,
+          "x2": 341,
+          "y2": 173
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-21",
+        "mapId": "yuno_fild03",
+        "mapIds": [
+          "yuno_fild03"
+        ],
+        "availableMapIds": [],
+        "name": "爾邁斯 瀑雷德",
+        "position": {
+          "x1": 707,
+          "y1": 117,
+          "x2": 752,
+          "y2": 173
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-22",
+        "mapId": "yuno_fild02",
+        "mapIds": [
+          "yuno_fild02"
+        ],
+        "availableMapIds": [],
+        "name": "啟 海伊洛別墅",
+        "position": {
+          "x1": 753,
+          "y1": 117,
+          "x2": 811,
+          "y2": 173
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-23",
+        "mapId": "odin_tem03",
+        "mapIds": [
+          "odin_tem03"
+        ],
+        "availableMapIds": [],
+        "name": "毀葛奧丁神殿北區",
+        "position": {
+          "x1": 1044,
+          "y1": 117,
+          "x2": 1102,
+          "y2": 173
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-24",
+        "mapId": "ra_san01",
+        "mapIds": [
+          "ra_san01",
+          "ra_san02",
+          "ra_san03",
+          "ra_san04",
+          "ra_san05"
+        ],
+        "availableMapIds": [],
+        "name": "拉赫神殿聖域一樓北區",
+        "position": {
+          "x1": 214,
+          "y1": 120,
+          "x2": 280,
+          "y2": 154
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-25",
+        "mapId": "ice_dun01",
+        "mapIds": [
+          "ice_dun01",
+          "ice_dun02",
+          "ice_dun03"
+        ],
+        "availableMapIds": [],
+        "name": "拉赫冰穴 1樓",
+        "position": {
+          "x1": 380,
+          "y1": 121,
+          "x2": 447,
+          "y2": 155
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-26",
+        "mapId": "kh_dun01",
+        "mapIds": [
+          "kh_dun01",
+          "kh_dun02"
+        ],
+        "availableMapIds": [],
+        "name": "機械娃娃工廠 1樓",
+        "position": {
+          "x1": 889,
+          "y1": 127,
+          "x2": 987,
+          "y2": 160
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-27",
+        "mapId": "mosk_dun03",
+        "mapIds": [
+          "mosk_dun03"
+        ],
+        "availableMapIds": [],
+        "name": "莫斯科森林最深處",
+        "position": {
+          "x1": 307,
+          "y1": 129,
+          "x2": 391,
+          "y2": 212
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-28",
+        "mapId": "yuno_fild04",
+        "mapIds": [
+          "yuno_fild04"
+        ],
+        "availableMapIds": [],
+        "name": "爾邁斯 瀑雷德",
+        "position": {
+          "x1": 636,
+          "y1": 137,
+          "x2": 694,
+          "y2": 173
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-29",
+        "mapId": "ama_fild01",
+        "mapIds": [
+          "ama_fild01"
+        ],
+        "availableMapIds": [],
+        "name": "天津町原野",
+        "position": {
+          "x1": 334,
+          "y1": 167,
+          "x2": 417,
+          "y2": 251
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-30",
+        "mapId": "gonryun",
+        "mapIds": [
+          "gonryun"
+        ],
+        "availableMapIds": [],
+        "name": "神仙之島崑崙",
+        "position": {
+          "x1": 907,
+          "y1": 172,
+          "x2": 991,
+          "y2": 255
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-31",
+        "mapId": "ra_fild03",
+        "mapIds": [
+          "ra_fild03"
+        ],
+        "availableMapIds": [],
+        "name": "拉赫 伊達平原",
+        "position": {
+          "x1": 224,
+          "y1": 174,
+          "x2": 282,
+          "y2": 234
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-32",
+        "mapId": "ra_fild04",
+        "mapIds": [
+          "ra_fild04"
+        ],
+        "availableMapIds": [],
+        "name": "拉赫 阿巫敦拉草原",
+        "position": {
+          "x1": 283,
+          "y1": 174,
+          "x2": 341,
+          "y2": 234
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-33",
+        "mapId": "ra_fild05",
+        "mapIds": [
+          "ra_fild05"
+        ],
+        "availableMapIds": [],
+        "name": "拉赫 阿巫敦拉草原",
+        "position": {
+          "x1": 342,
+          "y1": 174,
+          "x2": 400,
+          "y2": 234
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-34",
+        "mapId": "ra_fild06",
+        "mapIds": [
+          "ra_fild06"
+        ],
+        "availableMapIds": [],
+        "name": "浦勒吐盧納",
+        "position": {
+          "x1": 401,
+          "y1": 174,
+          "x2": 459,
+          "y2": 234
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-35",
+        "mapId": "ein_fild03",
+        "mapIds": [
+          "ein_fild03"
+        ],
+        "availableMapIds": [],
+        "name": "艾音布羅克原野",
+        "position": {
+          "x1": 460,
+          "y1": 174,
+          "x2": 517,
+          "y2": 234
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-36",
+        "mapId": "ein_fild04",
+        "mapIds": [
+          "ein_fild04"
+        ],
+        "availableMapIds": [],
+        "name": "艾音布羅克原野",
+        "position": {
+          "x1": 518,
+          "y1": 174,
+          "x2": 575,
+          "y2": 234
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-37",
+        "mapId": "ein_fild05",
+        "mapIds": [
+          "ein_fild05"
+        ],
+        "availableMapIds": [],
+        "name": "艾音布羅克原野",
+        "position": {
+          "x1": 576,
+          "y1": 174,
+          "x2": 635,
+          "y2": 234
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-38",
+        "mapId": "ein_fild06",
+        "mapIds": [
+          "ein_fild06"
+        ],
+        "availableMapIds": [],
+        "name": "艾音布羅克原野",
+        "position": {
+          "x1": 636,
+          "y1": 174,
+          "x2": 694,
+          "y2": 234
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-39",
+        "mapId": "yuno_fild07",
+        "mapIds": [
+          "yuno_fild07"
+        ],
+        "availableMapIds": [],
+        "name": "爾邁斯峽谷(深淵峽谷)",
+        "position": {
+          "x1": 695,
+          "y1": 174,
+          "x2": 752,
+          "y2": 234
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-40",
+        "mapId": "yuno_fild08",
+        "mapIds": [
+          "yuno_fild08"
+        ],
+        "availableMapIds": [],
+        "name": "朱諾 啟 海伊洛學院",
+        "position": {
+          "x1": 753,
+          "y1": 174,
+          "x2": 811,
+          "y2": 234
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-41",
+        "mapId": "yuno_fild09",
+        "mapIds": [
+          "yuno_fild09"
+        ],
+        "availableMapIds": [],
+        "name": "秀發茲發德 警備隊營地",
+        "position": {
+          "x1": 812,
+          "y1": 174,
+          "x2": 870,
+          "y2": 234
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-42",
+        "mapId": "odin_tem01",
+        "mapIds": [
+          "odin_tem01"
+        ],
+        "availableMapIds": [],
+        "name": "毀葛奧丁神殿西區",
+        "position": {
+          "x1": 988,
+          "y1": 174,
+          "x2": 1043,
+          "y2": 234
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-43",
+        "mapId": "odin_tem02",
+        "mapIds": [
+          "odin_tem02"
+        ],
+        "availableMapIds": [],
+        "name": "毀葛奧丁神殿南區",
+        "position": {
+          "x1": 1044,
+          "y1": 174,
+          "x2": 1102,
+          "y2": 234
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-44",
+        "mapId": "eclage",
+        "mapIds": [
+          "eclage"
+        ],
+        "availableMapIds": [],
+        "name": "守護精靈首都埃克拉珠",
+        "position": {
+          "x1": 392,
+          "y1": 184,
+          "x2": 480,
+          "y2": 274
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-45",
+        "mapId": "moro_cav",
+        "mapIds": [
+          "moro_cav",
+          "moro_vol"
+        ],
+        "availableMapIds": [],
+        "name": "火焰洞穴",
+        "position": {
+          "x1": 549,
+          "y1": 197,
+          "x2": 639,
+          "y2": 231
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-46",
+        "mapId": "jor_twice",
+        "mapIds": [
+          "jor_twice"
+        ],
+        "availableMapIds": [],
+        "name": "jor_twice",
+        "position": {
+          "x1": 530,
+          "y1": 204,
+          "x2": 646,
+          "y2": 319
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-47",
+        "mapId": "mosk_dun01",
+        "mapIds": [
+          "mosk_dun01"
+        ],
+        "availableMapIds": [],
+        "name": "莫斯科森林",
+        "position": {
+          "x1": 186,
+          "y1": 208,
+          "x2": 270,
+          "y2": 293
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-48",
+        "mapId": "gon_dun03",
+        "mapIds": [
+          "gon_dun03"
+        ],
+        "availableMapIds": [],
+        "name": "崑崙武陵道院",
+        "position": {
+          "x1": 1149,
+          "y1": 217,
+          "x2": 1243,
+          "y2": 251
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-49",
+        "mapId": "oz_dun01",
+        "mapIds": [
+          "oz_dun01",
+          "oz_dun02"
+        ],
+        "availableMapIds": [],
+        "name": "oz_dun01",
+        "position": {
+          "x1": 53,
+          "y1": 232,
+          "x2": 130,
+          "y2": 268
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-50",
+        "mapId": "ra_fild08",
+        "mapIds": [
+          "ra_fild08"
+        ],
+        "availableMapIds": [],
+        "name": "拉赫 伊達平原",
+        "position": {
+          "x1": 283,
+          "y1": 235,
+          "x2": 341,
+          "y2": 291
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-51",
+        "mapId": "lhz_fild01",
+        "mapIds": [
+          "lhz_fild01"
+        ],
+        "availableMapIds": [],
+        "name": "里希塔樂鎮原野",
+        "position": {
+          "x1": 401,
+          "y1": 235,
+          "x2": 459,
+          "y2": 291
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-52",
+        "mapId": "lhz_fild02",
+        "mapIds": [
+          "lhz_fild02"
+        ],
+        "availableMapIds": [],
+        "name": "里希塔樂鎮原野(死神峽谷)",
+        "position": {
+          "x1": 460,
+          "y1": 235,
+          "x2": 517,
+          "y2": 291
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-53",
+        "mapId": "einbroch",
+        "mapIds": [
+          "einbroch"
+        ],
+        "availableMapIds": [],
+        "name": "鋼鐵之都  艾音布羅克",
+        "position": {
+          "x1": 518,
+          "y1": 235,
+          "x2": 575,
+          "y2": 291
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-54",
+        "mapId": "ein_fild07",
+        "mapIds": [
+          "ein_fild07"
+        ],
+        "availableMapIds": [],
+        "name": "艾音布羅克原野",
+        "position": {
+          "x1": 636,
+          "y1": 235,
+          "x2": 694,
+          "y2": 291
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-55",
+        "mapId": "yuno_fild11",
+        "mapIds": [
+          "yuno_fild11"
+        ],
+        "availableMapIds": [],
+        "name": "朱諾原野",
+        "position": {
+          "x1": 695,
+          "y1": 235,
+          "x2": 752,
+          "y2": 291
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-56",
+        "mapId": "yuno_fild12",
+        "mapIds": [
+          "yuno_fild12"
+        ],
+        "availableMapIds": [],
+        "name": "秀發茲發德 國界檢查站",
+        "position": {
+          "x1": 753,
+          "y1": 235,
+          "x2": 811,
+          "y2": 291
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-57",
+        "mapId": "yuno_fild01",
+        "mapIds": [
+          "yuno_fild01"
+        ],
+        "availableMapIds": [],
+        "name": "秀發茲發德國界檢查站",
+        "position": {
+          "x1": 812,
+          "y1": 235,
+          "x2": 870,
+          "y2": 291
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-58",
+        "mapId": "einbech",
+        "mapIds": [
+          "einbech"
+        ],
+        "availableMapIds": [],
+        "name": "採礦村艾音貝赫",
+        "position": {
+          "x1": 576,
+          "y1": 245,
+          "x2": 635,
+          "y2": 291
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-59",
+        "mapId": "brasilis",
+        "mapIds": [
+          "brasilis"
+        ],
+        "availableMapIds": [],
+        "name": "巴西",
+        "position": {
+          "x1": 925,
+          "y1": 257,
+          "x2": 1009,
+          "y2": 342
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-60",
+        "mapId": "amatsu",
+        "mapIds": [
+          "amatsu"
+        ],
+        "availableMapIds": [],
+        "name": "天水之國 天津町",
+        "position": {
+          "x1": 282,
+          "y1": 258,
+          "x2": 366,
+          "y2": 343
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-61",
+        "mapId": "ra_temple",
+        "mapIds": [
+          "ra_temple"
+        ],
+        "availableMapIds": [],
+        "name": "菲依雅 大神殿(瑟斯隆尼勒)",
+        "position": {
+          "x1": 236,
+          "y1": 261,
+          "x2": 271,
+          "y2": 291
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-62",
+        "mapId": "bra_dun01",
+        "mapIds": [
+          "bra_dun01",
+          "bra_dun02"
+        ],
+        "availableMapIds": [],
+        "name": "瀑布內的洞窟",
+        "position": {
+          "x1": 1115,
+          "y1": 263,
+          "x2": 1220,
+          "y2": 297
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-63",
+        "mapId": "gon_fild01",
+        "mapIds": [
+          "gon_fild01"
+        ],
+        "availableMapIds": [],
+        "name": "崑崙原野",
+        "position": {
+          "x1": 912,
+          "y1": 270,
+          "x2": 996,
+          "y2": 353
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-64",
+        "mapId": "ecl_fild01",
+        "mapIds": [
+          "ecl_fild01"
+        ],
+        "availableMapIds": [],
+        "name": "開枝散葉的大地",
+        "position": {
+          "x1": 392,
+          "y1": 275,
+          "x2": 480,
+          "y2": 363
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-65",
+        "mapId": "gw_fild01",
+        "mapIds": [
+          "gw_fild01"
+        ],
+        "availableMapIds": [],
+        "name": "gw_fild01",
+        "position": {
+          "x1": 50,
+          "y1": 292,
+          "x2": 106,
+          "y2": 351
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-66",
+        "mapId": "ra_fild10",
+        "mapIds": [
+          "ra_fild10"
+        ],
+        "availableMapIds": [],
+        "name": "歐茲 峽谷",
+        "position": {
+          "x1": 107,
+          "y1": 292,
+          "x2": 163,
+          "y2": 351
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-67",
+        "mapId": "ra_fild11",
+        "mapIds": [
+          "ra_fild11"
+        ],
+        "availableMapIds": [],
+        "name": "伊達 平原",
+        "position": {
+          "x1": 164,
+          "y1": 292,
+          "x2": 223,
+          "y2": 351
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-68",
+        "mapId": "rachel",
+        "mapIds": [
+          "rachel"
+        ],
+        "availableMapIds": [],
+        "name": "阿盧納貝茲 教國首都 拉赫",
+        "position": {
+          "x1": 224,
+          "y1": 292,
+          "x2": 282,
+          "y2": 351
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-69",
+        "mapId": "ra_fild12",
+        "mapIds": [
+          "ra_fild12"
+        ],
+        "availableMapIds": [],
+        "name": "拉赫 伊達平原",
+        "position": {
+          "x1": 283,
+          "y1": 292,
+          "x2": 341,
+          "y2": 351
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-70",
+        "mapId": "lighthalzen",
+        "mapIds": [
+          "lighthalzen"
+        ],
+        "availableMapIds": [],
+        "name": "企業之都里希塔樂鎮",
+        "position": {
+          "x1": 401,
+          "y1": 292,
+          "x2": 459,
+          "y2": 346
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-71",
+        "mapId": "lhz_fild03",
+        "mapIds": [
+          "lhz_fild03"
+        ],
+        "availableMapIds": [],
+        "name": "里希塔樂鎮原野",
+        "position": {
+          "x1": 460,
+          "y1": 292,
+          "x2": 517,
+          "y2": 351
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-72",
+        "mapId": "ein_fild08",
+        "mapIds": [
+          "ein_fild08"
+        ],
+        "availableMapIds": [],
+        "name": "艾音布羅克原野",
+        "position": {
+          "x1": 518,
+          "y1": 292,
+          "x2": 575,
+          "y2": 351
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-73",
+        "mapId": "ein_fild09",
+        "mapIds": [
+          "ein_fild09"
+        ],
+        "availableMapIds": [],
+        "name": "艾音布羅克原野",
+        "position": {
+          "x1": 576,
+          "y1": 292,
+          "x2": 635,
+          "y2": 351
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-74",
+        "mapId": "alde_gld",
+        "mapIds": [
+          "alde_gld"
+        ],
+        "availableMapIds": [],
+        "name": "艾爾帕蘭衛星都市 露依納",
+        "position": {
+          "x1": 753,
+          "y1": 292,
+          "x2": 811,
+          "y2": 351
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-75",
+        "mapId": "aldebaran",
+        "mapIds": [
+          "aldebaran"
+        ],
+        "availableMapIds": [],
+        "name": "運河之都 艾爾帕蘭",
+        "position": {
+          "x1": 812,
+          "y1": 292,
+          "x2": 870,
+          "y2": 351
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-76",
+        "mapId": "mosk_fild02",
+        "mapIds": [
+          "mosk_fild02"
+        ],
+        "availableMapIds": [],
+        "name": "莫斯科原野",
+        "position": {
+          "x1": 189,
+          "y1": 301,
+          "x2": 272,
+          "y2": 386
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-77",
+        "mapId": "ama_dun01",
+        "mapIds": [
+          "ama_dun01",
+          "ama_dun02",
+          "ama_dun03"
+        ],
+        "availableMapIds": [],
+        "name": "天津町 榻榻米迷宮",
+        "position": {
+          "x1": 420,
+          "y1": 310,
+          "x2": 514,
+          "y2": 344
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-78",
+        "mapId": "moscovia",
+        "mapIds": [
+          "moscovia"
+        ],
+        "availableMapIds": [],
+        "name": "莫斯科",
+        "position": {
+          "x1": 395,
+          "y1": 334,
+          "x2": 501,
+          "y2": 440
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-79",
+        "mapId": "gw_fild02",
+        "mapIds": [
+          "gw_fild02"
+        ],
+        "availableMapIds": [],
+        "name": "gw_fild02",
+        "position": {
+          "x1": 50,
+          "y1": 352,
+          "x2": 106,
+          "y2": 409
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-80",
+        "mapId": "ve_fild01",
+        "mapIds": [
+          "ve_fild01"
+        ],
+        "availableMapIds": [],
+        "name": "菲音斯原野",
+        "position": {
+          "x1": 164,
+          "y1": 352,
+          "x2": 223,
+          "y2": 409
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-81",
+        "mapId": "ve_fild02",
+        "mapIds": [
+          "ve_fild02"
+        ],
+        "availableMapIds": [],
+        "name": "菲音斯原野",
+        "position": {
+          "x1": 224,
+          "y1": 352,
+          "x2": 282,
+          "y2": 409
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-82",
+        "mapId": "mjolnir_12",
+        "mapIds": [
+          "mjolnir_12"
+        ],
+        "availableMapIds": [],
+        "name": "妙勒妙勒尼山脈 北邊山麓",
+        "position": {
+          "x1": 812,
+          "y1": 352,
+          "x2": 870,
+          "y2": 410
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-83",
+        "mapId": "ecl_tdun01",
+        "mapIds": [
+          "ecl_tdun01",
+          "ecl_tdun02",
+          "ecl_tdun03"
+        ],
+        "availableMapIds": [],
+        "name": "彩虹橋高塔 1樓",
+        "position": {
+          "x1": 242,
+          "y1": 354,
+          "x2": 332,
+          "y2": 388
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-84",
+        "mapId": "alde_dun01",
+        "mapIds": [
+          "alde_dun01",
+          "alde_dun02",
+          "alde_dun03",
+          "alde_dun04",
+          "c_tower1",
+          "c_tower2",
+          "c_tower3",
+          "c_tower4"
+        ],
+        "availableMapIds": [],
+        "name": "艾爾帕蘭鐘塔 地下1樓",
+        "position": {
+          "x1": 912,
+          "y1": 354,
+          "x2": 989,
+          "y2": 387
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-85",
+        "mapId": "ein_dun01",
+        "mapIds": [
+          "ein_dun01",
+          "ein_dun02",
+          "ein_dun03"
+        ],
+        "availableMapIds": [],
+        "name": "艾音貝赫礦山 1樓",
+        "position": {
+          "x1": 579,
+          "y1": 360,
+          "x2": 645,
+          "y2": 394
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-86",
+        "mapId": "bif_fild02",
+        "mapIds": [
+          "bif_fild02"
+        ],
+        "availableMapIds": [],
+        "name": "彩虹橋北部",
+        "position": {
+          "x1": 392,
+          "y1": 365,
+          "x2": 480,
+          "y2": 453
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-87",
+        "mapId": "lhz_dun01",
+        "mapIds": [
+          "lhz_dun01",
+          "lhz_dun02",
+          "lhz_dun03"
+        ],
+        "availableMapIds": [],
+        "name": "活體實驗研究所 地下1樓",
+        "position": {
+          "x1": 382,
+          "y1": 372,
+          "x2": 474,
+          "y2": 405
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-88",
+        "mapId": "lasagna",
+        "mapIds": [
+          "lasagna"
+        ],
+        "availableMapIds": [],
+        "name": "港口都市 羅札納",
+        "position": {
+          "x1": 401,
+          "y1": 375,
+          "x2": 576,
+          "y2": 547
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-89",
+        "mapId": "ve_fild03",
+        "mapIds": [
+          "ve_fild03"
+        ],
+        "availableMapIds": [],
+        "name": "菲音斯原野",
+        "position": {
+          "x1": 107,
+          "y1": 410,
+          "x2": 163,
+          "y2": 468
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-90",
+        "mapId": "ve_fild04",
+        "mapIds": [
+          "ve_fild04"
+        ],
+        "availableMapIds": [],
+        "name": "菲音斯原野",
+        "position": {
+          "x1": 164,
+          "y1": 410,
+          "x2": 223,
+          "y2": 468
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-91",
+        "mapId": "aru_gld",
+        "mapIds": [
+          "aru_gld"
+        ],
+        "availableMapIds": [],
+        "name": "發菲依雅",
+        "position": {
+          "x1": 224,
+          "y1": 410,
+          "x2": 282,
+          "y2": 468
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-92",
+        "mapId": "mjolnir_01",
+        "mapIds": [
+          "mjolnir_01"
+        ],
+        "availableMapIds": [],
+        "name": "妙勒妙勒尼山脈北區",
+        "position": {
+          "x1": 576,
+          "y1": 411,
+          "x2": 635,
+          "y2": 468
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-93",
+        "mapId": "mjolnir_02",
+        "mapIds": [
+          "mjolnir_02"
+        ],
+        "availableMapIds": [],
+        "name": "妙勒妙勒尼山脈北區",
+        "position": {
+          "x1": 636,
+          "y1": 411,
+          "x2": 694,
+          "y2": 468
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-94",
+        "mapId": "mjolnir_03",
+        "mapIds": [
+          "mjolnir_03"
+        ],
+        "availableMapIds": [],
+        "name": "妙勒妙勒尼山脈北區",
+        "position": {
+          "x1": 695,
+          "y1": 411,
+          "x2": 752,
+          "y2": 468
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-95",
+        "mapId": "mjolnir_04",
+        "mapIds": [
+          "mjolnir_04"
+        ],
+        "availableMapIds": [],
+        "name": "妙勒妙勒尼山脈北區",
+        "position": {
+          "x1": 753,
+          "y1": 411,
+          "x2": 811,
+          "y2": 468
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-96",
+        "mapId": "mjolnir_05",
+        "mapIds": [
+          "mjolnir_05"
+        ],
+        "availableMapIds": [],
+        "name": "妙勒妙勒尼山脈北區",
+        "position": {
+          "x1": 812,
+          "y1": 411,
+          "x2": 870,
+          "y2": 468
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-97",
+        "mapId": "mjo_dun01",
+        "mapIds": [
+          "mjo_dun01",
+          "mjo_dun02",
+          "mjo_dun03"
+        ],
+        "availableMapIds": [],
+        "name": "妙勒尼廢礦 1樓",
+        "position": {
+          "x1": 495,
+          "y1": 413,
+          "x2": 560,
+          "y2": 447
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-98",
+        "mapId": "thor_v01",
+        "mapIds": [
+          "thor_v01",
+          "thor_v02",
+          "thor_v03"
+        ],
+        "availableMapIds": [],
+        "name": "菲音斯 托爾火山洞穴 1樓",
+        "position": {
+          "x1": 33,
+          "y1": 421,
+          "x2": 99,
+          "y2": 455
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-99",
+        "mapId": "mora",
+        "mapIds": [
+          "mora"
+        ],
+        "availableMapIds": [],
+        "name": "草精族穆拉村",
+        "position": {
+          "x1": 242,
+          "y1": 433,
+          "x2": 332,
+          "y2": 467
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-100",
+        "mapId": "lasa_fild02",
+        "mapIds": [
+          "lasa_fild02"
+        ],
+        "availableMapIds": [],
+        "name": "羅比奧森林",
+        "position": {
+          "x1": 1027,
+          "y1": 437,
+          "x2": 1202,
+          "y2": 609
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-101",
+        "mapId": "jor_back6",
+        "mapIds": [
+          "jor_back6"
+        ],
+        "availableMapIds": [],
+        "name": "jor_back6",
+        "position": {
+          "x1": 530,
+          "y1": 438,
+          "x2": 646,
+          "y2": 554
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-102",
+        "mapId": "jor_back5",
+        "mapIds": [
+          "jor_back5"
+        ],
+        "availableMapIds": [],
+        "name": "jor_back5",
+        "position": {
+          "x1": 647,
+          "y1": 438,
+          "x2": 763,
+          "y2": 554
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-103",
+        "mapId": "dicastes02",
+        "mapIds": [
+          "dicastes02"
+        ],
+        "availableMapIds": [],
+        "name": "布魯姆德 姚樂希森林",
+        "position": {
+          "x1": 977,
+          "y1": 450,
+          "x2": 1067,
+          "y2": 541
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-104",
+        "mapId": "spl_fild01",
+        "mapIds": [
+          "spl_fild01"
+        ],
+        "availableMapIds": [],
+        "name": "史波浪壯麗原野",
+        "position": {
+          "x1": 482,
+          "y1": 455,
+          "x2": 570,
+          "y2": 543
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-105",
+        "mapId": "bif_fild01",
+        "mapIds": [
+          "bif_fild01"
+        ],
+        "availableMapIds": [],
+        "name": "彩虹橋南部",
+        "position": {
+          "x1": 392,
+          "y1": 456,
+          "x2": 480,
+          "y2": 543
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-106",
+        "mapId": "prt_maze01",
+        "mapIds": [
+          "prt_maze01",
+          "prt_maze02",
+          "prt_maze03"
+        ],
+        "availableMapIds": [],
+        "name": "普隆德拉迷宮森林 1樓",
+        "position": {
+          "x1": 960,
+          "y1": 460,
+          "x2": 1050,
+          "y2": 493
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-107",
+        "mapId": "glast_01",
+        "mapIds": [
+          "glast_01"
+        ],
+        "availableMapIds": [],
+        "name": "克雷斯特漢姆古城",
+        "position": {
+          "x1": 408,
+          "y1": 469,
+          "x2": 459,
+          "y2": 527
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-108",
+        "mapId": "gef_fild06",
+        "mapIds": [
+          "gef_fild06"
+        ],
+        "availableMapIds": [],
+        "name": "吉芬原野",
+        "position": {
+          "x1": 460,
+          "y1": 469,
+          "x2": 517,
+          "y2": 527
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-109",
+        "mapId": "gef_fild05",
+        "mapIds": [
+          "gef_fild05"
+        ],
+        "availableMapIds": [],
+        "name": "冷豔舞姬村",
+        "position": {
+          "x1": 518,
+          "y1": 469,
+          "x2": 575,
+          "y2": 527
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-110",
+        "mapId": "gef_fild04",
+        "mapIds": [
+          "gef_fild04"
+        ],
+        "availableMapIds": [],
+        "name": "吉芬原野",
+        "position": {
+          "x1": 576,
+          "y1": 469,
+          "x2": 635,
+          "y2": 527
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-111",
+        "mapId": "mjolnir_06",
+        "mapIds": [
+          "mjolnir_06"
+        ],
+        "availableMapIds": [
+          "mjolnir_06"
+        ],
+        "name": "妙勒妙勒尼山脈南區",
+        "position": {
+          "x1": 636,
+          "y1": 469,
+          "x2": 694,
+          "y2": 527
+        },
+        "levelRange": {
+          "min": 23,
+          "max": 29
+        },
+        "availableForAfk": true,
+        "unlocked": true,
+        "selectable": true,
+        "unlockCondition": null
+      },
+      {
+        "regionId": "region-112",
+        "mapId": "mjolnir_07",
+        "mapIds": [
+          "mjolnir_07"
+        ],
+        "availableMapIds": [
+          "mjolnir_07"
+        ],
+        "name": "妙勒妙勒尼山脈南區",
+        "position": {
+          "x1": 695,
+          "y1": 469,
+          "x2": 752,
+          "y2": 527
+        },
+        "levelRange": {
+          "min": 55,
+          "max": 59
+        },
+        "availableForAfk": true,
+        "unlocked": true,
+        "selectable": true,
+        "unlockCondition": null
+      },
+      {
+        "regionId": "region-113",
+        "mapId": "mjolnir_08",
+        "mapIds": [
+          "mjolnir_08"
+        ],
+        "availableMapIds": [],
+        "name": "妙勒妙勒尼山脈南區",
+        "position": {
+          "x1": 753,
+          "y1": 469,
+          "x2": 811,
+          "y2": 527
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-114",
+        "mapId": "mjolnir_10",
+        "mapIds": [
+          "mjolnir_10"
+        ],
+        "availableMapIds": [],
+        "name": "妙勒妙勒尼山脈南區",
+        "position": {
+          "x1": 812,
+          "y1": 469,
+          "x2": 870,
+          "y2": 527
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-115",
+        "mapId": "mjolnir_11",
+        "mapIds": [
+          "mjolnir_11"
+        ],
+        "availableMapIds": [],
+        "name": "妙勒妙勒尼山脈南區",
+        "position": {
+          "x1": 871,
+          "y1": 469,
+          "x2": 927,
+          "y2": 527
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-116",
+        "mapId": "ve_fild06",
+        "mapIds": [
+          "ve_fild06"
+        ],
+        "availableMapIds": [],
+        "name": "菲音斯原野",
+        "position": {
+          "x1": 164,
+          "y1": 485,
+          "x2": 223,
+          "y2": 527
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-117",
+        "mapId": "gl_cas01",
+        "mapIds": [
+          "gl_cas01",
+          "gl_cas02",
+          "gl_church",
+          "gl_chyard",
+          "gl_dun01",
+          "gl_dun02",
+          "gl_in01",
+          "gl_knt01",
+          "gl_knt02",
+          "gl_prison",
+          "gl_prison1",
+          "gl_sew01",
+          "gl_sew02",
+          "gl_sew03",
+          "gl_sew04",
+          "gl_step"
+        ],
+        "availableMapIds": [],
+        "name": "克雷斯特漢姆古城 1樓",
+        "position": {
+          "x1": 285,
+          "y1": 488,
+          "x2": 375,
+          "y2": 522
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-118",
+        "mapId": "mal_dun01",
+        "mapIds": [
+          "mal_dun01"
+        ],
+        "availableMapIds": [],
+        "name": "星光珊瑚地區",
+        "position": {
+          "x1": 1144,
+          "y1": 512,
+          "x2": 1234,
+          "y2": 548
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-119",
+        "mapId": "veins",
+        "mapIds": [
+          "veins"
+        ],
+        "availableMapIds": [],
+        "name": "峽谷村 菲音斯",
+        "position": {
+          "x1": 161,
+          "y1": 528,
+          "x2": 218,
+          "y2": 585
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-120",
+        "mapId": "gef_fild08",
+        "mapIds": [
+          "gef_fild08"
+        ],
+        "availableMapIds": [],
+        "name": "吉芬原野",
+        "position": {
+          "x1": 460,
+          "y1": 528,
+          "x2": 517,
+          "y2": 586
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-121",
+        "mapId": "gef_fild07",
+        "mapIds": [
+          "gef_fild07"
+        ],
+        "availableMapIds": [],
+        "name": "吉芬原野",
+        "position": {
+          "x1": 518,
+          "y1": 528,
+          "x2": 575,
+          "y2": 586
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-122",
+        "mapId": "geffen",
+        "mapIds": [
+          "geffen"
+        ],
+        "availableMapIds": [],
+        "name": "魔法之都 吉芬",
+        "position": {
+          "x1": 576,
+          "y1": 528,
+          "x2": 635,
+          "y2": 586
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-123",
+        "mapId": "gef_fild00",
+        "mapIds": [
+          "gef_fild00"
+        ],
+        "availableMapIds": [
+          "gef_fild00"
+        ],
+        "name": "吉芬原野",
+        "position": {
+          "x1": 636,
+          "y1": 528,
+          "x2": 694,
+          "y2": 586
+        },
+        "levelRange": {
+          "min": 1,
+          "max": 6
+        },
+        "availableForAfk": true,
+        "unlocked": true,
+        "selectable": true,
+        "unlockCondition": null
+      },
+      {
+        "regionId": "region-124",
+        "mapId": "prt_fild00",
+        "mapIds": [
+          "prt_fild00"
+        ],
+        "availableMapIds": [
+          "prt_fild00"
+        ],
+        "name": "普隆德拉原野",
+        "position": {
+          "x1": 695,
+          "y1": 528,
+          "x2": 752,
+          "y2": 586
+        },
+        "levelRange": {
+          "min": 13,
+          "max": 19
+        },
+        "availableForAfk": true,
+        "unlocked": true,
+        "selectable": true,
+        "unlockCondition": null
+      },
+      {
+        "regionId": "region-125",
+        "mapId": "mjolnir_09",
+        "mapIds": [
+          "mjolnir_09"
+        ],
+        "availableMapIds": [
+          "mjolnir_09"
+        ],
+        "name": "妙勒妙勒尼山脈 南邊山麓",
+        "position": {
+          "x1": 753,
+          "y1": 528,
+          "x2": 811,
+          "y2": 586
+        },
+        "levelRange": {
+          "min": 8,
+          "max": 14
+        },
+        "availableForAfk": true,
+        "unlocked": true,
+        "selectable": true,
+        "unlockCondition": null
+      },
+      {
+        "regionId": "region-126",
+        "mapId": "prt_fild01",
+        "mapIds": [
+          "prt_fild01"
+        ],
+        "availableMapIds": [],
+        "name": "普隆德拉原野",
+        "position": {
+          "x1": 812,
+          "y1": 528,
+          "x2": 870,
+          "y2": 586
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-127",
+        "mapId": "prt_fild02",
+        "mapIds": [
+          "prt_fild02"
+        ],
+        "availableMapIds": [],
+        "name": "普隆德拉原野",
+        "position": {
+          "x1": 871,
+          "y1": 528,
+          "x2": 927,
+          "y2": 586
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-128",
+        "mapId": "prt_fild03",
+        "mapIds": [
+          "prt_fild03"
+        ],
+        "availableMapIds": [],
+        "name": "普隆德拉原野",
+        "position": {
+          "x1": 928,
+          "y1": 528,
+          "x2": 986,
+          "y2": 570
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-129",
+        "mapId": "prt_monk",
+        "mapIds": [
+          "prt_monk"
+        ],
+        "availableMapIds": [],
+        "name": "聖 卡畢利那 修道院",
+        "position": {
+          "x1": 987,
+          "y1": 528,
+          "x2": 1042,
+          "y2": 570
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-130",
+        "mapId": "dicastes01",
+        "mapIds": [
+          "dicastes01"
+        ],
+        "availableMapIds": [],
+        "name": "邪派國都艾爾迪卡斯特",
+        "position": {
+          "x1": 977,
+          "y1": 543,
+          "x2": 1067,
+          "y2": 633
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-131",
+        "mapId": "splendide",
+        "mapIds": [
+          "splendide"
+        ],
+        "availableMapIds": [],
+        "name": "守護精靈前線陣地史波浪壯麗",
+        "position": {
+          "x1": 392,
+          "y1": 544,
+          "x2": 480,
+          "y2": 633
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-132",
+        "mapId": "spl_fild02",
+        "mapIds": [
+          "spl_fild02"
+        ],
+        "availableMapIds": [],
+        "name": "史波浪壯麗原野",
+        "position": {
+          "x1": 482,
+          "y1": 546,
+          "x2": 570,
+          "y2": 633
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-133",
+        "mapId": "mid_camp",
+        "mapIds": [
+          "mid_camp"
+        ],
+        "availableMapIds": [],
+        "name": "米德加爾特聯盟營區",
+        "position": {
+          "x1": 571,
+          "y1": 546,
+          "x2": 659,
+          "y2": 633
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-134",
+        "mapId": "man_fild01",
+        "mapIds": [
+          "man_fild01"
+        ],
+        "availableMapIds": [],
+        "name": "魔怒克原野",
+        "position": {
+          "x1": 661,
+          "y1": 546,
+          "x2": 749,
+          "y2": 633
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-135",
+        "mapId": "man_fild02",
+        "mapIds": [
+          "man_fild02"
+        ],
+        "availableMapIds": [],
+        "name": "魔怒克原野",
+        "position": {
+          "x1": 752,
+          "y1": 546,
+          "x2": 839,
+          "y2": 633
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-136",
+        "mapId": "dali",
+        "mapIds": [
+          "dali"
+        ],
+        "availableMapIds": [],
+        "name": "次元裂縫",
+        "position": {
+          "x1": 276,
+          "y1": 553,
+          "x2": 437,
+          "y2": 710
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-137",
+        "mapId": "jor_back4",
+        "mapIds": [
+          "jor_back4"
+        ],
+        "availableMapIds": [],
+        "name": "jor_back4",
+        "position": {
+          "x1": 764,
+          "y1": 556,
+          "x2": 880,
+          "y2": 670
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-138",
+        "mapId": "dew_dun02",
+        "mapIds": [
+          "dew_dun02"
+        ],
+        "availableMapIds": [],
+        "name": "伊斯坦納洞穴",
+        "position": {
+          "x1": 183,
+          "y1": 568,
+          "x2": 277,
+          "y2": 602
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-139",
+        "mapId": "gef_dun00",
+        "mapIds": [
+          "gef_dun00",
+          "gef_dun01",
+          "gef_dun02"
+        ],
+        "availableMapIds": [],
+        "name": "吉芬地下密穴 1樓",
+        "position": {
+          "x1": 328,
+          "y1": 579,
+          "x2": 392,
+          "y2": 613
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-140",
+        "mapId": "ve_fild07",
+        "mapIds": [
+          "ve_fild07"
+        ],
+        "availableMapIds": [],
+        "name": "菲音斯原野",
+        "position": {
+          "x1": 161,
+          "y1": 586,
+          "x2": 218,
+          "y2": 643
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-141",
+        "mapId": "gef_fild13",
+        "mapIds": [
+          "gef_fild13"
+        ],
+        "availableMapIds": [],
+        "name": "怖立特離亞",
+        "position": {
+          "x1": 518,
+          "y1": 587,
+          "x2": 575,
+          "y2": 643
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-142",
+        "mapId": "gef_fild09",
+        "mapIds": [
+          "gef_fild09"
+        ],
+        "availableMapIds": [],
+        "name": "吉芬原野",
+        "position": {
+          "x1": 576,
+          "y1": 587,
+          "x2": 635,
+          "y2": 643
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-143",
+        "mapId": "gef_fild01",
+        "mapIds": [
+          "gef_fild01"
+        ],
+        "availableMapIds": [],
+        "name": "吉芬原野",
+        "position": {
+          "x1": 636,
+          "y1": 587,
+          "x2": 694,
+          "y2": 643
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-144",
+        "mapId": "prt_fild04",
+        "mapIds": [
+          "prt_fild04"
+        ],
+        "availableMapIds": [],
+        "name": "普隆德拉原野",
+        "position": {
+          "x1": 695,
+          "y1": 587,
+          "x2": 752,
+          "y2": 643
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-145",
+        "mapId": "prt_fild05",
+        "mapIds": [
+          "prt_fild05"
+        ],
+        "availableMapIds": [
+          "prt_fild05"
+        ],
+        "name": "普隆德拉原野",
+        "position": {
+          "x1": 753,
+          "y1": 587,
+          "x2": 811,
+          "y2": 643
+        },
+        "levelRange": {
+          "min": 11,
+          "max": 21
+        },
+        "availableForAfk": true,
+        "unlocked": true,
+        "selectable": true,
+        "unlockCondition": null
+      },
+      {
+        "regionId": "region-146",
+        "mapId": "prontera",
+        "mapIds": [
+          "prontera"
+        ],
+        "availableMapIds": [],
+        "name": "盧恩 米德加茲王國  首都普隆德拉",
+        "position": {
+          "x1": 812,
+          "y1": 587,
+          "x2": 870,
+          "y2": 643
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-147",
+        "mapId": "prt_fild06",
+        "mapIds": [
+          "prt_fild06"
+        ],
+        "availableMapIds": [],
+        "name": "普隆德拉原野",
+        "position": {
+          "x1": 871,
+          "y1": 587,
+          "x2": 927,
+          "y2": 643
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-148",
+        "mapId": "malangdo",
+        "mapIds": [
+          "malangdo"
+        ],
+        "availableMapIds": [],
+        "name": "綿綿島",
+        "position": {
+          "x1": 1158,
+          "y1": 587,
+          "x2": 1216,
+          "y2": 642
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-149",
+        "mapId": "prt_mk",
+        "mapIds": [
+          "prt_mk"
+        ],
+        "availableMapIds": [],
+        "name": "prt_mk",
+        "position": {
+          "x1": 942,
+          "y1": 589,
+          "x2": 1002,
+          "y2": 610
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-150",
+        "mapId": "ma_scene01",
+        "mapIds": [
+          "ma_scene01"
+        ],
+        "availableMapIds": [],
+        "name": "食月暴龍湖",
+        "position": {
+          "x1": 1077,
+          "y1": 603,
+          "x2": 1161,
+          "y2": 687
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-151",
+        "mapId": "spl_fild03",
+        "mapIds": [
+          "spl_fild03"
+        ],
+        "availableMapIds": [],
+        "name": "史波浪壯麗原野",
+        "position": {
+          "x1": 482,
+          "y1": 635,
+          "x2": 570,
+          "y2": 724
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-152",
+        "mapId": "dic_fild01",
+        "mapIds": [
+          "dic_fild01"
+        ],
+        "availableMapIds": [],
+        "name": "卡米達山麓",
+        "position": {
+          "x1": 977,
+          "y1": 635,
+          "x2": 1067,
+          "y2": 726
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-153",
+        "mapId": "man_fild03",
+        "mapIds": [
+          "man_fild03"
+        ],
+        "availableMapIds": [],
+        "name": "魔怒克原野",
+        "position": {
+          "x1": 661,
+          "y1": 636,
+          "x2": 749,
+          "y2": 724
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-154",
+        "mapId": "manuk",
+        "mapIds": [
+          "manuk"
+        ],
+        "availableMapIds": [],
+        "name": "礦村魔怒克",
+        "position": {
+          "x1": 752,
+          "y1": 636,
+          "x2": 839,
+          "y2": 724
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-155",
+        "mapId": "iz_dun00",
+        "mapIds": [
+          "iz_dun00",
+          "iz_dun01",
+          "iz_dun02",
+          "iz_dun03",
+          "iz_dun04",
+          "iz_dun05"
+        ],
+        "availableMapIds": [
+          "iz_dun00",
+          "iz_dun01",
+          "iz_dun02",
+          "iz_dun03",
+          "iz_dun04",
+          "iz_dun05"
+        ],
+        "name": "海底洞穴 1樓",
+        "position": {
+          "x1": 976,
+          "y1": 639,
+          "x2": 1070,
+          "y2": 673
+        },
+        "levelRange": {
+          "min": 40,
+          "max": 42
+        },
+        "availableForAfk": true,
+        "unlocked": true,
+        "selectable": true,
+        "unlockCondition": null
+      },
+      {
+        "regionId": "region-156",
+        "mapId": "gef_fild10",
+        "mapIds": [
+          "gef_fild10"
+        ],
+        "availableMapIds": [],
+        "name": "獸人村",
+        "position": {
+          "x1": 576,
+          "y1": 644,
+          "x2": 635,
+          "y2": 701
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-157",
+        "mapId": "gef_fild03",
+        "mapIds": [
+          "gef_fild03"
+        ],
+        "availableMapIds": [],
+        "name": "吉芬原野",
+        "position": {
+          "x1": 636,
+          "y1": 644,
+          "x2": 694,
+          "y2": 701
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-158",
+        "mapId": "gef_fild02",
+        "mapIds": [
+          "gef_fild02"
+        ],
+        "availableMapIds": [],
+        "name": "吉芬原野",
+        "position": {
+          "x1": 695,
+          "y1": 644,
+          "x2": 752,
+          "y2": 701
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-159",
+        "mapId": "prt_fild07",
+        "mapIds": [
+          "prt_fild07"
+        ],
+        "availableMapIds": [],
+        "name": "普隆德拉原野",
+        "position": {
+          "x1": 753,
+          "y1": 644,
+          "x2": 811,
+          "y2": 701
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-160",
+        "mapId": "prt_fild08",
+        "mapIds": [
+          "prt_fild08"
+        ],
+        "availableMapIds": [
+          "prt_fild08"
+        ],
+        "name": "普隆德拉原野 08",
+        "position": {
+          "x1": 812,
+          "y1": 644,
+          "x2": 870,
+          "y2": 701
+        },
+        "levelRange": {
+          "min": 1,
+          "max": 6
+        },
+        "availableForAfk": true,
+        "unlocked": true,
+        "selectable": true,
+        "unlockCondition": null
+      },
+      {
+        "regionId": "region-161",
+        "mapId": "izlude",
+        "mapIds": [
+          "izlude"
+        ],
+        "availableMapIds": [],
+        "name": "衛星都市 依斯魯得島",
+        "position": {
+          "x1": 871,
+          "y1": 644,
+          "x2": 902,
+          "y2": 676
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-162",
+        "mapId": "izlu2dun",
+        "mapIds": [
+          "izlu2dun"
+        ],
+        "availableMapIds": [],
+        "name": "柏伊亞嵐島",
+        "position": {
+          "x1": 928,
+          "y1": 644,
+          "x2": 948,
+          "y2": 665
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-163",
+        "mapId": "gefenia01",
+        "mapIds": [
+          "gefenia01",
+          "gefenia02",
+          "gefenia03",
+          "gefenia04"
+        ],
+        "availableMapIds": [],
+        "name": "葛帔尼亞",
+        "position": {
+          "x1": 410,
+          "y1": 649,
+          "x2": 500,
+          "y2": 683
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-164",
+        "mapId": "umbala",
+        "mapIds": [
+          "umbala"
+        ],
+        "availableMapIds": [],
+        "name": "雨檀族村落 汶巴拉",
+        "position": {
+          "x1": 308,
+          "y1": 660,
+          "x2": 356,
+          "y2": 716
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-165",
+        "mapId": "niflheim",
+        "mapIds": [
+          "niflheim",
+          "nif_fild01",
+          "nif_fild02"
+        ],
+        "availableMapIds": [],
+        "name": "亡者國都 尼芙菲姆",
+        "position": {
+          "x1": 190,
+          "y1": 661,
+          "x2": 280,
+          "y2": 695
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-166",
+        "mapId": "dew_fild01",
+        "mapIds": [
+          "dew_fild01"
+        ],
+        "availableMapIds": [],
+        "name": "德瓦他原野_賈提族部落",
+        "position": {
+          "x1": 39,
+          "y1": 670,
+          "x2": 122,
+          "y2": 754
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-167",
+        "mapId": "lou_dun01",
+        "mapIds": [
+          "lou_dun01"
+        ],
+        "availableMapIds": [],
+        "name": "龍之城王陵",
+        "position": {
+          "x1": 179,
+          "y1": 672,
+          "x2": 262,
+          "y2": 757
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-168",
+        "mapId": "jor_back3",
+        "mapIds": [
+          "jor_back3"
+        ],
+        "availableMapIds": [],
+        "name": "jor_back3",
+        "position": {
+          "x1": 764,
+          "y1": 672,
+          "x2": 880,
+          "y2": 788
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-169",
+        "mapId": "jor_back2",
+        "mapIds": [
+          "jor_back2"
+        ],
+        "availableMapIds": [],
+        "name": "jor_back2",
+        "position": {
+          "x1": 881,
+          "y1": 672,
+          "x2": 997,
+          "y2": 788
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-170",
+        "mapId": "louyang",
+        "mapIds": [
+          "louyang"
+        ],
+        "availableMapIds": [],
+        "name": "古都龍之城",
+        "position": {
+          "x1": 277,
+          "y1": 675,
+          "x2": 361,
+          "y2": 760
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-171",
+        "mapId": "pay_dun00",
+        "mapIds": [
+          "pay_dun00",
+          "pay_dun01",
+          "pay_dun02",
+          "pay_dun03",
+          "pay_dun04"
+        ],
+        "availableMapIds": [
+          "pay_dun00",
+          "pay_dun01",
+          "pay_dun02",
+          "pay_dun03",
+          "pay_dun04"
+        ],
+        "name": "斐揚洞穴 1樓",
+        "position": {
+          "x1": 1065,
+          "y1": 692,
+          "x2": 1143,
+          "y2": 726
+        },
+        "levelRange": {
+          "min": 17,
+          "max": 30
+        },
+        "availableForAfk": true,
+        "unlocked": true,
+        "selectable": true,
+        "unlockCondition": null
+      },
+      {
+        "regionId": "region-172",
+        "mapId": "pay_arche",
+        "mapIds": [
+          "pay_arche"
+        ],
+        "availableMapIds": [],
+        "name": "斐揚 弓箭手村",
+        "position": {
+          "x1": 985,
+          "y1": 694,
+          "x2": 1030,
+          "y2": 745
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-173",
+        "mapId": "nameless_n",
+        "mapIds": [
+          "nameless_n"
+        ],
+        "availableMapIds": [],
+        "name": "無名島",
+        "position": {
+          "x1": 94,
+          "y1": 698,
+          "x2": 157,
+          "y2": 760
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-174",
+        "mapId": "gef_fild11",
+        "mapIds": [
+          "gef_fild11"
+        ],
+        "availableMapIds": [],
+        "name": "吉芬原野",
+        "position": {
+          "x1": 576,
+          "y1": 702,
+          "x2": 635,
+          "y2": 760
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-175",
+        "mapId": "prt_fild11",
+        "mapIds": [
+          "prt_fild11"
+        ],
+        "availableMapIds": [],
+        "name": "普隆德拉原野",
+        "position": {
+          "x1": 636,
+          "y1": 702,
+          "x2": 694,
+          "y2": 760
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-176",
+        "mapId": "prt_fild10",
+        "mapIds": [
+          "prt_fild10"
+        ],
+        "availableMapIds": [],
+        "name": "普隆德拉原野",
+        "position": {
+          "x1": 695,
+          "y1": 702,
+          "x2": 752,
+          "y2": 760
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-177",
+        "mapId": "prt_fild09",
+        "mapIds": [
+          "prt_fild09"
+        ],
+        "availableMapIds": [],
+        "name": "普隆德拉原野",
+        "position": {
+          "x1": 753,
+          "y1": 702,
+          "x2": 811,
+          "y2": 760
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-178",
+        "mapId": "moc_fild01",
+        "mapIds": [
+          "moc_fild01"
+        ],
+        "availableMapIds": [
+          "moc_fild01"
+        ],
+        "name": "蘇克拉特沙漠",
+        "position": {
+          "x1": 812,
+          "y1": 702,
+          "x2": 870,
+          "y2": 760
+        },
+        "levelRange": {
+          "min": 23,
+          "max": 25
+        },
+        "availableForAfk": true,
+        "unlocked": true,
+        "selectable": true,
+        "unlockCondition": null
+      },
+      {
+        "regionId": "region-179",
+        "mapId": "pay_fild04",
+        "mapIds": [
+          "pay_fild04"
+        ],
+        "availableMapIds": [
+          "pay_fild04"
+        ],
+        "name": "蘇克拉特沙漠",
+        "position": {
+          "x1": 871,
+          "y1": 702,
+          "x2": 927,
+          "y2": 760
+        },
+        "levelRange": {
+          "min": 30,
+          "max": 37
+        },
+        "availableForAfk": true,
+        "unlocked": true,
+        "selectable": true,
+        "unlockCondition": null
+      },
+      {
+        "regionId": "region-180",
+        "mapId": "lasa_fild01",
+        "mapIds": [
+          "lasa_fild01"
+        ],
+        "availableMapIds": [],
+        "name": "羅比奧平原崗亭",
+        "position": {
+          "x1": 404,
+          "y1": 704,
+          "x2": 580,
+          "y2": 875
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-181",
+        "mapId": "orcsdun01",
+        "mapIds": [
+          "orcsdun01",
+          "orcsdun02"
+        ],
+        "availableMapIds": [],
+        "name": "吉芬獸人地下洞穴 1樓",
+        "position": {
+          "x1": 427,
+          "y1": 710,
+          "x2": 490,
+          "y2": 743
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-182",
+        "mapId": "dewata",
+        "mapIds": [
+          "dewata"
+        ],
+        "availableMapIds": [],
+        "name": "德瓦他",
+        "position": {
+          "x1": 234,
+          "y1": 714,
+          "x2": 317,
+          "y2": 797
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-183",
+        "mapId": "ma_fild02",
+        "mapIds": [
+          "ma_fild02"
+        ],
+        "availableMapIds": [],
+        "name": "普勒斯特",
+        "position": {
+          "x1": 947,
+          "y1": 715,
+          "x2": 1032,
+          "y2": 799
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-184",
+        "mapId": "um_fild04",
+        "mapIds": [
+          "um_fild04"
+        ],
+        "availableMapIds": [],
+        "name": "汶巴拉滬家叢林",
+        "position": {
+          "x1": 297,
+          "y1": 717,
+          "x2": 356,
+          "y2": 775
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-185",
+        "mapId": "abbey01",
+        "mapIds": [
+          "abbey01",
+          "abbey02",
+          "abbey03"
+        ],
+        "availableMapIds": [],
+        "name": "無名島修道院 1樓",
+        "position": {
+          "x1": 173,
+          "y1": 718,
+          "x2": 236,
+          "y2": 751
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-186",
+        "mapId": "ayothaya",
+        "mapIds": [
+          "ayothaya"
+        ],
+        "availableMapIds": [],
+        "name": "哎喲泰雅",
+        "position": {
+          "x1": 829,
+          "y1": 727,
+          "x2": 912,
+          "y2": 810
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-187",
+        "mapId": "lasa_dun01",
+        "mapIds": [
+          "lasa_dun01",
+          "lasa_dun02",
+          "lasa_dun03"
+        ],
+        "availableMapIds": [],
+        "name": "龍巢穴1樓",
+        "position": {
+          "x1": 971,
+          "y1": 728,
+          "x2": 1076,
+          "y2": 762
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-188",
+        "mapId": "dic_fild02",
+        "mapIds": [
+          "dic_fild02"
+        ],
+        "availableMapIds": [],
+        "name": "卡米達山麓",
+        "position": {
+          "x1": 977,
+          "y1": 728,
+          "x2": 1067,
+          "y2": 818
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-189",
+        "mapId": "ayo_fild01",
+        "mapIds": [
+          "ayo_fild01"
+        ],
+        "availableMapIds": [],
+        "name": "哎喲泰雅原野",
+        "position": {
+          "x1": 921,
+          "y1": 736,
+          "x2": 1005,
+          "y2": 820
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-190",
+        "mapId": "payon",
+        "mapIds": [
+          "payon"
+        ],
+        "availableMapIds": [],
+        "name": "山岳之都 斐揚",
+        "position": {
+          "x1": 967,
+          "y1": 746,
+          "x2": 1013,
+          "y2": 803
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-191",
+        "mapId": "pay_fild08",
+        "mapIds": [
+          "pay_fild08"
+        ],
+        "availableMapIds": [],
+        "name": "斐揚森林",
+        "position": {
+          "x1": 1014,
+          "y1": 746,
+          "x2": 1053,
+          "y2": 803
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-192",
+        "mapId": "pay_fild09",
+        "mapIds": [
+          "pay_fild09"
+        ],
+        "availableMapIds": [],
+        "name": "斐揚森林",
+        "position": {
+          "x1": 1054,
+          "y1": 746,
+          "x2": 1113,
+          "y2": 803
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-193",
+        "mapId": "dic_dun01",
+        "mapIds": [
+          "dic_dun01",
+          "dic_dun02",
+          "dic_dun03"
+        ],
+        "availableMapIds": [],
+        "name": "卡米達隧道",
+        "position": {
+          "x1": 821,
+          "y1": 753,
+          "x2": 911,
+          "y2": 787
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-194",
+        "mapId": "moc_pryd01",
+        "mapIds": [
+          "moc_pryd01",
+          "moc_pryd02",
+          "moc_pryd03",
+          "moc_pryd04",
+          "moc_pryd05",
+          "moc_pryd06"
+        ],
+        "availableMapIds": [
+          "moc_pryd01",
+          "moc_pryd02",
+          "moc_pryd03",
+          "moc_pryd04",
+          "moc_pryd05",
+          "moc_pryd06"
+        ],
+        "name": "夢羅克金字塔 1樓",
+        "position": {
+          "x1": 449,
+          "y1": 759,
+          "x2": 538,
+          "y2": 793
+        },
+        "levelRange": {
+          "min": 24,
+          "max": 30
+        },
+        "availableForAfk": true,
+        "unlocked": true,
+        "selectable": true,
+        "unlockCondition": null
+      },
+      {
+        "regionId": "region-195",
+        "mapId": "moc_fild02",
+        "mapIds": [
+          "moc_fild02"
+        ],
+        "availableMapIds": [
+          "moc_fild02"
+        ],
+        "name": "蘇克拉特沙漠",
+        "position": {
+          "x1": 858,
+          "y1": 761,
+          "x2": 906,
+          "y2": 809
+        },
+        "levelRange": {
+          "min": 23,
+          "max": 25
+        },
+        "availableForAfk": true,
+        "unlocked": true,
+        "selectable": true,
+        "unlockCondition": null
+      },
+      {
+        "regionId": "region-196",
+        "mapId": "lou_fild01",
+        "mapIds": [
+          "lou_fild01"
+        ],
+        "availableMapIds": [],
+        "name": "龍之城原野",
+        "position": {
+          "x1": 277,
+          "y1": 770,
+          "x2": 361,
+          "y2": 854
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-197",
+        "mapId": "dali02",
+        "mapIds": [
+          "dali02"
+        ],
+        "availableMapIds": [],
+        "name": "次元裂縫",
+        "position": {
+          "x1": 525,
+          "y1": 771,
+          "x2": 685,
+          "y2": 927
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-198",
+        "mapId": "prt_sewb1",
+        "mapIds": [
+          "prt_sewb1",
+          "prt_sewb2",
+          "prt_sewb3",
+          "prt_sewb4"
+        ],
+        "availableMapIds": [],
+        "name": "普隆德拉地下水道 1樓",
+        "position": {
+          "x1": 720,
+          "y1": 773,
+          "x2": 809,
+          "y2": 807
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-199",
+        "mapId": "um_fild01",
+        "mapIds": [
+          "um_fild01"
+        ],
+        "availableMapIds": [],
+        "name": "汶巴拉嚕嚕卡森林",
+        "position": {
+          "x1": 239,
+          "y1": 776,
+          "x2": 296,
+          "y2": 834
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-200",
+        "mapId": "um_fild02",
+        "mapIds": [
+          "um_fild02"
+        ],
+        "availableMapIds": [],
+        "name": "汶巴拉滬家森林",
+        "position": {
+          "x1": 297,
+          "y1": 776,
+          "x2": 356,
+          "y2": 834
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-201",
+        "mapId": "um_fild03",
+        "mapIds": [
+          "um_fild03"
+        ],
+        "availableMapIds": [],
+        "name": "汶巴拉卡拉拉森林",
+        "position": {
+          "x1": 357,
+          "y1": 776,
+          "x2": 416,
+          "y2": 834
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-202",
+        "mapId": "lou_dun02",
+        "mapIds": [
+          "lou_dun02",
+          "lou_dun03"
+        ],
+        "availableMapIds": [],
+        "name": "龍之城王陵內部",
+        "position": {
+          "x1": 70,
+          "y1": 777,
+          "x2": 164,
+          "y2": 811
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-203",
+        "mapId": "moc_fild07",
+        "mapIds": [
+          "moc_fild07"
+        ],
+        "availableMapIds": [],
+        "name": "蘇克拉特沙漠",
+        "position": {
+          "x1": 603,
+          "y1": 785,
+          "x2": 659,
+          "y2": 844
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-204",
+        "mapId": "jor_back1",
+        "mapIds": [
+          "jor_back1"
+        ],
+        "availableMapIds": [],
+        "name": "jor_back1",
+        "position": {
+          "x1": 881,
+          "y1": 789,
+          "x2": 997,
+          "y2": 905
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-205",
+        "mapId": "icecastle",
+        "mapIds": [
+          "icecastle"
+        ],
+        "availableMapIds": [],
+        "name": "icecastle",
+        "position": {
+          "x1": 998,
+          "y1": 789,
+          "x2": 1114,
+          "y2": 905
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-206",
+        "mapId": "ayo_dun01",
+        "mapIds": [
+          "ayo_dun01",
+          "ayo_dun02"
+        ],
+        "availableMapIds": [],
+        "name": "哎喲泰雅 古神殿迷宮",
+        "position": {
+          "x1": 1048,
+          "y1": 796,
+          "x2": 1142,
+          "y2": 830
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-207",
+        "mapId": "in_sphinx1",
+        "mapIds": [
+          "in_sphinx1",
+          "in_sphinx2",
+          "in_sphinx3",
+          "in_sphinx4",
+          "in_sphinx5"
+        ],
+        "availableMapIds": [],
+        "name": "夢羅克人面獅身像 地下1樓",
+        "position": {
+          "x1": 449,
+          "y1": 798,
+          "x2": 538,
+          "y2": 832
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-208",
+        "mapId": "pay_fild01",
+        "mapIds": [
+          "pay_fild01"
+        ],
+        "availableMapIds": [],
+        "name": "斐揚森林",
+        "position": {
+          "x1": 936,
+          "y1": 804,
+          "x2": 994,
+          "y2": 861
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-209",
+        "mapId": "pay_fild07",
+        "mapIds": [
+          "pay_fild07"
+        ],
+        "availableMapIds": [],
+        "name": "斐揚森林",
+        "position": {
+          "x1": 995,
+          "y1": 804,
+          "x2": 1053,
+          "y2": 861
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-210",
+        "mapId": "pay_fild10",
+        "mapIds": [
+          "pay_fild10"
+        ],
+        "availableMapIds": [],
+        "name": "斐揚森林",
+        "position": {
+          "x1": 1054,
+          "y1": 804,
+          "x2": 1113,
+          "y2": 861
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-211",
+        "mapId": "moc_fild13",
+        "mapIds": [
+          "moc_fild13"
+        ],
+        "availableMapIds": [],
+        "name": "蘇克拉特沙漠",
+        "position": {
+          "x1": 836,
+          "y1": 810,
+          "x2": 882,
+          "y2": 868
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-212",
+        "mapId": "moc_fild03",
+        "mapIds": [
+          "moc_fild03"
+        ],
+        "availableMapIds": [],
+        "name": "蘇克拉特沙漠",
+        "position": {
+          "x1": 883,
+          "y1": 810,
+          "x2": 935,
+          "y2": 868
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-213",
+        "mapId": "ma_fild01",
+        "mapIds": [
+          "ma_fild01"
+        ],
+        "availableMapIds": [],
+        "name": "巴勒攸 馬西瓦哥",
+        "position": {
+          "x1": 957,
+          "y1": 812,
+          "x2": 1041,
+          "y2": 897
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-214",
+        "mapId": "moc_ruins",
+        "mapIds": [
+          "moc_ruins"
+        ],
+        "availableMapIds": [],
+        "name": "沙漠之都 夢羅克",
+        "position": {
+          "x1": 567,
+          "y1": 817,
+          "x2": 602,
+          "y2": 848
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-215",
+        "mapId": "comodo",
+        "mapIds": [
+          "comodo"
+        ],
+        "availableMapIds": [],
+        "name": "海邊之都 克魔島",
+        "position": {
+          "x1": 297,
+          "y1": 835,
+          "x2": 356,
+          "y2": 893
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-216",
+        "mapId": "cmd_fild01",
+        "mapIds": [
+          "cmd_fild01"
+        ],
+        "availableMapIds": [],
+        "name": "克魔島巴不其卡森林",
+        "position": {
+          "x1": 367,
+          "y1": 835,
+          "x2": 425,
+          "y2": 893
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-217",
+        "mapId": "cmd_fild03",
+        "mapIds": [
+          "cmd_fild03"
+        ],
+        "availableMapIds": [],
+        "name": "克魔島基乃依沼澤地",
+        "position": {
+          "x1": 426,
+          "y1": 835,
+          "x2": 483,
+          "y2": 893
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-218",
+        "mapId": "dew_dun01",
+        "mapIds": [
+          "dew_dun01"
+        ],
+        "availableMapIds": [],
+        "name": "喀拉喀托火山島",
+        "position": {
+          "x1": 339,
+          "y1": 839,
+          "x2": 422,
+          "y2": 923
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-219",
+        "mapId": "morocc",
+        "mapIds": [
+          "morocc"
+        ],
+        "availableMapIds": [],
+        "name": "沙漠之都 夢羅克",
+        "position": {
+          "x1": 606,
+          "y1": 845,
+          "x2": 655,
+          "y2": 893
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-220",
+        "mapId": "moc_fild19",
+        "mapIds": [
+          "moc_fild19"
+        ],
+        "availableMapIds": [],
+        "name": "蘇克拉特沙漠",
+        "position": {
+          "x1": 567,
+          "y1": 849,
+          "x2": 602,
+          "y2": 881
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-221",
+        "mapId": "treasure01",
+        "mapIds": [
+          "treasure01",
+          "treasure02"
+        ],
+        "availableMapIds": [],
+        "name": "艾爾貝塔沈船 1樓",
+        "position": {
+          "x1": 1112,
+          "y1": 866,
+          "x2": 1174,
+          "y2": 899
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-222",
+        "mapId": "pay_fild02",
+        "mapIds": [
+          "pay_fild02"
+        ],
+        "availableMapIds": [],
+        "name": "斐揚森林",
+        "position": {
+          "x1": 960,
+          "y1": 869,
+          "x2": 1003,
+          "y2": 931
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-223",
+        "mapId": "xmas_dun01",
+        "mapIds": [
+          "xmas_dun01",
+          "xmas_dun02"
+        ],
+        "availableMapIds": [],
+        "name": "薑餅城玩具工廠倉庫",
+        "position": {
+          "x1": 873,
+          "y1": 872,
+          "x2": 1000,
+          "y2": 906
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-224",
+        "mapId": "pay_fild03",
+        "mapIds": [
+          "pay_fild03"
+        ],
+        "availableMapIds": [],
+        "name": "斐揚森林",
+        "position": {
+          "x1": 1004,
+          "y1": 885,
+          "x2": 1058,
+          "y2": 931
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-225",
+        "mapId": "malaya",
+        "mapIds": [
+          "malaya"
+        ],
+        "availableMapIds": [],
+        "name": "馬來港",
+        "position": {
+          "x1": 834,
+          "y1": 886,
+          "x2": 917,
+          "y2": 970
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-226",
+        "mapId": "cmd_fild02",
+        "mapIds": [
+          "cmd_fild02"
+        ],
+        "availableMapIds": [],
+        "name": "克魔島克克魔海邊",
+        "position": {
+          "x1": 367,
+          "y1": 894,
+          "x2": 425,
+          "y2": 950
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-227",
+        "mapId": "cmd_fild04",
+        "mapIds": [
+          "cmd_fild04"
+        ],
+        "availableMapIds": [],
+        "name": "克魔島克克魔海邊",
+        "position": {
+          "x1": 426,
+          "y1": 894,
+          "x2": 483,
+          "y2": 950
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-228",
+        "mapId": "cmd_fild06",
+        "mapIds": [
+          "cmd_fild06"
+        ],
+        "availableMapIds": [],
+        "name": "要塞都市 山特樂曼西區",
+        "position": {
+          "x1": 484,
+          "y1": 894,
+          "x2": 543,
+          "y2": 950
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-229",
+        "mapId": "cmd_fild08",
+        "mapIds": [
+          "cmd_fild08"
+        ],
+        "availableMapIds": [],
+        "name": "要塞都市 山特樂曼東區",
+        "position": {
+          "x1": 544,
+          "y1": 894,
+          "x2": 602,
+          "y2": 950
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-230",
+        "mapId": "moc_fild12",
+        "mapIds": [
+          "moc_fild12"
+        ],
+        "availableMapIds": [],
+        "name": "蘇克拉特沙漠",
+        "position": {
+          "x1": 603,
+          "y1": 894,
+          "x2": 659,
+          "y2": 950
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-231",
+        "mapId": "moc_fild11",
+        "mapIds": [
+          "moc_fild11"
+        ],
+        "availableMapIds": [
+          "moc_fild11"
+        ],
+        "name": "蘇克拉特沙漠 11",
+        "position": {
+          "x1": 660,
+          "y1": 894,
+          "x2": 717,
+          "y2": 950
+        },
+        "levelRange": {
+          "min": 12,
+          "max": 16
+        },
+        "availableForAfk": true,
+        "unlocked": true,
+        "selectable": true,
+        "unlockCondition": null
+      },
+      {
+        "regionId": "region-232",
+        "mapId": "ma_dun01",
+        "mapIds": [
+          "ma_dun01"
+        ],
+        "availableMapIds": [],
+        "name": "噩夢醫院 1樓",
+        "position": {
+          "x1": 680,
+          "y1": 900,
+          "x2": 785,
+          "y2": 934
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-233",
+        "mapId": "beach_dun",
+        "mapIds": [
+          "beach_dun"
+        ],
+        "availableMapIds": [],
+        "name": "克魔島西邊洞穴加露",
+        "position": {
+          "x1": 135,
+          "y1": 901,
+          "x2": 213,
+          "y2": 935
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-234",
+        "mapId": "xmas",
+        "mapIds": [
+          "xmas"
+        ],
+        "availableMapIds": [],
+        "name": "白雪村落 薑餅城",
+        "position": {
+          "x1": 795,
+          "y1": 904,
+          "x2": 854,
+          "y2": 963
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-235",
+        "mapId": "jor_tail",
+        "mapIds": [
+          "jor_tail"
+        ],
+        "availableMapIds": [],
+        "name": "jor_tail",
+        "position": {
+          "x1": 881,
+          "y1": 906,
+          "x2": 997,
+          "y2": 1018
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-236",
+        "mapId": "alberta",
+        "mapIds": [
+          "alberta"
+        ],
+        "availableMapIds": [],
+        "name": "港都 艾爾貝塔",
+        "position": {
+          "x1": 1059,
+          "y1": 913,
+          "x2": 1113,
+          "y2": 964
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-237",
+        "mapId": "alb2trea",
+        "mapIds": [
+          "alb2trea"
+        ],
+        "availableMapIds": [],
+        "name": "沉船附近島嶼",
+        "position": {
+          "x1": 1114,
+          "y1": 920,
+          "x2": 1134,
+          "y2": 944
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-238",
+        "mapId": "pay_fild06",
+        "mapIds": [
+          "pay_fild06"
+        ],
+        "availableMapIds": [],
+        "name": "斐揚森林",
+        "position": {
+          "x1": 1004,
+          "y1": 932,
+          "x2": 1058,
+          "y2": 989
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-239",
+        "mapId": "moc_fild16",
+        "mapIds": [
+          "moc_fild16"
+        ],
+        "availableMapIds": [],
+        "name": "蘇克拉特沙漠",
+        "position": {
+          "x1": 718,
+          "y1": 939,
+          "x2": 776,
+          "y2": 996
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-240",
+        "mapId": "beach_dun2",
+        "mapIds": [
+          "beach_dun2"
+        ],
+        "availableMapIds": [],
+        "name": "克魔島北邊洞穴盧安達",
+        "position": {
+          "x1": 200,
+          "y1": 944,
+          "x2": 280,
+          "y2": 977
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-241",
+        "mapId": "beach_dun3",
+        "mapIds": [
+          "beach_dun3"
+        ],
+        "availableMapIds": [],
+        "name": "克魔島東邊洞穴馬吾",
+        "position": {
+          "x1": 285,
+          "y1": 944,
+          "x2": 363,
+          "y2": 977
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-242",
+        "mapId": "cmd_fild07",
+        "mapIds": [
+          "cmd_fild07"
+        ],
+        "availableMapIds": [],
+        "name": "發樂斯 燈塔島",
+        "position": {
+          "x1": 484,
+          "y1": 951,
+          "x2": 543,
+          "y2": 1009
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-243",
+        "mapId": "cmd_fild09",
+        "mapIds": [
+          "cmd_fild09"
+        ],
+        "availableMapIds": [],
+        "name": "要塞都市 山特樂曼南區",
+        "position": {
+          "x1": 544,
+          "y1": 951,
+          "x2": 602,
+          "y2": 1009
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-244",
+        "mapId": "moc_fild18",
+        "mapIds": [
+          "moc_fild18"
+        ],
+        "availableMapIds": [],
+        "name": "蘇克拉特沙漠",
+        "position": {
+          "x1": 603,
+          "y1": 951,
+          "x2": 659,
+          "y2": 1009
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-245",
+        "mapId": "moc_fild17",
+        "mapIds": [
+          "moc_fild17"
+        ],
+        "availableMapIds": [],
+        "name": "蘇克拉特沙漠",
+        "position": {
+          "x1": 660,
+          "y1": 951,
+          "x2": 717,
+          "y2": 1009
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-246",
+        "mapId": "xmas_fild01",
+        "mapIds": [
+          "xmas_fild01"
+        ],
+        "availableMapIds": [],
+        "name": "薑餅城原野",
+        "position": {
+          "x1": 795,
+          "y1": 963,
+          "x2": 854,
+          "y2": 1018
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-247",
+        "mapId": "tur_dun01",
+        "mapIds": [
+          "tur_dun01"
+        ],
+        "availableMapIds": [],
+        "name": "烏龜島",
+        "position": {
+          "x1": 1164,
+          "y1": 975,
+          "x2": 1191,
+          "y2": 1004
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-248",
+        "mapId": "anthell01",
+        "mapIds": [
+          "anthell01",
+          "anthell02"
+        ],
+        "availableMapIds": [],
+        "name": "夢羅克螞蟻地獄密穴 1樓",
+        "position": {
+          "x1": 336,
+          "y1": 981,
+          "x2": 429,
+          "y2": 1016
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      },
+      {
+        "regionId": "region-249",
+        "mapId": "tur_dun02",
+        "mapIds": [
+          "tur_dun02",
+          "tur_dun03",
+          "tur_dun04",
+          "tur_dun05"
+        ],
+        "availableMapIds": [],
+        "name": "烏龜島 密穴",
+        "position": {
+          "x1": 1080,
+          "y1": 981,
+          "x2": 1142,
+          "y2": 1014
+        },
+        "levelRange": null,
+        "availableForAfk": false,
+        "unlocked": false,
+        "selectable": false,
+        "unlockCondition": "尚未列入目前可掛機地圖"
+      }
+    ]
   },
   "maps": {
     "gef_fild00": {
@@ -11,6 +5194,54 @@
       "name": "吉芬原野",
       "totalMonsters": 238,
       "monsterTypes": 6,
+      "normalMonsterCount": 238,
+      "normalMonsterTypes": 6,
+      "combatMonsterCount": 230,
+      "combatMonsterTypes": 4,
+      "resourceMonsterCount": 8,
+      "levelRange": {
+        "min": 1,
+        "max": 6
+      },
+      "fullLevelRange": {
+        "min": 1,
+        "max": 6
+      },
+      "primaryMonsters": [
+        {
+          "id": 1011,
+          "name": "蒼蠅",
+          "level": 5,
+          "count": 160
+        },
+        {
+          "id": 1002,
+          "name": "波利",
+          "level": 1,
+          "count": 34
+        },
+        {
+          "id": 1007,
+          "name": "綠棉蟲",
+          "level": 6,
+          "count": 34
+        }
+      ],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
+      "worldPosition": {
+        "mapId": "gef_fild00",
+        "x1": 636,
+        "y1": 528,
+        "x2": 694,
+        "y2": 586
+      },
       "detail": "/ro/data/map-info/gef_fild00.json"
     },
     "geffen": {
@@ -18,6 +5249,29 @@
       "name": "魔法之都 吉芬",
       "totalMonsters": 0,
       "monsterTypes": 0,
+      "normalMonsterCount": 0,
+      "normalMonsterTypes": 0,
+      "combatMonsterCount": 0,
+      "combatMonsterTypes": 0,
+      "resourceMonsterCount": 0,
+      "levelRange": null,
+      "fullLevelRange": null,
+      "primaryMonsters": [],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": {
+        "mapId": "geffen",
+        "x1": 576,
+        "y1": 528,
+        "x2": 635,
+        "y2": 586
+      },
       "detail": "/ro/data/map-info/geffen.json"
     },
     "geffen_in": {
@@ -25,6 +5279,23 @@
       "name": "吉芬內部",
       "totalMonsters": 0,
       "monsterTypes": 0,
+      "normalMonsterCount": 0,
+      "normalMonsterTypes": 0,
+      "combatMonsterCount": 0,
+      "combatMonsterTypes": 0,
+      "resourceMonsterCount": 0,
+      "levelRange": null,
+      "fullLevelRange": null,
+      "primaryMonsters": [],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": null,
       "detail": "/ro/data/map-info/geffen_in.json"
     },
     "int_land": {
@@ -32,6 +5303,36 @@
       "name": "int_land",
       "totalMonsters": 40,
       "monsterTypes": 1,
+      "normalMonsterCount": 40,
+      "normalMonsterTypes": 1,
+      "combatMonsterCount": 40,
+      "combatMonsterTypes": 1,
+      "resourceMonsterCount": 0,
+      "levelRange": {
+        "min": 1,
+        "max": 1
+      },
+      "fullLevelRange": {
+        "min": 1,
+        "max": 1
+      },
+      "primaryMonsters": [
+        {
+          "id": 2401,
+          "name": "波利",
+          "level": 1,
+          "count": 40
+        }
+      ],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": null,
       "detail": "/ro/data/map-info/int_land.json"
     },
     "int_land01": {
@@ -39,6 +5340,36 @@
       "name": "int_land01",
       "totalMonsters": 40,
       "monsterTypes": 1,
+      "normalMonsterCount": 40,
+      "normalMonsterTypes": 1,
+      "combatMonsterCount": 40,
+      "combatMonsterTypes": 1,
+      "resourceMonsterCount": 0,
+      "levelRange": {
+        "min": 1,
+        "max": 1
+      },
+      "fullLevelRange": {
+        "min": 1,
+        "max": 1
+      },
+      "primaryMonsters": [
+        {
+          "id": 2401,
+          "name": "波利",
+          "level": 1,
+          "count": 40
+        }
+      ],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": null,
       "detail": "/ro/data/map-info/int_land01.json"
     },
     "int_land02": {
@@ -46,6 +5377,36 @@
       "name": "int_land02",
       "totalMonsters": 40,
       "monsterTypes": 1,
+      "normalMonsterCount": 40,
+      "normalMonsterTypes": 1,
+      "combatMonsterCount": 40,
+      "combatMonsterTypes": 1,
+      "resourceMonsterCount": 0,
+      "levelRange": {
+        "min": 1,
+        "max": 1
+      },
+      "fullLevelRange": {
+        "min": 1,
+        "max": 1
+      },
+      "primaryMonsters": [
+        {
+          "id": 2401,
+          "name": "波利",
+          "level": 1,
+          "count": 40
+        }
+      ],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": null,
       "detail": "/ro/data/map-info/int_land02.json"
     },
     "int_land03": {
@@ -53,6 +5414,36 @@
       "name": "int_land03",
       "totalMonsters": 40,
       "monsterTypes": 1,
+      "normalMonsterCount": 40,
+      "normalMonsterTypes": 1,
+      "combatMonsterCount": 40,
+      "combatMonsterTypes": 1,
+      "resourceMonsterCount": 0,
+      "levelRange": {
+        "min": 1,
+        "max": 1
+      },
+      "fullLevelRange": {
+        "min": 1,
+        "max": 1
+      },
+      "primaryMonsters": [
+        {
+          "id": 2401,
+          "name": "波利",
+          "level": 1,
+          "count": 40
+        }
+      ],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": null,
       "detail": "/ro/data/map-info/int_land03.json"
     },
     "int_land04": {
@@ -60,6 +5451,36 @@
       "name": "int_land04",
       "totalMonsters": 40,
       "monsterTypes": 1,
+      "normalMonsterCount": 40,
+      "normalMonsterTypes": 1,
+      "combatMonsterCount": 40,
+      "combatMonsterTypes": 1,
+      "resourceMonsterCount": 0,
+      "levelRange": {
+        "min": 1,
+        "max": 1
+      },
+      "fullLevelRange": {
+        "min": 1,
+        "max": 1
+      },
+      "primaryMonsters": [
+        {
+          "id": 2401,
+          "name": "波利",
+          "level": 1,
+          "count": 40
+        }
+      ],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": null,
       "detail": "/ro/data/map-info/int_land04.json"
     },
     "iz_ac01": {
@@ -67,34 +5488,119 @@
       "name": "克里圖拉學院1樓",
       "totalMonsters": 4,
       "monsterTypes": 2,
+      "normalMonsterCount": 0,
+      "normalMonsterTypes": 0,
+      "combatMonsterCount": 0,
+      "combatMonsterTypes": 0,
+      "resourceMonsterCount": 0,
+      "levelRange": null,
+      "fullLevelRange": null,
+      "primaryMonsters": [],
+      "bossCount": 4,
+      "bossTypes": 2,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": null,
       "detail": "/ro/data/map-info/iz_ac01.json"
     },
     "iz_ac01_a": {
       "id": "iz_ac01_a",
-      "name": "魔法學院1樓",
+      "name": "學院 1樓",
       "totalMonsters": 4,
       "monsterTypes": 2,
+      "normalMonsterCount": 0,
+      "normalMonsterTypes": 0,
+      "combatMonsterCount": 0,
+      "combatMonsterTypes": 0,
+      "resourceMonsterCount": 0,
+      "levelRange": null,
+      "fullLevelRange": null,
+      "primaryMonsters": [],
+      "bossCount": 4,
+      "bossTypes": 2,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": null,
       "detail": "/ro/data/map-info/iz_ac01_a.json"
     },
     "iz_ac01_b": {
       "id": "iz_ac01_b",
-      "name": "魔法學院1樓",
+      "name": "學院 1樓",
       "totalMonsters": 4,
       "monsterTypes": 2,
+      "normalMonsterCount": 0,
+      "normalMonsterTypes": 0,
+      "combatMonsterCount": 0,
+      "combatMonsterTypes": 0,
+      "resourceMonsterCount": 0,
+      "levelRange": null,
+      "fullLevelRange": null,
+      "primaryMonsters": [],
+      "bossCount": 4,
+      "bossTypes": 2,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": null,
       "detail": "/ro/data/map-info/iz_ac01_b.json"
     },
     "iz_ac01_c": {
       "id": "iz_ac01_c",
-      "name": "魔法學院1樓",
+      "name": "學院 1樓",
       "totalMonsters": 4,
       "monsterTypes": 2,
+      "normalMonsterCount": 0,
+      "normalMonsterTypes": 0,
+      "combatMonsterCount": 0,
+      "combatMonsterTypes": 0,
+      "resourceMonsterCount": 0,
+      "levelRange": null,
+      "fullLevelRange": null,
+      "primaryMonsters": [],
+      "bossCount": 4,
+      "bossTypes": 2,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": null,
       "detail": "/ro/data/map-info/iz_ac01_c.json"
     },
     "iz_ac01_d": {
       "id": "iz_ac01_d",
-      "name": "魔法學院1樓",
+      "name": "學院 1樓",
       "totalMonsters": 4,
       "monsterTypes": 2,
+      "normalMonsterCount": 0,
+      "normalMonsterTypes": 0,
+      "combatMonsterCount": 0,
+      "combatMonsterTypes": 0,
+      "resourceMonsterCount": 0,
+      "levelRange": null,
+      "fullLevelRange": null,
+      "primaryMonsters": [],
+      "bossCount": 4,
+      "bossTypes": 2,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": null,
       "detail": "/ro/data/map-info/iz_ac01_d.json"
     },
     "iz_ac02": {
@@ -102,41 +5608,521 @@
       "name": "克里圖拉學院2樓",
       "totalMonsters": 0,
       "monsterTypes": 0,
+      "normalMonsterCount": 0,
+      "normalMonsterTypes": 0,
+      "combatMonsterCount": 0,
+      "combatMonsterTypes": 0,
+      "resourceMonsterCount": 0,
+      "levelRange": null,
+      "fullLevelRange": null,
+      "primaryMonsters": [],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": null,
       "detail": "/ro/data/map-info/iz_ac02.json"
     },
     "iz_ac02_a": {
       "id": "iz_ac02_a",
-      "name": "魔法學院2樓",
+      "name": "學院 2樓",
       "totalMonsters": 0,
       "monsterTypes": 0,
+      "normalMonsterCount": 0,
+      "normalMonsterTypes": 0,
+      "combatMonsterCount": 0,
+      "combatMonsterTypes": 0,
+      "resourceMonsterCount": 0,
+      "levelRange": null,
+      "fullLevelRange": null,
+      "primaryMonsters": [],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": null,
       "detail": "/ro/data/map-info/iz_ac02_a.json"
     },
     "iz_ac02_b": {
       "id": "iz_ac02_b",
-      "name": "魔法學院2樓",
+      "name": "學院 2樓",
       "totalMonsters": 0,
       "monsterTypes": 0,
+      "normalMonsterCount": 0,
+      "normalMonsterTypes": 0,
+      "combatMonsterCount": 0,
+      "combatMonsterTypes": 0,
+      "resourceMonsterCount": 0,
+      "levelRange": null,
+      "fullLevelRange": null,
+      "primaryMonsters": [],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": null,
       "detail": "/ro/data/map-info/iz_ac02_b.json"
     },
     "iz_ac02_c": {
       "id": "iz_ac02_c",
-      "name": "魔法學院2樓",
+      "name": "學院 2樓",
       "totalMonsters": 0,
       "monsterTypes": 0,
+      "normalMonsterCount": 0,
+      "normalMonsterTypes": 0,
+      "combatMonsterCount": 0,
+      "combatMonsterTypes": 0,
+      "resourceMonsterCount": 0,
+      "levelRange": null,
+      "fullLevelRange": null,
+      "primaryMonsters": [],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": null,
       "detail": "/ro/data/map-info/iz_ac02_c.json"
     },
     "iz_ac02_d": {
       "id": "iz_ac02_d",
-      "name": "魔法學院2樓",
+      "name": "學院 2樓",
       "totalMonsters": 0,
       "monsterTypes": 0,
+      "normalMonsterCount": 0,
+      "normalMonsterTypes": 0,
+      "combatMonsterCount": 0,
+      "combatMonsterTypes": 0,
+      "resourceMonsterCount": 0,
+      "levelRange": null,
+      "fullLevelRange": null,
+      "primaryMonsters": [],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": null,
       "detail": "/ro/data/map-info/iz_ac02_d.json"
+    },
+    "iz_dun00": {
+      "id": "iz_dun00",
+      "name": "海底洞穴 1樓",
+      "totalMonsters": 217,
+      "monsterTypes": 7,
+      "normalMonsterCount": 217,
+      "normalMonsterTypes": 7,
+      "combatMonsterCount": 211,
+      "combatMonsterTypes": 6,
+      "resourceMonsterCount": 6,
+      "levelRange": {
+        "min": 40,
+        "max": 42
+      },
+      "fullLevelRange": {
+        "min": 34,
+        "max": 45
+      },
+      "primaryMonsters": [
+        {
+          "id": 1161,
+          "name": "漂浮蟲",
+          "level": 40,
+          "count": 88
+        },
+        {
+          "id": 1141,
+          "name": "水母",
+          "level": 42,
+          "count": 61
+        }
+      ],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": {
+        "id": "undersea_tunnel",
+        "name": "海底洞穴",
+        "entranceMapId": "iz_dun00",
+        "floorLabel": "1樓",
+        "order": 1
+      },
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
+      "worldPosition": {
+        "mapId": "iz_dun00",
+        "x1": 976,
+        "y1": 639,
+        "x2": 1070,
+        "y2": 673
+      },
+      "detail": "/ro/data/map-info/iz_dun00.json"
+    },
+    "iz_dun01": {
+      "id": "iz_dun01",
+      "name": "海底洞穴 2樓",
+      "totalMonsters": 192,
+      "monsterTypes": 8,
+      "normalMonsterCount": 192,
+      "normalMonsterTypes": 8,
+      "combatMonsterCount": 182,
+      "combatMonsterTypes": 7,
+      "resourceMonsterCount": 10,
+      "levelRange": {
+        "min": 34,
+        "max": 45
+      },
+      "fullLevelRange": {
+        "min": 34,
+        "max": 48
+      },
+      "primaryMonsters": [
+        {
+          "id": 1066,
+          "name": "螃蟹",
+          "level": 45,
+          "count": 60
+        },
+        {
+          "id": 1070,
+          "name": "庫克雷",
+          "level": 42,
+          "count": 50
+        },
+        {
+          "id": 1068,
+          "name": "海葵",
+          "level": 34,
+          "count": 30
+        }
+      ],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": {
+        "id": "undersea_tunnel",
+        "name": "海底洞穴",
+        "entranceMapId": "iz_dun00",
+        "floorLabel": "2樓",
+        "order": 2
+      },
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
+      "worldPosition": {
+        "mapId": "iz_dun01",
+        "x1": 976,
+        "y1": 639,
+        "x2": 1070,
+        "y2": 673
+      },
+      "detail": "/ro/data/map-info/iz_dun01.json"
+    },
+    "iz_dun02": {
+      "id": "iz_dun02",
+      "name": "海底洞穴 3樓",
+      "totalMonsters": 198,
+      "monsterTypes": 7,
+      "normalMonsterCount": 198,
+      "normalMonsterTypes": 7,
+      "combatMonsterCount": 183,
+      "combatMonsterTypes": 6,
+      "resourceMonsterCount": 15,
+      "levelRange": {
+        "min": 34,
+        "max": 53
+      },
+      "fullLevelRange": {
+        "min": 34,
+        "max": 60
+      },
+      "primaryMonsters": [
+        {
+          "id": 1067,
+          "name": "卡那多斯",
+          "level": 48,
+          "count": 60
+        },
+        {
+          "id": 1068,
+          "name": "海葵",
+          "level": 34,
+          "count": 40
+        },
+        {
+          "id": 1144,
+          "name": "烏賊",
+          "level": 47,
+          "count": 40
+        },
+        {
+          "id": 1044,
+          "name": "人魚",
+          "level": 53,
+          "count": 40
+        }
+      ],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": {
+        "id": "undersea_tunnel",
+        "name": "海底洞穴",
+        "entranceMapId": "iz_dun00",
+        "floorLabel": "3樓",
+        "order": 3
+      },
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
+      "worldPosition": {
+        "mapId": "iz_dun02",
+        "x1": 976,
+        "y1": 639,
+        "x2": 1070,
+        "y2": 673
+      },
+      "detail": "/ro/data/map-info/iz_dun02.json"
+    },
+    "iz_dun03": {
+      "id": "iz_dun03",
+      "name": "海底洞穴 4樓",
+      "totalMonsters": 180,
+      "monsterTypes": 7,
+      "normalMonsterCount": 180,
+      "normalMonsterTypes": 7,
+      "combatMonsterCount": 180,
+      "combatMonsterTypes": 7,
+      "resourceMonsterCount": 0,
+      "levelRange": {
+        "min": 34,
+        "max": 57
+      },
+      "fullLevelRange": {
+        "min": 34,
+        "max": 60
+      },
+      "primaryMonsters": [
+        {
+          "id": 1158,
+          "name": "劍魚",
+          "level": 52,
+          "count": 45
+        },
+        {
+          "id": 1045,
+          "name": "馬克",
+          "level": 56,
+          "count": 40
+        },
+        {
+          "id": 1069,
+          "name": "異變魚",
+          "level": 57,
+          "count": 40
+        },
+        {
+          "id": 1068,
+          "name": "海葵",
+          "level": 34,
+          "count": 30
+        },
+        {
+          "id": 1142,
+          "name": "氣泡蟲",
+          "level": 51,
+          "count": 20
+        }
+      ],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": {
+        "id": "undersea_tunnel",
+        "name": "海底洞穴",
+        "entranceMapId": "iz_dun00",
+        "floorLabel": "4樓",
+        "order": 4
+      },
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
+      "worldPosition": {
+        "mapId": "iz_dun03",
+        "x1": 976,
+        "y1": 639,
+        "x2": 1070,
+        "y2": 673
+      },
+      "detail": "/ro/data/map-info/iz_dun03.json"
+    },
+    "iz_dun04": {
+      "id": "iz_dun04",
+      "name": "海底洞穴 5樓",
+      "totalMonsters": 164,
+      "monsterTypes": 7,
+      "normalMonsterCount": 164,
+      "normalMonsterTypes": 7,
+      "combatMonsterCount": 164,
+      "combatMonsterTypes": 7,
+      "resourceMonsterCount": 0,
+      "levelRange": {
+        "min": 34,
+        "max": 61
+      },
+      "fullLevelRange": {
+        "min": 34,
+        "max": 61
+      },
+      "primaryMonsters": [
+        {
+          "id": 1264,
+          "name": "人魚士兵",
+          "level": 60,
+          "count": 61
+        },
+        {
+          "id": 1065,
+          "name": "海神",
+          "level": 61,
+          "count": 58
+        },
+        {
+          "id": 1068,
+          "name": "海葵",
+          "level": 34,
+          "count": 18
+        }
+      ],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": {
+        "id": "undersea_tunnel",
+        "name": "海底洞穴",
+        "entranceMapId": "iz_dun00",
+        "floorLabel": "5樓",
+        "order": 5
+      },
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
+      "worldPosition": {
+        "mapId": "iz_dun04",
+        "x1": 976,
+        "y1": 639,
+        "x2": 1070,
+        "y2": 673
+      },
+      "detail": "/ro/data/map-info/iz_dun04.json"
+    },
+    "iz_dun05": {
+      "id": "iz_dun05",
+      "name": "海底洞穴 6樓",
+      "totalMonsters": 167,
+      "monsterTypes": 5,
+      "normalMonsterCount": 142,
+      "normalMonsterTypes": 4,
+      "combatMonsterCount": 142,
+      "combatMonsterTypes": 4,
+      "resourceMonsterCount": 0,
+      "levelRange": {
+        "min": 110,
+        "max": 115
+      },
+      "fullLevelRange": {
+        "min": 110,
+        "max": 115
+      },
+      "primaryMonsters": [
+        {
+          "id": 2204,
+          "name": "賽杜拉",
+          "level": 110,
+          "count": 60
+        },
+        {
+          "id": 2201,
+          "name": "深海電鰻",
+          "level": 113,
+          "count": 50
+        },
+        {
+          "id": 2203,
+          "name": "醬缸章魚",
+          "level": 115,
+          "count": 30
+        }
+      ],
+      "bossCount": 25,
+      "bossTypes": 1,
+      "hasMvp": false,
+      "dungeon": {
+        "id": "undersea_tunnel",
+        "name": "海底洞穴",
+        "entranceMapId": "iz_dun00",
+        "floorLabel": "6樓",
+        "order": 6
+      },
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
+      "worldPosition": {
+        "mapId": "iz_dun05",
+        "x1": 976,
+        "y1": 639,
+        "x2": 1070,
+        "y2": 673
+      },
+      "detail": "/ro/data/map-info/iz_dun05.json"
     },
     "iz_int": {
       "id": "iz_int",
       "name": "介紹地圖",
       "totalMonsters": 0,
       "monsterTypes": 0,
+      "normalMonsterCount": 0,
+      "normalMonsterTypes": 0,
+      "combatMonsterCount": 0,
+      "combatMonsterTypes": 0,
+      "resourceMonsterCount": 0,
+      "levelRange": null,
+      "fullLevelRange": null,
+      "primaryMonsters": [],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": null,
       "detail": "/ro/data/map-info/iz_int.json"
     },
     "iz_int01": {
@@ -144,6 +6130,23 @@
       "name": "介紹地圖",
       "totalMonsters": 0,
       "monsterTypes": 0,
+      "normalMonsterCount": 0,
+      "normalMonsterTypes": 0,
+      "combatMonsterCount": 0,
+      "combatMonsterTypes": 0,
+      "resourceMonsterCount": 0,
+      "levelRange": null,
+      "fullLevelRange": null,
+      "primaryMonsters": [],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": null,
       "detail": "/ro/data/map-info/iz_int01.json"
     },
     "iz_int02": {
@@ -151,6 +6154,23 @@
       "name": "介紹地圖",
       "totalMonsters": 0,
       "monsterTypes": 0,
+      "normalMonsterCount": 0,
+      "normalMonsterTypes": 0,
+      "combatMonsterCount": 0,
+      "combatMonsterTypes": 0,
+      "resourceMonsterCount": 0,
+      "levelRange": null,
+      "fullLevelRange": null,
+      "primaryMonsters": [],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": null,
       "detail": "/ro/data/map-info/iz_int02.json"
     },
     "iz_int03": {
@@ -158,6 +6178,23 @@
       "name": "介紹地圖",
       "totalMonsters": 0,
       "monsterTypes": 0,
+      "normalMonsterCount": 0,
+      "normalMonsterTypes": 0,
+      "combatMonsterCount": 0,
+      "combatMonsterTypes": 0,
+      "resourceMonsterCount": 0,
+      "levelRange": null,
+      "fullLevelRange": null,
+      "primaryMonsters": [],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": null,
       "detail": "/ro/data/map-info/iz_int03.json"
     },
     "iz_int04": {
@@ -165,6 +6202,23 @@
       "name": "介紹地圖",
       "totalMonsters": 0,
       "monsterTypes": 0,
+      "normalMonsterCount": 0,
+      "normalMonsterTypes": 0,
+      "combatMonsterCount": 0,
+      "combatMonsterTypes": 0,
+      "resourceMonsterCount": 0,
+      "levelRange": null,
+      "fullLevelRange": null,
+      "primaryMonsters": [],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": null,
       "detail": "/ro/data/map-info/iz_int04.json"
     },
     "izlude": {
@@ -172,6 +6226,29 @@
       "name": "衛星都市 依斯魯得島",
       "totalMonsters": 0,
       "monsterTypes": 0,
+      "normalMonsterCount": 0,
+      "normalMonsterTypes": 0,
+      "combatMonsterCount": 0,
+      "combatMonsterTypes": 0,
+      "resourceMonsterCount": 0,
+      "levelRange": null,
+      "fullLevelRange": null,
+      "primaryMonsters": [],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": {
+        "mapId": "izlude",
+        "x1": 871,
+        "y1": 644,
+        "x2": 902,
+        "y2": 676
+      },
       "detail": "/ro/data/map-info/izlude.json"
     },
     "izlude_a": {
@@ -179,6 +6256,23 @@
       "name": "衛星都市 依斯魯得島",
       "totalMonsters": 0,
       "monsterTypes": 0,
+      "normalMonsterCount": 0,
+      "normalMonsterTypes": 0,
+      "combatMonsterCount": 0,
+      "combatMonsterTypes": 0,
+      "resourceMonsterCount": 0,
+      "levelRange": null,
+      "fullLevelRange": null,
+      "primaryMonsters": [],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": null,
       "detail": "/ro/data/map-info/izlude_a.json"
     },
     "izlude_b": {
@@ -186,6 +6280,23 @@
       "name": "衛星都市 依斯魯得島",
       "totalMonsters": 0,
       "monsterTypes": 0,
+      "normalMonsterCount": 0,
+      "normalMonsterTypes": 0,
+      "combatMonsterCount": 0,
+      "combatMonsterTypes": 0,
+      "resourceMonsterCount": 0,
+      "levelRange": null,
+      "fullLevelRange": null,
+      "primaryMonsters": [],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": null,
       "detail": "/ro/data/map-info/izlude_b.json"
     },
     "izlude_c": {
@@ -193,6 +6304,23 @@
       "name": "衛星都市 依斯魯得島",
       "totalMonsters": 0,
       "monsterTypes": 0,
+      "normalMonsterCount": 0,
+      "normalMonsterTypes": 0,
+      "combatMonsterCount": 0,
+      "combatMonsterTypes": 0,
+      "resourceMonsterCount": 0,
+      "levelRange": null,
+      "fullLevelRange": null,
+      "primaryMonsters": [],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": null,
       "detail": "/ro/data/map-info/izlude_c.json"
     },
     "izlude_d": {
@@ -200,6 +6328,23 @@
       "name": "衛星都市 依斯魯得島",
       "totalMonsters": 0,
       "monsterTypes": 0,
+      "normalMonsterCount": 0,
+      "normalMonsterTypes": 0,
+      "combatMonsterCount": 0,
+      "combatMonsterTypes": 0,
+      "resourceMonsterCount": 0,
+      "levelRange": null,
+      "fullLevelRange": null,
+      "primaryMonsters": [],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": null,
       "detail": "/ro/data/map-info/izlude_d.json"
     },
     "izlude_in": {
@@ -207,6 +6352,23 @@
       "name": "依斯魯得島內部",
       "totalMonsters": 0,
       "monsterTypes": 0,
+      "normalMonsterCount": 0,
+      "normalMonsterTypes": 0,
+      "combatMonsterCount": 0,
+      "combatMonsterTypes": 0,
+      "resourceMonsterCount": 0,
+      "levelRange": null,
+      "fullLevelRange": null,
+      "primaryMonsters": [],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": null,
       "detail": "/ro/data/map-info/izlude_in.json"
     },
     "mjolnir_06": {
@@ -214,6 +6376,54 @@
       "name": "妙勒妙勒尼山脈南區",
       "totalMonsters": 213,
       "monsterTypes": 6,
+      "normalMonsterCount": 213,
+      "normalMonsterTypes": 6,
+      "combatMonsterCount": 203,
+      "combatMonsterTypes": 4,
+      "resourceMonsterCount": 10,
+      "levelRange": {
+        "min": 23,
+        "max": 29
+      },
+      "fullLevelRange": {
+        "min": 23,
+        "max": 29
+      },
+      "primaryMonsters": [
+        {
+          "id": 1077,
+          "name": "毒魔菇",
+          "level": 26,
+          "count": 100
+        },
+        {
+          "id": 1056,
+          "name": "狸貓",
+          "level": 29,
+          "count": 70
+        },
+        {
+          "id": 1018,
+          "name": "克瑞米",
+          "level": 23,
+          "count": 30
+        }
+      ],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
+      "worldPosition": {
+        "mapId": "mjolnir_06",
+        "x1": 636,
+        "y1": 469,
+        "x2": 694,
+        "y2": 527
+      },
       "detail": "/ro/data/map-info/mjolnir_06.json"
     },
     "mjolnir_07": {
@@ -221,6 +6431,54 @@
       "name": "妙勒妙勒尼山脈南區",
       "totalMonsters": 243,
       "monsterTypes": 7,
+      "normalMonsterCount": 243,
+      "normalMonsterTypes": 7,
+      "combatMonsterCount": 232,
+      "combatMonsterTypes": 4,
+      "resourceMonsterCount": 11,
+      "levelRange": {
+        "min": 55,
+        "max": 59
+      },
+      "fullLevelRange": {
+        "min": 55,
+        "max": 59
+      },
+      "primaryMonsters": [
+        {
+          "id": 1166,
+          "name": "野豬",
+          "level": 59,
+          "count": 161
+        },
+        {
+          "id": 1494,
+          "name": "巨象甲蟲",
+          "level": 55,
+          "count": 34
+        },
+        {
+          "id": 1118,
+          "name": "噬人花",
+          "level": 59,
+          "count": 34
+        }
+      ],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
+      "worldPosition": {
+        "mapId": "mjolnir_07",
+        "x1": 695,
+        "y1": 469,
+        "x2": 752,
+        "y2": 527
+      },
       "detail": "/ro/data/map-info/mjolnir_07.json"
     },
     "mjolnir_09": {
@@ -228,6 +6486,54 @@
       "name": "妙勒妙勒尼山脈 南邊山麓",
       "totalMonsters": 240,
       "monsterTypes": 5,
+      "normalMonsterCount": 240,
+      "normalMonsterTypes": 5,
+      "combatMonsterCount": 229,
+      "combatMonsterTypes": 4,
+      "resourceMonsterCount": 11,
+      "levelRange": {
+        "min": 8,
+        "max": 14
+      },
+      "fullLevelRange": {
+        "min": 8,
+        "max": 14
+      },
+      "primaryMonsters": [
+        {
+          "id": 1167,
+          "name": "小野豬",
+          "level": 14,
+          "count": 159
+        },
+        {
+          "id": 1010,
+          "name": "樹精",
+          "level": 8,
+          "count": 34
+        },
+        {
+          "id": 1004,
+          "name": "蜂兵",
+          "level": 11,
+          "count": 34
+        }
+      ],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
+      "worldPosition": {
+        "mapId": "mjolnir_09",
+        "x1": 753,
+        "y1": 528,
+        "x2": 811,
+        "y2": 586
+      },
       "detail": "/ro/data/map-info/mjolnir_09.json"
     },
     "moc_fild01": {
@@ -235,6 +6541,48 @@
       "name": "蘇克拉特沙漠",
       "totalMonsters": 339,
       "monsterTypes": 5,
+      "normalMonsterCount": 339,
+      "normalMonsterTypes": 5,
+      "combatMonsterCount": 329,
+      "combatMonsterTypes": 4,
+      "resourceMonsterCount": 10,
+      "levelRange": {
+        "min": 23,
+        "max": 25
+      },
+      "fullLevelRange": {
+        "min": 7,
+        "max": 25
+      },
+      "primaryMonsters": [
+        {
+          "id": 1055,
+          "name": "摩卡",
+          "level": 23,
+          "count": 202
+        },
+        {
+          "id": 1019,
+          "name": "大嘴鳥",
+          "level": 25,
+          "count": 93
+        }
+      ],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
+      "worldPosition": {
+        "mapId": "moc_fild01",
+        "x1": 812,
+        "y1": 702,
+        "x2": 870,
+        "y2": 760
+      },
       "detail": "/ro/data/map-info/moc_fild01.json"
     },
     "moc_fild02": {
@@ -242,6 +6590,48 @@
       "name": "蘇克拉特沙漠",
       "totalMonsters": 238,
       "monsterTypes": 6,
+      "normalMonsterCount": 238,
+      "normalMonsterTypes": 6,
+      "combatMonsterCount": 224,
+      "combatMonsterTypes": 4,
+      "resourceMonsterCount": 14,
+      "levelRange": {
+        "min": 23,
+        "max": 25
+      },
+      "fullLevelRange": {
+        "min": 7,
+        "max": 25
+      },
+      "primaryMonsters": [
+        {
+          "id": 1019,
+          "name": "大嘴鳥",
+          "level": 25,
+          "count": 153
+        },
+        {
+          "id": 1055,
+          "name": "摩卡",
+          "level": 23,
+          "count": 58
+        }
+      ],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
+      "worldPosition": {
+        "mapId": "moc_fild02",
+        "x1": 858,
+        "y1": 761,
+        "x2": 906,
+        "y2": 809
+      },
       "detail": "/ro/data/map-info/moc_fild02.json"
     },
     "moc_fild11": {
@@ -249,6 +6639,54 @@
       "name": "蘇克拉特沙漠 11",
       "totalMonsters": 318,
       "monsterTypes": 4,
+      "normalMonsterCount": 318,
+      "normalMonsterTypes": 4,
+      "combatMonsterCount": 318,
+      "combatMonsterTypes": 4,
+      "resourceMonsterCount": 0,
+      "levelRange": {
+        "min": 12,
+        "max": 16
+      },
+      "fullLevelRange": {
+        "min": 12,
+        "max": 16
+      },
+      "primaryMonsters": [
+        {
+          "id": 1009,
+          "name": "禿鷹",
+          "level": 12,
+          "count": 137
+        },
+        {
+          "id": 1107,
+          "name": "沙漠幼狼",
+          "level": 14,
+          "count": 137
+        },
+        {
+          "id": 1001,
+          "name": "蠍子",
+          "level": 16,
+          "count": 41
+        }
+      ],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
+      "worldPosition": {
+        "mapId": "moc_fild11",
+        "x1": 660,
+        "y1": 894,
+        "x2": 717,
+        "y2": 950
+      },
       "detail": "/ro/data/map-info/moc_fild11.json"
     },
     "moc_fild19": {
@@ -256,13 +6694,90 @@
       "name": "蘇克拉特沙漠",
       "totalMonsters": 0,
       "monsterTypes": 0,
+      "normalMonsterCount": 0,
+      "normalMonsterTypes": 0,
+      "combatMonsterCount": 0,
+      "combatMonsterTypes": 0,
+      "resourceMonsterCount": 0,
+      "levelRange": null,
+      "fullLevelRange": null,
+      "primaryMonsters": [],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": {
+        "mapId": "moc_fild19",
+        "x1": 567,
+        "y1": 849,
+        "x2": 602,
+        "y2": 881
+      },
       "detail": "/ro/data/map-info/moc_fild19.json"
+    },
+    "moc_fild20": {
+      "id": "moc_fild20",
+      "name": "蘇克拉特沙漠次元裂縫",
+      "totalMonsters": 5,
+      "monsterTypes": 5,
+      "normalMonsterCount": 1,
+      "normalMonsterTypes": 1,
+      "combatMonsterCount": 1,
+      "combatMonsterTypes": 1,
+      "resourceMonsterCount": 0,
+      "levelRange": {
+        "min": 132,
+        "max": 132
+      },
+      "fullLevelRange": {
+        "min": 132,
+        "max": 132
+      },
+      "primaryMonsters": [
+        {
+          "id": 2744,
+          "name": "迅捷夢羅克門徒",
+          "level": 132,
+          "count": 1
+        }
+      ],
+      "bossCount": 4,
+      "bossTypes": 4,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": null,
+      "detail": "/ro/data/map-info/moc_fild20.json"
     },
     "moc_para01": {
       "id": "moc_para01",
       "name": "夢羅克伊甸園內部",
       "totalMonsters": 0,
       "monsterTypes": 0,
+      "normalMonsterCount": 0,
+      "normalMonsterTypes": 0,
+      "combatMonsterCount": 0,
+      "combatMonsterTypes": 0,
+      "resourceMonsterCount": 0,
+      "levelRange": null,
+      "fullLevelRange": null,
+      "primaryMonsters": [],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": null,
       "detail": "/ro/data/map-info/moc_para01.json"
     },
     "moc_pryd01": {
@@ -270,13 +6785,395 @@
       "name": "夢羅克金字塔 1樓",
       "totalMonsters": 100,
       "monsterTypes": 2,
+      "normalMonsterCount": 100,
+      "normalMonsterTypes": 2,
+      "combatMonsterCount": 100,
+      "combatMonsterTypes": 2,
+      "resourceMonsterCount": 0,
+      "levelRange": {
+        "min": 24,
+        "max": 30
+      },
+      "fullLevelRange": {
+        "min": 24,
+        "max": 30
+      },
+      "primaryMonsters": [
+        {
+          "id": 1005,
+          "name": "吸血蝙蝠",
+          "level": 24,
+          "count": 72
+        },
+        {
+          "id": 1031,
+          "name": "波波利",
+          "level": 30,
+          "count": 28
+        }
+      ],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": {
+        "id": "morocc_pyramid",
+        "name": "夢羅克金字塔",
+        "entranceMapId": "moc_pryd01",
+        "floorLabel": "1樓",
+        "order": 1
+      },
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
+      "worldPosition": {
+        "mapId": "moc_pryd01",
+        "x1": 449,
+        "y1": 759,
+        "x2": 538,
+        "y2": 793
+      },
       "detail": "/ro/data/map-info/moc_pryd01.json"
+    },
+    "moc_pryd02": {
+      "id": "moc_pryd02",
+      "name": "夢羅克金字塔 2樓",
+      "totalMonsters": 140,
+      "monsterTypes": 7,
+      "normalMonsterCount": 140,
+      "normalMonsterTypes": 7,
+      "combatMonsterCount": 140,
+      "combatMonsterTypes": 7,
+      "resourceMonsterCount": 0,
+      "levelRange": {
+        "min": 30,
+        "max": 55
+      },
+      "fullLevelRange": {
+        "min": 30,
+        "max": 59
+      },
+      "primaryMonsters": [
+        {
+          "id": 1028,
+          "name": "邪骸士兵",
+          "level": 34,
+          "count": 31
+        },
+        {
+          "id": 1016,
+          "name": "邪骸弓箭手",
+          "level": 50,
+          "count": 31
+        },
+        {
+          "id": 1041,
+          "name": "木乃伊",
+          "level": 55,
+          "count": 31
+        },
+        {
+          "id": 1031,
+          "name": "波波利",
+          "level": 30,
+          "count": 20
+        },
+        {
+          "id": 1111,
+          "name": "紅蝙蝠",
+          "level": 47,
+          "count": 20
+        }
+      ],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": {
+        "id": "morocc_pyramid",
+        "name": "夢羅克金字塔",
+        "entranceMapId": "moc_pryd01",
+        "floorLabel": "2樓",
+        "order": 2
+      },
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
+      "worldPosition": {
+        "mapId": "moc_pryd02",
+        "x1": 449,
+        "y1": 759,
+        "x2": 538,
+        "y2": 793
+      },
+      "detail": "/ro/data/map-info/moc_pryd02.json"
+    },
+    "moc_pryd03": {
+      "id": "moc_pryd03",
+      "name": "夢羅克金字塔 3樓",
+      "totalMonsters": 112,
+      "monsterTypes": 6,
+      "normalMonsterCount": 112,
+      "normalMonsterTypes": 6,
+      "combatMonsterCount": 112,
+      "combatMonsterTypes": 6,
+      "resourceMonsterCount": 0,
+      "levelRange": {
+        "min": 52,
+        "max": 55
+      },
+      "fullLevelRange": {
+        "min": 47,
+        "max": 58
+      },
+      "primaryMonsters": [
+        {
+          "id": 1041,
+          "name": "木乃伊",
+          "level": 55,
+          "count": 70
+        },
+        {
+          "id": 1032,
+          "name": "畢萊特",
+          "level": 52,
+          "count": 20
+        }
+      ],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": {
+        "id": "morocc_pyramid",
+        "name": "夢羅克金字塔",
+        "entranceMapId": "moc_pryd01",
+        "floorLabel": "3樓",
+        "order": 3
+      },
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
+      "worldPosition": {
+        "mapId": "moc_pryd03",
+        "x1": 449,
+        "y1": 759,
+        "x2": 538,
+        "y2": 793
+      },
+      "detail": "/ro/data/map-info/moc_pryd03.json"
+    },
+    "moc_pryd04": {
+      "id": "moc_pryd04",
+      "name": "夢羅克金字塔 4樓",
+      "totalMonsters": 140,
+      "monsterTypes": 6,
+      "normalMonsterCount": 140,
+      "normalMonsterTypes": 6,
+      "combatMonsterCount": 140,
+      "combatMonsterTypes": 6,
+      "resourceMonsterCount": 0,
+      "levelRange": {
+        "min": 55,
+        "max": 59
+      },
+      "fullLevelRange": {
+        "min": 55,
+        "max": 114
+      },
+      "primaryMonsters": [
+        {
+          "id": 1029,
+          "name": "蛇女伊絲",
+          "level": 59,
+          "count": 62
+        },
+        {
+          "id": 1041,
+          "name": "木乃伊",
+          "level": 55,
+          "count": 31
+        },
+        {
+          "id": 1146,
+          "name": "黑狐",
+          "level": 58,
+          "count": 24
+        },
+        {
+          "id": 1191,
+          "name": "邪惡箱",
+          "level": 56,
+          "count": 18
+        }
+      ],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": {
+        "id": "morocc_pyramid",
+        "name": "夢羅克金字塔",
+        "entranceMapId": "moc_pryd01",
+        "floorLabel": "4樓",
+        "order": 4
+      },
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
+      "worldPosition": {
+        "mapId": "moc_pryd04",
+        "x1": 449,
+        "y1": 759,
+        "x2": 538,
+        "y2": 793
+      },
+      "detail": "/ro/data/map-info/moc_pryd04.json"
+    },
+    "moc_pryd05": {
+      "id": "moc_pryd05",
+      "name": "夢羅克金字塔 地下1樓",
+      "totalMonsters": 158,
+      "monsterTypes": 4,
+      "normalMonsterCount": 158,
+      "normalMonsterTypes": 4,
+      "combatMonsterCount": 158,
+      "combatMonsterTypes": 4,
+      "resourceMonsterCount": 0,
+      "levelRange": {
+        "min": 52,
+        "max": 58
+      },
+      "fullLevelRange": {
+        "min": 52,
+        "max": 58
+      },
+      "primaryMonsters": [
+        {
+          "id": 1149,
+          "name": "米洛斯",
+          "level": 58,
+          "count": 78
+        },
+        {
+          "id": 1032,
+          "name": "畢萊特",
+          "level": 52,
+          "count": 65
+        }
+      ],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": {
+        "id": "morocc_pyramid",
+        "name": "夢羅克金字塔",
+        "entranceMapId": "moc_pryd01",
+        "floorLabel": "地下1樓",
+        "order": 5
+      },
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
+      "worldPosition": {
+        "mapId": "moc_pryd05",
+        "x1": 449,
+        "y1": 759,
+        "x2": 538,
+        "y2": 793
+      },
+      "detail": "/ro/data/map-info/moc_pryd05.json"
+    },
+    "moc_pryd06": {
+      "id": "moc_pryd06",
+      "name": "夢羅克金字塔 地下2樓",
+      "totalMonsters": 118,
+      "monsterTypes": 5,
+      "normalMonsterCount": 118,
+      "normalMonsterTypes": 5,
+      "combatMonsterCount": 118,
+      "combatMonsterTypes": 5,
+      "resourceMonsterCount": 0,
+      "levelRange": {
+        "min": 52,
+        "max": 114
+      },
+      "fullLevelRange": {
+        "min": 52,
+        "max": 114
+      },
+      "primaryMonsters": [
+        {
+          "id": 1032,
+          "name": "畢萊特",
+          "level": 52,
+          "count": 35
+        },
+        {
+          "id": 1191,
+          "name": "邪惡箱",
+          "level": 56,
+          "count": 35
+        },
+        {
+          "id": 1194,
+          "name": "捲甲蟲",
+          "level": 107,
+          "count": 23
+        },
+        {
+          "id": 1297,
+          "name": "狂暴木乃伊",
+          "level": 114,
+          "count": 23
+        }
+      ],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": {
+        "id": "morocc_pyramid",
+        "name": "夢羅克金字塔",
+        "entranceMapId": "moc_pryd01",
+        "floorLabel": "地下2樓",
+        "order": 6
+      },
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
+      "worldPosition": {
+        "mapId": "moc_pryd06",
+        "x1": 449,
+        "y1": 759,
+        "x2": 538,
+        "y2": 793
+      },
+      "detail": "/ro/data/map-info/moc_pryd06.json"
     },
     "moc_prydb1": {
       "id": "moc_prydb1",
       "name": "盜賊公會",
       "totalMonsters": 0,
       "monsterTypes": 0,
+      "normalMonsterCount": 0,
+      "normalMonsterTypes": 0,
+      "combatMonsterCount": 0,
+      "combatMonsterTypes": 0,
+      "resourceMonsterCount": 0,
+      "levelRange": null,
+      "fullLevelRange": null,
+      "primaryMonsters": [],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": null,
       "detail": "/ro/data/map-info/moc_prydb1.json"
     },
     "moc_ruins": {
@@ -284,6 +7181,29 @@
       "name": "沙漠之都 夢羅克",
       "totalMonsters": 0,
       "monsterTypes": 0,
+      "normalMonsterCount": 0,
+      "normalMonsterTypes": 0,
+      "combatMonsterCount": 0,
+      "combatMonsterTypes": 0,
+      "resourceMonsterCount": 0,
+      "levelRange": null,
+      "fullLevelRange": null,
+      "primaryMonsters": [],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": {
+        "mapId": "moc_ruins",
+        "x1": 567,
+        "y1": 817,
+        "x2": 602,
+        "y2": 848
+      },
       "detail": "/ro/data/map-info/moc_ruins.json"
     },
     "morocc": {
@@ -291,6 +7211,29 @@
       "name": "沙漠之都 夢羅克",
       "totalMonsters": 0,
       "monsterTypes": 0,
+      "normalMonsterCount": 0,
+      "normalMonsterTypes": 0,
+      "combatMonsterCount": 0,
+      "combatMonsterTypes": 0,
+      "resourceMonsterCount": 0,
+      "levelRange": null,
+      "fullLevelRange": null,
+      "primaryMonsters": [],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": {
+        "mapId": "morocc",
+        "x1": 606,
+        "y1": 845,
+        "x2": 655,
+        "y2": 893
+      },
       "detail": "/ro/data/map-info/morocc.json"
     },
     "new_1-3": {
@@ -298,6 +7241,36 @@
       "name": "新手修練場",
       "totalMonsters": 32,
       "monsterTypes": 2,
+      "normalMonsterCount": 32,
+      "normalMonsterTypes": 2,
+      "combatMonsterCount": 32,
+      "combatMonsterTypes": 2,
+      "resourceMonsterCount": 0,
+      "levelRange": {
+        "min": 1,
+        "max": 1
+      },
+      "fullLevelRange": {
+        "min": 1,
+        "max": 1
+      },
+      "primaryMonsters": [
+        {
+          "id": 2398,
+          "name": "小波利",
+          "level": 1,
+          "count": 30
+        }
+      ],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": null,
       "detail": "/ro/data/map-info/new_1-3.json"
     },
     "pay_arche": {
@@ -305,6 +7278,29 @@
       "name": "斐揚 弓箭手村",
       "totalMonsters": 0,
       "monsterTypes": 0,
+      "normalMonsterCount": 0,
+      "normalMonsterTypes": 0,
+      "combatMonsterCount": 0,
+      "combatMonsterTypes": 0,
+      "resourceMonsterCount": 0,
+      "levelRange": null,
+      "fullLevelRange": null,
+      "primaryMonsters": [],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": {
+        "mapId": "pay_arche",
+        "x1": 985,
+        "y1": 694,
+        "x2": 1030,
+        "y2": 745
+      },
       "detail": "/ro/data/map-info/pay_arche.json"
     },
     "pay_dun00": {
@@ -312,13 +7308,377 @@
       "name": "斐揚洞穴 1樓",
       "totalMonsters": 125,
       "monsterTypes": 7,
+      "normalMonsterCount": 125,
+      "normalMonsterTypes": 7,
+      "combatMonsterCount": 107,
+      "combatMonsterTypes": 5,
+      "resourceMonsterCount": 18,
+      "levelRange": {
+        "min": 17,
+        "max": 30
+      },
+      "fullLevelRange": {
+        "min": 17,
+        "max": 30
+      },
+      "primaryMonsters": [
+        {
+          "id": 1015,
+          "name": "殭屍",
+          "level": 17,
+          "count": 40
+        },
+        {
+          "id": 1076,
+          "name": "骷髏",
+          "level": 27,
+          "count": 35
+        },
+        {
+          "id": 1005,
+          "name": "吸血蝙蝠",
+          "level": 24,
+          "count": 15
+        },
+        {
+          "id": 1031,
+          "name": "波波利",
+          "level": 30,
+          "count": 15
+        }
+      ],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": {
+        "id": "payon_cave",
+        "name": "斐揚洞穴",
+        "entranceMapId": "pay_dun00",
+        "floorLabel": "1樓",
+        "order": 1
+      },
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
+      "worldPosition": {
+        "mapId": "pay_dun00",
+        "x1": 1065,
+        "y1": 692,
+        "x2": 1143,
+        "y2": 726
+      },
       "detail": "/ro/data/map-info/pay_dun00.json"
+    },
+    "pay_dun01": {
+      "id": "pay_dun01",
+      "name": "斐揚洞穴 2樓",
+      "totalMonsters": 125,
+      "monsterTypes": 7,
+      "normalMonsterCount": 125,
+      "normalMonsterTypes": 7,
+      "combatMonsterCount": 108,
+      "combatMonsterTypes": 5,
+      "resourceMonsterCount": 17,
+      "levelRange": {
+        "min": 34,
+        "max": 53
+      },
+      "fullLevelRange": {
+        "min": 34,
+        "max": 53
+      },
+      "primaryMonsters": [
+        {
+          "id": 1028,
+          "name": "邪骸士兵",
+          "level": 34,
+          "count": 53
+        },
+        {
+          "id": 1016,
+          "name": "邪骸弓箭手",
+          "level": 50,
+          "count": 32
+        },
+        {
+          "id": 1116,
+          "name": "轉轉蛋",
+          "level": 53,
+          "count": 16
+        }
+      ],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": {
+        "id": "payon_cave",
+        "name": "斐揚洞穴",
+        "entranceMapId": "pay_dun00",
+        "floorLabel": "2樓",
+        "order": 2
+      },
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
+      "worldPosition": {
+        "mapId": "pay_dun01",
+        "x1": 1065,
+        "y1": 692,
+        "x2": 1143,
+        "y2": 726
+      },
+      "detail": "/ro/data/map-info/pay_dun01.json"
+    },
+    "pay_dun02": {
+      "id": "pay_dun02",
+      "name": "斐揚洞穴 3樓",
+      "totalMonsters": 205,
+      "monsterTypes": 12,
+      "normalMonsterCount": 205,
+      "normalMonsterTypes": 12,
+      "combatMonsterCount": 183,
+      "combatMonsterTypes": 9,
+      "resourceMonsterCount": 22,
+      "levelRange": {
+        "min": 34,
+        "max": 59
+      },
+      "fullLevelRange": {
+        "min": 13,
+        "max": 72
+      },
+      "primaryMonsters": [
+        {
+          "id": 1028,
+          "name": "邪骸士兵",
+          "level": 34,
+          "count": 45
+        },
+        {
+          "id": 1026,
+          "name": "僵屍",
+          "level": 58,
+          "count": 40
+        },
+        {
+          "id": 1068,
+          "name": "海葵",
+          "level": 34,
+          "count": 31
+        },
+        {
+          "id": 1188,
+          "name": "妖道",
+          "level": 59,
+          "count": 30
+        },
+        {
+          "id": 1016,
+          "name": "邪骸弓箭手",
+          "level": 50,
+          "count": 20
+        }
+      ],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": {
+        "id": "payon_cave",
+        "name": "斐揚洞穴",
+        "entranceMapId": "pay_dun00",
+        "floorLabel": "3樓",
+        "order": 3
+      },
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
+      "worldPosition": {
+        "mapId": "pay_dun02",
+        "x1": 1065,
+        "y1": 692,
+        "x2": 1143,
+        "y2": 726
+      },
+      "detail": "/ro/data/map-info/pay_dun02.json"
+    },
+    "pay_dun03": {
+      "id": "pay_dun03",
+      "name": "斐揚洞穴 4樓",
+      "totalMonsters": 139,
+      "monsterTypes": 15,
+      "normalMonsterCount": 139,
+      "normalMonsterTypes": 15,
+      "combatMonsterCount": 115,
+      "combatMonsterTypes": 10,
+      "resourceMonsterCount": 24,
+      "levelRange": {
+        "min": 34,
+        "max": 64
+      },
+      "fullLevelRange": {
+        "min": 13,
+        "max": 72
+      },
+      "primaryMonsters": [
+        {
+          "id": 1170,
+          "name": "鬼女",
+          "level": 64,
+          "count": 70
+        },
+        {
+          "id": 1068,
+          "name": "海葵",
+          "level": 34,
+          "count": 17
+        }
+      ],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": {
+        "id": "payon_cave",
+        "name": "斐揚洞穴",
+        "entranceMapId": "pay_dun00",
+        "floorLabel": "4樓",
+        "order": 4
+      },
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
+      "worldPosition": {
+        "mapId": "pay_dun03",
+        "x1": 1065,
+        "y1": 692,
+        "x2": 1143,
+        "y2": 726
+      },
+      "detail": "/ro/data/map-info/pay_dun03.json"
+    },
+    "pay_dun04": {
+      "id": "pay_dun04",
+      "name": "斐揚洞穴 5樓",
+      "totalMonsters": 153,
+      "monsterTypes": 12,
+      "normalMonsterCount": 152,
+      "normalMonsterTypes": 11,
+      "combatMonsterCount": 134,
+      "combatMonsterTypes": 8,
+      "resourceMonsterCount": 18,
+      "levelRange": {
+        "min": 50,
+        "max": 72
+      },
+      "fullLevelRange": {
+        "min": 50,
+        "max": 141
+      },
+      "primaryMonsters": [
+        {
+          "id": 1110,
+          "name": "土人",
+          "level": 68,
+          "count": 40
+        },
+        {
+          "id": 1129,
+          "name": "鬼火",
+          "level": 66,
+          "count": 30
+        },
+        {
+          "id": 1180,
+          "name": "九尾狐",
+          "level": 72,
+          "count": 30
+        },
+        {
+          "id": 1016,
+          "name": "邪骸弓箭手",
+          "level": 50,
+          "count": 15
+        },
+        {
+          "id": 1277,
+          "name": "將軍魔碑",
+          "level": 55,
+          "count": 15
+        }
+      ],
+      "bossCount": 1,
+      "bossTypes": 1,
+      "hasMvp": false,
+      "dungeon": {
+        "id": "payon_cave",
+        "name": "斐揚洞穴",
+        "entranceMapId": "pay_dun00",
+        "floorLabel": "5樓",
+        "order": 5
+      },
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
+      "worldPosition": {
+        "mapId": "pay_dun04",
+        "x1": 1065,
+        "y1": 692,
+        "x2": 1143,
+        "y2": 726
+      },
+      "detail": "/ro/data/map-info/pay_dun04.json"
     },
     "pay_fild04": {
       "id": "pay_fild04",
       "name": "蘇克拉特沙漠",
       "totalMonsters": 222,
       "monsterTypes": 11,
+      "normalMonsterCount": 218,
+      "normalMonsterTypes": 7,
+      "combatMonsterCount": 212,
+      "combatMonsterTypes": 5,
+      "resourceMonsterCount": 6,
+      "levelRange": {
+        "min": 30,
+        "max": 37
+      },
+      "fullLevelRange": {
+        "min": 1,
+        "max": 37
+      },
+      "primaryMonsters": [
+        {
+          "id": 1031,
+          "name": "波波利",
+          "level": 30,
+          "count": 141
+        },
+        {
+          "id": 1242,
+          "name": "冰波利",
+          "level": 37,
+          "count": 32
+        }
+      ],
+      "bossCount": 4,
+      "bossTypes": 4,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
+      "worldPosition": {
+        "mapId": "pay_fild04",
+        "x1": 871,
+        "y1": 702,
+        "x2": 927,
+        "y2": 760
+      },
       "detail": "/ro/data/map-info/pay_fild04.json"
     },
     "pay_gld": {
@@ -326,6 +7686,23 @@
       "name": "青林湖",
       "totalMonsters": 0,
       "monsterTypes": 0,
+      "normalMonsterCount": 0,
+      "normalMonsterTypes": 0,
+      "combatMonsterCount": 0,
+      "combatMonsterTypes": 0,
+      "resourceMonsterCount": 0,
+      "levelRange": null,
+      "fullLevelRange": null,
+      "primaryMonsters": [],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": null,
       "detail": "/ro/data/map-info/pay_gld.json"
     },
     "payon": {
@@ -333,6 +7710,29 @@
       "name": "山岳之都 斐揚",
       "totalMonsters": 0,
       "monsterTypes": 0,
+      "normalMonsterCount": 0,
+      "normalMonsterTypes": 0,
+      "combatMonsterCount": 0,
+      "combatMonsterTypes": 0,
+      "resourceMonsterCount": 0,
+      "levelRange": null,
+      "fullLevelRange": null,
+      "primaryMonsters": [],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": {
+        "mapId": "payon",
+        "x1": 967,
+        "y1": 746,
+        "x2": 1013,
+        "y2": 803
+      },
       "detail": "/ro/data/map-info/payon.json"
     },
     "payon_in02": {
@@ -340,6 +7740,23 @@
       "name": "斐揚內部",
       "totalMonsters": 0,
       "monsterTypes": 0,
+      "normalMonsterCount": 0,
+      "normalMonsterTypes": 0,
+      "combatMonsterCount": 0,
+      "combatMonsterTypes": 0,
+      "resourceMonsterCount": 0,
+      "levelRange": null,
+      "fullLevelRange": null,
+      "primaryMonsters": [],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": null,
       "detail": "/ro/data/map-info/payon_in02.json"
     },
     "prontera": {
@@ -347,6 +7764,29 @@
       "name": "盧恩 米德加茲王國  首都普隆德拉",
       "totalMonsters": 0,
       "monsterTypes": 0,
+      "normalMonsterCount": 0,
+      "normalMonsterTypes": 0,
+      "combatMonsterCount": 0,
+      "combatMonsterTypes": 0,
+      "resourceMonsterCount": 0,
+      "levelRange": null,
+      "fullLevelRange": null,
+      "primaryMonsters": [],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": {
+        "mapId": "prontera",
+        "x1": 812,
+        "y1": 587,
+        "x2": 870,
+        "y2": 643
+      },
       "detail": "/ro/data/map-info/prontera.json"
     },
     "prt_church": {
@@ -354,6 +7794,23 @@
       "name": "普隆德拉教堂內部",
       "totalMonsters": 0,
       "monsterTypes": 0,
+      "normalMonsterCount": 0,
+      "normalMonsterTypes": 0,
+      "combatMonsterCount": 0,
+      "combatMonsterTypes": 0,
+      "resourceMonsterCount": 0,
+      "levelRange": null,
+      "fullLevelRange": null,
+      "primaryMonsters": [],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": false,
+      "unlocked": false,
+      "selectable": false,
+      "grindable": false,
+      "worldPosition": null,
       "detail": "/ro/data/map-info/prt_church.json"
     },
     "prt_fild00": {
@@ -361,6 +7818,48 @@
       "name": "普隆德拉原野",
       "totalMonsters": 268,
       "monsterTypes": 6,
+      "normalMonsterCount": 268,
+      "normalMonsterTypes": 6,
+      "combatMonsterCount": 262,
+      "combatMonsterTypes": 4,
+      "resourceMonsterCount": 6,
+      "levelRange": {
+        "min": 13,
+        "max": 19
+      },
+      "fullLevelRange": {
+        "min": 13,
+        "max": 19
+      },
+      "primaryMonsters": [
+        {
+          "id": 1012,
+          "name": "羅達蛙",
+          "level": 13,
+          "count": 169
+        },
+        {
+          "id": 1094,
+          "name": "蝸牛",
+          "level": 19,
+          "count": 65
+        }
+      ],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
+      "worldPosition": {
+        "mapId": "prt_fild00",
+        "x1": 695,
+        "y1": 528,
+        "x2": 752,
+        "y2": 586
+      },
       "detail": "/ro/data/map-info/prt_fild00.json"
     },
     "prt_fild05": {
@@ -368,6 +7867,54 @@
       "name": "普隆德拉原野",
       "totalMonsters": 292,
       "monsterTypes": 6,
+      "normalMonsterCount": 292,
+      "normalMonsterTypes": 6,
+      "combatMonsterCount": 285,
+      "combatMonsterTypes": 4,
+      "resourceMonsterCount": 7,
+      "levelRange": {
+        "min": 11,
+        "max": 21
+      },
+      "fullLevelRange": {
+        "min": 11,
+        "max": 21
+      },
+      "primaryMonsters": [
+        {
+          "id": 1004,
+          "name": "蜂兵",
+          "level": 11,
+          "count": 199
+        },
+        {
+          "id": 1048,
+          "name": "盜蟲卵",
+          "level": 20,
+          "count": 42
+        },
+        {
+          "id": 1051,
+          "name": "盜蟲",
+          "level": 21,
+          "count": 42
+        }
+      ],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
+      "worldPosition": {
+        "mapId": "prt_fild05",
+        "x1": 753,
+        "y1": 587,
+        "x2": 811,
+        "y2": 643
+      },
       "detail": "/ro/data/map-info/prt_fild05.json"
     },
     "prt_fild08": {
@@ -375,6 +7922,54 @@
       "name": "普隆德拉原野 08",
       "totalMonsters": 276,
       "monsterTypes": 10,
+      "normalMonsterCount": 276,
+      "normalMonsterTypes": 10,
+      "combatMonsterCount": 276,
+      "combatMonsterTypes": 10,
+      "resourceMonsterCount": 0,
+      "levelRange": {
+        "min": 1,
+        "max": 6
+      },
+      "fullLevelRange": {
+        "min": 1,
+        "max": 6
+      },
+      "primaryMonsters": [
+        {
+          "id": 1002,
+          "name": "波利",
+          "level": 1,
+          "count": 87
+        },
+        {
+          "id": 1007,
+          "name": "綠棉蟲",
+          "level": 6,
+          "count": 77
+        },
+        {
+          "id": 1063,
+          "name": "瘋兔",
+          "level": 3,
+          "count": 67
+        }
+      ],
+      "bossCount": 0,
+      "bossTypes": 0,
+      "hasMvp": false,
+      "dungeon": null,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
+      "worldPosition": {
+        "mapId": "prt_fild08",
+        "x1": 812,
+        "y1": 644,
+        "x2": 870,
+        "y2": 701
+      },
       "detail": "/ro/data/map-info/prt_fild08.json"
     }
   }
