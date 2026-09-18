@@ -34,7 +34,7 @@
   PersistentAgentRespawnDelayMilliseconds = 1500
   PersistentAgentRespawnMaxAttempts = 5
   PersistentAgentNavigationEnabled = $true
-  PersistentAgentNavigationMapAllowlist = @('pay_arche','prt_fild05','prt_fild07','pay_dun00')
+  PersistentAgentNavigationMapAllowlist = @('pay_arche','prt_fild05','prt_fild07','pay_dun00','payon','pay_gld','moc_fild02','moc_fild01','prt_fild09')
   PersistentAgentNavigationMaxRetries = 6
   PersistentAgentNavigationStuckMilliseconds = 5000
   PersistentAgentNpcEnabled = $false
@@ -66,8 +66,8 @@
   PersistentAgentSupplyMaxRetries = 3
   # Gate3 routes (1:1 projection of PERSISTENT_AGENT_ROUTE_*). Accepted g3 / g3b2 route JSON.
   PersistentAgentRouteDeath = '[{"map":"pay_arche","x":36,"y":131,"portalTo":"pay_dun00"},{"map":"pay_dun00","x":21,"y":183}]'
-  PersistentAgentRouteSupplyOut = '[{"map":"prt_fild07","x":132,"y":381,"portalTo":"prt_fild05"},{"map":"prt_fild05","x":142,"y":46},{"map":"prt_fild05","x":135,"y":57},{"map":"prt_fild05","x":114,"y":76},{"map":"prt_fild05","x":111,"y":81},{"map":"prt_fild05","x":110,"y":94},{"map":"prt_fild05","x":122,"y":104},{"map":"prt_fild05","x":132,"y":111},{"map":"prt_fild05","x":153,"y":116},{"map":"prt_fild05","x":181,"y":120},{"map":"prt_fild05","x":205,"y":144},{"map":"prt_fild05","x":233,"y":168},{"map":"prt_fild05","x":241,"y":176},{"map":"prt_fild05","x":269,"y":202},{"map":"prt_fild05","x":280,"y":212},{"map":"prt_fild05","x":289,"y":219}]'
-  PersistentAgentRouteSupplyBack = '[{"map":"prt_fild05","x":263,"y":198},{"map":"prt_fild05","x":235,"y":198},{"map":"prt_fild05","x":207,"y":179},{"map":"prt_fild05","x":179,"y":151},{"map":"prt_fild05","x":170,"y":142},{"map":"prt_fild05","x":149,"y":125},{"map":"prt_fild05","x":121,"y":105},{"map":"prt_fild05","x":110,"y":94},{"map":"prt_fild05","x":111,"y":79},{"map":"prt_fild05","x":136,"y":56},{"map":"prt_fild05","x":138,"y":52},{"map":"prt_fild05","x":137,"y":24},{"map":"prt_fild05","x":135,"y":22},{"map":"prt_fild05","x":133,"y":17},{"map":"prt_fild05","x":134,"y":14,"portalTo":"prt_fild07"},{"map":"prt_fild07","x":130,"y":370}]'
+  PersistentAgentRouteSupplyOut = '[{"map":"pay_dun00","x":21,"y":186,"portalTo":"pay_arche"},{"map":"pay_arche","x":81,"y":18,"portalTo":"payon"},{"map":"payon","x":16,"y":143,"portalTo":"pay_gld"},{"map":"pay_gld","x":16,"y":276,"portalTo":"moc_fild02"},{"map":"moc_fild02","x":67,"y":342,"portalTo":"moc_fild01"},{"map":"moc_fild01","x":22,"y":242,"portalTo":"prt_fild09"},{"map":"prt_fild09","x":224,"y":380,"portalTo":"prt_fild07"},{"map":"prt_fild07","x":132,"y":381,"portalTo":"prt_fild05"},{"map":"prt_fild05","x":289,"y":219}]'
+  PersistentAgentRouteSupplyBack = '[{"map":"prt_fild05","x":134,"y":14,"portalTo":"prt_fild07"},{"map":"prt_fild07","x":206,"y":12,"portalTo":"prt_fild09"},{"map":"prt_fild09","x":383,"y":223,"portalTo":"moc_fild01"},{"map":"moc_fild01","x":301,"y":16,"portalTo":"moc_fild02"},{"map":"moc_fild02","x":378,"y":272,"portalTo":"pay_gld"},{"map":"pay_gld","x":374,"y":149,"portalTo":"payon"},{"map":"payon","x":228,"y":330,"portalTo":"pay_arche"},{"map":"pay_arche","x":36,"y":131,"portalTo":"pay_dun00"},{"map":"pay_dun00","x":21,"y":183}]'
   # Gate3 live status (1:1 projection of PERSISTENT_AGENT_LIVE_STATUS_*).
   PersistentAgentLiveStatusEnabled = $true
   PersistentAgentLiveStatusExportMilliseconds = 500
