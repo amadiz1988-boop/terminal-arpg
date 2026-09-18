@@ -394,6 +394,21 @@ async function readMapPrimaryMonsterIds(mapId) {
   return ids;
 }
 
+// rAthena validates start_farm against its own farm mob allowlist. A persisted
+// target (state row or grind-target.json) may predate the accepted farm config,
+// so a resolved target whose mob is not accepted is normalized to an accepted
+// primary monster of the same map. rAthena still decides the final transition.
+async function normalizeFarmTarget(farmTarget) {
+  if (!farmTarget || persistentAgentFarmMobs.length === 0) return farmTarget;
+  if (persistentAgentFarmMobs.includes(Number(farmTarget.mobId)))
+    return farmTarget;
+  const allowedMobs = new Set(persistentAgentFarmMobs);
+  const mobId = (await readMapPrimaryMonsterIds(farmTarget.targetMap)).find(
+    (id) => allowedMobs.has(id),
+  );
+  return mobId ? { targetMap: farmTarget.targetMap, mobId } : farmTarget;
+}
+
 // Post-OpenKore-Exit, a migrated SERVER_AGENT character may have no persisted
 // farm intent. The Web start action reuses the canonical accepted farm
 // configuration for the character's authoritative current map; the map-server
@@ -1799,6 +1814,8 @@ async function readCharacterControllerStatus(
         : null;
     const liveStatus = await readPersistentAgentLiveStatusView(charId);
     let resolvedFarmTarget = farmTarget;
+    if (includeFarmTarget && rollout.allowed && resolvedFarmTarget)
+      resolvedFarmTarget = await normalizeFarmTarget(resolvedFarmTarget);
     if (
       includeFarmTarget &&
       !resolvedFarmTarget &&
@@ -1959,11 +1976,15 @@ async function queueServerAgentRelocation(account, controller, requestedMapId) {
   const map = mapRoutingIndex.maps?.[mapId];
   if (!map?.availableForAfk || !map.unlocked || !map.selectable)
     throw new HttpError(400, '此地圖尚未開放為掛機地圖');
-  const mobId = Number(
-    (map.primaryMonsters ?? []).find((monster) =>
-      Number.isSafeInteger(Number(monster?.id)),
-    )?.id,
-  );
+  const primaryMobIds = (map.primaryMonsters ?? [])
+    .map((monster) => Number(monster?.id))
+    .filter((id) => Number.isSafeInteger(id) && id > 0);
+  // rAthena validates start_farm against its own farm mob allowlist, so the
+  // Web relocation must choose a primary monster the server accepts instead of
+  // blindly taking the first spawn.
+  const allowedFarmMobs = new Set(persistentAgentFarmMobs);
+  const mobId =
+    primaryMobIds.find((id) => allowedFarmMobs.has(id)) ?? primaryMobIds[0];
   if (!Number.isSafeInteger(mobId) || mobId <= 0)
     throw new HttpError(409, 'farm_target_unresolved');
 
