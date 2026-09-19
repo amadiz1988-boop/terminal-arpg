@@ -320,6 +320,48 @@ STOP at backend/source acceptance and explicitly request browser/live acceptance
 Do not substitute API/log evidence.
 ```
 
+### 17. Canonical Workline Templates
+
+New worklines MUST use:
+
+```text
+WORKLINE_DISPATCH_TEMPLATE_V1
+defined at:
+docs/project-control/workline-dispatch-template.md
+```
+
+Existing / blocked worklines MUST use:
+
+```text
+WORKLINE_CONTINUATION_TEMPLATE_V1
+defined at:
+docs/project-control/workline-continuation-template.md
+```
+
+Templates are operational procedure. `AGENTS.md` remains policy authority.
+
+Continuation work MUST NOT restart discovery by default. It must resume from:
+
+```text
+CURRENT_PHASE
+LAST_CONFIRMED_GOOD
+FIRST_BROKEN_TRANSITION
+```
+
+unless Project Control explicitly orders a reconstruction.
+
+Short form:
+
+```text
+For new workline:
+Use WORKLINE_DISPATCH_TEMPLATE_V1.
+
+For existing workline:
+Use WORKLINE_CONTINUATION_TEMPLATE_V1.
+Continue from CURRENT_PHASE.
+Do not restart audit.
+```
+
 ## Short-Term Product North Star
 
 SHORT-TERM PRODUCT NORTH STAR:
