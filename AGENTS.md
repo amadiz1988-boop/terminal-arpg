@@ -889,7 +889,7 @@ Git hygiene 與 OpenKore Exit 驗收規則；若文字與既有規則重複，�
 
 Policy name：`PLAYER_WEB_RESPONSE_EXPERIENCE_POLICY`
 
-Version：`PLAYER_WEB_RESPONSE_EXPERIENCE_POLICY_V1.1`
+Version：`PLAYER_WEB_RESPONSE_EXPERIENCE_POLICY_V1.2`
 
 All Player Web development and performance work MUST follow:
 
@@ -953,6 +953,27 @@ Then use revision/delta/event cursor.
 No unchanged full-payload refresh.
 No Everything Snapshot.
 Measure real player latency before optimizing.
+```
+
+V1.2 authoritative delivery direction, concise reference only:
+
+```text
+PA_AUTHORITATIVE_WEB_DELIVERY_DIRECTION:
+
+For Player Web data flows:
+
+PA/rAthena authority
+→ domain projection
+→ interest-driven delivery
+→ revision/delta
+→ Browser.
+
+Produce once.
+Read once where practical.
+Deliver only on current interest.
+Send only changed data.
+Keep hot paths small.
+Do not let Web presence control PA runtime.
 ```
 
 此 policy 必須相容 `PC-DISPATCH-STANDARD`、`WORKLINE_DISPATCH_TEMPLATE_V1`、
