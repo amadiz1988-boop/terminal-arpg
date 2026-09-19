@@ -759,6 +759,31 @@ Do not re-enable OpenKore runtime.
 Do not reinvent a proven capability without evidence.
 ```
 
+### 12. Operational Compliance Gate (MANDATORY)
+
+For any workline involving an OpenKore-era capability, the worker MUST execute:
+
+`OPENKORE_REFERENCE_GATE_V1`
+
+defined at:
+
+`docs/project-control/openkore-reference-gate.md`
+
+before making source changes.
+
+A statement such as "OpenKore was referenced" is not sufficient evidence.
+
+Compliance requires:
+
+- exact reference files/symbols
+- Last-Good reconstruction
+- OpenKore → PA behavior mapping
+- `FIRST_BROKEN_TRANSITION`
+- duplicate-engine check
+
+The Gate is operational procedure.
+`AGENTS.md` remains policy authority.
+
 本節強化既有 `Single Runtime Policy`、`PC-DISPATCH-STANDARD`、
 `LAST_GOOD → CURRENT → FIRST_BROKEN_TRANSITION`、Browser UI acceptance、
 Git hygiene 與 OpenKore Exit 驗收規則；若文字與既有規則重複，保留原規則，本節只
