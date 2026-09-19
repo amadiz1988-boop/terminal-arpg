@@ -4,6 +4,257 @@
 
 執行 substantial Repository 工作前，先依 `.agents/skills/task-model-router/SKILL.md` 判斷建議模型、推理強度與速度，並在施工前提醒使用者。該 Skill 只負責建議，不得改變任務 scope，也不得自行宣稱已切換模型。
 
+## Project Control Dispatch Standard
+
+版本：`PC-DISPATCH-STANDARD-v1.1`
+
+本節固定 Project Control 1／2／3 歸納出的開發方法，避免更換 Project Control 對話後：開發方向遺失、已完成能力被重新實作、派工格式退化、工作線 scope 失控、大量 recursive search、infrastructure／refactor 蓋過玩家功能恢復，或功能恢復而沒有 Git checkpoint。
+
+### 1. Development Method
+
+所有既有功能恢復工作固定使用：
+
+```text
+LAST_GOOD
+→ CURRENT
+→ FIRST_BROKEN_TRANSITION
+→ MINIMAL_FIX
+→ BOUNDED_TEST
+→ LIVE_ACCEPTANCE
+→ GIT_CHECKPOINT
+```
+
+任何過去已由 OpenKore Exit docs、Gate 1A / 1B / 2 / 3、runtime proof、historical PASS、known-good commit 證明存在的能力，預設視為 `REGRESSION` / `INTEGRATION RESTORATION`，不得直接重新設計或重新實作。只有證據證明能力從未存在，才允許 new implementation。
+
+預設問題永遠是：
+
+```text
+"Where is the first broken transition?"
+```
+
+不是：
+
+```text
+"How should we redesign this system?"
+```
+
+### 2. Project Control Migration
+
+Project Control 搬到新對話時，禁止只搬最後一條工作指示。必須建立完整 `PROJECT CONTROL MIGRATION BUNDLE`，至少包含：
+
+```text
+PROJECT IDENTITY
+NON-NEGOTIABLE RULES
+CURRENT PRODUCTION STATE
+CURRENT GIT STATE
+LAST-GOOD EVIDENCE
+CURRENT FEATURE MATRIX
+PRODUCT DECISIONS
+COMPLETED WORKLINES
+ACTIVE / PENDING WORKLINES
+TEST / LIVE ACCEPTANCE MATRIX
+KNOWN TECH DEBT
+NEXT 3 ACTIONS
+```
+
+新 Project Control 必須能在不重讀舊聊天的情況下接手。
+
+### 3. Worker Dispatch Format
+
+所有 Kilo / Codex / A／B／C／D／E substantial workline 固定包含：
+
+```text
+WINDOW
+WORKLINE_ID
+ROLE
+OBJECTIVE
+CURRENT SOURCE OF TRUTH
+WORKSPACE_ROOT
+ALLOWED_PATHS
+EXACT_FILES_FIRST
+FORBIDDEN_SEARCH
+DO_NOT_TOUCH
+PHASES
+STOP_CONDITIONS
+TESTS
+FINAL REPORT FORMAT
+```
+
+不能只寫「找問題修一下」。
+
+### 4. Search Policy
+
+優先：
+
+```text
+exact files
+git grep
+git ls-files
+指定目錄 bounded search
+```
+
+禁止預設使用：
+
+```text
+Get-ChildItem -Recurse
+dir /s
+C:\ recursive search
+Project root recursive scan
+.tmp-* archaeology
+node_modules scan
+backup scan
+```
+
+如果 `ALLOWED_PATHS` 找不到需要的 symbol：
+
+```text
+STOP
+→ 回報 SEARCH_SCOPE_INSUFFICIENT
+```
+
+不得自行擴大搜尋範圍。
+
+### 5. Canonical Source
+
+```text
+Web repo:
+C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\terminal-arpg
+
+Persistent native source:
+C:\Users\Administrator\source\ghost-island-rathena
+
+Production:
+C:\Users\Administrator\ghost-island-production\ro-stack
+```
+
+`.tmp-*` worktree 只能作為歷史證據、patch evidence、isolated work，不得作為 canonical production source。
+
+### 6. Single Runtime Policy
+
+只允許 canonical `login`、`char`、`map`、`Dashboard`、`MariaDB`。禁止啟第二套 login／char／map runtime。需要 runtime proof 時，使用既有 canonical runtime。
+
+### 7. OpenKore Policy
+
+OpenKore runtime count 必須保持 `0`。OpenKore 不得重新成為 runtime dependency。OpenKore Exit 文件只能作 `LAST_GOOD` / historical evidence。
+
+### 8. Project Control Priority
+
+優先順序：
+
+```text
+1. 玩家可見功能恢復
+2. 已知成功行為保留
+3. 最小 regression surface
+4. 最少 production disruption
+5. Git 可重建性
+6. architecture cleanup / tooling cleanup
+```
+
+不得讓 launcher refactor、retry harness、framework、architecture cleanup、tooling redesign 長期阻塞玩家功能恢復；除非它是當前功能真正的 `FIRST_BROKEN_TRANSITION`。
+
+### 9. UI Policy
+
+UI styling 預設 frozen。除非使用者明確要求，不得進行 cosmetic redesign。功能恢復優先。
+
+### 10. Token / Context Policy
+
+- Project Control 可以保留完整 `CURRENT SOURCE OF TRUTH`。
+- Worker 只取得當前任務需要的 context。
+- 一般 worker prompt：背景保持精簡，但 implementation phases 必須明確完整。
+- Worker final report：約 10–20 行。`PASS` 只報結果與 test counts；`FAIL` 才附必要 evidence。
+- 如果 worker 對話開始堆積大量歷史：`STOP` → 新開 worker conversation → short `CURRENT SOURCE OF TRUTH` handoff。不要無限累積上下文。
+
+### 11. Git Checkpoint Policy
+
+已完成工作不能長期只存在 dirty／untracked tree。重大 continuation 或 Project Control migration 前，應建立 Git checkpoint。
+
+changes 分類：
+
+```text
+READY
+WIP
+UNKNOWN
+UNRELATED
+```
+
+只有 `READY` 可以 commit。禁止：
+
+```text
+git add .
+git add -A
+git clean
+git reset --hard
+git checkout .
+git restore .
+```
+
+逐檔 `git add <exact-file>`；mixed file 用 `git add -p <exact-file>`。commit 前執行 `git diff --cached --stat` 與 `git diff --cached`。
+
+不得 commit：runtime log、backup、binary、secret、database、`node_modules`、`.tmp` artifact。
+
+Production 已部署但 Git 無法 fresh-checkout 重建：不能視為真正完成。
+
+### 12. Completion Definition
+
+功能真正 `DONE` 必須符合適用項目：
+
+```text
+SOURCE FIXED
+BOUNDED TEST PASS
+LIVE ACCEPTANCE PASS
+PRODUCTION HEALTHY
+OPENKORE = 0
+GIT CHECKPOINT EXISTS
+```
+
+不能只有 `source changed` 或 `production currently works` 就宣告永久完成。
+
+### 13. Current Product Decision Examples
+
+以下作為「產品決策應寫入 Migration Bundle」的例子：
+
+- 玩家掛機只選地圖，不選怪物
+- 只有存在合法 monster spawn 的地圖可掛機
+- 城鎮可顯示，但不可作掛機地圖
+- `AUTO_FARM` 自己 SCAN / TARGET / RETARGET
+- Admin control 不建立 Player Web session
+- OpenKore 不恢復
+
+這些是目前決策的例子。未來產品決策若改變，必須更新 `CURRENT SOURCE OF TRUTH`，不能靠舊聊天猜測。
+
+### 14. Default Workflow
+
+任何工作線預設：
+
+```text
+PHASE 1  LAST_GOOD / CURRENT
+PHASE 2  FIRST_BROKEN_TRANSITION
+PHASE 3  MINIMAL_FIX
+PHASE 4  BOUNDED_TEST
+PHASE 5  LIVE_ACCEPTANCE（如必要）
+PHASE 6  GIT_CHECKPOINT
+```
+
+若某 Phase 不需要，必須說明原因。
+
+### 15. Reporting Discipline
+
+報告分清 `FACT` / `INFERENCE` / `UNKNOWN`。Evidence 不足時寫 `UNKNOWN`，不得猜測。Worker completion report 不寫聊天式回顧，固定使用：
+
+```text
+LAST_GOOD =
+CURRENT =
+FIRST_BROKEN_TRANSITION =
+ROOT_CAUSE =
+MINIMAL_FIX =
+FILES_CHANGED =
+TESTS =
+LIVE_ACCEPTANCE =
+GIT_CHECKPOINT =
+PRODUCTION_TOUCHED =
+READY / DONE =
+```
+
 ## Short-Term Product North Star
 
 SHORT-TERM PRODUCT NORTH STAR:
