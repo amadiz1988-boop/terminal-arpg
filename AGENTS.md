@@ -16,6 +16,7 @@ Browser acceptance、真實使用者 evidence 與 Git checkpoint 操作規則，
 最重要鐵律：
 
 - 每次 Project Control 回覆底部固定附 A～E 六欄工作表，模型與 1.5× Fast 欄位不得省略。
+- 每份派工固定使用外層 Header → 單一可複製 Worker prompt → 外層 Footer；三行 destination/model/Fast 不得進入 prompt 本體，Header/Footer 必須一致。
 - 沒有正式派工不得標 `WORKING`；Worker 完成後沒有下一棒即改 `WAITING` 或 `CLOSED`。
 - 平行施工以不發生 file、runtime、fixture、Browser session、deploy collision 為前提。
 - Browser Web 驗收採 control-by-control；真實使用者 Browser FAIL 優先於其他 fixture PASS。

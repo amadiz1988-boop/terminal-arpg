@@ -55,18 +55,70 @@ These rules are mandatory:
 - Project Control tracks A-E and does not require the user to repost a dispatch
   to recover state.
 
-## 3. Dispatch wrapper and model routing
+## 3. Dispatch outer wrapper and model routing
 
-Before each dispatch, tell the user outside the worker prompt:
+Every worker dispatch uses this structure:
 
 ```text
-貼到：A / B / C / D / E
-模型：GPT-5.6 Sol｜中 / 高 / 其他
-1.5× Fast：ON / OFF
+[OUTER HEADER - outside the copyable Worker prompt]
+
+貼到：A｜Web / Dashboard
+模型：GPT-5.6 Sol｜高
+1.5× Fast：OFF
+
+[ONE COPYABLE WORKER PROMPT CODE BLOCK]
+
+【在目前這個視窗直接繼續執行】
+
+不要轉交。
+不要另開工作視窗。
+不要只記錄任務。
+EXECUTE TO COMPLETION.
+
+完整 Worker 任務內容
+
+[OUTER FOOTER - outside the copyable Worker prompt]
+
+貼到：A｜Web / Dashboard
+模型：GPT-5.6 Sol｜高
+1.5× Fast：OFF
 ```
 
-The model and Fast choice must not be placed in the routing prompt header. This
-prevents the worker from interpreting them as a transfer instruction.
+The outer header and outer footer are mandatory and identical. They repeat the
+same destination workline, model, reasoning level, and Fast setting. They are
+Project Control response-wrapper metadata, not Worker routing or execution
+instructions.
+
+The three metadata lines must not appear inside the copyable Worker prompt:
+
+```text
+貼到：
+模型：
+1.5× Fast：
+```
+
+The copyable prompt starts with the fixed four-line execution header shown
+above. The user can copy that single code block without sending destination,
+model, or Fast metadata to the Worker.
+
+When dispatching multiple worklines, each workline gets its own complete
+`OUTER HEADER → COPYABLE PROMPT → OUTER FOOTER` wrapper. Metadata for multiple
+worklines must not be combined into one Worker prompt.
+
+The A-E workline footer table remains separate Project Control state metadata;
+it does not replace the dispatch wrapper.
+
+Canonical wrapper contract:
+
+```text
+DISPATCH_OUTER_HEADER_REQUIRED = YES
+DISPATCH_OUTER_FOOTER_REQUIRED = YES
+OUTER_HEADER_FOOTER_IDENTICAL = YES
+DESTINATION_INSIDE_COPYABLE_PROMPT = NO
+MODEL_INSIDE_COPYABLE_PROMPT = NO
+FAST_INSIDE_COPYABLE_PROMPT = NO
+COPYABLE_PROMPT_STARTS_WITH = 【在目前這個視窗直接繼續執行】
+```
 
 Use the following default routing:
 
