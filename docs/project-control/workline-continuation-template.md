@@ -169,6 +169,17 @@ Exactly one minimal action. Opening several new directions at once is forbidden.
 
 ## 9. REFERENCE / POLICY
 
+Every continuation handoff MUST also carry the long-term product direction:
+
+```text
+LONG_TERM_PRODUCT_DIRECTION = Character Life & Social Simulation
+CANONICAL_DIRECTION_DOC      = docs/character-life-social-simulation-roadmap.md
+```
+
+Do not paste the roadmap. For scopes listed in `AGENTS.md`
+(`CHARACTER_LIFE_SOCIAL_SIMULATION_DIRECTION`), report
+`CHARACTER_LIFE_DIRECTION_COMPATIBILITY = PASS / FAIL / N/A`.
+
 Continue the policy already required by the original workline, for example:
 
 ```text

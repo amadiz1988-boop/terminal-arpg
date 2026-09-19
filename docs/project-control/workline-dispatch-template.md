@@ -105,7 +105,15 @@ branch_or_checkpoint:
 current_runtime_authority:
 completed_evidence:
 known_blocker:
+long_term_product_direction:
+canonical_direction_doc:
+foundation_status:
+autonomous_runtime_status:
 ```
+
+`long_term_product_direction` is fixed to `Character Life & Social Simulation`
+and `canonical_direction_doc` to
+`docs/character-life-social-simulation-roadmap.md`. Do not paste the roadmap.
 
 Rules:
 
@@ -195,6 +203,24 @@ If the workline touches Browser UI:
 
 ```text
 Browser evidence required by AGENTS policy.
+```
+
+If the workline touches Persistent Agent, Combat, Navigation, Supply, Recovery,
+Quest, Event Ledger, Live State, Control Authority, Memory, Social or Character
+autonomy, dispatch and acceptance MUST add:
+
+```text
+CHARACTER_LIFE_DIRECTION_COMPATIBILITY = PASS / FAIL / N/A
+```
+
+Question: does this implementation remain reusable by Life Director / Social
+Director / Autonomous Character without requiring a second runtime engine?
+
+On `FAIL`:
+
+```text
+STOP
+PROJECT_CONTROL_DECISION_REQUIRED = YES
 ```
 
 ---

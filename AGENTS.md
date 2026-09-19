@@ -374,6 +374,70 @@ Roadmap / future work index（規劃狀態與 `IMPLEMENTATION_AUTHORIZED` 的唯
 docs/PROJECT_ROADMAP.md；詳細未來系統：docs/roadmap/。
 `PLANNED` 不代表已授權實作。
 
+## Character Life & Social Simulation Direction 鐵律
+
+`CHARACTER_LIFE_SOCIAL_SIMULATION_DIRECTION`：`docs/character-life-social-simulation-roadmap.md`
+is the canonical long-term product direction for persistent character autonomy
+and living-world / social simulation。此方向不是廢棄概念，而是專案的
+LONG-TERM PRODUCT NORTH STAR。
+
+Core architecture：
+
+```text
+Life Director
+→ Social Director
+→ Persistent Agent
+→ rAthena
+```
+
+- Persistent Agent remains the execution authority；Life Director／Social Director 只提出 high-level intent。
+- `AUTO_FARM`／Supply／Navigation／Recovery／Quest 是可重用的底層 capability，位於 autonomy layer 之下；它們不是完整的 autonomy product。
+- Autonomous mode、`FREE_AGENT`／`WORLD_OWNED`、psyche／mood、memory、diary、Daily Reflection、relationship graph 與 player interaction runtime 均尚未 production；不得因 `AUTO_FARM` 存在就宣稱角色自主完成。
+- 所有影響 PA capabilities、control authority、Event Ledger、character state、memory、social interaction 或 autonomous execution 的架構，MUST 保持與此方向相容，除非 Project Control 明確 supersede。
+
+`NORTH_STAR != IMMEDIATE_IMPLEMENTATION_MANDATE`：
+
+- North Star 約束架構，不授權施工；current restoration work 仍為優先。
+- Workers MUST NOT opportunistically 開始 Life Director、Social Director、LLM runtime 或 Daily Reflection 實作，也不得藉此擴張當前 workline scope。
+- AC1／AC2／AC3 prototypes 維持 `HISTORICAL_REFERENCE`，不得直接 copy 進 production；autonomy implementation 的啟動時機由 Project Control 決定。
+
+Project Control handoff：每次 `CURRENT SOURCE OF TRUTH`／cutover handoff MUST 包含：
+
+```text
+LONG_TERM_PRODUCT_DIRECTION = Character Life & Social Simulation
+CANONICAL_DIRECTION_DOC      = docs/character-life-social-simulation-roadmap.md
+FOUNDATION_STATUS            =
+AUTONOMOUS_RUNTIME_STATUS    =
+```
+
+禁止每次貼整份 roadmap。
+
+Architecture compatibility gate：下列範圍的派工與驗收 MUST 增加：
+
+```text
+CHARACTER_LIFE_DIRECTION_COMPATIBILITY = PASS / FAIL / N/A
+```
+
+Question：Does this implementation remain reusable by Life Director／Social Director／Autonomous Character without requiring a second runtime engine？
+
+Scope：Persistent Agent、Combat、Navigation、Supply、Recovery、Quest、Event Ledger、Live State、Control Authority、Memory、Social、Character autonomy。
+
+若 `FAIL`：`STOP` → `PROJECT_CONTROL_DECISION_REQUIRED = YES`。
+
+Current implementation map（不建立新文件）：
+
+```text
+FOUNDATION（IMPLEMENTED / PARTIAL）
+  Persistent Agent · Event Ledger（persistent_life_session / persistent_life_event）
+  AUTO_FARM · Navigation · Supply · Recovery · Quest Runtime · Live projections
+
+NOT YET PRODUCTION
+  Life Director · Social Director · AUTONOMOUS mode · FREE_AGENT / WORLD_OWNED
+  Psyche / Mood · Memory · Daily Reflection · Relationship Graph · Player interaction runtime
+```
+
+Canonical direction doc 內容為歷史原文（`e29b4c5`），不得改寫或現代化；產品設計變更另由 Project Control 決策。
+
 ## Routing First 鐵律
 
 ### Routing Bootstrap — Canonical Path Derivation
