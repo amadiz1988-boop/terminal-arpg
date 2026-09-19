@@ -885,6 +885,64 @@ DIRECT_CODE_REUSE_ALLOWED = YES/NO/UNKNOWN
 Git hygiene 與 OpenKore Exit 驗收規則；若文字與既有規則重複，保留原規則，本節只
 引用與強化，不取代其中任何一條。
 
+## PLAYER WEB RESPONSE EXPERIENCE POLICY 鐵律
+
+Policy name：`PLAYER_WEB_RESPONSE_EXPERIENCE_POLICY`
+
+Version：`PLAYER_WEB_RESPONSE_EXPERIENCE_POLICY_V1`
+
+All Player Web development and performance work MUST follow:
+
+```text
+PLAYER_WEB_RESPONSE_EXPERIENCE_POLICY
+defined at:
+docs/project-control/player-web-response-experience-policy.md
+```
+
+尤其涉及下列項目時必須遵守：
+
+```text
+polling
+SSE
+WebSocket
+API refresh
+route loading
+lazy loading
+minimap
+combat log
+inventory
+farm stats
+quest
+RUM
+dashboard projection
+```
+
+This policy is operational / design reference.
+`AGENTS.md` remains policy authority.
+The full policy is NOT copied into `AGENTS.md`.
+
+Short form:
+
+```text
+PLAYER_WEB_RESPONSE_EXPERIENCE_POLICY:
+Load only what the current route needs.
+Subscribe only to currently relevant domains.
+Prioritize visible data.
+Throttle or stop hidden/inactive delivery.
+Stop high-frequency Web delivery when no Browser session exists.
+Keep PA runtime independent.
+Initial authoritative snapshot first.
+Then use revision/delta/event cursor.
+No unchanged full-payload refresh.
+No Everything Snapshot.
+Measure real player latency before optimizing.
+```
+
+此 policy 必須相容 `PC-DISPATCH-STANDARD`、`WORKLINE_DISPATCH_TEMPLATE_V1`、
+`WORKLINE_CONTINUATION_TEMPLATE_V1`、`OPENKORE_REFERENCE_POLICY`、
+`OPENKORE_REFERENCE_GATE_V1.1`、`Single Runtime Policy` 與 Browser Acceptance
+Policy，且不得重定義 PA Runtime Authority。
+
 ## OpenKore Exit 驗收鐵律
 
 - Source presence 不等於能力完成。
