@@ -14,6 +14,7 @@ param(
   [switch]$SkipRestart,
   [switch]$SimulateRestartFailure,
   [int]$SimulateStageFailureAfter = 0,
+  [string]$SimulateReceiptMissingField,
   [string]$RestartTaskName = 'GhostIslandRO-CanonicalDashboard'
 )
 
@@ -128,6 +129,9 @@ function Resolve-DeploymentInputs {
   if (($SkipRestart -or $SimulateRestartFailure -or $SimulateStageFailureAfter -gt 0) -and -not $TestMode) {
     throw 'TEST_ONLY_SWITCH_REQUIRES_TEST_MODE'
   }
+  if ($SimulateReceiptMissingField -and -not $TestMode) {
+    throw 'TEST_ONLY_SWITCH_REQUIRES_TEST_MODE'
+  }
   if ($TestMode -and $production.TrimEnd('\') -eq $canonicalProductionRoot.TrimEnd('\')) {
     throw 'TEST_MODE_CANNOT_TARGET_CANONICAL_PRODUCTION'
   }
@@ -214,8 +218,8 @@ function New-DeploymentPlan {
         StagedPath = $stagedPath
         BackupPath = $backupPath
         WasPresent = $wasPresent
-        ProductionPreHash = $preSha256
-        CommitParentHash = if ($parentBlob) { $parentBlob.Hash } else { $null }
+        ProductionPreHash = if ($exists) { $preSha256 } else { 'ABSENT' }
+        CommitParentHash = if ($parentBlob) { $parentBlob.Hash } else { 'ABSENT' }
         CommitTargetHash = $targetBlob.Hash
         StagedHash = Get-Sha256FromBytes $stagedBytes
         StagedGitBlobHash = Get-GitBlobHashFromBytes $stagedBytes
@@ -317,6 +321,27 @@ function Invoke-DashboardOnlyRestart {
   return 'PASS'
 }
 
+function Test-ReceiptCompleteness {
+  param(
+    [Parameter(Mandatory = $true)]$Receipt,
+    [switch]$DryRun
+  )
+  foreach ($name in @('SOURCE_COMMIT', 'SOURCE_PARENT', 'AUTHORIZED_PATHS', 'FILES', 'restart_result', 'health_after')) {
+    $value = $Receipt.$name
+    if ($null -eq $value -or ([string]$value).Trim().Length -eq 0) { return $false }
+  }
+  if (@($Receipt.AUTHORIZED_PATHS).Count -eq 0 -or @($Receipt.FILES).Count -eq 0) { return $false }
+  if ($DryRun -and ($Receipt.restart_result -ne 'NOT_RUN' -or $Receipt.health_after -ne 'NOT_RUN')) { return $false }
+  foreach ($file in @($Receipt.FILES)) {
+    foreach ($name in @('path', 'production_pre_hash', 'commit_parent_hash', 'commit_target_hash', 'staged_hash', 'deployment_mode', 'production_post_hash')) {
+      $value = $file.$name
+      if ($null -eq $value -or ([string]$value).Trim().Length -eq 0) { return $false }
+    }
+    if ($DryRun -and $file.production_post_hash -ne 'NOT_APPLIED') { return $false }
+  }
+  return $true
+}
+
 function Convert-PlanSummary {
   param([Parameter(Mandatory = $true)]$Plan, [string]$Result = 'PRECHECK')
   $pre = [ordered]@{}
@@ -325,18 +350,50 @@ function Convert-PlanSummary {
     $pre[$entry.Path] = $entry.ProductionPreHash
     $staged[$entry.Path] = $entry.StagedHash
   }
-  [ordered]@{
+  $files = @($Plan.Entries | ForEach-Object { [ordered]@{
+    path = $_.Path
+    production_pre_hash = $_.ProductionPreHash
+    commit_parent_hash = $_.CommitParentHash
+    commit_target_hash = $_.CommitTargetHash
+    staged_hash = $_.StagedHash
+    deployment_mode = $_.DeploymentMode
+    production_post_hash = 'NOT_APPLIED'
+  } })
+  $summary = [ordered]@{
     RESULT = $Result
     SAFE_TO_DEPLOY = if ($Plan.Safe) { 'YES' } else { 'NO' }
     CONFLICTS = @($Plan.Conflicts)
     SOURCE_COMMIT = $Plan.SourceCommit
     SOURCE_PARENT = $Plan.SourceParent
-    FILES = @($Plan.Entries | ForEach-Object { $_.Path })
+    AUTHORIZED_PATHS = @($Plan.Entries | ForEach-Object { $_.Path })
+    FILES = $files
+    FILE_PATHS = @($Plan.Entries | ForEach-Object { $_.Path })
     PRE_HASHES = $pre
     STAGED_HASHES = $staged
     DEPLOYMENT_MODES = @($Plan.Entries | ForEach-Object { [ordered]@{ Path = $_.Path; Mode = $_.DeploymentMode } })
     STAGING_ROOT = $Plan.RunRoot
+    restart_result = 'NOT_RUN'
+    health_after = 'NOT_RUN'
   }
+  if ($SimulateReceiptMissingField) {
+    switch ($SimulateReceiptMissingField) {
+      'SOURCE_COMMIT' { $summary.Remove('SOURCE_COMMIT') }
+      'SOURCE_PARENT' { $summary.Remove('SOURCE_PARENT') }
+      'AUTHORIZED_PATHS' { $summary.Remove('AUTHORIZED_PATHS') }
+      'restart_result' { $summary.Remove('restart_result') }
+      'health_after' { $summary.Remove('health_after') }
+      'path' { $files[0].Remove('path') }
+      'production_pre_hash' { $files[0].Remove('production_pre_hash') }
+      'commit_parent_hash' { $files[0].Remove('commit_parent_hash') }
+      'commit_target_hash' { $files[0].Remove('commit_target_hash') }
+      'staged_hash' { $files[0].Remove('staged_hash') }
+      'deployment_mode' { $files[0].Remove('deployment_mode') }
+      'production_post_hash' { $files[0].Remove('production_post_hash') }
+      default { throw "UNSUPPORTED_RECEIPT_TEST_FIELD:$SimulateReceiptMissingField" }
+    }
+  }
+  $summary.RECEIPT_COMPLETE = if (Test-ReceiptCompleteness -Receipt ([pscustomobject]$summary) -DryRun) { 'YES' } else { 'NO' }
+  return $summary
 }
 
 try {
@@ -346,6 +403,13 @@ try {
   $summary = Convert-PlanSummary -Plan $plan
   if (-not $plan.Safe) {
     $summary | ConvertTo-Json -Depth 8
+    exit 1
+  }
+  if ($summary.RECEIPT_COMPLETE -ne 'YES') {
+    $summary.RESULT = 'RECEIPT_INCOMPLETE'
+    $summary.SAFE_TO_DEPLOY = 'NO'
+    $summary.RECEIPT_COMPLETE = 'NO'
+    $summary | ConvertTo-Json -Depth 10
     exit 1
   }
   if ($Precheck) {
@@ -383,9 +447,14 @@ try {
       deployment_mode = $_.DeploymentMode
     } })
     restart_result = $restartResult
+    health_after = [bool]$postRuntime.Health
     health_result = [bool]$postRuntime.Health
     runtime = $postRuntime
   }
+  if (-not (Test-ReceiptCompleteness -Receipt ([pscustomobject]$receipt))) {
+    throw 'RECEIPT_INCOMPLETE'
+  }
+  $receipt.RECEIPT_COMPLETE = 'YES'
   $receiptTarget = if ($ReceiptPath) { $ReceiptPath } else { Join-Path $inputs.Production '.local\ro-stack\dashboard\deploy-receipts\latest.json' }
   New-Item -ItemType Directory -Force -Path (Split-Path -Parent $receiptTarget) | Out-Null
   $receipt | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $receiptTarget -Encoding utf8
