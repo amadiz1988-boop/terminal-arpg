@@ -1,0 +1,49 @@
+{
+  "PRE_IMPLEMENTATION_REUSE_GATE": {
+    "featureId": "pl-autonomy-social-sandbox-v0",
+    "featureName": "Persistent Life Social Sandbox V0",
+    "scope": "NEW_CAPABILITY",
+    "taskCategory": "NEW_CAPABILITY",
+    "categories": ["party", "automation", "observability", "task_scheduling"],
+    "openKoreRelevant": true,
+    "checks": {
+      "currentProject": {
+        "status": "CHECKED",
+        "implementationFound": false,
+        "evidence": "Existing persistent_life_session/persistent_life_event provide factual storage and Dashboard projections; no autonomous encounter/social decision harness exists."
+      },
+      "legacyProject": {
+        "status": "CHECKED",
+        "evidence": "docs/roadmap/persistent-social-pa-v1.md defines the deferred social direction; it does not provide an executable sandbox."
+      },
+      "reuseRegistry": {
+        "status": "REGISTRY_HIT",
+        "reference": "ok-social-auto, ra-party, ra-friend",
+        "evidence": "check-registry.mjs returned REUSE_PRIOR_RESULT; native party/friend authority and OpenKore social policy were reviewed."
+      },
+      "rAthena": {
+        "status": "CHECKED",
+        "evidence": "rAthena party/friend primitives remain world authority; the V0 harness emits no gameplay command and does not duplicate those primitives."
+      },
+      "openKore": {
+        "status": "CHECKED",
+        "evidence": "docs/openkore-harvest-registry.md D9/D13/D14/D15 and ok-social-auto were checked as behavior references only; OpenKore runtime remains disabled."
+      },
+      "externalEcosystem": {
+        "status": "NOT_APPLICABLE",
+        "reason": "No external dependency or provider is introduced by this deterministic test PoC."
+      },
+      "genericOSS": {
+        "status": "NOT_APPLICABLE",
+        "reason": "No generic OSS implementation is copied or adopted; the harness is bounded project-specific test logic."
+      }
+    },
+    "decision": "BUILD_NEW",
+    "whyNotReuse": "The repository has factual Event Ledger storage, social transport boundaries, and deferred design documents, but no reusable deterministic encounter-to-social-decision-to-resume harness. The smallest safe addition is isolated test-only logic that emits intents and evidence without owning gameplay state.",
+    "freshResearchPerformed": false,
+    "freshResearchJustification": "",
+    "registryUpdateRequired": false,
+    "registryUpdate": { "status": "NO_CHANGE", "entryId": "ok-social-auto", "evidence": "Prior registry result reused; no new ecosystem facts were discovered." },
+    "inheritedFrom": ""
+  }
+}
