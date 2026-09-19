@@ -189,4 +189,199 @@ export function reconcileDaily({ dayStart, dayEnd, facts }) {
   };
 }
 
+const SHADOW_CONTEXT_FIELDS = Object.freeze([
+  'character_id',
+  'map',
+  'current_activity',
+  'macro_goal',
+  'hunt_active',
+  'nearby_relevant_characters',
+  'party_state',
+  'recent_encounters',
+  'recent_social_events',
+  'updated_at',
+  'revision',
+]);
+
+function shadowUnavailable(reason, details = {}) {
+  return { ok: false, reason, context: null, ...details };
+}
+
+function asEventType(event) {
+  const type = event?.type ?? event?.eventType ?? event?.event_type;
+  return typeof type === 'string' ? type.toUpperCase() : null;
+}
+
+function normalizeRuntimeEvents(events) {
+  if (!Array.isArray(events)) return [];
+  return events
+    .map((event) => ({
+      ...event,
+      type: asEventType(event),
+      actorId: event?.actorId ?? event?.actor_id ?? null,
+      targetId: event?.targetId ?? event?.target_id ?? null,
+      map: event?.map ?? event?.mapName ?? event?.map_name ?? null,
+      sequence: event?.sequence ?? event?.revision ?? null,
+    }))
+    .filter((event) => event.type);
+}
+
+function runtimeSource(runtimePayload) {
+  if (!runtimePayload || typeof runtimePayload !== 'object') return null;
+  const source = runtimePayload.live && typeof runtimePayload.live === 'object'
+    ? runtimePayload.live
+    : runtimePayload;
+  return { envelope: runtimePayload, source };
+}
+
+/**
+ * Adapt the canonical live projection shape into the minimal, read-only
+ * context consumed by shadow Social Director logic. This function never
+ * dispatches commands and rejects ambiguous or stale input.
+ */
+export function createShadowWorldContext({
+  runtimePayload,
+  previousRevision = 0,
+  now = Date.now(),
+  maxAgeMs = 120000,
+} = {}) {
+  const resolved = runtimeSource(runtimePayload);
+  if (!resolved) return shadowUnavailable('RUNTIME_PAYLOAD_MISSING');
+  const { envelope, source } = resolved;
+  const characterId = envelope.characterId ?? envelope.character_id ?? source.charId ?? source.char_id;
+  const revision = Number(envelope.revision ?? source.revision);
+  const updatedAt = envelope.updatedAt ?? envelope.updated_at ?? source.updatedAt ?? source.updated_at;
+  const map = source.map ?? source.mapName ?? source.map_name;
+  if (characterId === undefined || characterId === null) return shadowUnavailable('CHARACTER_ID_MISSING');
+  if (!Number.isFinite(revision)) return shadowUnavailable('REVISION_MISSING');
+  if (revision <= Number(previousRevision)) return shadowUnavailable('STALE_REVISION', { revision, previousRevision });
+  if (typeof map !== 'string' || map.length === 0) return shadowUnavailable('MAP_MISSING', { revision });
+
+  const parsedUpdatedAt = Date.parse(updatedAt ?? '');
+  const ageMs = Number.isFinite(parsedUpdatedAt) ? Math.max(0, now - parsedUpdatedAt) : null;
+  const fresh = source.fresh ?? envelope.fresh ?? (ageMs !== null && ageMs <= maxAgeMs);
+  if (fresh !== true) return shadowUnavailable('LIVE_CONTEXT_STALE', { revision, ageMs });
+
+  const macroGoal = source.macroGoal ?? source.macro_goal ?? envelope.macroGoal ?? 'HUNT';
+  const players = Array.isArray(source.players) ? source.players : [];
+  const nearbyRelevantCharacters = players
+    .map((player) => ({
+      character_id: player?.id ?? player?.charId ?? player?.char_id ?? null,
+      name: player?.name ?? null,
+      map: player?.map ?? map,
+      x: player?.x ?? null,
+      y: player?.y ?? null,
+    }))
+    .filter((player) => player.character_id !== null && String(player.character_id) !== String(characterId));
+  const allEvents = normalizeRuntimeEvents(
+    envelope.events ?? source.events ?? envelope.socialEvents ?? source.socialEvents,
+  );
+  const recentEncounters = normalizeRuntimeEvents(
+    envelope.recentEncounters ?? source.recentEncounters ?? allEvents.filter((event) => event.type === 'ENCOUNTER'),
+  );
+  const recentSocialEvents = normalizeRuntimeEvents(
+    envelope.recentSocialEvents ?? source.recentSocialEvents ?? allEvents.filter((event) => event.type !== 'ENCOUNTER'),
+  );
+  const context = {
+    character_id: characterId,
+    map,
+    current_activity: source.currentActivity ?? source.current_activity ?? source.activity ?? source.runtimePhase ?? 'UNAVAILABLE',
+    macro_goal: macroGoal,
+    hunt_active: source.huntActive ?? source.hunt_active ?? macroGoal === 'HUNT',
+    nearby_relevant_characters: nearbyRelevantCharacters,
+    party_state: source.partyState ?? source.party_state ?? 'UNAVAILABLE',
+    recent_encounters: recentEncounters,
+    recent_social_events: recentSocialEvents,
+    updated_at: updatedAt ?? null,
+    revision,
+  };
+  return { ok: true, context, fields: SHADOW_CONTEXT_FIELDS };
+}
+
+function shadowActorFromContext(context, actor) {
+  if (actor) return actor;
+  const id = String(context.character_id);
+  return {
+    id,
+    genesisSeed: `shadow:${id}`,
+    macroGoal: context.macro_goal,
+    map: context.map,
+    hiddenGenesis: hiddenGenesis(`shadow:${id}`),
+    recognition: new Map(),
+    lifeEvidence: [],
+  };
+}
+
+/**
+ * Produce a deterministic observation-only decision. The returned intent is
+ * data for inspection; it has no transport or gameplay side effects.
+ */
+export function createShadowIntent({ context, actor, encounterCharacterId, timestamp = Date.now() } = {}) {
+  if (!context || context.macro_goal !== 'HUNT') {
+    return { mode: 'SHADOW', accepted: false, reason: 'PARENT_GOAL_UNAVAILABLE', intent: null };
+  }
+  if (encounterCharacterId === undefined || encounterCharacterId === null) {
+    return { mode: 'SHADOW', accepted: false, reason: 'ENCOUNTER_CHARACTER_MISSING', intent: null };
+  }
+  const shadowActor = shadowActorFromContext(context, actor);
+  const other = {
+    id: String(encounterCharacterId),
+    macroGoal: 'HUNT',
+    map: context.map,
+  };
+  const previousEncounters = context.recent_encounters.filter((event) =>
+    String(event.actorId) === String(shadowActor.id) && String(event.targetId) === String(other.id),
+  ).length;
+  shadowActor.recognition.set(recognitionKey(shadowActor.id, other.id), previousEncounters);
+  const decision = decideSocial({
+    actor: shadowActor,
+    other,
+    sequence: context.revision,
+  });
+  const reasonCodes = ['SHADOW_MODE', 'PARENT_GOAL_HUNT'];
+  if (previousEncounters > 0) reasonCodes.push('REPEATED_ENCOUNTER');
+  reasonCodes.push(decision.intent === 'NONE' ? 'NO_SOCIAL_INTENT' : 'SOCIAL_INTENT');
+  return {
+    mode: 'SHADOW',
+    accepted: true,
+    intent: {
+      timestamp,
+      character_id: context.character_id,
+      context_revision: context.revision,
+      encounter_character_id: encounterCharacterId,
+      evidence_summary: {
+        recognized_encounters: previousEncounters,
+        proximity_observed: context.nearby_relevant_characters.some(
+          (candidate) => String(candidate.character_id) === String(encounterCharacterId),
+        ),
+      },
+      decision: decision.intent,
+      reason_codes: reasonCodes,
+      parent_macro_goal: 'HUNT',
+      would_interrupt_hunt: decision.intent !== 'NONE',
+      would_resume_hunt: true,
+    },
+  };
+}
+
+/** Shadow mode is intentionally fail-closed and never invokes a dispatcher. */
+export function dispatchShadowIntent(intent, dispatcher = null) {
+  return {
+    mode: 'SHADOW',
+    dispatched: false,
+    dispatch_attempted: false,
+    reason: 'SHADOW_MODE',
+    intent: intent ?? null,
+    dispatcher_ignored: dispatcher !== null,
+  };
+}
+
+export function reconcileDailyFromRuntime({ dayStart, dayEnd, runtimePayload } = {}) {
+  const resolved = runtimeSource(runtimePayload);
+  const events = resolved
+    ? normalizeRuntimeEvents(resolved.envelope.events ?? resolved.source.events ?? resolved.envelope.socialEvents ?? resolved.source.socialEvents)
+    : [];
+  return reconcileDaily({ dayStart, dayEnd, facts: events });
+}
+
 export { SOCIAL_INTENTS };

@@ -2,10 +2,14 @@ import assert from 'node:assert/strict';
 import {
   SOCIAL_INTENTS,
   completeSocialInteraction,
+  createShadowIntent,
+  createShadowWorldContext,
   createSandbox,
   createSeededCharacters,
+  dispatchShadowIntent,
   encounter,
   reconcileDaily,
+  reconcileDailyFromRuntime,
 } from './persistent-life-social-sandbox-v0.mjs';
 
 const checks = [];
@@ -102,6 +106,134 @@ check('player-facing output contains no hidden parameters', () => {
   const summary = reconcileDaily({ dayStart: { macroGoal: 'HUNT' }, dayEnd: { macroGoal: 'HUNT' }, facts: [] });
   const serialized = JSON.stringify(summary);
   assert.doesNotMatch(serialized, /socialInitiative|trust|utility|rejectionSensitivity|relationshipScore/i);
+});
+
+const realShapedPayload = {
+  characterId: 1001,
+  revision: 11,
+  updatedAt: '2026-09-20T10:00:00.000Z',
+  live: {
+    charId: 1001,
+    fresh: true,
+    map: 'pay_dun00',
+    runtimePhase: 'AUTO_FARM',
+    resident: true,
+    players: [{ id: 1002, name: 'Other', map: 'pay_dun00', x: 80, y: 92 }],
+    partyState: 'NONE',
+    recentEncounters: [{ eventType: 'ENCOUNTER', actorId: 1001, targetId: 1002, mapName: 'pay_dun00', sequence: 10 }],
+    recentSocialEvents: [],
+  },
+  events: [
+    { eventType: 'NORMAL_HIT', actorId: 1001, sequence: 9 },
+    { eventType: 'ENCOUNTER', actorId: 1001, targetId: 1002, mapName: 'pay_dun00', sequence: 10 },
+  ],
+};
+
+check('real-shaped canonical context adapter returns the minimal contract', () => {
+  const result = createShadowWorldContext({ runtimePayload: realShapedPayload, now: Date.parse('2026-09-20T10:00:30.000Z') });
+  assert.equal(result.ok, true);
+  assert.deepEqual(Object.keys(result.context).sort(), [
+    'character_id', 'current_activity', 'hunt_active', 'macro_goal', 'map',
+    'nearby_relevant_characters', 'party_state', 'recent_encounters',
+    'recent_social_events', 'revision', 'updated_at',
+  ].sort());
+  assert.equal(result.context.character_id, 1001);
+  assert.equal(result.context.map, 'pay_dun00');
+  assert.equal(result.context.current_activity, 'AUTO_FARM');
+  assert.equal(result.context.nearby_relevant_characters[0].character_id, 1002);
+  assert.equal(result.context.recent_encounters[0].type, 'ENCOUNTER');
+});
+
+check('stale context revision is rejected fail-closed', () => {
+  const result = createShadowWorldContext({ runtimePayload: realShapedPayload, previousRevision: 11, now: Date.parse('2026-09-20T10:00:30.000Z') });
+  assert.equal(result.ok, false);
+  assert.equal(result.reason, 'STALE_REVISION');
+});
+
+check('missing runtime fields use a safe unavailable result', () => {
+  const result = createShadowWorldContext({
+    runtimePayload: { characterId: 1001, revision: 12, live: { fresh: true, players: [] } },
+  });
+  assert.equal(result.ok, false);
+  assert.equal(result.reason, 'MAP_MISSING');
+});
+
+check('shadow mode remains fail-closed when no HUNT parent exists', () => {
+  const result = createShadowIntent({
+    context: { character_id: 1001, map: 'pay_dun00', macro_goal: 'UNAVAILABLE', recent_encounters: [], nearby_relevant_characters: [], revision: 12 },
+    encounterCharacterId: 1002,
+  });
+  assert.equal(result.accepted, false);
+  assert.equal(result.reason, 'PARENT_GOAL_UNAVAILABLE');
+});
+
+check('shadow dispatch proves zero command dispatch', () => {
+  let calls = 0;
+  const result = dispatchShadowIntent({ decision: 'GREETING' }, () => { calls += 1; });
+  assert.equal(result.dispatched, false);
+  assert.equal(result.dispatch_attempted, false);
+  assert.equal(calls, 0);
+});
+
+check('shadow intent preserves HUNT parent and resume contract', () => {
+  const context = createShadowWorldContext({ runtimePayload: realShapedPayload, now: Date.parse('2026-09-20T10:00:30.000Z') }).context;
+  const result = createShadowIntent({ context, encounterCharacterId: 1002, timestamp: 1234 });
+  assert.equal(result.accepted, true);
+  assert.equal(result.intent.parent_macro_goal, 'HUNT');
+  assert.equal(result.intent.would_resume_hunt, true);
+  assert.equal(result.intent.context_revision, 11);
+});
+
+check('encounter produces a structured shadow decision', () => {
+  const context = createShadowWorldContext({ runtimePayload: realShapedPayload, now: Date.parse('2026-09-20T10:00:30.000Z') }).context;
+  const result = createShadowIntent({ context, encounterCharacterId: 1002 });
+  assert.ok(SOCIAL_INTENTS.includes(result.intent.decision));
+  assert.ok(result.intent.reason_codes.includes('SHADOW_MODE'));
+  assert.equal(result.intent.evidence_summary.proximity_observed, true);
+});
+
+check('repeated encounter is represented without mutating the world', () => {
+  const repeatedPayload = {
+    ...realShapedPayload,
+    revision: 12,
+    live: {
+      ...realShapedPayload.live,
+      recentEncounters: [{ eventType: 'ENCOUNTER', actorId: 1001, targetId: 1002, sequence: 10 }],
+    },
+  };
+  const context = createShadowWorldContext({ runtimePayload: repeatedPayload, previousRevision: 11, now: Date.parse('2026-09-20T10:00:30.000Z') }).context;
+  const result = createShadowIntent({ context, encounterCharacterId: 1002 });
+  assert.ok(result.intent.reason_codes.includes('REPEATED_ENCOUNTER'));
+  assert.equal(context.recent_encounters.length, 1);
+});
+
+check('ordinary combat noise is filtered from real-shaped daily reconciliation', () => {
+  const summary = reconcileDailyFromRuntime({
+    dayStart: { map: 'pay_dun00', macroGoal: 'HUNT' },
+    dayEnd: { map: 'pay_dun00', macroGoal: 'HUNT' },
+    runtimePayload: {
+      events: [
+        { eventType: 'NORMAL_HIT', actorId: 1001 },
+        { eventType: 'NORMAL_DAMAGE', actorId: 1001 },
+        { eventType: 'POTION_USED', actorId: 1001 },
+        { eventType: 'GREETING', actorId: 1001, targetId: 1002, sequence: 13 },
+      ],
+    },
+  });
+  assert.equal(summary.ignoredOperationalCount, 3);
+  assert.deepEqual(summary.meaningfulFacts.map((fact) => fact.type), ['GREETING']);
+});
+
+check('daily reconciliation keeps structured life facts from a real-shaped context', () => {
+  const summary = reconcileDailyFromRuntime({
+    dayStart: { map: 'pay_dun00', macroGoal: 'HUNT' },
+    dayEnd: { map: 'pay_dun00', macroGoal: 'HUNT' },
+    runtimePayload: realShapedPayload,
+  });
+  assert.equal(summary.ignoredOperationalCount, 1);
+  assert.deepEqual(summary.meaningfulFacts.map((fact) => fact.type), ['ENCOUNTER']);
+  assert.equal(summary.diaryEligible, true);
+  assert.equal(summary.dayEnd.macroGoal, 'HUNT');
 });
 
 const failed = checks.filter((entry) => !entry.ok);
