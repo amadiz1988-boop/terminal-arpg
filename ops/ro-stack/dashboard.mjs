@@ -89,6 +89,12 @@ import {
   resolveFarmTarget,
 } from './persistent-agent/web-canary.mjs';
 import {
+  AGENT_PHASE,
+  FARM_DECISION,
+  decideActivation,
+  decideFarmStart,
+} from './admin-agent-control.mjs';
+import {
   buildPhysicalMapGraph,
   nearestSupplyHubForMap,
   supplyHubs,
@@ -98,17 +104,35 @@ import {
   planWebRelocation,
 } from './persistent-agent/map-route.mjs';
 import {
+  planRelocation,
+  RELOCATION_POLICY,
+} from './persistent-agent/relocation-policy.mjs';
+import {
+  createRelocationProgress,
+  nextRelocationAction,
+} from './persistent-agent/relocation-executor.mjs';
+import {
+  existingCommandsForStep,
+} from './persistent-agent/relocation-command-surface.mjs';
+import {
+  kafraContextForPlan,
+} from './persistent-agent/kafra-content.mjs';
+import {
   CharacterProjectionCache,
   CharacterViewerRegistry,
   DomainRevisionTracker,
+  NATIVE_COMBAT_EVENT_TYPES,
   OBSERVATION_POLICY,
   ObservationInterest,
   coalesceCombatEventLines,
   coalesceCombatEvents,
   legacyObservationMode,
+  nativeLifeEventLine,
+  parseLifeEventFacts,
   projectLiveSnapshot,
   publicObservationPolicy,
   revisionKeyForInterest,
+  withLiveFreshness,
 } from './web-observation.mjs';
 import { CombatSseBroker, CombatSseRollout } from './combat-sse.mjs';
 import {
@@ -206,6 +230,7 @@ const mime = {
   '.html': 'text/html; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
+  '.mjs': 'text/javascript; charset=utf-8',
   '.png': 'image/png',
   '.webp': 'image/webp',
   '.bmp': 'image/bmp',
@@ -336,100 +361,25 @@ function serverAgentWarpGraph() {
   return serverAgentWarpGraphPromise;
 }
 
-// Canonical Persistent Agent farm capability allowlist. rAthena remains the
-// only authority that accepts a farm target, so the Web start action must reuse
-// the exact accepted farm map/mob configuration instead of inventing a new one.
-// Values are read from the canonical stack.config.psd1 (single source of
-// truth) and fail closed (empty) when unavailable.
-const stackConfigPath = join(
-  dirname(fileURLToPath(import.meta.url)),
-  'stack.config.psd1',
-);
-function parsePsd1StringArray(text, key) {
-  const match = text.match(new RegExp(`^\\s*${key}\\s*=\\s*@\\(([^)]*)\\)`, 'm'));
-  if (!match) return [];
-  return [...match[1].matchAll(/'([^']*)'/g)].map((entry) => entry[1]);
+// Farm map eligibility: a canonical map is farm-selectable only when it has at
+// least one monster spawn. Visibility is never gated. Eligibility comes from the
+// canonical map-info metadata the world map already renders, not from a
+// town-name rule, a region unlock, a rollout allowlist or a static map/mob
+// allowlist. The player selects the MAP only; AUTO_FARM chooses the monster.
+function farmMapEligibility(mapId) {
+  const map = mapRoutingIndex.maps?.[String(mapId ?? '')];
+  if (!map) return { map: null, farmable: false, reason: 'farm_target_unresolved' };
+  const hasMonster =
+    Number(map.normalMonsterCount ?? 0) > 0 ||
+    Number(map.combatMonsterCount ?? 0) > 0 ||
+    Number(map.bossCount ?? 0) > 0 ||
+    (map.primaryMonsters?.length ?? 0) > 0;
+  return {
+    map,
+    farmable: hasMonster,
+    reason: hasMonster ? null : 'farm_map_not_farmable',
+  };
 }
-function parsePsd1NumberArray(text, key) {
-  const match = text.match(new RegExp(`^\\s*${key}\\s*=\\s*@\\(([^)]*)\\)`, 'm'));
-  if (!match) return [];
-  return [...match[1].matchAll(/\d+/g)].map((entry) => Number(entry[0]));
-}
-let persistentAgentFarmMaps = [];
-let persistentAgentFarmMobs = [];
-try {
-  const stackConfig = await readFile(stackConfigPath, 'utf8');
-  persistentAgentFarmMaps = parsePsd1StringArray(
-    stackConfig,
-    'PersistentAgentFarmMapAllowlist',
-  );
-  persistentAgentFarmMobs = parsePsd1NumberArray(
-    stackConfig,
-    'PersistentAgentFarmMobAllowlist',
-  );
-} catch {
-  persistentAgentFarmMaps = [];
-  persistentAgentFarmMobs = [];
-}
-const mapPrimaryMonsterCache = new Map();
-async function readMapPrimaryMonsterIds(mapId) {
-  const id = String(mapId ?? '');
-  if (!/^[a-z0-9_]{1,31}$/.test(id)) return [];
-  if (mapPrimaryMonsterCache.has(id)) return mapPrimaryMonsterCache.get(id);
-  let ids = [];
-  try {
-    const detail = JSON.parse(
-      await readFile(
-        join(publicRoot, 'ro', 'data', 'map-info', `${id}.json`),
-        'utf8',
-      ),
-    );
-    ids = (detail.primaryMonsters ?? [])
-      .map((monster) => Number(monster?.id))
-      .filter((mobId) => Number.isSafeInteger(mobId) && mobId > 0);
-  } catch {
-    ids = [];
-  }
-  mapPrimaryMonsterCache.set(id, ids);
-  return ids;
-}
-
-// rAthena validates start_farm against its own farm mob allowlist. A persisted
-// target (state row or grind-target.json) may predate the accepted farm config,
-// so a resolved target whose mob is not accepted is normalized to an accepted
-// primary monster of the same map. rAthena still decides the final transition.
-async function normalizeFarmTarget(farmTarget) {
-  if (!farmTarget || persistentAgentFarmMobs.length === 0) return farmTarget;
-  if (persistentAgentFarmMobs.includes(Number(farmTarget.mobId)))
-    return farmTarget;
-  const allowedMobs = new Set(persistentAgentFarmMobs);
-  const mobId = (await readMapPrimaryMonsterIds(farmTarget.targetMap)).find(
-    (id) => allowedMobs.has(id),
-  );
-  return mobId ? { targetMap: farmTarget.targetMap, mobId } : farmTarget;
-}
-
-// Post-OpenKore-Exit, a migrated SERVER_AGENT character may have no persisted
-// farm intent. The Web start action reuses the canonical accepted farm
-// configuration for the character's authoritative current map; the map-server
-// still validates and owns the transition, so rAthena remains the only
-// authority (a character not standing on the target map cannot start farm).
-async function resolveWebStartFarmTarget(liveStatus) {
-  if (
-    persistentAgentFarmMaps.length === 0 ||
-    persistentAgentFarmMobs.length === 0
-  )
-    return null;
-  const mapId = liveStatus?.fresh ? String(liveStatus.map ?? '') : '';
-  if (!persistentAgentFarmMaps.includes(mapId)) return null;
-  if (!mapRoutingIndex.maps?.[mapId]) return null;
-  const allowedMobs = new Set(persistentAgentFarmMobs);
-  const mobId = (await readMapPrimaryMonsterIds(mapId)).find((id) =>
-    allowedMobs.has(id),
-  );
-  return mobId ? { targetMap: mapId, mobId } : null;
-}
-
 const webExperienceRegistry = JSON.parse(
   await readFile(webExperienceRegistryPath, 'utf8'),
 );
@@ -1239,12 +1189,14 @@ function parseAgentStateRow(output) {
     taskPhase: row[9] || null,
     targetMap: row[10] || null,
     targetRules: row[11] || null,
+    lastCommandId: row[12] || null,
+    lastErrorCode: row[13] || null,
   };
 }
 
 async function readAgentStateRow(charId) {
   const output = await sql(
-    `SELECT char_id,account_id,agent_enabled,control_owner,ownership_state,agent_mode,revision,COALESCE(runtime_state,'INACTIVE'),COALESCE(task_type,''),COALESCE(task_phase,''),COALESCE(target_map,''),COALESCE(target_rules,'') FROM persistent_agent_state WHERE char_id=${Number(charId)} LIMIT 1;`,
+    `SELECT char_id,account_id,agent_enabled,control_owner,ownership_state,agent_mode,revision,COALESCE(runtime_state,'INACTIVE'),COALESCE(task_type,''),COALESCE(task_phase,''),COALESCE(target_map,''),COALESCE(target_rules,''),COALESCE(last_command_id,''),COALESCE(last_error_code,'') FROM persistent_agent_state WHERE char_id=${Number(charId)} LIMIT 1;`,
   );
   return parseAgentStateRow(output);
 }
@@ -1312,6 +1264,107 @@ async function readPersistentAgentLiveStatusView(charId) {
   return createLiveStatusView(await readPersistentAgentLiveStatusRow(charId), {
     maxAgeMs: LIVE_STATUS_MAX_AGE_MS,
   });
+}
+
+// True when the character is owned by the native SERVER_AGENT controller. Used
+// by the combat terminal to pick the native Event Ledger source instead of the
+// OpenKore worker text log. Tolerates a missing read model and never throws.
+async function characterIsServerAgentControlled(characterId) {
+  const charId = Number(characterId);
+  if (!Number.isSafeInteger(charId) || charId <= 0) return false;
+  try {
+    const live = await readPersistentAgentLiveStatusRow(charId);
+    return (
+      live?.controlOwner === SERVER_AGENT_OWNER &&
+      live?.ownershipState === SERVER_AGENT_OWNER
+    );
+  } catch {
+    return false;
+  }
+}
+
+// Native SERVER_AGENT combat terminal source. A SERVER_AGENT-owned character
+// has no OpenKore worker text log, so the last-good text-log projection is
+// always empty for it. The combat terminal is fed from the authoritative
+// rAthena Persistent Life event ledger instead. Read-only, bounded, and only
+// used when the character is owned by SERVER_AGENT.
+function persistentLifeEventSchemaUnavailable(error) {
+  return /persistent_life_event.*(?:doesn't exist|does not exist)|Unknown table/i.test(
+    String(error?.message ?? error),
+  );
+}
+
+function nativeCombatEventLineForRow(event) {
+  let mobName = '';
+  let itemName = '';
+  if (event.eventType.startsWith('MONSTER_')) {
+    const mobId = Number(event.facts.mobId);
+    if (Number.isSafeInteger(mobId) && mobId > 0)
+      mobName = resolveMonsterDisplayName({ mobId }) ?? '';
+  } else if (event.eventType === 'LOOT_ACQUIRED') {
+    const itemId = Number(event.facts.itemId);
+    if (Number.isSafeInteger(itemId) && itemId > 0)
+      itemName = localizedItemName(itemId) ?? '';
+  }
+  return nativeLifeEventLine({ ...event, mobName, itemName });
+}
+
+async function readNativeCombatLog(
+  characterId,
+  requestedEventId,
+  limit = logProjectionInitialLines,
+) {
+  const charId = Number(characterId);
+  if (!Number.isSafeInteger(charId) || charId <= 0)
+    return { available: false, lines: [], cursor: 0, reset: true };
+  const hasCursor =
+    Number.isSafeInteger(requestedEventId) && requestedEventId > 0;
+  const types = NATIVE_COMBAT_EVENT_TYPES.map((type) => `'${type}'`).join(',');
+  let output;
+  try {
+    output = await sql(
+      `SELECT event_id,event_type,map,facts FROM persistent_life_event ` +
+        `WHERE char_id=${charId} AND event_type IN (${types}) ` +
+        `ORDER BY occurred_at DESC, event_id DESC LIMIT ${Number(limit)};`,
+    );
+  } catch (error) {
+    if (persistentLifeEventSchemaUnavailable(error))
+      return { available: false, lines: [], cursor: 0, reset: true };
+    throw error;
+  }
+  const events = (output ? output.split(/\r?\n/) : [])
+    .filter(Boolean)
+    .map((line) => {
+      const row = line.split('\t');
+      return {
+        eventId: Number(row[0]),
+        eventType: row[1] || '',
+        map: row[2] && row[2] !== 'NULL' ? row[2] : '',
+        facts: parseLifeEventFacts(row[3]),
+      };
+    })
+    .filter((event) => Number.isSafeInteger(event.eventId))
+    .sort((left, right) => left.eventId - right.eventId);
+  const newest = events.reduce(
+    (maximum, event) => Math.max(maximum, event.eventId),
+    0,
+  );
+  if (!hasCursor)
+    return {
+      available: true,
+      lines: events.map(nativeCombatEventLineForRow).filter(Boolean),
+      cursor: newest,
+      reset: true,
+    };
+  return {
+    available: true,
+    lines: events
+      .filter((event) => event.eventId > requestedEventId)
+      .map(nativeCombatEventLineForRow)
+      .filter(Boolean),
+    cursor: Math.max(requestedEventId, newest),
+    reset: false,
+  };
 }
 
 // --- SERVER_AGENT authoritative read model (P2F) ---------------------------
@@ -1744,7 +1797,12 @@ async function currentCharacterLiveSnapshot(account, id, maximumAgeMs) {
       goal: quest.goal,
     }));
   return {
-    updatedAt: Date.now(),
+    // Authoritative state timestamp: the live-status age is computed from the
+    // mapper's updated_at, so the minimap freshness shows real state age instead
+    // of a fabricated "just now".
+    updatedAt: Number.isFinite(Number(live.ageMs))
+      ? Date.now() - Math.max(0, Number(live.ageMs))
+      : Date.now(),
     name: stored.name,
     jobId,
     baseLevel: Number(characterModel?.baseLevel ?? stored.baseLevel),
@@ -1798,7 +1856,7 @@ async function currentCharacterLiveSnapshot(account, id, maximumAgeMs) {
 async function readCharacterControllerStatus(
   account,
   charId,
-  { includeFarmTarget = false } = {},
+  { includeFarmTarget = false, allowFarmTargetFallback = true } = {},
 ) {
   try {
     const [stateRow, rollout] = await Promise.all([
@@ -1810,26 +1868,19 @@ async function readCharacterControllerStatus(
         ? resolveFarmTarget({
             stateRow,
             grindTarget: await readGrindTarget(account),
+            allowFarmTargetFallback,
           })
         : null;
     const liveStatus = await readPersistentAgentLiveStatusView(charId);
-    let resolvedFarmTarget = farmTarget;
-    if (includeFarmTarget && rollout.allowed && resolvedFarmTarget)
-      resolvedFarmTarget = await normalizeFarmTarget(resolvedFarmTarget);
-    if (
-      includeFarmTarget &&
-      !resolvedFarmTarget &&
-      rollout.allowed &&
-      stateRow &&
-      String(stateRow.controlOwner ?? '') === SERVER_AGENT_OWNER &&
-      Boolean(stateRow.agentEnabled)
-    )
-      resolvedFarmTarget = await resolveWebStartFarmTarget(liveStatus);
+    // MOB_SELECTION_REMOVED / NO SILENT FALLBACK: the persisted player-selected
+    // farm map is the ONLY target. There is no canonical-map or default-map
+    // fallback; when it does not resolve, rAthena surfaces the blocker and the
+    // start action stays unavailable.
     return createControllerStatus({
       charId,
       stateRow,
       rollout,
-      farmTarget: resolvedFarmTarget,
+      farmTarget,
       liveStatus,
     });
   } catch (error) {
@@ -1865,6 +1916,23 @@ async function queueCanaryAutomation(account, controller, body) {
         ? controller.actionBlockers.startFarm
         : controller.actionBlockers.stopFarm) ?? 'invalid_transition',
     );
+  // A farm target that is not the character's authoritative current map is a
+  // relocation, not a direct start: rAthena only accepts start_farm on the
+  // target map, so reuse the W4 coordinator (STOP_FARM -> START_NAVIGATION ->
+  // arrival -> START_FARM). An unavailable live position fails closed.
+  if (action === W1_ACTION.START_FARM) {
+    // FARMABLE_MAP_REQUIRED: a persisted map with no monster spawn is an explicit
+    // blocker, never silently rewritten to another map.
+    const targetMap = String(controller.farmTarget?.targetMap ?? '');
+    const eligibility = farmMapEligibility(targetMap);
+    if (!eligibility.map) throw new HttpError(409, 'farm_target_unresolved');
+    if (!eligibility.farmable) throw new HttpError(409, 'farm_map_not_farmable');
+    const live = controller.liveStatus ?? null;
+    const currentMap = live?.fresh && live.map ? String(live.map) : null;
+    if (!currentMap) throw new HttpError(409, 'agent_position_unavailable');
+    if (currentMap !== targetMap)
+      return await queueServerAgentRelocation(account, controller, targetMap);
+  }
   return {
     executor: SERVER_AGENT_OWNER,
     command: await queueOwnershipCommand(account, charId, {
@@ -1939,7 +2007,6 @@ async function reconcileRelocations() {
           { action: 'start_farm', expectedRevision: revision },
           {
             targetMap: pending.targetMap,
-            mobId: pending.mobId,
             lootEnabled: true,
             survivalEnabled: true,
             deathRecoveryEnabled: true,
@@ -1950,6 +2017,67 @@ async function reconcileRelocations() {
       } else if (pending.stage === 'WAIT_FARM') {
         if (mode === 'AUTO_FARM' && currentMap === pending.targetMap)
           pendingRelocations.delete(charId);
+      } else if (pending.stage === 'RELOCATION' && pending.relocationPlan) {
+        // Cross-region relocation: wait for authoritative progress (revision
+        // bump) between commands; one existing contract action at a time.
+        if (pending.commandPending && revision === pending.commandRevision)
+          continue;
+        pending.commandPending = false;
+        const observation = { currentMap, agentMode: mode };
+        const next = nextRelocationAction(pending.relocationPlan,
+          pending.relocationProgress, observation);
+        if (next.reason) {
+          console.warn(`WEB_RELOCATION_BLOCKED char=${charId} reason=${next.reason}`);
+          pendingRelocations.delete(charId);
+          continue;
+        }
+        if (next.done) {
+          pendingRelocations.delete(charId);
+          continue;
+        }
+        if (!next.action)
+          continue; // waiting for an authoritative observation
+        const stageIndex = next.stageIndex;
+        const step = pending.relocationPlan.steps[stageIndex];
+        const expanded = existingCommandsForStep(step, { kafra: pending.kafraContext });
+        if (expanded.missing || expanded.commands.length === 0) {
+          console.warn(`WEB_RELOCATION_BLOCKED char=${charId} reason=kafra_dialog_failed missing=${expanded.missing ?? 'none'}`);
+          pendingRelocations.delete(charId);
+          continue;
+        }
+        const sent = pending.commandIndexByStage[stageIndex] ?? 0;
+        if (sent >= expanded.commands.length)
+          continue; // stage commands sent; wait for authoritative confirmation
+        const command = expanded.commands[sent];
+        let payload = command.payload;
+        // The relocation planner's walking route is a list of MAP NAMES; the
+        // native start_navigation contract expects route[] elements to be
+        // objects { map, x, y, portalTo? }. Canonicalize through the SAME
+        // proven builder used by the DIRECT path (planWebRelocation /
+        // buildRouteSteps) instead of inventing a second route serializer.
+        if (command.action === 'start_navigation') {
+          const hops = Array.isArray(payload?.route) ? payload.route : [];
+          const fromMap = String(hops[0] ?? '');
+          const toMap = String(hops[hops.length - 1] ?? '');
+          const navPlan = fromMap && toMap
+            ? planWebRelocation(await serverAgentWarpGraph(), fromMap, toMap)
+            : null;
+          if (!navPlan?.route) {
+            console.warn(`WEB_RELOCATION_BLOCKED char=${charId} reason=route_unrepresentable`);
+            pendingRelocations.delete(charId);
+            continue;
+          }
+          payload = { ...payload, route: navPlan.route };
+        }
+        await queueOwnershipCommand(
+          account,
+          charId,
+          { action: command.action, expectedRevision: revision },
+          payload,
+        );
+        pending.commandIndexByStage[stageIndex] = sent + 1;
+        pending.commandPending = true;
+        pending.commandRevision = revision;
       }
     } catch (error) {
       pending.attempts = Number(pending.attempts ?? 0) + 1;
@@ -1964,29 +2092,23 @@ async function reconcileRelocations() {
 }
 
 // W4 server-side adapter: turn a Web world-map selection into a SERVER_AGENT
-// relocation. The browser sends only `mapId`; the server resolves the farm mob
-// and the DIRECT route (rAthena warp topology), then hands the orchestration to
-// reconcileRelocations() above. No route waypoint, portal sequence or raw
-// command ever comes from the browser.
+// relocation. The browser sends only `mapId`; the server validates that the map
+// is a real farmable map and resolves the DIRECT route (rAthena warp topology),
+// then hands the orchestration to reconcileRelocations() above. The player never
+// selects a monster; no mobId is resolved, generated or persisted. No route
+// waypoint, portal sequence or raw command ever comes from the browser.
 async function queueServerAgentRelocation(account, controller, requestedMapId) {
   const charId = Number(account.characterId);
   const mapId = String(requestedMapId ?? '').trim();
   if (!/^[a-z0-9_]{1,31}$/.test(mapId))
-    throw new HttpError(400, '無效的掛機地圖');
-  const map = mapRoutingIndex.maps?.[mapId];
-  if (!map?.availableForAfk || !map.unlocked || !map.selectable)
-    throw new HttpError(400, '此地圖尚未開放為掛機地圖');
-  const primaryMobIds = (map.primaryMonsters ?? [])
-    .map((monster) => Number(monster?.id))
-    .filter((id) => Number.isSafeInteger(id) && id > 0);
-  // rAthena validates start_farm against its own farm mob allowlist, so the
-  // Web relocation must choose a primary monster the server accepts instead of
-  // blindly taking the first spawn.
-  const allowedFarmMobs = new Set(persistentAgentFarmMobs);
-  const mobId =
-    primaryMobIds.find((id) => allowedFarmMobs.has(id)) ?? primaryMobIds[0];
-  if (!Number.isSafeInteger(mobId) || mobId <= 0)
-    throw new HttpError(409, 'farm_target_unresolved');
+    throw new HttpError(400, 'farm_target_unresolved');
+  const eligibility = farmMapEligibility(mapId);
+  if (!eligibility.map) throw new HttpError(409, 'farm_target_unresolved');
+  // All maps stay visible; only maps with at least one monster spawn are
+  // farm-selectable. No town-name rule, no rollout allowlist, no fallback.
+  if (!eligibility.farmable)
+    throw new HttpError(409, 'farm_map_not_farmable');
+  const map = eligibility.map;
 
   // The authoritative current position comes from the PA live-status read model.
   const live = controller.liveStatus ?? null;
@@ -2003,20 +2125,76 @@ async function queueServerAgentRelocation(account, controller, requestedMapId) {
   );
   const grindTarget = {
     mapId,
-    mobId,
     name: map.name ?? mapId,
     levelRange: map.levelRange ?? null,
     updatedAt: Date.now(),
   };
-  await writeJsonAtomic(
-    join(instancesRoot, instanceId(account.accountId), 'grind-target.json'),
-    grindTarget,
-  );
-  observationConfigCache.delete(`grind:${Number(account.accountId)}`);
+  // P5 write safety: starting AUTO_FARM must not rewrite grind-target.json.
+  // The file is written only when the resolved target actually differs from the
+  // persisted one (a genuine user change or first selection), never merely
+  // because start/target resolution ran.
+  const persistedGrindTarget = await readGrindTarget(account);
+  const targetChanged =
+    !persistedGrindTarget
+    || String(persistedGrindTarget.mapId ?? '') !== mapId;
+  if (targetChanged) {
+    await writeJsonAtomic(
+      join(instancesRoot, instanceId(account.accountId), 'grind-target.json'),
+      grindTarget,
+    );
+    observationConfigCache.delete(`grind:${Number(account.accountId)}`);
+  }
 
   if (!plan.route) {
-    if (plan.reason !== 'already_at_destination')
-      throw new HttpError(409, plan.reason ?? 'route_unavailable');
+    if (plan.reason !== 'already_at_destination') {
+      // CP-R2: classify cross-region movement with the restored last-good
+      // planner so an unreachable destination is an explicit blocker
+      // (farm_target_invalid / hub_unreachable / butterfly_missing /
+      // service_destination_unavailable / ...) instead of a blanket
+      // route_unavailable. DIRECT plans are unaffected (handled above).
+      const relocationPlan = planRelocation({
+        currentMap,
+        target: { targetMap: mapId, source: 'selected' },
+        graph: physicalMapGraph,
+        mapSummary: map,
+      });
+      if (relocationPlan.policy === RELOCATION_POLICY.UNREACHABLE)
+        throw new HttpError(409, relocationPlan.reason ?? 'farm_target_invalid');
+      // Reachable cross-region plan (walk to hub -> Kafra save -> Butterfly
+      // Wing 602 -> Kafra dialogue transfer -> walk). Executed stage by stage
+      // by the existing reconcile loop through EXISTING contract actions only.
+      const farmActive =
+        Boolean(controller.agentMode) && controller.agentMode !== 'PERSISTENT_IDLE';
+      let stopCommand = null;
+      if (farmActive) {
+        stopCommand = await queueOwnershipCommand(account, charId, {
+          action: 'stop_farm',
+          expectedRevision: Number(controller.revision),
+        });
+      }
+      pendingRelocations.set(charId, {
+        accountId: Number(account.accountId),
+        charId,
+        targetMap: mapId,
+        stage: 'RELOCATION',
+        relocationPlan,
+        relocationProgress: createRelocationProgress(),
+        kafraContext: kafraContextForPlan(relocationPlan),
+        commandIndexByStage: {},
+        commandPending: false,
+        commandRevision: 0,
+        attempts: 0,
+        busy: false,
+        deadline: Date.now() + RELOCATION_DEADLINE_MS,
+      });
+      return {
+        policy: relocationPlan.policy,
+        route: null,
+        targetMap: mapId,
+        command: stopCommand,
+        grindTarget,
+      };
+    }
     pendingRelocations.delete(charId);
     const command = await queueOwnershipCommand(
       account,
@@ -2024,7 +2202,6 @@ async function queueServerAgentRelocation(account, controller, requestedMapId) {
       { action: 'start_farm', expectedRevision: Number(controller.revision) },
       {
         targetMap: mapId,
-        mobId,
         lootEnabled: true,
         survivalEnabled: true,
         deathRecoveryEnabled: true,
@@ -2035,7 +2212,6 @@ async function queueServerAgentRelocation(account, controller, requestedMapId) {
       route: null,
       reason: plan.reason,
       targetMap: mapId,
-      mobId,
       command,
       grindTarget,
     };
@@ -2054,7 +2230,6 @@ async function queueServerAgentRelocation(account, controller, requestedMapId) {
     accountId: Number(account.accountId),
     charId,
     targetMap: mapId,
-    mobId,
     route: plan.route,
     stage: 'WAIT_IDLE',
     attempts: 0,
@@ -2065,7 +2240,6 @@ async function queueServerAgentRelocation(account, controller, requestedMapId) {
     policy: plan.policy,
     route: plan.route,
     targetMap: mapId,
-    mobId,
     command,
     grindTarget,
   };
@@ -2098,6 +2272,11 @@ async function queueOwnershipCommand(
   const action = String(body.action ?? '');
   if (!ownershipActions.has(action))
     throw new HttpError(422, 'invalid_transition');
+  // OPENKORE_REMOVED invariant: returning a character to the legacy OpenKore
+  // controller is retired from every production Web path. Only the authorized
+  // isolated acceptance harness may still exercise the historical handback.
+  if (action === 'release_agent' && runtimeMode !== 'isolated-test')
+    throw new HttpError(409, 'OPENKORE_HANDOFF_RETIRED');
   if (rolloutGatedActions.has(action)) {
     const gate = await readPersistentAgentRollout(sql, account.accountId, charId, {
       requireEdenCourseA:
@@ -2126,9 +2305,10 @@ async function queueOwnershipCommand(
     // reaches this branch; the browser still never supplies route waypoints.
     payloadObject = serverResolvedPayload;
   } else if (action === 'start_farm') {
+    // MOB_SELECTION_REMOVED: the player selects a farm MAP only. No mobId is
+    // required, generated or forwarded; AUTO_FARM chooses the monster.
     const targetMap = String(body.targetMap ?? '');
-    const mobId = Number(body.mobId);
-    if (!/^[a-z0-9_]{1,31}$/.test(targetMap) || !Number.isSafeInteger(mobId) || mobId <= 0)
+    if (!/^[a-z0-9_]{1,31}$/.test(targetMap))
       throw new HttpError(422, 'invalid_transition');
     const skillEnabled = body.skillEnabled === true;
     const skillId = Number(body.skillId ?? 0);
@@ -2136,7 +2316,6 @@ async function queueOwnershipCommand(
       throw new HttpError(422, 'invalid_transition');
     payloadObject = {
       targetMap,
-      mobId,
       lootEnabled: body.lootEnabled === true,
       skillEnabled,
       skillId: skillEnabled ? skillId : 0,
@@ -3472,18 +3651,21 @@ async function loadCombatSseFrame({
       rawLive,
       ObservationInterest.COMBAT_PAGE,
     ),
-    live = await tracedCharacterProjection(
-      {
-        characterId,
-        domain: 'live',
-        revision: liveRevision,
-        variant: ObservationInterest.COMBAT_PAGE,
-        ttlMs: OBSERVATION_POLICY.projectionCacheMs,
-      },
-      async () =>
-        await withMapPlayerCount(
-          projectLiveSnapshot(rawLive, ObservationInterest.COMBAT_PAGE),
-        ),
+    live = withLiveFreshness(
+      await tracedCharacterProjection(
+        {
+          characterId,
+          domain: 'live',
+          revision: liveRevision,
+          variant: ObservationInterest.COMBAT_PAGE,
+          ttlMs: OBSERVATION_POLICY.projectionCacheMs,
+        },
+        async () =>
+          await withMapPlayerCount(
+            projectLiveSnapshot(rawLive, ObservationInterest.COMBAT_PAGE),
+          ),
+      ),
+      rawLive,
     );
   return {
     reset: false,
@@ -3497,6 +3679,375 @@ async function loadCombatSseFrame({
   };
 }
 
+// C3-OPS-CONTROL-PLANE: character metadata (origin/role) read path. A missing
+// row is UNKNOWN/UNKNOWN. This never inserts and never infers from AID, CID,
+// name, SERVER_AGENT allowlist or residency. Metadata freshness is NOT live
+// status freshness; liveStateAgeMs comes from persistent_agent_live_status.
+const characterMetaFallback = Object.freeze({
+  characterOrigin: 'UNKNOWN',
+  characterRole: 'UNKNOWN',
+});
+async function readCharacterMeta(charId) {
+  const id = Number(charId);
+  if (!Number.isFinite(id) || id <= 0) return { ...characterMetaFallback };
+  try {
+    const out = await sql(
+      `SELECT character_origin,character_role FROM character_meta WHERE char_id=${id} LIMIT 1;`,
+    );
+    if (!out) return { ...characterMetaFallback };
+    const row = String(out).split('\t');
+    return {
+      characterOrigin: row[0] && row[0] !== 'NULL' ? row[0] : 'UNKNOWN',
+      characterRole: row[1] && row[1] !== 'NULL' ? row[1] : 'UNKNOWN',
+    };
+  } catch {
+    return { ...characterMetaFallback };
+  }
+}
+
+const CHARACTER_ORIGINS = new Set(['PLAYER', 'ADMIN', 'SYSTEM', 'UNKNOWN']);
+const CHARACTER_ROLES = new Set(['PRODUCTION', 'CANARY', 'TEST', 'UNKNOWN']);
+
+// ADMIN-only mutation of character_meta. Validated enums only (no free-text
+// interpolation). Writes character_meta + character_meta_audit in one MariaDB
+// session (START TRANSACTION … COMMIT). Never touches the rAthena char table.
+// Operator identity is owned by the outer security boundary, which does not
+// pass an app-level operator id. A fixed sentinel is recorded until the columns
+// are widened (separate migration) to hold a human-readable operator source.
+const SERVER_OPS_OPERATOR_ID = 0;
+async function setCharacterMeta(charId, input) {
+  const id = Number(charId);
+  if (!Number.isFinite(id) || id <= 0) throw new HttpError(400, 'char_id 不合法');
+  const origin = input?.characterOrigin;
+  const role = input?.characterRole;
+  if (origin !== undefined && !CHARACTER_ORIGINS.has(origin))
+    throw new HttpError(400, 'character_origin 不合法');
+  if (role !== undefined && !CHARACTER_ROLES.has(role))
+    throw new HttpError(400, 'character_role 不合法');
+  if (origin === undefined && role === undefined)
+    throw new HttpError(400, '沒有要修改的欄位');
+  const current = await readCharacterMeta(id);
+  const nextOrigin = origin ?? current.characterOrigin;
+  const nextRole = role ?? current.characterRole;
+  const now = Date.now();
+  const by = SERVER_OPS_OPERATOR_ID;
+  const statements = [
+    `INSERT INTO character_meta (char_id,character_origin,character_role,updated_at,updated_by) VALUES (${id},'${nextOrigin}','${nextRole}',${now},${by}) ON DUPLICATE KEY UPDATE character_origin=VALUES(character_origin),character_role=VALUES(character_role),updated_at=VALUES(updated_at),updated_by=VALUES(updated_by);`,
+  ];
+  if (origin !== undefined && origin !== current.characterOrigin) {
+    statements.push(
+      `INSERT INTO character_meta_audit (char_id,field,old_value,new_value,changed_at,changed_by) VALUES (${id},'character_origin','${current.characterOrigin}','${origin}',${now},${by});`,
+    );
+  }
+  if (role !== undefined && role !== current.characterRole) {
+    statements.push(
+      `INSERT INTO character_meta_audit (char_id,field,old_value,new_value,changed_at,changed_by) VALUES (${id},'character_role','${current.characterRole}','${role}',${now},${by});`,
+    );
+  }
+  await sql(`START TRANSACTION;\n${statements.join('\n')}\nCOMMIT;`);
+  return {
+    charId: id,
+    characterOrigin: nextOrigin,
+    characterRole: nextRole,
+    updatedAt: now,
+    updatedBy: by,
+  };
+}
+
+// ADMIN character roster for the Server Ops surface. Read-only; joins the
+// existing char table with character_meta (missing row ⇒ UNKNOWN).
+async function listAdminCharacters(limit = 200) {
+  const out = await sql(
+    `SELECT c.char_id,c.account_id,COALESCE(l.userid,''),c.name,c.class,c.base_level,c.job_level,COALESCE(s.map,c.last_map),c.online,COALESCE(m.character_origin,'UNKNOWN'),COALESCE(m.character_role,'UNKNOWN'),COALESCE(s.resident,0),COALESCE(s.hp,0),COALESCE(s.max_hp,0),COALESCE(s.sp,0),COALESCE(s.max_sp,0),COALESCE(s.x,0),COALESCE(s.y,0),COALESCE(s.runtime_phase,''),COALESCE(s.control_owner,''),COALESCE(s.ownership_state,''),COALESCE(s.runtime_state,''),COALESCE(s.agent_mode,''),COALESCE(st.task_type,''),COALESCE(st.task_phase,''),COALESCE(st.last_error_code,''),ROUND(TIMESTAMPDIFF(MICROSECOND,s.updated_at,CURRENT_TIMESTAMP(3))/1000),COALESCE(a.last_web_activity_at,0),COALESCE(a.last_web_login_at,0) FROM \`char\` c LEFT JOIN login l ON l.account_id=c.account_id LEFT JOIN character_meta m ON m.char_id=c.char_id LEFT JOIN persistent_agent_live_status s ON s.char_id=c.char_id LEFT JOIN persistent_agent_state st ON st.char_id=c.char_id LEFT JOIN web_account_activity a ON a.account_id=c.account_id ORDER BY c.char_id ASC LIMIT ${Number(limit)};`,
+  );
+  if (!out) return [];
+  return String(out)
+    .split(/\r?\n/)
+    .filter(Boolean)
+    .map((line) => {
+      const r = line.split('\t');
+      const liveAge = r[26] && r[26] !== 'NULL' ? Number(r[26]) : null;
+      return {
+        charId: Number(r[0]),
+        accountId: Number(r[1]),
+        accountName: r[2] || '',
+        name: r[3],
+        classId: Number(r[4]),
+        baseLevel: Number(r[5]),
+        jobLevel: Number(r[6]),
+        map: r[7],
+        online: r[8] === '1',
+        characterOrigin: r[9] || 'UNKNOWN',
+        characterRole: r[10] || 'UNKNOWN',
+        resident: r[11] === '1',
+        hp: Number(r[12]),
+        maxHp: Number(r[13]),
+        sp: Number(r[14]),
+        maxSp: Number(r[15]),
+        x: Number(r[16]),
+        y: Number(r[17]),
+        runtimePhase: r[18] || '',
+        controlOwner: r[19] || '',
+        ownershipState: r[20] || '',
+        runtimeState: r[21] || '',
+        agentMode: r[22] || '',
+        taskType: r[23] || '',
+        taskPhase: r[24] || '',
+        lastErrorCode: r[25] || '',
+        liveAgeMs: Number.isFinite(liveAge) ? liveAge : null,
+        lastWebActivityAt: Number(r[27]) || 0,
+        lastWebLoginAt: Number(r[28]) || 0,
+      };
+    });
+}
+
+// --- ADMIN character agent controls (啟動角色自主 / 啟動掛機) ---------------
+// Reuses the existing SERVER_AGENT claim_agent activation and start_farm
+// command surface. The admin path NEVER creates a Web session, never spawns
+// OpenKore and never writes ownership/agent fields directly — rAthena remains
+// the only executor. The pure transition rules live in admin-agent-control.mjs
+// so the transport, UI and tests share one decision.
+const ADMIN_ACTIVATION_DEADLINE_MS = 90_000;
+const ADMIN_ACTIVATION_POLL_MS = 1_500;
+const adminAgentOperationLocks = new Map();
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function readAdminCharacterIdentity(charId) {
+  const id = Number(charId);
+  if (!Number.isSafeInteger(id) || id <= 0) throw new HttpError(400, 'char_id 不合法');
+  const out = await sql(
+    `SELECT account_id,online,COALESCE(name,'') FROM \`char\` WHERE char_id=${id} LIMIT 1;`,
+  );
+  if (!out) throw new HttpError(404, 'character_not_found');
+  const row = out.split('\t');
+  const accountId = Number(row[0]);
+  if (!Number.isSafeInteger(accountId) || accountId <= 0)
+    throw new HttpError(404, 'character_not_found');
+  return { charId: id, accountId, online: row[1] === '1', name: row[2] || '' };
+}
+
+async function readAdminAgentSnapshot(charId) {
+  const [stateRow, live] = await Promise.all([
+    readAgentStateRow(charId),
+    readPersistentAgentLiveStatusView(charId),
+  ]);
+  return { stateRow, live };
+}
+
+function adminAgentStatusPayload(charId, snapshot) {
+  const stateRow = snapshot?.stateRow ?? null;
+  const live = snapshot?.live ?? null;
+  return {
+    charId: Number(charId),
+    controlOwner: stateRow?.controlOwner ?? null,
+    ownershipState: stateRow?.ownershipState ?? null,
+    agentEnabled: Boolean(stateRow?.agentEnabled),
+    agentMode: stateRow?.agentMode ?? null,
+    runtimeState: stateRow?.runtimeState ?? null,
+    lastCommandId: stateRow?.lastCommandId ?? null,
+    lastErrorCode: stateRow?.lastErrorCode ?? null,
+    resident: Boolean(live?.resident),
+    liveFresh: Boolean(live?.fresh),
+    liveAgeMs: Number.isFinite(live?.ageMs) ? live.ageMs : null,
+  };
+}
+
+// Ensure the character is a live SERVER_AGENT resident. Direct when already
+// resident; otherwise queue the existing claim_agent activation and wait for the
+// authoritative resident flag. Never proceeds past an explicit blocker.
+async function ensureAdminServerAgentAutonomy(charId) {
+  const identity = await readAdminCharacterIdentity(charId);
+  const account = { accountId: identity.accountId, characterId: identity.charId };
+  let snapshot = await readAdminAgentSnapshot(identity.charId);
+  let decision = decideActivation({
+    stateRow: snapshot.stateRow,
+    live: snapshot.live,
+    characterOnline: identity.online,
+  });
+  if (decision.phase === AGENT_PHASE.BLOCKED)
+    return { ok: false, blocker: decision.blocker, account, snapshot, activated: false, alreadyResident: false, claimCommand: null };
+  if (decision.phase === AGENT_PHASE.RESIDENT)
+    return { ok: true, blocker: null, account, snapshot, activated: false, alreadyResident: true, claimCommand: null };
+
+  let claimCommand = null;
+  if (decision.phase === AGENT_PHASE.CLAIM) {
+    // Existing activation/claim/resident mechanism (idempotent): initializes
+    // the canonical persistent_agent_state row + rollout allowlist, then queues
+    // claim_agent. No ownership field is written directly here.
+    const queued = await bootstrapServerAgentOwnership(account, identity.charId);
+    claimCommand = queued?.commandId ?? null;
+  }
+
+  const deadline = Date.now() + ADMIN_ACTIVATION_DEADLINE_MS;
+  while (Date.now() < deadline) {
+    await sleep(ADMIN_ACTIVATION_POLL_MS);
+    snapshot = await readAdminAgentSnapshot(identity.charId);
+    decision = decideActivation({ stateRow: snapshot.stateRow, live: snapshot.live });
+    if (decision.phase === AGENT_PHASE.RESIDENT)
+      return { ok: true, blocker: null, account, snapshot, activated: Boolean(claimCommand), alreadyResident: false, claimCommand };
+    if (decision.phase === AGENT_PHASE.BLOCKED)
+      return { ok: false, blocker: decision.blocker, account, snapshot, activated: Boolean(claimCommand), alreadyResident: false, claimCommand };
+  }
+  return { ok: false, blocker: 'resident_not_confirmed', account, snapshot, activated: Boolean(claimCommand), alreadyResident: false, claimCommand };
+}
+
+async function runAdminAgentAutonomy(charId) {
+  const result = await ensureAdminServerAgentAutonomy(charId);
+  return {
+    ok: result.ok,
+    charId: Number(charId),
+    action: 'autonomy',
+    phase: result.ok ? 'confirmed' : 'failed',
+    activated: Boolean(result.activated),
+    alreadyResident: Boolean(result.alreadyResident),
+    command: result.claimCommand ? { commandId: result.claimCommand, action: 'claim_agent' } : null,
+    blocker: result.blocker ?? null,
+    agent: adminAgentStatusPayload(charId, result.snapshot),
+  };
+}
+
+// Start farm for an admin-selected character. Activation first (reusing the
+// autonomy path); if activation fails, the farm command is never sent. A
+// missing farm target is an explicit blocker — the admin path does NOT use the
+// web canonical fallback, so the player's persisted target stays authoritative.
+async function runAdminAgentFarm(charId) {
+  const id = Number(charId);
+  const activation = await ensureAdminServerAgentAutonomy(id);
+  const base = {
+    charId: id,
+    action: 'farm',
+    activated: Boolean(activation.activated),
+    alreadyResident: Boolean(activation.alreadyResident),
+  };
+  if (!activation.ok)
+    return {
+      ...base,
+      ok: false,
+      phase: 'activating',
+      alreadyFarming: false,
+      relocation: false,
+      target: null,
+      command: null,
+      blocker: activation.blocker ?? 'activation_failed',
+      agent: adminAgentStatusPayload(id, activation.snapshot),
+    };
+  const controller = await readCharacterControllerStatus(activation.account, id, {
+    includeFarmTarget: true,
+    allowFarmTargetFallback: false,
+  });
+  if (!controller.available)
+    return {
+      ...base,
+      ok: false,
+      phase: 'starting',
+      alreadyFarming: false,
+      relocation: false,
+      target: null,
+      command: null,
+      blocker: controller.unavailableReason ?? 'agent_status_unavailable',
+      agent: adminAgentStatusPayload(id, await readAdminAgentSnapshot(id)),
+    };
+  const decision = decideFarmStart({
+    resident: true,
+    startFarmAllowed: controller.actions.startFarm,
+    startFarmBlocker: controller.actionBlockers.startFarm ?? null,
+    farmTarget: controller.farmTarget ?? null,
+  });
+  if (decision.decision === FARM_DECISION.ALREADY_FARMING)
+    return {
+      ...base,
+      ok: true,
+      phase: 'confirmed',
+      alreadyFarming: true,
+      relocation: false,
+      target: controller.farmTarget ?? null,
+      command: null,
+      blocker: null,
+      agent: adminAgentStatusPayload(id, await readAdminAgentSnapshot(id)),
+    };
+  if (decision.decision === FARM_DECISION.BLOCKED)
+    return {
+      ...base,
+      ok: false,
+      phase: 'starting',
+      alreadyFarming: false,
+      relocation: false,
+      target: controller.farmTarget ?? null,
+      command: null,
+      blocker: decision.blocker,
+      agent: adminAgentStatusPayload(id, await readAdminAgentSnapshot(id)),
+    };
+  const dispatched = await queueCanaryAutomation(activation.account, controller, {
+    action: 'start',
+  });
+  return {
+    ...base,
+    ok: true,
+    phase: 'confirmed',
+    alreadyFarming: false,
+    relocation: Boolean(dispatched?.policy),
+    target: controller.farmTarget ?? null,
+    command: dispatched?.command ?? null,
+    blocker: null,
+    agent: adminAgentStatusPayload(id, await readAdminAgentSnapshot(id)),
+  };
+}
+
+function runAdminAgentAction(charId, action) {
+  return action === 'autonomy'
+    ? runAdminAgentAutonomy(charId)
+    : runAdminAgentFarm(charId);
+}
+
+// C3-OPS-CONTROL-PLANE: the ONLY lifecycle control path. It shells the
+// canonical ro-stack.ps1; it never spawns login/char/map directly. MariaDB and
+// the Dashboard control plane are never targeted by stop/restart.
+const roStackScriptPath = join(root, 'ops', 'ro-stack', 'ro-stack.ps1');
+async function runStackLifecycle(action) {
+  try {
+    const { stdout, stderr } = await execFileAsync(
+      'powershell.exe',
+      ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', roStackScriptPath, action],
+      { cwd: root, windowsHide: true, timeout: 180_000 },
+    );
+    return { ok: true, output: String(stdout ?? '').trim(), stderr: String(stderr ?? '').trim() };
+  } catch (error) {
+    return {
+      ok: false,
+      output: String(error?.stdout ?? '').trim(),
+      stderr: String(error?.stderr ?? error?.message ?? '').trim(),
+      exitCode: Number.isFinite(Number(error?.code)) ? Number(error.code) : null,
+    };
+  }
+}
+
+const STACK_LIFECYCLE_STATES = new Set([
+  'ALREADY_RUNNING',
+  'ALREADY_STOPPED',
+  'STARTING',
+  'STOPPING',
+  'RESTARTING',
+  'STOPPED',
+  'STOP_FAILED',
+  'RESTART_SUCCESS',
+  'RESTART_FAILED',
+  'LIFECYCLE_BUSY',
+]);
+function parseStackLifecycleState(output) {
+  const lines = String(output ?? '')
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  for (const line of lines) {
+    const token = line.split(/\s+/)[0];
+    if (STACK_LIFECYCLE_STATES.has(token)) return token;
+  }
+  return null;
+}
+
 async function queryCharacter(accountId) {
   const output = await sql(
     `SELECT c.char_id,c.name,c.class,c.sex,c.hair,c.hair_color,c.base_level,c.job_level,c.base_exp,c.job_exp,c.zeny,c.str,c.agi,c.vit,c.\`int\`,c.dex,c.luk,c.hp,c.max_hp,c.sp,c.max_sp,c.status_point,c.skill_point,c.last_map,c.last_x,c.last_y,c.online,j.value FROM \`char\` c LEFT JOIN char_reg_str j ON j.char_id=c.char_id AND j.\`key\`='terminal_target_job$' AND j.\`index\`=0 WHERE c.account_id=${Number(accountId)} AND c.char_num=0 LIMIT 1;`,
@@ -3504,6 +4055,7 @@ async function queryCharacter(accountId) {
   if (!output) return null;
   const row = output.split('\t'),
     n = (i) => Number(row[i] ?? 0);
+  const meta = await readCharacterMeta(row[0]);
   return {
     charId: n(0),
     name: row[1],
@@ -3533,6 +4085,8 @@ async function queryCharacter(accountId) {
     y: n(25),
     online: row[26] === '1',
     targetJob: row[27] && row[27] !== 'NULL' ? row[27] : null,
+    characterOrigin: meta.characterOrigin,
+    characterRole: meta.characterRole,
   };
 }
 
@@ -5586,14 +6140,14 @@ async function readGrindTarget(account) {
           'utf8',
         ),
       );
+      // MOB_SELECTION_REMOVED / LEGACY_MOBID_IGNORED: only targetMap is read.
+      // A legacy mobId in an old grind-target.json is ignored, never exposed,
+      // never a filter and never used to reject or rewrite the map.
       return /^[a-z0-9_]{1,31}$/.test(value?.mapId ?? '')
         ? {
             mapId: value.mapId,
             name: String(value.name ?? value.mapId),
             levelRange: value.levelRange ?? null,
-            mobId: Number.isSafeInteger(Number(value.mobId))
-              ? Number(value.mobId)
-              : 0,
             updatedAt: Number(value.updatedAt ?? 0),
           }
         : null;
@@ -5728,16 +6282,15 @@ async function authoritativeGrindRedPotions(charId) {
 async function saveGrindTarget(account, requestedMapId) {
   const mapId = String(requestedMapId ?? '').trim();
   if (!/^[a-z0-9_]{1,31}$/.test(mapId))
-    throw new HttpError(400, '無效的掛機地圖');
-  const mapIndex = JSON.parse(await readFile(mapInfoIndexPath, 'utf8'));
-  const map = mapIndex.maps?.[mapId];
-  if (
-    !map?.availableForAfk ||
-    !map.unlocked ||
-    !map.selectable ||
-    !map.levelRange
-  )
-    throw new HttpError(400, '此地圖尚未開放為掛機地圖');
+    throw new HttpError(400, 'farm_target_unresolved');
+  // MOB_SELECTION_REMOVED: the player selects the MAP only. All canonical maps
+  // stay visible, but only a map with at least one monster spawn is farm
+  // selectable. No town-name rule, no region unlock, no rollout/static
+  // allowlist, and no default-map fallback.
+  const eligibility = farmMapEligibility(mapId);
+  if (!eligibility.map) throw new HttpError(400, 'farm_target_unresolved');
+  if (!eligibility.farmable) throw new HttpError(409, 'farm_map_not_farmable');
+  const map = eligibility.map;
 
   const id = await ensureWorker(account);
   const [snapshot, supplyCycle, savePoint] = await Promise.all([
@@ -7309,6 +7862,7 @@ async function handleDashboardRequest(request, response) {
               hairColor: account.hairColor,
               baseLevel: account.baseLevel,
               jobLevel: account.jobLevel,
+              adminSurface: true,
             }
           : null,
         equipment,
@@ -7338,7 +7892,10 @@ async function handleDashboardRequest(request, response) {
         cursor: combatStream.cursor,
         combatRevision: combatStream.combatRevision,
         combatStream,
-        live: projectLiveSnapshot(rawLive, ObservationInterest.COMBAT_PAGE),
+        live: withLiveFreshness(
+          projectLiveSnapshot(rawLive, ObservationInterest.COMBAT_PAGE),
+          rawLive,
+        ),
       });
     }
     if (
@@ -7693,18 +8250,21 @@ async function handleDashboardRequest(request, response) {
         );
         if (rawDerived) {
           const liveRevision = revisionKeyForInterest(rawDerived, interest),
-            derived = await tracedCharacterProjection(
-              {
-                characterId: account.characterId,
-                domain: 'live',
-                revision: liveRevision,
-                variant: interest,
-                ttlMs: OBSERVATION_POLICY.projectionCacheMs,
-              },
-              async () =>
-                await withMapPlayerCount(
-                  projectLiveSnapshot(rawDerived, interest),
-                ),
+            derived = withLiveFreshness(
+              await tracedCharacterProjection(
+                {
+                  characterId: account.characterId,
+                  domain: 'live',
+                  revision: liveRevision,
+                  variant: interest,
+                  ttlMs: OBSERVATION_POLICY.projectionCacheMs,
+                },
+                async () =>
+                  await withMapPlayerCount(
+                    projectLiveSnapshot(rawDerived, interest),
+                  ),
+              ),
+              rawDerived,
             );
           const needsInventoryFallback =
               interest === ObservationInterest.INVENTORY_PAGE &&
@@ -8010,7 +8570,7 @@ async function handleDashboardRequest(request, response) {
         liveStatus: liveApplied.liveStatus,
         equipment: currentEquipment,
         inventory: mergedInventory,
-        derived,
+        derived: withLiveFreshness(derived, derived),
         onboarding,
         eden,
         questJournal,
@@ -8066,16 +8626,19 @@ async function handleDashboardRequest(request, response) {
         ]),
         rawLive = withStatDomainSnapshot(account.characterId, rawSnapshot),
         liveRevision = revisionKeyForInterest(rawLive, interest),
-        live = await tracedCharacterProjection(
-          {
-            characterId: account.characterId,
-            domain: 'live',
-            revision: liveRevision,
-            variant: interest,
-            ttlMs: OBSERVATION_POLICY.projectionCacheMs,
-          },
-          async () =>
-            await withMapPlayerCount(projectLiveSnapshot(rawLive, interest)),
+        live = withLiveFreshness(
+          await tracedCharacterProjection(
+            {
+              characterId: account.characterId,
+              domain: 'live',
+              revision: liveRevision,
+              variant: interest,
+              ttlMs: OBSERVATION_POLICY.projectionCacheMs,
+            },
+            async () =>
+              await withMapPlayerCount(projectLiveSnapshot(rawLive, interest)),
+          ),
+          rawLive,
         ),
         lines = session.projection.lines,
         requested = url.searchParams.has('cursor')
@@ -8096,10 +8659,24 @@ async function handleDashboardRequest(request, response) {
             ? coalesceCombatEventLines(deltaLines)
             : [],
         combatDelta = coalesceCombatEvents(deltaLines);
+      let nativeLog = null;
+      if (interest === ObservationInterest.COMBAT_PAGE) {
+        const serverAgentControlled =
+          rawLive?.serverAgentReadModel === true ||
+          (!rawLines.length &&
+            (await characterIsServerAgentControlled(account.characterId)));
+        if (serverAgentControlled)
+          nativeLog = await readNativeCombatLog(
+            account.characterId,
+            Number.isInteger(requested) && requested >= 0 ? requested : null,
+          );
+      }
       return json(response, 200, {
-        cursor: session.projection.cursor,
-        reset: !valid,
-        lines: rawLines,
+        cursor: nativeLog?.available
+          ? nativeLog.cursor
+          : session.projection.cursor,
+        reset: nativeLog?.available ? nativeLog.reset : !valid,
+        lines: nativeLog?.available ? nativeLog.lines : rawLines,
         combatDelta:
           interest === ObservationInterest.COMBAT_PAGE
             ? undefined
