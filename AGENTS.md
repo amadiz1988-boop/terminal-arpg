@@ -763,13 +763,15 @@ Do not reinvent a proven capability without evidence.
 
 For any workline involving an OpenKore-era capability, the worker MUST execute:
 
-`OPENKORE_REFERENCE_GATE_V1`
+`OPENKORE_REFERENCE_GATE_V1.1`
 
 defined at:
 
 `docs/project-control/openkore-reference-gate.md`
 
 before making source changes.
+
+Gate now includes mature rAthena reference evaluation.
 
 A statement such as "OpenKore was referenced" is not sufficient evidence.
 
@@ -778,11 +780,63 @@ Compliance requires:
 - exact reference files/symbols
 - Last-Good reconstruction
 - OpenKore → PA behavior mapping
+- mature rAthena reference check（如適用）
 - `FIRST_BROKEN_TRANSITION`
 - duplicate-engine check
 
 The Gate is operational procedure.
 `AGENTS.md` remains policy authority.
+
+### 13. Mature rAthena Reference Policy
+
+OpenKore 仍是 automation behavior 的主要成熟參考來源；成熟 rAthena
+official／community implementation 是重要的 secondary reference，尤其適合
+server-side behavior。對 PA 開發，若 rAthena ecosystem 已有成熟 server-side
+實作，必須在重新設計前先研究。
+
+Reference scope 包含：behavior、algorithm、state transitions、server-side API
+usage、recovery logic、targeting rules、navigation logic、item／equipment
+semantics、combat automation、supply automation、edge-case handling。
+
+研究成熟方案 ≠ 直接安裝第三方插件。正式 Runtime Authority 不變：
+
+```text
+PA / SERVER_AGENT → rAthena
+```
+
+Reference reconstruction 優先考慮：
+
+```text
+A. OpenKore mature implementation
+B. Mature rAthena official/community implementation
+C. Project historical Last-Good / acceptance evidence
+D. Current PA implementation
+```
+
+這不是「排名決定誰一定正確」。真正流程是 collect mature references → compare
+proven behaviors → identify common semantics → map into PA architecture。若
+OpenKore 與 rAthena implementation 有差異，不得自行選一邊，必須記錄：
+
+```text
+REFERENCE_CONFLICT = YES
+OPENKORE_BEHAVIOR =
+RATHENA_BEHAVIOR =
+CURRENT_PA_CONSTRAINT =
+```
+
+再由 Project Control 決定。
+
+License／Code Reuse 規則：允許研究 behavior、architecture、algorithm、state
+machine、edge cases 與 data semantics；但直接複製第三方 source code 前必須確認
+license。Mandatory：
+
+```text
+REFERENCE_LICENSE =
+DIRECT_CODE_REUSE_ALLOWED = YES/NO/UNKNOWN
+```
+
+若 `LICENSE = UNKNOWN`，則 `DIRECT_CODE_REUSE_ALLOWED = NO`：可以研究行為，但不得
+直接 copy source。OpenKore 亦同樣適用。
 
 本節強化既有 `Single Runtime Policy`、`PC-DISPATCH-STANDARD`、
 `LAST_GOOD → CURRENT → FIRST_BROKEN_TRANSITION`、Browser UI acceptance、
