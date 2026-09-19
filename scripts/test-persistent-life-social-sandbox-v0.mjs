@@ -140,6 +140,7 @@ check('real-shaped canonical context adapter returns the minimal contract', () =
   assert.equal(result.context.character_id, 1001);
   assert.equal(result.context.map, 'pay_dun00');
   assert.equal(result.context.current_activity, 'AUTO_FARM');
+  assert.equal(result.context.hunt_active, true);
   assert.equal(result.context.nearby_relevant_characters[0].character_id, 1002);
   assert.equal(result.context.recent_encounters[0].type, 'ENCOUNTER');
 });

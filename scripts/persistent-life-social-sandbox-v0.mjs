@@ -282,12 +282,14 @@ export function createShadowWorldContext({
   const recentSocialEvents = normalizeRuntimeEvents(
     envelope.recentSocialEvents ?? source.recentSocialEvents ?? allEvents.filter((event) => event.type !== 'ENCOUNTER'),
   );
+  const currentActivity = source.currentActivity ?? source.current_activity ?? source.activity ?? source.runtimePhase ?? 'UNAVAILABLE';
+  const inferredHuntActive = macroGoal === 'HUNT' && ['AUTO_FARM', 'HUNT', 'COMBAT'].includes(String(currentActivity).toUpperCase());
   const context = {
     character_id: characterId,
     map,
-    current_activity: source.currentActivity ?? source.current_activity ?? source.activity ?? source.runtimePhase ?? 'UNAVAILABLE',
+    current_activity: currentActivity,
     macro_goal: macroGoal,
-    hunt_active: source.huntActive ?? source.hunt_active ?? macroGoal === 'HUNT',
+    hunt_active: source.huntActive ?? source.hunt_active ?? inferredHuntActive,
     nearby_relevant_characters: nearbyRelevantCharacters,
     party_state: source.partyState ?? source.party_state ?? 'UNAVAILABLE',
     recent_encounters: recentEncounters,
