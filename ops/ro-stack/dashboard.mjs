@@ -158,6 +158,11 @@ const edenInstructorName = () =>
   resolveNpcAsset('eden-instructor-boya').name ?? '伊甸園教官 保亞';
 
 const execFileAsync = promisify(execFile);
+import {
+  buildAdminFixtureNavigationRoute,
+  navigationCommandIsPending,
+  parseAdminFixtureNavigationInput,
+} from './persistent-agent/admin-fixture-navigation.mjs';
 const scryptAsync = promisify(scrypt);
 const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const runtime = join(root, '.local', 'ro-stack');
@@ -7676,6 +7681,153 @@ function sessionCookie(token, request) {
   return `ro_session=${token}; HttpOnly; SameSite=Lax; Path=/; Max-Age=604800${secure ? '; Secure' : ''}`;
 }
 
+// PHASE_4B_ADMIN_FIXTURE_NAVIGATION_PRODUCER: the Admin surface may submit a
+// bounded fixture movement intent for an already-authorized test character.
+// The route is resolved here and delivered through the existing ownership
+// command contract. No player session, projection write, Social dispatch or
+// second navigation executor is introduced.
+async function runAdminFixtureNavigation(charId, input) {
+  const id = Number(charId);
+  const identity = await readAdminCharacterIdentity(id);
+  const parsed = parseAdminFixtureNavigationInput(input);
+  if (!parsed.ok) throw new HttpError(422, parsed.reason);
+  if (!mapRoutingIndex.maps?.[parsed.targetMap])
+    throw new HttpError(409, 'target_map_unresolved');
+
+  const rollout = await readPersistentAgentRollout(
+    sql,
+    identity.accountId,
+    id,
+  );
+  if (!rollout.allowed) throw new HttpError(403, rollout.reason);
+
+  const snapshot = await readAdminAgentSnapshot(id);
+  const stateRow = snapshot.stateRow;
+  const live = snapshot.live;
+  if (
+    !stateRow ||
+    stateRow.controlOwner !== SERVER_AGENT_OWNER ||
+    stateRow.ownershipState !== SERVER_AGENT_OWNER ||
+    !stateRow.agentEnabled
+  )
+    throw new HttpError(409, 'agent_not_owner');
+  if (!live?.resident || !live.fresh || !live.map)
+    throw new HttpError(409, 'agent_position_unavailable');
+
+  const latestNavigation = await readLatestNoviceCommand(id, 'start_navigation');
+  if (
+    pendingRelocations.has(id) ||
+    navigationCommandIsPending(latestNavigation?.status)
+  )
+    throw new HttpError(409, 'navigation_already_pending');
+
+  const plan = live.map === parsed.targetMap
+    ? { route: null, reason: 'already_at_destination' }
+    : planWebRelocation(
+      await serverAgentWarpGraph(),
+      live.map,
+      parsed.targetMap,
+    );
+  const route = buildAdminFixtureNavigationRoute({
+    currentMap: live.map,
+    targetMap: parsed.targetMap,
+    targetX: parsed.targetX,
+    targetY: parsed.targetY,
+    resolvedRoute: plan.route,
+  });
+  if (!route) throw new HttpError(409, 'route_failed');
+
+  const account = { accountId: identity.accountId, characterId: id };
+  const command = await queueOwnershipCommand(
+    account,
+    id,
+    { action: 'start_navigation', expectedRevision: Number(stateRow.revision) },
+    { route },
+  );
+  await recordRolloutEvent(sql, {
+    accountId: identity.accountId,
+    charId: id,
+    eventType: 'ADMIN_FIXTURE_NAVIGATION_QUEUED',
+    commandId: command.commandId,
+  }).catch(() => {});
+  return {
+    ok: true,
+    charId: id,
+    executor: SERVER_AGENT_OWNER,
+    target: {
+      map: parsed.targetMap,
+      x: parsed.targetX,
+      y: parsed.targetY,
+    },
+    command,
+  };
+}
+
+async function handleAdminFixtureNavigationRequest(url, request, response) {
+  const match = url.pathname.match(
+    /^\/api\/admin\/characters\/(\d{1,10})\/agent\/fixture-navigation$/,
+  );
+  if (!match) return false;
+  const requestedCharId = Number(match[1]);
+  if (!isAdminSurfaceHost(request)) {
+    await recordRolloutEvent(sql, {
+      accountId: 0,
+      charId: requestedCharId,
+      eventType: 'ADMIN_FIXTURE_NAVIGATION_REJECTED',
+      errorCode: 'admin_auth_required',
+    }).catch(() => {});
+    json(response, 403, { error: 'admin_auth_required' });
+    return true;
+  }
+  if (request.method !== 'POST') {
+    json(response, 405, { error: 'method_not_allowed' });
+    return true;
+  }
+  if (adminAgentOperationLocks.has(requestedCharId)) {
+    json(response, 409, {
+      ok: false,
+      charId: requestedCharId,
+      action: 'fixture_navigation',
+      phase: 'failed',
+      error: 'operation_in_progress',
+      blocker: 'operation_in_progress',
+    });
+    return true;
+  }
+  adminAgentOperationLocks.set(requestedCharId, 'fixture_navigation');
+  try {
+    const result = await runAdminFixtureNavigation(
+      requestedCharId,
+      await requestBody(request),
+    );
+    json(response, 202, result);
+  } catch (error) {
+    const blocker =
+      error instanceof HttpError ? error.message : 'fixture_navigation_failed';
+    await recordRolloutEvent(sql, {
+      accountId: 0,
+      charId: requestedCharId,
+      eventType: 'ADMIN_FIXTURE_NAVIGATION_REJECTED',
+      errorCode: blocker,
+    }).catch(() => {});
+    console.error(
+      `Admin fixture navigation failed char=${requestedCharId}:`,
+      error,
+    );
+    json(response, error instanceof HttpError ? error.statusCode : 500, {
+      ok: false,
+      charId: requestedCharId,
+      action: 'fixture_navigation',
+      phase: 'failed',
+      error: blocker,
+      blocker,
+    });
+  } finally {
+    adminAgentOperationLocks.delete(requestedCharId);
+  }
+  return true;
+}
+
 async function handleDashboardRequest(request, response) {
   const requestStarted = performance.now();
   let requestMetricUrl = null;
@@ -7722,6 +7874,7 @@ async function handleDashboardRequest(request, response) {
         { 'set-cookie': sessionCookie(result.token, request) },
       );
     }
+    if (await handleAdminFixtureNavigationRequest(url, request, response)) return;
     if (url.pathname === '/api/account' && request.method === 'DELETE') {
       const token = cookie(request, 'ro_session');
       if (token) {
