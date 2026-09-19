@@ -70,17 +70,25 @@ Detailed future roadmap:   docs/roadmap/
 
 ---
 
-## Persistent Agent Canonical Source Authority
+## Persistent Agent Native Source Authority
 
-Single authoritative Persistent Agent source lineage. This supersedes every
-other PA worktree, branch, patch artifact and runtime copy.
+CANONICAL_NATIVE_SOURCE:
+C:\Users\Administrator\source\ghost-island-rathena
+
+The Persistent Agent native implementation is owned by that canonical rAthena
+source tree. No `.tmp-*` worktree is source authority for native PA code.
+
+The `.tmp-p2d-pa-equipment-action-v1` lineage below is retained ONLY as
+`HISTORICAL_EVIDENCE` / `LAST_GOOD_LINEAGE`; it is NOT `SOURCE_OF_TRUTH`, NOT
+`NATIVE_AUTHORITY` and NOT a `CANONICAL_SOURCE`.
 
 ```
-PERSISTENT_AGENT_CANONICAL_SOURCE:
-C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\.tmp-pa-gate3-live-status-integration-v1
-PERSISTENT_AGENT_CANONICAL_BRANCH: canonical/persistent-agent-gate3-v1
-PERSISTENT_AGENT_CANONICAL_HEAD:   ba0e4433b310e6932464700d93bd37175d71077b
-PERSISTENT_AGENT_LINEAGE:          3ffdad1 -> 5ed8f0d -> 866f423 -> ea5b995 -> c41cc4c -> a3cea54 -> 1fd30bd -> ba0e443
+PERSISTENT_AGENT_LAST_GOOD_LINEAGE_WORKTREE:
+C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\.tmp-p2d-pa-equipment-action-v1
+PERSISTENT_AGENT_LAST_GOOD_LINEAGE_BRANCH: canonical/persistent-agent-p2f-v1
+PERSISTENT_AGENT_LAST_GOOD_LINEAGE_HEAD:   fd12d2a10ac0109a5f802be2c24107afd11f7419
+PERSISTENT_AGENT_LINEAGE:          3ffdad1 -> 5ed8f0d -> 866f423 -> ea5b995 -> c41cc4c -> a3cea54 -> 1fd30bd -> ba0e443 -> 704a4ac (P2B) -> b13a8e2 (P2C NAV4) -> ab44223 (P2D) -> fd12d2a (P2F)
+PERSISTENT_AGENT_SUPERSEDED_HEAD: ba0e4433b310e6932464700d93bd37175d71077b (superseded by ab44223; not runtime truth)
 PERSISTENT_AGENT_MILESTONE_REF:    milestone/gate1a-no-client-player-flow-pass-20260917
 PERSISTENT_AGENT_MILESTONE_TARGET: 5ed8f0d21ee138ddd37db4f7070a4decafeb84e5
 PERSISTENT_AGENT_MILESTONE_REF_2:  milestone/gate1b-survival-death-recovery-pass-20260917
@@ -89,11 +97,18 @@ PERSISTENT_AGENT_MILESTONE_REF_3:  milestone/gate2-supply-replenishment-pass-202
 PERSISTENT_AGENT_MILESTONE_TARGET_3: a3cea54da3ae15b86a256dd23627af784b391056
 PERSISTENT_AGENT_MILESTONE_REF_4:  milestone/gate3-multimap-relocation-pass-20260917
 PERSISTENT_AGENT_MILESTONE_TARGET_4: ba0e4433b310e6932464700d93bd37175d71077b
+P2F_READ_MODEL_COMMIT:             fd12d2a10ac0109a5f802be2c24107afd11f7419
+WEB_P2F_READ_MODEL_BRANCH:         feature/p2f-headless-web-read-model
+WEB_P2F_READ_MODEL_HEAD:           b6e5a6aafed39ac01eb411f1411e48c2d56a2400
 ```
 
 Rules:
 
-- Future PA source changes start ONLY in the canonical worktree above.
+- Native PA source changes start ONLY in `CANONICAL_NATIVE_SOURCE`
+  (`C:\Users\Administrator\source\ghost-island-rathena`).
+- `.tmp-p2d-pa-equipment-action-v1` (`canonical/persistent-agent-p2f-v1` @
+  `fd12d2a`) is `HISTORICAL_EVIDENCE` / `LAST_GOOD_LINEAGE` only; it is NOT
+  SOURCE_OF_TRUTH, NOT NATIVE_AUTHORITY and NOT a CANONICAL_SOURCE.
 - Historical PA worktrees are read-only reference; do not delete them.
 - `.tmp-gate1a-player-flow-v1` is now `LEGACY_DIRTY_REFERENCE` / `SOURCE_AUTHORITY=NO`:
   its branch `canonical/persistent-agent-no-client-v1` remains frozen at `a3cea54`
@@ -102,14 +117,15 @@ Rules:
 - `.tmp-pa-iso-runtime` is shared test/runtime support only; it is NOT source authority.
 - Binaries and runtime copies are never source authority.
 - Patch artifacts are derived artifacts unless explicitly declared canonical.
-- A future agent located in any other PA worktree must STOP and report
-  `NON_CANONICAL_PA_WORKTREE` before attempting a PA source edit.
+- A future agent attempting a native PA source edit outside
+  `CANONICAL_NATIVE_SOURCE` must STOP and report `NON_CANONICAL_PA_WORKTREE`.
 
 PA root classification (frozen references; do not delete):
 
 | Root | Classification | Source authority |
 | --- | --- | --- |
-| `.tmp-pa-gate3-live-status-integration-v1` | CANONICAL (`canonical/persistent-agent-gate3-v1` @ `ba0e443`) | YES |
+| `.tmp-p2d-pa-equipment-action-v1` | HISTORICAL_EVIDENCE / LAST_GOOD_LINEAGE (`canonical/persistent-agent-p2f-v1` @ `fd12d2a`; contains P2B + P2C NAV4 + P2D + P2F) | NO |
+| `.tmp-pa-gate3-live-status-integration-v1` | SUPERSEDED_REFERENCE (`canonical/persistent-agent-gate3-v1` @ `ba0e443`, superseded by `ab44223`; not runtime truth) | NO |
 | `.tmp-gate1a-player-flow-v1` | LEGACY_DIRTY_REFERENCE (branch `canonical/persistent-agent-no-client-v1` @ `a3cea54`, dirty worktree) | NO |
 | `.tmp-server-agent-no-client-controller-v1` | REFERENCE (ancestor snapshot `3ffdad1`) | NO |
 | `.tmp-pa-lifecycle-consolidation-v1` | REFERENCE (divergent historical `95376cc`) | NO |
@@ -118,7 +134,7 @@ PA root classification (frozen references; do not delete):
 Legacy patch `terminal-arpg/ops/ro-stack/patches/persistent-agent.patch`
 = `STALE_REFERENCE` / derived artifact (last generated 2026-09-14, predates
 command-contract hardening `866f423`). Never use it as source authority over
-the canonical Git source.
+`CANONICAL_NATIVE_SOURCE`.
 
 ---
 
@@ -134,7 +150,7 @@ CANONICAL_HEAD:  3ffdad1420feadde1e4d96667d7a33136bddb3c5
 SOURCE_AUTHORITY: NO
 SOURCE_OF_TRUTH: terminal-arpg/docs/openkore-exit-source-of-truth.md
 LAST_VERIFIED:   2026-09-17
-DO_NOT_EDIT:     read-only reference; PA source edits belong to Workline B canonical worktree
+DO_NOT_EDIT:     read-only reference; native PA source edits belong to CANONICAL_NATIVE_SOURCE (C:\Users\Administrator\source\ghost-island-rathena)
 DO_NOT_SEARCH:   C:\ root, project root, other worktrees unless SoT explicitly references them
 ```
 
@@ -145,18 +161,27 @@ DO_NOT_SEARCH:   C:\ root, project root, other worktrees unless SoT explicitly r
 ```
 WORKLINE:        B
 STATUS:          CANONICAL
-ROLE:            PERSISTENT_AGENT_CANONICAL_SOURCE
-ACTIVE_WORKTREE: C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\.tmp-pa-gate3-live-status-integration-v1
-ACTIVE_BRANCH:   canonical/persistent-agent-gate3-v1
-CANONICAL_HEAD:  ba0e4433b310e6932464700d93bd37175d71077b
-PARENT:          1fd30bdd83fa90d6c25ebbabe88ccad13c08453a
-GRANDPARENT:     a3cea54da3ae15b86a256dd23627af784b391056
+ROLE:            CANONICAL_WEB_WORKLINE (Dashboard / Player Web / relocation)
+ACTIVE_WORKTREE: C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\terminal-arpg
+ACTIVE_BRANCH:   verify on entry (git branch --show-current)
+CANONICAL_HEAD:  verify on entry (git rev-parse HEAD)
+PERSISTENT_AGENT_NATIVE_AUTHORITY: C:\Users\Administrator\source\ghost-island-rathena
+PERSISTENT_AGENT_LAST_GOOD_LINEAGE:
+  # HISTORICAL_EVIDENCE only; NOT SOURCE_OF_TRUTH / NATIVE_AUTHORITY / CANONICAL_SOURCE
+  WORKTREE: .tmp-p2d-pa-equipment-action-v1
+  BRANCH:   canonical/persistent-agent-p2f-v1
+  HEAD:     fd12d2a10ac0109a5f802be2c24107afd11f7419
+PARENT:          ab442233a2741ab02a2829428bf82a135dcc8a91
+GRANDPARENT:     b13a8e2 (P2C NAV4 integration)
+SUPERSEDED_HEAD: ba0e4433b310e6932464700d93bd37175d71077b (ba0e443 MUST NOT be runtime truth)
 MILESTONE_REF:   milestone/gate1a-no-client-player-flow-pass-20260917 -> 5ed8f0d21ee138ddd37db4f7070a4decafeb84e5
 MILESTONE_REF_2: milestone/gate1b-survival-death-recovery-pass-20260917 -> c41cc4c86fff3feb35da54fd4ebf7206cd09818d
 MILESTONE_REF_3: milestone/gate2-supply-replenishment-pass-20260917 -> a3cea54da3ae15b86a256dd23627af784b391056
 MILESTONE_REF_4: milestone/gate3-multimap-relocation-pass-20260917 -> ba0e4433b310e6932464700d93bd37175d71077b
-SOURCE_OF_TRUTH: terminal-arpg/docs/openkore-exit-source-of-truth.md
-LAST_VERIFIED:   2026-09-17
+SOURCE_OF_TRUTH: terminal-arpg (canonical Web source: ops/ro-stack/dashboard.mjs,
+                 ops/ro-stack/dashboard/app.js, ops/ro-stack/persistent-agent/*)
+P2F_READ_MODEL_COMMIT: fd12d2a10ac0109a5f802be2c24107afd11f7419 (P2F-HEADLESS-WEB-READ-MODEL)
+LAST_VERIFIED:   2026-09-19
 SEARCH_SCOPE:    ACTIVE_WORKTREE_ONLY
 CROSS_WORKTREE_ALLOWED: NO
 LEGACY_DIRTY_REFERENCE:
@@ -246,10 +271,10 @@ NEXT: AUTOMATED_PRODUCTION_CANARY
 
 Do NOT open `C:\` or `g-p-6a9bcb57afdc8191966436643af8acdf\` as daily coding workspace.
 Open the ACTIVE_WORKTREE directly. Examples:
-- Workline B (Persistent Agent, canonical) → `.tmp-pa-gate3-live-status-integration-v1`
+- Workline B (Web / Dashboard, canonical) → `terminal-arpg`
 - Workline C → `terminal-arpg-phase4a-canonical`
 
-Persistent Agent edits belong ONLY to Workline B's canonical worktree above.
+Persistent Agent native edits belong ONLY to `CANONICAL_NATIVE_SOURCE` (`C:\Users\Administrator\source\ghost-island-rathena`); the `.tmp-p2d-pa-equipment-action-v1` lineage is `HISTORICAL_EVIDENCE` / `LAST_GOOD_LINEAGE` only.
 `.tmp-server-agent-no-client-controller-v1` is a frozen reference, not a workspace.
 `.tmp-gate1a-player-flow-v1` is now `LEGACY_DIRTY_REFERENCE` (dirty worktree, no
 source authority); do not open it for PA edits or attempt to clean it.
