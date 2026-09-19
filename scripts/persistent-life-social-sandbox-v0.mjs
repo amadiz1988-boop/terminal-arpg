@@ -300,6 +300,106 @@ export function createShadowWorldContext({
   return { ok: true, context, fields: SHADOW_CONTEXT_FIELDS };
 }
 
+function visibleEntityId(entity) {
+  const id = entity?.character_id ?? entity?.characterId ?? entity?.char_id ?? entity?.id ?? entity?.entity_id;
+  return id === undefined || id === null || id === '' ? null : String(id);
+}
+
+function visibleEntitySet(entities, selfId) {
+  const self = selfId === undefined || selfId === null ? null : String(selfId);
+  return new Set((Array.isArray(entities) ? entities : [])
+    .map(visibleEntityId)
+    .filter((id) => id !== null && id !== self));
+}
+
+function derivedPresenceFact({ type, characterId, counterpartId, map, revision, timestamp, projectionSource }) {
+  return {
+    type,
+    classification: 'DERIVED_LIFE_FACT',
+    character_id: characterId,
+    counterpart_id: counterpartId,
+    map,
+    revision,
+    timestamp,
+    projection_source: projectionSource,
+  };
+}
+
+/**
+ * Derive observation-only social presence transitions from two canonical
+ * projections. This does not simulate a world and never emits gameplay
+ * commands or authoritative events.
+ */
+export function deriveShadowEncounterTransitions({
+  characterId,
+  previousVisibleSet = [],
+  currentVisibleSet = [],
+  previousMap,
+  currentMap,
+  previousRevision,
+  currentRevision,
+  timestamp = Date.now(),
+  projectionSource = 'persistent_agent_live_entity',
+} = {}) {
+  const previous = Number(previousRevision);
+  const current = Number(currentRevision);
+  if (!Number.isFinite(previous) || !Number.isFinite(current)) {
+    return { ok: false, reason: 'REVISION_MISSING', derivedLifeFacts: [], continuedPresence: [], presenceEnds: [] };
+  }
+  if (current <= previous) {
+    return { ok: false, reason: 'STALE_REVISION', derivedLifeFacts: [], continuedPresence: [], presenceEnds: [] };
+  }
+  if (typeof currentMap !== 'string' || currentMap.length === 0) {
+    return { ok: false, reason: 'MAP_MISSING', derivedLifeFacts: [], continuedPresence: [], presenceEnds: [] };
+  }
+  if (previousMap !== undefined && previousMap !== currentMap) {
+    return {
+      ok: true,
+      reason: 'MAP_CHANGED',
+      derivedLifeFacts: [],
+      continuedPresence: [],
+      presenceEnds: [],
+    };
+  }
+
+  const previousIds = visibleEntitySet(previousVisibleSet, characterId);
+  const currentIds = visibleEntitySet(currentVisibleSet, characterId);
+  const entered = [...currentIds].filter((id) => !previousIds.has(id)).sort();
+  const continuedPresence = [...currentIds].filter((id) => previousIds.has(id)).sort();
+  const left = [...previousIds].filter((id) => !currentIds.has(id)).sort();
+  return {
+    ok: true,
+    reason: 'PRESENCE_DIFF',
+    derivedLifeFacts: entered.map((counterpartId) => derivedPresenceFact({
+      type: 'ENCOUNTER',
+      characterId,
+      counterpartId,
+      map: currentMap,
+      revision: current,
+      timestamp,
+      projectionSource,
+    })),
+    continuedPresence: continuedPresence.map((counterpartId) => ({
+      type: 'CONTINUED_PRESENCE',
+      character_id: characterId,
+      counterpart_id: counterpartId,
+      map: currentMap,
+      revision: current,
+      timestamp,
+      projection_source: projectionSource,
+    })),
+    presenceEnds: left.map((counterpartId) => derivedPresenceFact({
+      type: 'ENCOUNTER_END',
+      characterId,
+      counterpartId,
+      map: previousMap ?? currentMap,
+      revision: current,
+      timestamp,
+      projectionSource,
+    })),
+  };
+}
+
 function shadowActorFromContext(context, actor) {
   if (actor) return actor;
   const id = String(context.character_id);

@@ -6,6 +6,7 @@ import {
   createShadowWorldContext,
   createSandbox,
   createSeededCharacters,
+  deriveShadowEncounterTransitions,
   dispatchShadowIntent,
   encounter,
   reconcileDaily,
@@ -235,6 +236,154 @@ check('daily reconciliation keeps structured life facts from a real-shaped conte
   assert.deepEqual(summary.meaningfulFacts.map((fact) => fact.type), ['ENCOUNTER']);
   assert.equal(summary.diaryEligible, true);
   assert.equal(summary.dayEnd.macroGoal, 'HUNT');
+});
+
+const presenceArgs = {
+  characterId: 1001,
+  previousMap: 'pay_dun00',
+  currentMap: 'pay_dun00',
+  previousRevision: 10,
+  currentRevision: 11,
+  timestamp: 1234,
+};
+
+check('empty to present derives exactly one encounter', () => {
+  const result = deriveShadowEncounterTransitions({
+    ...presenceArgs,
+    previousVisibleSet: [],
+    currentVisibleSet: [{ id: 1002, x: 80, y: 92 }],
+  });
+  assert.equal(result.ok, true);
+  assert.equal(result.derivedLifeFacts.length, 1);
+  assert.equal(result.derivedLifeFacts[0].type, 'ENCOUNTER');
+  assert.equal(result.derivedLifeFacts[0].classification, 'DERIVED_LIFE_FACT');
+  assert.equal(result.derivedLifeFacts[0].projection_source, 'persistent_agent_live_entity');
+});
+
+check('continuous presence does not duplicate an encounter', () => {
+  const result = deriveShadowEncounterTransitions({
+    ...presenceArgs,
+    previousVisibleSet: [{ id: 1002 }],
+    currentVisibleSet: [{ id: 1002 }],
+  });
+  assert.deepEqual(result.derivedLifeFacts, []);
+  assert.deepEqual(result.continuedPresence.map((fact) => fact.counterpart_id), ['1002']);
+});
+
+check('present to absent derives a presence end', () => {
+  const result = deriveShadowEncounterTransitions({
+    ...presenceArgs,
+    previousVisibleSet: [{ id: 1002 }],
+    currentVisibleSet: [],
+  });
+  assert.deepEqual(result.presenceEnds.map((fact) => fact.type), ['ENCOUNTER_END']);
+  assert.deepEqual(result.presenceEnds.map((fact) => fact.counterpart_id), ['1002']);
+});
+
+check('absence followed by return derives a new encounter', () => {
+  const result = deriveShadowEncounterTransitions({
+    ...presenceArgs,
+    previousRevision: 12,
+    currentRevision: 13,
+    previousVisibleSet: [],
+    currentVisibleSet: [{ id: 1002 }],
+  });
+  assert.equal(result.derivedLifeFacts.length, 1);
+  assert.equal(result.derivedLifeFacts[0].counterpart_id, '1002');
+});
+
+check('two different characters enter independently', () => {
+  const result = deriveShadowEncounterTransitions({
+    ...presenceArgs,
+    previousVisibleSet: [],
+    currentVisibleSet: [{ id: 1002 }, { id: 1003 }],
+  });
+  assert.deepEqual(result.derivedLifeFacts.map((fact) => fact.counterpart_id), ['1002', '1003']);
+});
+
+check('stale revision produces no false encounter', () => {
+  const result = deriveShadowEncounterTransitions({
+    ...presenceArgs,
+    currentRevision: 10,
+    previousVisibleSet: [],
+    currentVisibleSet: [{ id: 1002 }],
+  });
+  assert.equal(result.ok, false);
+  assert.equal(result.reason, 'STALE_REVISION');
+  assert.deepEqual(result.derivedLifeFacts, []);
+});
+
+check('map change produces no false encounter', () => {
+  const result = deriveShadowEncounterTransitions({
+    ...presenceArgs,
+    previousMap: 'morocc',
+    currentMap: 'pay_dun00',
+    previousVisibleSet: [],
+    currentVisibleSet: [{ id: 1002 }],
+  });
+  assert.equal(result.reason, 'MAP_CHANGED');
+  assert.deepEqual(result.derivedLifeFacts, []);
+});
+
+check('self entity is excluded from social encounter derivation', () => {
+  const result = deriveShadowEncounterTransitions({
+    ...presenceArgs,
+    previousVisibleSet: [],
+    currentVisibleSet: [{ id: 1001 }, { id: 1002 }],
+  });
+  assert.deepEqual(result.derivedLifeFacts.map((fact) => fact.counterpart_id), ['1002']);
+});
+
+check('derived encounter feeds Social Director shadow mode with default NONE', () => {
+  const derived = deriveShadowEncounterTransitions({
+    ...presenceArgs,
+    previousVisibleSet: [],
+    currentVisibleSet: [{ id: 1002 }],
+  }).derivedLifeFacts[0];
+  const context = {
+    character_id: 1001,
+    map: 'pay_dun00',
+    macro_goal: 'HUNT',
+    hunt_active: true,
+    nearby_relevant_characters: [{ character_id: 1002 }],
+    recent_encounters: [derived],
+    revision: 11,
+  };
+  const shadow = createShadowIntent({
+    context,
+    actor: {
+      id: '1001',
+      macroGoal: 'HUNT',
+      map: 'pay_dun00',
+      hiddenGenesis: {
+        socialInitiative: 0,
+        strangerOpenness: 0,
+        partyPreference: 0,
+        riskTolerance: 0,
+        rejectionSensitivity: 0,
+        socialRewardSensitivity: 0,
+      },
+      recognition: new Map(),
+    },
+    encounterCharacterId: '1002',
+  });
+  assert.equal(shadow.mode, 'SHADOW');
+  assert.equal(shadow.intent.decision, 'NONE');
+});
+
+check('derived encounter keeps the HUNT parent goal unchanged', () => {
+  const context = {
+    character_id: 1001,
+    map: 'pay_dun00',
+    macro_goal: 'HUNT',
+    hunt_active: true,
+    nearby_relevant_characters: [{ character_id: 1002 }],
+    recent_encounters: [],
+    revision: 11,
+  };
+  const shadow = createShadowIntent({ context, encounterCharacterId: '1002' });
+  assert.equal(shadow.intent.parent_macro_goal, 'HUNT');
+  assert.equal(shadow.intent.would_resume_hunt, true);
 });
 
 const failed = checks.filter((entry) => !entry.ok);
