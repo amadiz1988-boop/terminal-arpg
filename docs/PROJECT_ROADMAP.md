@@ -115,7 +115,8 @@ CURRENT:
 NEXT:
   PL1-A Factual Diary Vertical Slice — ACTIVE / AUTHORIZED
   (scoped Project Control authorization; deterministic Event Ledger facts,
-   authenticated read-only API, existing Web surface, Browser acceptance)
+   authenticated read-only API, existing Web surface, Browser acceptance;
+   Diary window is based on unseen facts, and may include ACTIVE sessions)
 
   PL1 Persistent Life Diary V1 remainder — PLANNED / NOT AUTHORIZED
   (LLM reflection, Diary storage expansion, memory context, and later modules

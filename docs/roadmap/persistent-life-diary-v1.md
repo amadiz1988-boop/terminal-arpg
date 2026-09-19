@@ -37,9 +37,32 @@ persistent_life_session
 → existing Persistent Life Web surface
 ```
 
-PL1-A may provide completed-session counts, deterministic highlights, and a
-factual event timeline. It does not authorize LLM reflection, Diary prose
-generation, mood or memory expansion, social simulation, or schema redesign.
+PL1-A may provide deterministic counts, highlights, and a factual event
+timeline for unseen authoritative history. ACTIVE, COMPLETED, and INTERRUPTED
+Persistent Life sessions may contribute Diary facts. It does not authorize LLM
+reflection, Diary prose generation, mood or memory expansion, social
+simulation, or schema redesign.
+
+Diary window semantics:
+
+```text
+Persistent Life session lifecycle != Diary observation window
+
+persistent_life_event
+  + persistent_life_session
+  + existing seen / seen_at state
+→ unacknowledged factual history
+→ deterministic Diary window
+→ player acknowledgement
+→ seen boundary advances
+```
+
+An ACTIVE `persistent_life_session` may produce a player-visible factual Diary
+window. A Diary window must not require `release_agent`, `SESSION_ENDED`, or a
+`COMPLETED` session. COMPLETED and INTERRUPTED sessions remain valid historical
+sources. Persistent Life ownership release remains governed by the existing
+`OPENKORE_HANDOFF_RETIRED` policy, which is intentionally preserved and is not
+reversed for Diary generation.
 
 PL1-A ownership routing:
 
