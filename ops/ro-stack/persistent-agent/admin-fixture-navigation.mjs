@@ -43,5 +43,5 @@ export function buildAdminFixtureNavigationRoute({
 }
 
 export function navigationCommandIsPending(status) {
-  return ['QUEUED', 'ACCEPTED', 'CONFIRMED'].includes(String(status ?? ''));
+  return ['QUEUED', 'ACCEPTED'].includes(String(status ?? ''));
 }

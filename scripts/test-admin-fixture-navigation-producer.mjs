@@ -73,13 +73,28 @@ test('cross-map route reuses the existing resolved navigation semantics', () => 
   ]);
 });
 
-test('pending and confirmed navigation statuses block competing movement', () => {
+test('in-flight navigation statuses block competing movement', () => {
   assert.equal(navigationCommandIsPending('QUEUED'), true);
   assert.equal(navigationCommandIsPending('ACCEPTED'), true);
-  assert.equal(navigationCommandIsPending('CONFIRMED'), true);
+  assert.equal(navigationCommandIsPending('CONFIRMED'), false);
   assert.equal(navigationCommandIsPending('REJECTED'), false);
   assert.ok(dashboard.includes("pendingRelocations.has(id)"));
   assert.ok(dashboard.includes("navigationCommandIsPending(latestNavigation?.status)"));
+});
+
+test('confirmed terminal status releases the per-character navigation guard', () => {
+  assert.equal(navigationCommandIsPending('CONFIRMED'), false);
+  assert.equal(navigationCommandIsPending('REJECTED'), false);
+  assert.equal(navigationCommandIsPending('FAILED'), false);
+});
+
+test('a previous confirmed command permits a second navigation request once other gates pass', () => {
+  assert.equal(navigationCommandIsPending('CONFIRMED'), false);
+  const start = dashboard.indexOf('const latestNavigation = await readLatestNoviceCommand(id, \'start_navigation\');');
+  const end = dashboard.indexOf('const plan = live.map === parsed.targetMap', start);
+  const region = dashboard.slice(start, end);
+  assert.ok(region.includes('navigationCommandIsPending(latestNavigation?.status)'));
+  assert.ok(region.includes("throw new HttpError(409, 'navigation_already_pending')"));
 });
 
 test('producer emits the existing persistent_agent_command start_navigation contract', () => {
