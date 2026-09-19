@@ -8,6 +8,19 @@
 
 版本：`PC-DISPATCH-STANDARD-v1.1`
 
+完整的 Project Control 回覆、A～E 狀態表、模型／Fast 欄位、平行派工、
+Browser acceptance、真實使用者 evidence 與 Git checkpoint 操作規則，見
+`docs/project-control/project-control-response-protocol.md`。該文件是本節
+的 canonical operational reference；AGENTS.md 仍是 policy authority。
+
+最重要鐵律：
+
+- 每次 Project Control 回覆底部固定附 A～E 六欄工作表，模型與 1.5× Fast 欄位不得省略。
+- 沒有正式派工不得標 `WORKING`；Worker 完成後沒有下一棒即改 `WAITING` 或 `CLOSED`。
+- 平行施工以不發生 file、runtime、fixture、Browser session、deploy collision 為前提。
+- Browser Web 驗收採 control-by-control；真實使用者 Browser FAIL 優先於其他 fixture PASS。
+- Git checkpoint 必須精確對應本次 patch；mixed file 無法隔離時標記 `BLOCKED_BY_MIXED_FILE`。
+
 本節固定 Project Control 1／2／3 歸納出的開發方法，避免更換 Project Control 對話後：開發方向遺失、已完成能力被重新實作、派工格式退化、工作線 scope 失控、大量 recursive search、infrastructure／refactor 蓋過玩家功能恢復，或功能恢復而沒有 Git checkpoint。
 
 ### 1. Development Method
