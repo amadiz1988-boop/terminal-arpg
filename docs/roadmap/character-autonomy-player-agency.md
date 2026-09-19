@@ -184,3 +184,293 @@ Karma / Fate 只能影響 encounter probability、attention、familiarity feelin
 - UI 最終文案與名稱
 
 以上項目在另有正式產品決策前，不得自行補充答案、建立 schema 或開始 runtime implementation。
+
+## 14. Character Autonomy Engine 架構定位
+
+本節記錄 2026-09-20 的 reference architecture。它只描述 Life Director / Social Director 上層自主決策如何組成，不建立第二套 Game Simulation。
+
+```text
+AUTONOMY_ENGINE != WORLD_SIMULATOR
+AUTONOMY_ENGINE != SECOND_RATHENA
+AUTONOMY_ENGINE != SECOND_PERSISTENT_AGENT
+```
+
+Autonomy Engine 只回答「角色現在想做什麼，以及在既有限制下下一步應提出什麼 Intent」。世界結果仍由既有 authority 裁定：
+
+```text
+rAthena / SERVER_AGENT = WORLD AUTHORITY
+Persistent Agent       = GAMEPLAY EXECUTION AUTHORITY
+Event Ledger           = FACTUAL HISTORY
+LLM                    = INTERPRETATION / NARRATION / BOUNDED REFLECTION
+```
+
+### Reference flow
+
+```text
+DELIBERATE WEB DECISION
+        ↓
+CONTROL AUTHORITY
+        ↓
+CHARACTER AUTONOMY ENGINE
+        ├ Character State
+        ├ Psyche
+        ├ Life Director
+        ├ Social Director
+        ├ Utility Evaluation
+        ├ Goal Stack
+        ├ HTN / Planner
+        ├ Permission Policy
+        └ Scheduler / Interrupt Manager
+        ↓
+Intent → Persistent Agent → rAthena → Real World Result
+        ↓
+Event Ledger → Significance / Emotion / Relationship / Memory
+        ↓
+Reflection / Diary / Narrative → feedback to Character State
+```
+
+## 15. Control Authority 與世界觀映射
+
+Control Authority 回答「現在誰有資格決定 Macro Goal」。概念狀態包括 `PLAYER_DIRECTED`、`AUTONOMOUS`、`FREE_AGENT / WORLD_OWNED` 與 `ADMIN_OVERRIDE / SUPPORT_AUTHORITY`。
+
+`ADMIN_OVERRIDE` 只處理 ownership、support recovery 與 administrative state transition，不代表管理員成為角色的 Life Director。
+
+延續 `DIEGETIC_IDENTITY_RULE`，Audit 可記錄 `origin = WEB`，角色內部語意仍為 `actor = SELF`、`decision = DELIBERATE_SELF_DECISION`。禁止建立 `PLAYER told CHARACTER` 的世界觀模型。Web 加 STR 的技術來源可標為 Web，世界事實仍是角色自己作出明確決定。
+
+## 16. Constraint-aware Autonomy
+
+`PLAYER_DIRECTED` 仍啟用 Life Director 與 Social Director，只將玩家 Macro Goal 作為 Constraint。指定斐揚洞穴掛機時，Life Director 不得永久更換 `FARM / specified map`，但可處理情緒、社交、組隊、補給期間生活行為、短暫休息、城鎮互動與遇人反應。Micro Activity 完成後必須依 Return Contract Resume Parent Goal。
+
+## 17. Life Director、Social Director 與決策模型
+
+Life Director 負責 `WHY / WHAT NEXT`，輸出 `ACTIVITY_INTENT`，不直接操作座標、攻擊、喝水、NPC click 或 pathfinding。候選 Activity 可包括 `FARM`、`QUEST`、`EXPLORE`、`REST`、`SUPPLY`、`SOCIALIZE`、`EARN_MONEY`、`SAFE_ACTIVITY` 及未來授權活動。
+
+Social Director 負責「要不要跟誰一起做或互動」，不成為第二套 Life Director。Life Intent 是繼續練功時，Social Director 才評估熟人互動、組隊、聊天或忽略。`INVITE != ACCEPT`，邀請雙方都必須經過各自的 Social Director / Policy。
+
+目前 preferred direction：
+
+```text
+ALGORITHM_DIRECTION = UTILITY_AI
+FORMULA = TBD
+```
+
+Utility AI 用 traits、mood、current goal、risk、growth need、economy need、social desire、relationship、memory、opportunity、environment 與 player-directed constraints 比較候選活動。公式、權重與 normalization 全部 TBD。
+
+## 18. Planner、Goal Stack 與 Return Contract
+
+目前 preferred planning architecture 為 HTN。Utility AI 負責 `WHAT / WHY`，HTN 負責 `HOW`，Persistent Agent 負責 `EXECUTE`。GOAP / ReGOAP 保留為 secondary reference，因目前產品需要可預期的階層、父目標、中斷、恢復與 bounded subgoal。
+
+概念流程：
+
+```text
+FARM pay_dun
+→ ensure readiness
+→ travel
+→ combat
+→ supply when required
+→ return town
+→ optional life window
+→ return pay_dun
+→ resume farm
+```
+
+Goal Stack 範例：`PLAYER MACRO GOAL`、`REQUIRED SUBGOAL`、`OPTIONAL LIFE ACTIVITY`、`SOCIAL INTERRUPT`。Temporary / Micro Autonomous Activity 必須攜帶概念上的 Return Contract：`WHY`、`PARENT_GOAL`、`DURATION / COST BUDGET`、`INTERRUPTIBILITY`、`RETURN_CONDITION`、`RESUME_TARGET`。實際 schema TBD。
+
+## 19. Permission Policy 與 Persistent Agent 邊界
+
+Action Permission Policy 必須分開 `DESIRE`、`DECISION`、`AUTHORITY` 與 `EXECUTION`。角色想換武器時可保留 Desire，若 Policy 為 `PLAYER_EXCLUSIVE` 則 `EXECUTION_DENIED`；飲用生存藥水若為 `AUTONOMY_ALLOWED`，則可交由 Persistent Agent 執行。
+
+Persistent Agent 維持 execution-focused，負責 Navigation、Combat、Loot、Supply、Recovery、Quest、Social Action 與既有 gameplay capability。人格、長期人生動機、情緒解讀、Relationship interpretation 與 Life choice 不塞回 Persistent Agent。
+
+## 20. Character State 與五層資料分離
+
+避免 Everything Context Blob。概念上分為：
+
+| 層 | 內容 |
+| --- | --- |
+| Stable Identity | traits、temperament、background、values、risk tolerance、social tendency |
+| Dynamic State | stress、confidence、happiness、loneliness、social_desire、frustration、fulfillment、life_satisfaction |
+| Current Life Context | map、activity、macro goal、HP/SP、party、nearby actors、quest context、recent meaningful event |
+| Long-term Context | memory、relationship、unfinished desire、important goal、guild、friends、romance、life trajectory |
+
+以上是 Product Concept，不構成 DB schema authorization。
+
+## 21. Fact、State、Intent、Memory、Narrative
+
+五者不得互相取代：
+
+| 層 | 定義 | 例 |
+| --- | --- | --- |
+| `FACT` | 發生過什麼 | 掉落稀有卡片 |
+| `STATE` | 現在是什麼狀態 | happiness 高 |
+| `INTENT` | 現在想做什麼 | 想再練一陣子 |
+| `MEMORY` | 角色如何記得過去 | 記得第一次稀有掉落 |
+| `NARRATIVE` | 角色如何描述它 | 對事件的主觀敘述 |
+
+Event Ledger 是不可變事實，Memory 是角色對部分事件形成的持久認知。Memory 未來可研究 salience、decay、reinforcement、reinterpretation、actor association 與 episodic / summary classification，完整 schema TBD。
+
+## 22. Significance、Emotion 與 Event Gateway
+
+事件處理採：
+
+```text
+EVENT LEDGER
+→ SIGNIFICANCE EVALUATION
+→ LIFE EVENT
+```
+
+Significance 同時考量 event type、rarity、character history、expectation、relationship、current mood、personal values 與 prior memory。第一次死亡對新角色可能很重要，第 1000 次普通死亡可能較低，曾敵對者在危急時救援也可能很重要。演算法 TBD。
+
+Emotion 只作 Decision Input，不直接硬寫 Action。Traits、Mood、Memory、Current Goal、Opportunity、Environment 與 Relationship 共同進 Utility Evaluation。
+
+千人架構必須有概念上的 `AUTONOMY EVENT GATEWAY`：
+
+| 分類 | 處理方向 |
+| --- | --- |
+| `IMMEDIATE_MEANINGFUL` | 死亡、稀有掉落、重要任務、組隊邀請 |
+| `ACTIVITY_SUMMARY` | 500 次擊殺、完整補給、活動邊界 |
+| `IGNORE_FOR_AUTONOMY` | 普通 hit、普通 damage、一般 monster movement |
+
+禁止每次 HIT、DAMAGE 或 Monster Movement 都喚醒完整 Autonomy Engine。Transport 尚未決定。
+
+## 23. Event-driven、Scheduler 與 Character Actor
+
+禁止所有角色每秒完整重新思考人生。採 `EVENT-DRIVEN + SCHEDULED REEVALUATION`：
+
+- Immediate Interrupt：死亡、HP danger、Party Invite、重要 whisper、稀有掉落、重大任務事件
+- Activity Boundary：補給完成、旅行完成、任務階段完成、抵達城鎮、隊伍結束
+- Periodic Reevaluation：boredom、social desire、life satisfaction、goal progress、activity continuation
+- Daily / Low-frequency Reflection：diary、reflection、長期 psyche interpretation
+
+一名 Persistent Character 對應一個主要 Character Actor / logical entity。Life Director、Social Director、Emotion、Planner 與 Memory 優先視為 Character Actor 內部 deterministic modules / services，不各自拆成爭奪控制權的 Actor。Character Actor 的責任是 identity boundary、state ownership、concurrency boundary、message serialization 與 lifecycle boundary。實際 cadence TBD。
+
+## 24. Preferred Technology Candidate 與研究範圍
+
+```text
+CHARACTER AUTONOMY SERVICE = C# / .NET
+VIRTUAL ACTOR CANDIDATE    = Microsoft Orleans
+```
+
+這是 preferred reference candidate，未授權安裝或實作。C# / .NET 的考量包括 strongly typed application model、async support、long-lived service suitability、Windows 開發環境相容、actor / persistence / scheduling ecosystem 與未來 scale-out potential。這些是設計考量，不是 benchmark 結論。
+
+Orleans、Erlang / OTP、Apache Pekko、Utility AI implementations、Fluid HTN 或其他成熟 HTN implementations、GOAP / ReGOAP、BehaviorTree.CPP 與 OpenKore 均列為 reference study direction：
+
+| Reference | 研究用途 |
+| --- | --- |
+| Microsoft Orleans | Virtual Actor、identity、lifecycle、persistence、timers、reminders、placement、failure handling |
+| Erlang / OTP | supervision、process isolation、failure containment、restart strategy、message-driven design |
+| Apache Pekko | actor model、cluster sharding、persistent entity、distributed placement |
+| Utility AI | consideration scoring、response curves、normalization、inertia、hysteresis、避免 oscillation |
+| Fluid HTN / mature HTN | hierarchical decomposition、partial planning、replan、interruption、observability |
+| GOAP / ReGOAP | preconditions、effects、world-state planning、dynamic replanning；secondary reference |
+| BehaviorTree.CPP | reactive execution、async action、interrupt、failure propagation、debugging；不得重寫 PA |
+| OpenKore | RO automation、navigation、combat、supply、party、follow、reconnect、edge cases；不得恢復 runtime dependency |
+
+在正式寫入 license、API capability、framework limitation、platform support 或 clustering semantics 前，必須查官方 Repository / 官方文件。無法確認時標記 `【資料不足，無法確認】`。
+
+## 25. rAthena、Database 與 Scale-out 邊界
+
+rAthena C++ 仍是 World Authority，不把 combat、damage、drop、inventory、quest authority 或 map authority 搬到 C#。Autonomy Service 只負責高階 decision、life state 與 planning。
+
+```text
+SCALE_TARGET = 1000+ persistent characters
+SCALE_VALIDATED = NO
+```
+
+1000 個角色不等於每秒 1000 次完整 Think。若平均每 30 秒一次 Life reevaluation，概念平均約為 `1000 / 30 ≈ 33 evaluations / second`，這不是 benchmark。實際負載取決於 decision cadence、event volume、combat noise filtering、DB latency、Character State size、relationship density、PA execution、LLM usage 與 hardware。
+
+維持 Sparse Relationship Graph；`Encounter != Relationship Allocation`，只有 meaningful interaction 才建立或保留 pairwise relationship。避免 unnecessary actor wakeups、excessive DB queries、relationship O(N²)、高頻 LLM 與 duplicated world simulation。
+
+初期不預設更換 MariaDB。rAthena Game Authority State、Autonomy State、Event Ledger、Memory Projection、Relationship Graph 與 Diary / Reflection 需保持責任分離。Redis、PostgreSQL、specialized graph DB 與 message broker 皆為 `TBD / MEASUREMENT REQUIRED`。
+
+## 26. LLM、Self-Emancipation 與 Fault Isolation
+
+LLM 維持最外圍、低頻：`Event Summary → Daily / bounded Reflection → restricted interpretation → server rule validation`。LLM 不控制 movement、combat、drops、quest result，不直接修改 mood DB、relationship 或下一個 world action；LLM 不可用時核心遊戲仍須運作。
+
+Self-Emancipation 不由 Emotion Engine 直接執行。正確邊界為：
+
+```text
+Life State
+→ Autonomy Tendency
+→ Eligibility
+→ Governance State Machine
+→ Warning
+→ Authority Transition
+```
+
+Psyche 只能成為輸入，ownership 屬高權限 domain。未來 Autonomy Runtime 也必須具備 fault isolation，一名角色的 Planner / Actor 錯誤不得拖垮全部角色；具體 supervision 與 lifecycle 實作未決。
+
+## 27. Architecture Anti-patterns
+
+未來避免以下模式：
+
+- 每個功能各自建立 AI，互相爭奪角色控制權
+- Mood 直接執行 Action，混淆 `Mood` 與 `Decision`
+- Life Director 直接操作 rAthena，跳過 `Intent → Persistent Agent → rAthena`
+- 複製 movement、inventory、combat 或 quest truth，建立第二套世界模擬
+- Every Event = Memory，跳過 Significance
+- Every Character = Always Active，忽略 event-driven / scheduled activation
+- 建立全矩陣 Relationship Graph，破壞 sparse graph
+- 為了未來規模直接引入 Kubernetes、Kafka、NATS、Redis、Elasticsearch 或多套 microservices
+
+原則為 `START SIMPLE → DESIGN FOR HORIZONTAL SCALE → SCALE ONLY WITH EVIDENCE`。
+
+## 28. Preferred Reference Architecture Summary
+
+```text
+Dashboard / Web
+→ Deliberate Self Decision
+→ Control Authority
+→ Character Actor
+   → Character State
+   → Utility Life Director
+   → Social Director
+   → HTN Planner
+   → Goal Stack
+   → Permission Policy
+   → Scheduler / Interrupt
+→ Persistent Agent
+→ rAthena
+→ Event Ledger
+→ Significance / Emotion / Relationship / Memory
+→ Daily Reflection / Narrative
+→ feedback to Character State
+```
+
+```text
+World Authority:          C++ / rAthena
+Gameplay Executor:        Existing Persistent Agent
+Autonomy Service Candidate:C# / .NET
+Virtual Actor Candidate:  Microsoft Orleans
+Life Decision:             Utility AI
+Planner:                   HTN
+Execution:                 Existing PA / rAthena
+LLM:                       Low-frequency interpretation / narrative only
+```
+
+## 29. 本架構仍未授權實作
+
+本文件新增的是 reference architecture 與 research direction。禁止因本文件安裝 Orleans、Pekko、BehaviorTree.CPP、HTN library 或任何 dependency；禁止建立 Autonomy Runtime、第二套 simulation、第二套 Persistent Agent 或 production integration。
+
+所有實作仍須先通過既有 reuse gate、dependency evaluation、license verification、prototype / benchmark、integration boundary review 與 Project Control explicit authorization。
+
+## 30. 架構未決事項
+
+以下全部標記 `TBD / RESEARCH REQUIRED`：
+
+- Orleans 是否正式採用
+- Autonomy Service 是否獨立 process
+- PA ↔ Autonomy transport
+- Actor persistence provider
+- actor state size 與 activation strategy
+- decision / scheduler cadence
+- Utility formula、HTN domain representation
+- Event Gateway transport
+- Memory schema 與 Relationship storage
+- horizontal sharding、failover 與 deployment topology
+- exact hardware requirement 與 verified 1000-character capacity
+- Redis / broker 是否必要
+- LLM provider / model
+- Admin observability
+
+不得自行補充上述答案。
