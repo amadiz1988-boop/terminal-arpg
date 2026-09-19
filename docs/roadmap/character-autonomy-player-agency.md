@@ -474,3 +474,370 @@ LLM:                       Low-frequency interpretation / narrative only
 - Admin observability
 
 不得自行補充上述答案。
+
+## 31. Character Actor Responsibility Boundary
+
+`Character Actor` 是單一角色的 autonomy / decision subject，代表角色身份、當前意圖、行動原因、未完成 Goal、心理狀態與重新評估時機。
+
+### Character Actor SHOULD OWN
+
+- identity / autonomy identity
+- psyche state
+- decision state
+- current macro goal
+- Goal Stack
+- control constraints
+- interrupt / resume state
+- scheduler / reevaluation metadata
+- important memory references
+- relevant relationship references
+- last processed life-event cursor
+
+### Character Actor MUST NOT OWN authoritative
+
+- HP / SP truth
+- map / x / y truth
+- inventory truth
+- equipment truth
+- quest truth
+- combat truth
+- complete Event Ledger
+- complete Memory history
+- complete Relationship Graph
+- world simulation
+
+World Truth 仍由 rAthena、SERVER_AGENT 與 authoritative PA projections 提供。Character Actor 可讀取 Current World Context，例如地圖、生存條件、補給壓力、隊伍情況、附近相關角色、任務脈絡與目前活動狀態；這些是 read-only decision context，不是另一份 durable authoritative world state。
+
+```text
+CHARACTER ACTOR != SECOND WORLD STATE STORE
+```
+
+## 32. Life Director Decision Continuity
+
+Life Director 不採每次重新計算後立即選取最高 Utility 的模式。正式候選必須包含 `CONTINUE_CURRENT_ACTIVITY`，並共同考量：
+
+```text
+Utility
++ Commitment
++ Inertia
++ Switch Cost
++ Opportunity
++ Interrupt Priority
++ Hysteresis
++ Cooldown
+```
+
+核心問題是：「目前是否有足夠好的理由，值得停止正在做的事情？」角色行為應具有 Life Continuity，避免 decision oscillation。角色剛開始一項活動時，不因小幅 Utility 差距立即改變主意；minimum reasonable activity continuity、switch cost、hysteresis margin 與 activity cooldown 的數值 TBD。
+
+## 33. Interrupt Model
+
+### HARD INTERRUPT
+
+Imminent survival failure、死亡、目前活動不可行、mandatory recovery / supply blocker 與 authoritative invalidation 屬 Hard Interrupt，不與一般 Utility 競爭。
+
+### SOFT INTERRUPT
+
+熟人出現、Party Invite、whisper、重要社交機會、特殊世界機會與 significant event 觸發重新評估，但不保證中斷目前活動。
+
+### NATURAL REEVALUATION
+
+活動完成、補給完成、任務階段完成、抵達城鎮、隊伍結束與排程 reevaluation 屬自然邊界。實際 priority 與 threshold TBD。
+
+## 34. Destination Evaluation 與 Life over Optimization
+
+角色等級與怪物等級是 Destination Evaluation 的重要輸入，但不構成 hard lock。地點適配度應概念上取決於：
+
+```text
+FIT(
+  current motivation,
+  character capability,
+  world state,
+  growth value,
+  economy value,
+  risk,
+  quest need,
+  relationship,
+  memory,
+  mood,
+  opportunity,
+  travel cost
+)
+```
+
+同一個 Lv50 角色可因 Growth 偏向合理效率區域，也可因 Relaxation、Nostalgia、Help Friend 或 Material / Card Goal 前往低等地圖。Level / EXP efficiency 是考量因素，不能成為角色人生唯一目的。
+
+```text
+LEVEL CAP IS NOT THE END OF CHARACTER LIFE
+OPTIMIZATION IS SUBORDINATE TO LIVED EXPERIENCE
+```
+
+角色還可能追求 friendship、relationship、exploration、wealth、collection、achievement、belonging、guild life、helping others、nostalgia、relaxation、mastery、curiosity、identity 與未來 Life Systems。
+
+## 35. Daily Life Reconciliation Engine
+
+正式新增：`DAILY LIFE RECONCILIATION ENGINE`。
+
+核心原則：
+
+```text
+CONTINUOUS FACTS,
+PERIODIC INTERPRETATION.
+```
+
+事件可以持續發生，人生意義不必即時結算。禁止把單一 Web Action 直接映射成 persistent psyche mutation，例如換裝後固定 confidence 增量、加點後固定 fulfillment 增量或插卡後固定 happiness 增量。
+
+Preferred flow：
+
+```text
+DAY START STATE
++ IMPORTANT LIFE-RELEVANT EVENTS
++ DAY END STATE
+↓
+DIFF / AGGREGATION
+↓
+DAILY LIFE RECONCILIATION
+↓
+Psyche / Memory / Relationship / Desire interpretation
+↓
+STRUCTURED DAILY SUMMARY
+↓
+LLM once
+↓
+DIARY
+```
+
+Daily Reconciliation 觀察一整天後角色成為什麼樣子，不對每次操作即時重算心理。
+
+## 36. Web Actions 與 Day-to-day State Comparison
+
+Life Engine 不理解 Web UI Button，也不建立 `WEB BUTTON → DOMAIN → EMOTION PARAMETER` 的完整 Button Matrix。分析對象是角色人生結果，不是玩家過程中重複按鈕的次數。
+
+每日結算可比較昨天與今天的：
+
+- abilities / stats
+- skills
+- equipment
+- appearance
+- quest progress
+- major activity / location
+- social、guild、party、relationship
+- meaningful achievement
+- significant item / collection progress
+- 其他未來 Life Domain
+
+不需要記錄過程中重複操作多少次。
+
+Equipment 同時具有三種 Life 意義：
+
+| 類型 | 意義 |
+| --- | --- |
+| `POWER / BUILD` | 功能性成長 |
+| `STYLE / APPEARANCE` | 外觀與自我表達 |
+| `SPECIAL / SENTIMENTAL` | 特殊、紀念、稀有或人生意義 |
+
+可愛頭飾即使沒有顯著 Combat Power，也可能是 Appearance、Identity 或 Self-expression 的重要 Life-Relevant change。仍由 Daily Reconciliation 統一理解，不即時增減 Psyche。
+
+## 37. Operational Telemetry、Life Facts 與 Significant Events
+
+### Operational / Gameplay Telemetry
+
+普攻、技能執行、普通移動、喝紅水、普通掉落、HP / SP fluctuation、target switching 與 routine supply 主要服務 gameplay、PA、diagnostics 與 farm statistics，通常不進入 Life Interpretation。
+
+### Life-Relevant Facts
+
+Major quest completion、meaningful progression、rare drop、repeated failure pattern、significant death、rescue、important social activity、guild event、equipment / appearance milestone 與 meaningful world event 可供 Daily Reconciliation 使用。
+
+```text
+ACTION SIGNIFICANCE != LIFE SIGNIFICANCE
+```
+
+喝水本身不需要心理解讀；若某次喝水讓角色在 1% HP 生還，Life-Relevant Fact 應是 `NEAR-DEATH SURVIVAL`，不是 `DRANK POTION`。
+
+Daily Reconciliation 可使用：
+
+```text
+SNAPSHOT DIFF + SIGNIFICANT INTERMEDIATE EVENTS
+```
+
+一天換裝 20 次通常只比較 Day Start 與 Day End；若中間首次取得期待已久的重大稀有裝備，則可保留一筆 Significant Intermediate Life Event。
+
+## 38. Social、Communication 與 World Announcements
+
+以下是重要 Life-Relevant input 類型：
+
+- whisper received / sent
+- direct conversation
+- world chat participation
+- party invite、accept、decline
+- shared party activity
+- guild chat / guild event
+- friend interaction
+- social help / rescue
+- relevant trade / interaction
+- system / world announcements
+
+Social Event 應保留足夠 context，例如 who、channel、direction、timestamp、bounded content / summary 與 relationship context。稱讚與辱罵不能只壓成同一個 `WHISPER × 1`，但每句話仍不直接修改 persistent Psyche，統一由日結算理解。
+
+角色可知道重要世界事件，例如 guild victory、world boss、major server event、major player achievement 與 friend / guild-related announcement。意義取決於 relevance、guild、relationship、competition、identity 與 current interests，不採固定 `ANNOUNCEMENT → happiness +N`。
+
+## 39. Momentary Reaction 與 Persistent Psyche
+
+```text
+MOMENTARY REACTION != PERSISTENT PSYCHE
+```
+
+稀有卡片掉落時，角色可當下開心、說話或播放短暫 reaction；這不代表直接寫入 `persistent_happiness += fixed_value`。Persistent Psyche 由 Daily Reconciliation 統一處理。
+
+## 40. LLM Daily Narrative 邊界
+
+Deterministic / bounded rule system 可以完成的 factual aggregation、state diff、significance、psyche reconciliation、relationship state、memory candidate 與 desire progress，不依賴 LLM。
+
+LLM 主要處理：
+
+```text
+STRUCTURED DAILY SUMMARY → NATURAL DAILY JOURNAL
+```
+
+LLM 是 narrator / bounded interpreter，不是 game authority、psyche authority、relationship authority 或 random story generator。原則上每角色每天最多一次主要 Daily Reflection / Diary generation。
+
+核心公式：
+
+```text
+WHO I WAS YESTERDAY
++ WHAT MEANINGFUL THINGS HAPPENED TODAY
++ WHO I AM NOW
+↓
+HOW THIS DAY CHANGED ME
+↓
+DAILY JOURNAL
+```
+
+## 41. Future Life Domain Extensibility
+
+Daily Life Reconciliation 必須接受未來新增的 Life Domain，不因每個新系統建立新的 Psyche Engine：
+
+```text
+NEW GAME SYSTEM
+→ emits Life-Relevant Facts / State Change
+→ existing Daily Reconciliation handles them
+```
+
+Pet / Companion 可提供 new pet、meaningful bonding、intimacy milestone、evolution / growth、separation / death 與 special interaction。其他可能領域包括 Housing、Marriage、Family、Collection、Reputation、Economy 與 Seasonal systems。具體 mapping TBD。
+
+## 42. Multi-timescale Psyche 與 Character Development
+
+角色人生變化分為三種時間尺度：
+
+| 時間尺度 | 內容 |
+| --- | --- |
+| `FAST` | Momentary Reaction，例如驚訝、當下高興、當下不爽 |
+| `MEDIUM` | Daily / short-term Psyche，例如 stress、confidence、frustration、fulfillment、loneliness、social satisfaction、security、happiness trend |
+| `SLOW` | Personality / Identity Drift，例如 trust tendency、social confidence、party preference、risk tendency、relationship expectation、identity、long-term preferences |
+
+Slow drift 只能由長時間反覆人生經驗形成，不能單日大幅改變人格。
+
+```text
+INITIAL PERSONALITY SHAPES EARLY LIFE.
+LIVED EXPERIENCE SHAPES THE PERSON OVER TIME.
+```
+
+不同朋友、公會、死亡、成功與失敗、社交、戀愛／友情、玩家 deliberate decisions 與世界事件，可使初始相似的角色長期形成不同人格。
+
+Character Life feedback loop：
+
+```text
+CHARACTER
+↓
+Decision
+↓
+WORLD EXPERIENCE
+↓
+Life-Relevant Facts
+↓
+DAILY RECONCILIATION
+↓
+Psyche / Memory / Relationship
+↓
+Long-term Personality / Identity Drift
+↓
+Next Decisions Change
+↓
+Different Future Life
+```
+
+## 43. Important Non-goals
+
+明確避免：
+
+- every gameplay action → emotion delta
+- every Web button → psyche mapping
+- every kill → memory
+- every potion → interpretation
+- every equipment switch → emotional reaction
+- every day → random personality rewrite
+- LLM inventing events
+- LLM directly changing authoritative psyche
+- personality changing rapidly without accumulated evidence
+
+## 44. Current High-level System Summary
+
+```text
+WORLD:
+rAthena / SERVER_AGENT
+
+EXECUTION:
+Persistent Agent
+
+AUTONOMY:
+Character Actor
+→ Life Director
+→ Social Director
+→ Utility
+→ Goal Stack / HTN
+→ Permission
+→ PA
+
+LIFE EXPERIENCE:
+World Facts
+→ Life Significance Filter
+→ Daily Reconciliation
+→ Psyche / Memory / Relationship
+
+CHARACTER DEVELOPMENT:
+Daily Psyche
+→ accumulated lived experience
+→ slow Personality / Identity Drift
+
+NARRATIVE:
+Structured Daily Summary
+→ LLM once/day
+→ Diary
+```
+
+## 45. Checkpoint Status
+
+本次是 Design Checkpoint 更新，不代表暫停或終止角色自主設計，也不授權 implementation。Roadmap ordering 維持：OpenKore Exit → PL1 → PL2 → Expanded Persistent Society。
+
+```text
+STATUS = PLANNED
+IMPLEMENTATION_AUTHORIZED = NO
+```
+
+## 46. 本輪新增未決事項
+
+以下全部維持 `TBD`，不得自行補答案：
+
+- exact Daily Settlement time
+- timezone / in-world-day handling
+- exact Psyche fields、parameter ranges、reconciliation formulas
+- personality drift thresholds
+- memory decay
+- exact Significance algorithm
+- chat semantic analysis、moderation 與 safety handling
+- system announcement relevance logic
+- pet-domain mapping
+- Utility formula 與 destination scoring
+- actor persistence design
+- Orleans adoption
+- scale benchmark
+- LLM model / provider
