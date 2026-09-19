@@ -841,3 +841,222 @@ IMPLEMENTATION_AUTHORIZED = NO
 - Orleans adoption
 - scale benchmark
 - LLM model / provider
+
+## 47. Character Genesis Principle
+
+玩家不得在創角時選擇角色人格，不提供外向／內向、熱情／冷淡、冒險／保守或社交／獨行等人格選單。Character Genesis 由世界生成：
+
+```text
+BACKGROUND
++ INNATE TEMPERAMENT
++ INITIAL SENSITIVITIES
++ EARLY MEMORY SEEDS
+↓
+CHARACTER BORN
+```
+
+```text
+BIRTH CONDITIONS ARE GIVEN.
+TEMPERAMENT BIASES THE START.
+LIVED EXPERIENCE BUILDS THE PERSON.
+```
+
+出生條件是給定的，先天氣質影響起點，角色長期成為什麼樣的人由後續人生形成。
+
+## 48. World-generated Background
+
+Background 可包含出生／成長地區、家庭環境、經濟條件、成長穩定度、童年事件、早期重要人物、少量早期成功／失敗、初始價值觀來源與 early memory seeds，由 Genesis Generator 生成。
+
+玩家不能選擇幸福家庭、悲慘童年或外向背景。Background 是 weak trait modifier、sensitivity modifier、initial memory seed 與 initial bias，不直接決定命運。
+
+禁止 deterministic stereotype，例如 `poor_background → greedy`、`happy_family → kind` 或 `lonely_childhood → introvert`。
+
+## 49. Bounded、可重現的 Genesis
+
+Genesis 不採每個 trait uniform random 0–100。Preferred direction 為 population distribution、bounded randomness、weak correlations、rare extremes、reproducible seed 與 generator versioning。大多數角色落在合理中間範圍，真正極端人格應較稀少；distribution 與 covariance TBD。
+
+出生狀態必須可追溯與重建，概念上至少需要：
+
+```text
+character_id
+genesis_seed
+generator_version
+```
+
+同一角色不可因重讀而重新隨機。具體 schema 尚未授權。
+
+## 50. Shared Genesis 與 Personality time-scale
+
+禁止建立 `PLAYER_CHARACTER_PERSONALITY_ENGINE` 與另一套 `WORLD_NPC_PERSONALITY_ENGINE`。所有 Persistent Characters 使用同一套 Genesis、Psyche 與 Personality 模型，差異只在 Control Authority，例如 `PLAYER_OWNED`、`WORLD_OWNED` 與 `FREE_AGENT`。角色轉為 FREE_AGENT 時不需要更換人格系統。
+
+正式分層：
+
+| 層 | 定義 | 範例 |
+| --- | --- | --- |
+| `TEMPERAMENT` | 先天氣質，極慢變 | extraversion tendency、emotional sensitivity、curiosity、risk、attachment |
+| `LEARNED DISPOSITION` | 後天人格傾向，慢速變 | social confidence、stranger openness、trust expectation、party preference、guild belonging、learned caution |
+| `HABIT` | 生活習慣，中速形成／改變 | 看世界頻、單練、固定隊伍、公會活動、探索 |
+| `MOOD` | 短期狀態 | stress、loneliness、confidence、frustration、social desire、happiness trend |
+
+```text
+TEMPERAMENT != DISPOSITION != HABIT != MOOD
+```
+
+## 51. Player-directed life 與 Personality Evolution
+
+玩家就是角色本人，因此玩家長期在 Web 控制期間實際做出的生活行為，就是角色本人的人生經歷。長期主動聊天、密語、世界頻、組隊、公會活動、幫助陌生人與維持朋友關係，可能經 Personality Reconciliation 逐漸形成 social confidence、social initiative、stranger openness、party preference 與 guild belonging。
+
+產品語意是「這個人過去就是這樣生活，所以這逐漸成為他的生活方式」，不建立「玩家訓練 AI」的世界觀。
+
+單次行為不得立即改變人格。世界頻一句話、一次密語或一次組隊，只能作為弱證據；人格塑形需觀察 repeated behavior、sustained pattern、meaningful outcomes、lived experience 與 longer time window。
+
+## 52. Autonomy Behavior Feedback Loop Guard
+
+Autonomy Engine 自己產生的行為不能無限制沿同方向強化 Personality。自主選擇本身只作 weak evidence 或 neutral evidence。
+
+```text
+DECISION ALONE != PERSONALITY REINFORCEMENT
+OUTCOME / EXPERIENCE = IMPORTANT SHAPING SOURCE
+```
+
+自主選擇組隊後成功共同活動、獲得幫助與建立朋友，可形成正向 social experience；主動互動持續被拒絕或衝突，可能形成不同 learned disposition。禁止由「稍微內向 → 自主單練 → 更內向 → 更常單練」形成失控 feedback loop。
+
+人格長期形成至少觀察：
+
+1. `DELIBERATE BEHAVIOR`
+2. `EXPERIENCED OUTCOME`
+3. `REPEATED LIFE PATTERN`
+
+概念公式：
+
+```text
+WHO I WAS BORN AS
++ HOW I CHOSE TO LIVE
++ WHAT THE WORLD DID TO ME
+= WHO I HAVE BECOME
+```
+
+## 53. Personality Drift Gate
+
+慢速人格不得每天因小事件漂移：
+
+```text
+Daily Experience
+↓
+Short-term Psyche / Habit Evidence
+↓
+Repeated Pattern?
+↓
+Sustained Pattern?
+↓
+Learned Disposition Drift
+```
+
+Temperament 比 Learned Disposition 更慢。天數、threshold、evidence weight、decay 與 saturation 全部 TBD。
+
+## 54. Character Parameters Visibility
+
+```text
+CHARACTER PARAMETERS ARE SIMULATION INTERNALS,
+NOT PLAYER-FACING STATS.
+```
+
+玩家不可直接看到 extraversion、trust threshold、rejection sensitivity、social confidence、risk tendency、attachment tendency、mood numeric values、relationship numeric values、Utility score、Personality Drift score 或 hidden decision weights。禁止顯示「外向度 72、信任 61、好感 84」等 numeric parameter UI。
+
+玩家只能透過行為、自主選擇、說話方式、社交方式、生活習慣、Daily Journal、Relationship consequences 與世界實際結果逐步理解角色。`INTERNAL STATE` 保持 hidden；`BEHAVIORAL EXPRESSION`、`NARRATIVE EXPRESSION` 與 `WORLD CONSEQUENCE` 可被觀察。玩家對角色個性的判斷可能錯誤，這是產品體驗的一部分。
+
+除非未來 Project Control 另行決定，不直接顯示內向、敏感、慢熟等 Personality label。角色可以在 Daily Reflection 中形成自然的自我敘述，但那是 Narrative，不是 system label。
+
+同樣原則適用於 familiarity、trust、affinity、cooperation 與 romance。模糊描述如陌生、熟悉、朋友、親近仍需另行產品決策，目前不自動授權。
+
+## 55. Admin / Debug Visibility
+
+`PLAYER UI` 與 `ADMIN / DEBUG TOOL` 必須分開。玩家不可見 simulation parameters；未來管理者或開發者可為 debug、balance、support、simulation inspection 與 regression testing 使用權限保護的 internal parameter inspection。這屬 `ADMIN OBSERVABILITY`，不屬 Player Gameplay UI，具體 Admin UI 尚未授權。
+
+## 56. Genesis 不是 Reroll 系統
+
+玩家不能預覽完整人格參數、選人格、調 trait slider 或看到數值後重骰，避免 Character Genesis 退化成 build optimization。玩家若長期不喜歡角色，可使用 `VOLUNTARY_RELEASE`；原角色不被刪除，仍轉為 `FREE_AGENT / WORLD_OWNED`，世界保留其人生。
+
+## 57. External Reference Research Direction
+
+以下只作 `REFERENCE IMPLEMENTATION / ARCHITECTURAL INSPIRATION`，不得直接安裝或複製 source：
+
+| Reference | 研究方向 |
+| --- | --- |
+| Cataclysm: Dark Days Ahead | NPC random personality、bounded generation、derived traits |
+| Google DeepMind Concordia | componentized agent、personality、memory architecture |
+| AI Town | conversation、memory、future social context |
+
+若文件要寫 license、API 或 capability，必須查官方 repository / official docs；無法確認時標記 `【資料不足，無法確認】`。External reference implementation 前仍需通過 `PRE_IMPLEMENTATION_REUSE_GATE`。
+
+## 58. LLM 與 Genesis 邊界
+
+LLM 不負責 random personality、Genesis trait generation、authoritative background values、personality drift numbers 或 relationship numbers。
+
+```text
+Deterministic / probabilistic Genesis Engine
+↓
+Structured Character Genesis
+↓
+LLM optional
+↓
+Natural-language background / journal
+```
+
+LLM 可以作 biographer / narrator，不能作 personality authority。
+
+## 59. Genesis Eventually Yields to Life
+
+出生背景永遠是歷史的一部分，但後天人生的重要性應逐步提高：
+
+```text
+EARLY LIFE:
+Genesis influence high
+
+LONG-TERM:
+Lived experience increasingly dominates learned disposition / habits / identity
+```
+
+角色生活多年後，不應每天仍因出生家庭背景直接固定加減人格。
+
+## 60. Current Character Formation Loop
+
+```text
+WORLD-GENERATED BACKGROUND
++ INNATE TEMPERAMENT
++ INITIAL SENSITIVITIES
++ EARLY MEMORY SEEDS
+↓
+CHARACTER BORN
+↓
+PLAYER-DIRECTED LIFE
++ AUTONOMOUS LIFE
++ WORLD RESPONSE
+↓
+DAILY LIFE RECONCILIATION
+↓
+MOOD / MEMORY / RELATIONSHIP / HABIT
+↓
+SLOW LEARNED DISPOSITION / IDENTITY DRIFT
+↓
+FUTURE DECISIONS CHANGE
+↓
+DIFFERENT FUTURE LIFE
+```
+
+## 61. Genesis / Personality 未決事項
+
+以下維持 `TBD`，不得自行補答案：
+
+- exact Genesis traits
+- exact probability distributions 與 covariance model
+- background taxonomy
+- early memory schema
+- sensitivity fields
+- personality drift math
+- player behavior、autonomy behavior 與 outcome evidence weighting
+- personality saturation / bounds 與 trait decay
+- qualitative relationship UI
+- Admin parameter inspector
+- open-source implementation choice
+- exact LLM role in background prose
