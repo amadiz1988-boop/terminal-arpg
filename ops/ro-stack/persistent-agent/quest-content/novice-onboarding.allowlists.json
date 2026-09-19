@@ -18,7 +18,7 @@
       "學院結業導師#terminal"
     ],
     "PERSISTENT_AGENT_NPC_MAPS": ["iz_int", "int_land", "izlude", "iz_ac01"],
-    "PERSISTENT_AGENT_NAVIGATION_MAPS": ["iz_int", "int_land", "izlude", "iz_ac01", "new_1-3"],
+    "PERSISTENT_AGENT_NAVIGATION_MAPS": ["iz_int", "int_land", "izlude", "iz_ac01", "new_1-3", "prt_fild08"],
     "PERSISTENT_AGENT_FARM_MAPS": ["new_1-3"],
     "PERSISTENT_AGENT_FARM_MOBS": [],
     "PERSISTENT_AGENT_QUEST_IDS": [21001, 7471, 21008, 7472, 7473, 4269, 2293],
@@ -30,7 +30,7 @@
   "counts": {
     "npcs": 11,
     "npcMaps": 4,
-    "navigationMaps": 5,
+    "navigationMaps": 6,
     "farmMaps": 1,
     "farmMobs": 0,
     "questIds": 7,
