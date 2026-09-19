@@ -209,6 +209,9 @@ GIT CHECKPOINT EXISTS
 
 不能只有 `source changed` 或 `production currently works` 就宣告永久完成。
 
+For user-facing Web features:
+DONE requires BROWSER_UI_PASS when the acceptance criteria depend on visible UI behavior.
+
 ### 13. Current Product Decision Examples
 
 以下作為「產品決策應寫入 Migration Bundle」的例子：
@@ -253,6 +256,68 @@ LIVE_ACCEPTANCE =
 GIT_CHECKPOINT =
 PRODUCTION_TOUCHED =
 READY / DONE =
+```
+
+### 16. Browser / UI Live Acceptance Policy
+
+When a feature's acceptance criteria require observing or interacting with the actual Player Web / Admin Web browser UI, backend evidence alone is insufficient.
+
+The following are NOT equivalent to browser/UI acceptance:
+
+```text
+API returns 200
+backend command CONFIRMED
+database/read-model updated
+native/server logs show PASS
+curl/http request succeeds
+source/unit tests pass
+```
+
+These may prove the backend path, but they do NOT prove that the user-facing Web flow is correct.
+
+If the worker environment does not have real browser/UI interaction capability, the worker MUST report separately:
+
+```text
+BACKEND_PATH = PASS/FAIL
+UI_LIVE_ACCEPTANCE = REQUIRES_BROWSER
+```
+
+and MUST NOT report:
+
+```text
+PLAYER_WEB_E2E = PASS
+ADMIN_WEB_E2E = PASS
+MINIMAP_REALTIME = PASS
+UI_STATE_SYNC = PASS
+```
+
+unless the actual browser UI was observed/interacted with.
+
+For browser-required features, final acceptance must verify the actual UI behavior, including where relevant:
+
+- button click works
+- visible state changes correctly
+- loading/disabled states are correct
+- rendered values match backend state
+- live freshness/latency is acceptable
+- map/marker/UI position updates are visible
+- no stale UI remains after backend success
+
+Project Control must distinguish:
+
+```text
+SOURCE_PASS
+BACKEND_PASS
+BROWSER_UI_PASS
+```
+
+Only BROWSER_UI_PASS qualifies as full E2E PASS when UI observation is part of the acceptance criteria.
+
+If browser access is unavailable:
+
+```text
+STOP at backend/source acceptance and explicitly request browser/live acceptance.
+Do not substitute API/log evidence.
 ```
 
 ## Short-Term Product North Star
