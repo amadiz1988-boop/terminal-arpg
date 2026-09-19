@@ -591,6 +591,179 @@ Canonical schema、decision taxonomy、failure codes 與 evaluator 只在
 5. 玩家會走路、使用蒼蠅翅膀、回城、補給、使用 Kafra、找 NPC、換地圖、找怪、戰鬥、撿物或死亡後恢復時，主要驗收優先覆蓋同一條真實行為鏈。
 6. Diagnostic test 可以高度人工化，只用於定位底層問題，不能取代 Player-flow acceptance。
 
+## OPENKORE-REFERENCE / PA-RUNTIME POLICY 鐵律
+
+Policy name：`OPENKORE_REFERENCE_POLICY`
+
+OpenKore Exit 的本質是 `RUNTIME AUTHORITY MIGRATION`，不是功能或工程知識的廢棄。
+OpenKore 退出 Production Runtime，由 PA／SERVER_AGENT 接替正式執行角色；但 OpenKore
+累積多年的成熟工程知識、演算法、資料模型、狀態機、例外處理與 Last-Good 行為必須
+永久保留，並優先作為 Reference Implementation。
+
+核心原則：
+
+```text
+Study OpenKore.
+Understand its proven behavior.
+Reproduce that behavior faithfully in PA / rAthena.
+Do not re-enable OpenKore as the runtime.
+```
+
+### 1. Runtime Authority
+
+```text
+Production Runtime:     PA / SERVER_AGENT → rAthena authoritative runtime
+OpenKore process count: 0
+```
+
+正式執行鏈固定為 `PA → rAthena`，禁止 `PA → OpenKore → rAthena`。OpenKore 不得重新
+成為 production runtime dependency，也不得成為 command、navigation、combat 或
+supply executor，或任何 gameplay authority。
+
+### 2. OpenKore Permanent Value
+
+OpenKore 永久保留為：Reference Implementation、Last-Good Behavior Source、
+Data Contract Reference、Algorithm Reference、State-Machine Reference、
+Edge-Case Knowledge Base、Historical Acceptance Evidence。退出 Runtime 不代表我們
+應忽略或重造這些能力。
+
+### 3. Learn and Reproduce, Do Not Re-enable
+
+「模仿 OpenKore」指模仿其 behavior、semantics、algorithm、data model、
+update timing、state transitions、retry policy、recovery behavior 與
+edge-case handling，不是複製其 process／runtime architecture。
+
+### 4. Default Restoration Strategy
+
+對既有能力（包括但不限於 Combat、Target Selection、Loot、Navigation、Supply、
+Death Recovery、Shop、Kafra、Inventory、Equipment、Farm Statistics、
+Character Live State、Web Status Projection、Quest-related legacy behavior）預設流程：
+
+```text
+OpenKore Last-Good / Reference
+→ Current PA implementation
+→ FIRST_BROKEN_TRANSITION
+→ Minimal Glue / Minimal Port
+→ Bounded Test
+→ Live Acceptance
+→ Browser UI Acceptance
+→ Git Checkpoint
+```
+
+不得跳過 Last-Good reconstruction 直接重新設計功能。
+
+### 5. No Duplicate Engine Policy
+
+若 OpenKore 已有成熟且已驗證的 route planner、combat policy、target policy、
+supply behavior、state machine、retry／recovery algorithm、inventory semantics 或
+data contract，必須先研究其現有實作。禁止在沒有證據與 Project Control 決策下重新
+發明第二套 navigation engine、combat engine、supply engine、route planner、
+state machine、character state model 或 Web data contract。
+
+若要偏離 OpenKore Last-Good 行為，必須明確記錄：
+
+1. Technical reason
+2. Current architecture constraint
+3. Project Control decision
+
+### 6. PA Replaces OpenKore's Runtime Role
+
+```text
+Historical: rAthena → packets → OpenKore → maintained character state → status/logs → Dashboard → Browser
+Current:    rAthena → PA / SERVER_AGENT → authoritative live state / projections / event ledger → Dashboard → Browser
+```
+
+PA 承接 OpenKore 過去作為「角色即時狀態提供者」的功能角色；且 PA 直接位於 rAthena
+authority 內，應比 OpenKore 更直接取得與提供角色狀態。
+
+### 7. Data Migration Principle
+
+OpenKore Exit 前，Web 消費 OpenKore 已整理完成的角色狀態；Exit 後，不應讓每個
+Web page／consumer 各自從多個 DB source 臨時重新拼出同一份角色狀態。應優先由 PA
+authority 提供清楚的 Live Snapshot、Inventory／Equipment Projection、
+Farm Session State、Event Ledger、Quest State 與 Navigation／Runtime State。
+
+Migration 核心目標：
+
+```text
+OpenKore-provided state semantics → PA-provided authoritative state semantics
+```
+
+而不是：
+
+```text
+OpenKore removed → every Web feature redesigns its own data source
+```
+
+### 8. State vs Event
+
+```text
+Live Snapshot / Projection = 現在角色是什麼狀態
+Event Ledger               = 剛剛發生了什麼事情
+```
+
+Live state 可包含 map、x／y、HP／SP、Base EXP／Job EXP、Zeny、runtime mode、
+farm target、current target、updatedAt、revision。Inventory／Equipment Projection
+包含 inventory、equipment、generation／revision。Event Ledger 包含 target、attack、
+hit、kill、loot、supply、death、recovery、navigation events。
+
+不得為了降低 query 次數，就建立一個包含所有系統的巨大 Everything Snapshot。
+
+### 9. Restore First, Optimize Second
+
+```text
+PHASE A: OpenKore-era proven behavior → PA authoritative runtime
+PHASE B: 功能與資料接線穩定後，再進行 measurement-driven 效能優化
+```
+
+PHASE B 才允許 Real User Monitoring、Browser latency tracing、P50／P95／P99、
+Network／Server／Read Model／Frontend Render latency 與 freshness／revision
+monitoring。固定原則：
+
+```text
+Correct behavior first.
+Measure second.
+Optimize the measured bottleneck third.
+```
+
+功能接線尚未恢復時，禁止在無明確證據下進行大型 architecture rewrite、
+transport rewrite、telemetry rewrite、data layer rewrite 或 speculative
+performance refactor。
+
+### 10. Project Control Default Decision
+
+遇到「OpenKore 以前有這個功能，Current PA／Web 現在不知道怎麼接」時，預設答案不是
+重新設計，而是：
+
+```text
+1. 查 OpenKore Last-Good
+2. 查 OpenKore reference implementation
+3. 確認原始 behavior / data contract
+4. 對照 PA 已有能力
+5. 找 FIRST_BROKEN_TRANSITION
+6. 只補缺失 seam / glue
+7. 正式執行仍由 PA / rAthena 完成
+```
+
+只有 OpenKore 沒有成熟方案，或 OpenKore 方案與 Current architecture 明確不相容，
+才允許進入新的架構設計。
+
+### 11. Short Form Rule
+
+```text
+OPENKORE_REFERENCE_POLICY:
+OpenKore = reference implementation / last-good knowledge.
+PA / SERVER_AGENT = production runtime authority.
+Reproduce proven OpenKore behavior in PA.
+Do not re-enable OpenKore runtime.
+Do not reinvent a proven capability without evidence.
+```
+
+本節強化既有 `Single Runtime Policy`、`PC-DISPATCH-STANDARD`、
+`LAST_GOOD → CURRENT → FIRST_BROKEN_TRANSITION`、Browser UI acceptance、
+Git hygiene 與 OpenKore Exit 驗收規則；若文字與既有規則重複，保留原規則，本節只
+引用與強化，不取代其中任何一條。
+
 ## OpenKore Exit 驗收鐵律
 
 - Source presence 不等於能力完成。
