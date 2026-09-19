@@ -199,6 +199,7 @@ Do not create parallel simulation systems.
 | Persistent Agent implementation roadmap | `docs/persistent-server-agent-roadmap.md` |
 | Production PA canary profile | `docs/PRODUCTION_PA_CANARY_CAPABILITY_PROFILE.md` |
 | Reuse gate | `docs/pre-implementation-reuse-gate.md` |
+| Character Autonomy / Player Agency | `docs/roadmap/character-autonomy-player-agency.md` (`PLANNED`, `IMPLEMENTATION_AUTHORIZED = NO`) |
 | Current status snapshot | `docs/CURRENT_STATUS.md` |
 | Actionable task list | `docs/TODO.md` |
 | Legacy RO milestone roadmap (superseded) | `docs/ROADMAP.md` |
