@@ -113,9 +113,13 @@ CURRENT:
   OpenKore Exit / SERVER_AGENT migration — ACTIVE
 
 NEXT:
-  PL1 Persistent Life Diary V1 — PLANNED / NOT AUTHORIZED
-  (start condition: OpenKore Exit sufficiently stabilized OR Project Control
-   explicitly authorizes PL1)
+  PL1-A Factual Diary Vertical Slice — ACTIVE / AUTHORIZED
+  (scoped Project Control authorization; deterministic Event Ledger facts,
+   authenticated read-only API, existing Web surface, Browser acceptance)
+
+  PL1 Persistent Life Diary V1 remainder — PLANNED / NOT AUTHORIZED
+  (LLM reflection, Diary storage expansion, memory context, and later modules
+   require separate authorization)
 
 AFTER PL1:
   PL2 Persistent Social PA V1 — PLANNED / NOT AUTHORIZED
@@ -136,14 +140,16 @@ OpenKore Exit (PHASE 1)
                        └─→ PHASE 4+ Expanded autonomous society
 ```
 
-PL1 and PL2 are not authorized by this roadmap. Gates never advance by source
-inspection alone; each slice needs its own acceptance evidence.
+The unscoped PL1 remainder and PL2 are not authorized by this roadmap. PL1-A is
+the single scoped exception authorized by Project Control. Gates never advance
+by source inspection alone; each slice needs its own acceptance evidence.
 
 ## 6. Detailed roadmap documents
 
 | ROADMAP_ID | Document | Status | IMPLEMENTATION_AUTHORIZED |
 | --- | --- | --- | --- |
 | `PL1-PERSISTENT-LIFE-DIARY` | `docs/roadmap/persistent-life-diary-v1.md` | `PLANNED` | `NO` |
+| `PL1-A-FACTUAL-DIARY` | `docs/roadmap/persistent-life-diary-v1.md#scoped-authorization-pl1-a-factual-diary-vertical-slice` | `ACTIVE` | `YES` |
 | `PL2-PERSISTENT-SOCIAL-PA` | `docs/roadmap/persistent-social-pa-v1.md` | `PLANNED` | `NO` |
 
 Summary of PL1: characters live through a real in-world day, then produce at most

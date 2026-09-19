@@ -5,7 +5,9 @@ Detailed roadmap for the first Persistent Life product slice.
 ```text
 ROADMAP_ID:                 PL1-PERSISTENT-LIFE-DIARY
 STATUS:                     PLANNED
-IMPLEMENTATION_AUTHORIZED:  NO
+IMPLEMENTATION_AUTHORIZED:  NO (FULL PL1)
+PL1_A_STATUS:                AUTHORIZED / IN PROGRESS
+PL1_A_IMPLEMENTATION_AUTHORIZED: YES
 CANONICAL_INDEX:            docs/PROJECT_ROADMAP.md
 SOURCE_OF_TRUTH:            docs/RO_AUTOMATION_PRODUCT_CONSTITUTION.md
 TASK_TYPE:                  ROADMAP / GOVERNANCE ONLY
@@ -19,7 +21,34 @@ OR
 Project Control explicitly authorizes PL1.
 ```
 
-This document does not authorize implementation. LLM remains narrator-only.
+This document authorizes only the scoped PL1-A factual Diary vertical slice.
+The remaining PL1 modules remain planned and unauthorized. LLM remains
+narrator-only and is not required by PL1-A.
+
+### Scoped authorization: PL1-A factual Diary vertical slice
+
+Authorized scope:
+
+```text
+persistent_life_session
+→ persistent_life_event
+→ deterministic factual session diary projection
+→ authenticated read-only API
+→ existing Persistent Life Web surface
+```
+
+PL1-A may provide completed-session counts, deterministic highlights, and a
+factual event timeline. It does not authorize LLM reflection, Diary prose
+generation, mood or memory expansion, social simulation, or schema redesign.
+
+PL1-A ownership routing:
+
+```text
+Backend / API / read projection = A｜Web / Dashboard / Player Web
+Frontend / Browser acceptance   = B｜UI / Browser
+Native PA / D / E               = not required unless evidence proves a
+                                  missing authoritative fact
+```
 
 ## 1. Product goal
 
@@ -155,11 +184,11 @@ Gate authority: `docs/pre-implementation-reuse-gate.md`.
 
 ```text
 OpenKore Exit / SERVER_AGENT migration (PHASE 1)
-   └─→ PL1-A Daily Event Aggregator
-        └─→ PL1-B Diary Storage Contract
-             └─→ PL1-C Daily Diary LLM
-                  └─→ PL1-D Diary Memory Context
-                       └─→ PL1-E Diary Player UI
-                            └─→ PL1 success condition / acceptance
-                                 └─→ PL2 Persistent Social PA V1
+   └─→ PL1-A factual Diary vertical slice (AUTHORIZED / IN PROGRESS)
+        ├─→ PL1-E Diary Player UI acceptance
+        └─→ PL1-B Diary Storage Contract (PLANNED / NOT AUTHORIZED)
+             └─→ PL1-C Daily Diary LLM (PLANNED / NOT AUTHORIZED)
+                  └─→ PL1-D Diary Memory Context (PLANNED / NOT AUTHORIZED)
+                       └─→ PL1 success condition / acceptance
+                            └─→ PL2 Persistent Social PA V1
 ```
