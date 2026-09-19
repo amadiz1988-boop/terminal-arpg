@@ -1,6 +1,6 @@
 # PLAYER_WEB_RESPONSE_EXPERIENCE_POLICY
 
-VERSION: `PLAYER_WEB_RESPONSE_EXPERIENCE_POLICY_V1`
+VERSION: `PLAYER_WEB_RESPONSE_EXPERIENCE_POLICY_V1.1`
 
 STATUS: CANONICAL
 
@@ -27,6 +27,221 @@ PA runtime continues independently from Web presence.
 
 ---
 
+## 0. PLAYER_VALUE_FIRST_DATA_PRINCIPLE
+
+`PLAYER_VALUE_FIRST_DATA_PRINCIPLE` is the first principle for this project's
+Player Web / data delivery.
+
+Before any Web data acquisition, projection, polling, SSE, stream, cache,
+preload, render, re-render, or RUM optimization, answer:
+
+```text
+1. Does the player currently really need this data?
+2. If needed, how fast does the player need to see it?
+3. Has this data actually changed?
+4. Can the player currently see / is the player currently using this feature?
+```
+
+Only when these conditions support it is it worth paying:
+
+```text
+query
+fetch
+subscribe
+poll
+transport
+serialization
+render
+re-render
+```
+
+```text
+Do not deliver data merely because the system has it.
+Deliver data when it has current player value.
+```
+
+Decision order:
+
+```text
+PLAYER NEED
+→ REQUIRED RESPONSIVENESS
+→ DATA CHANGE
+→ CURRENT VISIBILITY / INTEREST
+→ MINIMAL AUTHORITATIVE DELIVERY
+→ RENDER
+```
+
+Short form:
+
+```text
+Need?
+How fast?
+Changed?
+Visible?
+```
+
+### 0.1 DECISION BEHAVIOR
+
+If:
+
+```text
+PLAYER_NEEDS_DATA = NO
+```
+
+prefer:
+
+```text
+DO NOT LOAD
+DEFER
+UNSUBSCRIBE
+```
+
+If:
+
+```text
+VISIBLE = NO
+```
+
+prefer:
+
+```text
+THROTTLE
+EVENT-ONLY
+UNSUBSCRIBE
+```
+
+If:
+
+```text
+DATA_CHANGED = NO
+```
+
+```text
+DO NOT RESEND FULL PAYLOAD
+DO NOT RE-RENDER
+```
+
+If the Browser is:
+
+```text
+hidden
+background
+disconnected
+```
+
+high-frequency Web delivery MUST stop or be significantly throttled.
+
+But:
+
+```text
+PA / SERVER_AGENT Runtime MUST CONTINUE.
+```
+
+### 0.2 DATA COST RULE
+
+Every high-frequency Web path MUST check:
+
+```text
+DATA_VALUE =
+QUERY_COST =
+TRANSPORT_COST =
+RENDER_COST =
+```
+
+Forbidden:
+
+```text
+To obtain one small high-frequency datum, e.g. map / x / y,
+incidentally query Inventory, Quest, Dialog, Combat history,
+Farm Stats, or other unrelated domains.
+```
+
+High-frequency data MUST use the smallest authoritative projection that
+satisfies the current player need.
+
+### 0.3 NO REFRESH FOR REFRESH'S SAKE
+
+```text
+"Forcing a refresh because a timer fired" is forbidden.
+```
+
+Polling / refresh MUST have an explicit purpose:
+
+```text
+authoritative freshness requirement
+active player visibility
+missing event-driven alternative
+known product responsiveness target
+```
+
+If the revision / generation / event cursor has not changed:
+
+```text
+prefer not to send the payload.
+```
+
+### 0.4 DEVELOPMENT FIRST PRINCIPLE
+
+Apply the same rule to new Web feature development.
+
+Before development, ask:
+
+```text
+PLAYER_VALUE =
+PLAYER_VISIBLE_BEHAVIOR =
+REQUIRED_LATENCY =
+AUTHORITATIVE_SOURCE =
+MINIMAL_DATA_REQUIRED =
+```
+
+Do not build a large data flow first and only later ask whether the player
+actually needs it.
+
+### 0.5 DATA DELIVERY EXAMPLES
+
+```text
+Login Page:
+  player does not need gameplay runtime data
+  → do not load Minimap / Combat / Inventory / Farm Stats / Quest runtime
+
+Character Select:
+  only character-selection data is needed
+  → do not start gameplay subscriptions early
+
+Minimap Active:
+  player is looking at it
+  → position is high priority
+  → cadence close to the authoritative requirement
+
+Minimap Hidden:
+  player cannot see it
+  → throttle / stop position delivery
+  → PA movement continues as normal
+
+Inventory Closed:
+  no inventory revision change
+  → do not keep sending inventory payload
+
+Combat Page Active:
+  combat events have player value
+  → real-time / low-latency delivery
+
+Combat Page Inactive:
+  event ledger authority is retained
+  → no need for continuous high-frequency DOM render
+
+Browser Closed:
+  Web delivery = STOP
+  PA autonomy = CONTINUE
+
+Browser Return:
+  authoritative snapshot
+  → revision / event cursor reconcile
+  → resume only relevant domains
+```
+
+---
+
 ## 1. PLAYER-FIRST EXPERIENCE PRINCIPLE
 
 The first objective of Web optimization is NOT:
@@ -48,13 +263,26 @@ Optimization order:
 
 ```text
 Correct
+→ Player-needed
 → Visible
 → Responsive
 → Efficient
 ```
 
+Web optimization does NOT treat any of the following as a standalone success
+standard:
+
+```text
+lowest request count
+lowest DB query count
+lowest bandwidth
+```
+
 Do not sacrifice real-time information the player is actively viewing in
 order to save requests.
+
+Do not perform meaningless high-frequency refresh on domains the player
+cannot see merely to "look real-time".
 
 ---
 
@@ -563,6 +791,10 @@ Referenceable short form for future dispatch:
 ```text
 PLAYER_WEB_RESPONSE_EXPERIENCE_POLICY:
 
+PLAYER_VALUE_FIRST_DATA_PRINCIPLE:
+Need? How fast? Changed? Visible?
+Do not deliver data merely because the system has it.
+
 Load only what the current route needs.
 Subscribe only to currently relevant domains.
 Prioritize visible data.
@@ -616,15 +848,27 @@ It defines the rules those changes must satisfy.
 
 ---
 
+## VERSION HISTORY
+
+```text
+V1
+= lifecycle / interest / domain delivery policy
+
+V1.1
+= PLAYER_VALUE_FIRST_DATA_PRINCIPLE
+  Need / How fast / Changed / Visible
+  as mandatory first-principle decision gate
+```
+
 ## VERSIONING
 
 Version:
 
 ```text
-PLAYER_WEB_RESPONSE_EXPERIENCE_POLICY_V1
+PLAYER_WEB_RESPONSE_EXPERIENCE_POLICY_V1.1
 ```
 
-Future substantive semantic change MUST use `V1.1` / `V2`.
+Future substantive semantic change MUST use `V1.2` / `V2`.
 
 Silent change is forbidden.
 

@@ -889,7 +889,7 @@ Git hygiene 與 OpenKore Exit 驗收規則；若文字與既有規則重複，�
 
 Policy name：`PLAYER_WEB_RESPONSE_EXPERIENCE_POLICY`
 
-Version：`PLAYER_WEB_RESPONSE_EXPERIENCE_POLICY_V1`
+Version：`PLAYER_WEB_RESPONSE_EXPERIENCE_POLICY_V1.1`
 
 All Player Web development and performance work MUST follow:
 
@@ -922,6 +922,23 @@ This policy is operational / design reference.
 The full policy is NOT copied into `AGENTS.md`.
 
 Short form:
+
+```text
+PLAYER_VALUE_FIRST_DATA_PRINCIPLE:
+
+Before fetching or delivering Web data, ask:
+
+Need?
+How fast?
+Changed?
+Visible?
+
+If the player does not currently need or see it,
+or the authoritative revision has not changed,
+do not maintain unnecessary high-frequency delivery.
+
+PA Runtime remains independent of Web presence.
+```
 
 ```text
 PLAYER_WEB_RESPONSE_EXPERIENCE_POLICY:
