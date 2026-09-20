@@ -1,0 +1,51 @@
+{
+  "PRE_IMPLEMENTATION_REUSE_GATE": {
+    "featureId": "PL-WORLD-OWNED-LIFE-DIRECTOR-V0",
+    "featureName": "Isolated WORLD_OWNED Life Director V0 deterministic harness",
+    "scope": "NEW_CAPABILITY",
+    "taskCategory": "NEW_CAPABILITY",
+    "categories": ["life-director", "goal-stack", "interrupt-resume", "persistent-agent"],
+    "openKoreRelevant": true,
+    "checks": {
+      "currentProject": {
+        "status": "CHECKED",
+        "evidence": "Existing Persistent Agent lifecycle, supply, recovery, quest runtime and Event Ledger/projection code are reusable; no Life Director runtime exists. Evidence: ops/ro-stack/persistent-agent, ops/ro-stack/quest-runtime/event-log.mjs, ops/ro-stack/sql/005-persistent-life.sql."
+      },
+      "legacyProject": {
+        "status": "CHECKED",
+        "evidence": "OpenKore harvested behavior contracts cover supply, recovery, quest, navigation and resume boundaries. Evidence: docs/openkore-harvest-registry.md sections A5 and A8."
+      },
+      "reuseRegistry": {
+        "status": "REGISTRY_HIT",
+        "reference": "State-machine and behavior references are registry-backed; rAthena primitives remain authoritative and BehaviorTree.CPP is reference/reuse candidate only."
+      },
+      "rAthena": {
+        "status": "CHECKED",
+        "evidence": "rAthena remains world authority for character state, movement, supply effects, recovery and quest results; PoC emits no runtime mutation."
+      },
+      "openKore": {
+        "status": "CHECKED",
+        "evidence": "OpenKore is used only as preserved behavior reference; no OpenKore process, command or source is imported into the PoC."
+      },
+      "externalEcosystem": {
+        "status": "NOT_APPLICABLE",
+        "reason": "The PoC uses repository-local deterministic logic and does not adopt an external dependency."
+      },
+      "genericOSS": {
+        "status": "NOT_APPLICABLE",
+        "reason": "A dependency-free reducer is sufficient for the isolated deterministic phase."
+      }
+    },
+    "decision": "PORTABLE_LOGIC",
+    "whyNotReuse": "The existing Persistent Agent owns execution and authoritative transitions, but it has no Life Director goal-stack decision contract. The PoC adds only a pure orchestration wrapper that reuses existing lifecycle semantics and emits no runtime commands.",
+    "freshResearchPerformed": false,
+    "freshResearchJustification": "",
+    "registryUpdateRequired": false,
+    "registryUpdate": {
+      "status": "NO_CHANGE",
+      "entryId": "",
+      "evidence": "Registry-backed local primitives are reused; no external candidate or license fact changed."
+    },
+    "inheritedFrom": ""
+  }
+}
