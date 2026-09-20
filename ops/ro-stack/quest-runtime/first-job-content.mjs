@@ -129,6 +129,19 @@ export function firstJobResumeTarget(content, baseLevel) {
   return target;
 }
 
+// The existing first-job resume table is also the canonical default farm-map
+// policy. Keep the policy lookup in this parser so level thresholds have one
+// source of truth and callers receive a stable map-only target.
+export function resolveDefaultFarmTarget(content, baseLevel) {
+  const target = firstJobResumeTarget(content, baseLevel);
+  return {
+    mapId: target.map,
+    x: target.x,
+    y: target.y,
+    minimumBaseLevel: target.minimumBaseLevel,
+  };
+}
+
 export function firstJobNavigationRoute(destination) {
   return [
     {

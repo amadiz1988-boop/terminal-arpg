@@ -23,6 +23,13 @@ export const W1_ACTION = Object.freeze({
 export const W1_ACTIONS = Object.freeze(Object.values(W1_ACTION));
 const w1ActionSet = new Set(W1_ACTIONS);
 
+export const FARM_MAP_SOURCE = Object.freeze({
+  DEFAULT_POLICY: 'DEFAULT_POLICY',
+  PLAYER_OVERRIDE: 'PLAYER_OVERRIDE',
+});
+
+const farmMapSourceSet = new Set(Object.values(FARM_MAP_SOURCE));
+
 // Authoritative ownership states that still mean "SERVER_AGENT holds this
 // character" from the Web's point of view.
 const serverAgentOwnershipStates = new Set([
@@ -105,6 +112,15 @@ export function createLiveStatusView(row, { now = Date.now(), maxAgeMs = LIVE_ST
     revision: toInteger(row.revision),
     updatedAt: row.updatedAt ?? null,
     ageMs,
+    // Presentation-only freshness metadata derived from the single authority
+    // (LIVE_STATUS_MAX_AGE_MS). The browser uses it to distinguish LIVE / STALE
+    // / OFFLINE without inventing a second freshness source.
+    freshness: {
+      ageMs,
+      authoritativeAt: updatedAtMs,
+      maxAgeMs,
+    },
+    statusIntervalMs: 1000,
   };
 }
 
@@ -115,16 +131,6 @@ export function isW1Action(action) {
 function toInteger(value) {
   const parsed = Number(value);
   return Number.isSafeInteger(parsed) ? parsed : 0;
-}
-
-function parseJsonObject(text) {
-  if (!text) return null;
-  try {
-    const value = JSON.parse(text);
-    return value && typeof value === 'object' ? value : null;
-  } catch {
-    return null;
-  }
 }
 
 // A read failure of the SERVER_AGENT state source must never be reported as
@@ -146,6 +152,7 @@ export function createUnavailableControllerStatus(charId, reason) {
     canary: null,
     farmTarget: null,
     liveStatus: null,
+    farmRunning: null,
     actions: Object.freeze({
       claim: false,
       startFarm: false,
@@ -166,6 +173,7 @@ export function createControllerStatus({
   rollout = null,
   farmTarget = null,
   liveStatus = null,
+  farmRunning = null,
   unavailableReason = null,
 }) {
   const canary = Boolean(rollout?.allowed);
@@ -183,7 +191,9 @@ export function createControllerStatus({
     serverAgentOwnershipStates.has(ownershipState ?? '');
   const isLegacyOwner = owner === OPENKORE_OWNER;
   const farmActive =
-    Boolean(agentMode) && agentMode !== 'PERSISTENT_IDLE';
+    farmRunning === null
+      ? Boolean(agentMode) && agentMode !== 'PERSISTENT_IDLE'
+      : farmRunning === true;
 
   const blockers = {};
   let claim = false;
@@ -244,32 +254,60 @@ export function createControllerStatus({
     rolloutReason: rollout?.reason ?? null,
     farmTarget: farmTarget ?? null,
     liveStatus: liveStatus ?? null,
+    farmRunning: farmRunning === null ? null : farmRunning === true,
     actions: { claim, startFarm, stopFarm, release },
     actionBlockers: blockers,
     unavailableReason,
   };
 }
 
-// Server-side resolution of the canary farm target. The browser never sends
+// Server-side resolution of the canary farm target. The browser never sends a
 // map/mob for the SERVER_AGENT path; the target comes from persisted agent
 // intent first, then from the dashboard-owned grind target config.
+//
+// MOB_SELECTION_REMOVED: the player farm target is map-only. Any legacy mobId
+// in persisted state (`targetRules.mobId`) or grind config (`grindTarget.mobId`)
+// is ignored, never a filter, and never used to reject or rewrite the map.
 export function resolveFarmTarget({ stateRow = null, grindTarget = null } = {}) {
-  const rules = parseJsonObject(stateRow?.targetRules ?? null);
+  const savedMap = String(grindTarget?.mapId ?? '');
+  const savedSource = farmMapSourceSet.has(String(grindTarget?.source ?? ''))
+    ? String(grindTarget.source)
+    : null;
+  // A manual choice is durable policy authority. This also protects the
+  // browser target from a stale PA target_map during restart/reconnect resume.
+  if (savedSource === FARM_MAP_SOURCE.PLAYER_OVERRIDE && mapIdPattern.test(savedMap))
+    return { targetMap: savedMap, source: savedSource };
+  if (grindTarget?.legacyUnclassified && mapIdPattern.test(savedMap))
+    return { targetMap: savedMap, source: null, legacyUnclassified: true };
+  const stateMap = String(stateRow?.targetMap ?? '');
+  const stateActive = Boolean(stateRow?.agentMode) &&
+    !['PERSISTENT_IDLE', 'INACTIVE'].includes(String(stateRow.agentMode));
+  if (
+    savedSource === FARM_MAP_SOURCE.DEFAULT_POLICY &&
+    stateActive &&
+    mapIdPattern.test(stateMap) &&
+    stateMap !== savedMap
+  )
+    return { targetMap: stateMap, source: savedSource };
+  const stateCandidate = mapIdPattern.test(stateMap)
+    ? savedSource
+      ? { targetMap: stateMap, source: savedSource }
+      : { targetMap: stateMap }
+    : null;
+  const savedCandidate = mapIdPattern.test(savedMap)
+    ? savedSource
+      ? { targetMap: savedMap, source: savedSource }
+      : { targetMap: savedMap }
+    : null;
   const candidates = [
-    {
-      targetMap: stateRow?.targetMap ?? null,
-      mobId: toInteger(rules?.mobId),
-    },
-    {
-      targetMap: grindTarget?.mapId ?? null,
-      mobId: toInteger(grindTarget?.mobId),
-    },
+    ...(savedSource === FARM_MAP_SOURCE.DEFAULT_POLICY && mapIdPattern.test(savedMap)
+      ? [{ targetMap: savedMap, source: savedSource }]
+      : []),
+    ...(stateCandidate ? [stateCandidate] : []),
+    ...(savedCandidate ? [savedCandidate] : []),
   ];
-  for (const candidate of candidates) {
-    const targetMap = String(candidate.targetMap ?? '');
-    if (mapIdPattern.test(targetMap) && candidate.mobId > 0)
-      return { targetMap, mobId: candidate.mobId };
-  }
+  for (const candidate of candidates)
+    if (mapIdPattern.test(candidate.targetMap)) return candidate;
   return null;
 }
 
@@ -284,16 +322,17 @@ export function buildW1CommandPayload(action, context = {}) {
     case W1_ACTION.STOP_FARM:
       return {};
     case W1_ACTION.START_FARM: {
+      // MOB_SELECTION_REMOVED: the player selects a farm MAP only. No mobId is
+      // resolved, generated or persisted by the Web; AUTO_FARM decides which
+      // legal monster to attack.
       const targetMap = String(context.farmTarget?.targetMap ?? '');
-      const mobId = toInteger(context.farmTarget?.mobId);
-      if (!mapIdPattern.test(targetMap) || mobId <= 0)
+      if (!mapIdPattern.test(targetMap))
         throw new Error('farm_target_unresolved');
       // Autonomous survival / death-recovery intent for a persistent agent.
       // The browser still only sends "start"; the server remains authoritative
       // and honors each flag only when its own capability config enables it.
       return {
         targetMap,
-        mobId,
         lootEnabled: true,
         survivalEnabled: true,
         deathRecoveryEnabled: true,

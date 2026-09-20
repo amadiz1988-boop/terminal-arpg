@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#566d8b" />
     <title>鬼島傳說｜冒險掛機</title>
     <link rel="icon" href="/ro/client/paperdoll/novice-male.png" />
-    <link rel="stylesheet" href="/styles.css?v=r067-original-login-background" />
+    <link rel="stylesheet" href="/styles.css?v=r068-inventory-item-actions" />
     <link rel="stylesheet" href="/ro-ui-kit.css?v=r011-character-select-scale" />
   </head>
   <body>
@@ -258,15 +258,32 @@
       <header class="brand">
         <div><b>鬼島傳說</b><small id="accountName">連線確認中</small></div>
         <div>
-          <span id="worldLamp" class="lamp">連線確認中</span
-          ><button
+          <button
             id="quickAudio"
             class="quick-audio"
             type="button"
-            aria-label="開啟音效設定"
+            aria-label="音效開啟，點擊靜音"
+            aria-pressed="false"
+            data-audio-state="on"
+            title="音效開關"
           >
-            音效</button
-          ><a id="adminObservatoryLink" href="/admin/observatory.html" target="_blank" class="admin-nav-link" style="display:none" aria-label="管理後台：Web 體驗監控">管理後台</a
+            <svg
+              class="quick-audio-icon"
+              viewBox="0 0 16 16"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                class="quick-audio-speaker"
+                d="M2.5 6h2L7.5 3v10L4.5 10h-2z"
+              />
+              <path
+                class="quick-audio-wave"
+                d="M9.6 5.4a3.4 3.4 0 0 1 0 5.2M11.8 3.8a6 6 0 0 1 0 8.4"
+              />
+              <path class="quick-audio-mute" d="M9.8 6l4 4M13.8 6l-4 4" />
+            </svg></button
+          ><span id="worldLamp" class="lamp">連線確認中</span
           ><button id="logout" class="logout">登出</button>
         </div>
       </header>
@@ -453,17 +470,16 @@
             <span>自動戰鬥控制</span><span id="status">讀取中</span>
           </div>
           <div class="controls">
-            <button id="start" class="primary">開始掛機</button
+            <button id="start" class="primary">開始指定掛機</button
             ><button id="stop">停止掛機</button
             ><button id="openWorldMap" type="button">更換掛機地圖</button>
           </div>
           <p id="grindTargetSummary" class="notice">掛機目標：尚未設定</p>
           <p id="automationNotice" class="notice"></p>
           <div id="canaryPanel" class="canary-panel" hidden>
-            <p id="controllerBadge" class="controller-badge">控制來源：讀取中</p>
+            <p id="controllerBadge" class="controller-badge" hidden></p>
             <div class="controls canary-controls">
-              <button id="canaryClaim" type="button" hidden>接管角色（Server Agent）</button
-              ><button id="canaryRelease" type="button" hidden>交還 OpenKore</button>
+              <button id="canaryClaim" type="button" hidden>由系統接管角色</button>
             </div>
             <p id="canaryNotice" class="notice"></p>
           </div>
@@ -492,7 +508,14 @@
         </div>
         <div class="window map-window" data-pet-anchor="map">
           <div class="titlebar">
-            <span>即時小地圖</span><span id="mapPosition">等待角色位置</span>
+            <span>即時小地圖</span><span id="mapPosition">等待角色位置</span
+            ><span
+              id="mapFreshness"
+              class="map-freshness"
+              data-state="unknown"
+              title="小地圖資料即時性"
+              >—</span
+            >
           </div>
           <div class="minimap-wrap">
             <canvas
@@ -1346,13 +1369,14 @@
     </main>
     <audio
       id="bgm"
-      src="/ro/client/bgm/01-title.mp3"
+      data-src="/ro/client/bgm/01-title.mp3"
       loop
       preload="metadata"
     ></audio>
-    <script src="/ro-ui-kit.js?v=r012-item-detail-v1" defer></script>
+    <script src="/ro-ui-kit.js?v=r013-item-quantity-detail" defer></script>
+    <script src="/minimap-presence.js?v=ui5-1" defer></script>
     <script
-      src="/app.js?v=r084-monster-name-identity"
+      src="/app.js?v=r088-inventory-item-actions"
       defer
       fetchpriority="high"
     ></script>

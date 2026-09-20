@@ -202,3 +202,25 @@ export function planWebRelocation(graph, currentMap, targetMap, { needsService =
   if (!route) return { policy, route: null, reason: 'route_unrepresentable' };
   return { policy, route, hops: path.length };
 }
+
+// Terminal-route adapter for controller-owned service destinations. Topology is
+// still resolved exclusively by planWebRelocation; this only replaces the final
+// landing cell with the configured service handoff point.
+export function buildTerminalRoute(graph, currentMap, targetMap, targetX, targetY) {
+  if (!mapIdPattern.test(String(currentMap)) ||
+      !mapIdPattern.test(String(targetMap)) ||
+      !Number.isSafeInteger(targetX) || targetX < 0 || targetX > 32767 ||
+      !Number.isSafeInteger(targetY) || targetY < 0 || targetY > 32767)
+    return null;
+  if (currentMap === targetMap)
+    return [{ map: currentMap, x: targetX, y: targetY }];
+  const plan = planWebRelocation(graph, currentMap, targetMap);
+  if (!plan?.route) return null;
+  const last = plan.route[plan.route.length - 1];
+  if (!last || last.portalTo || last.map !== targetMap) return null;
+  return plan.route.map((step, index) =>
+    index === plan.route.length - 1
+      ? { ...step, x: targetX, y: targetY }
+      : step,
+  );
+}

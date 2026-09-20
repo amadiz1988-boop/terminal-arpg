@@ -34,14 +34,16 @@ function loadDeferredScript(source) {
   return deferredScriptPromises.get(source);
 }
 async function loadCharacterSelectionAssets() {
-  await loadDeferredScript('/ro-asset-resolver.js?v=r003-monster-display-name');
+  await loadDeferredScript('/ro-asset-resolver.js?v=r005-map-name-index');
   await window.roAssetResolver?.load();
+  void prefetchMapInfo();
 }
 let gameplayModulesPromise = null;
 function loadGameplayModules() {
   if (!gameplayModulesPromise) {
     gameplayModulesPromise = (async () => {
       await loadCharacterSelectionAssets();
+      void loadSkillTrees().catch(() => null);
       await Promise.all([
         loadDeferredScript('/pet-showcase.js?v=r001'),
         loadDeferredScript('/pet-companion-settings.js?v=r003-size-aware'),
@@ -202,6 +204,7 @@ const jobNames = {
   defaultAudio = {
     musicEnabled: true,
     soundEnabled: true,
+    muted: false,
     musicVolume: 20,
     soundVolume: 35,
     damageFloatsEnabled: true,
@@ -534,22 +537,54 @@ const ObservationInterest = Object.freeze({
     NO_WEB: 'NO_WEB',
   }),
   DEFAULT_OBSERVATION_POLICY = Object.freeze({
-    COMBAT_PAGE: { eventPollMs: 300, statePollMs: 5000, socialPollMs: 1000 },
-    QUEST_PAGE: { eventPollMs: 1000, statePollMs: 5000, socialPollMs: 1000 },
+    COMBAT_PAGE: {
+      eventPollMs: 300,
+      statePollMs: 5000,
+      socialPollMs: 1000,
+      positionPollMs: 500,
+    },
+    QUEST_PAGE: {
+      eventPollMs: 1000,
+      statePollMs: 5000,
+      socialPollMs: 1000,
+      positionPollMs: 0,
+    },
     INVENTORY_PAGE: {
       eventPollMs: 2500,
       statePollMs: 5000,
       socialPollMs: 1000,
+      positionPollMs: 0,
     },
-    SOCIAL_PAGE: { eventPollMs: 5000, statePollMs: 5000, socialPollMs: 750 },
+    SOCIAL_PAGE: {
+      eventPollMs: 5000,
+      statePollMs: 5000,
+      socialPollMs: 750,
+      positionPollMs: 0,
+    },
     OTHER_GAME_PAGE: {
       eventPollMs: 5000,
       statePollMs: 5000,
       socialPollMs: 1000,
+      positionPollMs: 0,
     },
-    IDLE_PAGE: { eventPollMs: 5000, statePollMs: 10000, socialPollMs: 2500 },
-    HIDDEN: { eventPollMs: 15000, statePollMs: 0, socialPollMs: 10000 },
-    NO_WEB: { eventPollMs: 0, statePollMs: 0, socialPollMs: 0 },
+    IDLE_PAGE: {
+      eventPollMs: 5000,
+      statePollMs: 10000,
+      socialPollMs: 2500,
+      positionPollMs: 0,
+    },
+    HIDDEN: {
+      eventPollMs: 15000,
+      statePollMs: 0,
+      socialPollMs: 10000,
+      positionPollMs: 2000,
+    },
+    NO_WEB: {
+      eventPollMs: 0,
+      statePollMs: 0,
+      socialPollMs: 0,
+      positionPollMs: 0,
+    },
   }),
   POLL_RETRY_MAX_MS = 5000,
   webViewerId = createWebViewerId();
@@ -558,12 +593,15 @@ let authenticated = false,
   audioSaveTimer = null,
   petSettingsSaveTimer = null,
   sessionStartedAt = null,
+  sessionEndedAt = null,
   statePoll = null,
   eventTimer = null,
   webActivityHeartbeatTimer = null,
   eventPollActive = false,
   eventPollRestartRequested = false,
   eventPollFailures = 0,
+  positionTimer = null,
+  positionInFlight = false,
   eventCursor = null,
   combatStreamConfig = {
     enabled: false,
@@ -615,6 +653,7 @@ let authenticated = false,
   gameEntryBootstrap = null,
   selectedCardBinId = null,
   selectedCardItemKey = null,
+  selectedCardInventoryIndex = null,
   cardArtPreviewAnchor = null,
   cardArtPreviewReturnFocus = null,
   cardArtPreviewHideTimer = null,
@@ -647,12 +686,16 @@ let authenticated = false,
   minimapTerrainKey = '',
   minimapTracks = new Map(),
   minimapLastPaint = 0,
+  minimapFreshness = null,
+  minimapFreshnessTimer = null,
+  minimapCombatObserved = true,
+  minimapPlayerStale = false,
   lastLiveHp = null,
   damageFlashUntil = 0,
   damageFloatSequence = 0,
   officialDamageAssetsReady = false,
   damageAccumulation = new Map(),
-  currentMusic = musicSources.title,
+  currentMusic = null,
   currentCreateSex = 'M';
 let audioPrefs = (() => {
   try {
@@ -964,6 +1007,7 @@ const webExperienceTelemetry = {
 };
 let minimapTelemetryLastAt = 0;
 let minimapTelemetryLastPosition = null;
+let minimapFreshnessTelemetryLastAt = 0;
 
 function applyWebExperienceTelemetry(config = {}) {
   webExperienceTelemetry.enabled = config.enabled === true;
@@ -980,6 +1024,12 @@ function telemetryActionForInteraction(name) {
     automation_stop: 'automation_stop',
     quest_page_open: 'quest_open',
     inventory_open: 'inventory_open',
+    stat_allocate: 'stat_allocate',
+    equip_item: 'equip_item',
+    unequip_item: 'unequip_item',
+    use_item: 'use_item',
+    npc_dialog_action: 'npc_dialog_action',
+    minimap_freshness: 'minimap_freshness',
   }[name] ?? null;
 }
 
@@ -996,21 +1046,88 @@ function telemetryAuthorityDuration(trace) {
   return values.length ? values.reduce((sum, value) => sum + value, 0) : null;
 }
 
+// WEB_REAL_USER_EXPERIENCE_V1: batched, bounded, fail-soft browser telemetry
+// transport. Never one HTTP request per frame; telemetry never blocks gameplay.
+const webExperienceTelemetryQueue = [];
+const WEB_EXPERIENCE_QUEUE_LIMIT = 24;
+const WEB_EXPERIENCE_BATCH_AT = 8;
+const WEB_EXPERIENCE_FLUSH_MS = 1500;
+// The telemetry endpoint enforces an 8 KiB request body cap. Batch by BYTES as
+// well as count so a realistic burst can never turn into a rejected 413 batch.
+const WEB_EXPERIENCE_BATCH_BYTES = 6000;
+let webExperienceTelemetryQueuedBytes = 0;
+let webExperienceTelemetryFlushTimer = null;
+function flushWebExperienceTelemetry() {
+  if (webExperienceTelemetryFlushTimer !== null) {
+    clearTimeout(webExperienceTelemetryFlushTimer);
+    webExperienceTelemetryFlushTimer = null;
+  }
+  if (!webExperienceTelemetryQueue.length) {
+    webExperienceTelemetryQueuedBytes = 0;
+    return;
+  }
+  const events = webExperienceTelemetryQueue.splice(0, webExperienceTelemetryQueue.length);
+  webExperienceTelemetryQueuedBytes = 0;
+  try {
+    void fetch('/api/web-experience/telemetry', {
+      method: 'POST',
+      cache: 'no-store',
+      keepalive: true,
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ events }),
+    }).catch(() => {});
+  } catch {}
+}
+function payloadByteSize(payload) {
+  try {
+    return JSON.stringify(payload).length;
+  } catch {
+    return 0;
+  }
+}
+function enqueueWebExperienceTelemetry(payload) {
+  try {
+    const size = payloadByteSize(payload);
+    // Flush first when this payload would push the batch past the endpoint cap.
+    if (
+      webExperienceTelemetryQueue.length &&
+      webExperienceTelemetryQueuedBytes + size > WEB_EXPERIENCE_BATCH_BYTES
+    )
+      flushWebExperienceTelemetry();
+    webExperienceTelemetryQueue.push(payload);
+    webExperienceTelemetryQueuedBytes += size;
+    if (webExperienceTelemetryQueue.length > WEB_EXPERIENCE_QUEUE_LIMIT) {
+      webExperienceTelemetryQueue.splice(
+        0,
+        webExperienceTelemetryQueue.length - WEB_EXPERIENCE_QUEUE_LIMIT,
+      );
+      webExperienceTelemetryQueuedBytes = webExperienceTelemetryQueue.reduce(
+        (total, item) => total + payloadByteSize(item),
+        0,
+      );
+    }
+    if (webExperienceTelemetryQueue.length >= WEB_EXPERIENCE_BATCH_AT)
+      flushWebExperienceTelemetry();
+    else if (webExperienceTelemetryFlushTimer === null)
+      webExperienceTelemetryFlushTimer = setTimeout(
+        flushWebExperienceTelemetry,
+        WEB_EXPERIENCE_FLUSH_MS,
+      );
+  } catch {}
+}
+
 function sendWebExperienceTelemetry(event) {
   if (!webExperienceTelemetry.enabled || !webExperienceTelemetry.eligible)
     return;
   const actionId = telemetryActionForInteraction(event.name) ?? event.actionId;
   if (!webExperienceTelemetry.actions.has(actionId)) return;
+  const metric = (value) => (Number.isFinite(Number(value)) ? Number(value) : null);
   const payload = {
     actionId,
-    durationMs: Number.isFinite(Number(event.durationMs)) ? Number(event.durationMs) : null,
-    authorityDurationMs: Number.isFinite(Number(event.authorityDurationMs))
-      ? Number(event.authorityDurationMs)
-      : null,
-    visibleDurationMs: Number.isFinite(Number(event.visibleDurationMs))
-      ? Number(event.visibleDurationMs)
-      : null,
-    freshnessMs: Number.isFinite(Number(event.freshnessMs)) ? Number(event.freshnessMs) : null,
+    durationMs: metric(event.durationMs),
+    authorityDurationMs: metric(event.authorityDurationMs),
+    visibleDurationMs: metric(event.visibleDurationMs),
+    freshnessMs: metric(event.freshnessMs),
     success: event.success === true ? true : event.success === false ? false : null,
     error: event.error === true ? true : event.error === false ? false : null,
     reject: event.reject === true ? true : event.reject === false ? false : null,
@@ -1018,14 +1135,147 @@ function sendWebExperienceTelemetry(event) {
     stale: event.stale === true ? true : event.stale === false ? false : null,
     deviceClass: browserDeviceClass(),
     authoritySource: event.authoritySource ?? 'WEB_ONLY',
+    // V1 layer breakdown. Unknown fields are ignored by the legacy canary
+    // pipeline and aggregated by the RUM read model.
+    traceId: typeof event.traceId === 'string' ? event.traceId : null,
+    requestStartedAt: metric(event.requestStartedAt),
+    responseAt: metric(event.responseAt),
+    authoritativeStateAt: metric(event.authoritativeStateAt),
+    visibleAt: metric(event.visibleAt),
+    serverMs: metric(event.serverMs),
+    playerPerceivedMs: metric(event.playerPerceivedMs),
+    errorCode: /^[A-Z0-9_]{1,64}$/.test(String(event.errorCode ?? ''))
+      ? String(event.errorCode)
+      : null,
   };
-  void fetch('/api/web-experience/telemetry', {
-    method: 'POST',
-    cache: 'no-store',
-    keepalive: true,
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify(payload),
-  }).catch(() => {});
+  enqueueWebExperienceTelemetry(payload);
+}
+
+// Shared Player Web interaction trace. Every V1 action uses this helper so
+// request RTT / server / state convergence / render stay comparable.
+const experienceTraceActions = new Set([
+  'stat_allocate',
+  'equip_item',
+  'unequip_item',
+  'use_item',
+  'npc_dialog_action',
+  'minimap_freshness',
+]);
+function beginExperienceTrace(actionId) {
+  if (!experienceTraceActions.has(actionId)) return null;
+  return {
+    actionId,
+    interactionId: crypto.randomUUID(),
+    traceId: crypto.randomUUID(),
+    captureRequests: true,
+    requests: [],
+    startedAt: performance.now(),
+    requestStartedAt: null,
+    responseAt: null,
+    authoritativeStateAt: null,
+    visibleAt: null,
+    serverMs: null,
+    errorCode: null,
+  };
+}
+function markExperienceRequest(trace) {
+  if (!trace || trace.requestStartedAt !== null) return trace;
+  trace.requestStartedAt = performance.now();
+  return trace;
+}
+function experienceServerMs(trace) {
+  const timing = trace?.requests?.at(-1)?.serverTiming ?? {};
+  const app = Number(timing.app);
+  if (Number.isFinite(app)) return app;
+  return telemetryAuthorityDuration(trace);
+}
+function markExperienceResponse(trace) {
+  if (!trace || trace.responseAt !== null) return trace;
+  const last = trace.requests?.at(-1);
+  trace.responseAt = performance.now();
+  trace.serverMs = experienceServerMs(trace);
+  // Prefer the real fetch start over the click time so request RTT excludes
+  // any local queue wait.
+  if (Number.isFinite(last?.requestStartMs))
+    trace.requestStartedAt = trace.startedAt + last.requestStartMs;
+  return trace;
+}
+function markExperienceAuthoritative(trace) {
+  if (!trace || trace.authoritativeStateAt !== null) return trace;
+  if (trace.responseAt === null) markExperienceResponse(trace);
+  trace.authoritativeStateAt = performance.now();
+  return trace;
+}
+async function settleExperienceTrace(trace, options = {}) {
+  if (!trace) return;
+  try {
+    if (trace.requestStartedAt === null) trace.requestStartedAt = trace.startedAt;
+    if (trace.responseAt === null) trace.responseAt = trace.requestStartedAt;
+    if (trace.authoritativeStateAt === null)
+      trace.authoritativeStateAt = trace.responseAt;
+    if (trace.visibleAt === null)
+      await new Promise((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(resolve)),
+      );
+    if (trace.visibleAt === null) trace.visibleAt = performance.now();
+    const perceived = trace.visibleAt - trace.startedAt;
+    const success =
+      options.success === true ? true : options.success === false ? false : null;
+    sendWebExperienceTelemetry({
+      actionId: trace.actionId,
+      traceId: trace.traceId,
+      requestStartedAt: trace.requestStartedAt - trace.startedAt,
+      responseAt: trace.responseAt - trace.startedAt,
+      authoritativeStateAt: trace.authoritativeStateAt - trace.startedAt,
+      visibleAt: perceived,
+      serverMs: trace.serverMs,
+      durationMs: perceived,
+      visibleDurationMs: perceived,
+      authorityDurationMs: trace.serverMs,
+      playerPerceivedMs: perceived,
+      freshnessMs: Number.isFinite(Number(options.freshnessMs))
+        ? Number(options.freshnessMs)
+        : null,
+      success,
+      error: success === false ? true : null,
+      reject: options.reject === true ? true : null,
+      timeout: options.timeout === true ? true : null,
+      stale: options.stale === true ? true : null,
+      errorCode: options.errorCode ?? trace.errorCode ?? null,
+      authoritySource: options.authoritySource ?? 'RATHENA_NATIVE',
+    });
+  } catch {}
+}
+
+// Bounded MutationObserver "visible update" probe. Used where a later state
+// render (not the fetch resolution) is the real visible success signal.
+// No full-page polling.
+function observeVisibleChange(node, timeoutMs = 3000) {
+  return new Promise((resolve) => {
+    if (!node || typeof MutationObserver !== 'function') {
+      resolve(false);
+      return;
+    }
+    let settled = false;
+    const finish = (observed) => {
+      if (settled) return;
+      settled = true;
+      observer.disconnect();
+      clearTimeout(timer);
+      resolve(observed);
+    };
+    const observer = new MutationObserver(() => finish(true));
+    const timer = setTimeout(
+      () => finish(false),
+      Math.max(250, Number(timeoutMs) || 3000),
+    );
+    observer.observe(node, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+      attributes: true,
+    });
+  });
 }
 
 function beginLatencyInteraction(name, options = {}) {
@@ -1144,8 +1394,20 @@ const api = async (url, options = {}) => {
     responseReceivedAt = performance.now(),
     traceEnabled = r.headers.get('x-web-latency-trace') === 'on';
   if (traceEnabled) webLatencyTrace.enabled = true;
-  const data = await r.json();
-  if (trace && traceEnabled)
+  const responseContentType = r.headers.get('content-type') ?? '',
+    responseText = await r.text();
+  let data = null;
+  if (
+    /application\/json|\+json/i.test(responseContentType) ||
+    /^\s*[\[{]/.test(responseText)
+  ) {
+    try {
+      data = JSON.parse(responseText);
+    } catch {
+      data = null;
+    }
+  }
+  if (trace && (traceEnabled || trace.captureRequests))
     trace.requests.push({
       endpoint: new URL(url, location.href).pathname,
       requestStartMs: requestStartedAt - trace.startedAt,
@@ -1154,6 +1416,14 @@ const api = async (url, options = {}) => {
       serverTiming: parseServerTiming(r.headers.get('server-timing')),
       status: r.status,
     });
+  if (!data || typeof data !== 'object') {
+    const error = new Error(r.ok ? '回應格式暫時異常' : '操作失敗');
+    error.status = r.status;
+    error.code = 'NON_JSON_RESPONSE';
+    error.responseContentType = responseContentType;
+    error.responseBodyPrefix = responseText.slice(0, 200);
+    throw error;
+  }
   if (!r.ok) {
     const error = new Error(data.error || '操作失敗');
     error.status = r.status;
@@ -1607,11 +1877,22 @@ function openCardArtPreview(anchor, forceMobile = cardArtTouchMode()) {
     },
   };
   const roItemDetail = window.RoOriginalUiKit?.RoItemDetail;
-  const model = roItemDetail?.buildModel(detail.item, detail.resolved);
+  const detailItem = {
+    ...(detail.item ?? {}),
+    amount:
+      detail.item?.amount ??
+      (Number.isFinite(Number(sourceNode.dataset.itemAmount))
+        ? Number(sourceNode.dataset.itemAmount)
+        : undefined),
+  };
+  const model = roItemDetail?.buildModel(detailItem, detail.resolved);
   if (model) roItemDetail.render(preview, model);
   const actionButton = $('#cardArtPreviewAction');
-  const action = sourceNode.dataset.itemAction || '';
-  actionButton.classList.toggle('hidden', !forceMobile || !action);
+  const fallbackAction = sourceNode.dataset.blockedReason
+    ? ''
+    : sourceNode.dataset.action || '';
+  const action = sourceNode.dataset.itemAction || fallbackAction;
+  actionButton.classList.toggle('hidden', !action);
   actionButton.dataset.itemAction = action;
   const actionLabel = action === 'card'
     ? '插入卡片'
@@ -1622,10 +1903,12 @@ function openCardArtPreview(anchor, forceMobile = cardArtTouchMode()) {
         : '使用道具';
   actionButton.setAttribute('aria-label', actionLabel);
   actionButton.title = actionLabel;
+  actionButton.disabled = false;
   preview.classList.toggle('mobile', forceMobile);
   preview.classList.toggle('anchored', !forceMobile);
+  preview.classList.toggle('actionable', Boolean(action));
   preview.classList.remove('hidden');
-  preview.setAttribute('role', forceMobile ? 'dialog' : 'tooltip');
+  preview.setAttribute('role', forceMobile || action ? 'dialog' : 'tooltip');
   if (forceMobile) {
     preview.setAttribute('aria-modal', 'true');
     cardArtPreviewReturnFocus = document.activeElement;
@@ -1671,8 +1954,16 @@ function setupCardArtPreview() {
   document.addEventListener('pointerout', (event) => {
     if (cardArtTouchMode()) return;
     const source = cardArtPreviewSourceNode(event.target);
+    const panel = $('#cardArtPreviewPanel');
+    if (panel?.contains(event.relatedTarget)) {
+      clearTimeout(cardArtPreviewHideTimer);
+      return;
+    }
     if (!source || source.contains(event.relatedTarget)) return;
     scheduleCardArtPreviewClose();
+  });
+  $('#cardArtPreviewPanel')?.addEventListener('pointerover', () => {
+    clearTimeout(cardArtPreviewHideTimer);
   });
   document.addEventListener('focusin', (event) => {
     if (!cardArtTouchMode() && event.target.closest?.('.card-art-trigger'))
@@ -1706,7 +1997,9 @@ function setupCardArtPreview() {
   $('#cardArtPreviewAction')?.addEventListener('click', () => {
     const source = cardArtPreviewAnchor?.closest('.inventory-item') ?? cardArtPreviewAnchor;
     if (!source) return;
-    const action = $('#cardArtPreviewAction').dataset.itemAction;
+    const actionButton = $('#cardArtPreviewAction');
+    const action = actionButton.dataset.itemAction;
+    actionButton.disabled = true;
     closeCardArtPreview({ restoreFocus: false });
     if (action === 'card') openCardMergeDialog(source);
     else source.dispatchEvent(new MouseEvent('dblclick', { bubbles: true, cancelable: true }));
@@ -1724,6 +2017,66 @@ function setupCardArtPreview() {
   });
 }
 
+// SERVER_AGENT inventory items carry no binId/itemKey: their authoritative
+// identity is the inventory slot index. These helpers let every inventory
+// action resolve identity by itemKey, otherwise binId, otherwise
+// inventoryIndex, so native SERVER_AGENT mutations work from the Web UI.
+function inventoryIdentityOf(item) {
+  return {
+    itemKey: item?.itemKey || '',
+    binId: Number.isInteger(item?.binId) ? Number(item.binId) : null,
+    inventoryIndex: Number.isInteger(item?.inventoryIndex)
+      ? Number(item.inventoryIndex)
+      : null,
+  };
+}
+function hasInventoryIdentity(identity) {
+  return Boolean(identity?.itemKey)
+    || identity?.binId !== null
+    || identity?.inventoryIndex !== null;
+}
+function inventoryMatchesIdentity(entry, identity) {
+  if (!entry || !identity) return false;
+  if (identity.itemKey) return entry.itemKey === identity.itemKey;
+  if (identity.inventoryIndex !== null && Number.isInteger(entry.inventoryIndex))
+    return Number(entry.inventoryIndex) === identity.inventoryIndex;
+  if (identity.binId !== null) return Number(entry.binId) === identity.binId;
+  return false;
+}
+function inventoryIdentityKey(identity) {
+  if (!identity) return '';
+  if (identity.itemKey) return identity.itemKey;
+  if (identity.inventoryIndex !== null) return `i${identity.inventoryIndex}`;
+  if (identity.binId !== null) return String(identity.binId);
+  return '';
+}
+function nodeInventoryIdentity(node) {
+  const itemKey = node.dataset.itemKey || '';
+  const binId = node.dataset.binId === '' || node.dataset.binId === undefined
+    ? NaN
+    : Number(node.dataset.binId);
+  const inventoryIndex = node.dataset.inventoryIndex === ''
+    || node.dataset.inventoryIndex === undefined
+    ? NaN
+    : Number(node.dataset.inventoryIndex);
+  return {
+    itemKey,
+    binId: Number.isInteger(binId) ? binId : null,
+    inventoryIndex: Number.isInteger(inventoryIndex)
+      ? Number(inventoryIndex)
+      : null,
+  };
+}
+function selectedCardIdentity() {
+  return {
+    itemKey: selectedCardItemKey || '',
+    binId: Number.isInteger(selectedCardBinId) ? selectedCardBinId : null,
+    inventoryIndex: Number.isInteger(selectedCardInventoryIndex)
+      ? selectedCardInventoryIndex
+      : null,
+  };
+}
+
 function compatibleCardTargets(cardItem) {
   const card = window.roAssetResolver?.resolveItemAsset(cardItem);
   const allowedLocations = new Set(card?.equipLocations ?? []);
@@ -1732,7 +2085,7 @@ function compatibleCardTargets(cardItem) {
     if (
       item.category !== 'equipment' ||
       !item.equippable ||
-      (!item.itemKey && !Number.isInteger(item.binId))
+      !hasInventoryIdentity(inventoryIdentityOf(item))
     ) return [];
     const equipment = window.roAssetResolver?.resolveEquipmentAsset(item);
     const slots = Number(equipment?.slots ?? item.slots ?? 0);
@@ -1752,6 +2105,7 @@ function closeCardMergeDialog({ restoreFocus = true, clearSelection = true } = {
   if (clearSelection) {
     selectedCardBinId = null;
     selectedCardItemKey = null;
+    selectedCardInventoryIndex = null;
     document.querySelectorAll('.inventory-item.card-selected')
       .forEach((entry) => entry.classList.remove('card-selected'));
   }
@@ -1761,17 +2115,19 @@ function closeCardMergeDialog({ restoreFocus = true, clearSelection = true } = {
 }
 
 function openCardMergeDialog(cardNode) {
-  const binId = cardNode.dataset.binId === '' ? NaN : Number(cardNode.dataset.binId);
-  const itemKey = cardNode.dataset.itemKey || '';
+  const identity = nodeInventoryIdentity(cardNode);
+  const binId = identity.binId ?? NaN;
+  const itemKey = identity.itemKey;
   const cardItem = inventoryItems.find((entry) =>
-    itemKey ? entry.itemKey === itemKey : entry.binId === binId);
+    inventoryMatchesIdentity(entry, identity));
   if (!cardItem) {
     setItemActionNotice('遊戲伺服器尚未同步此卡片');
     return;
   }
   const resolvedCard = window.roAssetResolver?.resolveItemAsset(cardItem);
-  selectedCardBinId = binId;
-  selectedCardItemKey = itemKey;
+  selectedCardBinId = identity.binId;
+  selectedCardItemKey = identity.itemKey;
+  selectedCardInventoryIndex = identity.inventoryIndex;
   document.querySelectorAll('.inventory-item.card-selected')
     .forEach((entry) => entry.classList.toggle('card-selected', entry === cardNode));
   $('#cardMergeTitle').textContent = `插入 ${resolvedCard?.name ?? cardItem.name}`;
@@ -1792,13 +2148,13 @@ function openCardMergeDialog(cardNode) {
       button.append(copy);
       button.addEventListener('click', () => {
         closeCardMergeDialog({ restoreFocus: false, clearSelection: false });
+        const targetIdentity = inventoryIdentityOf(item);
         const target = [...document.querySelectorAll('.inventory-item[data-category="equipment"]')]
-          .find((node) => item.itemKey
-            ? node.dataset.itemKey === item.itemKey
-            : Number(node.dataset.binId) === Number(item.binId));
+          .find((node) => inventoryMatchesIdentity(nodeInventoryIdentity(node), targetIdentity));
         if (!target) {
           selectedCardBinId = null;
           selectedCardItemKey = null;
+          selectedCardInventoryIndex = null;
           setItemActionNotice('裝備資料已更新，請重新選擇卡片');
           return;
         }
@@ -2583,9 +2939,12 @@ function setupRankings() {
   };
   requestAnimationFrame(animate);
 }
-const duration = (s) => {
+// Farm Stats elapsed clock. `end` is an authoritative session end time (ms):
+// while a farm session is ACTIVE the clock follows wall time, and once
+// STOP_FARM ends it the clock freezes instead of growing against a stale start.
+const duration = (s, end) => {
   if (!s) return '00:00:00';
-  const n = Math.max(0, Math.floor((Date.now() - s) / 1000));
+  const n = Math.max(0, Math.floor(((end || Date.now()) - s) / 1000));
   return [Math.floor(n / 3600), Math.floor((n % 3600) / 60), n % 60]
     .map((v) => String(v).padStart(2, '0'))
     .join(':');
@@ -2647,7 +3006,18 @@ function syncAudioControls() {
   const bgm = $('#bgm');
   // Preserve the displayed percentage while halving physical BGM output.
   bgm.volume = Math.max(0, Math.min(0.5, audioPrefs.musicVolume / 200));
-  bgm.muted = !audioPrefs.musicEnabled;
+  bgm.muted = !(audioPrefs.musicEnabled && !audioPrefs.muted);
+  const audioToggle = $('#quickAudio');
+  if (audioToggle) {
+    const muted = Boolean(audioPrefs.muted);
+    audioToggle.dataset.audioState = muted ? 'muted' : 'on';
+    audioToggle.setAttribute('aria-pressed', String(muted));
+    audioToggle.setAttribute(
+      'aria-label',
+      muted ? '音效已靜音，點擊恢復' : '音效開啟，點擊靜音',
+    );
+    audioToggle.title = muted ? '音效已靜音' : '音效開啟';
+  }
 }
 
 function damageFloatMotion(container, node, lane = 0, sequence = 0) {
@@ -2909,7 +3279,7 @@ function playCombatSound(
   if (
     !key ||
     !combatSounds[key] ||
-    !audioPrefs.soundEnabled ||
+    !(audioPrefs.soundEnabled && !audioPrefs.muted) ||
     audioPrefs.soundVolume <= 0
   )
     return;
@@ -3003,7 +3373,20 @@ async function loadAccountAudio() {
   try {
     const data = await api('/api/preferences');
     accountPreferences = data.preferences;
-    audioPrefs = { ...defaultAudio, ...data.preferences };
+    const localPrefs = (() => {
+      try {
+        return JSON.parse(localStorage.getItem('ro-audio') || '{}');
+      } catch {
+        return {};
+      }
+    })();
+    audioPrefs = {
+      ...defaultAudio,
+      ...data.preferences,
+      ...(typeof localPrefs.muted === 'boolean'
+        ? { muted: localPrefs.muted }
+        : {}),
+    };
     window.PetCompanionSettings?.hydrateFromApi(data.preferences);
     localStorage.setItem('ro-audio', JSON.stringify(audioPrefs));
   } catch {}
@@ -3038,20 +3421,47 @@ function monsterDisplayName(name, mobId) {
   const resolved = window.roAssetResolver?.resolveMonsterDisplayName?.(query);
   return resolved ?? name ?? null;
 }
+const hasHan = (value) => /[\u3400-\u9fff]/u.test(String(value ?? ''));
+// Single shared map display name for every player-facing surface. Reuses the
+// existing project name table first, then the generated map-info index, then
+// the canonical Web map-name index exposed by resolveMapDisplayName, and only
+// then the raw English/OpenKore label.
+function mapDisplayName(mapId, englishName) {
+  const id = String(mapId ?? '').trim();
+  if (!id) return englishName ?? null;
+  if (mapNames[id]) return mapNames[id];
+  const info = mapInfoData?.maps?.[id];
+  if (info?.name && info.name !== id && hasHan(info.name)) return info.name;
+  const canonical = window.roAssetResolver?.resolveMapDisplayName?.(id);
+  if (canonical && hasHan(canonical)) return canonical;
+  return englishName ?? id;
+}
+function mapDisplayLabel(mapId, englishName) {
+  const id = String(mapId ?? '').trim();
+  return `${mapDisplayName(id, englishName)} (${id})`;
+}
+let mapInfoPrefetch = null;
+function prefetchMapInfo() {
+  if (mapInfoData?.maps || mapInfoPrefetch) return mapInfoPrefetch;
+  mapInfoPrefetch = fetch('/ro/data/map-info.json', { cache: 'no-store' })
+    .then((response) => (response.ok ? response.json() : null))
+    .then((data) => {
+      if (data?.maps) mapInfoData = data;
+      return data;
+    })
+    .catch(() => null);
+  return mapInfoPrefetch;
+}
 function localize(line) {
   const passiveProc = passiveProcName(line);
-  const activeSkill = line.match(/You use (.+?) \(Lv: (\d+)\)/),
-    selfSkill = line.match(/You use (.+?) on yourself \(Lv: (\d+)\)/),
-    recoverySkill = line.match(
-      /You use (.+?) on yourself \(Gained: (\d+) hp\)/,
-    );
   for (const [from, to] of Object.entries(names))
     line = line.replaceAll(from, to);
   line = line
     .replace(/^\[\s*(\d+)\/\s*(\d+)\]\s*/, '[HP $1% · SP $2%] ')
     .replace(
-      /Map Change: (prontera|prt_fild08|prt_in)\.gat/,
-      (_, m) => `[地圖] 進入 ${mapNames[m] ?? m}`,
+      /Map Change: ([a-z0-9_@-]+)\.gat(?:\s*\((\d+),\s*(\d+)\))?/i,
+      (_, mapId, x, y) =>
+        `[地圖] 進入 ${mapDisplayLabel(mapId)}${x && y ? ` (${x}, ${y})` : ''}`,
     )
     .replace(
       /Auto-storaging due to itemsMaxWeight/,
@@ -3068,7 +3478,16 @@ function localize(line) {
     .replace(/Auto-storage sequence completed\./, '[補給] 卡普拉存倉完成')
     .replace(/Auto-sell sequence completed\./, '[補給] 戰利品販售完成')
     .replace(/Auto-buy sequence completed\./, '[補給] 補給品購買完成')
-    .replace(/Calculating random route to: /, '[尋路] 計算路徑：')
+    .replace(
+      /Calculating random route to: (.+?) \(([a-z0-9_@-]+)\)(?::|：)\s*(\d+,\s*\d+)/i,
+      (_, englishName, mapId, coordinates) =>
+        `[尋路] 計算路徑：${mapDisplayLabel(mapId, englishName)}：${coordinates}`,
+    )
+    .replace(
+      /Calculating lockMap route to: (.+?)\s*\(([a-z0-9_@-]+)\)/i,
+      (_, englishName, mapId) =>
+        `[尋路] 目標地圖：${mapDisplayLabel(mapId, englishName)}`,
+    )
     .replace(/Moving to /, '[移動] 前往 ')
     .replace(
       /You are now attacking Monster (.+?)(?:\s+\(\d+\))?$/,
@@ -3081,18 +3500,24 @@ function localize(line) {
     .replace(
       /You use (.+?) \(Lv: (\d+)\) on Monster (.+?)(?:\s+\(\d+\))?(?=\s+\(Dmg:|$)/,
       (_, skill, level, name) =>
-        `[主動技能] ${localizedSkillName(activeSkill?.[1] ?? skill)} Lv.${level} · 攻擊 ${monsterDisplayName(name)}`,
+        `[主動技能] ${localizedSkillName(skill)} Lv.${level} · 攻擊 ${monsterDisplayName(name)}`,
+    )
+    .replace(
+      /You use (.+?) on Monster (.+?)(?:\s+\(\d+\))? \(Lv: (\d+)\)/,
+      (_, skill, name, level) =>
+        `[主動技能] ${localizedSkillName(skill)} Lv.${level} · 攻擊 ${monsterDisplayName(name)}`,
     )
     .replace(/You use (.+?) on yourself \(Lv: (\d+)\)/, (_, skill, level) => {
-      const definition = localizedSkillDefinition(selfSkill?.[1] ?? skill);
+      const definition = localizedSkillDefinition(skill);
+      const name = localizedSkillName(skill);
       return definition?.automationMode === 'selfBuff'
-        ? `[輔助技能] ${definition.name} Lv.${level} · 自動維持狀態`
-        : `[主動技能] ${definition?.name ?? skill} Lv.${level} · 以自身為中心施放`;
+        ? `[輔助技能] ${name} Lv.${level} · 自動維持狀態`
+        : `[主動技能] ${name} Lv.${level} · 以自身為中心施放`;
     })
     .replace(
       /You use (.+?) on yourself \(Gained: (\d+) hp\)/,
       (_, skill, gained) =>
-        `[主動技能] ${localizedSkillName(recoverySkill?.[1] ?? skill)} · 自身恢復 ${gained} HP`,
+        `[主動技能] ${localizedSkillName(skill)} · 自身恢復 ${gained} HP`,
     )
     .replace(
       /Monster (.+?)(?:\s+\(\d+\))? attacks you/,
@@ -3140,7 +3565,15 @@ function localizedSkillDefinition(englishName) {
   return null;
 }
 function localizedSkillName(englishName) {
-  return localizedSkillDefinition(englishName)?.name ?? englishName;
+  const name = String(englishName ?? '').trim();
+  if (!name) return name;
+  const definition = localizedSkillDefinition(name);
+  const query = definition?.id
+    ? { skillId: definition.id, internalName: definition.handle, enName: name }
+    : { enName: name };
+  const canonical = window.roAssetResolver?.resolveSkillDisplayName?.(query);
+  if (canonical && hasHan(canonical)) return canonical;
+  return definition?.name ?? name;
 }
 const passiveProcRules = Object.freeze([
   { handle: 'TF_DOUBLE', hits: 2, name: '二刀連擊' },
@@ -3641,29 +4074,129 @@ function updateMinimapTrack(key, x, y, now) {
     until: now + duration,
   });
 }
-function updateMinimapTargets(live) {
+function minimapPresenceApi() {
+  return globalThis.minimapPresence ?? null;
+}
+function compactMinimapViewport() {
+  return window.innerWidth <= 600;
+}
+// Records the authoritative state age carried by the live read model and the
+// monotonic time it was received. The banner then grows the age locally.
+function noteMinimapFreshness(live) {
+  const freshness = live?.freshness;
+  if (!freshness || !Number.isFinite(Number(freshness.ageMs))) return;
+  minimapFreshness = {
+    ageMs: Math.max(0, Number(freshness.ageMs)),
+    authoritativeAt: Number(freshness.authoritativeAt) || null,
+    statusIntervalMs: Number(live.statusIntervalMs) || 0,
+    maxAgeMs: Number(freshness.maxAgeMs) || null,
+    atPerf: performance.now(),
+  };
+}
+function renderMinimapFreshness() {
+  const element = $('#mapFreshness'),
+    presence = minimapPresenceApi();
+  if (!element || !presence) return;
+  if (!minimapFreshness) {
+    element.textContent = '—';
+    element.dataset.state = 'unknown';
+    element.title = '小地圖資料即時性：等待資料';
+    return;
+  }
+  const ageMs = presence.freshnessAgeMs(minimapFreshness, performance.now()),
+    // STALE is defined by the single authority (LIVE_STATUS_MAX_AGE_MS) carried
+    // in freshness.maxAgeMs, so the banner never disagrees with the server.
+    authorityMaxAgeMs = Number(minimapFreshness.maxAgeMs),
+    state = Number.isFinite(authorityMaxAgeMs) && authorityMaxAgeMs > 0
+      ? ageMs >= authorityMaxAgeMs
+        ? 'stale'
+        : ageMs >= 1000
+          ? 'slow'
+          : 'live'
+      : presence.freshnessState(ageMs, minimapFreshness.statusIntervalMs),
+    formatted = presence.formatFreshnessMs(ageMs);
+  element.dataset.state = state;
+  element.textContent = state === 'stale' ? `資料延遲 ${formatted}` : formatted;
+  element.title = `小地圖狀態即時性 ${Math.round(ageMs)}ms`;
+}
+function startMinimapFreshnessClock() {
+  if (minimapFreshnessTimer !== null) return;
+  minimapFreshnessTimer = setInterval(renderMinimapFreshness, 250);
+}
+function updateMinimapTargets(live, options = {}) {
   const now = performance.now(),
-    monsters = live.monsters ?? [],
-    players = live.players ?? [],
+    presence = minimapPresenceApi(),
+    combatObserved = options.combatObserved ?? true,
+    staleAgeMs = Number(live?.freshness?.ageMs),
+    authorityMaxAgeMs = Number(live?.freshness?.maxAgeMs),
+    playerStale =
+      combatObserved &&
+      Number.isFinite(staleAgeMs) &&
+      presence &&
+      staleAgeMs >=
+        (Number.isFinite(authorityMaxAgeMs) && authorityMaxAgeMs > 0
+          ? authorityMaxAgeMs
+          : presence.playerStaleThresholdMs(live?.statusIntervalMs));
+  minimapCombatObserved = combatObserved;
+  minimapPlayerStale = playerStale;
+  // MONOTONIC POSITION: the position hot path, the event poll and the state poll
+  // can land out of order. An older authoritative frame must never move the
+  // marker backwards on the same map, so the displayed position only advances in
+  // authoritative time. Interpolation still only smooths received samples.
+  const incomingAuthoritativeAt = Number(live?.freshness?.authoritativeAt),
+    displayedAuthoritativeAt = Number(
+      minimapLive?.freshness?.authoritativeAt ?? minimapLive?.updatedAt,
+    );
+  if (
+    minimapLive?.map &&
+    live?.map === minimapLive.map &&
+    Number.isFinite(incomingAuthoritativeAt) &&
+    Number.isFinite(displayedAuthoritativeAt) &&
+    incomingAuthoritativeAt < displayedAuthoritativeAt
+  ) {
+    live = {
+      ...live,
+      playerX: minimapLive.playerX,
+      playerY: minimapLive.playerY,
+      updatedAt: minimapLive.updatedAt,
+      freshness: minimapLive.freshness ?? live.freshness,
+    };
+  }
+  const monsters = combatObserved && !playerStale ? live.monsters ?? [] : [],
+    players = combatObserved && !playerStale ? live.players ?? [] : [],
     mapMonsterCount = Number(
       live.mapMonsterCount ?? mapInfoData?.maps?.[live.map]?.totalMonsters ?? 0,
     ),
     mapPlayerCount = Number(live.mapPlayerCount ?? 0),
     nextKeys = new Set(['self']);
-  if (minimapLive?.map && minimapLive.map !== live.map) minimapTracks.clear();
-  updateMinimapTrack('self', live.playerX, live.playerY, now);
-  for (const monster of monsters) {
-    const key = `monster:${monster.id}`;
-    nextKeys.add(key);
-    updateMinimapTrack(key, monster.x, monster.y, now);
+  if (minimapLive?.map && minimapLive.map !== live.map) {
+    minimapTracks.clear();
+    minimapPlayerStale = false;
   }
-  for (const player of players) {
-    const key = `player:${player.id}`;
-    nextKeys.add(key);
-    updateMinimapTrack(key, player.x, player.y, now);
+  // STALE: authoritative state is delayed. Keep the last known terrain and
+  // marker tracks on screen (the freshness banner shows 資料延遲) instead of
+  // blanking the minimap. Only a genuine map change (cleared above) or an
+  // unavailable map (OFFLINE) removes markers.
+  const mapUnavailable = !live.map;
+  if (mapUnavailable) minimapTracks.clear();
+  const retainStale = !mapUnavailable
+    && Boolean(playerStale)
+    && Boolean(minimapLive?.map);
+  if (!retainStale) {
+    updateMinimapTrack('self', live.playerX, live.playerY, now);
+    for (const monster of monsters) {
+      const key = `monster:${monster.id}`;
+      nextKeys.add(key);
+      updateMinimapTrack(key, monster.x, monster.y, now);
+    }
+    for (const player of players) {
+      const key = `player:${player.id}`;
+      nextKeys.add(key);
+      updateMinimapTrack(key, player.x, player.y, now);
+    }
+    for (const key of minimapTracks.keys())
+      if (!nextKeys.has(key)) minimapTracks.delete(key);
   }
-  for (const key of minimapTracks.keys())
-    if (!nextKeys.has(key)) minimapTracks.delete(key);
   const telemetryPosition = `${live.map ?? ''}:${Number(live.playerX ?? 0)}:${Number(live.playerY ?? 0)}`;
   const telemetryMoved = minimapTelemetryLastPosition !== telemetryPosition;
   if (
@@ -3675,10 +4208,39 @@ function updateMinimapTargets(live) {
     sendWebExperienceTelemetry({
       actionId: 'minimap_marker_update',
       success: true,
-      authoritySource: 'OPENKORE_BRIDGE',
+      authoritySource: 'RATHENA_LIVE_STATUS',
     });
     minimapTelemetryLastAt = now;
     minimapTelemetryLastPosition = telemetryPosition;
+  }
+  // MINIMAP_FRESHNESS: the rendered marker's data age, not a user click. This
+  // is what feeds dataAgeP50/P95/Max for the minimap in the health read model.
+  if (
+    webExperienceTelemetry.enabled &&
+    webExperienceTelemetry.eligible &&
+    webExperienceTelemetry.actions.has('minimap_freshness') &&
+    telemetryMoved &&
+    (now - minimapFreshnessTelemetryLastAt >= 1000 || minimapFreshnessTelemetryLastAt === 0)
+  ) {
+    const freshnessAgeMs = Number(live.freshness?.ageMs);
+    const authorityMaxAgeMs = Number(live.freshness?.maxAgeMs);
+    const stale =
+      Number.isFinite(authorityMaxAgeMs) &&
+      authorityMaxAgeMs > 0 &&
+      Number.isFinite(freshnessAgeMs) &&
+      freshnessAgeMs >= authorityMaxAgeMs;
+    sendWebExperienceTelemetry({
+      actionId: 'minimap_freshness',
+      success: !stale,
+      stale,
+      freshnessMs: Number.isFinite(freshnessAgeMs) ? freshnessAgeMs : null,
+      durationMs: Number.isFinite(freshnessAgeMs) ? freshnessAgeMs : null,
+      visibleDurationMs: Number.isFinite(freshnessAgeMs) ? freshnessAgeMs : null,
+      playerPerceivedMs: Number.isFinite(freshnessAgeMs) ? freshnessAgeMs : null,
+      errorCode: stale ? 'STALE_AUTHORITATIVE_STATE' : null,
+      authoritySource: 'RATHENA_LIVE_STATUS',
+    });
+    minimapFreshnessTelemetryLastAt = now;
   }
   minimapLive = live;
   if (lastLiveHp !== null && live.hp < lastLiveHp) damageFlashUntil = now + 180;
@@ -3691,7 +4253,12 @@ function updateMinimapTargets(live) {
   );
   $('#mapPosition').textContent = mapFieldError
     ? `${mapNames[live.map] ?? live.map} · ${mapFieldError}`
-    : `${mapNames[live.map] ?? live.map} (${live.playerX}, ${live.playerY}) · 視野怪物 ${monsters.length}`;
+    : compactMinimapViewport()
+      ? `${mapNames[live.map] ?? live.map} (${live.playerX}, ${live.playerY})`
+      : `${mapNames[live.map] ?? live.map} (${live.playerX}, ${live.playerY}) · 視野怪物 ${retainStale ? (minimapLive?.monsters?.length ?? monsters.length) : monsters.length}${retainStale ? ' · 狀態更新延遲' : ''}`;
+  noteMinimapFreshness(live);
+  startMinimapFreshnessClock();
+  renderMinimapFreshness();
   if (!minimapFrame) minimapFrame = requestAnimationFrame(paintMinimap);
 }
 function syncMinimapCanvas(canvas) {
@@ -3767,26 +4334,82 @@ function paintMinimap(now) {
       );
       ctx.fill();
     };
-    for (const monster of live.monsters ?? []) {
-      const position = sampleMinimapTrack(
-        minimapTracks.get(`monster:${monster.id}`),
-        now,
-      );
-      point(
-        position.x,
-        position.y,
-        monster.engaged ? 6 : 4,
-        monster.engaged ? '#ff4f62' : '#f4a7d2',
-      );
-    }
-    for (const player of live.players ?? []) {
-      const position = sampleMinimapTrack(
-        minimapTracks.get(`player:${player.id}`),
-        now,
-      );
-      point(position.x, position.y, 5, '#70b8ff');
+    if (minimapCombatObserved) {
+      for (const monster of live.monsters ?? []) {
+        const position = sampleMinimapTrack(
+          minimapTracks.get(`monster:${monster.id}`),
+          now,
+        );
+        point(
+          position.x,
+          position.y,
+          monster.engaged ? 6 : 4,
+          monster.engaged ? '#ff4f62' : '#f4a7d2',
+        );
+      }
     }
     const self = sampleMinimapTrack(minimapTracks.get('self'), now);
+    const selfX = ox + self.x * scale,
+      selfY = oy + (mapField.height - 1 - self.y) * scale,
+      presence = minimapPresenceApi();
+    if (
+      minimapCombatObserved &&
+      !minimapPlayerStale &&
+      presence &&
+      Array.isArray(live.players)
+    ) {
+      const compact = compactMinimapViewport(),
+        fontSize = compact ? 10 : 11,
+        labelCandidates = [];
+      for (const player of live.players) {
+        const position = sampleMinimapTrack(
+          minimapTracks.get(`player:${player.id}`),
+          now,
+        );
+        const playerX = ox + position.x * scale,
+          playerY = oy + (mapField.height - 1 - position.y) * scale;
+        ctx.fillStyle = '#70b8ff';
+        ctx.strokeStyle = '#0b2a45';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.rect(playerX - 3, playerY - 3, 6, 6);
+        ctx.fill();
+        ctx.stroke();
+        const name = String(player.name ?? '').trim();
+        if (!name) continue;
+        labelCandidates.push({
+          key: `player:${player.id}`,
+          text: name,
+          x: playerX,
+          y: playerY,
+          distance: Math.hypot(playerX - selfX, playerY - selfY),
+          markerSize: 6,
+        });
+      }
+      const placements = presence.placePlayerLabels(labelCandidates, {
+        width,
+        height,
+        fontSize,
+        maxLabels: presence.maxPlayerLabels(window.innerWidth),
+        margin: 2,
+      });
+      ctx.font = `${fontSize}px "Noto Sans TC", "Microsoft JhengHei", sans-serif`;
+      ctx.textBaseline = 'middle';
+      for (const placement of placements) {
+        ctx.fillStyle = '#04121fdd';
+        ctx.fillRect(placement.x, placement.y, placement.w, placement.h);
+        ctx.strokeStyle = '#2f6ea5';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(
+          placement.x + 0.5,
+          placement.y + 0.5,
+          placement.w - 1,
+          placement.h - 1,
+        );
+        ctx.fillStyle = '#dff0ff';
+        ctx.fillText(placement.text, placement.x + 3, placement.y + placement.h / 2);
+      }
+    }
     point(
       self.x,
       self.y,
@@ -3804,10 +4427,10 @@ window.addEventListener('resize', () => {
   if (minimapLive && !minimapFrame)
     minimapFrame = requestAnimationFrame(paintMinimap);
 });
-function renderMinimap(live) {
+function renderMinimap(live, options = {}) {
   if (!live) return;
   ensureMap(live.map);
-  updateMinimapTargets(live);
+  updateMinimapTargets(live, options);
   syncMapInfoToLive(live);
 }
 
@@ -4074,11 +4697,17 @@ function reportWebActivityPresence() {
   if (!authenticated) return Promise.resolve();
   const visibility =
     document.visibilityState === 'hidden' ? 'hidden' : 'visible';
-  return fetch('/api/web-presence/heartbeat', {
+  const interest = currentWebInterest();
+  return fetch('/api/web-presence', {
     method: 'POST',
     cache: 'no-store',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ visibility, viewerId: webViewerId }),
+    body: JSON.stringify({
+      visibility,
+      viewerId: webViewerId,
+      interest,
+      mode: currentWebViewMode(interest),
+    }),
   })
     .then((response) => {
       if (!response.ok) throw new Error('Web activity heartbeat failed');
@@ -4111,7 +4740,89 @@ function restartEventPolling() {
   eventTimer = setTimeout(pollEvents, 0);
 }
 
+// MINIMAP POSITION DELIVERY. The authoritative position is projected by the
+// server to a single-row shape and delivered on the Web interest cadence
+// (`positionPollMs`). The marker is only repainted when the authoritative
+// sample actually changed, and an older sample can never move it backwards.
+function positionPollInterval(interest = currentWebInterest()) {
+  return Number(policyForInterest(interest).positionPollMs) || 0;
+}
+function positionSampleUnchanged(position) {
+  const current = minimapLive;
+  if (!current) return false;
+  return (
+    current.map === position.map &&
+    Number(current.playerX) === Number(position.x) &&
+    Number(current.playerY) === Number(position.y) &&
+    Number(current.updatedAt ?? current.freshness?.authoritativeAt ?? 0) ===
+      Number(position.updatedAt)
+  );
+}
+function applyLivePosition(position) {
+  if (!position?.available || !Number.isFinite(Number(position.x))) return;
+  if (positionSampleUnchanged(position)) return;
+  const displayedAt = Number(
+    minimapLive?.freshness?.authoritativeAt ?? minimapLive?.updatedAt ?? 0,
+  );
+  const incomingAt = Number(position.updatedAt);
+  if (
+    minimapLive?.map &&
+    position.map === minimapLive.map &&
+    Number.isFinite(displayedAt) &&
+    Number.isFinite(incomingAt) &&
+    incomingAt < displayedAt
+  )
+    return;
+  const base = lastState?.derived ?? {};
+  const combatObserved = Object.hasOwn(base, 'players');
+  const merged = {
+    ...base,
+    map: position.map ?? base.map,
+    playerX: position.x,
+    playerY: position.y,
+    updatedAt: Number.isFinite(incomingAt) ? incomingAt : base.updatedAt,
+  };
+  if (position.freshness) merged.freshness = position.freshness;
+  if (Number.isFinite(Number(position.statusIntervalMs)))
+    merged.statusIntervalMs = Number(position.statusIntervalMs);
+  if (lastState) lastState = { ...lastState, derived: merged };
+  renderMinimap(merged, { combatObserved });
+}
+async function pollLivePosition() {
+  positionTimer = null;
+  if (!authenticated) return;
+  const interval = positionPollInterval();
+  if (!interval) return;
+  const id = Number(lastState?.character?.charId ?? controllerState?.charId);
+  if (
+    !positionInFlight &&
+    Number.isSafeInteger(id) &&
+    id > 0
+  ) {
+    positionInFlight = true;
+    try {
+      const position = await api(`/api/live-position?characterId=${id}`);
+      applyLivePosition(position);
+    } catch {
+      // A failed position probe never disturbs the minimap; the slower polls
+      // remain the fallback and the next tick retries.
+    } finally {
+      positionInFlight = false;
+    }
+  }
+  if (authenticated && positionPollInterval())
+    positionTimer = setTimeout(() => void pollLivePosition(), interval);
+}
+function restartPositionPolling() {
+  if (positionTimer !== null) clearTimeout(positionTimer);
+  positionTimer = null;
+  if (!authenticated || $('#game').classList.contains('hidden')) return;
+  if (!positionPollInterval()) return;
+  void pollLivePosition();
+}
+
 function restartStatePolling({ immediate = false } = {}) {
+  restartPositionPolling();
   clearInterval(statePoll);
   statePoll = null;
   if (!authenticated || $('#game').classList.contains('hidden')) return;
@@ -4761,17 +5472,31 @@ function renderJobChange(character, live) {
   $('#npcActions').replaceChildren(...actions);
 }
 
-async function jobChangeAction(body, pendingText) {
+async function jobChangeAction(body, pendingText, experienceTrace = null) {
   $('#jobChangeNotice').textContent = pendingText;
+  markExperienceRequest(experienceTrace);
   try {
     await api('/api/job-change', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
+      latencyTrace: experienceTrace,
       body: JSON.stringify(body),
     });
+    markExperienceResponse(experienceTrace);
     $('#jobChangeNotice').textContent = '指令已接受，等待遊戲伺服器確認。';
+    if (experienceTrace) {
+      // NPC_DIALOG_ACTION visible success = the next dialog state is actually
+      // rendered, not merely that the command POST resolved.
+      const observed = await observeVisibleChange($('#npcDialog'), 3000);
+      if (observed) markExperienceAuthoritative(experienceTrace);
+      await settleExperienceTrace(experienceTrace, {
+        success: observed,
+        errorCode: observed ? null : 'VISIBLE_UPDATE_TIMEOUT',
+      });
+    }
   } catch (error) {
     $('#jobChangeNotice').textContent = error.message;
+    await settleExperienceTrace(experienceTrace, { success: false, errorCode: 'ACTION_FAILED' });
   }
 }
 function setEquipment(c, items = []) {
@@ -4790,6 +5515,8 @@ function setEquipment(c, items = []) {
     slot.classList.remove('equipped');
     delete slot.dataset.binId;
     delete slot.dataset.itemKey;
+    delete slot.dataset.inventoryIndex;
+    delete slot.dataset.inventoryGeneration;
     delete slot.dataset.action;
     delete slot.dataset.category;
     delete slot.dataset.iconFallback;
@@ -4805,13 +5532,22 @@ function setEquipment(c, items = []) {
     if (!slot) continue;
     slot.classList.add('equipped');
     const live = inventoryItems.find((candidate) =>
-      Number.isInteger(item.binId)
-        ? candidate.binId === item.binId
-        : candidate.itemId === item.itemId && candidate.equipped,
+      Number.isInteger(item.inventoryIndex)
+        ? Number(candidate.inventoryIndex) === Number(item.inventoryIndex)
+        : Number.isInteger(item.binId)
+          ? candidate.binId === item.binId
+          : candidate.itemId === item.itemId && candidate.equipped,
     );
-    if (Number.isInteger(live?.binId)) {
-      slot.dataset.binId = live.binId;
+    const liveIdentity = inventoryIdentityOf(live);
+    if (hasInventoryIdentity(liveIdentity)) {
+      slot.dataset.binId = live.binId ?? '';
       slot.dataset.itemKey = live.itemKey ?? '';
+      slot.dataset.inventoryIndex = liveIdentity.inventoryIndex !== null
+        ? String(liveIdentity.inventoryIndex)
+        : '';
+      slot.dataset.inventoryGeneration = Number.isInteger(live.inventoryGeneration)
+        ? String(live.inventoryGeneration)
+        : '';
       slot.dataset.action = 'unequip';
       slot.dataset.category = 'equipment';
       slot.tabIndex = 0;
@@ -4883,13 +5619,22 @@ const supplyStageLabels = Object.freeze({
   mapRoute: '前往補給地點',
   route: '移動中',
 });
+// Authoritative PA runtime phase -> Supply window label. Only the phases that
+// actually change the supply-cycle display are mapped; every other
+// authoritative phase (AUTO_FARM, IDLE, ...) and every unknown/absent phase
+// keeps the existing neutral label instead of inventing supply activity.
+const supplyPhaseLabels = Object.freeze({
+  SUPPLY: '補給中',
+  RETURN_TO_FARM: '返回練功地圖',
+});
 function setSupplyCycle(settings, live, inventory = []) {
   supplyCycleSettings = settings;
   const runtime = live?.supplyCycle,
     enabled = Boolean(settings?.enabled),
-    stage = runtime?.stage;
+    stage = runtime?.stage,
+    phaseLabel = supplyPhaseLabels[live?.runtimePhase];
   $('#supplyStage').textContent = enabled
-    ? (supplyStageLabels[stage] ?? '掛機循環待命')
+    ? (phaseLabel ?? supplyStageLabels[stage] ?? '掛機循環待命')
     : '尚未啟用';
   const editing = $('#supplyForm').contains(document.activeElement);
   if (!editing) {
@@ -4964,6 +5709,21 @@ function currentMapInfoId() {
     lastState?.character?.map ??
     ''
   );
+}
+// Player-facing reason when the server refuses a farm-map selection because the
+// relocation planner cannot reach it. Internal reason codes never reach the UI.
+const farmTargetRouteBlockerMessages = {
+  farm_route_unavailable: '目前無法自動前往此掛機地圖',
+  farm_target_invalid: '目前無法自動前往此掛機地圖',
+  hub_unreachable: '目前無法自動前往此掛機地圖',
+  route_unavailable: '目前無法自動前往此掛機地圖',
+  no_direct_route: '目前無法自動前往此掛機地圖',
+  route_unrepresentable: '目前無法自動前往此掛機地圖',
+  service_destination_unavailable: '目前無法自動前往此掛機地圖',
+  post_service_route_unreachable: '目前無法自動前往此掛機地圖',
+};
+function farmTargetBlockedMessage(reason) {
+  return farmTargetRouteBlockerMessages[reason] ?? reason;
 }
 function renderMapInfo(mapId, map = mapInfoCache.get(mapId)) {
   const summary = mapInfoData?.maps?.[mapId];
@@ -5161,10 +5921,25 @@ async function loadMapInfo(mapId = currentMapInfoId()) {
   } finally {
     if (mapInfoLoadingId === targetMap) mapInfoLoadingId = '';
   }
-  if (minimapLive) updateMinimapTargets(minimapLive);
+  if (minimapLive)
+    updateMinimapTargets(minimapLive, {
+      combatObserved: minimapCombatObserved,
+    });
 }
 function levelRangeText(range) {
   return range ? `Lv. ${range.min}～${range.max}` : '無一般怪物等級資料';
+}
+// MOB_SELECTION_REMOVED: farm-selectable is decided by spawn presence, not by
+// town name, region unlock, fog or a rollout/static allowlist. Every canonical
+// map stays visible; only maps with at least one monster spawn are selectable.
+function isFarmableMapSummary(summary) {
+  if (!summary) return false;
+  return (
+    Number(summary.normalMonsterCount ?? 0) > 0 ||
+    Number(summary.combatMonsterCount ?? 0) > 0 ||
+    Number(summary.bossCount ?? 0) > 0 ||
+    (summary.primaryMonsters?.length ?? 0) > 0
+  );
 }
 function syncGrindTargetSummary(target = lastState?.grindTarget) {
   const transition = lastState?.grindHubTransition ?? target?.hubTransition;
@@ -5178,22 +5953,44 @@ function syncGrindTargetSummary(target = lastState?.grindTarget) {
     ? `掛機目標：${summary?.name ?? target.name ?? target.mapId}（${target.mapId}）`
     : '掛機目標：尚未設定';
 }
+// The persisted grind target is the player's last selection and is the only
+// farm target: there is no silent fallback or normalization. Always render the
+// authoritative resolved target map so the UI never advertises another map.
+function syncAuthoritativeFarmTarget(status) {
+  const targetMap = String(status?.farmTarget?.targetMap ?? '');
+  if (!/^[a-z0-9_]{1,31}$/.test(targetMap)) return;
+  const summary = mapInfoData?.maps?.[targetMap];
+  const name =
+    summary?.name ?? lastState?.grindTarget?.name ?? targetMap;
+  $('#grindTargetSummary').textContent = `掛機目標：${name}（${targetMap}）`;
+}
+async function reconcileFarmTargetAfterNonJsonResponse(mapId, timeoutMs = 4000) {
+  const targetMap = String(mapId ?? ''),
+    deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    await refresh({ full: false });
+    if (String(lastState?.grindTarget?.mapId ?? '') === targetMap)
+      return lastState.grindTarget;
+    await new Promise((resolve) => setTimeout(resolve, 150));
+  }
+  return null;
+}
 function renderWorldMapNodes() {
   const regions = mapInfoData?.worldMap?.regions ?? [],
-    unlockedRegions = regions.filter((region) => region.unlocked),
+    unlockedRegions = regions,
     unlockedMapCount = unlockedRegions.reduce(
       (count, region) => count + (region.availableMapIds?.length ?? 1),
       0,
     );
   $('#worldMapStatus').textContent =
-    `原廠地圖座標，${unlockedRegions.length} 個區域、${unlockedMapCount} 張地圖已開放掛機；暗色區域尚未開放`;
+    `原廠地圖座標，${unlockedRegions.length} 個區域、${unlockedMapCount} 張地圖；只有有怪物的地圖可設為掛機`;
   $('#worldMapNodes').replaceChildren(
     ...regions.map((region) => {
-      const hitArea = document.createElement('button'),
+      const         hitArea = document.createElement('button'),
         position = region.position,
-        unlocked = Boolean(
-          region.unlocked && region.selectable && region.availableForAfk,
-        );
+        // PRODUCT RULE: every known map is visible and selectable. No fog,
+        // no farm-allowlist visibility gate. Name/level/monster data is kept.
+        unlocked = true;
       hitArea.type = 'button';
       hitArea.className = `world-map-region ${unlocked ? 'unlocked' : 'locked'}`;
       hitArea.dataset.regionId = region.regionId;
@@ -5242,10 +6039,8 @@ function renderWorldMapNodes() {
         crop.append(preview);
         hitArea.append(crop);
       }
-      hitArea.onclick = () =>
-        unlocked
-          ? void selectWorldMap(region.mapId)
-          : selectLockedWorldMap(region);
+      // PRODUCT RULE: no fog / no locked branch; every region is selectable.
+      hitArea.onclick = () => void selectWorldMap(region.mapId);
       return hitArea;
     }),
   );
@@ -5274,17 +6069,10 @@ function selectLockedWorldMap(region) {
 }
 async function selectWorldMap(mapId) {
   const summary = mapInfoData?.maps?.[mapId];
-  if (
-    !summary?.availableForAfk ||
-    !summary.unlocked ||
-    !summary.selectable
-  ) {
-    const region = mapInfoData?.worldMap?.regions?.find(
-      (candidate) => candidate.mapId === mapId,
-    );
-    if (region) selectLockedWorldMap(region);
-    return;
-  }
+  // PRODUCT RULE: selection is gated only by registry existence. The former
+  // availableForAfk / unlocked / selectable gate (fog) is removed; the farm
+  // allowlist is no longer a visibility/selection condition.
+  if (!summary) return;
   setSelectedWorldMap(mapId);
   let map = mapInfoCache.get(mapId);
   if (!map) {
@@ -5306,11 +6094,7 @@ async function selectWorldMap(mapId) {
     floorButtons.className = 'world-map-floor-buttons';
     const floors = Object.values(mapInfoData.maps)
       .filter(
-        (candidate) =>
-          candidate.dungeon?.id === summary.dungeon.id &&
-          candidate.availableForAfk &&
-          candidate.unlocked &&
-          candidate.selectable,
+        (candidate) => candidate.dungeon?.id === summary.dungeon.id,
       )
       .sort((a, b) => a.dungeon.order - b.dungeon.order);
     for (const floor of floors) {
@@ -5354,14 +6138,21 @@ async function selectWorldMap(mapId) {
     summary.dungeon && mapId !== summary.dungeon.entranceMapId
       ? `移動方式：先抵達${summary.dungeon.name}入口，再依原生樓層傳送點前往${summary.dungeon.floorLabel}。`
       : '移動方式：比較蝴蝶翅膀、卡普拉與步行成本，自動採用可行的最短路徑。';
+  // Farm selectability is spawn-based only. A map without a monster spawn stays
+  // visible and openable, but cannot be set as the farm map.
+  const farmable = isFarmableMapSummary(summary);
+  const isCurrentFarmMap = lastState?.grindTarget?.mapId === mapId;
   const apply = document.createElement('button');
   apply.type = 'button';
   apply.className = 'primary';
-  apply.textContent =
-    lastState?.grindTarget?.mapId === mapId
-      ? '目前掛機地圖'
-      : '設定為掛機地圖';
-  apply.disabled = lastState?.grindTarget?.mapId === mapId;
+  if (!farmable) {
+    apply.textContent = '此地圖沒有可掛機怪物';
+    apply.disabled = true;
+    apply.title = '此地圖沒有可掛機怪物';
+  } else {
+    apply.textContent = isCurrentFarmMap ? '目前掛機地圖' : '設定為掛機地圖';
+    apply.disabled = isCurrentFarmMap;
+  }
   apply.onclick = async () => {
     apply.disabled = true;
     apply.textContent = '正在套用';
@@ -5382,12 +6173,30 @@ async function selectWorldMap(mapId) {
       $('#worldMapStatus').textContent =
         `已設定 ${map.name}，正在評估回城、卡普拉與最短步行路線`;
     } catch (error) {
+      if (error?.code === 'NON_JSON_RESPONSE') {
+        try {
+          const reconciledTarget = await reconcileFarmTargetAfterNonJsonResponse(mapId);
+          if (reconciledTarget?.mapId === mapId) {
+            syncGrindTargetSummary(reconciledTarget);
+            renderWorldMapNodes();
+            apply.textContent = '目前掛機地圖';
+            $('#worldMapStatus').textContent =
+              `已設定 ${map.name}，正在評估回城、卡普拉與最短步行路線`;
+            return;
+          }
+        } catch {
+          // Fall through to the bounded user-facing error below.
+        }
+      }
       apply.disabled = false;
       apply.textContent = '設定為掛機地圖';
-      $('#worldMapStatus').textContent = error.message;
+      $('#worldMapStatus').textContent = farmTargetBlockedMessage(error.message);
     }
   };
   controls.append(apply);
+  const farmNote = document.createElement('p');
+  farmNote.className = 'world-map-farm-note';
+  farmNote.textContent = farmable ? '' : '此地圖沒有可掛機怪物，無法設為掛機地圖。';
   detail.replaceChildren(
     title,
     floorPicker,
@@ -5397,6 +6206,7 @@ async function selectWorldMap(mapId) {
     boss,
     resources,
     routeNote,
+    farmNote,
     controls,
   );
 }
@@ -5456,6 +6266,15 @@ function renderInventoryList(target, category) {
         : window.roAssetResolver?.resolveItemAsset(item);
       node.dataset.binId = item.binId ?? '';
       node.dataset.itemKey = item.itemKey ?? '';
+      node.dataset.inventoryIndex = Number.isInteger(item.inventoryIndex)
+        ? String(item.inventoryIndex)
+        : '';
+      node.dataset.inventoryGeneration = Number.isInteger(item.inventoryGeneration)
+        ? String(item.inventoryGeneration)
+        : '';
+      node.dataset.itemAmount = Number.isFinite(Number(item.amount))
+        ? String(item.amount)
+        : '';
       node.dataset.category = item.category;
       node.dataset.blockedReason = item.equipRestriction || '';
       node.dataset.action =
@@ -5468,16 +6287,14 @@ function renderInventoryList(target, category) {
             : 'use';
       if (
         item.category === 'card' &&
-        (selectedCardItemKey
-          ? item.itemKey === selectedCardItemKey
-          : Number.isInteger(selectedCardBinId) && item.binId === selectedCardBinId)
+        inventoryMatchesIdentity(item, selectedCardIdentity())
       ) node.classList.add('card-selected');
       const cardArt = attachCardArtPreviewData(node, item, resolvedItem);
       attachItemDetailData(node, item, resolvedItem);
       node.title = item.category === 'equipment'
         ? `${equipmentTooltip(resolvedItem, item)}\n\n${item.equipped ? '雙擊卸下' : item.canEquip === false ? item.equipRestriction || '此裝備目前無法穿上' : '雙擊裝備'}`
         :
-        item.binId === null
+        item.binId === null && !Number.isInteger(item.inventoryIndex)
           ? '等待角色資料同步'
           : item.category === 'equipment'
             ? item.equipped
@@ -6318,9 +7135,34 @@ function renderJobQuest(runtime, character) {
   if (root) root.textContent = '目前沒有可用的二轉任務 Adapter。';
   enhanceMissionInteractionStage(runtime);
 }
+// Auto first-job driver (Web intent only). A fresh Novice is advanced by the
+// native bound command terminal_onboarding_advance; graduation reuses the same
+// protected rAthena jobchange through /api/onboarding/graduate. The server owns
+// controller/completion and the native command is idempotent, so this only
+// expresses intent at a bounded rate.
+let autoFirstJobAttempt = { key: '', at: 0 };
+function maybeAutoFirstJob(onboarding, character) {
+  if (!onboarding || !character) return;
+  if (Number(character.classId) !== 0) return;
+  if (onboarding.complete || onboarding.graduated) return;
+  const charKey = String(character.id ?? character.charId ?? '');
+  const action = Number(onboarding.stage ?? 0) >= 3 ? 'graduate' : 'advance';
+  const key = `${charKey}:${action}`;
+  const now = performance.now();
+  if (autoFirstJobAttempt.key === key && now - autoFirstJobAttempt.at < 30000)
+    return;
+  autoFirstJobAttempt = { key, at: now };
+  api(`/api/onboarding/${action}`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: '{}',
+  }).catch(() => {});
+}
+
 function renderOnboarding(onboarding, character, running, live) {
   const quests = onboarding?.quests ?? [];
   const complete = Boolean(onboarding?.complete);
+  maybeAutoFirstJob(onboarding, character);
   const migratedFirstJob = Number(character?.classId) > 0 && !complete;
   const currentIndex = Math.max(0, Number(onboarding?.currentIndex) || 0);
   const currentQuest = quests[currentIndex];
@@ -6429,11 +7271,11 @@ function renderEden(eden, character) {
     equipment_accept: `正在與${boyaName}對話並接取原生任務 7128。`,
     equipment_route_field: '正在前往夢羅克南東方綠洲 moc_fild11。',
     equipment_dog: '正在與 Talking Dog 對話並同步下一個原生任務。',
-    equipment_hunt_condor: '正在擊殺 Condor，進度以 OpenKore 任務資料同步。',
+    equipment_hunt_condor: '正在擊殺 Condor，進度以伺服器任務資料同步。',
     equipment_hunt_wolf:
-      '正在擊殺 Baby Desert Wolf，進度以 OpenKore 任務資料同步。',
+      '正在擊殺 Baby Desert Wolf，進度以伺服器任務資料同步。',
     equipment_hunt_scorpion:
-      '正在擊殺 Scorpion，進度以 OpenKore 任務資料同步。',
+      '正在擊殺 Scorpion，進度以伺服器任務資料同步。',
     equipment_report_boya: `條件完成，正在返回${boyaName}回報。`,
     equipment_reward: '正在向 Administrator Michael 領取第一套裝備。',
     equipment26_accept: `正在與${boyaName}對話並接取原生任務 7138。`,
@@ -6602,6 +7444,29 @@ function itemEquipmentEntry(item) {
   };
 }
 
+function syncAdminSurfaceLink(adminSurface) {
+  const headerRow = document.querySelector(
+    '#game header.brand > div:last-child',
+  );
+  if (!headerRow) return;
+  const existing = $('#adminObservatoryLink');
+  if (!adminSurface) {
+    existing?.remove();
+    return;
+  }
+  if (existing) return;
+  const link = document.createElement('a');
+  link.id = 'adminObservatoryLink';
+  link.href = '/admin/observatory.html';
+  link.target = '_blank';
+  link.className = 'admin-nav-link';
+  link.setAttribute('aria-label', '管理後台：Web 體驗監控');
+  link.textContent = '管理後台';
+  const logout = $('#logout');
+  if (logout) headerRow.insertBefore(link, logout);
+  else headerRow.append(link);
+}
+
 async function refreshOnce(full, latencyTrace = null) {
   try {
     const interest = currentWebInterest(),
@@ -6624,10 +7489,10 @@ async function refreshOnce(full, latencyTrace = null) {
       return;
     }
     sessionStartedAt = state.startedAt;
+    sessionEndedAt = state.endedAt ?? null;
     currentRunning = state.running;
     $('#accountName').textContent = `帳號：${state.account.username}`;
-    const adminLink = $('#adminObservatoryLink');
-    if (adminLink) adminLink.style.display = '';
+    syncAdminSurfaceLink(state.account?.adminSurface === true);
     const activeTask = taskInProgress(state.derived);
     $('#status').textContent = activeTask
       ? '任務進行中'
@@ -6648,9 +7513,11 @@ async function refreshOnce(full, latencyTrace = null) {
     $('#deaths').textContent = state.deaths;
     $('#baseExpGained').textContent = state.baseExpGained.toLocaleString();
     $('#jobExpGained').textContent = state.jobExpGained.toLocaleString();
-    $('#duration').textContent = duration(state.startedAt);
+    $('#duration').textContent = duration(state.startedAt, state.endedAt);
     setCharacter(state.character, state.derived);
-    renderMinimap(state.derived);
+    renderMinimap(state.derived, {
+      combatObserved: Object.hasOwn(incoming.derived ?? {}, 'players'),
+    });
     if (!incoming.partial) {
       renderOnboarding(
         state.onboarding,
@@ -6715,6 +7582,7 @@ function applyGameEntryLeanState(incoming) {
   lastState = state;
   applyCombatStreamState(state.combatStream);
   sessionStartedAt = state.startedAt;
+  sessionEndedAt = state.endedAt ?? null;
   currentRunning = Boolean(state.running);
   $('#accountName').textContent = `帳號：${state.account.username}`;
   $('#status').textContent = state.running ? '掛機中' : '已停止';
@@ -6724,7 +7592,9 @@ function applyGameEntryLeanState(incoming) {
   }
   $('#automationNotice').textContent = '';
   setCharacterHeader(state.character, state.derived);
-  renderMinimap(state.derived);
+  renderMinimap(state.derived, {
+    combatObserved: Object.hasOwn(incoming.derived ?? {}, 'players'),
+  });
   setMusicContext(state.character?.map);
   $('#game').dataset.hydrationState = 'first-playable';
   $('#game').dataset.hydratedDomains = incoming.hydratedDomains.join(',');
@@ -6796,10 +7666,27 @@ async function hydrateGameEntryBackground() {
     });
   }
 }
+async function readLoginHealth(latencyTrace = null) {
+  let lastError = null;
+  let lastHealth = null;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      const health = await api('/api/health', { latencyTrace });
+      if (health.ok === true) return health;
+      lastHealth = health;
+    } catch (error) {
+      lastError = error;
+    }
+    if (attempt === 0)
+      await new Promise((resolve) => setTimeout(resolve, 250));
+  }
+  if (lastHealth) return lastHealth;
+  throw lastError ?? new Error('伺服器健康檢查失敗');
+}
 async function enter(latencyTrace = null) {
   const [session, health] = await Promise.all([
     api('/api/session', { latencyTrace }),
-    api('/api/health', { latencyTrace }).catch(() => ({ ok: false })),
+    readLoginHealth(latencyTrace),
   ]);
   $('#loginServerStatus').textContent = health.ok ? '伺服器正常' : '無法連線';
   applyObservationPolicy(session.observationPolicy);
@@ -6818,7 +7705,6 @@ async function enter(latencyTrace = null) {
     $('#authError').textContent = '';
     return;
   }
-  await loadAccountAudio();
   if (!session.account.characterId || !session.account.characterName) {
     setMusicContext('title');
     currentCreateSex = session.account.sex === 'F' ? 'F' : 'M';
@@ -6834,9 +7720,9 @@ async function enter(latencyTrace = null) {
       $('#hair').value,
     );
     $('#characterError').textContent = '請先建立角色';
+    void loadAccountAudio();
     return;
   }
-  setMusicContext('title');
   const character = {
     charId: session.account.characterId,
     name: session.account.characterName,
@@ -6862,10 +7748,10 @@ async function enter(latencyTrace = null) {
       map: session.account.map,
     },
   };
-  await loadCharacterSelectionAssets();
-  await loadCharacterShowcase();
   const selectPaperdoll = $('#selectPaperdoll');
   selectPaperdoll.dataset.direction = '0';
+  characterShowcase.character = character;
+  characterShowcase.equipment = session.equipment ?? [];
   paintRankingCharacter(
     selectPaperdoll,
     {
@@ -6886,6 +7772,25 @@ async function enter(latencyTrace = null) {
   show($('#characterForm'), false);
   show($('#characterSelectForm'));
   show($('#game'), false);
+  setTimeout(() => {
+    void loadAccountAudio();
+    setMusicContext('title');
+    void loadCharacterSelectionAssets()
+      .then(() => loadCharacterShowcase())
+      .then(() => {
+        paintRankingCharacter(
+          selectPaperdoll,
+          {
+            classId: character.classId,
+            appearance: character,
+            equipment: characterShowcase.equipment,
+          },
+          'stand',
+          0,
+        );
+      })
+      .catch(() => {});
+  }, 0);
   scheduleGameplayModuleWarmup();
 }
 const persistentLifeState = { charId: null, data: null, timelineOpen: false };
@@ -6902,40 +7807,77 @@ function formatPersistentLifeDuration(session) {
   return hours > 0 ? `${hours} 小時 ${minutes} 分鐘` : `${minutes} 分鐘`;
 }
 
+function persistentLifeFactsText(facts) {
+  if (!facts || typeof facts !== 'object') return '';
+  const entries = Object.entries(facts).filter(
+    ([, value]) => value !== null && value !== undefined && value !== '',
+  );
+  return entries.length ? `｜事實 ${JSON.stringify(Object.fromEntries(entries))}` : '';
+}
+
+function persistentLifeEventText(event) {
+  if (!event || typeof event !== 'object') return '';
+  const identity = [
+    Number.isFinite(Number(event.eventId)) ? `#${Number(event.eventId)}` : null,
+    Number.isFinite(Number(event.sequence)) ? `第 ${Number(event.sequence)} 段` : null,
+  ]
+    .filter(Boolean)
+    .join(' ');
+  const occurredAt = event.occurredAt ? String(event.occurredAt) : '時間未提供';
+  const label = event.label ? String(event.label) : String(event.eventType ?? '事件');
+  const map = event.map ? `（${String(event.map)}）` : '';
+  const type = event.eventType ? `｜類型 ${String(event.eventType)}` : '';
+  const source = event.source ? `｜來源 ${String(event.source)}` : '';
+  return `${identity ? `${identity}｜` : ''}${occurredAt}｜${label}${map}${type}${source}${persistentLifeFactsText(event.facts)}`;
+}
+
+function renderPersistentLifeLoading() {
+  const container = $('#persistentLifeWindow');
+  if (!container) return;
+  container.hidden = false;
+  $('#persistentLifeStatus').textContent = '讀取中';
+  $('#persistentLifeSummary').textContent = '正在讀取離線足跡……';
+  $('#persistentLifeHighlights').replaceChildren();
+  $('#persistentLifeTimeline').replaceChildren();
+  $('#persistentLifeTimeline').hidden = true;
+}
+
 function renderPersistentLife() {
   const container = $('#persistentLifeWindow');
   if (!container) return;
   const data = persistentLifeState.data;
   const session = data?.session;
-  if (!data?.available || !session || !data.counts?.total) {
+  if (!data?.available || !session) {
     container.hidden = true;
     return;
   }
+  const counts = data.counts ?? {};
+  const highlightsData = Array.isArray(data.highlights) ? data.highlights : [];
+  const eventsData = Array.isArray(data.events) ? data.events : [];
   const duration = formatPersistentLifeDuration(session);
   $('#persistentLifeStatus').textContent = session.seen ? '已查看' : '新的足跡';
   $('#persistentLifeSummary').textContent = [
     duration ? `離線時間 ${duration}` : null,
     session.startMap ? `從 ${session.startMap} 出發` : null,
     session.endMap ? `最後在 ${session.endMap}` : null,
-    `擊殺 ${data.counts.kills}、取得物品 ${data.counts.loot}、NPC 互動 ${data.counts.npcInteractions}`,
+    `擊殺 ${Number(counts.kills ?? 0)}、取得物品 ${Number(counts.loot ?? 0)}、NPC 互動 ${Number(counts.npcInteractions ?? 0)}`,
+    `地圖變更 ${Number(counts.mapChanges ?? 0)}、死亡 ${Number(counts.deaths ?? 0)}`,
   ]
     .filter(Boolean)
     .join('｜');
   const highlights = $('#persistentLifeHighlights');
   highlights.replaceChildren(
-    ...data.highlights.map((event) => {
+    ...highlightsData.map((event) => {
       const item = document.createElement('li');
-      item.textContent = `${event.label}${event.map ? `（${event.map}）` : ''}`;
+      item.textContent = persistentLifeEventText(event);
       return item;
     }),
   );
   const timeline = $('#persistentLifeTimeline');
   timeline.replaceChildren(
-    ...data.events.map((event) => {
+    ...eventsData.map((event) => {
       const item = document.createElement('li');
-      item.textContent = `${event.occurredAt}｜${event.label}${
-        event.map ? `（${event.map}）` : ''
-      }`;
+      item.textContent = persistentLifeEventText(event);
       return item;
     }),
   );
@@ -6950,12 +7892,15 @@ async function refreshPersistentLife(charId) {
   const id = Number(charId);
   if (!Number.isSafeInteger(id) || id <= 0) return;
   persistentLifeState.charId = id;
+  renderPersistentLifeLoading();
   try {
     persistentLifeState.data = await api(
       `/api/ro/agents/${id}/persistent-life/latest`,
     );
     renderPersistentLife();
   } catch (error) {
+    persistentLifeState.data = null;
+    renderPersistentLife();
     console.error('PERSISTENT_LIFE_LOAD_FAILED', error);
   }
 }
@@ -6984,7 +7929,6 @@ const canaryWebActions = new Set([
   'claim_agent',
   'start_farm',
   'stop_farm',
-  'release_agent',
 ]);
 let controllerState = null;
 
@@ -6995,14 +7939,59 @@ function agentOwnsCharacter() {
   );
 }
 
-function controllerLabel(status) {
-  if (!status || status.available !== true)
-    return '控制來源：Server Agent 狀態不可用';
-  return `控制來源：${status.controlOwner ?? 'UNKNOWN'}　擁有權：${
-    status.ownershipState ?? 'UNKNOWN'
-  }　執行：${status.runtimeState ?? 'UNKNOWN'}　模式：${
-    status.agentMode ?? 'UNKNOWN'
-  }`;
+// Player-facing automation status. This is presentation only: it maps the
+// existing authoritative SERVER_AGENT live phase / agent mode onto natural
+// language and never invents a second automation-state model. When every
+// automation-control field is unresolved the caller hides the strip instead of
+// exposing internal control-plane labels.
+const playerAutomationPhaseLabels = Object.freeze({
+  AUTO_FARM: '自動戰鬥中',
+  RECOVERING: '恢復中',
+  RESPAWNING: '等待復活',
+  SUPPLY: '前往補給',
+  RETURN_TO_FARM: '前往掛機地圖',
+  NAVIGATING: '前往掛機地圖',
+  DEAD: '等待復活',
+  RELEASING: '停止中',
+  IDLE: '已停止',
+});
+const playerAutomationModeLabels = Object.freeze({
+  AUTO_FARM: '自動戰鬥中',
+  AUTO_QUEST: '任務進行中',
+  RECOVERING: '恢復中',
+  DEAD: '等待復活',
+  NAVIGATING: '前往掛機地圖',
+  PERSISTENT_IDLE: '已停止',
+});
+
+function playerAutomationStatus(status) {
+  if (!status || status.available !== true) return null;
+  // OPENKORE ownership is not a player-relevant automation state in this
+  // control surface; the existing 掛機 status line already covers it.
+  if (status.controller !== 'SERVER_AGENT') return null;
+  if (status.farmRunning === false) return '狀態：已停止';
+  const live = status.liveStatus;
+  const phase = typeof live?.phase === 'string' ? live.phase.trim() : '';
+  const phaseLabel = phase ? playerAutomationPhaseLabels[phase] : null;
+  if (phaseLabel) return `狀態：${phaseLabel}`;
+  const mode =
+    typeof status.agentMode === 'string' ? status.agentMode.trim() : '';
+  const modeLabel = mode ? playerAutomationModeLabels[mode] : null;
+  return modeLabel ? `狀態：${modeLabel}` : null;
+}
+
+// Player-facing reason when an automation intent is not currently accepted.
+// Presentation only: the authoritative eligibility still comes from the
+// server-side controller status. Internal blocker codes never reach the UI.
+function playerAutomationBlockedReason(status) {
+  const blockers = status?.actionBlockers ?? {};
+  if (blockers.startFarm === 'farm_target_unresolved')
+    return '此角色尚未設定伺服器可受理的掛機地圖，請先更換掛機地圖。';
+  if (blockers.startFarm === 'task_already_active') return '掛機正在進行中。';
+  if (blockers.startFarm === 'rollout_not_allowlisted')
+    return '此角色目前尚未開放自動掛機。';
+  if (blockers.stopFarm === 'nothing_to_stop') return '目前沒有進行中的掛機。';
+  return '目前無法受理新的掛機指令。';
 }
 
 function applyControllerUi(status) {
@@ -7014,11 +8003,20 @@ function applyControllerUi(status) {
   }
   const badge = $('#controllerBadge'),
     claim = $('#canaryClaim'),
-    release = $('#canaryRelease'),
     notice = $('#canaryNotice');
   const canaryView = status?.available === true && status.canary === true;
-  panel.hidden = false;
-  badge.textContent = controllerLabel(status);
+  const playerStatus = playerAutomationStatus(status);
+  const modeLabel =
+    status?.controller === 'SERVER_AGENT' ? '指定掛機' : '玩家控制';
+  // The strip is only rendered when it carries a player-facing status or the
+  // character is a canary with control actions. Otherwise it stays hidden.
+  panel.hidden = !(canaryView || playerStatus !== null);
+  badge.hidden = !canaryView && playerStatus === null;
+  badge.textContent = playerStatus
+    ? `控制模式：${modeLabel}　${playerStatus}`
+    : `控制模式：${modeLabel}`;
+  // Debug/admin instrumentation only: raw fields stay off the visible surface
+  // but remain available to runtime diagnostics and the admin API.
   badge.dataset.available = status?.available === true ? '1' : '0';
   badge.dataset.controller = status?.controller ?? 'UNAVAILABLE';
   badge.dataset.agentMode = status?.agentMode ?? '';
@@ -7031,34 +8029,28 @@ function applyControllerUi(status) {
   badge.dataset.liveReason = live?.reason ?? '';
   badge.dataset.supplyItemAmount = live ? String(live.supplyItemAmount ?? '') : '';
   claim.hidden = !(canaryView && status.actions?.claim === true);
-  release.hidden = !(canaryView && status.actions?.release === true);
-  $('#start').textContent = '開始掛機';
+  $('#start').textContent = '開始指定掛機';
   $('#stop').textContent = '停止掛機';
   if (!canaryView) {
-    notice.textContent =
-      status?.available === false
-        ? 'Server Agent 狀態暫時無法讀取，僅顯示 OpenKore 相容狀態。'
-        : '';
+    notice.textContent = '';
     return;
   }
   if (status.controller === 'SERVER_AGENT') {
     $('#start').disabled = status.actions?.startFarm !== true;
     $('#stop').disabled = status.actions?.stopFarm !== true;
-    $('#start').textContent = '開始掛機（Server Agent）';
-    $('#stop').textContent = '停止掛機（Server Agent）';
     const liveText = !live
-      ? '　即時狀態：尚無資料。'
+      ? '　即時狀態：等待同步。'
       : live.fresh
-        ? `　即時：${live.phase}${live.map ? ` @ ${live.map} (${live.x}, ${live.y})` : ''}　HP ${live.hp}/${live.maxHp}　補給品 ${live.supplyItemAmount}`
+        ? `　即時：${playerAutomationPhaseLabels[live.phase] ?? live.phase}${live.map ? ` @ ${live.map} (${live.x}, ${live.y})` : ''}　HP ${live.hp}/${live.maxHp}　補給品 ${live.supplyItemAmount}`
         : `　即時狀態：${
             live.reason === 'live_status_not_resident'
-              ? '角色未在線（顯示最後儲存值）'
-              : '快照過期（顯示最後儲存值）'
+              ? '狀態同步中（顯示最後儲存值）'
+              : '狀態更新延遲（顯示最後儲存值）'
           }`;
     notice.textContent =
       (status.actions?.startFarm === true
-        ? '此角色由 Server Agent 控制，掛機指令會交由伺服器執行。'
-        : 'Server Agent 目前不可接受新的掛機指令。') + liveText;
+        ? '角色由系統托管，掛機指令會交由伺服器執行。'
+        : playerAutomationBlockedReason(status)) + liveText;
   }
 }
 
@@ -7094,10 +8086,8 @@ async function actCanary(action) {
   const id = Number(lastState?.character?.charId ?? controllerState?.charId);
   if (!Number.isSafeInteger(id) || id <= 0) return;
   const claim = $('#canaryClaim'),
-    release = $('#canaryRelease'),
     notice = $('#canaryNotice');
   if (claim) claim.disabled = true;
-  if (release) release.disabled = true;
   if (notice) notice.textContent = '指令已送出，等待伺服器確認。';
   const postOwnership = () =>
     api(`/api/ro/agents/${id}/ownership/commands`, {
@@ -7118,8 +8108,8 @@ async function actCanary(action) {
     }
   } catch (error) {
     const messages = {
-      rollout_disabled: 'Server Agent 尚未開放',
-      rollout_not_allowlisted: '此角色不在 Server Agent 測試名單內',
+      rollout_disabled: '自動掛機尚未開放',
+      rollout_not_allowlisted: '此角色尚未開放自動掛機',
       ownership_conflict: '角色目前由其他控制來源持有',
       stale_revision: '狀態已更新，請重新整理',
       idempotency_conflict: '重複指令已拒絕',
@@ -7131,7 +8121,6 @@ async function actCanary(action) {
   await syncControllerStatus(id);
   setTimeout(() => {
     if (claim) claim.disabled = false;
-    if (release) release.disabled = false;
   }, 1500);
   setTimeout(() => {
     void refresh();
@@ -7201,6 +8190,7 @@ async function act(action) {
   try {
     try {
       await postAutomation();
+      await refresh({ full: true });
     } catch (error) {
       // The Persistent Agent bumps its ownership revision while settling a
       // claim, so the first CAS can legitimately be stale. Re-read the
@@ -7212,7 +8202,9 @@ async function act(action) {
     }
     void completeLatencyInteraction(latencyTrace, { success: true });
   } catch (error) {
-    $('#status').textContent = error.message;
+    $('#status').textContent = {
+      nothing_to_stop: '目前沒有進行中的掛機。',
+    }[error.message] ?? error.message;
     void completeLatencyInteraction(latencyTrace, {
       success: false,
       error: true,
@@ -7272,9 +8264,9 @@ async function runEdenTask(taskId) {
       latencyTrace,
     });
     $('#edenNotice').textContent = result.ownershipTransition === 'CLAIMING_AGENT'
-      ? '正在依角色 ownership 契約請求 Server Agent 接管。'
+      ? '正在請求系統接管角色。'
       : result.executor === 'SERVER_AGENT' && result.resumed
-        ? 'Server Agent 已繼續目前的伊甸園任務。'
+        ? '系統已繼續目前的伊甸園任務。'
         : taskId === 'equipment12'
         ? '已開始第一套伊甸園裝備任務'
         : taskId === 'equipment26'
@@ -7302,12 +8294,12 @@ async function runEdenTask(taskId) {
       unexpected_map: '角色目前所在地圖與任務步驟不一致',
       timeout: '任務步驟等待逾時',
       quarantined: '角色已進入安全隔離狀態',
-      rollout_disabled: 'Server Agent 尚未開放給測試帳號',
-      rollout_not_allowlisted: '此角色不在 Server Agent 測試名單內',
-      rollout_schema_unavailable: 'Server Agent 開放設定尚未就緒',
-      rollout_identity_invalid: '角色識別資料無效，無法啟動 Server Agent',
+      rollout_disabled: '系統自動任務尚未開放給測試帳號',
+      rollout_not_allowlisted: '此角色尚未開放自動任務',
+      rollout_schema_unavailable: '自動任務開放設定尚未就緒',
+      rollout_identity_invalid: '角色識別資料無效，無法啟動自動任務',
       eden_course_a_disabled: '伊甸園 Course A 暫停開放',
-      emergency_disabled: 'Server Agent 已緊急停用，角色將安全返回待機狀態',
+      emergency_disabled: '自動任務已緊急停用，角色將安全返回待機狀態',
       command_rejected: '已有任務正在執行，這次操作已拒絕',
     };
     $('#edenNotice').textContent = messages[error.message] ?? error.message;
@@ -7448,10 +8440,7 @@ $('#soundToggle').onchange = (event) =>
   setAudio({ soundEnabled: event.target.checked });
 $('#damageFloatToggle').onchange = (event) =>
   setAudio({ damageFloatsEnabled: event.target.checked });
-$('#quickAudio').onclick = () => {
-  document.querySelector('[data-tab="system"]').click();
-  $('#system').scrollIntoView({ behavior: 'smooth', block: 'start' });
-};
+$('#quickAudio').onclick = () => setAudio({ muted: !audioPrefs.muted });
 document.addEventListener('pointerdown', () => unlockAudio(true));
 document.addEventListener('keydown', () => unlockAudio(true));
 hydrateRememberedAccount();
@@ -8009,7 +8998,7 @@ function renderStatQueueProjection() {
   }
   return projected;
 }
-async function sendStatIntent(intent) {
+async function sendStatIntent(intent, latencyTrace = null) {
   const payload = {
     commandId: intent.commandId,
     characterId: Number(
@@ -8026,6 +9015,7 @@ async function sendStatIntent(intent) {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(payload),
+        latencyTrace,
       });
     } catch (error) {
       if (error.status || attempt > 0) throw error;
@@ -8041,7 +9031,8 @@ async function processStatCommandQueue() {
     while (statCommandQueue.length) {
       const intent = statCommandQueue[0];
       try {
-        const result = await sendStatIntent(intent);
+        const result = await sendStatIntent(intent, intent.experience ?? null);
+        markExperienceResponse(intent.experience);
         if (result?.character) {
           statAuthoritativeState = normalizeStatDomainState({
             ...result.character,
@@ -8116,6 +9107,7 @@ async function processStatCommandQueue() {
         )
           stopStatHold();
       }
+      markExperienceAuthoritative(intent.experience);
       renderStatQueueProjection();
     }
   } finally {
@@ -8132,6 +9124,8 @@ function addStatusPoint(stat) {
     return Promise.resolve({ accepted: false, reason: 'queue_full' });
   }
   if (!statAuthoritativeState) statAuthoritativeState = currentStatDomainState();
+  const statExperience = beginExperienceTrace('stat_allocate');
+  markExperienceRequest(statExperience);
   let resolveIntent;
   const completion = new Promise((resolve) => {
       resolveIntent = resolve;
@@ -8141,8 +9135,17 @@ function addStatusPoint(stat) {
       stat,
       resolve: resolveIntent,
       cost: 0,
+      experience: statExperience,
     };
   statCommandQueue.push(intent);
+  void completion.then((outcome) =>
+    settleExperienceTrace(statExperience, {
+      success: outcome?.accepted === true,
+      errorCode: outcome?.accepted === true
+        ? null
+        : String(outcome?.reason ?? 'stat_rejected').toUpperCase().slice(0, 64),
+    }),
+  );
   const projected = renderStatQueueProjection();
   if (!statCommandQueue.includes(intent)) {
     $('#statNotice').textContent = '能力點數不足';
@@ -8410,11 +9413,13 @@ $('#npcActions').onclick = (event) => {
     void jobChangeAction(
       { action: 'select', choice: Number(choice.dataset.npcChoice) },
       '正在送出 NPC 選項',
+      beginExperienceTrace('npc_dialog_action'),
     );
   else if (action)
     void jobChangeAction(
       { action: action.dataset.npcAction },
       '正在更新 NPC 對話',
+      beginExperienceTrace('npc_dialog_action'),
     );
 };
 $('#supplyForm').onsubmit = async (event) => {
@@ -8458,7 +9463,6 @@ $('#supplyForm').onsubmit = async (event) => {
 $('#start').onclick = () => act('start');
 $('#stop').onclick = () => act('stop');
 $('#canaryClaim').onclick = () => void actCanary('claim_agent');
-$('#canaryRelease').onclick = () => void actCanary('release_agent');
 $('#openWorldMap').onclick = () =>
   void openWorldMap().catch((error) => {
     $('#grindTargetSummary').textContent = error.message;
@@ -8478,10 +9482,14 @@ addEventListener('keydown', (event) => {
 });
 setInterval(() => {
   if (!$('#game').classList.contains('hidden'))
-    $('#duration').textContent = duration(sessionStartedAt);
+    $('#duration').textContent = duration(sessionStartedAt, sessionEndedAt);
   if (lastEventAt && performance.now() - lastEventAt > 2000 && currentRunning)
     $('#logLatency').textContent = '等待戰鬥事件';
 }, 1000);
+setInterval(() => {
+  if (!$('#game').classList.contains('hidden') && persistentLifeState.charId)
+    void refreshPersistentLife(persistentLifeState.charId);
+}, 15000);
 setupFoldableWindows();
 setupTaskSections();
 setupCharacterShowcase();
@@ -8505,7 +9513,7 @@ function setItemActionNotice(message) {
   $('#itemNotice').textContent = message;
   $('#equipmentItemNotice').textContent = message;
 }
-async function confirmItemAction(action, trackedBinId, trackedItemKey, before) {
+async function confirmItemAction(action, trackedIdentity, before, experienceTrace = null) {
   const deadline = Date.now() + 7000;
   let confirmed = false,
     after = null,
@@ -8515,10 +9523,7 @@ async function confirmItemAction(action, trackedBinId, trackedItemKey, before) {
     const events = await api(eventApiUrl({ cursor: null }));
     latestLive = events.live ?? latestLive;
     after = events.live?.inventory?.find((entry) =>
-      trackedItemKey
-        ? entry.itemKey === trackedItemKey
-        : entry.binId === trackedBinId,
-    );
+      inventoryMatchesIdentity(entry, trackedIdentity));
     confirmed =
       action === 'card'
         ? !after || Number(after.amount) < Number(before?.amount ?? 0)
@@ -8530,13 +9535,10 @@ async function confirmItemAction(action, trackedBinId, trackedItemKey, before) {
     if (confirmed) break;
   }
   if (confirmed) {
+    markExperienceAuthoritative(experienceTrace);
     if (after) {
       inventoryItems = inventoryItems.map((item) =>
-        (
-          trackedItemKey
-            ? item.itemKey === trackedItemKey
-            : item.binId === trackedBinId
-        )
+        inventoryMatchesIdentity(item, trackedIdentity)
           ? {
               ...item,
               amount: Number(after.amount),
@@ -8548,10 +9550,7 @@ async function confirmItemAction(action, trackedBinId, trackedItemKey, before) {
       );
     } else {
       inventoryItems = inventoryItems.filter((item) =>
-        trackedItemKey
-          ? item.itemKey !== trackedItemKey
-          : item.binId !== trackedBinId,
-      );
+        !inventoryMatchesIdentity(item, trackedIdentity));
     }
     const equipment = inventoryItems
       .filter((item) => item.category === 'equipment' && item.equipped)
@@ -8594,6 +9593,7 @@ async function confirmItemAction(action, trackedBinId, trackedItemKey, before) {
   if (confirmed && action === 'card') {
     selectedCardBinId = null;
     selectedCardItemKey = null;
+    selectedCardInventoryIndex = null;
   }
   void refresh();
   return confirmed;
@@ -8608,9 +9608,8 @@ document.addEventListener('dblclick', async (event) => {
     setItemActionNotice(blockedReason);
     return;
   }
-  const binId = item.dataset.binId === '' ? NaN : Number(item.dataset.binId);
-  const itemKey = item.dataset.itemKey || '';
-  if (!Number.isInteger(binId)) {
+  const identity = nodeInventoryIdentity(item);
+  if (!hasInventoryIdentity(identity)) {
     setItemActionNotice('遊戲伺服器尚未同步此道具');
     return;
   }
@@ -8623,22 +9622,35 @@ document.addEventListener('dblclick', async (event) => {
     setItemActionNotice('請選擇要插入卡片的裝備');
     return;
   }
-  const cardBinId = selectedCardBinId;
-  if (cardBinId !== null && item.dataset.category === 'equipment')
+  const cardIdentity = selectedCardIdentity();
+  if (action !== 'card'
+    && hasInventoryIdentity(cardIdentity)
+    && item.dataset.category === 'equipment')
     action = 'card';
-  const trackedBinId = action === 'card' ? cardBinId : binId;
-  const trackedItemKey = action === 'card' ? selectedCardItemKey : itemKey;
-  const pendingKey = trackedItemKey || String(trackedBinId);
+  if (!['use', 'equip', 'unequip'].includes(action)) {
+    item.classList.remove('pending');
+    setItemActionNotice('此道具目前沒有可用操作');
+    return;
+  }
+  const trackedIdentity = action === 'card' ? cardIdentity : identity;
+  const pendingKey = inventoryIdentityKey(trackedIdentity);
   if (pendingItemCommands.has(pendingKey)) {
     setItemActionNotice('此道具操作仍在伺服器確認中');
     item.classList.remove('pending');
     return;
   }
+  const experience = ['equip', 'unequip', 'use'].includes(action)
+    ? beginExperienceTrace(
+        action === 'equip'
+          ? 'equip_item'
+          : action === 'unequip'
+            ? 'unequip_item'
+            : 'use_item',
+      )
+    : null;
+  markExperienceRequest(experience);
   const before = inventoryItems.find((entry) =>
-    trackedItemKey
-      ? entry.itemKey === trackedItemKey
-      : entry.binId === trackedBinId,
-    ),
+    inventoryMatchesIdentity(entry, trackedIdentity)),
     rollbackInventory = inventoryItems.map((entry) => ({ ...entry })),
     rollbackEquipment = lastState?.equipment?.map((entry) => ({ ...entry }));
   if (action === 'equip' || action === 'unequip')
@@ -8654,29 +9666,6 @@ document.addEventListener('dblclick', async (event) => {
       0.5,
     );
   else if (action === 'card') playCombatSound('uiConfirm', 0, '', 0, 0.5);
-  if (['use', 'equip', 'unequip'].includes(action)) {
-    inventoryItems = inventoryItems
-      .map((entry) => {
-        const matches = trackedItemKey
-          ? entry.itemKey === trackedItemKey
-          : entry.binId === trackedBinId;
-        if (!matches) return entry;
-        if (action === 'use')
-          return { ...entry, amount: Math.max(0, Number(entry.amount) - 1) };
-        return { ...entry, equipped: action === 'equip' };
-      })
-      .filter((entry) => Number(entry.amount) > 0);
-    const optimisticEquipment = inventoryItems
-      .filter((entry) => entry.category === 'equipment' && entry.equipped)
-      .map(itemEquipmentEntry);
-    lastState = {
-      ...lastState,
-      inventory: inventoryItems,
-      equipment: optimisticEquipment,
-    };
-    renderInventory();
-    setEquipment(lastState.character, optimisticEquipment);
-  }
   pendingItemCommands.add(pendingKey);
   try {
     for (let attempt = 0; attempt < 3; attempt += 1) {
@@ -8684,12 +9673,20 @@ document.addEventListener('dblclick', async (event) => {
         await api('/api/item-action', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
+          latencyTrace: experience,
           body: JSON.stringify({
             action,
-            binId: action === 'card' ? cardBinId : binId,
-            itemKey: action === 'card' ? selectedCardItemKey : itemKey,
-            targetBinId: action === 'card' ? binId : undefined,
-            targetItemKey: action === 'card' ? itemKey : undefined,
+            binId: trackedIdentity.binId,
+            itemKey: trackedIdentity.itemKey,
+            inventoryIndex: trackedIdentity.inventoryIndex ?? undefined,
+            inventoryGeneration: Number.isInteger(before?.inventoryGeneration)
+              ? before.inventoryGeneration
+              : undefined,
+            targetBinId: action === 'card' ? identity.binId : undefined,
+            targetItemKey: action === 'card' ? identity.itemKey : undefined,
+            targetInventoryIndex: action === 'card'
+              ? (identity.inventoryIndex ?? undefined)
+              : undefined,
             ...characterCommandMeta('inventory'),
           }),
         });
@@ -8701,12 +9698,7 @@ document.addEventListener('dblclick', async (event) => {
     }
     setItemActionNotice('指令已送出，伺服器確認中');
     item.classList.remove('pending');
-    const confirmed = await confirmItemAction(
-      action,
-      trackedBinId,
-      trackedItemKey,
-      before,
-    );
+    const confirmed = await confirmItemAction(action, trackedIdentity, before, experience);
     if (!confirmed) {
       inventoryItems = rollbackInventory;
       lastState = {
@@ -8717,6 +9709,10 @@ document.addEventListener('dblclick', async (event) => {
       renderInventory();
       setEquipment(lastState.character, rollbackEquipment ?? []);
     }
+    await settleExperienceTrace(experience, {
+      success: confirmed,
+      errorCode: confirmed ? null : 'VISIBLE_NOT_CONFIRMED',
+    });
   } catch (error) {
     inventoryItems = rollbackInventory;
     lastState = {
@@ -8727,6 +9723,7 @@ document.addEventListener('dblclick', async (event) => {
     renderInventory();
     setEquipment(lastState.character, rollbackEquipment ?? []);
     setItemActionNotice(error.message);
+    await settleExperienceTrace(experience, { success: false, errorCode: 'ACTION_FAILED' });
   } finally {
     pendingItemCommands.delete(pendingKey);
     item.classList.remove('pending');

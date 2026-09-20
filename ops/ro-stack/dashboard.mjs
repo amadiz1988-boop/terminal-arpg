@@ -8,6 +8,7 @@ import {
   timingSafeEqual,
 } from 'node:crypto';
 import { execFile, spawn } from 'node:child_process';
+import { createOpsControlPlane } from './ops-control-plane.mjs';
 import { createServer } from 'node:http';
 import { closeSync, openSync, readFileSync } from 'node:fs';
 import {
@@ -48,13 +49,13 @@ import {
 } from './isolated-runtime.mjs';
 import { QuestRuntimeService } from './quest-runtime/service.mjs';
 import { MariaDbQuestRuntimeStore } from './quest-runtime/store.mjs';
-import { OpenKoreQuestBridge } from './quest-runtime/openkore-bridge.mjs';
 import { ServerAgentQuestBridge } from './quest-runtime/server-agent-bridge.mjs';
 import {
   firstJobNavigationRoute,
   firstJobResumeTarget,
   firstJobRoute,
   parseFirstJobContent,
+  resolveDefaultFarmTarget,
 } from './quest-runtime/first-job-content.mjs';
 import { AssassinQuestService } from './quest-runtime/assassin-service.mjs';
 import { ASSASSIN_JOB_ADAPTER } from './quest-runtime/assassin-adapter.mjs';
@@ -79,6 +80,7 @@ import {
 import {
   LIVE_STATUS_MAX_AGE_MS,
   LIVE_STATUS_SOURCE,
+  FARM_MAP_SOURCE,
   OPENKORE_OWNER,
   SERVER_AGENT_OWNER,
   W1_ACTION,
@@ -100,23 +102,26 @@ import {
   supplyHubs,
 } from './grind-hub-routing.mjs';
 import {
+  buildTerminalRoute,
   loadWarpGraph,
   planWebRelocation,
 } from './persistent-agent/map-route.mjs';
 import {
+  decideNormalizationAction,
+  resolveSpawnEntry as resolveNoviceSpawnEntry,
+} from './persistent-agent/novice-onboarding-spawn.mjs';
+import {
+  coordinatorDeadlineMsForRouteSteps,
   planRelocation,
   RELOCATION_POLICY,
+  RELOCATION_REASON,
 } from './persistent-agent/relocation-policy.mjs';
 import {
-  createRelocationProgress,
   nextRelocationAction,
 } from './persistent-agent/relocation-executor.mjs';
 import {
   existingCommandsForStep,
 } from './persistent-agent/relocation-command-surface.mjs';
-import {
-  kafraContextForPlan,
-} from './persistent-agent/kafra-content.mjs';
 import {
   CharacterProjectionCache,
   CharacterViewerRegistry,
@@ -127,19 +132,30 @@ import {
   coalesceCombatEventLines,
   coalesceCombatEvents,
   legacyObservationMode,
+  nativeFarmEndedAt,
+  nativeFarmRunning,
+  nativeFarmStartedAt,
   nativeLifeEventLine,
   parseLifeEventFacts,
+  projectLivePosition,
+  projectGameEntryLeanSnapshot,
   projectLiveSnapshot,
+  projectNativeFarmStats,
   publicObservationPolicy,
   revisionKeyForInterest,
   withLiveFreshness,
 } from './web-observation.mjs';
-import { CombatSseBroker, CombatSseRollout } from './combat-sse.mjs';
+import {
+  CombatSseBroker,
+  CombatSseRollout,
+  gateCombatSseForServerAgent,
+} from './combat-sse.mjs';
 import {
   CANARY_ACTIONS as WEB_EXPERIENCE_CANARY_ACTIONS,
   createProductionTelemetry,
   deploymentIdentity,
 } from './web-experience/production-telemetry.mjs';
+import { createExperienceHealth } from './web-experience/experience-health.mjs';
 import {
   addWebLatencyDuration,
   runWithWebLatencyTrace,
@@ -149,6 +165,7 @@ import {
 import {
   getRoAssetPublicSnapshot,
   resolveItemAsset,
+  resolveMonsterDisplayName,
   resolveNpcAsset,
 } from './ro-asset-resolver.mjs';
 
@@ -205,6 +222,18 @@ const edenCourseASequencePath = join(
   'persistent-agent',
   'quest-sequences',
   'eden-course-a.json',
+);
+const noviceOnboardingSequencePath = join(
+  dirname(fileURLToPath(import.meta.url)),
+  'persistent-agent',
+  'quest-sequences',
+  'novice-onboarding.json',
+);
+const noviceOnboardingAllowlistPath = join(
+  dirname(fileURLToPath(import.meta.url)),
+  'persistent-agent',
+  'quest-content',
+  'novice-onboarding.allowlists.json',
 );
 const firstJobContentPath = join(
   dirname(fileURLToPath(import.meta.url)),
@@ -343,6 +372,12 @@ const twroItemNames = await loadTwroItemNames();
 const edenCourseASequence = JSON.parse(
   await readFile(edenCourseASequencePath, 'utf8'),
 );
+const noviceOnboardingSequence = JSON.parse(
+  await readFile(noviceOnboardingSequencePath, 'utf8'),
+);
+const noviceOnboardingAllowlist = JSON.parse(
+  await readFile(noviceOnboardingAllowlistPath, 'utf8'),
+);
 const firstJobContent = parseFirstJobContent(
   JSON.parse(await readFile(firstJobContentPath, 'utf8')),
 );
@@ -365,6 +400,19 @@ function serverAgentWarpGraph() {
     );
   return serverAgentWarpGraphPromise;
 }
+
+// GLOBAL_SUPPLY: the ONE canonical configured supply service map (mirrors the
+// native supply service identity Tool Dealer#Extended_Prt @ prt_fild05 290,221).
+// It is a single service destination, never a per-farm route table: the farm
+// map is only the route origin and every origin reuses the same resolver.
+const SUPPLY_SERVICE_MAP = 'prt_fild05';
+// The canonical service NPC cell (Tool Dealer#Extended_Prt @ prt_fild05 290,221).
+// The generic resolver terminates at a warp-landing cell, but native supply
+// arrival requires the character within 4 cells of the NPC. The OUT leg must
+// therefore terminate at ONE service point shared by every farm origin; this is
+// not a per-farm waypoint table.
+const SUPPLY_SERVICE_X = 289;
+const SUPPLY_SERVICE_Y = 219;
 
 // Farm map eligibility: a canonical map is farm-selectable only when it has at
 // least one monster spawn. Visibility is never gated. Eligibility comes from the
@@ -422,6 +470,9 @@ const webExperienceTelemetry = createProductionTelemetry({
     fileHashes: webExperienceFileHashes,
   }),
 });
+// WEB_REAL_USER_EXPERIENCE_V1 rolling read model. Fed by the SAME ingest
+// endpoint and canary eligibility as production telemetry; no second transport.
+const webExperienceHealth = createExperienceHealth();
 
 async function loadSkillAutomationDefinitions() {
   const data = JSON.parse(await readFile(skillTreePath, 'utf8'));
@@ -441,6 +492,210 @@ function localizedItemName(itemId, fallback) {
   if (/\p{Script=Han}/u.test(officialName ?? '')) return officialName;
   if (/\p{Script=Han}/u.test(fallback ?? '')) return fallback;
   return `道具 #${itemId}`;
+}
+
+// PL1-A factual diary projection. This is a read model over the authoritative
+// Persistent Life tables; it does not create lifecycle facts or narrative text.
+const persistentLifeEventTypes = new Set([
+  'SESSION_STARTED',
+  'SESSION_ENDED',
+  'FARM_SESSION_STARTED',
+  'FARM_SESSION_STOPPED',
+  'MONSTER_KILL',
+  'LOOT_ACQUIRED',
+  'MAP_CHANGED',
+  'NPC_INTERACTION',
+  'PLAYER_DEATH',
+]);
+const persistentLifeEmptyCounts = () => ({
+  total: 0,
+  kills: 0,
+  loot: 0,
+  npcInteractions: 0,
+  mapChanges: 0,
+  deaths: 0,
+});
+const persistentLifeProjectionLimit = 120;
+const persistentLifeHighlightLimit = 5;
+
+function persistentLifeSchemaUnavailable(error) {
+  return /persistent_life_(?:session|event).*(?:doesn't exist|does not exist)|Unknown table/i.test(
+    String(error?.message ?? error),
+  );
+}
+
+function persistentLifeMapLabel(mapId) {
+  const id = String(mapId ?? '').trim();
+  if (!id) return '';
+  return String(mapRoutingIndex.maps?.[id]?.name ?? id);
+}
+
+function persistentLifeEventLabel(event) {
+  const facts = event.facts ?? {};
+  const map = persistentLifeMapLabel(event.map || facts.map);
+  switch (event.eventType) {
+    case 'SESSION_STARTED':
+      return '角色開始活動';
+    case 'SESSION_ENDED':
+      return '角色結束活動';
+    case 'FARM_SESSION_STARTED':
+      return '開始自動狩獵';
+    case 'FARM_SESSION_STOPPED':
+      return '結束自動狩獵';
+    case 'MONSTER_KILL': {
+      const mobId = Number(facts.mobId);
+      const name = Number.isSafeInteger(mobId) && mobId > 0
+        ? resolveMonsterDisplayName({ mobId })
+        : '';
+      return name ? `擊敗${name}` : '擊敗怪物';
+    }
+    case 'LOOT_ACQUIRED': {
+      const itemId = Number(facts.itemId);
+      const name = Number.isSafeInteger(itemId) && itemId > 0
+        ? localizedItemName(itemId, facts.itemName)
+        : '取得物品';
+      return `取得${name}`;
+    }
+    case 'MAP_CHANGED':
+      return map ? `移動至${map}` : '地圖變更';
+    case 'NPC_INTERACTION': {
+      const npc = String(facts.npc ?? facts.npcName ?? '').trim();
+      return npc ? `與${npc}互動` : 'NPC 互動';
+    }
+    case 'PLAYER_DEATH':
+      return '角色死亡';
+    default:
+      return '';
+  }
+}
+
+function persistentLifeFactsFromHex(hex) {
+  const value = String(hex ?? '').trim();
+  if (!value) return {};
+  if (value.length > 8192) return {};
+  return parseLifeEventFacts(Buffer.from(value, 'hex').toString('utf8'));
+}
+
+function persistentLifeEventOrder(left, right) {
+  return left.sequence - right.sequence || left.eventId - right.eventId;
+}
+
+function projectPersistentLifeEvent(row, sessionId) {
+  const event = {
+    eventId: Number(row[0]),
+    sequence: Number(row[1]),
+    occurredAt: row[2] || null,
+    eventType: row[3] || '',
+    map: row[4] || null,
+    facts: persistentLifeFactsFromHex(row[5]),
+    importance: Number(row[6] ?? 0),
+    source: row[7] || '',
+    sessionId,
+  };
+  if (!persistentLifeEventTypes.has(event.eventType)) return null;
+  const label = persistentLifeEventLabel(event);
+  if (!label) return null;
+  return {
+    eventId: event.eventId,
+    sequence: event.sequence,
+    occurredAt: event.occurredAt,
+    eventType: event.eventType,
+    map: event.map,
+    facts: event.facts,
+    source: event.source,
+    label,
+    importance: event.importance,
+  };
+}
+
+function persistentLifeEmptyProjection() {
+  return {
+    available: true,
+    session: null,
+    counts: persistentLifeEmptyCounts(),
+    highlights: [],
+    events: [],
+  };
+}
+
+async function readPersistentLifeDiary(account, charId) {
+  const accountId = Number(account.accountId);
+  const id = Number(charId);
+  try {
+    const sessionOutput = await sql(
+      `SELECT session_id,status,DATE_FORMAT(started_at,'%Y-%m-%d %H:%i:%s.%f'),` +
+        `COALESCE(DATE_FORMAT(ended_at,'%Y-%m-%d %H:%i:%s.%f'),'') AS ended_at,` +
+        `COALESCE(start_map,''),COALESCE(end_map,''),event_count,` +
+        `IF(seen_at IS NULL,0,1),` +
+        `DATE_FORMAT(seen_at,'%Y-%m-%d %H:%i:%s.%f') AS seen_at ` +
+        `FROM persistent_life_session ` +
+        `WHERE char_id=${id} AND account_id=${accountId} ` +
+        `AND status IN ('ACTIVE','COMPLETED','INTERRUPTED') ` +
+        `ORDER BY IF(status='ACTIVE',0,1),started_at DESC,session_id DESC LIMIT 1;`,
+    );
+    if (!sessionOutput) return persistentLifeEmptyProjection();
+    const sessionRow = sessionOutput.split('\t');
+    const sessionId = sessionRow[0];
+    const eventOutput = await sql(
+      `SELECT event_id,sequence,DATE_FORMAT(occurred_at,'%Y-%m-%d %H:%i:%s.%f'),` +
+        `event_type,COALESCE(map,''),HEX(COALESCE(facts,'')),importance,source ` +
+        `FROM persistent_life_event e JOIN persistent_life_session s ` +
+        `ON s.session_id=e.session_id AND s.char_id=e.char_id ` +
+        `WHERE e.session_id='${escapeSql(sessionId)}' AND e.char_id=${id} ` +
+        `AND ((s.seen_at IS NULL AND e.occurred_at>=s.started_at) ` +
+        `OR (s.seen_at IS NOT NULL AND e.occurred_at>s.seen_at)) ` +
+        `ORDER BY sequence ASC,event_id ASC LIMIT ${persistentLifeProjectionLimit};`,
+    );
+    const seenSequences = new Set();
+    const events = (eventOutput ? eventOutput.split(/\r?\n/) : [])
+      .filter(Boolean)
+      .map((line) => projectPersistentLifeEvent(line.split('\t'), sessionId))
+      .filter((event) => {
+        if (!event || seenSequences.has(event.sequence)) return false;
+        seenSequences.add(event.sequence);
+        return true;
+      })
+      .sort(persistentLifeEventOrder);
+    const counts = events.reduce((result, event) => {
+      result.total += 1;
+      if (event.eventType === 'MONSTER_KILL') result.kills += 1;
+      if (event.eventType === 'LOOT_ACQUIRED') result.loot += 1;
+      if (event.eventType === 'NPC_INTERACTION') result.npcInteractions += 1;
+      if (event.eventType === 'MAP_CHANGED') result.mapChanges += 1;
+      if (event.eventType === 'PLAYER_DEATH') result.deaths += 1;
+      return result;
+    }, persistentLifeEmptyCounts());
+    const highlights = events
+      .slice()
+      .sort((left, right) => right.importance - left.importance || persistentLifeEventOrder(left, right))
+      .slice(0, persistentLifeHighlightLimit)
+      .sort(persistentLifeEventOrder)
+      .map(({ importance, ...event }) => event);
+    // An ACTIVE session remains the current lifecycle owner, but an empty
+    // acknowledgement window must not reopen an already-read Diary.
+    if (events.length === 0 && sessionRow[1] === 'ACTIVE')
+      return persistentLifeEmptyProjection();
+    return {
+      available: true,
+      session: {
+        sessionId,
+        status: sessionRow[1],
+        startedAt: sessionRow[2] || null,
+        endedAt: sessionRow[3] || null,
+        startMap: sessionRow[4] || null,
+        endMap: sessionRow[5] || null,
+        eventCount: Number(sessionRow[6] ?? 0),
+        seen: events.length === 0 ? sessionRow[7] === '1' : false,
+      },
+      counts,
+      highlights,
+      events: events.map(({ importance, ...event }) => event),
+    };
+  } catch (error) {
+    if (persistentLifeSchemaUnavailable(error))
+      return { ...persistentLifeEmptyProjection(), available: false };
+    throw error;
+  }
 }
 
 class HttpError extends Error {
@@ -660,6 +915,19 @@ async function sql(statement) {
   return await task;
 }
 
+// C3 SERVER OPS: one cached runtime sampler for this Dashboard process. Browser
+// requests read the cache; they never spawn PowerShell/CIM themselves.
+const opsControlPlane = createOpsControlPlane({
+  root,
+  canonicalRathenaRoot: join(root, '.local', 'ro-stack', 'rathena'),
+  canonicalPorts: { login: 6901, character: 6122, map: 5122 },
+  databasePort: Number(databasePort),
+  statePath: join(runtime, 'state.json'),
+  dashboardPort: Number(port),
+  sql,
+});
+opsControlPlane.start();
+
 async function readQuestAuthority({ charId, accountId, questId, adapterId }) {
   const requestedQuestId = Number.isSafeInteger(Number(questId)) && Number(questId) > 0
     ? Number(questId)
@@ -762,13 +1030,9 @@ const questRuntimeService = new QuestRuntimeService({
   authorityReader: readQuestAuthority,
   authoritativeCommitters: { [CommitType.JOB_CHANGE]: commitRegisteredJobChange },
 });
-const questRuntimeBridge = new OpenKoreQuestBridge({
-  instancesRoot,
-  service: questRuntimeService,
-});
 // P2I: native SERVER_AGENT Quest Runtime transport. It enqueues the generic
 // `run_server_command` / `start_navigation` primitives on the canonical
-// `persistent_agent_command` queue instead of writing OpenKore `.cmd` files.
+// `persistent_agent_command` queue. This is the only Quest Runtime transport.
 const serverAgentQuestBridge = new ServerAgentQuestBridge({
   readAgentStateRevision: async (charId) => {
     const row = await readAgentStateRow(charId);
@@ -782,10 +1046,12 @@ const serverAgentQuestBridge = new ServerAgentQuestBridge({
     );
   },
 });
-// Controller-aware dispatch: SERVER_AGENT characters use the native transport;
-// OPENKORE characters keep the incumbent file transport. A SERVER_AGENT
-// character whose objective has no native primitive fails explicitly — it never
-// falls back to starting an OpenKore worker.
+// C4 / OPENKORE_BRIDGE_PRODUCTION_REACHABLE = NO: the legacy
+// `OpenKoreQuestBridge` is no longer imported or instantiated. Quest Runtime
+// dispatch is native-only. A non-SERVER_AGENT controller has no native Quest
+// Runtime primitive, so it fails closed (NATIVE_CAPABILITY_GAP) rather than
+// falling back to a filesystem `.cmd` transport.
+const questRuntimeWatch = new Map(); // accountId -> lease expiry (in-memory only)
 const questRuntimeDispatchBridge = {
   async dispatch(state) {
     const charId = Number(state.charId);
@@ -793,27 +1059,19 @@ const questRuntimeDispatchBridge = {
     const controller = await readCharacterControllerStatus(account, charId, {
       includeFarmTarget: false,
     });
-    if (
-      controller.available &&
-      controller.controller === SERVER_AGENT_OWNER
-    )
+    if (controller.available && controller.controller === SERVER_AGENT_OWNER)
       return await serverAgentQuestBridge.dispatch(state);
-    if (
-      !controller.available &&
-      controller.unavailableReason === 'agent_status_unavailable'
-    )
-      throw new HttpError(503, 'Server Agent 狀態暫時無法讀取，已停止操作以保護角色');
-    // P2-OPENKORE-EXIT-MAINLINE (row 39): the legacy OpenKore `.cmd` bridge is
-    // production-retired; SERVER_AGENT uses the native bridge above.
-    if (runtimeMode !== 'isolated-test')
-      throw new HttpError(409, 'LEGACY_OPENKORE_MIGRATION_REQUIRED');
-    return await questRuntimeBridge.dispatch(state);
+    if (!controller.available && controller.unavailableReason === 'agent_status_unavailable')
+      throw new HttpError(503, '系統狀態暫時無法讀取，已停止操作以保護角色');
+    throw new HttpError(501, 'NATIVE_CAPABILITY_GAP');
   },
-  consumeAccount: (accountId) => questRuntimeBridge.consumeAccount(accountId),
-  refreshWatchedAccounts: () => questRuntimeBridge.refreshWatchedAccounts(),
-  consumeWatchedAccounts: () => questRuntimeBridge.consumeWatchedAccounts(),
-  watchedAccountCount: () => questRuntimeBridge.watchedAccountCount(),
-  watchAccount: (accountId) => questRuntimeBridge.watchAccount(accountId),
+  consumeAccount: async () => [],
+  refreshWatchedAccounts: async () => questRuntimeWatch.size,
+  consumeWatchedAccounts: async () => [],
+  watchedAccountCount: () => questRuntimeWatch.size,
+  watchAccount: (accountId) => {
+    questRuntimeWatch.set(Number(accountId), Date.now() + 600_000);
+  },
 };
 const assassinQuestService = new AssassinQuestService({
   runtimeService: questRuntimeService,
@@ -875,10 +1133,10 @@ async function consumeQuestRuntimeCallbacks() {
   questCallbackPumpActive = true;
   try {
     if (!questCallbackRecoveryDiscoveryComplete) {
-      await questRuntimeBridge.refreshWatchedAccounts();
+      await questRuntimeDispatchBridge.refreshWatchedAccounts();
       questCallbackRecoveryDiscoveryComplete = true;
     }
-    await questRuntimeBridge.consumeWatchedAccounts();
+    await questRuntimeDispatchBridge.consumeWatchedAccounts();
   } catch (error) {
     if (error?.code !== 'ENOENT')
       console.error('Quest callback pump failed:', error);
@@ -977,12 +1235,67 @@ const commandIdPattern =
 const questSequenceStepTypes = new Set([
   'GO_NPC', 'TALK_NPC', 'DIALOG_NEXT', 'DIALOG_MENU_SELECT',
   'ACCEPT_QUEST', 'WAIT_QUEST_STATE', 'GO_MAP', 'USE_ITEM', 'KILL_MONSTER',
-  'COLLECT_ITEM', 'RETURN_NPC', 'COMPLETE_QUEST', 'CONFIRM_REWARD',
+  'COLLECT_ITEM', 'RETURN_NPC', 'COMPLETE_QUEST', 'CONFIRM_REWARD', 'FARM_UNTIL',
+  // Native Quest Engine CP1-1/CP1-2 control flow + generic skill allocation.
+  // Web is validator/dispatcher only; the native PA is the sole executor.
+  // Restores the lost last-good `sendAddSkillPoint` semantics on top of the
+  // existing native allocate_skill_point capability (skill-agnostic; NV_BASIC
+  // is content, not code).
+  'CONDITION', 'BRANCH', 'REPEAT_UNTIL', 'ALLOCATE_SKILL',
 ]);
 const questSequenceStates = new Set(['ABSENT', 'ACTIVE', 'COMPLETE', 'HUNTING_COMPLETE']);
-const rAthenaNpcNamePattern = /^[A-Za-z0-9_# ]{1,31}$/;
+// Mirrors native persistent_agent_quest_condition.inc readers/operators.
+const questConditionReaders = new Set([
+  'job_level', 'base_level', 'skill_level', 'skill_point',
+  'hp_percent', 'item_amount', 'quest_state',
+]);
+const questConditionOperators = new Set(['eq', 'ne', 'lt', 'lte', 'gt', 'gte']);
+// Mirrors native CP1-0/CP1-2 bounds
+// (persistent_agent_quest_sequence_step_parser.inc).
+const MAX_QUEST_SEQUENCE_NESTING_DEPTH = 4;
+const MAX_QUEST_NESTED_STEPS = 128;
+const MAX_QUEST_REPEAT_ITERATIONS = 1000;
+const MAX_QUEST_REPEAT_DEADLINE_MS = 3600000;
+const MAX_QUEST_ALLOCATE_SKILL_LEVEL = 10;
+const rAthenaNpcNamePattern = /^[\p{L}\p{N}_# ]{1,31}$/u;
+// rAthena map names may contain '-' (new_1-3) and '@' (instance maps); the
+// native executor resolves maps via map_mapname2mapid, so the Web validator
+// must not reject a legitimate map before dispatch.
+const sequenceMapPattern = /^[a-z0-9_@-]{1,31}$/;
 
-function normalizeQuestSequenceStep(input) {
+// Native CP1-1 CONDITION schema: { read, op, value, skillId?/itemId?/questId? }.
+function normalizeQuestCondition(input) {
+  if (!input || typeof input !== 'object' || Array.isArray(input))
+    throw new HttpError(422, 'invalid_transition');
+  const read = String(input.read ?? '');
+  const op = String(input.op ?? '');
+  const value = Number(input.value);
+  if (!questConditionReaders.has(read) || !questConditionOperators.has(op) ||
+      !Number.isSafeInteger(value))
+    throw new HttpError(422, 'invalid_transition');
+  const condition = { type: 'CONDITION', read, op, value };
+  if (read === 'skill_level') {
+    const skillId = Number(input.skillId);
+    if (!Number.isSafeInteger(skillId) || skillId <= 0 || skillId > 65535)
+      throw new HttpError(422, 'invalid_transition');
+    condition.skillId = skillId;
+  } else if (read === 'item_amount') {
+    const itemId = Number(input.itemId);
+    if (!Number.isSafeInteger(itemId) || itemId <= 0 || itemId > 4294967295)
+      throw new HttpError(422, 'invalid_transition');
+    condition.itemId = itemId;
+  } else if (read === 'quest_state') {
+    const questId = Number(input.questId);
+    if (!Number.isSafeInteger(questId) || questId <= 0)
+      throw new HttpError(422, 'invalid_transition');
+    condition.questId = questId;
+  }
+  return condition;
+}
+
+function normalizeQuestSequenceStep(input, depth = 0) {
+  if (!Number.isSafeInteger(depth) || depth < 0 || depth > MAX_QUEST_SEQUENCE_NESTING_DEPTH)
+    throw new HttpError(422, 'invalid_transition');
   const type = String(input?.type ?? '');
   if (!questSequenceStepTypes.has(type))
     throw new HttpError(422, 'invalid_transition');
@@ -991,7 +1304,7 @@ function normalizeQuestSequenceStep(input) {
   if (npcTypes.has(type)) {
     const npcName = String(input.npcName ?? '');
     const map = String(input.map ?? '');
-    if (!rAthenaNpcNamePattern.test(npcName) || !/^[a-z0-9_]{1,31}$/.test(map))
+    if (!rAthenaNpcNamePattern.test(npcName) || !/^[a-z0-9_@-]{1,31}$/.test(map))
       throw new HttpError(422, 'invalid_transition');
     step.npcName = npcName;
     step.map = map;
@@ -1020,7 +1333,7 @@ function normalizeQuestSequenceStep(input) {
     const map = String(input.map ?? '');
     const x = Number(input.x ?? 0);
     const y = Number(input.y ?? 0);
-    if (!/^[a-z0-9_]{1,31}$/.test(map) || !Number.isSafeInteger(x) || x < 0 || x > 32767 ||
+    if (!/^[a-z0-9_@-]{1,31}$/.test(map) || !Number.isSafeInteger(x) || x < 0 || x > 32767 ||
         !Number.isSafeInteger(y) || y < 0 || y > 32767)
       throw new HttpError(422, 'invalid_transition');
     Object.assign(step, { map, x, y });
@@ -1038,9 +1351,9 @@ function normalizeQuestSequenceStep(input) {
       const x = Number(entry?.x);
       const y = Number(entry?.y);
       const portalTo = String(entry?.portalTo ?? '');
-      if (!/^[a-z0-9_]{1,31}$/.test(map) || !Number.isSafeInteger(x) || x < 0 || x > 32767 ||
+      if (!/^[a-z0-9_@-]{1,31}$/.test(map) || !Number.isSafeInteger(x) || x < 0 || x > 32767 ||
           !Number.isSafeInteger(y) || y < 0 || y > 32767 ||
-          (portalTo && !/^[a-z0-9_]{1,31}$/.test(portalTo)))
+          (portalTo && !/^[a-z0-9_@-]{1,31}$/.test(portalTo)))
         throw new HttpError(422, 'invalid_transition');
       return portalTo ? { map, x, y, portalTo } : { map, x, y };
     });
@@ -1056,12 +1369,18 @@ function normalizeQuestSequenceStep(input) {
       expectedArrivalCondition,
     });
   }
+  if (type === 'FARM_UNTIL') {
+    const map = String(input.map ?? '');
+    if (!sequenceMapPattern.test(map)) throw new HttpError(422, 'invalid_transition');
+    step.map = map;
+    step.condition = normalizeQuestCondition(input.condition);
+  }
   if (type === 'KILL_MONSTER') {
     const map = String(input.map ?? '');
     const questId = Number(input.questId);
     const mobId = Number(input.mobId);
     const count = Number(input.count);
-    if (!/^[a-z0-9_]{1,31}$/.test(map) || !Number.isSafeInteger(questId) || questId <= 0 ||
+    if (!/^[a-z0-9_@-]{1,31}$/.test(map) || !Number.isSafeInteger(questId) || questId <= 0 ||
         !Number.isSafeInteger(mobId) || mobId <= 0 || !Number.isSafeInteger(count) || count < 1 || count > 1000)
       throw new HttpError(422, 'invalid_transition');
     Object.assign(step, { map, questId, mobId, count });
@@ -1096,6 +1415,19 @@ function normalizeQuestSequenceStep(input) {
       throw new HttpError(422, 'invalid_transition');
     Object.assign(step, { itemId, count });
   }
+  if (type === 'ALLOCATE_SKILL') {
+    // Generic: the executor reads the authoritative current level, confirms a
+    // real skill point, dispatches native allocate_skill_point, waits for the
+    // server-confirmed read-model change, and repeats until targetLevel or a
+    // blocked condition. No DB skill mutation is permitted.
+    const skillId = Number(input.skillId);
+    const targetLevel = Number(input.targetLevel);
+    if (!Number.isSafeInteger(skillId) || skillId <= 0 || skillId > 65535 ||
+        !Number.isSafeInteger(targetLevel) || targetLevel < 1 ||
+        targetLevel > MAX_QUEST_ALLOCATE_SKILL_LEVEL)
+      throw new HttpError(422, 'invalid_transition');
+    Object.assign(step, { skillId, targetLevel });
+  }
   if (type === 'CONFIRM_REWARD') {
     if (!Array.isArray(input.expectedRewards) || input.expectedRewards.length < 1 || input.expectedRewards.length > 16)
       throw new HttpError(422, 'invalid_transition');
@@ -1114,7 +1446,99 @@ function normalizeQuestSequenceStep(input) {
       step[field] = value;
     }
   }
+  if (input.expectedDestinationMap !== undefined) {
+    const expectedDestinationMap = String(input.expectedDestinationMap);
+    if (!sequenceMapPattern.test(expectedDestinationMap))
+      throw new HttpError(422, 'invalid_transition');
+    step.expectedDestinationMap = expectedDestinationMap;
+  }
+  // Native CP1-1 CONDITION: read authoritative PA/native state only.
+  if (type === 'CONDITION') return normalizeQuestCondition(input);
+  // Native CP1-2 BRANCH: nested children recurse through the SAME vocabulary.
+  if (type === 'BRANCH') {
+    if (!Array.isArray(input.thenSteps) || !Array.isArray(input.elseSteps) ||
+        input.thenSteps.length > MAX_QUEST_NESTED_STEPS ||
+        input.elseSteps.length > MAX_QUEST_NESTED_STEPS)
+      throw new HttpError(422, 'invalid_transition');
+    step.condition = normalizeQuestCondition(input.condition);
+    step.thenSteps = input.thenSteps.map((child) =>
+      normalizeQuestSequenceStep(child, depth + 1));
+    step.elseSteps = input.elseSteps.map((child) =>
+      normalizeQuestSequenceStep(child, depth + 1));
+    return step;
+  }
+  // Native CP1-2 REPEAT_UNTIL: bounded iterations + optional deadline; the
+  // native executor waits for authoritative state change between passes.
+  if (type === 'REPEAT_UNTIL') {
+    const maxIterations = Number(input.maxIterations);
+    if (!Number.isSafeInteger(maxIterations) || maxIterations < 1 ||
+        maxIterations > MAX_QUEST_REPEAT_ITERATIONS)
+      throw new HttpError(422, 'invalid_transition');
+    if (!Array.isArray(input.bodySteps) || input.bodySteps.length < 1 ||
+        input.bodySteps.length > MAX_QUEST_NESTED_STEPS)
+      throw new HttpError(422, 'invalid_transition');
+    step.condition = normalizeQuestCondition(input.condition);
+    step.bodySteps = input.bodySteps.map((child) =>
+      normalizeQuestSequenceStep(child, depth + 1));
+    step.maxIterations = maxIterations;
+    if (input.deadlineMs !== undefined) {
+      const deadlineMs = Number(input.deadlineMs);
+      if (!Number.isSafeInteger(deadlineMs) || deadlineMs < 0 ||
+          deadlineMs > MAX_QUEST_REPEAT_DEADLINE_MS)
+        throw new HttpError(422, 'invalid_transition');
+      step.deadlineMs = deadlineMs;
+    }
+    return step;
+  }
   return step;
+}
+
+function noviceOnboardingPayload() {
+  const env = noviceOnboardingAllowlist?.env;
+  if (
+    noviceOnboardingSequence?.schema !== 'ro-quest-sequence/v1' ||
+    noviceOnboardingSequence.sequenceId !== 'novice_onboarding' ||
+    Number(noviceOnboardingSequence.taskId) !== 7100001 ||
+    noviceOnboardingSequence.enabled !== true ||
+    noviceOnboardingSequence.engineStatus !== 'READY' ||
+    !env ||
+    !Array.isArray(env.PERSISTENT_AGENT_QUEST_TASKS) ||
+    !env.PERSISTENT_AGENT_QUEST_TASKS.includes(7100001) ||
+    !Array.isArray(env.PERSISTENT_AGENT_QUEST_SEQUENCES) ||
+    !env.PERSISTENT_AGENT_QUEST_SEQUENCES.includes('novice_onboarding')
+  )
+    throw new HttpError(409, 'novice_sequence_unavailable');
+
+  const steps = noviceOnboardingSequence.steps.map((input) =>
+    normalizeQuestSequenceStep(input, 0),
+  );
+  const npcAllowlist = new Set(env.PERSISTENT_AGENT_NPCS ?? []);
+  const npcMapAllowlist = new Set(env.PERSISTENT_AGENT_NPC_MAPS ?? []);
+  const navigationMapAllowlist = new Set(env.PERSISTENT_AGENT_NAVIGATION_MAPS ?? []);
+  const farmMapAllowlist = new Set(env.PERSISTENT_AGENT_FARM_MAPS ?? []);
+  const questAllowlist = new Set(env.PERSISTENT_AGENT_QUEST_IDS ?? []);
+  for (const step of steps) {
+    if (step.npcName && !npcAllowlist.has(step.npcName))
+      throw new HttpError(409, 'novice_sequence_not_allowlisted');
+    if (step.type === 'FARM_UNTIL') {
+      if (!farmMapAllowlist.has(step.map))
+        throw new HttpError(409, 'novice_sequence_not_allowlisted');
+    } else if (step.map && !npcMapAllowlist.has(step.map) &&
+      !navigationMapAllowlist.has(step.map)) {
+      throw new HttpError(409, 'novice_sequence_not_allowlisted');
+    }
+    if (step.questId && !questAllowlist.has(step.questId))
+      throw new HttpError(409, 'novice_sequence_not_allowlisted');
+    if (step.expectedDestinationMap &&
+      !npcMapAllowlist.has(step.expectedDestinationMap) &&
+      !navigationMapAllowlist.has(step.expectedDestinationMap))
+      throw new HttpError(409, 'novice_sequence_not_allowlisted');
+  }
+  return {
+    taskId: 7100001,
+    sequenceId: 'novice_onboarding',
+    steps,
+  };
 }
 
 function parseOwnershipCommandRow(output) {
@@ -1370,6 +1794,106 @@ async function readNativeCombatLog(
     cursor: Math.max(requestedEventId, newest),
     reset: false,
   };
+}
+
+// Farm Statistics PA projection source (Farm Stats PA Migration). A
+// SERVER_AGENT-owned character has no OpenKore worker text log, so the legacy
+// logProjectionSummary() is always empty for it. This reads the authoritative
+// farm session (FARM_SESSION_STARTED / FARM_SESSION_STOPPED, boundary =
+// start_farm -> stop_farm), the authoritative Event Ledger aggregates and the
+// persisted EXP baseline. It never parses a text log, never starts OpenKore and
+// creates no second statistics engine.
+const farmStatsLootItemName = (itemId) => {
+  const name = localizedItemName(Number(itemId));
+  return name || `Item #${Number(itemId) || 0}`;
+};
+
+async function readNativeFarmStats(characterId) {
+  const charId = Number(characterId);
+  if (!Number.isSafeInteger(charId) || charId <= 0) return { available: false };
+  let startRow;
+  let stopRow;
+  let killsRaw;
+  let deathsRaw;
+  let lootRaw;
+  try {
+    startRow = await sql(
+      `SELECT e.event_id,ROUND(UNIX_TIMESTAMP(e.occurred_at)*1000),e.facts,s.status,` +
+        `ROUND(UNIX_TIMESTAMP(s.ended_at)*1000) FROM persistent_life_event e ` +
+        `JOIN persistent_life_session s ON s.session_id=e.session_id ` +
+        `WHERE e.char_id=${charId} AND e.event_type='FARM_SESSION_STARTED' ` +
+        `ORDER BY e.event_id DESC LIMIT 1;`,
+    );
+    const start = (startRow ? startRow.split(/\r?\n/) : []).filter(Boolean)[0];
+    if (!start) return { available: false };
+    const startColumns = start.split('\t');
+    const startId = Number(startColumns[0]);
+    if (!Number.isSafeInteger(startId) || startId <= 0) return { available: false };
+    const startedAt = Number(startColumns[1]);
+    const startFacts = parseLifeEventFacts(startColumns[2]);
+    const sessionStatus = startColumns[3] || '';
+    const sessionEndedAt =
+      startColumns[4] && startColumns[4] !== 'NULL' ? Number(startColumns[4]) : null;
+    stopRow = await sql(
+      `SELECT event_id,ROUND(UNIX_TIMESTAMP(occurred_at)*1000),facts FROM persistent_life_event ` +
+        `WHERE char_id=${charId} AND event_type='FARM_SESSION_STOPPED' AND event_id > ${startId} ` +
+        `ORDER BY event_id ASC LIMIT 1;`,
+    );
+    const stop = (stopRow ? stopRow.split(/\r?\n/) : []).filter(Boolean)[0];
+    let stopId = 0;
+    let stopMs = null;
+    let stopFacts = {};
+    if (stop) {
+      const stopColumns = stop.split('\t');
+      stopId = Number(stopColumns[0]) || 0;
+      stopMs = stopColumns[1] && stopColumns[1] !== 'NULL' ? Number(stopColumns[1]) : null;
+      stopFacts = parseLifeEventFacts(stopColumns[2]);
+    }
+    const upperBound = stopId ? ` AND event_id <= ${stopId}` : '';
+    killsRaw = await sql(
+      `SELECT COUNT(*) FROM persistent_life_event WHERE char_id=${charId} ` +
+        `AND event_type='MONSTER_KILL' AND event_id >= ${startId}${upperBound};`,
+    );
+    deathsRaw = await sql(
+      `SELECT COUNT(*) FROM persistent_life_event WHERE char_id=${charId} ` +
+        `AND event_type='PLAYER_DEATH' AND event_id >= ${startId}${upperBound};`,
+    );
+    lootRaw = await sql(
+      `SELECT CAST(JSON_EXTRACT(facts,'$.itemId') AS UNSIGNED),` +
+        `SUM(CAST(JSON_EXTRACT(facts,'$.amount') AS UNSIGNED)) FROM persistent_life_event ` +
+        `WHERE char_id=${charId} AND event_type='LOOT_ACQUIRED' ` +
+        `AND event_id >= ${startId}${upperBound} GROUP BY 1;`,
+    );
+    const active = sessionStatus === 'ACTIVE' && !stopId;
+    const endedAt = stopMs ?? (sessionStatus === 'ACTIVE' ? null : sessionEndedAt);
+    const items = (lootRaw ? lootRaw.split(/\r?\n/) : [])
+      .filter(Boolean)
+      .map((line) => {
+        const columns = line.split('\t');
+        return {
+          name: farmStatsLootItemName(columns[0]),
+          amount: Number(columns[1]) || 0,
+        };
+      })
+      .filter((item) => item.amount > 0)
+      .sort((left, right) => right.amount - left.amount);
+    return {
+      available: true,
+      active,
+      startedAt: Number.isFinite(startedAt) ? startedAt : null,
+      endedAt: Number.isFinite(endedAt) ? endedAt : null,
+      baseExp: Number(startFacts.baseExp ?? 0),
+      jobExp: Number(startFacts.jobExp ?? 0),
+      endBaseExp: Number.isFinite(Number(stopFacts.baseExp)) ? Number(stopFacts.baseExp) : null,
+      endJobExp: Number.isFinite(Number(stopFacts.jobExp)) ? Number(stopFacts.jobExp) : null,
+      kills: Math.max(0, Number(String(killsRaw).trim()) || 0),
+      deaths: Math.max(0, Number(String(deathsRaw).trim()) || 0),
+      items,
+    };
+  } catch (error) {
+    if (persistentLifeEventSchemaUnavailable(error)) return { available: false };
+    throw error;
+  }
 }
 
 // --- SERVER_AGENT authoritative read model (P2F) ---------------------------
@@ -1659,7 +2183,8 @@ function serverAgentInventoryItems(readModel, jobId = 0) {
       weaponType: '',
       identified: row.identified,
       refine: row.refine,
-      slotCount: Number(resolved?.slots ?? 0),
+      slotCount: Number(resolved?.slots ?? known?.slots ?? 0),
+      equipLocations: resolved?.equipLocations ?? known?.equipLocations ?? [],
       cardIds: row.cardIds,
       aegisName: known?.aegisName ?? null,
       name: localizedItemName(row.itemId, known?.name),
@@ -1755,11 +2280,16 @@ async function currentCharacterLiveSnapshot(account, id, maximumAgeMs) {
   }
   const live = controller.liveStatus;
   if (!live?.available || !live.fresh) return null;
-  const stored = await queryCharacter(account.accountId);
+  // Concurrent read wave: the stored character row, the authoritative read
+  // model and the live dialog are independent reads. Serializing them would
+  // make the rapid minimap poll path pay one Database CLI round trip per step.
+  const [stored, readModel, dialog] = await Promise.all([
+    queryCharacter(account.accountId),
+    readServerAgentReadModel(charId),
+    readServerAgentDialog(charId),
+  ]);
   if (!stored) return null;
   const revision = Number(live.revision ?? 0);
-  const readModel = await readServerAgentReadModel(charId);
-  const dialog = await readServerAgentDialog(charId);
   const characterModel = readModel?.character ?? null;
   const inventoryGeneration = Number(
     characterModel?.inventoryGeneration ?? revision,
@@ -1864,29 +2394,33 @@ async function readCharacterControllerStatus(
   { includeFarmTarget = false, allowFarmTargetFallback = true } = {},
 ) {
   try {
-    const [stateRow, rollout] = await Promise.all([
+    // One concurrent read wave: state, rollout and the live-status view are
+    // independent and each costs one Database CLI round trip. Keeping them in
+    // the same Promise.all keeps the rapid minimap poll path bounded by the
+    // slowest single query instead of the sum of the waves.
+    const [stateRow, rollout, liveStatus, nativeFarm] = await Promise.all([
       readAgentStateRow(charId),
       readPersistentAgentRollout(sql, account.accountId, charId),
+      readPersistentAgentLiveStatusView(charId),
+      readNativeFarmStats(charId),
     ]);
-    const farmTarget =
-      includeFarmTarget && rollout.allowed
-        ? resolveFarmTarget({
-            stateRow,
-            grindTarget: await readGrindTarget(account),
-            allowFarmTargetFallback,
-          })
-        : null;
-    const liveStatus = await readPersistentAgentLiveStatusView(charId);
-    // MOB_SELECTION_REMOVED / NO SILENT FALLBACK: the persisted player-selected
-    // farm map is the ONLY target. There is no canonical-map or default-map
-    // fallback; when it does not resolve, rAthena surfaces the blocker and the
-    // start action stays unavailable.
+    let farmTarget = null;
+    if (includeFarmTarget && rollout.allowed) {
+      const persistedTarget = await readGrindTarget(account);
+      const policyTarget = await ensureDefaultGrindTarget(account, persistedTarget);
+      farmTarget = resolveFarmTarget({
+        stateRow,
+        grindTarget: policyTarget,
+        allowFarmTargetFallback,
+      });
+    }
     return createControllerStatus({
       charId,
       stateRow,
       rollout,
       farmTarget,
       liveStatus,
+      farmRunning: nativeFarm.available ? nativeFarm.active === true : null,
     });
   } catch (error) {
     return createUnavailableControllerStatus(
@@ -1938,14 +2472,46 @@ async function queueCanaryAutomation(account, controller, body) {
     if (currentMap !== targetMap)
       return await queueServerAgentRelocation(account, controller, targetMap);
   }
+  const command = await queueOwnershipCommand(account, charId, {
+    action,
+    expectedRevision: controller.revision,
+    ...buildW1CommandPayload(action, { farmTarget: controller.farmTarget }),
+  });
+  if (action === W1_ACTION.START_FARM || action === W1_ACTION.STOP_FARM)
+    await clearPersistedRelocation(account);
   return {
     executor: SERVER_AGENT_OWNER,
-    command: await queueOwnershipCommand(account, charId, {
-      action,
-      expectedRevision: controller.revision,
-      ...buildW1CommandPayload(action, { farmTarget: controller.farmTarget }),
-    }),
+    command,
   };
+}
+
+function parseNoviceCommandRow(output) {
+  if (!output) return null;
+  const row = output.split('\t');
+  let payload = null;
+  try {
+    payload = JSON.parse(row[2] || '{}');
+  } catch {
+    payload = null;
+  }
+  return {
+    commandId: row[0],
+    action: row[1],
+    payload,
+    status: row[3],
+    reasonCode: row[4] || null,
+  };
+}
+
+async function readLatestNoviceCommand(charId, action) {
+  const output = await sql(
+    `SELECT command_id,action,payload,command_status,COALESCE(reason_code,'') FROM persistent_agent_command WHERE char_id=${Number(charId)} AND action='${escapeSql(action)}' ORDER BY requested_at DESC LIMIT 1;`,
+  );
+  return parseNoviceCommandRow(output);
+}
+
+function commandStatusIsLive(command) {
+  return ['QUEUED', 'ACCEPTED', 'CONFIRMED'].includes(command?.status);
 }
 
 // W4 server-side relocation coordinator.
@@ -1961,10 +2527,218 @@ async function queueCanaryAutomation(account, controller, body) {
 // The browser still sends only `mapId`. The Dashboard never walks the character,
 // never invents waypoints and never overrides ownership/revision CAS.
 const pendingRelocations = new Map();
-const RELOCATION_DEADLINE_MS = 180_000;
+const persistedRelocationFileName = 'relocation-pending.json';
+
+function persistedRelocationPath(accountId) {
+  return join(
+    instancesRoot,
+    instanceId(accountId),
+    persistedRelocationFileName,
+  );
+}
+
+async function writePersistedRelocation(account, targetMap) {
+  await writeJsonAtomic(persistedRelocationPath(account.accountId), {
+    targetMap,
+    createdAt: Date.now(),
+  });
+}
+
+async function readPersistedRelocation(accountId) {
+  try {
+    const value = JSON.parse(
+      await readFile(persistedRelocationPath(accountId), 'utf8'),
+    );
+    return /^[a-z0-9_]{1,31}$/.test(String(value?.targetMap ?? ''))
+      ? { targetMap: String(value.targetMap) }
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+async function clearPersistedRelocation(account) {
+  await unlink(persistedRelocationPath(account.accountId)).catch(() => {});
+}
+
+const persistedRelocationRecoveryRunning = new Set();
+
+// A Dashboard restart must not erase a player-confirmed map change between
+// START_NAVIGATION and the arrival-triggered START_FARM. The intent file is
+// only a durable handoff marker; route resolution and commands remain on the
+// existing coordinator and native command contract.
+async function reconcilePersistedRelocations() {
+  if (isolatedTestMode) return;
+  let rows;
+  try {
+    rows = await sql(
+      "SELECT char_id,account_id,agent_mode FROM persistent_agent_state WHERE control_owner='SERVER_AGENT' AND ownership_state='SERVER_AGENT' AND agent_enabled=1 AND agent_mode='PERSISTENT_IDLE';",
+    );
+  } catch (error) {
+    if (agentStateSchemaUnavailable(error)) return;
+    throw error;
+  }
+  for (const line of String(rows ?? '').split(/\r?\n/)) {
+    if (!line) continue;
+    const [charIdText, accountIdText] = line.split('\t');
+    const charId = Number(charIdText);
+    const accountId = Number(accountIdText);
+    if (!Number.isSafeInteger(charId) || charId <= 0 ||
+        !Number.isSafeInteger(accountId) || accountId <= 0 ||
+        pendingRelocations.has(charId) ||
+        persistedRelocationRecoveryRunning.has(charId))
+      continue;
+    const intent = await readPersistedRelocation(accountId);
+    if (!intent) continue;
+    persistedRelocationRecoveryRunning.add(charId);
+    try {
+      const account = { accountId, characterId: charId };
+      const controller = await readCharacterControllerStatus(account, charId, {
+        includeFarmTarget: false,
+      });
+      if (!controller.available || controller.controller !== SERVER_AGENT_OWNER)
+        continue;
+      const live = controller.liveStatus ?? null;
+      const currentMap = live?.fresh && live.map ? String(live.map) : null;
+      if (!currentMap) continue;
+      if (currentMap === intent.targetMap) {
+        await queueOwnershipCommand(
+          account,
+          charId,
+          { action: 'start_farm', expectedRevision: Number(controller.revision) },
+          {
+            targetMap: intent.targetMap,
+            lootEnabled: true,
+            survivalEnabled: true,
+            deathRecoveryEnabled: true,
+          },
+        );
+        await clearPersistedRelocation(account);
+      } else {
+        await queueServerAgentRelocation(account, controller, intent.targetMap);
+      }
+    } finally {
+      persistedRelocationRecoveryRunning.delete(charId);
+    }
+  }
+}
+// The coordinator deadline is route-aware (relocation-policy.mjs). A flat budget
+// would abandon a multi-map Web relocation before the native navigation runtime
+// (120000 ms per route step) can legitimately arrive, so arrival would never
+// dispatch start_farm.
 
 function relocationAccount(pending) {
   return { accountId: pending.accountId, characterId: pending.charId };
+}
+
+// R2 AUTO_FARM deferred-restore resume. Native (AUTO_FARM_RESTORE_DEFERRED)
+// keeps the authoritative target_map / target_rules and loads PERSISTENT_IDLE
+// when a restart happens off the farm map. This server-side loop returns the
+// character with the SAME canonical relocation coordinator (planWebRelocation
+// via queueServerAgentRelocation) and resumes the ORIGINAL farm intent. It never
+// rewrites the target, never farms the current map, and never plans its own
+// route. Only authoritative deferred intent (owner SERVER_AGENT + mode
+// PERSISTENT_IDLE + a persisted target_map/target_rules pair) is eligible, so
+// ordinary idle characters (target_map cleared by stop_farm) are untouched.
+const deferredFarmResume = new Map(); // charId -> { revision, targetMap, retryAt, attempts }
+const deferredFarmResumeRunning = new Set();
+
+async function reconcileDeferredFarmRestores() {
+  if (isolatedTestMode) return;
+  let rows;
+  try {
+    rows = await sql(
+      "SELECT char_id,account_id,revision,target_map,target_rules FROM persistent_agent_state WHERE control_owner='SERVER_AGENT' AND ownership_state='SERVER_AGENT' AND agent_enabled=1 AND agent_mode='PERSISTENT_IDLE' AND target_map IS NOT NULL AND target_map<>'' AND target_rules IS NOT NULL AND target_rules<>'';",
+    );
+  } catch (error) {
+    if (agentStateSchemaUnavailable(error)) return;
+    throw error;
+  }
+  const seen = new Set();
+  for (const line of String(rows ?? '').split(/\r?\n/)) {
+    if (!line) continue;
+    const parts = line.split('\t');
+    const charId = Number(parts[0]);
+    const accountId = Number(parts[1]);
+    const revision = Number(parts[2]);
+    const targetMap = String(parts[3] ?? '');
+    const targetRules = parts.slice(4).join('\t');
+    if (!Number.isSafeInteger(charId) || charId <= 0 || !targetMap) continue;
+    seen.add(charId);
+    // Stale-intent protection: a changed revision or target means the deferred
+    // intent is no longer the one we observed.
+    const snapshot = deferredFarmResume.get(charId);
+    if (snapshot && (snapshot.revision !== revision || snapshot.targetMap !== targetMap))
+      deferredFarmResume.delete(charId);
+    const state = deferredFarmResume.get(charId);
+    if (state && Date.now() < state.retryAt) continue;
+    // One relocation in flight per character (canonical coordinator + this loop).
+    if (pendingRelocations.has(charId) || deferredFarmResumeRunning.has(charId)) continue;
+    let intent = null;
+    try {
+      intent = JSON.parse(targetRules);
+    } catch {
+      intent = null;
+    }
+    // The persisted rules must still describe this exact target map.
+    if (!intent || String(intent.targetMap ?? '') !== targetMap) continue;
+    deferredFarmResumeRunning.add(charId);
+    try {
+      const account = { accountId, characterId: charId };
+      const controller = await readCharacterControllerStatus(account, charId, {
+        includeFarmTarget: false,
+      });
+      // Player takeover / authority loss -> abort and yield.
+      if (!controller.available || controller.controller !== SERVER_AGENT_OWNER) {
+        deferredFarmResume.delete(charId);
+        continue;
+      }
+      if (Number(controller.revision) !== revision) continue; // wait for a stable snapshot
+      const live = await readPersistentAgentLiveStatusView(charId);
+      const currentMap = live?.fresh && live.map ? String(live.map) : null;
+      if (!currentMap) continue;
+      if (currentMap === targetMap) {
+        // Already home: resume the ORIGINAL intent, no relocation.
+        await queueOwnershipCommand(
+          account,
+          charId,
+          { action: 'start_farm', expectedRevision: revision },
+          {
+            targetMap,
+            lootEnabled: intent.lootEnabled === true,
+            survivalEnabled: intent.survivalEnabled === true,
+            deathRecoveryEnabled: intent.deathRecoveryEnabled === true,
+          },
+        );
+      } else {
+        // Canonical relocation: same resolver + coordinator as a player map pick.
+        await queueServerAgentRelocation(account, controller, targetMap);
+      }
+      deferredFarmResume.set(charId, {
+        revision,
+        targetMap,
+        retryAt: Date.now() + 15000,
+        attempts: 0,
+      });
+    } catch (error) {
+      const attempts = Number(deferredFarmResume.get(charId)?.attempts ?? 0) + 1;
+      const backoff = Math.min(120000, 5000 * 2 ** Math.min(attempts, 5));
+      deferredFarmResume.set(charId, {
+        revision,
+        targetMap,
+        retryAt: Date.now() + backoff,
+        attempts,
+      });
+      console.warn(
+        `WEB_DEFERRED_RESUME_BLOCKED char=${charId} target=${targetMap} attempt=${attempts}: ${error?.message ?? error}`,
+      );
+      if (attempts > 6) deferredFarmResume.delete(charId); // bounded retry, never infinite
+    } finally {
+      deferredFarmResumeRunning.delete(charId);
+    }
+  }
+  for (const charId of [...deferredFarmResume.keys()])
+    if (!seen.has(charId)) deferredFarmResume.delete(charId);
 }
 
 async function reconcileRelocations() {
@@ -1972,11 +2746,13 @@ async function reconcileRelocations() {
     if (pending.busy) continue;
     if (Date.now() > pending.deadline) {
       pendingRelocations.delete(charId);
+      await clearPersistedRelocation(relocationAccount(pending));
       console.warn(`WEB_RELOCATION_TIMEOUT char=${charId} stage=${pending.stage}`);
       continue;
     }
     pending.busy = true;
     try {
+      const account = relocationAccount(pending);
       const [stateRow, live] = await Promise.all([
         readAgentStateRow(charId),
         readPersistentAgentLiveStatusView(charId),
@@ -1986,9 +2762,9 @@ async function reconcileRelocations() {
         String(stateRow.controlOwner ?? '') !== SERVER_AGENT_OWNER
       ) {
         pendingRelocations.delete(charId);
+        await clearPersistedRelocation(account);
         continue;
       }
-      const account = relocationAccount(pending);
       const mode = String(stateRow.agentMode ?? '');
       const currentMap = live?.fresh && live.map ? String(live.map) : null;
       const revision = Number(stateRow.revision);
@@ -2017,6 +2793,7 @@ async function reconcileRelocations() {
             deathRecoveryEnabled: true,
           },
         );
+        await clearPersistedRelocation(account);
         pending.stage = 'WAIT_FARM';
         pending.attempts = 0;
       } else if (pending.stage === 'WAIT_FARM') {
@@ -2089,7 +2866,10 @@ async function reconcileRelocations() {
       console.warn(
         `WEB_RELOCATION_STEP_FAILED char=${charId} stage=${pending.stage} attempt=${pending.attempts}: ${error?.message ?? error}`,
       );
-      if (pending.attempts > 6) pendingRelocations.delete(charId);
+      if (pending.attempts > 6) {
+        pendingRelocations.delete(charId);
+        await clearPersistedRelocation(relocationAccount(pending));
+      }
     } finally {
       pending.busy = false;
     }
@@ -2132,75 +2912,55 @@ async function queueServerAgentRelocation(account, controller, requestedMapId) {
     mapId,
     name: map.name ?? mapId,
     levelRange: map.levelRange ?? null,
+    source: FARM_MAP_SOURCE.PLAYER_OVERRIDE,
     updatedAt: Date.now(),
   };
   // P5 write safety: starting AUTO_FARM must not rewrite grind-target.json.
   // The file is written only when the resolved target actually differs from the
   // persisted one (a genuine user change or first selection), never merely
-  // because start/target resolution ran.
+  // because start/target resolution ran. A blocked selection never persists:
+  // an unreachable map must not overwrite the last good farm target.
   const persistedGrindTarget = await readGrindTarget(account);
   const targetChanged =
     !persistedGrindTarget
-    || String(persistedGrindTarget.mapId ?? '') !== mapId;
-  if (targetChanged) {
+    || String(persistedGrindTarget.mapId ?? '') !== mapId
+    || persistedGrindTarget.source !== FARM_MAP_SOURCE.PLAYER_OVERRIDE;
+  const persistGrindTarget = async () => {
+    if (!targetChanged) return;
     await writeJsonAtomic(
       join(instancesRoot, instanceId(account.accountId), 'grind-target.json'),
       grindTarget,
     );
     observationConfigCache.delete(`grind:${Number(account.accountId)}`);
-  }
+  };
 
   if (!plan.route) {
     if (plan.reason !== 'already_at_destination') {
-      // CP-R2: classify cross-region movement with the restored last-good
-      // planner so an unreachable destination is an explicit blocker
-      // (farm_target_invalid / hub_unreachable / butterfly_missing /
-      // service_destination_unavailable / ...) instead of a blanket
-      // route_unavailable. DIRECT plans are unaffected (handled above).
+      // The canonical rAthena warp resolver above found no walking route. The
+      // restored last-good planner can still return a plan, but every such plan
+      // needs either a Kafra/NPC service transfer (production disabled) or a
+      // pure walking route on the legacy portal table that the canonical
+      // topology rejects. Scheduling it would later be dropped by
+      // reconcileRelocations() with only a console.warn, so a valid but
+      // unreachable farm map is an explicit, player-visible blocker here.
       const relocationPlan = planRelocation({
         currentMap,
         target: { targetMap: mapId, source: 'selected' },
         graph: physicalMapGraph,
         mapSummary: map,
       });
-      if (relocationPlan.policy === RELOCATION_POLICY.UNREACHABLE)
-        throw new HttpError(409, relocationPlan.reason ?? 'farm_target_invalid');
-      // Reachable cross-region plan (walk to hub -> Kafra save -> Butterfly
-      // Wing 602 -> Kafra dialogue transfer -> walk). Executed stage by stage
-      // by the existing reconcile loop through EXISTING contract actions only.
-      const farmActive =
-        Boolean(controller.agentMode) && controller.agentMode !== 'PERSISTENT_IDLE';
-      let stopCommand = null;
-      if (farmActive) {
-        stopCommand = await queueOwnershipCommand(account, charId, {
-          action: 'stop_farm',
-          expectedRevision: Number(controller.revision),
-        });
-      }
-      pendingRelocations.set(charId, {
-        accountId: Number(account.accountId),
-        charId,
-        targetMap: mapId,
-        stage: 'RELOCATION',
-        relocationPlan,
-        relocationProgress: createRelocationProgress(),
-        kafraContext: kafraContextForPlan(relocationPlan),
-        commandIndexByStage: {},
-        commandPending: false,
-        commandRevision: 0,
-        attempts: 0,
-        busy: false,
-        deadline: Date.now() + RELOCATION_DEADLINE_MS,
-      });
-      return {
-        policy: relocationPlan.policy,
-        route: null,
-        targetMap: mapId,
-        command: stopCommand,
-        grindTarget,
-      };
+      console.warn(
+        `WEB_RELOCATION_UNREACHABLE char=${charId} map=${mapId} reason=${
+          relocationPlan.policy === RELOCATION_POLICY.UNREACHABLE
+            ? relocationPlan.reason ?? 'unknown'
+            : relocationPlan.policy
+        }`,
+      );
+      throw new HttpError(409, RELOCATION_REASON.FARM_ROUTE_UNAVAILABLE);
     }
     pendingRelocations.delete(charId);
+    await clearPersistedRelocation(account);
+    await persistGrindTarget();
     const command = await queueOwnershipCommand(
       account,
       charId,
@@ -2222,6 +2982,8 @@ async function queueServerAgentRelocation(account, controller, requestedMapId) {
     };
   }
 
+  await persistGrindTarget();
+  await writePersistedRelocation(account, mapId);
   const farmActive =
     Boolean(controller.agentMode) && controller.agentMode !== 'PERSISTENT_IDLE';
   let command = null;
@@ -2239,7 +3001,12 @@ async function queueServerAgentRelocation(account, controller, requestedMapId) {
     stage: 'WAIT_IDLE',
     attempts: 0,
     busy: false,
-    deadline: Date.now() + RELOCATION_DEADLINE_MS,
+    // Use the ALREADY RESOLVED route length; never re-plan a second route.
+    deadline:
+      Date.now() +
+      coordinatorDeadlineMsForRouteSteps(
+        Array.isArray(plan.route) ? plan.route.length : 1,
+      ),
   });
   return {
     policy: plan.policy,
@@ -2463,7 +3230,7 @@ async function queueOwnershipCommand(
     payloadObject = {
       taskId,
       sequenceId,
-      steps: body.steps.map(normalizeQuestSequenceStep),
+      steps: body.steps.map((step) => normalizeQuestSequenceStep(step, 0)),
     };
   } else if (action === 'run_server_command') {
     // P2I generic native quest/job execution. The Web supplies only the bound
@@ -2512,6 +3279,42 @@ async function queueOwnershipCommand(
       payloadObject.destinationMap = destinationMap;
       payloadObject.destinationX = destinationX;
       payloadObject.destinationY = destinationY;
+    }
+  }
+  // GLOBAL_SUPPLY generic relocation delivery: resolve the canonical supply legs
+  // with the SAME server-side resolver used by the Player Web start_navigation
+  // path and deliver them on the start_farm command. The farm map is only the
+  // origin; there is no per-farm route table and no second planner. Farming on
+  // the service map itself needs no farm-origin leg. A missing service leg is an
+  // explicit blocker because Native requires it after authoritative Save Point.
+  if (action === 'start_farm' && payloadObject.targetMap) {
+    const farmMap = String(payloadObject.targetMap);
+    const graph = await serverAgentWarpGraph();
+    const savePoint = await readCharacterSavePoint(account.accountId);
+    const supplyServiceRoute = savePoint
+      ? buildTerminalRoute(
+          graph,
+          savePoint.map,
+          SUPPLY_SERVICE_MAP,
+          SUPPLY_SERVICE_X,
+          SUPPLY_SERVICE_Y,
+        )
+      : null;
+    if (!supplyServiceRoute)
+      throw new HttpError(409, 'supply_route_unavailable');
+    payloadObject.supplyServiceRoute = supplyServiceRoute;
+    if (farmMap !== SUPPLY_SERVICE_MAP) {
+      const outbound = planWebRelocation(graph, farmMap, SUPPLY_SERVICE_MAP);
+      const inbound = planWebRelocation(graph, SUPPLY_SERVICE_MAP, farmMap);
+      if (!outbound?.route || !inbound?.route)
+        throw new HttpError(409, 'supply_route_unavailable');
+      const supplyRouteOut = outbound.route.map((step, index) =>
+        index === outbound.route.length - 1 && !step.portalTo && step.map === SUPPLY_SERVICE_MAP
+          ? { ...step, x: SUPPLY_SERVICE_X, y: SUPPLY_SERVICE_Y }
+          : step,
+      );
+      payloadObject.supplyRouteOut = supplyRouteOut;
+      payloadObject.supplyRouteBack = inbound.route;
     }
   }
   const payload = JSON.stringify(payloadObject);
@@ -2570,7 +3373,7 @@ async function sendQuestCommitCommand({ identity, command }) {
     !controller.available &&
     controller.unavailableReason === 'agent_status_unavailable'
   )
-    throw new HttpError(503, 'Server Agent 狀態暫時無法讀取，已停止操作以保護角色');
+    throw new HttpError(503, '系統狀態暫時無法讀取，已停止操作以保護角色');
   await queueCharacterCommand(
     { accountId: Number(identity.accountId) },
     'quest_server_command',
@@ -3074,11 +3877,13 @@ function publicErrorMessage(error) {
     'prerequisite_incomplete',
     'already_completed',
     'route_failed',
+    'farm_route_unavailable',
     'npc_failed',
     'npc_no_progress',
     'target_unresolved',
     'inventory_full',
     'command_rejected',
+    'nothing_to_stop',
     'ownership_conflict',
     'stale_revision',
     'already_owned',
@@ -3163,6 +3968,21 @@ function requestBinary(request, maxBytes) {
   });
 }
 
+// Minimal low-frequency Web-presence heartbeat (throttled to 30s/account).
+// Reuses the existing web_account_activity table so Ops can show a real
+// "Web 在線 / Web 離線 · N 前" instead of treating an unexpired session as online.
+const webActivityWriteAt = new Map();
+function noteWebActivity(accountId) {
+  const key = Number(accountId);
+  if (!Number.isFinite(key) || key <= 0) return;
+  const now = Date.now();
+  if ((webActivityWriteAt.get(key) ?? 0) > now - 30_000) return;
+  webActivityWriteAt.set(key, now);
+  sql(
+    `UPDATE web_account_activity SET last_web_activity_at=${now},updated_at=${now},last_presence_state='ONLINE',presence_updated_at=${now} WHERE account_id=${key};`,
+  ).catch(() => {});
+}
+
 async function sessionAccount(request) {
   const token = cookie(request, 'ro_session');
   if (!token) return null;
@@ -3193,8 +4013,15 @@ async function sessionAccount(request) {
     jobLevel: Number(row[12] ?? 1),
   };
   sessionCache.set(hash, { account, expiresAt: Number(row[8]) });
+  noteWebActivity(account.accountId);
   return account;
 }
+
+// C6: Server Ops / Observatory authorization is owned by the OUTER security
+// boundary (reverse proxy / admin-only routing / local control boundary). This
+// backend deliberately performs NO second account-level authorization layer.
+// `web_account_roles` (migration 010) is UNUSED / NON-AUTHORITATIVE at runtime;
+// schema cleanup, if any, is a separate migration.
 
 async function loginOrRegister(username, password, sex, registrationClient) {
   if (!accountPattern.test(username))
@@ -3611,8 +4438,25 @@ async function withMapPlayerCount(live) {
   return { ...live, mapPlayerCount: await queryMapPlayerCount(live.map) };
 }
 
+// A SERVER_AGENT-owned character has no OpenKore worker text log, and the
+// combat SSE frame loader (loadCombatSseFrame) reads only that text-log
+// projection. The native Event Ledger is delivered through /api/events
+// polling, so reporting SSE as ineligible for SERVER_AGENT characters keeps
+// the browser on the last-good native combat-log path instead of an empty
+// SSE stream. Non-SERVER_AGENT characters keep the rollout decision.
+async function combatSseStateForAccount(account, snapshot) {
+  const base = await combatSseRollout.state(account?.characterId);
+  const characterId = Number(account?.characterId);
+  const serverAgentControlled =
+    snapshot?.serverAgentReadModel === true ||
+    (Number.isSafeInteger(characterId) &&
+      characterId > 0 &&
+      (await characterIsServerAgentControlled(characterId)));
+  return gateCombatSseForServerAgent(base, serverAgentControlled);
+}
+
 async function combatStreamState(account, session, snapshot) {
-  const rollout = await combatSseRollout.state(account?.characterId);
+  const rollout = await combatSseStateForAccount(account, snapshot);
   return {
     ...rollout,
     endpoint: '/api/combat-stream',
@@ -4229,6 +5073,55 @@ async function queryOnboardingProgress(charId) {
   };
 }
 
+// Native CP2/CP3 Quest Sequence projection (read-only). Web consumes it; it
+// never executes. The tables arrive with migration 011, so until then this
+// honestly reports unavailable instead of fabricating progress.
+async function readQuestSequenceProjection(charId) {
+  const id = Number(charId);
+  const tableCount = Number(
+    (await sql(
+      `SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_name IN ('persistent_agent_live_quest_sequence','persistent_agent_quest_checkpoint');`,
+    )) || 0,
+  );
+  if (tableCount < 2)
+    return { available: false, reason: 'migration_011_pending', projection: null, checkpoint: null };
+  let projection = null;
+  const rows = await sql(
+    `SELECT sequence_id,root_step_index,step_index,frame_depth,status,COALESCE(blocked_reason,''),checkpoint_at,last_transition_at,ROUND(TIMESTAMPDIFF(MICROSECOND,updated_at,CURRENT_TIMESTAMP(3))/1000) FROM persistent_agent_live_quest_sequence WHERE char_id=${id} LIMIT 1;`,
+  );
+  if (rows) {
+    const [
+      sequenceId, rootStepIndex, stepIndex, frameDepth, status, blockedReason,
+      checkpointAt, lastTransitionAt, ageMs,
+    ] = rows.split('\t');
+    projection = {
+      sequenceId,
+      rootStepIndex: Number(rootStepIndex),
+      stepIndex: Number(stepIndex),
+      frameDepth: Number(frameDepth),
+      status,
+      blockedReason: blockedReason || null,
+      checkpointAt: Number(checkpointAt) || null,
+      lastTransitionAt: Number(lastTransitionAt) || null,
+      ageMs: Number(ageMs) || 0,
+    };
+  }
+  let checkpoint = null;
+  const checkpointRows = await sql(
+    `SELECT sequence_id,status,COALESCE(blocked_reason,''),updated_at FROM persistent_agent_quest_checkpoint WHERE char_id=${id} LIMIT 1;`,
+  );
+  if (checkpointRows) {
+    const [sequenceId, status, blockedReason, updatedAt] = checkpointRows.split('\t');
+    checkpoint = {
+      sequenceId,
+      status,
+      blockedReason: blockedReason || null,
+      updatedAt,
+    };
+  }
+  return { available: true, projection, checkpoint };
+}
+
 const edenEquipment12Quests = Object.freeze({
   7128: {
     objective: '前往夢羅克南東方綠洲',
@@ -4688,11 +5581,18 @@ const inventoryCatalog = {
 };
 function indexedCatalogEntry(itemId) {
   const resolved = resolveItemAsset(itemId);
-  if (resolved.assetStatus === 'missing') return null;
+  // Classification comes from the authoritative rAthena equipment index, which
+  // also covers items that have no asset-verified icon yet. Only fully unknown
+  // items (no classification and no asset) are treated as absent.
+  const classified =
+    resolved.category === 'equipment' || resolved.equipment === true;
+  if (resolved.assetStatus === 'missing' && !classified) return null;
   return {
     aegisName: resolved.aegisName ?? null,
     name: resolved.name,
-    category: resolved.category ?? 'etc',
+    category: resolved.category ?? (classified ? 'equipment' : 'etc'),
+    slots: Number(resolved.slots ?? 0),
+    equipLocations: resolved.equipLocations ?? [],
   };
 }
 function catalogEntry(itemId) {
@@ -5291,7 +6191,7 @@ async function assertNotServerAgentOpenKoreFallback(account, charId, code) {
     !controller.available &&
     controller.unavailableReason === 'agent_status_unavailable'
   )
-    throw new HttpError(503, 'Server Agent 狀態暫時無法讀取，已停止操作以保護角色');
+    throw new HttpError(503, '系統狀態暫時無法讀取，已停止操作以保護角色');
 }
 
 async function queueJobChangeAction(account, input) {
@@ -5350,7 +6250,7 @@ async function queueJobChangeAction(account, input) {
     !controller.available &&
     controller.unavailableReason === 'agent_status_unavailable'
   )
-    throw new HttpError(503, 'Server Agent 狀態暫時無法讀取，已停止操作以保護角色');
+    throw new HttpError(503, '系統狀態暫時無法讀取，已停止操作以保護角色');
 
   // P2-OPENKORE-EXIT-MAINLINE: normal production no longer writes OpenKore .cmd
   // for first-job NPC route/talk/dialog. Legacy OPENKORE controllers get a
@@ -5486,6 +6386,213 @@ async function queueServerAgentJobChange(account, { action, job, choice, snapsho
 async function queueOnboardingAdvance(account) {
   if (!account.characterId) throw new Error('請先建立角色');
   const charId = Number(account.characterId);
+  const [character, progress, payload, sequenceProjection] = await Promise.all([
+    queryCharacter(account.accountId),
+    queryOnboardingProgress(charId),
+    Promise.resolve().then(() => noviceOnboardingPayload()),
+    readQuestSequenceProjection(charId),
+  ]);
+  if (!character) throw new Error('找不到角色');
+  if (Number(character.classId) !== 0 || progress.graduated)
+    throw new HttpError(409, 'already_completed');
+  const controller = await readCharacterControllerStatus(account, charId, {
+    includeFarmTarget: false,
+  });
+  if (!controller.available || controller.controller !== SERVER_AGENT_OWNER)
+    throw new HttpError(409, 'server_agent_required');
+  const stateRow = await readAgentStateRow(charId);
+  if (!stateRow) throw new HttpError(409, 'agent_state_unavailable');
+  const checkpoint = sequenceProjection.available
+    ? sequenceProjection.checkpoint
+    : null;
+  if (checkpoint?.sequenceId === payload.sequenceId)
+    return {
+      executor: 'SERVER_AGENT',
+      source: 'persistent_agent',
+      resumed: true,
+      checkpoint: checkpoint.status,
+      sequenceId: payload.sequenceId,
+      revision: stateRow.revision,
+    };
+  const liveStatus = controller.liveStatus;
+  const authoritativeMap = liveStatus?.fresh && liveStatus.map
+    ? String(controller.liveStatus.map)
+    : '';
+  const authoritativeX = liveStatus?.fresh ? Number(liveStatus.x) : null;
+  const authoritativeY = liveStatus?.fresh ? Number(liveStatus.y) : null;
+  const spawnEntry = resolveNoviceSpawnEntry({
+    spawnMap: authoritativeMap,
+    sequenceId: payload.sequenceId,
+    s00StepIndex: 0,
+    s00Map: payload.steps[0]?.map,
+  });
+  if (spawnEntry.status !== 'PASS')
+    throw new HttpError(409, 'novice_spawn_unsupported');
+  const normalization = decideNormalizationAction({
+    authoritativeMap,
+    spawnX: authoritativeX,
+    spawnY: authoritativeY,
+    sequenceId: payload.sequenceId,
+    s00StepIndex: 0,
+    s00Map: payload.steps[0]?.map,
+  });
+  if (normalization.action === 'FAIL_CLOSED')
+    throw new HttpError(409, 'novice_spawn_unsupported');
+  if (normalization.action === 'WAIT_FOR_MAP')
+    return {
+      executor: 'SERVER_AGENT',
+      source: 'persistent_agent',
+      normalization: 'WAIT_FOR_MAP',
+      normalizationMap: 'iz_int',
+      authoritativeMap,
+      sequenceId: payload.sequenceId,
+      revision: stateRow.revision,
+    };
+  if (
+    controller.agentMode === 'AUTO_QUEST' &&
+    controller.targetRules?.sequenceId === payload.sequenceId
+  )
+    return {
+      executor: 'SERVER_AGENT',
+      source: 'persistent_agent',
+      resumed: true,
+      sequenceId: payload.sequenceId,
+      revision: stateRow.revision,
+    };
+  if (normalization.action === 'S00') {
+    const existingSequence = await readLatestNoviceCommand(
+      charId,
+      'start_quest_sequence',
+    );
+    if (
+      existingSequence?.payload?.sequenceId === payload.sequenceId &&
+      commandStatusIsLive(existingSequence)
+    )
+      return {
+        executor: 'SERVER_AGENT',
+        source: 'persistent_agent',
+        resumed: true,
+        sequenceId: payload.sequenceId,
+        command: existingSequence.commandId,
+        revision: stateRow.revision,
+      };
+    if (
+      existingSequence?.payload?.sequenceId === payload.sequenceId &&
+      existingSequence.status !== 'REJECTED'
+    )
+      throw new HttpError(409, 'command_rejected');
+    if (controller.agentMode !== 'PERSISTENT_IDLE')
+      throw new HttpError(409, 'command_rejected');
+    const command = await queueOwnershipCommand(account, charId, {
+      action: 'start_quest_sequence',
+      taskId: payload.taskId,
+      sequenceId: payload.sequenceId,
+      steps: payload.steps,
+      expectedRevision: Number(stateRow.revision),
+    });
+    return {
+      executor: 'SERVER_AGENT',
+      source: 'persistent_agent',
+      sequenceId: payload.sequenceId,
+      command: command.commandId,
+    };
+  }
+  if (controller.agentMode !== 'PERSISTENT_IDLE')
+    throw new HttpError(409, 'command_rejected');
+  const route = normalization.route;
+  const existingNavigation = await readLatestNoviceCommand(
+    charId,
+    'start_navigation',
+  );
+  const existingRoute = existingNavigation?.payload?.route;
+  const sameRoute = JSON.stringify(existingRoute) === JSON.stringify(route);
+  if (sameRoute && commandStatusIsLive(existingNavigation))
+    return {
+      executor: 'SERVER_AGENT',
+      source: 'persistent_agent',
+      normalization:
+        normalization.action === 'SECOND_LEG'
+          ? 'SECOND_LEG_ALREADY_QUEUED'
+          : 'FIRST_LEG_ALREADY_QUEUED',
+      normalizationMap: 'iz_int',
+      authoritativeMap,
+      sequenceId: payload.sequenceId,
+      command: existingNavigation.commandId,
+      revision: stateRow.revision,
+    };
+  if (sameRoute && existingNavigation.status !== 'REJECTED')
+    throw new HttpError(409, 'command_rejected');
+  if (sameRoute && existingNavigation.status === 'REJECTED')
+    throw new HttpError(409, 'command_rejected');
+  if (normalization.action === 'FIRST_LEG' || normalization.action === 'SECOND_LEG') {
+    const navigation = await queueOwnershipCommand(account, charId, {
+      action: 'start_navigation',
+      route,
+      expectedRevision: Number(stateRow.revision),
+    });
+    return {
+      executor: 'SERVER_AGENT',
+      source: 'persistent_agent',
+      normalization:
+        normalization.action === 'SECOND_LEG'
+          ? 'SECOND_LEG_QUEUED'
+          : 'FIRST_LEG_QUEUED',
+      normalizationMap: 'iz_int',
+      authoritativeMap,
+      sequenceId: payload.sequenceId,
+      command: navigation.commandId,
+    };
+  }
+  throw new HttpError(409, 'novice_spawn_unsupported');
+}
+
+// Fresh SERVER_AGENT Novices must continue onboarding after a navigation
+// command arrives. The native runtime owns movement and map authority; this
+// reconciliation only re-evaluates the existing idempotent Web transition.
+const noviceOnboardingReconcileRunning = new Set();
+
+async function reconcileNoviceOnboarding() {
+  if (isolatedTestMode) return;
+  let rows;
+  try {
+    rows = await sql(
+      "SELECT s.char_id,s.account_id FROM persistent_agent_state s JOIN `char` c ON c.char_id=s.char_id LEFT JOIN char_reg_str j ON j.char_id=c.char_id AND j.`key`='terminal_target_job$' AND j.`index`=0 WHERE s.control_owner='SERVER_AGENT' AND s.ownership_state='SERVER_AGENT' AND s.agent_enabled=1 AND s.agent_mode='PERSISTENT_IDLE' AND c.class=0 AND COALESCE(j.value,'')<>'';",
+    );
+  } catch (error) {
+    if (agentStateSchemaUnavailable(error)) return;
+    throw error;
+  }
+  for (const line of String(rows ?? '').split(/\r?\n/)) {
+    if (!line) continue;
+    const [charIdText, accountIdText] = line.split('\t');
+    const charId = Number(charIdText);
+    const accountId = Number(accountIdText);
+    if (!Number.isSafeInteger(charId) || charId <= 0 ||
+        !Number.isSafeInteger(accountId) || accountId <= 0 ||
+        noviceOnboardingReconcileRunning.has(charId))
+      continue;
+    noviceOnboardingReconcileRunning.add(charId);
+    try {
+      await queueOnboardingAdvance({ accountId, characterId: charId });
+    } catch (error) {
+      // Eligibility and in-flight command states are expected while the
+      // authoritative runtime is moving. The next bounded tick retries.
+      if (!(error instanceof HttpError) ||
+          !['already_completed', 'server_agent_required', 'agent_state_unavailable',
+            'command_rejected', 'novice_spawn_unsupported'].includes(error.message))
+        console.warn(`NOVICE_ONBOARDING_RECONCILE_FAILED: ${error?.message ?? error}`);
+    } finally {
+      noviceOnboardingReconcileRunning.delete(charId);
+    }
+  }
+}
+
+// Authoritative auto first-job graduation. Same protected native command path as
+// advance: the Web only expresses intent; the bound rAthena NPC command owns the
+// `jobchange` and the terminal_target_job$ mapping. Idempotent by native state.
+async function queueOnboardingGraduate(account) {
+  if (!account.characterId) throw new Error('請先建立角色');
+  const charId = Number(account.characterId);
   const [character, progress] = await Promise.all([
     queryCharacter(account.accountId),
     queryOnboardingProgress(charId),
@@ -5502,7 +6609,7 @@ async function queueOnboardingAdvance(account) {
   if (!stateRow) throw new HttpError(409, 'agent_state_unavailable');
   const command = await queueOwnershipCommand(account, charId, {
     action: 'run_server_command',
-    command: 'terminal_onboarding_advance',
+    command: 'terminal_academy_graduate',
     expectedRevision: Number(stateRow.revision),
   });
   return {
@@ -5558,7 +6665,7 @@ async function queueOnboardingResume(account, questId) {
     !controller.available &&
     controller.unavailableReason === 'agent_status_unavailable'
   )
-    throw new HttpError(503, 'Server Agent 狀態暫時無法讀取，已停止操作以保護角色');
+    throw new HttpError(503, '系統狀態暫時無法讀取，已停止操作以保護角色');
 
   await setAutomationIntent(account.accountId, true);
   const id = instanceId(account.accountId);
@@ -5627,7 +6734,7 @@ async function queueEdenEnrollment(account) {
     !controller.available &&
     controller.unavailableReason === 'agent_status_unavailable'
   )
-    throw new HttpError(503, 'Server Agent 狀態暫時無法讀取，已停止操作以保護角色');
+    throw new HttpError(503, '系統狀態暫時無法讀取，已停止操作以保護角色');
 
   await setAutomationIntent(account.accountId, true);
   const id = instanceId(account.accountId);
@@ -6025,22 +7132,10 @@ async function withStatCommandLock(characterId, operation) {
     if (statCommandLocks.get(key) === current) statCommandLocks.delete(key);
   }
 }
-async function waitForCharacterCommandResult(account, commandId) {
-  const resultPath = join(
-      instancesRoot,
-      instanceId(account.accountId),
-      'commands',
-      `${commandId}.result`,
-    ),
-    deadline = Date.now() + statCommandConfirmationTimeoutMs;
-  while (Date.now() < deadline) {
-    try {
-      return JSON.parse(await readFile(resultPath, 'utf8'));
-    } catch (error) {
-      if (error?.code !== 'ENOENT' && !(error instanceof SyntaxError)) throw error;
-    }
-    await new Promise((resolve) => setTimeout(resolve, 25));
-  }
+async function waitForCharacterCommandResult() {
+  // C4: the `.result` filesystem transport has been removed. Command outcomes
+  // are confirmed through the canonical persistent_agent_command queue
+  // (getOwnershipCommand), never through a file.
   return null;
 }
 async function waitForStatDomainChange(
@@ -6079,55 +7174,11 @@ function rejectedStatResult(commandId, statName, reason, state) {
     statState: state,
   };
 }
-async function queueCharacterCommand(account, action, argument, options = {}) {
-  // P2-OPENKORE-EXIT-MAINLINE (row 39): the OpenKore `.cmd`/`.result` file
-  // transport is production-retired. SERVER_AGENT uses `persistent_agent_command`;
-  // every production caller of this producer fails closed. Only authorized
-  // isolated/closed-test diagnostics may write `.cmd`.
-  if (runtimeMode !== 'isolated-test')
-    throw new HttpError(409, 'LEGACY_OPENKORE_MIGRATION_REQUIRED');
-  const commandId = options.commandId || randomUUID(),
-    commandDir = join(instancesRoot, instanceId(account.accountId), 'commands'),
-    pendingPath = join(commandDir, `${commandId}.pending`),
-    commandPath = join(commandDir, `${commandId}.cmd`),
-    resultPath = join(commandDir, `${commandId}.result`),
-    contents = `${action}\n${argument}\n`;
-  await mkdir(commandDir, { recursive: true });
-  for (const existingPath of [resultPath, commandPath, pendingPath]) {
-    try {
-      await readFile(existingPath);
-      return {
-        commandId,
-        accepted: true,
-        duplicate: true,
-        expectedRevision: options.expectedRevision ?? null,
-      };
-    } catch (error) {
-      if (error?.code !== 'ENOENT') throw error;
-    }
-  }
-  try {
-    await writeFile(pendingPath, contents, {
-      encoding: 'utf8',
-      flag: 'wx',
-    });
-  } catch (error) {
-    if (error?.code === 'EEXIST')
-      return {
-        commandId,
-        accepted: true,
-        duplicate: true,
-        expectedRevision: options.expectedRevision ?? null,
-      };
-    throw error;
-  }
-  await rename(pendingPath, commandPath);
-  return {
-    commandId,
-    accepted: true,
-    duplicate: false,
-    expectedRevision: options.expectedRevision ?? null,
-  };
+async function queueCharacterCommand() {
+  // C4 / CMD_RESULT_TRANSPORT_PRODUCTION_REACHABLE = NO: the OpenKore
+  // `.cmd`/`.result` filesystem transport has been physically removed from the
+  // production Web backend. SERVER_AGENT uses `persistent_agent_command`.
+  throw new HttpError(409, 'LEGACY_OPENKORE_MIGRATION_REQUIRED');
 }
 
 async function readGrindTarget(account) {
@@ -6154,6 +7205,12 @@ async function readGrindTarget(account) {
             name: String(value.name ?? value.mapId),
             levelRange: value.levelRange ?? null,
             updatedAt: Number(value.updatedAt ?? 0),
+            source: Object.values(FARM_MAP_SOURCE).includes(String(value.source ?? ''))
+              ? String(value.source)
+              : null,
+            legacyUnclassified: !Object.values(FARM_MAP_SOURCE).includes(
+              String(value.source ?? ''),
+            ),
           }
         : null;
     } catch {
@@ -6323,6 +7380,7 @@ async function saveGrindTarget(account, requestedMapId) {
     mapId,
     name: map.name,
     levelRange: map.levelRange,
+    source: FARM_MAP_SOURCE.PLAYER_OVERRIDE,
     updatedAt: Date.now(),
   };
   const previousTarget = await readGrindTarget(account),
@@ -7054,42 +8112,17 @@ async function publicWorldHealth() {
   }
 }
 
-async function ensureWorker(account) {
-  const id = instanceId(account.accountId),
-    folder = join(instancesRoot, id);
-  const credentials = await accountCredentials(account.accountId);
-  const character = await queryCharacter(account.accountId);
-  const savedGrindTarget = await readGrindTarget(account);
-  const recommendedMap =
-    savedGrindTarget?.mapId ||
-    (Number(character?.baseLevel) >= 26
-      ? 'pay_dun00'
-      : Number(character?.baseLevel) >= 12
-        ? 'moc_fild11'
-        : 'prt_fild08');
-  await execFileAsync(
-    'powershell.exe',
-    [
-      '-NoProfile',
-      '-ExecutionPolicy',
-      'Bypass',
-      '-File',
-      join(root, 'ops', 'ro-stack', 'openkore-instance.ps1'),
-      'create',
-      '-InstanceId',
-      id,
-      '-Username',
-      credentials.username,
-      '-Password',
-      credentials.password,
-      '-CharacterSlot',
-      '0',
-      '-LockMap',
-      recommendedMap,
-    ],
-    { cwd: root, windowsHide: true },
-  );
-  return id;
+// OPENKORE_WEB_REACHABLE = NO.
+// The production Web backend no longer has ANY capability to create, spawn,
+// hand off to, or return an OpenKore worker. The `openkore-instance.ps1`
+// invocation and the `start.exe` spawn were physically deleted from this file.
+// Historical scripts/plugins/patches remain on disk as archive only and are
+// unreachable from a request. Legacy callers fail closed (no silent migration).
+function openKoreWebControlRetired() {
+  throw new HttpError(409, 'LEGACY_OPENKORE_MIGRATION_REQUIRED');
+}
+async function ensureWorker() {
+  openKoreWebControlRetired();
 }
 function isolatedWorkerLaunchRejection(account) {
   return isolatedWorkerStartRejection({
@@ -7113,102 +8146,14 @@ function authorizeWorkerLaunch(account) {
   console.error(error.message);
   throw error;
 }
-const workerStartPromises = new Map();
-async function startWorker(account) {
-  // P2-OPENKORE-EXIT-MAINLINE choke point: no production path may convert a
-  // SERVER_AGENT (or unreadable) controller into an OpenKore worker. Only an
-  // explicit legacy OPENKORE controller may reach the worker spawn below.
-  const guardCharId = Number(account?.characterId);
-  if (Number.isSafeInteger(guardCharId) && guardCharId > 0) {
-    const guardController = await readCharacterControllerStatus(account, guardCharId, {
-      includeFarmTarget: false,
-    });
-    if (guardController.available && guardController.controller === SERVER_AGENT_OWNER)
-      throw new HttpError(501, 'SERVER_AGENT_CAPABILITY_BLOCKED');
-    if (!guardController.available)
-      throw new HttpError(503, guardController.unavailableReason ?? 'agent_status_unavailable');
-  }
-  // P2-OPENKORE-EXIT-MAINLINE: normal production may never spawn an OpenKore
-  // worker for any character, legacy controller state included. Only an
-  // explicitly authorized isolated/closed-test runtime may reach the spawn below
-  // (further constrained by authorizeWorkerLaunch's explicit allowlist).
-  if (runtimeMode !== 'isolated-test')
-    throw new HttpError(409, 'LEGACY_OPENKORE_MIGRATION_REQUIRED');
-  const id = instanceId(account.accountId);
-  const pending = workerStartPromises.get(id);
-  if (pending) return await pending;
-  const task = startWorkerOnce(account, id);
-  workerStartPromises.set(id, task);
-  try {
-    return await task;
-  } finally {
-    if (workerStartPromises.get(id) === task) workerStartPromises.delete(id);
-  }
+async function startWorker() {
+  openKoreWebControlRetired();
 }
-async function startWorkerOnce(account, id) {
-  authorizeWorkerLaunch(account);
-  await ensureWorker(account);
-  if ((await currentWorkerState(id)).running) return;
-  const { spawn } = await import('node:child_process'),
-    folder = join(instancesRoot, id),
-    openkore = join(runtime, 'openkore'),
-    logs = join(folder, 'logs'),
-    commands = join(folder, 'commands');
-  await mkdir(logs, { recursive: true });
-  await mkdir(commands, { recursive: true });
-  const stamp = new Date()
-      .toISOString()
-      .replaceAll(/[-:TZ.]/g, '')
-      .slice(0, 14),
-    stdout = join(logs, `${stamp}.out.log`),
-    stderr = join(logs, `${stamp}.err.log`),
-    tables = `${join(folder, 'tables')};${join(openkore, 'tables')}`;
-  const outFd = openSync(stdout, 'a'),
-    errFd = openSync(stderr, 'a'),
-    plugins = join(root, 'ops', 'ro-stack', 'openkore-plugins');
-  const child = spawn(
-    join(openkore, 'start.exe'),
-    [
-      `--control=${join(folder, 'control')}`,
-      `--tables=${tables}`,
-      `--plugins=${plugins}`,
-      '--interface=Headless',
-    ],
-    {
-      cwd: openkore,
-      windowsHide: true,
-      detached: true,
-      stdio: ['ignore', outFd, errFd],
-      env: {
-        ...process.env,
-        RO_STATUS_SNAPSHOT: join(folder, 'status.json'),
-        RO_COMMAND_DIR: commands,
-        RO_SOCIAL_LOG: join(folder, 'social.jsonl'),
-        RO_ACCOUNT_ID: String(account.accountId),
-        RO_CHARACTER_ID: String(account.characterId),
-      },
-    },
-  );
-  closeSync(outFd);
-  closeSync(errFd);
-  child.unref();
-  await writeFile(
-    join(folder, 'state.json'),
-    JSON.stringify(
-      { pid: child.pid, stdout, stderr, startedAt: Date.now() },
-      null,
-      2,
-    ),
-  );
+async function startWorkerOnce() {
+  openKoreWebControlRetired();
 }
-async function stopWorker(account) {
-  const id = instanceId(account.accountId),
-    statePath = join(instancesRoot, id, 'state.json');
-  try {
-    const state = JSON.parse(await readFile(statePath, 'utf8'));
-    process.kill(Number(state.pid));
-  } catch {}
-  await unlink(statePath).catch(() => {});
+async function stopWorker() {
+  openKoreWebControlRetired();
 }
 async function setAutomationIntent(accountId, desired) {
   await sql(
@@ -7621,9 +8566,32 @@ async function serveRuntimeMapField(pathname, response) {
   response.end(field.content);
   return true;
 }
-async function serveFile(pathname, response) {
-  const isPublic = pathname.startsWith('/ro/'),
-    base = isPublic ? publicRoot : webRoot,
+// Host-based surface split: the Admin hostname must land on the Server Ops
+// surface at `/`, never on the Player Web login. Only the root path differs;
+// /admin/* and /api/* are unchanged, and play/localhost are untouched.
+const adminSurfaceHosts = new Set(
+  String(process.env.RO_ADMIN_HOSTS ?? 'admin.g8land.com')
+    .split(',')
+    .map((value) => value.trim().toLowerCase())
+    .filter(Boolean),
+);
+function isAdminSurfaceHost(request) {
+  const host = String(request?.headers?.host ?? '')
+    .split(':')[0]
+    .toLowerCase();
+  return adminSurfaceHosts.has(host) || host.startsWith('admin.');
+}
+async function serveFile(pathname, response, request) {
+  const isPublic = pathname.startsWith('/ro/');
+  // Admin host root must redirect to the Server Ops document at its REAL url so
+  // that the document's relative assets (./server-ops.js, styles) resolve under
+  // /admin/ instead of / (which 404s and leaves the page stuck at 載入中).
+  if (!isPublic && pathname === '/' && isAdminSurfaceHost(request)) {
+    response.writeHead(302, { location: '/admin/server-ops.html', ...securityHeaders });
+    response.end();
+    return true;
+  }
+  const base = isPublic ? publicRoot : webRoot,
     requested = isPublic
       ? pathname.slice(1)
       : pathname === '/'
@@ -7763,6 +8731,61 @@ async function runAdminFixtureNavigation(charId, input) {
   };
 }
 
+async function readCharacterBaseLevel(account) {
+  const output = await sql(
+    `SELECT base_level FROM \`char\` WHERE char_id=${Number(account.characterId)} AND account_id=${Number(account.accountId)} LIMIT 1;`,
+  );
+  if (!output) return null;
+  const level = Number(output.trim());
+  return Number.isSafeInteger(level) && level >= 1 ? level : null;
+}
+
+async function ensureDefaultGrindTarget(account, existingTarget) {
+  if (existingTarget?.source === FARM_MAP_SOURCE.PLAYER_OVERRIDE)
+    return existingTarget;
+  // A legacy record without source is preserved and excluded from automatic
+  // policy writes until a player explicitly chooses a map again.
+  if (existingTarget?.legacyUnclassified) return existingTarget;
+  let baseLevel;
+  try {
+    baseLevel = await readCharacterBaseLevel(account);
+  } catch {
+    return existingTarget;
+  }
+  if (baseLevel === null) return existingTarget;
+  const resolved = resolveDefaultFarmTarget(firstJobContent, baseLevel);
+  const eligibility = farmMapEligibility(resolved.mapId);
+  if (!eligibility.map || !eligibility.farmable) return existingTarget;
+  if (
+    existingTarget?.source === FARM_MAP_SOURCE.DEFAULT_POLICY &&
+    existingTarget.mapId === resolved.mapId
+  )
+    return existingTarget;
+  const target = {
+    mapId: resolved.mapId,
+    name: eligibility.map.name ?? resolved.mapId,
+    levelRange: eligibility.map.levelRange ?? null,
+    source: FARM_MAP_SOURCE.DEFAULT_POLICY,
+    updatedAt: Date.now(),
+  };
+  const targetPath = join(
+    instancesRoot,
+    instanceId(account.accountId),
+    'grind-target.json',
+  );
+  try {
+    await writeJsonAtomic(targetPath, target);
+  } catch {
+    return existingTarget;
+  }
+  observationConfigCache.set(`grind:${Number(account.accountId)}`, {
+    at: Date.now(),
+    value: target,
+    pending: null,
+  });
+  return target;
+}
+
 async function handleAdminFixtureNavigationRequest(url, request, response) {
   const match = url.pathname.match(
     /^\/api\/admin\/characters\/(\d{1,10})\/agent\/fixture-navigation$/,
@@ -7846,7 +8869,7 @@ async function handleDashboardRequest(request, response) {
     );
     requestMetricUrl = url;
     if (!url.pathname.startsWith('/api/')) {
-      if (await serveFile(url.pathname, response)) return;
+      if (await serveFile(url.pathname, response, request)) return;
       return json(response, 404, { error: 'not_found' });
     }
     if (!mutationOriginAllowed(request))
@@ -7949,7 +8972,7 @@ async function handleDashboardRequest(request, response) {
           },
           questCallbacks: {
             intervalMs: 1_000,
-            watchedAccounts: questRuntimeBridge.watchedAccountCount(),
+            watchedAccounts: questRuntimeDispatchBridge.watchedAccountCount(),
           },
           logProjection: {
             ...logProjectionMetrics,
@@ -7965,13 +8988,12 @@ async function handleDashboardRequest(request, response) {
             ...webExperienceTelemetry.status(),
             actions: WEB_EXPERIENCE_CANARY_ACTIONS,
           },
+          webExperienceRum: webExperienceHealth.status(),
         },
       });
     }
 
     if (url.pathname === '/api/admin/web-experience/summary') {
-      if (!loopbackRequest(request))
-        return json(response, 404, { error: 'not_found' });
       const window = ['1h', '24h'].includes(url.searchParams.get('window'))
         ? url.searchParams.get('window')
         : '1h';
@@ -7984,8 +9006,6 @@ async function handleDashboardRequest(request, response) {
       /^\/api\/admin\/web-experience\/action\/([A-Za-z0-9._:-]{1,96})$/,
     );
     if (webExperienceActionMatch) {
-      if (!loopbackRequest(request))
-        return json(response, 404, { error: 'not_found' });
       const window = ['1h', '24h'].includes(url.searchParams.get('window'))
         ? url.searchParams.get('window')
         : '1h';
@@ -7995,6 +9015,118 @@ async function handleDashboardRequest(request, response) {
           { window },
         )),
         telemetryStatus: webExperienceTelemetry.status(),
+      });
+    }
+    // WEB_REAL_USER_EXPERIENCE_V1: player-perceived latency health read model.
+    // Same admin boundary as the observatory endpoints above (outer Cloudflare
+    // Access owns authorization).
+    if (url.pathname === '/api/admin/web-experience/health') {
+      const window = ['1m', '5m', '15m'].includes(url.searchParams.get('window'))
+        ? url.searchParams.get('window')
+        : '5m';
+      return json(response, 200, {
+        ...webExperienceHealth.snapshot({ window }),
+        status: webExperienceHealth.status(),
+      });
+    }
+    const webExperienceHealthMatch = url.pathname.match(
+      /^\/api\/admin\/web-experience\/health\/([A-Za-z0-9._:-]{1,96})$/,
+    );
+    if (webExperienceHealthMatch) {
+      const window = ['1m', '5m', '15m'].includes(url.searchParams.get('window'))
+        ? url.searchParams.get('window')
+        : '5m';
+      return json(response, 200, {
+        ...webExperienceHealth.actionDetail(webExperienceHealthMatch[1], { window }),
+        status: webExperienceHealth.status(),
+      });
+    }
+    // --- Server Ops (C3): ADMIN-only, authorization enforced before mutation ---
+    if (url.pathname === '/api/admin/characters' && request.method === 'GET') {
+      return json(response, 200, { characters: await listAdminCharacters() });
+    }
+    const adminCharacterMetaMatch = url.pathname.match(
+      /^\/api\/admin\/characters\/(\d{1,10})\/meta$/,
+    );
+    if (adminCharacterMetaMatch) {
+      const metaCharId = Number(adminCharacterMetaMatch[1]);
+      if (request.method === 'GET') {
+        return json(response, 200, { charId: metaCharId, ...(await readCharacterMeta(metaCharId)) });
+      }
+      if (request.method === 'POST') {
+        const body = await requestBody(request);
+        const updated = await setCharacterMeta(metaCharId, body);
+        return json(response, 200, updated);
+      }
+      return json(response, 405, { error: 'method_not_allowed' });
+    }
+    const adminCharacterAgentMatch = url.pathname.match(
+      /^\/api\/admin\/characters\/(\d{1,10})\/agent\/(autonomy|farm)$/,
+    );
+    if (adminCharacterAgentMatch) {
+      if (request.method !== 'POST')
+        return json(response, 405, { error: 'method_not_allowed' });
+      const agentCharId = Number(adminCharacterAgentMatch[1]);
+      const agentAction = adminCharacterAgentMatch[2];
+      // In-process guard: a double click or a racing request must never dispatch
+      // a second claim/farm command for the same character.
+      if (adminAgentOperationLocks.has(agentCharId))
+        return json(response, 409, {
+          ok: false,
+          charId: agentCharId,
+          action: agentAction,
+          phase: 'failed',
+          error: 'operation_in_progress',
+          blocker: 'operation_in_progress',
+        });
+      adminAgentOperationLocks.set(agentCharId, agentAction);
+      try {
+        const result = await runAdminAgentAction(agentCharId, agentAction);
+        return json(response, result.ok ? 200 : 409, result);
+      } catch (error) {
+        const blocker =
+          error instanceof HttpError ? error.message : 'admin_agent_action_failed';
+        console.error(
+          `Admin agent action failed char=${agentCharId} action=${agentAction}:`,
+          error,
+        );
+        return json(response, error instanceof HttpError ? error.statusCode : 500, {
+          ok: false,
+          charId: agentCharId,
+          action: agentAction,
+          phase: 'failed',
+          error: blocker,
+          blocker,
+        });
+      } finally {
+        adminAgentOperationLocks.delete(agentCharId);
+      }
+    }
+    const adminServerMatch = url.pathname.match(
+      /^\/api\/admin\/server\/(status|start|stop|restart)$/,
+    );
+    if (adminServerMatch) {
+      const stackAction = adminServerMatch[1];
+      const isStatus = stackAction === 'status';
+      const methodOk = isStatus ? request.method === 'GET' : request.method === 'POST';
+      if (!methodOk) return json(response, 405, { error: 'method_not_allowed' });
+      if (isStatus) {
+        const snapshot = await opsControlPlane.buildStatus();
+        const lifecycleState = snapshot.connectivity.every((c) => c.processHealth === 'HEALTHY')
+          ? 'RUNNING'
+          : snapshot.connectivity.some((c) => c.processHealth === 'HEALTHY')
+            ? 'PARTIAL'
+            : 'STOPPED';
+        return json(response, 200, { ...snapshot, lifecycleState, services: snapshot.connectivity });
+      }
+      const run = await runStackLifecycle(stackAction);
+      const state = parseStackLifecycleState(run.output) ?? (run.ok ? 'SUCCESS' : 'FAILED');
+      return json(response, run.ok ? 200 : 409, {
+        action: stackAction,
+        state,
+        healthy: run.ok,
+        output: run.output,
+        stderr: run.stderr,
       });
     }
     const account = await sessionAccount(request);
@@ -8020,12 +9152,38 @@ async function handleDashboardRequest(request, response) {
           : null,
         equipment,
         observationPolicy: publicObservationPolicy(),
-        combatSse: await combatSseRollout.state(account?.characterId),
+        combatSse: await combatSseStateForAccount(account, null),
 
         webExperienceTelemetry: webExperienceTelemetry.publicConfig(account ?? {}),
       });
     }
     if (!account) return json(response, 401, { error: '請先登入' });
+    const persistentLifeLatestMatch = url.pathname.match(
+      /^\/api\/ro\/agents\/(\d+)\/persistent-life\/latest$/,
+    );
+    if (persistentLifeLatestMatch && request.method === 'GET') {
+      const charId = Number(persistentLifeLatestMatch[1]);
+      if (Number(account.characterId) !== charId)
+        throw new HttpError(403, 'ownership_conflict');
+      return json(response, 200, await readPersistentLifeDiary(account, charId));
+    }
+    const persistentLifeSeenMatch = url.pathname.match(
+      /^\/api\/ro\/agents\/(\d+)\/persistent-life\/latest\/seen$/,
+    );
+    if (persistentLifeSeenMatch && request.method === 'POST') {
+      const charId = Number(persistentLifeSeenMatch[1]);
+      if (Number(account.characterId) !== charId)
+        throw new HttpError(403, 'ownership_conflict');
+      const diary = await readPersistentLifeDiary(account, charId);
+      if (diary.session) {
+        await sql(
+          `UPDATE persistent_life_session SET seen_at=CURRENT_TIMESTAMP(3) ` +
+            `WHERE session_id='${escapeSql(diary.session.sessionId)}' ` +
+            `AND char_id=${charId} AND account_id=${Number(account.accountId)};`,
+        );
+      }
+      return json(response, 200, await readPersistentLifeDiary(account, charId));
+    }
     if (
       url.pathname === '/api/combat-snapshot' &&
       request.method === 'GET'
@@ -8061,7 +9219,7 @@ async function handleDashboardRequest(request, response) {
         throw new HttpError(400, 'Web viewer 識別格式錯誤');
       if (interest !== ObservationInterest.COMBAT_PAGE)
         throw new HttpError(409, 'combat_sse_interest_inactive');
-      const rollout = await combatSseRollout.state(account.characterId);
+      const rollout = await combatSseStateForAccount(account, null);
       if (!rollout.eligible)
         throw new HttpError(409, 'combat_sse_unavailable');
       await updateWebPresence(
@@ -8092,14 +9250,40 @@ async function handleDashboardRequest(request, response) {
       request.method === 'POST'
     ) {
       const body = await requestBody(request);
-      const result = webExperienceTelemetry.record(body, {
+      const identity = {
         accountId: account.accountId,
         characterId: account.characterId,
         username: account.username,
-      });
-      return json(response, result.accepted ? 202 : 202, {
-        ok: result.accepted,
-        telemetry: result,
+      };
+      // Batch ingest: the browser buffers and posts { events: [...] }. A single
+      // legacy event object is still accepted. The batch is bounded so a hostile
+      // or buggy client cannot amplify one request into unbounded work.
+      const events = Array.isArray(body?.events) ? body.events.slice(0, 64) : [body];
+      let accepted = 0;
+      let rejected = 0;
+      let lastResult = { accepted: false, reason: 'NO_EVENTS' };
+      const eligible = webExperienceTelemetry.isEligible(identity);
+      for (const event of events) {
+        try {
+          lastResult = webExperienceTelemetry.record(event, identity);
+        } catch {
+          lastResult = { accepted: false, reason: 'TELEMETRY_FAILED' };
+        }
+        if (lastResult.accepted) accepted += 1;
+        else rejected += 1;
+        // Fail-soft: the RUM read model must never affect gameplay. Ingestion is
+        // skipped for non-canary identities, matching production telemetry.
+        if (eligible && webExperienceHealth.actions.includes(event?.actionId)) {
+          try {
+            webExperienceHealth.ingest(event);
+          } catch {}
+        }
+      }
+      return json(response, 202, {
+        ok: accepted > 0,
+        accepted,
+        rejected,
+        telemetry: lastResult,
       });
     }
     if (
@@ -8206,10 +9390,20 @@ async function handleDashboardRequest(request, response) {
       // worker. Bootstrap the canonical SERVER_AGENT ownership (claim_agent
       // command) instead; a character is created authoritatively either way.
       let serverAgentBootstrap = 'SKIPPED';
+      let serverAgentOnboarding = 'SKIPPED';
       if (refreshed?.characterId) {
         try {
           await bootstrapServerAgentOwnership(refreshed, refreshed.characterId);
           serverAgentBootstrap = 'QUEUED';
+          // Kick the authoritative onboarding forward transition. If the agent
+          // is not resident yet this stays PENDING and the Web retries the
+          // advance/graduate once the controller reports SERVER_AGENT.
+          try {
+            await queueOnboardingAdvance(refreshed);
+            serverAgentOnboarding = 'ADVANCE_QUEUED';
+          } catch {
+            serverAgentOnboarding = 'PENDING_SERVER_AGENT';
+          }
         } catch (error) {
           serverAgentBootstrap = 'UNAVAILABLE';
           console.error(
@@ -8220,6 +9414,7 @@ async function handleDashboardRequest(request, response) {
       return json(response, 200, {
         characterName: refreshed?.characterName,
         serverAgentBootstrap,
+        serverAgentOnboarding,
       });
     }
     if (url.pathname === '/api/job-target' && request.method === 'POST') {
@@ -8384,6 +9579,91 @@ async function handleDashboardRequest(request, response) {
         projectionOnly =
           !fullStateRequested ||
           (hasExplicitInterest && interest !== ObservationInterest.QUEST_PAGE);
+      if (viewMode === 'entry') {
+        const [controller, combatSse] = await Promise.all([
+            readCharacterControllerStatus(account, Number(account.characterId), {
+              includeFarmTarget: false,
+            }),
+            combatSseRollout.state(account.characterId),
+          ]),
+          live = controller.liveStatus?.available
+            ? controller.liveStatus
+            : null,
+          rawEntry = {
+            updatedAt:
+              live?.freshness?.authoritativeAt ?? Date.now(),
+            name: account.characterName,
+            jobId: account.classId,
+            baseLevel: account.baseLevel,
+            jobLevel: account.jobLevel,
+            hp: live?.hp ?? 0,
+            maxHp: live?.maxHp ?? 0,
+            sp: live?.sp ?? 0,
+            maxSp: live?.maxSp ?? 0,
+            map: live?.map ?? null,
+            playerX: live?.x ?? 0,
+            playerY: live?.y ?? 0,
+            webViewMode: controller.agentMode,
+            webInterest: ObservationInterest.COMBAT_PAGE,
+            statusIntervalMs: live?.statusIntervalMs ?? null,
+            domainRevisions: { live: Number(controller.revision ?? 0) },
+          },
+          derived = projectGameEntryLeanSnapshot(rawEntry),
+          character = {
+            charId: account.characterId,
+            name: derived.name || account.characterName,
+            classId: Number(derived.jobId ?? account.classId ?? 0),
+            sex: account.sex,
+            hair: account.hair,
+            hairColor: account.hairColor,
+            targetJob: account.targetJob,
+            baseLevel: Number(derived.baseLevel ?? account.baseLevel ?? 1),
+            jobLevel: Number(derived.jobLevel ?? account.jobLevel ?? 1),
+            hp: Number(derived.hp ?? 0),
+            maxHp: Number(derived.maxHp ?? 0),
+            sp: Number(derived.sp ?? 0),
+            maxSp: Number(derived.maxSp ?? 0),
+            map: derived.map ?? null,
+            x: Number(derived.playerX ?? 0),
+            y: Number(derived.playerY ?? 0),
+            online: live?.fresh === true,
+          },
+          running =
+            controller.controller === SERVER_AGENT_OWNER &&
+            controller.agentMode !== 'PERSISTENT_IDLE';
+        return json(response, 200, {
+          contract: 'GAME_ENTRY_LEAN_STATE',
+          partial: true,
+          firstPlayable: true,
+          uiReady: true,
+          hydratedDomains: ['identity', 'vitals', 'map', 'automation', 'ownership'],
+          deferredDomains: [
+            'quest',
+            'inventory',
+            'equipment',
+            'worldMap',
+            'history',
+            'social',
+            'journal',
+          ],
+          account: { username: account.username },
+          character,
+          derived,
+          running,
+          startedAt: null,
+          automation: {
+            running,
+            mode: controller.agentMode ?? null,
+          },
+          ownership: controller,
+          interest: ObservationInterest.COMBAT_PAGE,
+          domainRevisions: derived.domainRevisions ?? {},
+          combatStream: {
+            ...combatSse,
+            endpoint: '/api/combat-stream',
+          },
+        });
+      }
       if (projectionOnly) {
         const [session, rawSnapshot, world, supplyCycle, grindTarget] =
           await Promise.all([
@@ -8480,11 +9760,16 @@ async function handleDashboardRequest(request, response) {
               y: Number(derived.playerY ?? 0),
               online: true,
             };
+          const nativeFarm =
+              rawDerived?.serverAgentReadModel === true
+                ? await readNativeFarmStats(account.characterId)
+                : { available: false };
           return json(response, 200, {
             partial: true,
             account: { username: account.username },
-            running: session.running,
-            startedAt: session.startedAt,
+            running: nativeFarmRunning(nativeFarm, session.running),
+            startedAt: nativeFarmStartedAt(nativeFarm, session.startedAt),
+            endedAt: nativeFarmEndedAt(nativeFarm),
             character,
             equipment: Array.isArray(rawDerived.inventory)
               ? liveEquipment(mergedInventory)
@@ -8501,7 +9786,7 @@ async function handleDashboardRequest(request, response) {
               session,
               rawDerived,
             ),
-            ...parsed,
+            ...projectNativeFarmStats(parsed, nativeFarm, derived),
           });
         }
       }
@@ -8622,6 +9907,10 @@ async function handleDashboardRequest(request, response) {
             : null,
         liveApplied = await applyLiveStatusToCharacter(account, baseCharacter),
         character = liveApplied.character;
+      const nativeFarm =
+        derived?.serverAgentReadModel === true
+          ? await readNativeFarmStats(account.characterId)
+          : { available: false };
       const eden = {
         ...edenProgress,
         journey: derived?.edenJourney ?? null,
@@ -8717,8 +10006,9 @@ async function handleDashboardRequest(request, response) {
       eden.questJournal = questJournal;
       return json(response, 200, {
         account: { username: account.username },
-        running: session.running,
-        startedAt: session.startedAt,
+        running: nativeFarmRunning(nativeFarm, session.running),
+        startedAt: nativeFarmStartedAt(nativeFarm, session.startedAt),
+        endedAt: nativeFarmEndedAt(nativeFarm),
         character,
         liveStatus: liveApplied.liveStatus,
         equipment: currentEquipment,
@@ -8748,7 +10038,7 @@ async function handleDashboardRequest(request, response) {
           ...(statState ? { stat: statState.statRevision } : {}),
         },
         combatStream: await combatStreamState(account, session, derived),
-        ...parsed,
+        ...projectNativeFarmStats(parsed, nativeFarm, derived),
       });
     }
     if (url.pathname === '/api/rankings' && request.method === 'GET') {
@@ -8756,6 +10046,23 @@ async function handleDashboardRequest(request, response) {
       return json(response, 200, {
         ranking: await queryClassRanking(classId),
       });
+    }
+    // MINIMAL POSITION PROJECTION. The minimap hot path must not depend on the
+    // heavy gameplay-event fan-out: this route performs exactly ONE read of the
+    // authoritative `persistent_agent_live_status` row and returns only the
+    // position facts. Reuse gate: no existing read is single-query (the
+    // controller read fans out to state+rollout+live, /api/events fans out to
+    // ~20), so a bounded projection is built here on the existing authority
+    // instead of adding a second one.
+    if (url.pathname === '/api/live-position' && request.method === 'GET') {
+      const characterId = Number(account.characterId);
+      let live = null;
+      try {
+        live = await readPersistentAgentLiveStatusView(characterId);
+      } catch {
+        live = null;
+      }
+      return json(response, 200, projectLivePosition(live, { characterId }));
     }
     if (url.pathname === '/api/events') {
       const id = instanceId(account.accountId),
@@ -8931,7 +10238,7 @@ async function handleDashboardRequest(request, response) {
           controllerStatus.unavailableReason === 'agent_status_unavailable'
         )
           return json(response, 503, {
-            error: 'Server Agent 狀態暫時無法讀取，已停止操作以保護角色',
+            error: '系統狀態暫時無法讀取，已停止操作以保護角色',
           });
       }
       // P2-OPENKORE-EXIT-MAINLINE: normal production no longer writes OpenKore
@@ -8988,7 +10295,7 @@ async function handleDashboardRequest(request, response) {
           controllerStatus.unavailableReason === 'agent_status_unavailable'
         )
           return json(response, 503, {
-            error: 'Server Agent 狀態暫時無法讀取，已停止操作以保護角色',
+            error: '系統狀態暫時無法讀取，已停止操作以保護角色',
           });
       }
       // P2-OPENKORE-EXIT-MAINLINE: normal production no longer writes OpenKore
@@ -9111,7 +10418,7 @@ async function handleDashboardRequest(request, response) {
         controllerStatus.unavailableReason === 'agent_status_unavailable'
       )
         return json(response, 503, {
-          error: 'Server Agent 狀態暫時無法讀取，已停止操作以保護角色',
+          error: '系統狀態暫時無法讀取，已停止操作以保護角色',
         });
       // P2-OPENKORE-EXIT-MAINLINE row 37: SERVER_AGENT grind-target uses the
       // native W4 relocation coordinator above. The legacy OPENKORE branch writes
@@ -9146,7 +10453,7 @@ async function handleDashboardRequest(request, response) {
         controllerStatus.unavailableReason === 'agent_status_unavailable'
       )
         return json(response, 503, {
-          error: 'Server Agent 狀態暫時無法讀取，已停止操作以保護角色',
+          error: '系統狀態暫時無法讀取，已停止操作以保護角色',
         });
       if (
         controllerStatus.available &&
@@ -9179,7 +10486,7 @@ async function handleDashboardRequest(request, response) {
         controllerStatus.unavailableReason === 'agent_status_unavailable'
       )
         return json(response, 503, {
-          error: 'Server Agent 狀態暫時無法讀取，已停止操作以保護角色',
+          error: '系統狀態暫時無法讀取，已停止操作以保護角色',
         });
       // P2-OPENKORE-EXIT-MAINLINE: normal production no longer writes OpenKore
       // .cmd for NPC dialog. Legacy OPENKORE controllers get a migration-required
@@ -9231,8 +10538,16 @@ async function handleDashboardRequest(request, response) {
         await queueOnboardingResume(account, body.questId),
       );
     }
+    if (url.pathname === '/api/quest-sequence' && request.method === 'GET') {
+      const sequenceCharId = Number(account.characterId);
+      if (!Number.isSafeInteger(sequenceCharId) || sequenceCharId <= 0)
+        return json(response, 409, { error: 'character_required' });
+      return json(response, 200, await readQuestSequenceProjection(sequenceCharId));
+    }
     if (url.pathname === '/api/onboarding/advance' && request.method === 'POST')
       return json(response, 202, await queueOnboardingAdvance(account));
+    if (url.pathname === '/api/onboarding/graduate' && request.method === 'POST')
+      return json(response, 202, await queueOnboardingGraduate(account));
     if (url.pathname === '/api/eden/enroll' && request.method === 'POST')
       return json(response, 202, await queueEdenEnrollment(account));
     if (url.pathname === '/api/eden/task' && request.method === 'POST') {
@@ -9316,7 +10631,7 @@ async function handleDashboardRequest(request, response) {
           controllerStatus.unavailableReason === 'agent_status_unavailable'
         )
           return json(response, 503, {
-            error: 'Server Agent 狀態暫時無法讀取，已停止操作以保護角色',
+            error: '系統狀態暫時無法讀取，已停止操作以保護角色',
           });
       }
       // P2-OPENKORE-EXIT-MAINLINE: normal production no longer writes OpenKore
@@ -9360,7 +10675,7 @@ async function handleDashboardRequest(request, response) {
         controllerStatus.unavailableReason === 'agent_status_unavailable'
       )
         return json(response, 503, {
-          error: 'Server Agent 狀態暫時無法讀取，已停止操作以保護角色',
+          error: '系統狀態暫時無法讀取，已停止操作以保護角色',
         });
       // Authoritative controller is OPENKORE, or the Persistent Agent schema is
       // not deployed: existing behaviour is preserved unchanged.
@@ -9424,9 +10739,23 @@ createServer((request, response) =>
   // W4 relocation coordinator runs in every mode: it only ever advances a Web
   // map selection that a SERVER_AGENT canary character actually made.
   const relocationTimer = setInterval(() => {
-    void reconcileRelocations();
+    void reconcilePersistedRelocations()
+      .then(() => reconcileRelocations())
+      .catch((error) => console.warn(`WEB_RELOCATION_RECOVERY_FAILED: ${error?.message ?? error}`));
   }, 1000);
   relocationTimer.unref();
+  const noviceOnboardingTimer = setInterval(() => {
+    void reconcileNoviceOnboarding().catch((error) =>
+      console.warn(`NOVICE_ONBOARDING_RECONCILE_FAILED: ${error?.message ?? error}`),
+    );
+  }, 1000);
+  noviceOnboardingTimer.unref();
+  // R2: return + resume deferred AUTO_FARM restarts. Reuses the canonical
+  // relocation coordinator; runs in every non-isolated mode.
+  const deferredFarmTimer = setInterval(() => {
+    void reconcileDeferredFarmRestores();
+  }, 5000);
+  deferredFarmTimer.unref();
   if (isolatedTestMode) {
     if (!isApprovedIsolatedDatabaseName(databaseName))
       console.warn(

@@ -48,6 +48,11 @@ export const OBSERVATION_POLICY = Object.freeze({
       socialPollMs: 1_000,
       statusExportMs: 300,
       commandPollMs: 250,
+      // Authoritative minimap position cadence. The native Persistent Agent
+      // exports `persistent_agent_live_status` about every 500ms, so the Web
+      // position hot path targets that cadence instead of the far heavier
+      // gameplay-event projection.
+      positionPollMs: 500,
     }),
     QUEST_PAGE: Object.freeze({
       eventPollMs: 1_000,
@@ -55,6 +60,7 @@ export const OBSERVATION_POLICY = Object.freeze({
       socialPollMs: 1_000,
       statusExportMs: 1_000,
       commandPollMs: 500,
+      positionPollMs: 0,
     }),
     INVENTORY_PAGE: Object.freeze({
       eventPollMs: 2_500,
@@ -62,6 +68,7 @@ export const OBSERVATION_POLICY = Object.freeze({
       socialPollMs: 1_000,
       statusExportMs: 2_000,
       commandPollMs: 100,
+      positionPollMs: 0,
     }),
     SOCIAL_PAGE: Object.freeze({
       eventPollMs: 5_000,
@@ -69,6 +76,7 @@ export const OBSERVATION_POLICY = Object.freeze({
       socialPollMs: 750,
       statusExportMs: 2_000,
       commandPollMs: 500,
+      positionPollMs: 0,
     }),
     OTHER_GAME_PAGE: Object.freeze({
       eventPollMs: 5_000,
@@ -76,6 +84,7 @@ export const OBSERVATION_POLICY = Object.freeze({
       socialPollMs: 1_000,
       statusExportMs: 2_000,
       commandPollMs: 500,
+      positionPollMs: 0,
     }),
     IDLE_PAGE: Object.freeze({
       eventPollMs: 5_000,
@@ -83,6 +92,7 @@ export const OBSERVATION_POLICY = Object.freeze({
       socialPollMs: 2_500,
       statusExportMs: 5_000,
       commandPollMs: 1_000,
+      positionPollMs: 0,
     }),
     HIDDEN: Object.freeze({
       eventPollMs: 15_000,
@@ -90,6 +100,9 @@ export const OBSERVATION_POLICY = Object.freeze({
       socialPollMs: 10_000,
       statusExportMs: 10_000,
       commandPollMs: 1_000,
+      // Tab is backgrounded: keep a slow authoritative heartbeat, never the
+      // visible live cadence.
+      positionPollMs: 2_000,
     }),
     NO_WEB: Object.freeze({
       eventPollMs: 0,
@@ -97,6 +110,7 @@ export const OBSERVATION_POLICY = Object.freeze({
       socialPollMs: 0,
       statusExportMs: 30_000,
       commandPollMs: 1_000,
+      positionPollMs: 0,
     }),
   }),
 });
@@ -213,6 +227,10 @@ const liveFieldsByDomain = Object.freeze({
     'aspd',
     'monsters',
     'players',
+    // Authoritative PA runtime phase (SERVER_AGENT live projection). Needed by
+    // the Supply window to show 補給中 / 返回練功地圖 instead of falling back to
+    // the neutral label. Projected like supplyCycle; no second state machine.
+    'runtimePhase',
     'supplyCycle',
   ]),
   events: Object.freeze(['taskEvents']),
@@ -251,7 +269,7 @@ export function observationPolicyFor(interest) {
 
 export function revisionKeyForInterest(snapshot, interest) {
   const revisions = snapshot?.domainRevisions ?? {};
-  return domainsForInterest(interest)
+  const domains = domainsForInterest(interest)
     .map((domain) => {
       const advertisedDomains = Array.isArray(snapshot?.includedDomains)
           ? snapshot.includedDomains
@@ -262,7 +280,17 @@ export function revisionKeyForInterest(snapshot, interest) {
           : fields.some((field) => snapshot?.[field] !== undefined);
       return `${domain}:${Number(revisions[domain] ?? 0)}:${available ? 'ready' : 'absent'}`;
     })
-    .join('|') || `headless:${Number(snapshot?.updatedAt ?? 0)}`;
+    .join('|');
+  // The native read model advances the authoritative `updatedAt` on every
+  // export but does NOT bump `domainRevisions`, so a revision-only key repeats
+  // while player/monster positions change and CharacterProjectionCache would
+  // reuse a stale `live` projection for the whole projectionCacheMs window.
+  // Fold the authoritative timestamp into the key so the projection follows
+  // the live read model.
+  const authoritativeAt = Number(snapshot?.updatedAt ?? 0);
+  return domains
+    ? `${domains}::${authoritativeAt}`
+    : `headless:${authoritativeAt}`;
 }
 
 export function aggregateViewerInterests(viewers) {
@@ -495,6 +523,35 @@ export function projectLiveSnapshot(snapshot, interest) {
   return projection;
 }
 
+const gameEntryLeanFields = Object.freeze([
+  'updatedAt',
+  'name',
+  'jobId',
+  'baseLevel',
+  'jobLevel',
+  'hp',
+  'maxHp',
+  'sp',
+  'maxSp',
+  'map',
+  'mapWidth',
+  'mapHeight',
+  'playerX',
+  'playerY',
+  'webViewMode',
+  'webInterest',
+  'statusIntervalMs',
+  'domainRevisions',
+]);
+
+export function projectGameEntryLeanSnapshot(snapshot) {
+  if (!snapshot) return null;
+  const projection = {};
+  for (const field of gameEntryLeanFields)
+    if (snapshot[field] !== undefined) projection[field] = snapshot[field];
+  return projection;
+}
+
 // Authoritative minimap-state freshness. `updatedAt` is written by the
 // controller/exporter process on the Dashboard host, so serverNow - updatedAt is
 // a clock-skew-free STATE_FRESHNESS value. The browser only adds elapsed local
@@ -604,6 +661,53 @@ export function coalesceCombatEventLines(lines) {
   return output;
 }
 
+// MINIMAL POSITION PROJECTION. The minimap is a visible live domain whose only
+// authoritative input is the native `persistent_agent_live_status` row. This
+// projection deliberately carries ONLY the position facts so the Web hot path
+// never has to assemble (or pay for) the full gameplay snapshot: no inventory,
+// equipment, farm stats, combat log, quest, supply or controller state.
+export const LIVE_POSITION_KEYS = Object.freeze([
+  'available',
+  'characterId',
+  'map',
+  'x',
+  'y',
+  'updatedAt',
+  'revision',
+  'freshness',
+  'statusIntervalMs',
+]);
+
+export function projectLivePosition(snapshot, { characterId = null } = {}) {
+  const id = Number(characterId);
+  if (!snapshot?.available || !snapshot.fresh)
+    return {
+      available: false,
+      characterId: Number.isSafeInteger(id) && id > 0 ? id : null,
+      map: null,
+      x: null,
+      y: null,
+      updatedAt: null,
+      revision: Number(snapshot?.revision ?? 0),
+      freshness: null,
+      statusIntervalMs: null,
+    };
+  const updatedAt = Number(snapshot.freshness?.authoritativeAt);
+  return {
+    available: true,
+    characterId: Number.isSafeInteger(id) && id > 0 ? id : null,
+    map: snapshot.map ?? null,
+    x: snapshot.x ?? null,
+    y: snapshot.y ?? null,
+    updatedAt: Number.isFinite(updatedAt) ? updatedAt : null,
+    revision: Number(snapshot.revision ?? 0),
+    freshness: snapshot.freshness ?? null,
+    statusIntervalMs: Number.isFinite(Number(snapshot.statusIntervalMs))
+      ? Number(snapshot.statusIntervalMs)
+      : null,
+  };
+}
+
 export function publicObservationPolicy() {
   return OBSERVATION_POLICY;
 }
@@ -694,4 +798,62 @@ export function nativeLifeEventLine(event = {}) {
     default:
       return null;
   }
+}
+
+// Farm Statistics PA projection. Pure function: it turns the authoritative
+// ledger aggregate (readNativeFarmStats) plus the authoritative live snapshot
+// into the exact field shape the existing Farm Stats DOM already consumes, so
+// a SERVER_AGENT character never reads an OpenKore worker log for kills, EXP or
+// loot. `parsed` is the legacy projection used for non-SERVER_AGENT characters.
+export function projectNativeFarmStats(parsed, nativeFarm, snapshot) {
+  const base = parsed && typeof parsed === 'object' ? { ...parsed } : {};
+  if (!nativeFarm?.available) return base;
+  const active = nativeFarm.active === true;
+  const currentBase =
+    active || nativeFarm.endBaseExp == null
+      ? Number(snapshot?.baseExp ?? 0)
+      : Number(nativeFarm.endBaseExp);
+  const currentJob =
+    active || nativeFarm.endJobExp == null
+      ? Number(snapshot?.jobExp ?? 0)
+      : Number(nativeFarm.endJobExp);
+  return {
+    ...base,
+    kills: Number(nativeFarm.kills ?? 0),
+    deaths: Number(nativeFarm.deaths ?? 0),
+    items: Array.isArray(nativeFarm.items) ? nativeFarm.items : [],
+    baseExpGained: Math.max(0, currentBase - Number(nativeFarm.baseExp ?? 0)),
+    jobExpGained: Math.max(0, currentJob - Number(nativeFarm.jobExp ?? 0)),
+  };
+}
+
+// Elapsed-clock source for the existing #duration DOM. When the farm session is
+// still ACTIVE the browser keeps counting from `startedAt`; once STOP_FARM (or
+// release / quarantine) ends it, the last authoritative end time freezes the
+// clock instead of letting it grow against a stale start.
+function finiteTimestamp(value) {
+  if (value === null || value === undefined || value === '') return null;
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? numeric : null;
+}
+
+export function nativeFarmStartedAt(nativeFarm, fallback = null) {
+  const startedAt = nativeFarm?.available
+    ? finiteTimestamp(nativeFarm.startedAt)
+    : null;
+  return startedAt ?? fallback ?? null;
+}
+
+export function nativeFarmEndedAt(nativeFarm) {
+  return nativeFarm?.available ? finiteTimestamp(nativeFarm.endedAt) : null;
+}
+
+// Authoritative run flag for the Farm Stats / runtime-status display. A
+// SERVER_AGENT-owned character has no OpenKore worker to answer "is it still
+// farming?", so the display reads the authoritative farm-session lifecycle
+// (FARM_SESSION_STARTED ... FARM_SESSION_STOPPED) instead. Non-SERVER_AGENT
+// characters (nativeFarm.available !== true) keep their existing `fallback`.
+export function nativeFarmRunning(nativeFarm, fallback = false) {
+  if (!nativeFarm?.available) return fallback;
+  return nativeFarm.active === true;
 }
