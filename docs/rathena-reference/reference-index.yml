@@ -7,7 +7,7 @@ upstream:
   version_confidence: high
 project:
   native_source: C:/Users/Administrator/source/ghost-island-rathena
-  native_head: a2fb32c1249e4955458ab2a91c08715ae38075e9
+  native_head: 1ffd06a07f8d997cf500334f92ccc7df6db354f7
   last_good_refs:
     - docs/EDEN_EQUIPMENT_SOURCE_DECISION.md
     - docs/eden-next-tier-source-audit.md
@@ -320,3 +320,12 @@ topics:
     forum_refs: []
     project_refs: [docs/testing-fixture-policy.md]
     authority: mixed
+  - topic: '35 DEBUGGING / STRUCTURED PROBES'
+    keywords: [debug, trace, probe, ShowDebug, ShowInfo, ShowWarning, ShowError, clif, packet, crash, backtrace]
+    authoritative_paths: [src/common/showmsg.hpp, src/common/packets.hpp, src/map/clif.hpp, src/map/clif_packetdb.hpp, src/map/script.cpp, src/map/npc.cpp, src/map/pc.cpp, src/map/battle.cpp, src/map/mob.cpp, src/common/core.cpp]
+    symbols: [ShowDebug, ShowInfo, ShowWarning, ShowError, Sql_ShowDebug, clif_parse, packet_len, debugmes, pc_setpos, battle_calc_damage, mob_dead, signal_crash]
+    official_docs: [doc/source_doc.txt, doc/packet_client.txt, doc/packet_interserv.txt, doc/packet_struct_notation.md]
+    official_samples: []
+    forum_refs: []
+    project_refs: [docs/rathena-reference/debugging.md, docs/player-action-trace-foundation.md]
+    authority: source-first
