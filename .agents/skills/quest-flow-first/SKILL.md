@@ -186,12 +186,19 @@ When OpenKore-era behavior applies:
 ```text
 RATHENA_REFERENCE_ATLAS_LOOKUP
 -> QUEST_FLOW_FIRST_HARD_GATE
+-> OPENKORE_REFERENCE_ATLAS_LOOKUP
 -> OPENKORE_REFERENCE_GATE
+-> PROJECT_LAST_GOOD_MAPPING
+-> CURRENT_QUEST_RUNTIME_MAPPING
+-> FIRST_BROKEN_TRANSITION
 -> implementation
 ```
 
-Complete the existing `OPENKORE_REFERENCE_GATE_V1.1` after the player flow is
-understood. Do not duplicate or replace that gate.
+Complete the focused `docs/openkore-reference/reference-index.yml` lookup after
+the player flow is understood, then complete the existing
+`OPENKORE_REFERENCE_GATE_V1.1`. Classify the mature behavior as
+`REPRODUCE`, `ADAPT`, `IMPROVE`, `REJECT_LEGACY` or `NOT_APPLICABLE`. Do not
+duplicate or replace that gate.
 
 ## Two-Blocker Circuit Breaker
 

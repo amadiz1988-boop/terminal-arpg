@@ -11,10 +11,18 @@ follow its exact authoritative source paths. The Atlas is an index, not world
 authority. Current canonical rAthena source, project-specific server rules and
 authoritative config win conflicts.
 
+OPENKORE ATLAS PRECONDITION:
+For OpenKore-era capability work, first search
+`docs/openkore-reference/reference-index.yml` and read only the relevant topic.
+Check Project Last-Good, locked OpenKore behavior, rAthena authority and Current
+PA before entering this gate. `REFERENCE_IS_FLOOR_NOT_CEILING = YES`; the Atlas
+is not product specification or runtime authority.
+
 QUEST PRECONDITION:
 For Quest, NPC, dialogue, quest-state, job-change and automatic-quest work,
 complete `RATHENA_REFERENCE_ATLAS_LOOKUP` and then
-`QUEST_FLOW_FIRST_HARD_GATE` from
+`QUEST_FLOW_FIRST_HARD_GATE`, then
+`OPENKORE_REFERENCE_ATLAS_LOOKUP` from
 `.agents/skills/quest-flow-first/SKILL.md` before entering this gate. Quest Flow
 First establishes normal player semantics and server completion criteria; this
 gate then evaluates OpenKore-era behavior and PA adaptation. Web control is not
@@ -266,7 +274,10 @@ Every major behavior must be classified before source edit:
 ```text
 REPRODUCE = retain OpenKore semantics
 ADAPT = retain semantics and move execution to PA / SERVER_AGENT → rAthena
+IMPROVE = change the implementation while preserving authority and proving an
+  equivalent or better player-visible result
 REJECT_LEGACY = record why the legacy behavior is unsuitable
+NOT_APPLICABLE = record why the reference does not apply to this capability
 ```
 
 Then complete the review:
@@ -291,6 +302,11 @@ OPENKORE_DEVIATION = YES
 OPENKORE_BEHAVIOR =
 PROPOSED_GHOST_ISLAND_BEHAVIOR =
 WHY_OPENKORE_IS_NOT_SUITABLE =
+WHY_DEVIATE =
+WHAT_IS_BETTER =
+SERVER_AUTHORITY_PRESERVED = YES / NO
+REGRESSION_RISK =
+RESULT_EQUIVALENT_OR_BETTER = YES / NO
 PLAYER_VALUE_GAIN =
 ARCHITECTURE_GAIN =
 NEW_RISK =

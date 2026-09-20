@@ -38,6 +38,63 @@ this skill. Only pure documentation, formatting, CSS/layout or static asset work
 that leaves gameplay state, authority, lifecycle and player-visible behavior
 unchanged may use `OPENKORE_REFERENCE_REQUIRED = NO`.
 
+## 2A. OpenKore Reference Atlas lookup
+
+For every discussion, planning, dispatch, debugging, implementation, refactor,
+migration, recovery or testing involving a triggered OpenKore-era capability,
+first search
+`docs/openkore-reference/reference-index.yml`, then read only the relevant
+topic. Continue with linked Project Last-Good evidence, locked OpenKore mature
+behavior, rAthena authority and Current PA before locating the
+`FIRST_BROKEN_TRANSITION`.
+
+```text
+OPENKORE_REFERENCE_ATLAS_TRIGGER = MANDATORY / BLOCKING
+OPENKORE_REFERENCE_ATLAS_TRIGGERED = YES / NO
+OPENKORE_ATLAS_TOPIC =
+OPENKORE_ATLAS_FILES =
+OPENKORE_ATLAS_SEARCHED = YES / NO
+RATHENA_ATLAS_SEARCHED = YES / NO
+AUTHORITATIVE_SOURCE_CHECKED = YES / NO
+PROJECT_LAST_GOOD_CHECKED = YES / NO
+OPENKORE_MATURE_BEHAVIOR_CHECKED = YES / NO
+RATHENA_AUTHORITY_CHECKED = YES / NO
+CURRENT_PA_CHECKED = YES / NO
+REFERENCE_GAP = CONFIRMED / NOT_CONFIRMED
+```
+
+Do not read the full Atlas by default. `UNKNOWN` does not establish absence.
+Only after `RATHENA_ATLAS_SEARCHED = YES`, `OPENKORE_ATLAS_SEARCHED = YES`,
+`PROJECT_LAST_GOOD_CHECKED = YES` and `AUTHORITATIVE_SOURCE_CHECKED = YES` may
+a Worker declare `REFERENCE_GAP = CONFIRMED`.
+
+The Atlas is an index and lookup aid. It is not product specification or
+runtime authority:
+
+```text
+REFERENCE_IS_FLOOR_NOT_CEILING = YES
+OPENKORE_REFERENCE_ATLAS != PRODUCT_SPEC
+OPENKORE_REFERENCE_ATLAS != RUNTIME_AUTHORITY
+FINAL_DESIGN_CENTER = PA / SERVER_AGENT
+```
+
+PA may improve mature behavior when server authority and the player-visible
+result are preserved. A deviation must record:
+
+```text
+REUSE_CLASSIFICATION = REPRODUCE / ADAPT / IMPROVE / REJECT_LEGACY / NOT_APPLICABLE
+WHY_DEVIATE =
+WHAT_IS_BETTER =
+SERVER_AUTHORITY_PRESERVED = YES / NO
+REGRESSION_RISK =
+RESULT_EQUIVALENT_OR_BETTER = YES / NO
+```
+
+Project-specific gameplay rules take precedence over upstream OpenKore item
+semantics. In this Project, Fly Wing and Butterfly Wing are `NON_CONSUMABLE`;
+reuse/adapt the mature `when`, `why`, state transition, retry and recovery
+knowledge without importing a conflicting consumption rule.
+
 ## 3. Six-question core alignment veto
 
 Before source edit and again during Project Control acceptance, answer:
@@ -116,7 +173,8 @@ edit.
 ## 5. Reconstruction order
 
 ```text
-OpenKore mature behavior
+OpenKore Reference Atlas lookup
+→ OpenKore mature behavior
 → Last-Good reconstruction
 → Current Ghost Island behavior
 → exact behavior comparison
@@ -136,6 +194,23 @@ PA / SERVER_AGENT → rAthena
 
 OpenKore runtime remains disabled as a production dependency.
 
+For Quest-related work, the complete order is:
+
+```text
+RATHENA_REFERENCE_ATLAS_LOOKUP
+→ QUEST_FLOW_FIRST_HARD_GATE
+→ OPENKORE_REFERENCE_ATLAS_LOOKUP
+→ OPENKORE_REFERENCE_GATE
+→ PROJECT_LAST_GOOD_MAPPING
+→ CURRENT_QUEST_RUNTIME_MAPPING
+→ FIRST_BROKEN_TRANSITION
+→ implementation
+```
+
+For non-Quest automation, use the Atlas, authoritative rAthena source,
+OpenKore Atlas, Project Last-Good, Current PA, then the first broken
+transition before implementation.
+
 ## 6. Behavior mapping
 
 Every major behavior requires an itemized mapping:
@@ -145,7 +220,7 @@ BEHAVIOR_MAPPING =
 1.
 OPENKORE =
 CURRENT_GHOST_ISLAND =
-DECISION = REPRODUCE / ADAPT / REJECT_LEGACY
+DECISION = REPRODUCE / ADAPT / IMPROVE / REJECT_LEGACY / NOT_APPLICABLE
 WHY =
 EXACT_STATE_TRANSITION =
 EXACT_RECOVERY =
@@ -226,6 +301,18 @@ Project Control marks `OPENKORE_REFERENCE_REQUIRED` in every related dispatch
 and includes:
 
 ```text
+OPENKORE_REFERENCE_ATLAS_TRIGGERED =
+OPENKORE_ATLAS_TOPIC =
+OPENKORE_ATLAS_FILES =
+OPENKORE_ATLAS_SEARCHED =
+PROJECT_LAST_GOOD_CHECKED =
+OPENKORE_MATURE_BEHAVIOR_CHECKED =
+RATHENA_AUTHORITY_CHECKED =
+CURRENT_PA_CHECKED =
+REFERENCE_IS_FLOOR_NOT_CEILING = YES
+FINAL_DESIGN_CENTER = PA / SERVER_AGENT
+REUSE_CLASSIFICATION = REPRODUCE / ADAPT / IMPROVE / REJECT_LEGACY / NOT_APPLICABLE
+REFERENCE_CONFLICT = YES / NO
 DO NOT IMPLEMENT BEFORE:
 OPENKORE_REFERENCE_GATE = PASS
 MANDATORY_PRE_IMPLEMENTATION_CHECK:

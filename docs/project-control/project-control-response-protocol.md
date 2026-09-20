@@ -31,10 +31,12 @@ D = Persistent Agent / Native / Combat / Supply / Navigation / native capability
 E = Quest / Job Change / Quest integration
 ```
 
-`F = on-demand rAthena Reference Atlas research / indexing / source mapping`.
+`F = ON_DEMAND REFERENCE / RESEARCH WORKLINE` for rAthena and OpenKore Atlas
+research, indexing, source mapping, provenance and reference-conflict review.
 F is normally `WAITING` or `CLOSED`, is not permanently active, and does not
 directly modify gameplay. Reopen F only for an Atlas gap, stale reference,
-version conflict, new rAthena subsystem or high-value forum/community research.
+version conflict, new subsystem, upstream meaning change or high-value
+forum/community research.
 The fixed Project Control footer remains the A-E six-column table.
 
 ## 2. Workline states
@@ -223,16 +225,20 @@ Atlas is an index and lookup aid, not gameplay authority. Current canonical
 rAthena source, project-specific server rules and authoritative config win a
 conflict; stale Atlas text must not drive implementation.
 
-Only after `ATLAS_SEARCHED = YES`, `AUTHORITATIVE_SOURCE_CHECKED = YES` and
-`PROJECT_LAST_GOOD_CHECKED = YES` may a Worker declare
-`REFERENCE_GAP = CONFIRMED` or request `NEW_IMPLEMENTATION`.
+For an OpenKore reference gap, only after
+`RATHENA_ATLAS_SEARCHED = YES`, `OPENKORE_ATLAS_SEARCHED = YES`,
+`PROJECT_LAST_GOOD_CHECKED = YES` and `AUTHORITATIVE_SOURCE_CHECKED = YES`
+may a Worker declare `REFERENCE_GAP = CONFIRMED` or request
+`NEW_IMPLEMENTATION`. `UNKNOWN` does not establish absence.
 
 Do not require reading all Atlas files. Preserve this lookup state across
 dispatch and continuation handoffs.
 
 For Quest work, the next gate is Quest Flow First. For other gameplay work,
-continue to authoritative source tracing, Last-Good/OpenKore comparison when
-applicable and `FIRST_BROKEN_TRANSITION`.
+use `RATHENA_REFERENCE_ATLAS -> authoritative rAthena source ->
+OPENKORE_REFERENCE_ATLAS -> PROJECT_LAST_GOOD -> CURRENT_PA ->
+FIRST_BROKEN_TRANSITION -> REPRODUCE / ADAPT / IMPROVE / REJECT_LEGACY /
+NOT_APPLICABLE -> implementation`.
 
 ## 5B. Quest Flow First hard gate
 
@@ -267,13 +273,17 @@ historical Last-Good reconstruction, current-runtime comparison and test-only
 diagnostics are permitted. The worker must understand the normal player flow
 through the server-recognized completion state before deciding how to automate.
 
-Quest Flow First runs before the existing OpenKore gate:
+Quest Flow First runs before the OpenKore Atlas and existing OpenKore gate:
 
 ```text
 RATHENA_REFERENCE_ATLAS_LOOKUP
 →
 QUEST_FLOW_FIRST_HARD_GATE
+→ OPENKORE_REFERENCE_ATLAS_LOOKUP
 → OPENKORE_REFERENCE_GATE
+→ PROJECT_LAST_GOOD_MAPPING
+→ CURRENT_QUEST_RUNTIME_MAPPING
+→ FIRST_BROKEN_TRANSITION
 → implementation
 ```
 
@@ -302,7 +312,62 @@ The recheck must reopen the player flow, rAthena script, historical Last-Good,
 current runtime mapping and wrong assumptions before Project Control
 reauthorizes the direction.
 
-## 5C. OpenKore reference-first hard gate
+## 5C. OpenKore Reference Atlas lookup gate
+
+For every workline triggered by an OpenKore-era automation capability, Project
+Control must require the focused OpenKore Atlas lookup before the existing
+OpenKore gate:
+
+```text
+OPENKORE_REFERENCE_ATLAS_TRIGGER = MANDATORY / BLOCKING
+OPENKORE_REFERENCE_ATLAS_TRIGGERED = YES
+OPENKORE_ATLAS_TOPIC =
+OPENKORE_ATLAS_FILES =
+OPENKORE_ATLAS_SEARCHED = YES / NO
+RATHENA_ATLAS_SEARCHED = YES / NO
+AUTHORITATIVE_SOURCE_CHECKED = YES / NO
+PROJECT_LAST_GOOD_CHECKED = YES / NO
+OPENKORE_MATURE_BEHAVIOR_CHECKED = YES / NO
+RATHENA_AUTHORITY_CHECKED = YES / NO
+CURRENT_PA_CHECKED = YES / NO
+REFERENCE_GAP = CONFIRMED / NOT_CONFIRMED
+REFERENCE_IS_FLOOR_NOT_CEILING = YES
+OPENKORE_REFERENCE_ATLAS != PRODUCT_SPEC
+OPENKORE_REFERENCE_ATLAS != RUNTIME_AUTHORITY
+FINAL_DESIGN_CENTER = PA / SERVER_AGENT
+REUSE_CLASSIFICATION = REPRODUCE / ADAPT / IMPROVE / REJECT_LEGACY / NOT_APPLICABLE
+WHY_DEVIATE =
+WHAT_IS_BETTER =
+SERVER_AUTHORITY_PRESERVED = YES / NO
+REGRESSION_RISK =
+RESULT_EQUIVALENT_OR_BETTER = YES / NO
+REFERENCE_CONFLICT = YES / NO
+OPENKORE_BEHAVIOR =
+PROJECT_LAST_GOOD =
+RATHENA_BEHAVIOR =
+CURRENT_PA_BEHAVIOR =
+PROJECT_RULE =
+LIKELY_REASON =
+PA_RECOMMENDED_DIRECTION =
+NEEDS_PC_DECISION = YES / NO
+```
+
+Project-specific item rule: Fly Wing and Butterfly Wing are
+`NON_CONSUMABLE`; upstream OpenKore consumption behavior must not override
+this project contract.
+
+Lookup starts at `docs/openkore-reference/reference-index.yml`, reads only the
+relevant topic, follows Project Last-Good links, checks locked OpenKore mature
+behavior, rAthena authority and Current PA, then identifies the first broken
+transition. `UNKNOWN` does not establish absence. Only after the relevant
+checks are complete may `REFERENCE_GAP = CONFIRMED` or a new implementation be
+requested. Preserve this state across dispatch and continuation handoffs.
+
+The mature reference is a floor for behavior, retry, recovery and edge cases;
+PA may improve it when server authority and player-visible equivalence remain
+proven. Do not copy OpenKore runtime architecture or restore OpenKore runtime.
+
+## 5D. OpenKore reference-first hard gate
 
 For every workline involving an OpenKore-era gameplay capability or a Web /
 Controller action that controls or presents one, Project Control must persist:

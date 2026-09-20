@@ -946,6 +946,45 @@ Compliance requires:
 The Gate is operational procedure.
 `AGENTS.md` remains policy authority.
 
+### OpenKore Reference Atlas integration
+
+OpenKore-era capability work, including discussion, planning, dispatch,
+debugging, implementation, refactor, migration, recovery and testing, must
+first search
+`docs/openkore-reference/reference-index.yml` and read only the relevant topic.
+Then check Project Last-Good, locked OpenKore mature behavior, rAthena
+authority, Current PA and `FIRST_BROKEN_TRANSITION`.
+
+```text
+OPENKORE_REFERENCE_ATLAS_TRIGGER = MANDATORY / BLOCKING
+OPENKORE_RUNTIME_COUNT = 0
+RATHENA_ATLAS_SEARCHED = YES / NO
+OPENKORE_ATLAS_SEARCHED = YES / NO
+AUTHORITATIVE_SOURCE_CHECKED = YES / NO
+PROJECT_LAST_GOOD_CHECKED = YES / NO
+REFERENCE_GAP = CONFIRMED / NOT_CONFIRMED
+REFERENCE_IS_FLOOR_NOT_CEILING = YES
+OPENKORE_REFERENCE_ATLAS != PRODUCT_SPEC
+OPENKORE_REFERENCE_ATLAS != RUNTIME_AUTHORITY
+FINAL_DESIGN_CENTER = PA / SERVER_AGENT
+REUSE_CLASSIFICATIONS = REPRODUCE / ADAPT / IMPROVE / REJECT_LEGACY / NOT_APPLICABLE
+REFERENCE_CONFLICT = YES / NO
+OPENKORE_BEHAVIOR =
+PROJECT_LAST_GOOD =
+RATHENA_BEHAVIOR =
+CURRENT_PA_BEHAVIOR =
+PROJECT_RULE =
+LIKELY_REASON =
+PA_RECOMMENDED_DIRECTION =
+NEEDS_PC_DECISION = YES / NO
+```
+
+OpenKore Atlas knowledge is a floor for mature behavior, retry, recovery and
+edge-case coverage. PA may improve it when server authority and player-visible
+equivalence are preserved. A deviation records `WHY_DEVIATE`,
+`WHAT_IS_BETTER`, `SERVER_AUTHORITY_PRESERVED`, `REGRESSION_RISK` and
+`RESULT_EQUIVALENT_OR_BETTER`.
+
 ### 12A. OPENKORE_REFERENCE_FIRST_HARD_GATE
 
 ```text
@@ -966,10 +1005,11 @@ SOURCE_EDIT = PROHIBITED
 強制順序：
 
 ```text
-OpenKore mature behavior
+OpenKore Reference Atlas lookup
+→ OpenKore mature behavior
 → Last-Good reconstruction
 → Current Ghost Island behavior
-→ REPRODUCE / ADAPT / REJECT_LEGACY mapping
+→ REPRODUCE / ADAPT / IMPROVE / REJECT_LEGACY / NOT_APPLICABLE mapping
 → GHOST_ISLAND_OPTIMIZATION_REVIEW
 → source edit
 ```
@@ -1383,8 +1423,9 @@ authoritative source 為準並安排 Atlas correction。只有在
 `REFERENCE_GAP = CONFIRMED` 並提出 `NEW_IMPLEMENTATION`。
 
 預設只讀 reference-index、相關 topic 與必要的 lookup-playbook，不要求
-Worker 閱讀完整 Atlas。F 為按需的 rAthena reference research／indexing／
-source mapping workline，預設 `WAITING / CLOSED`，不直接修改 gameplay。
+Worker 閱讀完整 Atlas。F 為按需的 rAthena／OpenKore Reference research、
+indexing、source mapping、provenance 與 conflict review workline，預設
+`WAITING / CLOSED`，不直接修改 gameplay。
 
 ## Quest Flow First Hard Gate
 
@@ -1399,8 +1440,15 @@ migration、recovery 與 testing，必須先讀取：
 固定順序：
 
 ```text
-QUEST_FLOW_FIRST_HARD_GATE
+RATHENA_REFERENCE_ATLAS_LOOKUP
+→ QUEST_FLOW_FIRST_HARD_GATE（如 Quest）
+→ OPENKORE_REFERENCE_ATLAS_LOOKUP（如適用）
 → OPENKORE_REFERENCE_GATE（如適用）
+→ PROJECT_LAST_GOOD_MAPPING
+→ CURRENT_QUEST_RUNTIME_MAPPING（如 Quest）
+→ CURRENT_RUNTIME_MAPPING（非 Quest）
+→ FIRST_BROKEN_TRANSITION
+→ REPRODUCE / ADAPT / IMPROVE / REJECT_LEGACY / NOT_APPLICABLE
 → implementation
 ```
 
@@ -1409,7 +1457,11 @@ Quest work 的完整順序為：
 ```text
 RATHENA_REFERENCE_ATLAS_LOOKUP
 → QUEST_FLOW_FIRST_HARD_GATE
+→ OPENKORE_REFERENCE_ATLAS_LOOKUP（如適用）
 → OPENKORE_REFERENCE_GATE（如適用）
+→ PROJECT_LAST_GOOD_MAPPING
+→ CURRENT_QUEST_RUNTIME_MAPPING
+→ FIRST_BROKEN_TRANSITION
 → implementation
 ```
 
