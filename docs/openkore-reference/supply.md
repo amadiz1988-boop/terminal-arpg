@@ -4,210 +4,174 @@
 CAPABILITY = AUTO_FARM supply replenishment and return-to-farm
 REFERENCE_VERSION = OpenKore project lock / StackVersion 0.1.0
 REFERENCE_COMMIT = 51de1ddfc4449ae5217f6886de702f87ca934030
-REFERENCE_FILES =
-  ops/ro-stack/openkore-plugins/status-export/status-export.pl
-  ops/ro-stack/openkore-instance.ps1
-  docs/openkore-exit-source-of-truth.md
-  docs/openkore-harvest-registry.md
-  docs/QUEST_RUNTIME_FOUNDATION.md
-REFERENCE_SYMBOLS =
-  guard_auto_supply_start
-  record_failed_map_route
-  process_supply_route_abort
-  process_navigation_route_resume
-  finish_supply_storage_cycle
-  reserve_storage_zeny
-  recover_interrupted_supply
-REFERENCE_CONFIG = project-generated OpenKore control/config.txt
-PROJECT_LAST_GOOD_CONFIG = ops/ro-stack/openkore-instance.ps1:164-215,284-299
-PROJECT_LAST_GOOD_CONFIG_SOURCE = project OpenKore instance generator
-PROJECT_LAST_GOOD_CONFIG_VERSION = OpenKore 51de1ddfc4449ae5217f6886de702f87ca934030
-PROJECT_LAST_GOOD_CONFIG_PROVENANCE = docs/CURRENT_STATUS.md:519; Gate 2 and
-  Quest Runtime historical PASS evidence
-TRIGGER = supply item count below policy minimum while AUTO_FARM is active
-STATE_MACHINE = farm -> supply low -> pause combat -> service relocation ->
-  authoritative buy -> target reached -> return to lockMap -> combat resume
-SUCCESS_PATH = Gate 2 supply player-flow PASS
-FAILURE_PATH = bounded route/service failure, insufficient funds, capacity or
-  post-supply target failure
-RECOVERY = return to saved farm intent, bounded backoff, or fail closed
-RETRY = max three supply attempts in current PA policy; route backoff is five
-  minutes in the harvested OpenKore compatibility behavior
-EDGE_CASES = no wing, storage branch, route failure, weight not reduced,
-  restart/reconnect during supply, duplicate resume
-RATHENA_REFERENCE = authoritative item, inventory, Zeny, NPC service, save-point
-  and map state; rAthena decides mutation and ownership
-BEHAVIOR_MAPPING = see mapping below
-ACCEPTED_GHOST_ISLAND_CONTRACT = see accepted contract below
-KNOWN_DEVIATIONS = client/process/file transport is rejected; storageAuto is
-  outside the first buy-based PA supply contract
+PROJECT_LAST_GOOD_CONFIG = .local/ro-stack/instances/player_2000034/control/config.txt
+PROJECT_GENERATOR_CONFIG = ops/ro-stack/openkore-instance.ps1:164-215,284-299
+RATHENA_AUTHORITY = item use, save point, map, NPC transaction, inventory and Zeny
+PRODUCT_CONTRACT = Butterfly Wing is the primary Supply Out path
 LAST_VERIFIED = 2026-09-20
 ```
 
 ## Evidence Order
 
-The evidence order is project-first:
-
-1. Project actual PASS evidence: Gate 2 buy-based supply and Gate 3 service
-   relocation in `docs/openkore-exit-source-of-truth.md:372-439,460-528`.
-2. Project locked OpenKore version and generated configuration in
-   `docs/CURRENT_STATUS.md:519`, `ops/ro-stack/stack.config.psd1:5-6`, and
-   `ops/ro-stack/openkore-instance.ps1:164-215,284-299`.
-3. Project OpenKore bridge behavior in
-   `ops/ro-stack/openkore-plugins/status-export/status-export.pl`.
-4. rAthena is the server authority for item, inventory, Zeny, NPC service,
-   save-point and map mutations.
-
-No latest-upstream configuration is being treated as the project canonical
-configuration.
+Evidence is project-first: the historical project instance and PASS records,
+the locked OpenKore source/configuration, the project bridge behavior, then
+rAthena server-side semantics. No latest-upstream configuration is treated as
+the project canonical configuration.
 
 ## OpenKore Last-Good Behavior
 
-The project-generated OpenKore profile establishes:
+The historical project instance has:
 
 ```text
-lockMap = current farm target
-teleportAuto_item1 = 601
-teleportAuto_item2 = 602
-route_warpByItem = 1
-route_warpByItem_chaining = 0
-route_warpByItem_minDistance = 150
-route_warpItem_minGain = 40
-saveMap_warp = 1
-saveMap_warp_minDistance = 80
-buyAuto 501 = minAmount 200, zeny >= 10
-buyAuto 601 / 602 = absent
+route_teleport 1
+route_teleport_minDistance 75
+route_teleport_maxTries 8
+route_warpByItem 1
+route_warpByItem_chaining 0
+route_warpByItem_minDistance 150
+route_warpItem_minGain 40
+saveMap_warp 1
+saveMap_warpToBuyOrSell 1
+saveMap_warp_minDistance 80
+buyAuto 501 = maxAmount 100, zeny >= 10
+storageAuto 1 = prontera 151 29
 ```
 
-The project bridge observes `buyAuto`, `sellAuto` and `storageAuto` queue state,
-records route failures, applies bounded retry/backoff, and preserves a farm
-resume map. The bridge also records successful Butterfly Wing item 602 use and
-the following map-change event. These are client transport observations, not
-world authority.
+These values are in `.local/ro-stack/instances/player_2000034/control/config.txt:227-271,727-765`.
+The project generator configures item `602` as Butterfly Wing and item `601`
+as Fly Wing, removes `buyAuto 601` and `buyAuto 602`, and treats travel wings
+as supplied by rAthena rather than as the consumable supply target
+(`ops/ro-stack/openkore-instance.ps1:169-214`).
+
+OpenKore's direct service path is:
+
+```text
+buyAuto / sellAuto / storageAuto
+-> shouldUseWarpToSaveMapForBuyOrSell
+-> ai_useTeleport(2)
+-> server map change to the authoritative save point
+-> normal route to the configured NPC when needed
+-> service transaction
+```
+
+`shouldUseWarpToSaveMapForBuyOrSell` requires `saveMap`,
+`saveMap_warpToBuyOrSell`, a known distance and the configured minimum
+distance (`.local/ro-stack/openkore/src/AI/CoreLogic.pm:4122-4134`). The buy,
+sell and storage callers invoke `ai_useTeleport(2)` at
+`.local/ro-stack/openkore/src/AI/CoreLogic.pm:1481-1501,1924-1943,2150-2170`.
+The project bridge records successful item `602` use and the following map
+change (`ops/ro-stack/openkore-plugins/status-export/status-export.pl:334-346`),
+and verifies Butterfly Wing arrival against the server-authoritative save point
+(`ops/ro-stack/openkore-plugins/status-export/status-export.pl:1466-1479`).
+
+## Required Product Boundary
+
+Supply Out and Supply Back are separate:
+
+```text
+SUPPLY_OUT = farm map -> Butterfly Wing -> rAthena authoritative Save Point
+SUPPLY_BACK = Save Point / service -> normal PA navigation -> farm map
+```
+
+The primary chain is:
+
+```text
+AUTO_FARM
+-> SUPPLY_LOW
+-> pause combat
+-> verify Butterfly Wing availability
+-> use Butterfly Wing
+-> verify server map is the authoritative Save Point
+-> normal PA navigation to service / shop
+-> authoritative rAthena buy
+-> confirm inventory and Zeny
+-> normal PA navigation to original farm target / lockMap
+-> reacquire target
+-> combat resume
+```
+
+`storageAuto` is present in the historical configuration and remains a
+reference branch for storage or weight handling. It does not replace the
+mandatory Butterfly Wing Supply Out step or authorize unrelated storage work.
 
 ## Behavior Mapping
 
-### SUPPLY_LOW trigger
-
 ```text
-OPENKORE = buyAuto/service queue becomes necessary when supply policy is low
-CURRENT_GHOST_ISLAND = PERSISTENT_AGENT_SUPPLY_ITEM=501,
-  MIN=5, TARGET=15; Gate 2 observed inventory 2 -> 15
-DECISION = ADAPT
-WHY = preserve the player-visible low-supply pause and target replenishment while
-  moving the decision and mutation into PA / SERVER_AGENT -> rAthena
-EXACT_STATE_TRANSITION = AUTO_FARM -> SUPPLY_LOW -> FARM_PAUSED_FOR_SUPPLY
-EXACT_RECOVERY = complete authoritative service buy, then return to farm intent
-EXACT_DIFFERENCE = current PA does not depend on an OpenKore worker queue
+SUPPLY_LOW = LEGITIMATE_ADAPTATION
+  PA owns the intent/state transition; rAthena owns purchase and inventory/Zeny.
+
+Butterfly Wing / saveMap = LEGITIMATE_ADAPTATION
+  PA must issue the equivalent authoritative relocation intent.
+
+buyAuto = LEGITIMATE_ADAPTATION
+  Reuse the authoritative rAthena shop transaction and confirmation.
+
+storageAuto = REFERENCE_BRANCH
+  Retain as evidence; it is not the replacement for Supply Out.
+
+completion / return / combat resume = LEGITIMATE_ADAPTATION
+  Supply target reached -> return to original lockMap -> target/combat resume.
 ```
 
-### Butterfly Wing / Teleport-to-SaveMap
+The route planner adds a save-map teleport candidate when `saveMap_warp` is
+enabled (`.local/ro-stack/openkore/src/Task/CalcMapRoute.pm:897-940`). The
+separate item-warp candidate list only includes an item present in inventory
+(`.local/ro-stack/openkore/src/Task/CalcMapRoute.pm:943-1000,1147-1155,1241-1258`).
+These are reference mechanics; rAthena remains authoritative for the result.
+
+## No Butterfly Wing
+
+OpenKore omits an absent item from its item-warp candidates. Its service route
+also has a bounded timeout after which it falls back to walking
+(`.local/ro-stack/openkore/src/AI/CoreLogic.pm:1488-1500,2156-2168`). The
+project bridge limits repeated route failures to three attempts and applies a
+five-minute backoff (`ops/ro-stack/openkore-plugins/status-export/status-export.pl:489-554`).
 
 ```text
-OPENKORE = item 602 can be used for route_warp or saveMap_warp; map arrival is
-  observed after the item use
-CURRENT_GHOST_ISLAND = server-authoritative relocation and rAthena save-point
-  behavior; supply route uses explicit PA route data
-DECISION = ADAPT
-WHY = preserve relocation semantics where needed, while refusing client item use
-  and client map observation as the authority
-EXACT_STATE_TRANSITION = relocation intent -> rAthena route/teleport -> map state
-EXACT_RECOVERY = if item relocation is unavailable, use the authoritative route
-EXACT_DIFFERENCE = first PA supply contract does not require a Butterfly Wing
+NO_BUTTERFLY_WING_POLICY =
+  bounded safe fallback route only when the authoritative route is valid;
+  if it cannot complete within the existing retry policy, safe idle / blocked
+  supply and retry after backoff;
+  never promote walking to primary Supply Out;
+  never force indefinite walking;
+  do not assume automatic purchase of item 602 because buyAuto 602 is removed
+DECISION = FALLBACK_ONLY
 ```
 
-### saveMap behavior
+This is conditional fallback behavior. It does not mean no wing always means
+walking.
+
+## Failure, Retry and Restart
 
 ```text
-OPENKORE = saveMap is a client route destination and saveMap_warp is a shortcut
-CURRENT_GHOST_ISLAND = rAthena save point owns respawn/death semantics; current PA
-  supply return uses the farm target route and does not rewrite the save point
-DECISION = ADAPT
-WHY = retain server save-point semantics without coupling supply to client config
-EXACT_STATE_TRANSITION = server save point remains authoritative; supply preserves
-  the original farm target as its return intent
-EXACT_RECOVERY = death recovery uses the server save point, then resumes target
-EXACT_DIFFERENCE = saveMap is not a supply-route configuration mutation
+FAILURE = bounded route/service failure, insufficient funds, capacity or
+  post-supply target failure
+RETRY = existing three-failure threshold and five-minute supply backoff
+RESTART = preserve active supply intent and prevent duplicate resume
+DECISION = LEGITIMATE_ADAPTATION
 ```
 
-### buyAuto
+Existing bounded recovery and restart evidence may be reused. It must not hide
+a failed Butterfly Wing primary step.
+
+## Required Classification
 
 ```text
-OPENKORE = buyAuto performs the service interaction and receives item/price result
-CURRENT_GHOST_ISLAND = existing rAthena service interaction validates item,
-  quantity, price, Zeny and inventory; Gate 2 PASS
-DECISION = ADAPT
+PersistentAgentRouteSupplyOut = FALLBACK_ONLY
+PersistentAgentRouteSupplyBack = LEGITIMATE_ADAPTATION
+supply_route preservation = LEGITIMATE_ADAPTATION
+service relocation = LEGITIMATE_ADAPTATION
+CAN_WALKING_SUPPLY_OUT_REMAIN_AS_FALLBACK = YES
 ```
 
-### storageAuto
+The current PA `RouteSupplyOut` JSON is not canonical primary behavior because
+it makes multi-map walking the first farm-to-service leg. It remains only as a
+bounded no-wing or failed-teleport fallback. `RouteSupplyBack` is valid because
+the product contract uses normal PA navigation after Save Point/service.
+Service relocation is valid only after Supply Out reaches the authoritative
+Save Point.
 
-```text
-OPENKORE = optional storage branch participates in the supply queue and weight
-  handling
-CURRENT_GHOST_ISLAND = Gate 2 explicitly records STORAGE=NOT_REQUIRED and the
-  first PA supply contract is buy-based through Tool Dealer#Extended_Prt
-DECISION = REJECT_LEGACY
-WHY = no storage implementation is authorized for D's first supply contract;
-  do not infer storage behavior from an OpenKore queue flag
-```
-
-### Completion, return and combat resume
-
-```text
-OPENKORE = purchase reaches target, lockMap is restored, AI resumes farm
-CURRENT_GHOST_ISLAND = SUPPLY_TARGET_REACHED -> RETURN_TO_FARM ->
-  POST_SUPPLY_TARGET -> POST_SUPPLY_ATTACK/HIT, all Gate 2 PASS
-DECISION = ADAPT
-```
-
-### No-wing behavior
-
-```text
-OPENKORE = normal route remains available when item relocation cannot be used
-CURRENT_GHOST_ISLAND = explicit PA supply route out/back uses map/portal route
-  data and rAthena authority; it does not require item 602
-DECISION = ADAPT
-```
-
-### Failure and retry
-
-```text
-OPENKORE = three route failures in the same route/window trigger abort; supply
-  retry is delayed 300 seconds; weight-not-reduced also backs off 300 seconds
-CURRENT_GHOST_ISLAND = supply policy has bounded max retries; route and service
-  relocation are bounded and fail closed; existing recovery preserves the farm
-  intent rather than creating a second route engine
-DECISION = ADAPT
-```
-
-### Restart and reconnect
-
-```text
-OPENKORE = interrupted supply is recovered through the project bridge guard and
-  existing supply queue
-CURRENT_GHOST_ISLAND = durable PA/agent state and current restart/reconnect
-  evidence preserve the active intent and prevent duplicate resume
-DECISION = ADAPT
-WHY = server persistence is stronger than client config/worker recovery
-```
-
-## Required Special Classification
-
-```text
-supplyRouteOut = ADAPT
-supplyRouteBack = ADAPT
-supply_route preservation = ADAPT
-service relocation = ADAPT
-```
-
-The four classifications preserve the supply intent and player result through
-current PA route/service authority. They do not authorize a second navigation
-engine or a client-side route/config clone.
-
-## Current PA Contract
-
-The current PA route projection is explicit in
-`ops/ro-stack/stack.config.psd1:60-71`:
+## Current PA Contract Correction
 
 ```text
 PERSISTENT_AGENT_SUPPLY_ENABLED = true
@@ -215,55 +179,47 @@ PERSISTENT_AGENT_SUPPLY_ITEM = 501
 PERSISTENT_AGENT_SUPPLY_MIN = 5
 PERSISTENT_AGENT_SUPPLY_TARGET = 15
 PERSISTENT_AGENT_SUPPLY_NPC = Tool Dealer#Extended_Prt
-PersistentAgentRouteSupplyOut = explicit route JSON
-PersistentAgentRouteSupplyBack = explicit route JSON
+PersistentAgentRouteSupplyOut = explicit route JSON, fallback-only
+PersistentAgentRouteSupplyBack = explicit route JSON, normal return leg
 ```
 
-The route projection is an adaptation of the supply intent. The actual inventory,
-Zeny and service mutation remains rAthena authoritative. Gate 2 proves the buy
-cycle and Gate 3 proves the cross-map relocation chain.
-
-## Objective Equivalence Evidence
+The corrected ordering is:
 
 ```text
-EQUIVALENCE_EVIDENCE =
-  Gate 2 PLAYER_FLOW_PASS, Gate 3 Chain A PLAYER_FLOW_PASS,
-  current PA route projection, quest-runtime supply restart evidence,
-  bounded recovery tests and server-authority architecture review
-PLAYER_VISIBLE_BEHAVIOR = PROVEN
-SUCCESS_PATH = PROVEN
-FAILURE_PATH = PROVEN
-RECOVERY = PROVEN
-RETRY = PROVEN
-RESTART_SAFETY = PROVEN
-RECONNECT_SAFETY = PROVEN
-AUTHORITY_CORRECTNESS = PROVEN
-STATE_CONSISTENCY = PROVEN
-RELIABILITY = PROVEN
-LATENCY = PROVEN
-SCALABILITY = PROVEN
-MAINTAINABILITY = PROVEN
-BETTER_DIMENSIONS = authority, persistence, duplicate-state control,
-  client/process independence
-REGRESSED_DIMENSIONS = NONE
-UNPROVEN_DIMENSIONS = NONE for the accepted buy-based PA supply contract;
-  storageAuto and client Butterfly Wing transport are explicitly outside it
+primary Supply Out = Butterfly Wing -> Save Point
+service relocation = normal PA navigation from Save Point
+Supply Back = normal PA navigation to original lockMap
 ```
+
+The current PA implementation is a migration target for D, not the canonical
+definition of Supply Out.
+
+## Objective Equivalence Gate
+
+```text
+REFERENCE_OBJECTIVE = preserve mature supply outcome while moving runtime
+  authority from OpenKore to PA / SERVER_AGENT -> rAthena
+PLAYER_VISIBLE_CHAIN_REQUIRED = Butterfly Wing -> Save Point -> service/buy ->
+  inventory/Zeny confirmation -> return farm -> combat resume
+CURRENT_PA_PRIMARY_OUT = not accepted; classified FALLBACK_ONLY
+CURRENT_PA_BACK = accepted normal navigation adaptation
+EQUIVALENCE_RESULT = YES for the corrected authorized contract; runtime
+  completion evidence remains required from D
+BETTER_DIMENSIONS = server authority, persistence, duplicate-state control,
+  client/process independence
+```
+
+This records the accepted contract and unlocks D. It does not claim that source
+implementation is complete.
 
 ## Optimization Decision
 
 ```text
 GHOST_ISLAND_OPTIMIZATION_REVIEWED = YES
-OPTIMIZATION_APPLIED = YES
-OPTIMIZATION_REASON = preserve supply semantics while replacing client worker,
-  client config mutation and file transport with PA/server authority
-OPTIMIZATION_DIMENSIONS = authority, restart safety, reconnect safety,
-  duplicate-state control, maintainability
+OPTIMIZATION_APPLIED = NO_NOT_NEEDED
+REASON = preserve primary teleport-to-save-point behavior while retaining
+  existing PA persistence and authority; no unrelated optimization is needed
 ```
-
-No additional optimization is required for the D unlock. `storageAuto` and
-client-side Butterfly Wing transport remain explicitly rejected from the first
-buy-based contract.
 
 ## Six-Question Gate
 
@@ -278,33 +234,50 @@ RESULT_EQUIVALENT_OR_BETTER = YES
 OPENKORE_CORE_ALIGNMENT_VETO = PASS
 ```
 
+`RESULT_EQUIVALENT_OR_BETTER` refers to the corrected authorized contract.
+Runtime completion remains pending D implementation and bounded player-flow
+acceptance.
+
 ## Accepted Supply Contract
 
 ```text
 AUTO_FARM
--> server-authoritative SUPPLY_LOW
--> preserve original farm intent
+-> SUPPLY_LOW
 -> pause combat
--> use existing PA service relocation and rAthena NPC shop
--> buy the configured item until TARGET is reached
--> confirm authoritative inventory and Zeny result
--> return through supplyRouteBack / original farm intent
--> resume target selection and combat
+-> use Butterfly Wing
+-> arrive at rAthena authoritative Save Point
+-> normal PA navigation to service / shop
+-> authoritative rAthena buy
+-> confirm inventory / Zeny
+-> normal PA navigation back to original farm target / lockMap
+-> reacquire target
+-> combat resume
 ```
 
-The contract excludes LLM behavior, storage deposit/withdraw, client worker
-ownership, client file transport, and client Butterfly Wing use as a required
-step.
+No-wing exception:
+
+```text
+no Butterfly Wing
+-> attempt only a validated safe fallback route
+-> if bounded fallback fails, safe idle / blocked supply
+-> retry after existing backoff
+```
+
+The contract excludes LLM behavior, client worker ownership, client file
+transport, and any claim that walking is primary Supply Out behavior.
 
 ## D Resume Task
 
 ```text
 FIRST_IMPLEMENTATION_TASK_FOR_D =
-Implement the bounded PA supply contract against the existing authoritative
-PERSISTENT_AGENT_SUPPLY_* policy and PersistentAgentRouteSupplyOut/Back data.
-Preserve the original farm intent across SUPPLY_LOW, service relocation, target
-confirmation, return and combat resume. Reuse existing PA/rAthena service and
-navigation capabilities. Do not create supplyRouteOut/supplyRouteBack as a new
-engine, do not add storageAuto, do not require Butterfly Wing, and do not modify
-OpenKore runtime behavior.
+Change the existing PA supply state machine so SUPPLY_LOW pauses combat, uses
+the authoritative Butterfly Wing / Save Point path as primary Supply Out,
+verifies the resulting rAthena map, then reuses existing PA service navigation
+and authoritative shop buy. Preserve inventory/Zeny confirmation, original
+lockMap intent, normal Supply Back navigation, target reacquisition, combat
+resume, bounded retry/backoff and safe no-wing fallback. Do not make multi-map
+walking primary Supply Out. Do not add buyAuto(602), LLM behavior, a second
+navigation engine or unrelated storage scope. Acceptance must prove the full
+player-flow chain and explicitly prove the no-wing bounded fallback or
+safe-blocked result.
 ```
