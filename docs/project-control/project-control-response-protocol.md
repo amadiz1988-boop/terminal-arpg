@@ -188,7 +188,73 @@ EXECUTE TO COMPLETION.
 The worker prompt body does not contain `WINDOW:`, `貼到：`, or `WORKLINE:` as
 routing instructions. The destination is shown to the user outside the block.
 
-## 5A. OpenKore reference-first hard gate
+## 5A. Quest Flow First hard gate
+
+For any discussion, planning, dispatch, debugging, implementation, refactor,
+migration, recovery or testing involving Quest, NPC, hidden NPC, OnTouch,
+dialogue, quest state, Quest Runtime, novice/onboarding, Eden, job change,
+event quest, quest navigation, quest recovery or automatic questing, Project
+Control must require:
+
+```text
+QUEST_FLOW_FIRST_TRIGGERED = YES
+QUEST_REFERENCE_DOSSIER = <path or NONE>
+TARGET_QUEST_IDENTIFIED = YES / NO
+TARGET_VERSION_IDENTIFIED = YES / NO
+PLAYER_FLOW_UNDERSTOOD = YES / NO / UNKNOWN / PARTIAL
+PLAYER_FLOW_SOURCE =
+RATHENA_SCRIPT_SOURCE =
+HISTORICAL_LAST_GOOD =
+CURRENT_QUEST_RUNTIME =
+INTERACTION_CLASSIFICATION =
+REUSABLE_COMPONENTS =
+WRONG_ASSUMPTIONS =
+FIRST_BROKEN_TRANSITION =
+WEB_CONTROL_REQUIRED = YES / NO
+SERVER_AGENT_AUTONOMY_ALLOWED = YES / NO
+IMPLEMENTATION_ALLOWED = YES / NO
+```
+
+`PLAYER_FLOW_UNDERSTOOD = UNKNOWN`, `NOT_PROVEN` or `PARTIAL` blocks gameplay
+semantic implementation. Only read-only archaeology, source tracing,
+historical Last-Good reconstruction, current-runtime comparison and test-only
+diagnostics are permitted. The worker must understand the normal player flow
+through the server-recognized completion state before deciding how to automate.
+
+Quest Flow First runs before the existing OpenKore gate:
+
+```text
+QUEST_FLOW_FIRST_HARD_GATE
+→ OPENKORE_REFERENCE_GATE
+→ implementation
+```
+
+Quest automation may remain autonomous. Player Web need not expose every
+low-level action. When `WEB_CONTROL_REQUIRED = NO`, SERVER_AGENT may execute
+approved deterministic navigation, search, retargeting, combat, dialogue,
+prohibited-target avoidance, bounded recovery and internal substeps after the
+Quest Flow First, Server Authority and automation contract gates pass. Each
+step is classified as `AUTONOMOUS`, `PLAYER_DECISION`,
+`PLAYER_CONFIRMATION`, `WEB_OPTIONAL` or `SERVER_AGENT_INTERNAL`.
+
+The only blocking conditions are unknown Quest semantics, loss of server
+authority or an undefined automation contract. Web control absence alone does
+not block autonomous execution.
+
+If one Quest flow has two downstream blockers or semantic fixes, stop before a
+third gameplay-semantic fix and record:
+
+```text
+UPSTREAM_ASSUMPTION_RECHECKED = YES
+DOWNSTREAM_BLOCKER_COUNT =
+THIRD_SEMANTIC_FIX_ALLOWED = NO
+```
+
+The recheck must reopen the player flow, rAthena script, historical Last-Good,
+current runtime mapping and wrong assumptions before Project Control
+reauthorizes the direction.
+
+## 5B. OpenKore reference-first hard gate
 
 For every workline involving an OpenKore-era gameplay capability or a Web /
 Controller action that controls or presents one, Project Control must persist:

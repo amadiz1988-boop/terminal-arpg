@@ -4,6 +4,15 @@ HARD_GATE_POLICY: `OPENKORE_REFERENCE_FIRST_HARD_GATE`
 HARD_GATE_VERSION: `V1`
 HARD_GATE_SEVERITY: `MANDATORY / BLOCKING`
 
+QUEST PRECONDITION:
+For Quest, NPC, dialogue, quest-state, job-change and automatic-quest work,
+complete `QUEST_FLOW_FIRST_HARD_GATE` from
+`.agents/skills/quest-flow-first/SKILL.md` before entering this gate. Quest Flow
+First establishes normal player semantics and server completion criteria; this
+gate then evaluates OpenKore-era behavior and PA adaptation. Web control is not
+an execution prerequisite when the Quest dossier authorizes SERVER_AGENT
+autonomy.
+
 VERSION: V1.1 (backward-compatible enhancement of V1)
 
 STATUS: CANONICAL

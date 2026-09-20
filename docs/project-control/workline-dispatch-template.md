@@ -192,6 +192,13 @@ Reference existing governance. Do not copy policy bodies into the dispatch.
 Follow PC-DISPATCH-STANDARD.
 ```
 
+For a Quest-related workline, complete `QUEST_FLOW_FIRST_HARD_GATE` in section
+10A before filling or evaluating the OpenKore gate below. The required order is:
+
+```text
+QUEST_FLOW_FIRST_HARD_GATE -> OPENKORE_REFERENCE_GATE -> implementation
+```
+
 If the workline touches an OpenKore-era capability:
 
 ```text
@@ -310,6 +317,63 @@ On `FAIL`:
 ```text
 STOP
 PROJECT_CONTROL_DECISION_REQUIRED = YES
+```
+
+---
+
+## 10A. QUEST_FLOW_FIRST_HARD_GATE
+
+If the workline touches Quest, NPC, dialogue, quest state, Quest Runtime,
+novice/onboarding, Eden, job change, event quest, quest navigation, quest
+recovery or automatic questing, complete this gate before gameplay-semantic
+implementation. It also applies to Project Control discussion and planning.
+
+```text
+QUEST_FLOW_FIRST_TRIGGERED = YES
+QUEST_REFERENCE_DOSSIER = <docs/quest-reference/<quest-key>.md or NONE>
+TARGET_QUEST_IDENTIFIED = YES / NO
+TARGET_VERSION_IDENTIFIED = YES / NO
+PLAYER_FLOW_UNDERSTOOD = YES / NO / UNKNOWN / PARTIAL
+PLAYER_FLOW_SOURCE =
+RATHENA_SCRIPT_SOURCE =
+HISTORICAL_LAST_GOOD =
+CURRENT_QUEST_RUNTIME =
+INTERACTION_CLASSIFICATION =
+REUSABLE_COMPONENTS =
+WRONG_ASSUMPTIONS =
+FIRST_BROKEN_TRANSITION =
+WEB_CONTROL_REQUIRED = YES / NO
+SERVER_AGENT_AUTONOMY_ALLOWED = YES / NO
+IMPLEMENTATION_ALLOWED = YES / NO
+```
+
+The worker must explain what a normal player does until the server recognizes
+the step as complete, then trace the authoritative script/state result. If
+`PLAYER_FLOW_UNDERSTOOD` is `UNKNOWN`, `NOT_PROVEN` or `PARTIAL`, set
+`IMPLEMENTATION_ALLOWED = NO` and perform only read-only archaeology,
+source tracing, historical reconstruction, current-runtime comparison or
+test-only diagnostics.
+
+Quest execution is not required to expose every low-level action through Web.
+When `WEB_CONTROL_REQUIRED = NO`, SERVER_AGENT may autonomously perform
+approved deterministic navigation, search, retargeting, combat, dialogue,
+bounded recovery and other internal steps after the semantic and authority
+gates pass. Record each step as `AUTONOMOUS`, `PLAYER_DECISION`,
+`PLAYER_CONFIRMATION`, `WEB_OPTIONAL` or `SERVER_AGENT_INTERNAL`.
+
+The Quest gate runs before the existing OpenKore gate:
+
+```text
+QUEST_FLOW_FIRST_HARD_GATE -> OPENKORE_REFERENCE_GATE -> implementation
+```
+
+Two downstream blockers require an upstream assumption recheck before a third
+gameplay-semantic fix:
+
+```text
+UPSTREAM_ASSUMPTION_RECHECKED = YES
+DOWNSTREAM_BLOCKER_COUNT =
+THIRD_SEMANTIC_FIX_ALLOWED = NO
 ```
 
 ---

@@ -1345,6 +1345,41 @@ Policy，且不得重定義 PA Runtime Authority。
 
 修改 Quest、NPC、補給、回程、掛機地圖或其他自動導航前，必須讀取 `.agents/skills/navigation-stall-safety/SKILL.md`。所有導航步驟都要以地圖變更、座標變更、有效 NPC 對話或任務階段推進判定進度；相同動作不得高頻重送，重試不得刷新自身停滯計時，並必須具備有限重試、已查核替代路線及恢復一般自動操作的終止狀態。
 
+## Quest Flow First Hard Gate
+
+凡涉及 Quest、任務、NPC、OnTouch、hidden NPC、dialogue、quest state、
+Quest Runtime、novice／onboarding、Eden、伊甸園、一轉、二轉、轉職、
+event quest、quest navigation、quest recovery 或 automatic questing 的
+discussion、planning、dispatch、debugging、implementation、refactor、
+migration、recovery 與 testing，必須先讀取：
+
+`.agents/skills/quest-flow-first/SKILL.md`
+
+固定順序：
+
+```text
+QUEST_FLOW_FIRST_HARD_GATE
+→ OPENKORE_REFERENCE_GATE（如適用）
+→ implementation
+```
+
+在正常玩家流程、rAthena server authority、互動類型、歷史 Last-Good、
+現有 Quest Runtime 與 `FIRST_BROKEN_TRANSITION` 尚未證明前，
+`GAMEPLAY_SEMANTIC_IMPLEMENTATION = BLOCKED`。此規則同時適用 Project
+Control 與 Worker，且不把 Player Web 手動控制當成 Quest Runtime 執行前提。
+
+每個 Quest dossier 必須標明：
+
+```text
+WEB_CONTROL_REQUIRED = YES / NO
+SERVER_AGENT_AUTONOMY_ALLOWED = YES / NO
+```
+
+`WEB_CONTROL_REQUIRED = NO` 時，通過 Quest Flow First、server authority 與
+automation contract 後，SERVER_AGENT 可執行合法的內部導航、搜尋、戰鬥、
+對話與恢復步驟。兩個 downstream blocker 後，第三個 gameplay-semantic fix
+前必須執行 upstream assumption recheck。
+
 ## 新工作讀取順序
 
 開始任何修改前，依序讀取：

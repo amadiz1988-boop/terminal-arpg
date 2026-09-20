@@ -180,6 +180,13 @@ Do not paste the roadmap. For scopes listed in `AGENTS.md`
 (`CHARACTER_LIFE_SOCIAL_SIMULATION_DIRECTION`), report
 `CHARACTER_LIFE_DIRECTION_COMPATIBILITY = PASS / FAIL / N/A`.
 
+For a Quest-related continuation, complete `QUEST_FLOW_FIRST_HARD_GATE` in
+section 9A before continuing or evaluating the OpenKore policy below:
+
+```text
+QUEST_FLOW_FIRST_HARD_GATE -> OPENKORE_REFERENCE_GATE -> implementation
+```
+
 Continue the policy already required by the original workline, for example:
 
 ```text
@@ -208,6 +215,55 @@ from this hard gate. Before the hard gate is complete, use only bounded read-onl
 diagnostics or isolated instrumentation that preserves gameplay semantics.
 
 Do not rerun the entire Gate.
+
+---
+
+## 9A. QUEST_FLOW_FIRST_CONTINUATION
+
+If the existing workline touches Quest, NPC, dialogue, quest state, Quest
+Runtime, novice/onboarding, Eden, job change, event quest, quest navigation,
+quest recovery or automatic questing, continue with the original Quest Flow
+First state. Do not restart the full archaeology unless current evidence is
+invalid or Project Control explicitly orders reconstruction.
+
+```text
+QUEST_FLOW_FIRST_TRIGGERED = YES
+QUEST_REFERENCE_DOSSIER =
+PLAYER_FLOW_UNDERSTOOD = YES / NO / UNKNOWN / PARTIAL
+PLAYER_FLOW_SOURCE =
+RATHENA_SCRIPT_SOURCE =
+HISTORICAL_LAST_GOOD =
+CURRENT_QUEST_RUNTIME =
+INTERACTION_CLASSIFICATION =
+REUSABLE_COMPONENTS =
+WRONG_ASSUMPTIONS =
+FIRST_BROKEN_TRANSITION =
+WEB_CONTROL_REQUIRED = YES / NO
+SERVER_AGENT_AUTONOMY_ALLOWED = YES / NO
+IMPLEMENTATION_ALLOWED = YES / NO
+```
+
+If `PLAYER_FLOW_UNDERSTOOD` is `UNKNOWN`, `NOT_PROVEN` or `PARTIAL`, continue
+only read-only archaeology, source tracing, historical reconstruction,
+current-runtime comparison or test-only diagnostics. Web control is not an
+execution prerequisite: when `WEB_CONTROL_REQUIRED = NO` and the semantic,
+authority and automation gates pass, SERVER_AGENT may continue approved
+internal quest steps autonomously.
+
+The gate order remains:
+
+```text
+QUEST_FLOW_FIRST_HARD_GATE -> OPENKORE_REFERENCE_GATE -> implementation
+```
+
+After two downstream blockers, record an upstream assumption recheck before
+any third gameplay-semantic fix:
+
+```text
+UPSTREAM_ASSUMPTION_RECHECKED = YES
+DOWNSTREAM_BLOCKER_COUNT =
+THIRD_SEMANTIC_FIX_ALLOWED = NO
+```
 
 ---
 
