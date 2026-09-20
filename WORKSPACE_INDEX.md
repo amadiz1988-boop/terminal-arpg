@@ -237,6 +237,7 @@ CANONICAL_HEAD:  31bc821257c47d0793fb3f2586d5eb9e17ad58cc
 BASE_HEAD:       31bc821257c47d0793fb3f2586d5eb9e17ad58cc
 SOURCE_OF_TRUTH: Quest/Web/Runtime = C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\.tmp-quest-dialogue-runtime-v1
 NATIVE_AUTHORITY: C:\Users\Administrator\source\ghost-island-rathena (READ-ONLY; route Native defects to D)
+NAVIGATION_REFERENCE: 31bc821257c47d0793fb3f2586d5eb9e17ad58cc (REFERENCE_DEPENDENCY; not an implementation base requirement)
 LAST_VERIFIED:   2026-09-21
 DO_NOT_SEARCH:   Use the resolved E worktree only. Do not search sibling worktrees.
 SEARCH_SCOPE:    E worktree exact paths; Native authority read-only when explicitly required
