@@ -1,0 +1,322 @@
+schema: RATHENA_REFERENCE_ATLAS_V1
+last_verified: '2026-09-20'
+upstream:
+  repository: https://github.com/rathena/rathena
+  branch: master
+  commit: e985006171d2eb320ee512a653f4c83aea3d81b6
+  version_confidence: high
+project:
+  native_source: C:/Users/Administrator/source/ghost-island-rathena
+  native_head: a2fb32c1249e4955458ab2a91c08715ae38075e9
+  last_good_refs:
+    - docs/EDEN_EQUIPMENT_SOURCE_DECISION.md
+    - docs/eden-next-tier-source-audit.md
+    - docs/JOB_QUEST_ADAPTER_CONTRACT.md
+    - ops/ro-stack/persistent-agent/quest-sequences/eden-course-a.json
+topics:
+  - topic: '01 QUEST'
+    keywords: [quest, setquest, checkquest, completequest, erasequest]
+    authoritative_paths: [src/map/quest.cpp, src/map/script.cpp, npc/re/quests]
+    symbols: [buildin_setquest, buildin_checkquest, buildin_completequest]
+    official_docs: [doc/script_commands.txt, doc/quest_variables.txt]
+    official_samples: [doc/sample/npc_test_quest.txt]
+    forum_refs: [https://rathena.org/board/topic/141623-request-custom-quest-player-input-the-details/]
+    project_refs: [docs/JOB_QUEST_ADAPTER_CONTRACT.md]
+    authority: mixed
+  - topic: '02 NPC'
+    keywords: [npc, script, sprite, dialog]
+    authoritative_paths: [src/map/npc.cpp, src/map/npc.hpp, npc]
+    symbols: [npc_script_event, npc_touchnext_areanpc]
+    official_docs: [doc/script_commands.txt]
+    official_samples: [doc/sample/npc_test_duplicate.txt]
+    forum_refs: [https://rathena.org/board/forum/28-script-releases/]
+    project_refs: []
+    authority: mixed
+  - topic: '03 DIALOGUE'
+    keywords: [mes, next, close, select, menu]
+    authoritative_paths: [src/map/script.cpp, doc/script_commands.txt]
+    symbols: [mes, next, select, menu]
+    official_docs: [doc/script_commands.txt]
+    official_samples: [npc/jobs/2-1/blacksmith.txt]
+    forum_refs: []
+    project_refs: []
+    authority: script
+  - topic: '04 ONTOUCH / HIDDEN NPC'
+    keywords: [OnTouch, OnTouch_, OnTouchNPC, hidden npc]
+    authoritative_paths: [src/map/npc.cpp, doc/script_commands.txt]
+    symbols: [OnTouch, OnTouch_, OnTouchNPC]
+    official_docs: [doc/script_commands.txt]
+    official_samples: [doc/sample/npc_test_duplicate.txt]
+    forum_refs: [https://rathena.org/board/topic/108965-ontouch-npc-not-working-solved/]
+    project_refs: []
+    authority: mixed
+  - topic: '05 WARP / MAP TRANSFER'
+    keywords: [warp, mapwarp, areawarp, pc_setpos]
+    authoritative_paths: [src/map/pc.cpp, src/map/unit.cpp, npc/warps]
+    symbols: [pc_setpos, unit_warp]
+    official_docs: [doc/script_commands.txt]
+    official_samples: [npc/warps/fields]
+    forum_refs: [https://rathena.org/board/topic/71742-dungeon-quest/]
+    project_refs: []
+    authority: mixed
+  - topic: '06 NAVIGATION / PATH'
+    keywords: [path, walk, route, collision, navigateto]
+    authoritative_paths: [src/map/path.cpp, src/map/unit.cpp, src/map/navi.cpp]
+    symbols: [unit_walktoxy, path_search]
+    official_docs: [doc/script_commands.txt]
+    official_samples: []
+    forum_refs: []
+    project_refs: [ops/ro-stack/persistent-agent/quest-sequences/eden-course-a.json]
+    authority: src-map
+  - topic: '07 MAP / MAPFLAG'
+    keywords: [mapflag, mf_nosave, mf_noteleport, map index]
+    authoritative_paths: [src/map/map.cpp, npc/mapflag, db/map_index.txt]
+    symbols: [setmapflag, setmapflagnosave]
+    official_docs: [doc/mapflags.txt, doc/script_commands.txt]
+    official_samples: [doc/sample/npc_test_setmapflag.txt]
+    forum_refs: []
+    project_refs: []
+    authority: mixed
+  - topic: '08 SAVE POINT / RESPAWN'
+    keywords: [savepoint, respawn, death, getsavepoint]
+    authoritative_paths: [src/map/pc.cpp, src/map/status.cpp]
+    symbols: [savepoint, getsavepoint, pc_setpos]
+    official_docs: [doc/script_commands.txt]
+    official_samples: [npc/custom/etc/penal_servitude.txt]
+    forum_refs: []
+    project_refs: []
+    authority: mixed
+  - topic: '09 JOB CHANGE'
+    keywords: [job change, Job_Change, JobLevel, SkillPoint]
+    authoritative_paths: [npc/jobs, src/map/pc.cpp]
+    symbols: [Job_Change, BaseJob, JobLevel]
+    official_docs: [doc/script_commands.txt]
+    official_samples: [npc/jobs/2-1/blacksmith.txt]
+    forum_refs: [https://rathena.org/board/topic/123970-job-quest-hunter-blacksmith/]
+    project_refs: [docs/JOB_QUEST_ADAPTER_CONTRACT.md]
+    authority: mixed
+  - topic: '10 ITEM / INVENTORY'
+    keywords: [getitem, delitem, countitem, inventory]
+    authoritative_paths: [src/map/itemdb.cpp, src/map/pc.cpp, db/re/item_db.yml]
+    symbols: [getitem, delitem, countitem]
+    official_docs: [doc/script_commands.txt, doc/item_db.txt]
+    official_samples: [npc/re/quests/eden/26-40.txt]
+    forum_refs: []
+    project_refs: []
+    authority: mixed
+  - topic: '11 SHOP / BUY / SELL'
+    keywords: [shop, cashshop, vending, buy, sell]
+    authoritative_paths: [src/map/vending.cpp, src/map/trade.cpp, npc/merchants]
+    symbols: [shop, npcshop, vending]
+    official_docs: [doc/script_commands.txt]
+    official_samples: [npc/merchants]
+    forum_refs: []
+    project_refs: []
+    authority: mixed
+  - topic: '12 KAFRA'
+    keywords: [Kafra, kafra, teleport, storage]
+    authoritative_paths: [npc/kafras, src/map/storage.cpp]
+    symbols: [storageopen, savepoint]
+    official_docs: [doc/script_commands.txt]
+    official_samples: [npc/kafras]
+    forum_refs: []
+    project_refs: []
+    authority: mixed
+  - topic: '13 STORAGE'
+    keywords: [storage, guild storage, cart]
+    authoritative_paths: [src/map/storage.cpp, src/map/storage.hpp]
+    symbols: [storage_storageopen, storage_additem]
+    official_docs: [doc/source_doc.txt]
+    official_samples: [npc/kafras]
+    forum_refs: []
+    project_refs: []
+    authority: src-map
+  - topic: '14 COMBAT'
+    keywords: [battle, damage, attack, kill attribution]
+    authoritative_paths: [src/map/battle.cpp, src/map/mob.cpp, src/map/status.cpp]
+    symbols: [battle_calc_damage, mob_dead]
+    official_docs: [conf/battle, doc/script_commands.txt]
+    official_samples: []
+    forum_refs: []
+    project_refs: []
+    authority: src-map
+  - topic: '15 MONSTER / SPAWN'
+    keywords: [monster, spawn, mob, areamonster]
+    authoritative_paths: [src/map/mob.cpp, npc/mobs, db/re/mob_db.yml]
+    symbols: [monster, areamonster]
+    official_docs: [doc/script_commands.txt]
+    official_samples: [doc/sample/instancing.txt]
+    forum_refs: []
+    project_refs: []
+    authority: mixed
+  - topic: '16 LOOT / DROP'
+    keywords: [drop, item drop, loot, mob_db]
+    authoritative_paths: [src/map/mob.cpp, db/re/mob_db.yml, db/re/item_group_db.yml]
+    symbols: [mob_dropitem, getitem]
+    official_docs: [doc/mob_db.txt, doc/item_group.txt]
+    official_samples: []
+    forum_refs: []
+    project_refs: []
+    authority: mixed
+  - topic: '17 SKILL'
+    keywords: [skill, skill_db, skill tree, cast]
+    authoritative_paths: [src/map/skill.cpp, src/map/skills, db/re/skill_db.yml]
+    symbols: [skill_castend, skill_check_condition]
+    official_docs: [doc/skill_db.txt]
+    official_samples: []
+    forum_refs: []
+    project_refs: []
+    authority: mixed
+  - topic: '18 STATUS EFFECT'
+    keywords: [status, sc_start, status change]
+    authoritative_paths: [src/map/status.cpp, db/re/status.yml]
+    symbols: [status_change_start, status_change_end]
+    official_docs: [doc/status_change.txt, doc/status.txt]
+    official_samples: []
+    forum_refs: []
+    project_refs: []
+    authority: mixed
+  - topic: '19 EXP / LEVEL / JOB LEVEL'
+    keywords: [experience, BaseLevel, JobLevel, getexp]
+    authoritative_paths: [src/map/pc.cpp, db/re/job_basepoints.yml, db/re/job_exp.yml]
+    symbols: [getexp, pc_gainexp]
+    official_docs: [doc/script_commands.txt]
+    official_samples: [npc/re/quests/eden/26-40.txt]
+    forum_refs: []
+    project_refs: []
+    authority: mixed
+  - topic: '20 PARTY'
+    keywords: [party, party leader, party quest]
+    authoritative_paths: [src/map/party.cpp, src/map/instance.cpp]
+    symbols: [party_create, instance_id]
+    official_docs: [doc/source_doc.txt]
+    official_samples: [doc/sample/instancing.txt]
+    forum_refs: []
+    project_refs: []
+    authority: src-map
+  - topic: '21 GUILD'
+    keywords: [guild, castle, guild storage]
+    authoritative_paths: [src/map/guild.cpp, npc/guild, db/re/castle_db.yml]
+    symbols: [guild_storage, guild_castle]
+    official_docs: [doc/source_doc.txt]
+    official_samples: [npc/warps/guildcastles.txt]
+    forum_refs: []
+    project_refs: []
+    authority: mixed
+  - topic: '22 CHAT'
+    keywords: [chat, whisper, channel, mapannounce]
+    authoritative_paths: [src/map/chat.cpp, src/map/clif.cpp]
+    symbols: [mapannounce, clif_displaymessage]
+    official_docs: [doc/whisper_sys.txt]
+    official_samples: []
+    forum_refs: []
+    project_refs: []
+    authority: mixed
+  - topic: '23 INSTANCE'
+    keywords: [instance, instance_create, instance_enter]
+    authoritative_paths: [src/map/instance.cpp, db/re/instance_db.yml]
+    symbols: [instance_create, instance_enter, instance_mapname]
+    official_docs: [doc/script_commands.txt]
+    official_samples: [doc/sample/instancing.txt]
+    forum_refs: []
+    project_refs: []
+    authority: mixed
+  - topic: '24 EVENT / TIMER'
+    keywords: [OnTimer, addtimer, OnInit, OnPCLoginEvent]
+    authoritative_paths: [src/map/npc.cpp, src/map/script.cpp]
+    symbols: [OnTimerXXXX, addtimer, OnInit]
+    official_docs: [doc/script_commands.txt]
+    official_samples: [doc/sample/instancing.txt]
+    forum_refs: []
+    project_refs: []
+    authority: mixed
+  - topic: '25 QUEST DATABASE'
+    keywords: [quest_db, Targets, Drops, TimeLimit]
+    authoritative_paths: [db/re/quest_db.yml, db/import/quest_db.yml]
+    symbols: [QUEST_DB]
+    official_docs: [db/readme.md, doc/quest_db.txt]
+    official_samples: [db/re/quest_db.yml]
+    forum_refs: []
+    project_refs: [docs/eden-next-tier-source-audit.md]
+    authority: db
+  - topic: '26 CHARACTER DATABASE'
+    keywords: [char database, character, save, SQL]
+    authoritative_paths: [src/char, sql-files]
+    symbols: [char_save, inter_save]
+    official_docs: [doc/source_doc.txt]
+    official_samples: []
+    forum_refs: []
+    project_refs: []
+    authority: mixed
+  - topic: '27 SCRIPT ENGINE'
+    keywords: [script engine, BUILDIN_FUNC, variables, RID]
+    authoritative_paths: [src/map/script.cpp, src/map/script.hpp]
+    symbols: [BUILDIN_FUNC, run_script_main, attachrid]
+    official_docs: [doc/script_commands.txt, doc/source_doc.txt]
+    official_samples: [doc/sample/npc_test_quest.txt]
+    forum_refs: [https://github.com/rathena/rathena/wiki/Basic-Scripting]
+    project_refs: []
+    authority: mixed
+  - topic: '28 CLIENT PACKET / CLIF'
+    keywords: [clif, packet, client, packetver]
+    authoritative_paths: [src/map/clif.cpp, doc/packet_client.txt]
+    symbols: [clif_parse, clif_send]
+    official_docs: [doc/packet_client.txt, doc/packet_interserv.txt]
+    official_samples: []
+    forum_refs: []
+    project_refs: []
+    authority: client-support
+  - topic: '29 SERVER AUTHORITY'
+    keywords: [authority, map server, char server, persistence]
+    authoritative_paths: [src/map, src/char, src/common]
+    symbols: [pc_setpos, quest_db, storage]
+    official_docs: [doc/source_doc.txt]
+    official_samples: []
+    forum_refs: []
+    project_refs: [docs/RO_AUTOMATION_PRODUCT_CONSTITUTION.md]
+    authority: mixed
+  - topic: '30 RECOVERY / DEATH'
+    keywords: [death, respawn, OnPCDieEvent, recovery]
+    authoritative_paths: [src/map/pc.cpp, src/map/status.cpp, src/map/npc.cpp]
+    symbols: [OnPCDieEvent, pc_setpos]
+    official_docs: [doc/script_commands.txt, doc/status.txt]
+    official_samples: [npc/custom/etc/penal_servitude.txt]
+    forum_refs: []
+    project_refs: []
+    authority: mixed
+  - topic: '31 TELEPORT / FLY WING / BUTTERFLY WING'
+    keywords: [Fly Wing, Butterfly Wing, teleport, savepoint]
+    authoritative_paths: [db/re/item_db_usable.yml, src/map/pc.cpp, src/map/status.cpp]
+    symbols: [item_script, pc_setpos, getsavepoint]
+    official_docs: [doc/script_commands.txt]
+    official_samples: []
+    forum_refs: []
+    project_refs: [docs/RO_FLY_WING_SOURCE_AUDIT.md]
+    authority: mixed
+  - topic: '32 AUTONOMOUS QUEST SUPPORT'
+    keywords: [SERVER_AGENT, quest runtime, GO_NPC, FARM_UNTIL]
+    authoritative_paths: [src/map/quest.cpp, src/map/npc.cpp, ops/ro-stack/quest-runtime]
+    symbols: [quest state, npc interaction, pc_setpos]
+    official_docs: [doc/script_commands.txt]
+    official_samples: [doc/sample/npc_test_quest.txt]
+    forum_refs: []
+    project_refs: [docs/JOB_QUEST_ADAPTER_CONTRACT.md, ops/ro-stack/persistent-agent/quest-sequences/eden-course-a.json]
+    authority: mixed
+  - topic: '33 PLUGIN / EXTENSION'
+    keywords: [plugin, extension, src/custom, import]
+    authoritative_paths: [src/custom, npc/custom, db/import]
+    symbols: [ACMD_FUNC, BUILDIN_FUNC]
+    official_docs: [doc/source_doc.txt, db/readme.md]
+    official_samples: [src/custom/atcommand.inc]
+    forum_refs: [https://rathena.org/board/topic/110581-adding-custom-plugins/]
+    project_refs: []
+    authority: mixed
+  - topic: '34 TEST / DEBUG / SCRIPT COMMANDS'
+    keywords: [test, debug, atcommand, reloadscript]
+    authoritative_paths: [doc/atcommands.txt, conf/atcommands.yml, src/map/atcommand.cpp]
+    symbols: [@reloadscript, @checkquest, @mapinfo]
+    official_docs: [doc/atcommands.txt, doc/script_commands.txt]
+    official_samples: [doc/sample]
+    forum_refs: []
+    project_refs: [docs/testing-fixture-policy.md]
+    authority: mixed
