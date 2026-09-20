@@ -224,13 +224,27 @@ PACKETVER 與既有 trace id。
    pre/post-state。
 6. 以最小修正完成 bounded regression，保留原始 dump 與 provenance。
 
-Current environment check on 2026-09-20：一般 PowerShell PATH 沒有 `cmake`、`gdb`、
-`cdb`、`windbg`、`procdump`、`dumpbin`、`cl`、`make` 或 `ninja`；Visual Studio
-2022 Build Tools 可由 `vswhere` 定位。受控執行 `src/common/common.vcxproj`
-Release|x64 build 時，checkout 缺少 generated `config/core.hpp`、`libconfig.h`、
-`zlib.h` 與 `ryml_std.hpp`，因此結果為 `BUILD_FAIL_DEPENDENCY_SETUP`，沒有宣稱
-build、dump 或 backtrace PASS。Native build 必須先準備 repository 既定依賴，再進入
-runtime integration。
+Native build readiness check on 2026-09-21：一般 PowerShell PATH 沒有 `cl`，但
+Visual Studio 2022 Build Tools 可由 `vswhere` 定位。Project Last-Good 使用 solution
+root 的 `rAthena.sln`，以 `MSBuild ... /t:Build /p:Configuration=Release
+/p:Platform=x64 /m` 執行，讓 `$(SolutionDir)` 正確指向 third-party include 與
+project dependencies。先前對 `common.vcxproj` 的直接呼叫遺失 `SolutionDir`，因此
+產生了誤導性的 missing-header 結果。
+
+本次 canonical source 的 header readiness：
+
+| HEADER | TYPE | EXPECTED_SOURCE | GENERATION / INSTALL STEP | RESULT |
+| --- | --- | --- | --- | --- |
+| `src/config/core.hpp` | repository config header | Native checkout `src/config/core.hpp` | Solution include path `$(SolutionDir)src` | PRESENT |
+| `3rdparty/libconfig/libconfig.h` | third-party dependency | Repository bundled `3rdparty/libconfig` | `libconfig.vcxproj` dependency build | PRESENT |
+| `3rdparty/zlib/include/zlib.h` | third-party dependency | Repository bundled `3rdparty/zlib/include` | `$(SolutionDir)3rdparty\\zlib\\include\\` | PRESENT |
+| `3rdparty/rapidyaml/src/ryml_std.hpp` | third-party dependency | Repository bundled rapidyaml | `ryml.vcxproj` dependency build | PRESENT |
+
+`core.hpp` 沒有額外 generated-header step；四個 header 都由 canonical checkout 或
+bundled dependency 提供，沒有 vendor、個人資料夾 include path 或任意網路檔案。`httplib`、
+`libconfig`、`ryml`、`yaml-cpp`、`common` 與 `map-server` 均通過 Release|x64 solution
+build。`src/common/showmsg.cpp` 以 compile-time anchor include `gi_trace.hpp`，`.obj/.pdb`
+依賴紀錄可見該 header，`common.lib` 再鏈入 map-server candidate。
 
 ## GUI-free debug contract
 
@@ -276,8 +290,9 @@ FIRST_BROKEN_TRANSITION compatibility
 ```
 
 `scripts/test-rathena-debug-reference.mjs` 以文件、schema 與 native helper 的
-靜態 contract 做 bounded checks。原生 compiler 未在目前 PATH，故 native build
-與 live runtime trace integration 保留為下一個受控工作線。
+靜態 contract 做 bounded checks。Native Release build 已完成；100,000 次 bounded
+microbenchmark 顯示 probe disabled 平均 `3 ns`、enabled 平均 `591 ns`，此結果是
+無輸出 stub 下的編譯後 helper sanity measurement，不代表 production load test。
 
 ## Source pointers
 
@@ -297,7 +312,15 @@ RATHENA_DEBUG_REFERENCE_CREATED = YES
 STRUCTURED_PROBE_FOUNDATION = YES (native header, opt-in, bounded)
 TRACE_ID_NATIVE_SUPPORT = OPTIONAL_CONTEXT, NO COMMAND SCHEMA CHANGE
 TRACE_PROPAGATION_GAP = PRESENT
-BUILD_PASS = BLOCKED (BUILD_FAIL_DEPENDENCY_SETUP: generated/dependency headers missing)
+BUILD_PASS = YES (Release|x64 rAthena.sln solution build)
+COMMON_BUILD = PASS
+MAP_SERVER_BUILD = PASS
+SOURCE_COMMIT = ff72578f608935d1df5d664b3e9df9d436361043
+CANDIDATE_PATH = C:\\Users\\Administrator\\source\\ghost-island-rathena\\map-server.exe
+CANDIDATE_SIZE = 6294528
+CANDIDATE_SHA256 = 086804201BBDB55B585D752AE41A9929975381D063167C4F965F924811CFE723
+GI_TRACE_COMPILED = YES (showmsg.obj dependency record and common.lib link)
+PROBE_OVERHEAD_RESULT = disabled_avg_ns=3; enabled_avg_ns=591; ratio=183.777 (stubbed bounded sanity)
 PRODUCTION_TOUCHED = NO
 RUNTIME_RESTARTED = NO
 READY_FOR_RUNTIME_TRACE_INTEGRATION = YES
