@@ -1345,6 +1345,47 @@ Policy，且不得重定義 PA Runtime Authority。
 
 修改 Quest、NPC、補給、回程、掛機地圖或其他自動導航前，必須讀取 `.agents/skills/navigation-stall-safety/SKILL.md`。所有導航步驟都要以地圖變更、座標變更、有效 NPC 對話或任務階段推進判定進度；相同動作不得高頻重送，重試不得刷新自身停滯計時，並必須具備有限重試、已查核替代路線及恢復一般自動操作的終止狀態。
 
+## rAthena Reference Atlas Lookup Gate
+
+涉及 Quest、NPC、dialogue、OnTouch、hidden NPC、Warp、Map、Mapflag、
+Navigation、Save Point、Respawn、Job Change、Item、Inventory、Shop、
+Buy／Sell、Kafra、Storage、Combat、Monster／Spawn、Loot／Drop、Skill、
+Status Effect、EXP／Job EXP、Party、Guild、Instance、Event／Timer、Script
+Engine、Client／CLIF gameplay、Teleport、Fly Wing、Butterfly Wing 或其他
+server-authoritative RO gameplay behavior 的 discussion、planning、dispatch、
+debugging、implementation、refactor、migration、recovery 與 testing，必須
+先使用：
+
+`docs/rathena-reference/reference-index.yml`
+
+```text
+RATHENA_REFERENCE_ATLAS_TRIGGER = MANDATORY / BLOCKING
+RATHENA_REFERENCE_ATLAS != SOURCE_OF_TRUTH
+```
+
+固定 lookup 順序：
+
+```text
+RATHENA_REFERENCE_ATLAS_LOOKUP
+→ relevant Atlas topic / lookup-playbook
+→ exact authoritative rAthena source path
+→ Project Last-Good / OpenKore reference（如適用）
+→ FIRST_BROKEN_TRANSITION
+→ implementation
+```
+
+Atlas 是 index／lookup aid，不是 gameplay authority。若 Atlas 與 current
+canonical rAthena source、project-specific server rule 或 authoritative config
+衝突，記錄 `REFERENCE_ATLAS_STALE_OR_CONFLICTING = YES`，以 current
+authoritative source 為準並安排 Atlas correction。只有在
+`ATLAS_SEARCHED = YES`、`AUTHORITATIVE_SOURCE_CHECKED = YES`、
+`PROJECT_LAST_GOOD_CHECKED = YES` 後，才能回報
+`REFERENCE_GAP = CONFIRMED` 並提出 `NEW_IMPLEMENTATION`。
+
+預設只讀 reference-index、相關 topic 與必要的 lookup-playbook，不要求
+Worker 閱讀完整 Atlas。F 為按需的 rAthena reference research／indexing／
+source mapping workline，預設 `WAITING / CLOSED`，不直接修改 gameplay。
+
 ## Quest Flow First Hard Gate
 
 凡涉及 Quest、任務、NPC、OnTouch、hidden NPC、dialogue、quest state、
@@ -1359,6 +1400,15 @@ migration、recovery 與 testing，必須先讀取：
 
 ```text
 QUEST_FLOW_FIRST_HARD_GATE
+→ OPENKORE_REFERENCE_GATE（如適用）
+→ implementation
+```
+
+Quest work 的完整順序為：
+
+```text
+RATHENA_REFERENCE_ATLAS_LOOKUP
+→ QUEST_FLOW_FIRST_HARD_GATE
 → OPENKORE_REFERENCE_GATE（如適用）
 → implementation
 ```

@@ -4,9 +4,17 @@ HARD_GATE_POLICY: `OPENKORE_REFERENCE_FIRST_HARD_GATE`
 HARD_GATE_VERSION: `V1`
 HARD_GATE_SEVERITY: `MANDATORY / BLOCKING`
 
+RATHENA ATLAS PRECONDITION:
+For gameplay work covered by the rAthena Reference Atlas, first search
+`docs/rathena-reference/reference-index.yml`, read only the relevant topic and
+follow its exact authoritative source paths. The Atlas is an index, not world
+authority. Current canonical rAthena source, project-specific server rules and
+authoritative config win conflicts.
+
 QUEST PRECONDITION:
 For Quest, NPC, dialogue, quest-state, job-change and automatic-quest work,
-complete `QUEST_FLOW_FIRST_HARD_GATE` from
+complete `RATHENA_REFERENCE_ATLAS_LOOKUP` and then
+`QUEST_FLOW_FIRST_HARD_GATE` from
 `.agents/skills/quest-flow-first/SKILL.md` before entering this gate. Quest Flow
 First establishes normal player semantics and server completion criteria; this
 gate then evaluates OpenKore-era behavior and PA adaptation. Web control is not

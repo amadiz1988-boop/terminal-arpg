@@ -192,11 +192,13 @@ Reference existing governance. Do not copy policy bodies into the dispatch.
 Follow PC-DISPATCH-STANDARD.
 ```
 
-For a Quest-related workline, complete `QUEST_FLOW_FIRST_HARD_GATE` in section
-10A before filling or evaluating the OpenKore gate below. The required order is:
+For a Quest-related workline, complete the Atlas lookup in section 10A and then
+`QUEST_FLOW_FIRST_HARD_GATE` in section 10B before filling or evaluating the
+OpenKore gate below. The required order is:
 
 ```text
-QUEST_FLOW_FIRST_HARD_GATE -> OPENKORE_REFERENCE_GATE -> implementation
+RATHENA_REFERENCE_ATLAS_LOOKUP -> QUEST_FLOW_FIRST_HARD_GATE ->
+OPENKORE_REFERENCE_GATE -> implementation
 ```
 
 If the workline touches an OpenKore-era capability:
@@ -321,7 +323,33 @@ PROJECT_CONTROL_DECISION_REQUIRED = YES
 
 ---
 
-## 10A. QUEST_FLOW_FIRST_HARD_GATE
+## 10A. RATHENA_REFERENCE_ATLAS_LOOKUP
+
+If the workline touches server-authoritative RO gameplay or asks how rAthena
+already behaves, perform this lookup before Quest Flow First or implementation:
+
+```text
+RATHENA_REFERENCE_ATLAS_TRIGGERED = YES
+RATHENA_REFERENCE_ATLAS_TOPIC =
+RATHENA_REFERENCE_ATLAS_FILES =
+ATLAS_SEARCHED = YES / NO
+AUTHORITATIVE_SOURCE_CHECKED = YES / NO
+PROJECT_LAST_GOOD_CHECKED = YES / NO
+REFERENCE_ATLAS_STALE_OR_CONFLICTING = YES / NO
+REFERENCE_GAP = CONFIRMED / NOT_CONFIRMED
+```
+
+Start at `docs/rathena-reference/reference-index.yml`, read only the relevant
+topic or lookup-playbook section, follow its exact authoritative source paths,
+then compare Project Last-Good when applicable. The Atlas is an index aid and
+does not override current rAthena source, project rules or authoritative config.
+Only after the three checks are `YES` may the Worker report
+`REFERENCE_GAP = CONFIRMED` or request new implementation. Preserve these
+fields across handoffs; do not require the full Atlas.
+
+---
+
+## 10B. QUEST_FLOW_FIRST_HARD_GATE
 
 If the workline touches Quest, NPC, dialogue, quest state, Quest Runtime,
 novice/onboarding, Eden, job change, event quest, quest navigation, quest
@@ -361,9 +389,10 @@ bounded recovery and other internal steps after the semantic and authority
 gates pass. Record each step as `AUTONOMOUS`, `PLAYER_DECISION`,
 `PLAYER_CONFIRMATION`, `WEB_OPTIONAL` or `SERVER_AGENT_INTERNAL`.
 
-The Quest gate runs before the existing OpenKore gate:
+The Quest gate runs after Atlas lookup and before the existing OpenKore gate:
 
 ```text
+RATHENA_REFERENCE_ATLAS_LOOKUP ->
 QUEST_FLOW_FIRST_HARD_GATE -> OPENKORE_REFERENCE_GATE -> implementation
 ```
 

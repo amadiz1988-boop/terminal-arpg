@@ -31,6 +31,12 @@ D = Persistent Agent / Native / Combat / Supply / Navigation / native capability
 E = Quest / Job Change / Quest integration
 ```
 
+`F = on-demand rAthena Reference Atlas research / indexing / source mapping`.
+F is normally `WAITING` or `CLOSED`, is not permanently active, and does not
+directly modify gameplay. Reopen F only for an Atlas gap, stale reference,
+version conflict, new rAthena subsystem or high-value forum/community research.
+The fixed Project Control footer remains the A-E six-column table.
+
 ## 2. Workline states
 
 Allowed states are `WORKING`, `WAITING`, `BLOCKED`, `HOLD`, `ACTIVE`, and
@@ -188,7 +194,47 @@ EXECUTE TO COMPLETION.
 The worker prompt body does not contain `WINDOW:`, `貼到：`, or `WORKLINE:` as
 routing instructions. The destination is shown to the user outside the block.
 
-## 5A. Quest Flow First hard gate
+## 5A. rAthena Reference Atlas lookup gate
+
+For any work involving Quest, NPC, dialogue, OnTouch, hidden NPC, Warp, Map,
+Mapflag, Navigation, Save Point, Respawn, Job Change, Item, Inventory, Shop,
+Buy/Sell, Kafra, Storage, Combat, Monster/Spawn, Loot/Drop, Skill, Status
+Effect, EXP/Job EXP, Party, Guild, Instance, Event/Timer, Script Engine,
+Client/CLIF gameplay, Teleport, Fly Wing, Butterfly Wing or other
+server-authoritative RO behavior, Project Control must first require:
+
+```text
+RATHENA_REFERENCE_ATLAS_TRIGGER = MANDATORY / BLOCKING
+RATHENA_REFERENCE_ATLAS != SOURCE_OF_TRUTH
+RATHENA_REFERENCE_ATLAS_TRIGGERED = YES
+RATHENA_REFERENCE_ATLAS_TOPIC =
+RATHENA_REFERENCE_ATLAS_FILES =
+ATLAS_SEARCHED = YES / NO
+AUTHORITATIVE_SOURCE_CHECKED = YES / NO
+PROJECT_LAST_GOOD_CHECKED = YES / NO
+REFERENCE_ATLAS_STALE_OR_CONFLICTING = YES / NO
+REFERENCE_GAP = CONFIRMED / NOT_CONFIRMED
+```
+
+Lookup starts with `docs/rathena-reference/reference-index.yml`, continues with
+only the relevant Atlas topic or lookup-playbook section, follows exact
+authoritative source paths, and checks Project Last-Good when applicable. The
+Atlas is an index and lookup aid, not gameplay authority. Current canonical
+rAthena source, project-specific server rules and authoritative config win a
+conflict; stale Atlas text must not drive implementation.
+
+Only after `ATLAS_SEARCHED = YES`, `AUTHORITATIVE_SOURCE_CHECKED = YES` and
+`PROJECT_LAST_GOOD_CHECKED = YES` may a Worker declare
+`REFERENCE_GAP = CONFIRMED` or request `NEW_IMPLEMENTATION`.
+
+Do not require reading all Atlas files. Preserve this lookup state across
+dispatch and continuation handoffs.
+
+For Quest work, the next gate is Quest Flow First. For other gameplay work,
+continue to authoritative source tracing, Last-Good/OpenKore comparison when
+applicable and `FIRST_BROKEN_TRANSITION`.
+
+## 5B. Quest Flow First hard gate
 
 For any discussion, planning, dispatch, debugging, implementation, refactor,
 migration, recovery or testing involving Quest, NPC, hidden NPC, OnTouch,
@@ -224,6 +270,8 @@ through the server-recognized completion state before deciding how to automate.
 Quest Flow First runs before the existing OpenKore gate:
 
 ```text
+RATHENA_REFERENCE_ATLAS_LOOKUP
+→
 QUEST_FLOW_FIRST_HARD_GATE
 → OPENKORE_REFERENCE_GATE
 → implementation
@@ -254,7 +302,7 @@ The recheck must reopen the player flow, rAthena script, historical Last-Good,
 current runtime mapping and wrong assumptions before Project Control
 reauthorizes the direction.
 
-## 5B. OpenKore reference-first hard gate
+## 5C. OpenKore reference-first hard gate
 
 For every workline involving an OpenKore-era gameplay capability or a Web /
 Controller action that controls or presents one, Project Control must persist:

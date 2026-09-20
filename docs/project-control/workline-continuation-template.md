@@ -180,11 +180,13 @@ Do not paste the roadmap. For scopes listed in `AGENTS.md`
 (`CHARACTER_LIFE_SOCIAL_SIMULATION_DIRECTION`), report
 `CHARACTER_LIFE_DIRECTION_COMPATIBILITY = PASS / FAIL / N/A`.
 
-For a Quest-related continuation, complete `QUEST_FLOW_FIRST_HARD_GATE` in
-section 9A before continuing or evaluating the OpenKore policy below:
+For a Quest-related continuation, complete the Atlas lookup in section 9A and
+then `QUEST_FLOW_FIRST_HARD_GATE` in section 9B before continuing or evaluating
+the OpenKore policy below:
 
 ```text
-QUEST_FLOW_FIRST_HARD_GATE -> OPENKORE_REFERENCE_GATE -> implementation
+RATHENA_REFERENCE_ATLAS_LOOKUP -> QUEST_FLOW_FIRST_HARD_GATE ->
+OPENKORE_REFERENCE_GATE -> implementation
 ```
 
 Continue the policy already required by the original workline, for example:
@@ -218,7 +220,28 @@ Do not rerun the entire Gate.
 
 ---
 
-## 9A. QUEST_FLOW_FIRST_CONTINUATION
+## 9A. RATHENA_REFERENCE_ATLAS_CONTINUATION
+
+If the existing workline touches server-authoritative RO gameplay or asks how
+rAthena already behaves, preserve its Atlas lookup state:
+
+```text
+RATHENA_REFERENCE_ATLAS_TRIGGERED = YES
+RATHENA_REFERENCE_ATLAS_TOPIC =
+RATHENA_REFERENCE_ATLAS_FILES =
+ATLAS_SEARCHED = YES / NO
+AUTHORITATIVE_SOURCE_CHECKED = YES / NO
+PROJECT_LAST_GOOD_CHECKED = YES / NO
+REFERENCE_ATLAS_STALE_OR_CONFLICTING = YES / NO
+REFERENCE_GAP = CONFIRMED / NOT_CONFIRMED
+```
+
+Continue from `docs/rathena-reference/reference-index.yml` and the relevant
+topic only. Do not reread the full Atlas. Current rAthena source, project
+rules and authoritative config win stale or conflicting Atlas text. Only after
+the three checks are `YES` may the workline declare a confirmed reference gap.
+
+## 9B. QUEST_FLOW_FIRST_CONTINUATION
 
 If the existing workline touches Quest, NPC, dialogue, quest state, Quest
 Runtime, novice/onboarding, Eden, job change, event quest, quest navigation,
@@ -253,7 +276,8 @@ internal quest steps autonomously.
 The gate order remains:
 
 ```text
-QUEST_FLOW_FIRST_HARD_GATE -> OPENKORE_REFERENCE_GATE -> implementation
+RATHENA_REFERENCE_ATLAS_LOOKUP -> QUEST_FLOW_FIRST_HARD_GATE ->
+OPENKORE_REFERENCE_GATE -> implementation
 ```
 
 After two downstream blockers, record an upstream assumption recheck before

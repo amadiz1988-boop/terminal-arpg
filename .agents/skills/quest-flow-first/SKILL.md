@@ -14,12 +14,33 @@ job, second job, job change, event quest, quest navigation, quest warp, quest
 recovery or automatic questing. The trigger applies to Project Control and
 documentation discussions as well as Worker source work.
 
+## rAthena Reference Atlas Precondition
+
+Before the Quest Flow First gate, search
+`docs/rathena-reference/reference-index.yml` by quest/topic keyword. Read only
+the relevant Atlas topic and `lookup-playbook` section when needed, follow the
+exact authoritative rAthena paths they identify, then check Project Last-Good
+and OpenKore reference when applicable.
+
+```text
+ATLAS_SEARCHED = YES
+AUTHORITATIVE_SOURCE_CHECKED = YES
+PROJECT_LAST_GOOD_CHECKED = YES
+```
+
+The Atlas is an index and lookup aid. It does not override current canonical
+rAthena source, project-specific server rules or authoritative config. Record
+`REFERENCE_ATLAS_STALE_OR_CONFLICTING = YES` on conflict and schedule Atlas
+correction. Declare `REFERENCE_GAP = CONFIRMED` only after all three checks
+above are proven. Atlas lookup does not replace this Skill.
+
 ## Purpose and Player Flow First
 
 The fixed order is:
 
 ```text
-UNDERSTAND PLAYER FLOW
+RATHENA_REFERENCE_ATLAS_LOOKUP
+-> UNDERSTAND PLAYER FLOW
 -> TRACE SERVER AUTHORITY
 -> RECOVER EXISTING / LAST-GOOD WORK
 -> MAP CURRENT QUEST RUNTIME
@@ -163,7 +184,8 @@ reward injection.
 When OpenKore-era behavior applies:
 
 ```text
-QUEST_FLOW_FIRST_HARD_GATE
+RATHENA_REFERENCE_ATLAS_LOOKUP
+-> QUEST_FLOW_FIRST_HARD_GATE
 -> OPENKORE_REFERENCE_GATE
 -> implementation
 ```
