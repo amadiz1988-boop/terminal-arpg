@@ -230,15 +230,18 @@ CROSS_WORKTREE_ALLOWED: NO
 
 ```
 WORKLINE:        E
-STATUS:          ROUTING_REQUIRES_PROJECT_CONTROL
-ACTIVE_WORKTREE: UNRESOLVED
-ACTIVE_BRANCH:   UNRESOLVED
-CANONICAL_HEAD:  UNRESOLVED
-SOURCE_OF_TRUTH: UNRESOLVED
-LAST_VERIFIED:   2026-09-16
-DO_NOT_SEARCH:   Do not start work. Report ROUTING_STALE and stop.
-SEARCH_SCOPE:       N/A (ROUTING_STALE)
+STATUS:          READY
+ACTIVE_WORKTREE: C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\.tmp-quest-dialogue-runtime-v1
+ACTIVE_BRANCH:   feat/quest-dialogue-runtime-v1
+CANONICAL_HEAD:  31bc821257c47d0793fb3f2586d5eb9e17ad58cc
+BASE_HEAD:       31bc821257c47d0793fb3f2586d5eb9e17ad58cc
+SOURCE_OF_TRUTH: Quest/Web/Runtime = C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\.tmp-quest-dialogue-runtime-v1
+NATIVE_AUTHORITY: C:\Users\Administrator\source\ghost-island-rathena (READ-ONLY; route Native defects to D)
+LAST_VERIFIED:   2026-09-21
+DO_NOT_SEARCH:   Use the resolved E worktree only. Do not search sibling worktrees.
+SEARCH_SCOPE:    E worktree exact paths; Native authority read-only when explicitly required
 CROSS_WORKTREE_ALLOWED: NO
+ROUTING_STALE:   NO
 ```
 
 ---
