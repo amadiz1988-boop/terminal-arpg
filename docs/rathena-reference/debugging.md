@@ -224,11 +224,13 @@ PACKETVER 與既有 trace id。
    pre/post-state。
 6. 以最小修正完成 bounded regression，保留原始 dump 與 provenance。
 
-Current environment check on 2026-09-20：`cmake`、`gdb`、`cdb`、`windbg`、
-`procdump`、`dumpbin`、`cl`、`make` 與 `ninja` 均不在目前 PowerShell PATH。
-因此本輪建立 procedure 與 source seam，沒有宣稱 build、dump 或 backtrace PASS。
-Native build must run in the repository's configured Visual Studio／CMake environment
-before runtime integration。
+Current environment check on 2026-09-20：一般 PowerShell PATH 沒有 `cmake`、`gdb`、
+`cdb`、`windbg`、`procdump`、`dumpbin`、`cl`、`make` 或 `ninja`；Visual Studio
+2022 Build Tools 可由 `vswhere` 定位。受控執行 `src/common/common.vcxproj`
+Release|x64 build 時，checkout 缺少 generated `config/core.hpp`、`libconfig.h`、
+`zlib.h` 與 `ryml_std.hpp`，因此結果為 `BUILD_FAIL_DEPENDENCY_SETUP`，沒有宣稱
+build、dump 或 backtrace PASS。Native build 必須先準備 repository 既定依賴，再進入
+runtime integration。
 
 ## GUI-free debug contract
 
@@ -295,7 +297,7 @@ RATHENA_DEBUG_REFERENCE_CREATED = YES
 STRUCTURED_PROBE_FOUNDATION = YES (native header, opt-in, bounded)
 TRACE_ID_NATIVE_SUPPORT = OPTIONAL_CONTEXT, NO COMMAND SCHEMA CHANGE
 TRACE_PROPAGATION_GAP = PRESENT
-BUILD_PASS = NOT MEASURED (compiler unavailable in PATH)
+BUILD_PASS = BLOCKED (BUILD_FAIL_DEPENDENCY_SETUP: generated/dependency headers missing)
 PRODUCTION_TOUCHED = NO
 RUNTIME_RESTARTED = NO
 READY_FOR_RUNTIME_TRACE_INTEGRATION = YES
