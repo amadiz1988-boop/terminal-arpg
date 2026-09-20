@@ -1,5 +1,5 @@
 atlas: OPENKORE_REFERENCE_ATLAS
-last_verified: 2026-09-20
+last_verified: 2026-09-21
 upstream:
   repository: https://github.com/OpenKore/openkore
   branch: master
@@ -255,7 +255,7 @@ topics:
     retry_policy: "Skip inaccessible or expired drops."
     recovery_policy: "Resume target after pickup or clear stale item."
     edge_cases: "Weight, party ownership, item expiry and map change."
-    project_last_good: "Gate 1A loot pickup and status-export item observation."
+    project_last_good: "Gate 1A loot pickup and status-export item observation; docs/reference-mining/topics/item-loot-inventory-storage-weight.md."
     project_acceptance_evidence: "Gate 1A PLAYER_FLOW_PASS."
     current_pa: "Native PA loot and rAthena inventory authority."
     current_pa_gap: "Fine-grained party loot policy is not proven."
@@ -274,7 +274,7 @@ topics:
     retry_policy: "Retry only after cooldown or timeout."
     recovery_policy: "Re-read inventory and state after rejection."
     edge_cases: "Non-consumable custom item, map change and stale inventory."
-    project_last_good: "Gate 1B potion recovery and Fly Wing item 601 diagnostic."
+    project_last_good: "Gate 1B potion recovery and Fly Wing item 601 diagnostic; docs/reference-mining/topics/item-loot-inventory-storage-weight.md."
     project_acceptance_evidence: "Gate 1B HP recovery and Fly Wing diagnostic evidence."
     current_pa: "rAthena pc_useitem and native PA item intent."
     current_pa_gap: "Generic item action coverage remains partial."
@@ -293,7 +293,7 @@ topics:
     retry_policy: "Wait for inventory readiness and re-read after transaction."
     recovery_policy: "Block dependent action until authoritative snapshot is ready."
     edge_cases: "Full slots, overweight, delayed packet and duplicate item IDs."
-    project_last_good: "status-export inventory checks and Gate 2 inventory/Zeny confirmation."
+    project_last_good: "status-export inventory checks and Gate 2 inventory/Zeny confirmation; docs/reference-mining/topics/item-loot-inventory-storage-weight.md."
     project_acceptance_evidence: "Gate 2 supply cycle."
     current_pa: "rAthena inventory state and PA read model."
     current_pa_gap: "Restart durability of every inventory-derived intent is partial."
@@ -369,7 +369,7 @@ topics:
     retry_policy: "NPC and storage session timeout."
     recovery_policy: "Close stale session, restore supply intent and retry boundedly."
     edge_cases: "Password, no NPC, death and storage capacity."
-    project_last_good: "Historical storageAuto config and Eden supply branch."
+    project_last_good: "Historical storageAuto config and Eden supply branch; docs/reference-mining/topics/item-loot-inventory-storage-weight.md."
     project_acceptance_evidence: "Storage is reference branch; Gate 2 buy path is accepted."
     current_pa: "Supply service contract with rAthena storage authority."
     current_pa_gap: "Player-flow storage closure is not proven."
@@ -426,7 +426,7 @@ topics:
     retry_policy: "Do not repeat service while weight state is unchanged."
     recovery_policy: "Re-read weight after sell/store and resume only under threshold."
     edge_cases: "Delayed weight packet, full slots and protected items."
-    project_last_good: "Historical config and status-export supply guard."
+    project_last_good: "Historical config and status-export supply guard; docs/reference-mining/topics/item-loot-inventory-storage-weight.md."
     project_acceptance_evidence: "Gate 2 supply target evidence; weight branch remains partial."
     current_pa: "rAthena inventory weight observation."
     current_pa_gap: "Full weight-triggered storage player flow is not proven."

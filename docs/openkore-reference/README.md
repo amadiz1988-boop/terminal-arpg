@@ -9,7 +9,7 @@ Baseline provenance:
 ```text
 UPSTREAM_OPENKORE_COMMIT = 51de1ddfc4449ae5217f6886de702f87ca934030
 UPSTREAM_BRANCH = master
-PROJECT_LAST_VERIFIED = 2026-09-20
+PROJECT_LAST_VERIFIED = 2026-09-21
 PROJECT_CANONICAL_ROOT = C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\terminal-arpg
 ```
 
@@ -33,6 +33,7 @@ Read the smallest exact reference first:
 - [macro-eventmacro.md](macro-eventmacro.md): reusable condition and event patterns.
 - [recovery.md](recovery.md): death, respawn, stuck, timeout and reconnect.
 - [configuration.md](configuration.md): high-value configuration semantics.
+- [item-loot-inventory-storage-weight.md](../reference-mining/topics/item-loot-inventory-storage-weight.md): cross-Atlas item, loot, inventory, storage and weight mining dossier.
 - [lookup-playbook.md](lookup-playbook.md): problem-to-reference routing.
 
 The machine-readable [reference-index.yml](reference-index.yml) contains all 45

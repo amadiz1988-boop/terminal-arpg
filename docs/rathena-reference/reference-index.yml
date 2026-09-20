@@ -1,5 +1,5 @@
 schema: RATHENA_REFERENCE_ATLAS_V1
-last_verified: '2026-09-20'
+last_verified: '2026-09-21'
 upstream:
   repository: https://github.com/rathena/rathena
   branch: master
@@ -102,7 +102,7 @@ topics:
     official_docs: [doc/script_commands.txt, doc/item_db.txt]
     official_samples: [npc/re/quests/eden/26-40.txt]
     forum_refs: []
-    project_refs: []
+    project_refs: [docs/reference-mining/topics/item-loot-inventory-storage-weight.md]
     authority: mixed
   - topic: '11 SHOP / BUY / SELL'
     keywords: [shop, cashshop, vending, buy, sell]
@@ -129,7 +129,7 @@ topics:
     official_docs: [doc/source_doc.txt]
     official_samples: [npc/kafras]
     forum_refs: []
-    project_refs: []
+    project_refs: [docs/reference-mining/topics/item-loot-inventory-storage-weight.md]
     authority: src-map
   - topic: '14 COMBAT'
     keywords: [battle, damage, attack, kill attribution]
@@ -156,7 +156,7 @@ topics:
     official_docs: [doc/mob_db.txt, doc/item_group.txt]
     official_samples: []
     forum_refs: []
-    project_refs: []
+    project_refs: [docs/reference-mining/topics/item-loot-inventory-storage-weight.md]
     authority: mixed
   - topic: '17 SKILL'
     keywords: [skill, skill_db, skill tree, cast]
@@ -314,7 +314,7 @@ topics:
   - topic: '34 TEST / DEBUG / SCRIPT COMMANDS'
     keywords: [test, debug, atcommand, reloadscript]
     authoritative_paths: [doc/atcommands.txt, conf/atcommands.yml, src/map/atcommand.cpp]
-    symbols: [@reloadscript, @checkquest, @mapinfo]
+    symbols: ['@reloadscript', '@checkquest', '@mapinfo']
     official_docs: [doc/atcommands.txt, doc/script_commands.txt]
     official_samples: [doc/sample]
     forum_refs: []

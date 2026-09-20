@@ -12,7 +12,7 @@
 | commit date | `2026-08-21` |
 | 專案 native checkout | `C:\Users\Administrator\source\ghost-island-rathena` |
 | 專案 native HEAD | `1ffd06a07f8d997cf500334f92ccc7df6db354f7` |
-| 研究日期 | `2026-09-20` |
+| 研究日期 | `2026-09-21` |
 | 版本規則 | 任務必先確認 Renewal / Pre-Renewal、branch、commit，再引用行為 |
 
 upstream master 是公開行為基線，專案 native checkout 是本專案實際可執行的 source truth。兩者不同時記錄衝突，不自動消除差異。
@@ -30,6 +30,7 @@ upstream master 是公開行為基線，專案 native checkout 是本專案實�
 | Instance、Timer、Event | [npc-and-trigger-model.md](npc-and-trigger-model.md)，`doc/sample/instancing.txt` |
 | Plugin / extension | [extensions-and-plugins.md](extensions-and-plugins.md) |
 | Debugging、packet boundary、structured probe | [debugging.md](debugging.md) |
+| Item、loot、inventory、storage、weight | [reference-mining/topics/item-loot-inventory-storage-weight.md](../reference-mining/topics/item-loot-inventory-storage-weight.md) |
 | Forum 成熟參考 | [forum-resource-index.md](forum-resource-index.md) |
 | 下一個 exact file / symbol | [lookup-playbook.md](lookup-playbook.md) |
 
