@@ -7683,9 +7683,28 @@ async function readLoginHealth(latencyTrace = null) {
   if (lastHealth) return lastHealth;
   throw lastError ?? new Error('伺服器健康檢查失敗');
 }
+async function hydrateCharacterSelectionEquipment(charId) {
+  try {
+    const session = await api('/api/session?view=equipment');
+    if (Number(session.account?.characterId) !== Number(charId)) return;
+    characterShowcase.equipment = session.equipment ?? [];
+    paintRankingCharacter(
+      $('#selectPaperdoll'),
+      {
+        classId: Number(session.account?.classId ?? 0),
+        appearance: session.account,
+        equipment: characterShowcase.equipment,
+      },
+      'stand',
+      0,
+    );
+  } catch {
+    // Equipment is deferred decoration; character selection remains usable.
+  }
+}
 async function enter(latencyTrace = null) {
   const [session, health] = await Promise.all([
-    api('/api/session', { latencyTrace }),
+    api('/api/session?view=entry', { latencyTrace }),
     readLoginHealth(latencyTrace),
   ]);
   $('#loginServerStatus').textContent = health.ok ? '伺服器正常' : '無法連線';
@@ -7773,6 +7792,7 @@ async function enter(latencyTrace = null) {
   show($('#characterSelectForm'));
   show($('#game'), false);
   setTimeout(() => {
+    void hydrateCharacterSelectionEquipment(character.charId);
     void loadAccountAudio();
     setMusicContext('title');
     void loadCharacterSelectionAssets()

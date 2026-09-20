@@ -7,8 +7,9 @@ import {
   scrypt,
   timingSafeEqual,
 } from 'node:crypto';
-import { execFile, spawn } from 'node:child_process';
+import { execFile } from 'node:child_process';
 import { createOpsControlPlane } from './ops-control-plane.mjs';
+import { createDashboardDatabase } from './dashboard-db.mjs';
 import { createServer } from 'node:http';
 import { closeSync, openSync, readFileSync } from 'node:fs';
 import {
@@ -709,18 +710,23 @@ class HttpError extends Error {
 const secrets = JSON.parse(
   await readFile(join(runtime, 'secrets.json'), 'utf8'),
 );
-const mariaFolder = (await readdir('C:\\Program Files'))
-  .filter((name) => name.startsWith('MariaDB '))
-  .sort()
-  .reverse()[0];
-if (!mariaFolder) throw new Error('MariaDB client unavailable');
-const maria = join('C:\\Program Files', mariaFolder, 'bin', 'mariadb.exe');
 const databaseHost = process.env.RO_DB_HOST ?? '127.0.0.1';
 const databasePort = Number(process.env.RO_DB_PORT ?? 3307);
 const databaseUser = process.env.RO_DB_USER ?? 'rathena_local';
 const databaseName = process.env.RO_DB_NAME ?? 'ragnarok';
 const databasePassword =
   process.env.RO_DB_PASSWORD ?? secrets.databasePassword;
+const databasePool = createDashboardDatabase({
+  host: databaseHost,
+  port: databasePort,
+  user: databaseUser,
+  password: databasePassword,
+  database: databaseName,
+  poolSize: process.env.RO_DB_POOL_SIZE,
+  queueLimit: process.env.RO_DB_QUEUE_LIMIT,
+  connectTimeoutMs: process.env.RO_DB_CONNECT_TIMEOUT_MS,
+  idleTimeoutMs: process.env.RO_DB_IDLE_TIMEOUT_MS,
+});
 
 const productionMetricsStartedAt = Date.now();
 const eventLoopDelay = monitorEventLoopDelay({ resolution: 20 });
@@ -851,50 +857,7 @@ async function executeSql(statement) {
   databaseMetrics.total += 1;
   recordRate(databaseMetrics.rates);
   try {
-    const output = await new Promise((resolve, reject) => {
-    const child = spawn(
-      maria,
-      [
-        '--ssl=OFF',
-        '--protocol=tcp',
-        '-h',
-        databaseHost,
-        '-P',
-        String(databasePort),
-        '-u',
-        databaseUser,
-        '-N',
-        '-B',
-        databaseName,
-      ],
-      {
-        env: { ...process.env, MYSQL_PWD: databasePassword },
-        windowsHide: true,
-        stdio: ['pipe', 'pipe', 'pipe'],
-      },
-    );
-    const stdout = [];
-    const stderr = [];
-    let outputSize = 0;
-    child.stdout.on('data', (chunk) => {
-      outputSize += chunk.length;
-      if (outputSize > 1024 * 1024) {
-        child.kill();
-        reject(new Error('MariaDB output exceeded 1 MiB'));
-        return;
-      }
-      stdout.push(chunk);
-    });
-    child.stderr.on('data', (chunk) => stderr.push(chunk));
-    child.on('error', reject);
-    child.on('close', (code) => {
-      if (code === 0) resolve(Buffer.concat(stdout).toString('utf8'));
-      else reject(new Error(Buffer.concat(stderr).toString('utf8').trim() || `MariaDB exited with code ${code}`));
-    });
-    child.stdin.on('error', reject);
-    child.stdin.end(`${statement}\n`, 'utf8');
-    });
-    return output.trim();
+    return (await databasePool.queryText(statement)).trim();
   } catch (error) {
     databaseMetrics.errors += 1;
     throw error;
@@ -8962,6 +8925,7 @@ async function handleDashboardRequest(request, response) {
             p50Ms: percentile(databaseMetrics.latencies, 0.5),
             p95Ms: percentile(databaseMetrics.latencies, 0.95),
             p99Ms: percentile(databaseMetrics.latencies, 0.99),
+            pool: databasePool.config,
           },
           metricsStartedAt: productionMetricsStartedAt,
         },
@@ -9131,7 +9095,9 @@ async function handleDashboardRequest(request, response) {
     }
     const account = await sessionAccount(request);
     if (url.pathname === '/api/session') {
-      const equipment = account?.characterId
+      const sessionView = String(url.searchParams.get('view') ?? 'full');
+      const entryView = sessionView === 'entry';
+      const equipment = !entryView && account?.characterId
         ? await queryEquipment(account.characterId)
         : [];
       return json(response, 200, {
@@ -9150,9 +9116,9 @@ async function handleDashboardRequest(request, response) {
               adminSurface: true,
             }
           : null,
-        equipment,
+        ...(entryView ? {} : { equipment }),
         observationPolicy: publicObservationPolicy(),
-        combatSse: await combatSseStateForAccount(account, null),
+        combatSse: entryView ? null : await combatSseStateForAccount(account, null),
 
         webExperienceTelemetry: webExperienceTelemetry.publicConfig(account ?? {}),
       });
@@ -10730,11 +10696,23 @@ async function handleDashboardRequest(request, response) {
   }
 }
 
-createServer((request, response) =>
+const dashboardServer = createServer((request, response) =>
   runWithWebLatencyTrace(request, response, () =>
     handleDashboardRequest(request, response),
   ),
-).listen(port, host, async () => {
+);
+let dashboardShuttingDown = false;
+async function shutdownDashboard() {
+  if (dashboardShuttingDown) return;
+  dashboardShuttingDown = true;
+  dashboardServer.closeAllConnections?.();
+  await new Promise((resolve) => dashboardServer.close(() => resolve()));
+  await databasePool.close();
+  process.exit(0);
+}
+process.once('SIGTERM', () => void shutdownDashboard());
+process.once('SIGINT', () => void shutdownDashboard());
+dashboardServer.listen(port, host, async () => {
   console.log(`RO multiplayer dashboard listening on http://${host}:${port}`);
   // W4 relocation coordinator runs in every mode: it only ever advances a Web
   // map selection that a SERVER_AGENT canary character actually made.
