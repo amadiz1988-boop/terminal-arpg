@@ -11,7 +11,7 @@
 | upstream commit | `e985006171d2eb320ee512a653f4c83aea3d81b6` |
 | commit date | `2026-08-21` |
 | 專案 native checkout | `C:\Users\Administrator\source\ghost-island-rathena` |
-| 專案 native HEAD | `a2fb32c1249e4955458ab2a91c08715ae38075e9` |
+| 專案 native HEAD | `1ffd06a07f8d997cf500334f92ccc7df6db354f7` |
 | 研究日期 | `2026-09-20` |
 | 版本規則 | 任務必先確認 Renewal / Pre-Renewal、branch、commit，再引用行為 |
 
@@ -29,12 +29,13 @@ upstream master 是公開行為基線，專案 native checkout 是本專案實�
 | Kafra、Storage、Shop、Item | [source-map.md](source-map.md) 與對應 script / `src/map/storage.cpp` |
 | Instance、Timer、Event | [npc-and-trigger-model.md](npc-and-trigger-model.md)，`doc/sample/instancing.txt` |
 | Plugin / extension | [extensions-and-plugins.md](extensions-and-plugins.md) |
+| Debugging、packet boundary、structured probe | [debugging.md](debugging.md) |
 | Forum 成熟參考 | [forum-resource-index.md](forum-resource-index.md) |
 | 下一個 exact file / symbol | [lookup-playbook.md](lookup-playbook.md) |
 
-## 34 個 topic taxonomy
+## 35 個 topic taxonomy
 
-01 QUEST · 02 NPC · 03 DIALOGUE · 04 ONTOUCH / HIDDEN NPC · 05 WARP / MAP TRANSFER · 06 NAVIGATION / PATH · 07 MAP / MAPFLAG · 08 SAVE POINT / RESPAWN · 09 JOB CHANGE · 10 ITEM / INVENTORY · 11 SHOP / BUY / SELL · 12 KAFRA · 13 STORAGE · 14 COMBAT · 15 MONSTER / SPAWN · 16 LOOT / DROP · 17 SKILL · 18 STATUS EFFECT · 19 EXP / LEVEL / JOB LEVEL · 20 PARTY · 21 GUILD · 22 CHAT · 23 INSTANCE · 24 EVENT / TIMER · 25 QUEST DATABASE · 26 CHARACTER DATABASE · 27 SCRIPT ENGINE · 28 CLIENT PACKET / CLIF · 29 SERVER AUTHORITY · 30 RECOVERY / DEATH · 31 TELEPORT / FLY WING / BUTTERFLY WING · 32 AUTONOMOUS QUEST SUPPORT · 33 PLUGIN / EXTENSION · 34 TEST / DEBUG / SCRIPT COMMANDS。
+01 QUEST · 02 NPC · 03 DIALOGUE · 04 ONTOUCH / HIDDEN NPC · 05 WARP / MAP TRANSFER · 06 NAVIGATION / PATH · 07 MAP / MAPFLAG · 08 SAVE POINT / RESPAWN · 09 JOB CHANGE · 10 ITEM / INVENTORY · 11 SHOP / BUY / SELL · 12 KAFRA · 13 STORAGE · 14 COMBAT · 15 MONSTER / SPAWN · 16 LOOT / DROP · 17 SKILL · 18 STATUS EFFECT · 19 EXP / LEVEL / JOB LEVEL · 20 PARTY · 21 GUILD · 22 CHAT · 23 INSTANCE · 24 EVENT / TIMER · 25 QUEST DATABASE · 26 CHARACTER DATABASE · 27 SCRIPT ENGINE · 28 CLIENT PACKET / CLIF · 29 SERVER AUTHORITY · 30 RECOVERY / DEATH · 31 TELEPORT / FLY WING / BUTTERFLY WING · 32 AUTONOMOUS QUEST SUPPORT · 33 PLUGIN / EXTENSION · 34 TEST / DEBUG / SCRIPT COMMANDS · 35 DEBUGGING / STRUCTURED PROBES。
 
 完整 machine-readable 對照見 [reference-index.yml](reference-index.yml)。
 
@@ -68,4 +69,4 @@ upstream master 是公開行為基線，專案 native checkout 是本專案實�
 
 - Forum 索引只保留高價值、能說明 pattern 或陷阱的項目；舊文標記 `HISTORICAL_REFERENCE`。
 - 沒有逐篇保存論壇全文；需要現況時回到 exact URL 與 upstream source。
-- 本任務只新增文件與索引，沒有修改 Persistent Agent、Quest gameplay、Dashboard gameplay、DB 或 runtime。
+- 本任務新增 debugging reference、索引、native opt-in probe foundation 與 bounded contract test，沒有修改 Persistent Agent、Quest gameplay、Dashboard gameplay、DB 或 runtime。
