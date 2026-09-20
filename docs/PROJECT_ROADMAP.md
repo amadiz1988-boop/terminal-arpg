@@ -200,6 +200,7 @@ Do not create parallel simulation systems.
 | Production PA canary profile | `docs/PRODUCTION_PA_CANARY_CAPABILITY_PROFILE.md` |
 | Reuse gate | `docs/pre-implementation-reuse-gate.md` |
 | Character Autonomy / Player Agency | `docs/roadmap/character-autonomy-player-agency.md` (`PLANNED`, `IMPLEMENTATION_AUTHORIZED = NO`) |
+| RO World Context / Character Autonomy Research | `docs/research/ro-world-context-autonomy-v1.md` (`RESEARCH_REFERENCE`, checkpoint `03c53a14a2187bd5c4c6752b409fb60ffa45db43`; context/bias/meaning only, no deterministic behavior or authority) |
 | Current status snapshot | `docs/CURRENT_STATUS.md` |
 | Actionable task list | `docs/TODO.md` |
 | Legacy RO milestone roadmap (superseded) | `docs/ROADMAP.md` |
