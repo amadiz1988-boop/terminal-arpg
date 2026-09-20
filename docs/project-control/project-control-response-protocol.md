@@ -415,6 +415,88 @@ requires the OpenKore reference-first gate. Before that gate passes, only bounde
 read-only diagnostics and isolated instrumentation that preserves gameplay
 semantics are allowed.
 
+## 5E. SYNTHETIC_FIRST_DEBUGGING_GATE_V1
+
+For cross-layer runtime or control-flow work, Project Control must require the
+following diagnostic gate before repeated manual Browser interaction:
+
+```text
+SYNTHETIC_FIRST_TRIGGERED = YES
+DIAGNOSTIC_SOURCE =
+ACTION_TRACE =
+SCENARIO =
+FIRST_BROKEN_TRANSITION =
+OWNER =
+MINIMAL_FIX =
+SYNTHETIC_REGRESSION =
+SYNTHETIC_LIVE_ACCEPTANCE =
+BROWSER_FINAL_ACCEPTANCE =
+```
+
+The canonical sequence is:
+
+```text
+LAST_GOOD / CURRENT
+→ WEB_DIAGNOSTIC / RUNTIME_HEALTH
+→ ACTION_TRACE
+→ SYNTHETIC_SCENARIO
+→ FIRST_BROKEN_TRANSITION
+→ OWNER
+→ MINIMAL_FIX
+→ BOUNDED_TEST
+→ SYNTHETIC_REGRESSION
+→ CLEAN_CHECKPOINT
+→ SUPERSET / PROVENANCE
+→ CONTROLLED_DEPLOY
+→ SYNTHETIC_LIVE_ACCEPTANCE
+→ BROWSER_FINAL_ACCEPTANCE
+```
+
+When scenario support exists, use
+`scripts/player-scenario-runner.mjs` and the playbook at
+`.agents/skills/synthetic-first-debugging/SKILL.md`. The supported scenario
+set is `start-farm`, `stop-farm`, `change-farm-map`, `use-fly-wing`,
+`use-butterfly-wing`, `supply-return` and `combat-cycle`.
+
+This gate preserves the following boundaries:
+
+```text
+HTTP 200 != PASS
+SOURCE_PASS != PRODUCTION_PASS
+NO_EVIDENCE != PASS
+STALE_EVIDENCE != CURRENT_PASS
+SYNTHETIC_PASS != BROWSER_FINAL_ACCEPTANCE
+```
+
+`SYNTHETIC_FIRST_TRIGGERED = N/A` is valid for pure documentation, design,
+CSS-only, asset-review, static-content and reference-research work. A pure
+Browser/presentation defect may begin in Browser and must record the Browser
+transition as the suspected domain. Synthetic diagnosis never bypasses Quest
+Flow First, either Reference Atlas, Single Runtime Policy or nearest legal
+reproducible state.
+
+Owner routing is bounded by the first proven failure:
+
+```text
+A finds the boundary has entered Native → STOP, OWNER = D
+D finds Native healthy and Web projection wrong → STOP, OWNER = A / B
+B finds server state correct and DOM reconciliation wrong → B continues
+```
+
+Default logical routing is Browser/presentation → B, Dashboard/API/Controller
+→ A, Native/PA → D, Quest semantics → E and reference gap → F. Admin diagnostic
+read model → G and Synthetic/Trace infrastructure → H require explicit Project
+Control assignment; G/H do not expand the fixed A-E footer table.
+
+Project Control status updates for this gate stay concise:
+
+```text
+CURRENT BLOCKER =
+FIRST_BROKEN_TRANSITION =
+OWNER =
+NEXT DIRECT ACTION =
+```
+
 ## 6. Continuation discipline
 
 Existing worklines continue through:

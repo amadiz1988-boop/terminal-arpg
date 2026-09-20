@@ -1,5 +1,20 @@
 # Synthetic Player Scenario Harness
 
+## Canonical governance
+
+Runtime／control-flow diagnosis uses `SYNTHETIC_FIRST_DEBUGGING_GATE_V1` from
+`.agents/skills/synthetic-first-debugging/SKILL.md`. This document defines the
+existing runner and scenario contracts; it does not create a separate debugging
+workflow. Project Control and Workers must preserve the sequence:
+
+```text
+diagnostic → trace → synthetic scenario → FIRST_BROKEN_TRANSITION
+→ minimal fix → synthetic regression → controlled acceptance → Browser final acceptance
+```
+
+Pure Browser／presentation defects may begin with Browser evidence. Synthetic
+PASS remains insufficient for Player Web final acceptance.
+
 `scripts/player-scenario-runner.mjs` is the bounded scenario entrypoint for
 Dashboard to Controller to Native/PA to rAthena observations. It reuses the
 existing Dashboard endpoints and relocation helpers; it does not implement a

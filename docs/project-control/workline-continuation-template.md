@@ -352,6 +352,39 @@ authoritative rAthena, OpenKore mature behavior and Project Last-Good checks.
 
 ---
 
+## 9D. SYNTHETIC_FIRST_DEBUGGING_CONTINUATION
+
+For a runtime or control-flow continuation, resume from the existing evidence
+and do not restart diagnosis from scratch:
+
+```text
+LAST_GOOD =
+CURRENT =
+SYNTHETIC_FIRST_TRIGGERED = YES
+DIAGNOSTIC_SOURCE =
+ACTION_TRACE =
+TRACE_EVIDENCE =
+SCENARIO =
+SCENARIO_RESULT = PASS / FAIL / BLOCKED / N/A
+FIRST_BROKEN_TRANSITION =
+CURRENT_OWNER =
+OWNER =
+MINIMAL_FIX =
+NEXT_MINIMAL_FIX =
+SYNTHETIC_REGRESSION =
+SYNTHETIC_LIVE_ACCEPTANCE =
+BROWSER_FINAL_ACCEPTANCE =
+```
+
+Continue with `.agents/skills/synthetic-first-debugging/SKILL.md` and
+`scripts/player-scenario-runner.mjs` when the scenario is supported. Preserve
+Quest Flow First, both Reference Atlas gates, Single Runtime Policy, nearest
+legal reproducible state and Browser final acceptance. Pure documentation,
+design, CSS-only, asset-review, static-content and reference-research
+continuations may use `SYNTHETIC_FIRST_TRIGGERED = N/A`.
+
+---
+
 ## 10. LIVE TEST INVALIDATION RULE
 
 If acceptance is disturbed by any of the following:
@@ -410,6 +443,21 @@ TESTS
 LIVE_PASS
 BROWSER_UI_PASS
 NEXT_ACTION / CLOSED
+```
+
+For a runtime or control-flow continuation, also report:
+
+```text
+SYNTHETIC_FIRST_TRIGGERED
+DIAGNOSTIC_SOURCE
+TRACE_EVIDENCE
+SCENARIO_RESULT
+FIRST_BROKEN_TRANSITION
+CURRENT_OWNER
+NEXT_MINIMAL_FIX
+SYNTHETIC_REGRESSION
+SYNTHETIC_LIVE_ACCEPTANCE
+BROWSER_FINAL_ACCEPTANCE
 ```
 
 For an OpenKore-relevant workline, also report:

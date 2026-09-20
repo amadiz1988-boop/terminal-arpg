@@ -482,6 +482,56 @@ rAthena authority and Current PA, then identify `FIRST_BROKEN_TRANSITION`.
 
 ---
 
+## 10D. SYNTHETIC_FIRST_DEBUGGING_GATE_V1
+
+For a runtime or control-flow workline involving Web, Dashboard API, Auth,
+Ownership, Controller, Command Dispatch, Native, Persistent Agent, rAthena,
+Event Ledger or state reconciliation, include this gate before repeated manual
+Browser interaction:
+
+```text
+SYNTHETIC_FIRST_TRIGGERED = YES
+DIAGNOSTIC_SOURCE =
+ACTION_TRACE =
+SCENARIO =
+FIRST_BROKEN_TRANSITION =
+OWNER =
+MINIMAL_FIX =
+SYNTHETIC_REGRESSION =
+SYNTHETIC_LIVE_ACCEPTANCE =
+BROWSER_FINAL_ACCEPTANCE =
+```
+
+When supported, explicitly instruct the Worker to use
+`scripts/player-scenario-runner.mjs` and the
+`.agents/skills/synthetic-first-debugging/SKILL.md` playbook. Do not require
+this gate for pure documentation, design discussion, CSS-only, asset review,
+static content or reference research; record `SYNTHETIC_FIRST_TRIGGERED = N/A`.
+
+The Worker must preserve these distinctions:
+
+```text
+HTTP 200 != PASS
+SOURCE_PASS != PRODUCTION_PASS
+NO_EVIDENCE != PASS
+STALE_EVIDENCE != CURRENT_PASS
+SYNTHETIC_PASS != BROWSER_FINAL_ACCEPTANCE
+```
+
+Owner stop rule:
+
+```text
+A finds Native boundary reached → STOP, OWNER = D
+D finds Native healthy and Web projection wrong → STOP, OWNER = A / B
+B finds server state correct and DOM reconciliation wrong → B continues
+```
+
+Synthetic First does not supersede Quest Flow First, rAthena/OpenKore
+Reference Atlas gates, Single Runtime Policy, nearest legal reproducible state,
+Browser final acceptance or Git hygiene.
+
+---
+
 ## 11. LAST_GOOD / CURRENT / FIRST_BROKEN_TRANSITION
 
 Regression / restore workline:
@@ -613,6 +663,21 @@ FIRST_BROKEN_TRANSITION =
 EXPECTED =
 ACTUAL =
 evidence (as required) =
+```
+
+For a runtime or control-flow workline, also report:
+
+```text
+SYNTHETIC_FIRST_TRIGGERED
+DIAGNOSTIC_SOURCE
+ACTION_TRACE
+SCENARIO
+FIRST_BROKEN_TRANSITION
+OWNER
+MINIMAL_FIX
+SYNTHETIC_REGRESSION
+SYNTHETIC_LIVE_ACCEPTANCE
+BROWSER_FINAL_ACCEPTANCE
 ```
 
 No chat-style retrospective.

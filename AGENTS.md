@@ -52,6 +52,77 @@ LAST_GOOD
 "How should we redesign this system?"
 ```
 
+### SYNTHETIC_FIRST_DEBUGGING_GATE_V1
+
+跨層 runtime／control-flow 問題涉及 Player Web、Dashboard API、Auth、
+Ownership、Controller、Command Dispatch、Native、Persistent Agent、
+rAthena、Event Ledger 或 state reconciliation 時，必須先使用
+`SYNTHETIC_FIRST_DEBUGGING_GATE_V1`。正式順序為：
+
+```text
+DIAGNOSTIC FIRST
+→ TRACE FIRST
+→ SYNTHETIC FIRST
+→ FIRST_BROKEN_TRANSITION
+→ MINIMAL FIX
+→ SYNTHETIC REGRESSION
+→ BROWSER LAST
+```
+
+完整 Worker 執行方式見：
+`.agents/skills/synthetic-first-debugging/SKILL.md`。
+
+Canonical execution sequence：
+
+```text
+LAST_GOOD / CURRENT
+→ WEB_DIAGNOSTIC / RUNTIME_HEALTH
+→ ACTION_TRACE
+→ SYNTHETIC_SCENARIO
+→ FIRST_BROKEN_TRANSITION
+→ OWNER
+→ MINIMAL_FIX
+→ BOUNDED_TEST
+→ SYNTHETIC_REGRESSION
+→ CLEAN_CHECKPOINT
+→ SUPERSET / PROVENANCE
+→ CONTROLLED_DEPLOY
+→ SYNTHETIC_LIVE_ACCEPTANCE
+→ BROWSER_FINAL_ACCEPTANCE
+```
+
+`HTTP 200 != PASS`、`SOURCE_PASS != PRODUCTION_PASS`、`NO_EVIDENCE != PASS`、
+`STALE_EVIDENCE != CURRENT_PASS`。Synthetic PASS 不取代涉及 UI 的 Player Web
+最終 Browser acceptance。
+
+有既有 scenario 支援時，Worker 必須優先使用
+`scripts/player-scenario-runner.mjs`。預設為 dry-run；live mutation 需要
+明確 `--execute`，並使用合法 auth、canonical endpoint、canonical controller
+與唯一 canonical runtime。不得 bypass auth、手動改 DB、偽造 success 或建立
+第二套 runtime。
+
+純 CSS／layout／DOM／browser-only presentation defect 可由 Browser 先定位，
+並將 Browser 標為 `FIRST_BROKEN_TRANSITION` domain。此例外不改變 Browser
+final acceptance 規則。
+
+Owner stop rule：
+
+```text
+A 發現斷點已進 Native → STOP，OWNER = D
+D 發現 Native 正常而 Web projection 錯 → STOP，OWNER = A / B
+B 發現 server state 正確但 DOM reconcile 錯 → B 繼續
+```
+
+預設 owner routing 為：Browser／presentation → B、Dashboard／API／Controller
+→ A、Native／PA → D、Quest semantics → E、reference gap → F。Admin diagnostic
+read model → G 與 Synthetic／Trace infrastructure → H 僅是 Project Control
+明確指定後才成立的邏輯 owner，不改變既有 A～E footer 狀態表。
+
+不得跨 owner 擴修。Synthetic First 只負責 bounded reproduction／diagnosis，
+不覆蓋 Quest Flow First、rAthena Reference Atlas、OpenKore Reference Atlas、
+Single Runtime Policy、nearest legal reproducible state、Browser final
+acceptance 或 Git hygiene。
+
 ### 2. Project Control Migration
 
 Project Control 搬到新對話時，禁止只搬最後一條工作指示。必須建立完整 `PROJECT CONTROL MIGRATION BUNDLE`，至少包含：
