@@ -12,6 +12,16 @@ sourcePriority:
 forumAuthority: PATTERN_ONLY_UNTIL_SOURCE_VERIFIED
 versionPolicy: Every completed topic records upstream baseline commit and stale/version conflict.
 topics:
+  - domain: admin_support_impersonation_security
+    priority: P0
+    status: COMPLETE
+    whyHighValue: Real-character support sessions cross Admin, Player Web, Controller and Synthetic Runner identity boundaries.
+    currentAtlasCoverage: Actor/effective identity, TTL, revocation, nested impersonation, CSRF, permission scope, audit and secret handling are consolidated in the security dossier.
+    knownGaps: OBSERVE_ONLY mutation coverage and PLAYER_ACTIONS security-sensitive exclusions require the immediate H security patch spec.
+    relatedProjectFlows: [Admin support session, Player Web, Synthetic Runner, Action Trace, Controller authorization]
+    lastReviewed: '2026-09-21'
+    upstreamBaseline: { RFC8693: '2019-07', OWASP: 'reviewed-2026-09-21', GitLab: 'reviewed-2026-09-21', Keycloak: 'reviewed-2026-09-21', CloudflareAccess: 'reviewed-2026-09-21' }
+    dossier: docs/reference-mining/admin-support-impersonation.md
   - domain: debugging_logging_packet_crash
     priority: P0
     status: COMPLETE_EXISTING_ATLAS

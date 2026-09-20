@@ -75,3 +75,5 @@ REFERENCE_MINING_GAP = YES / NO
 ## Current completed cycle
 
 `ITEM_LOOT_INVENTORY_STORAGE_WEIGHT` 已完成一次完整 mining cycle。它對應 AutoLoot、Auto-Identify、Inventory、Storage、Supply 與 Weight threshold，並回寫 rAthena / OpenKore Atlas 的 Project Last-Good pointers。
+
+`ADMIN_SUPPORT_IMPERSONATION_SECURITY` 已完成 security mining cycle。它對照 Project H contract、RFC 8693、OWASP、Cloudflare Access、GitLab 與 Keycloak，記錄 actor/effective identity、TTL、revocation、nested impersonation、CSRF、audit、secret handling 與立即修補規格。Dossier：`docs/reference-mining/admin-support-impersonation.md`。
