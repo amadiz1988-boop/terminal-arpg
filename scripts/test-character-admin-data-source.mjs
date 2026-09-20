@@ -22,6 +22,7 @@ assert.match(dashboard, /persistent_life_event/);
 assert.match(dashboard, /activitySourceStatus/);
 assert.match(dashboard, /adminFreshness/);
 assert.doesNotMatch(dashboard.slice(dashboard.indexOf('async function listAdminCharacters'), dashboard.indexOf('// --- ADMIN character agent controls')), /status\.json|worker\.running/);
+assert.match(admin, /c\.freshness === 'STALE'/);
 
 for (const marker of ['data-filter="job"', 'data-filter="freshness"', 'data-filter="farmSource"', 'data-filter="activity"', 'data-clear-character-filters', "'lastMovement'", "'lastCombat'", "'updatedAt'"])
   assert.match(admin, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
