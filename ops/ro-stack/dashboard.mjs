@@ -71,6 +71,7 @@ import {
   createJobQuestAdapterRegistry,
 } from './quest-runtime/job-adapter-contract.mjs';
 import { CommitType } from './quest-runtime/contracts.mjs';
+import { JOB_MAPPING_SOURCE, resolveJobName } from './job-name-resolver.mjs';
 import { buildEdenCourseAQuestJournal } from './persistent-agent/quest-journal-contract.mjs';
 import {
   readEdenCourseARollout,
@@ -4566,51 +4567,174 @@ async function setCharacterMeta(charId, input) {
   };
 }
 
+function parseAdminFarmTargetSource(targetRules) {
+  try {
+    const parsed = JSON.parse(String(targetRules ?? ''));
+    const source = String(parsed?.source ?? parsed?.targetSource ?? '').toUpperCase();
+    return ['DEFAULT_POLICY', 'PLAYER_OVERRIDE'].includes(source) ? source : 'UNCLASSIFIED';
+  } catch {
+    return 'UNCLASSIFIED';
+  }
+}
+
+function adminFreshness({ resident, online, liveAgeMs }) {
+  if (!online && !resident) return 'OFFLINE';
+  if (Number.isFinite(liveAgeMs)) {
+    if (liveAgeMs <= LIVE_STATUS_MAX_AGE_MS && resident) return 'LIVE';
+    if (liveAgeMs > LIVE_STATUS_MAX_AGE_MS) return 'STALE';
+  }
+  return 'UNKNOWN';
+}
+
+const adminActivityEventTypes = Object.freeze([
+  'MAP_CHANGED', 'MONSTER_TARGET', 'MONSTER_ATTACK', 'MONSTER_HIT',
+  'MONSTER_KILL', 'LOOT_ACQUIRED', 'PLAYER_DEATH',
+]);
+
+function adminActivityEvent(row) {
+  const columns = String(row).split('\t');
+  return {
+    charId: Number(columns[0]),
+    eventId: Number(columns[1]),
+    occurredAt: Number(columns[2]) || null,
+    eventType: columns[3] || '',
+    map: columns[4] && columns[4] !== 'NULL' ? columns[4] : null,
+    facts: persistentLifeFactsFromHex(columns[5]),
+    source: columns[6] || null,
+  };
+}
+
+function buildAdminActivity(events) {
+  const byChar = new Map();
+  for (const event of events) {
+    if (!Number.isSafeInteger(event.charId)) continue;
+    const current = byChar.get(event.charId) ?? { events: [] };
+    current.events.push(event);
+    byChar.set(event.charId, current);
+  }
+  for (const entry of byChar.values()) {
+    entry.events.sort((left, right) => right.occurredAt - left.occurredAt || right.eventId - left.eventId);
+    const latest = (type) => entry.events.find((event) => event.eventType === type) ?? null;
+    const movement = latest('MAP_CHANGED');
+    const combat = entry.events.find((event) => ['MONSTER_TARGET', 'MONSTER_ATTACK', 'MONSTER_HIT', 'MONSTER_KILL', 'LOOT_ACQUIRED'].includes(event.eventType)) ?? null;
+    const toMap = movement?.map ?? movement?.facts?.to ?? null;
+    entry.lastMovement = movement ? {
+      at: movement.occurredAt,
+      type: movement.eventType,
+      fromMap: movement.facts?.from ?? null,
+      fromX: movement.facts?.fromX ?? null,
+      fromY: movement.facts?.fromY ?? null,
+      toMap,
+      toX: movement.facts?.toX ?? null,
+      toY: movement.facts?.toY ?? null,
+      source: movement.source,
+      gap: movement.facts?.fromX === undefined,
+    } : null;
+    entry.lastCombat = combat ? {
+      at: combat.occurredAt,
+      eventType: combat.eventType,
+      targetId: combat.facts?.entityId ?? combat.facts?.targetId ?? null,
+      targetMobId: combat.facts?.mobId ?? null,
+      targetName: Number.isSafeInteger(Number(combat.facts?.mobId)) && Number(combat.facts?.mobId) > 0
+        ? resolveMonsterDisplayName({ mobId: Number(combat.facts.mobId) }) ?? null
+        : null,
+      damage: combat.facts?.damage ?? null,
+      map: combat.map ?? combat.facts?.map ?? null,
+      x: combat.facts?.x ?? null,
+      y: combat.facts?.y ?? null,
+      source: combat.source,
+    } : null;
+    entry.lastAttack = latest('MONSTER_ATTACK');
+    entry.lastHit = latest('MONSTER_HIT');
+    entry.lastKill = latest('MONSTER_KILL');
+    entry.lastLoot = latest('LOOT_ACQUIRED');
+    entry.lastDeath = latest('PLAYER_DEATH');
+    entry.lastRecovery = null;
+  }
+  return byChar;
+}
+
+async function readAdminCharacterActivity(charIds) {
+  const ids = [...new Set(charIds.map(Number).filter((id) => Number.isSafeInteger(id) && id > 0))];
+  if (!ids.length) return { available: true, byChar: new Map() };
+  try {
+    const types = adminActivityEventTypes.map((type) => `'${type}'`).join(',');
+    const output = await sql(
+      `SELECT char_id,event_id,ROUND(UNIX_TIMESTAMP(occurred_at)*1000),event_type,COALESCE(map,''),HEX(COALESCE(facts,'')),source FROM persistent_life_event WHERE char_id IN (${ids.join(',')}) AND event_type IN (${types}) ORDER BY occurred_at DESC,event_id DESC LIMIT ${Math.max(100, ids.length * 16)};`,
+    );
+    const events = (output ? output.split(/\r?\n/) : []).filter(Boolean).map(adminActivityEvent);
+    return { available: true, byChar: buildAdminActivity(events) };
+  } catch (error) {
+    if (persistentLifeEventSchemaUnavailable(error)) return { available: false, byChar: new Map() };
+    throw error;
+  }
+}
+
 // ADMIN character roster for the Server Ops surface. Read-only; joins the
-// existing char table with character_meta (missing row ⇒ UNKNOWN).
+// existing char table with PA state/live projections and the factual Event Ledger.
 async function listAdminCharacters(limit = 200) {
   const out = await sql(
-    `SELECT c.char_id,c.account_id,COALESCE(l.userid,''),c.name,c.class,c.base_level,c.job_level,COALESCE(s.map,c.last_map),c.online,COALESCE(m.character_origin,'UNKNOWN'),COALESCE(m.character_role,'UNKNOWN'),COALESCE(s.resident,0),COALESCE(s.hp,0),COALESCE(s.max_hp,0),COALESCE(s.sp,0),COALESCE(s.max_sp,0),COALESCE(s.x,0),COALESCE(s.y,0),COALESCE(s.runtime_phase,''),COALESCE(s.control_owner,''),COALESCE(s.ownership_state,''),COALESCE(s.runtime_state,''),COALESCE(s.agent_mode,''),COALESCE(st.task_type,''),COALESCE(st.task_phase,''),COALESCE(st.last_error_code,''),ROUND(TIMESTAMPDIFF(MICROSECOND,s.updated_at,CURRENT_TIMESTAMP(3))/1000),COALESCE(a.last_web_activity_at,0),COALESCE(a.last_web_login_at,0) FROM \`char\` c LEFT JOIN login l ON l.account_id=c.account_id LEFT JOIN character_meta m ON m.char_id=c.char_id LEFT JOIN persistent_agent_live_status s ON s.char_id=c.char_id LEFT JOIN persistent_agent_state st ON st.char_id=c.char_id LEFT JOIN web_account_activity a ON a.account_id=c.account_id ORDER BY c.char_id ASC LIMIT ${Number(limit)};`,
+    `SELECT c.char_id,c.account_id,COALESCE(l.userid,''),c.name,c.class,c.base_level,c.job_level,COALESCE(s.map,c.last_map),c.online,COALESCE(m.character_origin,'UNKNOWN'),COALESCE(m.character_role,'UNKNOWN'),COALESCE(s.resident,0),COALESCE(s.hp,0),COALESCE(s.max_hp,0),COALESCE(s.sp,0),COALESCE(s.max_sp,0),COALESCE(s.zeny,c.zeny,0),COALESCE(s.x,c.last_x,0),COALESCE(s.y,c.last_y,0),COALESCE(c.save_map,''),COALESCE(c.save_x,0),COALESCE(c.save_y,0),COALESCE(s.runtime_phase,''),COALESCE(s.control_owner,''),COALESCE(s.ownership_state,''),COALESCE(s.runtime_state,''),COALESCE(s.agent_mode,''),COALESCE(st.task_type,''),COALESCE(st.task_phase,''),COALESCE(st.last_error_code,''),ROUND(TIMESTAMPDIFF(MICROSECOND,s.updated_at,CURRENT_TIMESTAMP(3))/1000),ROUND(UNIX_TIMESTAMP(s.updated_at)*1000),COALESCE(st.target_map,''),COALESCE(st.target_rules,''),COALESCE(a.last_web_activity_at,0),COALESCE(a.last_web_login_at,0) FROM \`char\` c LEFT JOIN login l ON l.account_id=c.account_id LEFT JOIN character_meta m ON m.char_id=c.char_id LEFT JOIN persistent_agent_live_status s ON s.char_id=c.char_id LEFT JOIN persistent_agent_state st ON st.char_id=c.char_id LEFT JOIN web_account_activity a ON a.account_id=c.account_id ORDER BY c.char_id ASC LIMIT ${Number(limit)};`,
   );
   if (!out) return [];
-  return String(out)
+  const rows = String(out)
     .split(/\r?\n/)
     .filter(Boolean)
     .map((line) => {
       const r = line.split('\t');
-      const liveAge = r[26] && r[26] !== 'NULL' ? Number(r[26]) : null;
+      const liveAge = r[30] && r[30] !== 'NULL' ? Number(r[30]) : null;
+      const resident = r[11] === '1';
+      const online = r[8] === '1';
+      const classId = Number(r[4]);
       return {
         charId: Number(r[0]),
         accountId: Number(r[1]),
         accountName: r[2] || '',
         name: r[3],
-        classId: Number(r[4]),
+        classId,
+        jobName: resolveJobName(classId),
+        jobMappingSource: JOB_MAPPING_SOURCE,
         baseLevel: Number(r[5]),
         jobLevel: Number(r[6]),
         map: r[7],
-        online: r[8] === '1',
+        online,
         characterOrigin: r[9] || 'UNKNOWN',
         characterRole: r[10] || 'UNKNOWN',
-        resident: r[11] === '1',
+        resident,
         hp: Number(r[12]),
         maxHp: Number(r[13]),
         sp: Number(r[14]),
         maxSp: Number(r[15]),
-        x: Number(r[16]),
-        y: Number(r[17]),
-        runtimePhase: r[18] || '',
-        controlOwner: r[19] || '',
-        ownershipState: r[20] || '',
-        runtimeState: r[21] || '',
-        agentMode: r[22] || '',
-        taskType: r[23] || '',
-        taskPhase: r[24] || '',
-        lastErrorCode: r[25] || '',
+        zeny: Number(r[16]),
+        x: Number(r[17]),
+        y: Number(r[18]),
+        saveMap: r[19] || '',
+        saveX: Number(r[20]),
+        saveY: Number(r[21]),
+        runtimePhase: r[22] || '',
+        controlOwner: r[23] || '',
+        ownershipState: r[24] || '',
+        runtimeState: r[25] || '',
+        agentMode: r[26] || '',
+        taskType: r[27] || '',
+        taskPhase: r[28] || '',
+        lastErrorCode: r[29] || '',
         liveAgeMs: Number.isFinite(liveAge) ? liveAge : null,
-        lastWebActivityAt: Number(r[27]) || 0,
-        lastWebLoginAt: Number(r[28]) || 0,
+        updatedAt: Number(r[31]) || null,
+        farmTarget: r[32] || '',
+        farmTargetSource: parseAdminFarmTargetSource(r[33]),
+        lastWebActivityAt: Number(r[34]) || 0,
+        lastWebLoginAt: Number(r[35]) || 0,
+        freshness: adminFreshness({ resident, online, liveAgeMs: liveAge }),
       };
     });
+  const activity = await readAdminCharacterActivity(rows.map((row) => row.charId));
+  return rows.map((row) => ({
+    ...row,
+    activitySourceStatus: activity.available ? 'AVAILABLE' : 'UNAVAILABLE',
+    lastRecovery: null,
+    ...((activity.byChar.get(row.charId) ?? {})),
+  }));
 }
 
 // --- ADMIN character agent controls (啟動角色自主 / 啟動掛機) ---------------

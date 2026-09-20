@@ -13,6 +13,22 @@ const ROLE_LABELS = { PRODUCTION: '正式', CANARY: 'Canary', TEST: '測試', UN
 const CONTROL_MODES = ['玩家控制', '待機', '指定掛機', '移動中', '補給中', '返回掛機地', '恢復中', '任務中', '隔離'];
 const HEALTH_RANK = { DOWN: 3, ERROR: 3, QUARANTINED: 3, FAILED: 3, DEGRADED: 2, STALE: 2, RECOVERING: 2, OFFLINE: 2, UNKNOWN: 1, HEALTHY: 0, LIVE: 0, ONLINE: 0, FRESH: 0, SUCCESS: 0 };
 const PROCESS_ROLES = ['login', 'char', 'map', 'mysqld', 'dashboard'];
+const STATUS_LABELS = {
+  ALL: '全部', HEALTHY: '健康', LIVE: '即時', FRESH: '新鮮', ONLINE: '在線',
+  DEGRADED: '降級', STALE: '資料過期', OFFLINE: '離線', UNKNOWN: '未知',
+  DOWN: '停止', ERROR: '錯誤', FAILED: '失敗', QUARANTINED: '隔離',
+  RECOVERING: '恢復中', SUCCESS: '成功', AVAILABLE: '可用', UNAVAILABLE: '不可用',
+  MOVEMENT: '移動', COMBAT: '戰鬥', ERROR_ONLY: '錯誤',
+  PLAYER_OVERRIDE: '玩家指定', DEFAULT_POLICY: '預設政策', UNCLASSIFIED: '未分類',
+  YES: '是', NO: '否',
+};
+const EVENT_LABELS = {
+  MAP_CHANGED: '地圖切換', MONSTER_TARGET: '鎖定怪物', MONSTER_ATTACK: '攻擊怪物',
+  MONSTER_HIT: '命中怪物', MONSTER_KILL: '擊殺怪物', LOOT_ACQUIRED: '取得戰利品',
+  PLAYER_DEATH: '角色死亡',
+};
+const labelStatus = (value) => STATUS_LABELS[String(value ?? '').toUpperCase()] ?? String(value ?? '—');
+const labelEvent = (value) => EVENT_LABELS[String(value ?? '').toUpperCase()] ?? String(value ?? '事件');
 
 const state = {
   tab: (location.hash || '#overview').slice(1),
@@ -20,7 +36,7 @@ const state = {
   loading: 'loading', error: null, lastLoadedAt: null,
   search: '', busy: false, expanded: null,
   charActions: {},
-  filters: { web: 'ALL', control: 'ALL', origin: 'ALL', role: 'ALL', map: 'ALL' },
+  filters: { web: 'ALL', control: 'ALL', origin: 'ALL', role: 'ALL', map: 'ALL', job: 'ALL', freshness: 'ALL', farmSource: 'ALL', activity: 'ALL' },
   webOnlyFailures: false,
   sort: {
     servers: { key: 'health', dir: -1 }, characters: { key: 'health', dir: -1 },
@@ -30,7 +46,7 @@ const state = {
 const el = (id) => document.getElementById(id);
 const esc = (v) => String(v ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 const dot = (s) => `<span class="dot ${esc(s)}" title="${esc(s)}"></span>`;
-const badge = (s) => `<span class="badge ${esc(s)}">${esc(s)}</span>`;
+const badge = (s) => `<span class="badge ${esc(s)}" title="${esc(s)}">${esc(labelStatus(s))}</span>`;
 function fmtBytes(n) {
   if (!Number.isFinite(Number(n)) || Number(n) <= 0) return '—';
   const u = ['B', 'KB', 'MB', 'GB', 'TB']; let v = Number(n), i = 0;
@@ -67,7 +83,35 @@ async function loadJobNames() {
     if (m) jobNames = Function(`"use strict";return (${m[1]})`)() ?? {};
   } catch { jobNames = {}; }
 }
-function jobName(classId) { const n = jobNames[Number(classId)]; return n || `未知職業 (#${classId})`; }
+function jobName(character) {
+  if (character && typeof character === 'object' && character.jobName) return character.jobName;
+  const classId = typeof character === 'object' ? character?.classId : character;
+  const n = jobNames[Number(classId)];
+  return n || `未支援職業 (#${classId})`;
+}
+
+function freshnessLabel(value) {
+  return ({ LIVE: '即時', STALE: '資料過期', OFFLINE: '目前離線', UNKNOWN: '新鮮度未知' })[String(value ?? '').toUpperCase()] ?? '新鮮度未知';
+}
+function activityEmpty(c, kind) {
+  if (c.activitySourceStatus === 'UNAVAILABLE') return '資料來源異常';
+  return kind === 'movement' ? '尚無地圖轉移紀錄' : '尚無戰鬥紀錄';
+}
+function activityWhen(activity, empty) {
+  if (!activity?.at) return empty;
+  return fmtWhen(activity.at);
+}
+function activityLabel(c, kind) {
+  const activity = kind === 'movement' ? c.lastMovement : c.lastCombat;
+  if (!activity) return activityEmpty(c, kind);
+  if (kind === 'movement') {
+    const from = activity.fromMap || '—', to = activity.toMap || '—';
+    return `${activityWhen(activity, '—')} · ${from} → ${to}${activity.gap ? ' · 座標未提供' : ''}`;
+  }
+  const target = activity.targetName || (activity.targetMobId ? `怪物 #${activity.targetMobId}` : '目標未提供');
+  const damage = Number.isFinite(Number(activity.damage)) ? ` · 傷害 ${Number(activity.damage)}` : '';
+  return `${activityWhen(activity, '—')} · ${labelEvent(activity.eventType)} · ${target}${damage}`;
+}
 
 // Web presence from the low-frequency heartbeat; an unexpired session is NOT presence.
 function webPresence(c) {
@@ -272,7 +316,7 @@ function filteredCharacters() {
   const q = state.search.trim().toLowerCase();
   return (state.characters ?? []).filter((c) => {
     if (q) {
-      const hay = [c.name, c.accountName, c.accountId, c.charId, c.map, c.characterOrigin, c.characterRole, webState(c), controlMode(c).label, jobName(c.classId), c.classId].join(' ').toLowerCase();
+      const hay = [c.name, c.accountName, c.accountId, c.charId, c.map, c.characterOrigin, c.characterRole, c.farmTarget, c.agentMode, c.farmTargetSource, c.freshness, webState(c), controlMode(c).label, jobName(c), c.classId].join(' ').toLowerCase();
       if (!hay.includes(q)) return false;
     }
     const f = state.filters;
@@ -281,31 +325,45 @@ function filteredCharacters() {
     if (f.origin !== 'ALL' && c.characterOrigin !== f.origin) return false;
     if (f.role !== 'ALL' && c.characterRole !== f.role) return false;
     if (f.map !== 'ALL' && c.map !== f.map) return false;
+    if (f.job !== 'ALL' && String(c.classId) !== f.job) return false;
+    if (f.freshness !== 'ALL' && c.freshness !== f.freshness) return false;
+    if (f.farmSource !== 'ALL' && c.farmTargetSource !== f.farmSource) return false;
+    if (f.activity === 'MOVEMENT' && !c.lastMovement) return false;
+    if (f.activity === 'COMBAT' && !c.lastCombat) return false;
+    if (f.activity === 'ERROR_ONLY' && !c.lastErrorCode) return false;
     return true;
   });
 }
 function renderCharacters() {
   const maps = [...new Set((state.characters ?? []).map((c) => c.map).filter(Boolean))].sort();
-  const opts = (list, cur) => list.map((v) => `<option${v === cur ? ' selected' : ''}>${esc(v)}</option>`).join('');
+  const jobs = [...new Map((state.characters ?? []).map((c) => [String(c.classId), jobName(c)])).entries()].sort((a, b) => a[1].localeCompare(b[1], 'zh-Hant'));
+  const opts = (list, cur) => list.map((v) => `<option value="${esc(v)}"${v === cur ? ' selected' : ''}>${esc(labelStatus(v))}</option>`).join('');
   const filterBar = `<div class="toolbar">
+    <label>職業</label><select data-filter="job"><option value="ALL"${state.filters.job === 'ALL' ? ' selected' : ''}>全部職業</option>${jobs.map(([id, label]) => `<option value="${esc(id)}"${id === state.filters.job ? ' selected' : ''}>${esc(label)}</option>`).join('')}</select>
+    <label>資料新鮮度</label><select data-filter="freshness">${opts(['ALL', 'LIVE', 'STALE', 'OFFLINE', 'UNKNOWN'], state.filters.freshness)}</select>
     <label>Web</label><select data-filter="web">${opts(['ALL', 'ONLINE', 'OFFLINE'], state.filters.web)}</select>
     <label>控制模式</label><select data-filter="control">${opts(['ALL', ...CONTROL_MODES], state.filters.control)}</select>
-    <label>Origin</label><select data-filter="origin">${opts(['ALL', ...ORIGINS], state.filters.origin)}</select>
-    <label>Role</label><select data-filter="role">${opts(['ALL', ...ROLES], state.filters.role)}</select>
-    <label>Map</label><select data-filter="map">${opts(['ALL', ...maps], state.filters.map)}</select>
-    <span class="count">${filteredCharacters().length} / ${(state.characters ?? []).length}</span>
+    <label>掛機來源</label><select data-filter="farmSource">${opts(['ALL', 'PLAYER_OVERRIDE', 'DEFAULT_POLICY', 'UNCLASSIFIED'], state.filters.farmSource)}</select>
+    <label>最近活動</label><select data-filter="activity">${opts(['ALL', 'MOVEMENT', 'COMBAT', 'ERROR_ONLY'], state.filters.activity)}</select>
+    <label>角色來源</label><select data-filter="origin">${opts(['ALL', ...ORIGINS], state.filters.origin)}</select>
+    <label>角色類型</label><select data-filter="role">${opts(['ALL', ...ROLES], state.filters.role)}</select>
+    <label>地圖</label><select data-filter="map">${opts(['ALL', ...maps], state.filters.map)}</select>
+    <button class="action" data-clear-character-filters>清除條件</button><span class="count">${filteredCharacters().length} / ${(state.characters ?? []).length}</span>
   </div>`;
   const rows = sortRows('characters', filteredCharacters(), (c, k) => {
     if (k === 'health') return characterHealthRank(charHealthKey(c));
     if (k === 'account') return c.accountName || '';
     if (k === 'name') return c.name ?? '';
-    if (k === 'job') return jobName(c.classId);
+    if (k === 'job') return jobName(c);
     if (k === 'level') return c.baseLevel;
     if (k === 'map') return c.map ?? '';
     if (k === 'web') return Number(c.lastWebActivityAt ?? 0);
     if (k === 'control') return controlMode(c).label;
     if (k === 'origin') return ORIGIN_LABELS[c.characterOrigin] ?? '未分類';
     if (k === 'role') return ROLE_LABELS[c.characterRole] ?? '未分類';
+    if (k === 'lastMovement') return Number(c.lastMovement?.at ?? 0);
+    if (k === 'lastCombat') return Number(c.lastCombat?.at ?? 0);
+    if (k === 'updatedAt') return Number(c.updatedAt ?? 0);
     return '';
   }, (a, b) => compareCharacterHealth(characterHealthRow(a), characterHealthRow(b), 1));
   const body = rows.map((c) => {
@@ -315,27 +373,26 @@ function renderCharacters() {
     const agentBusy = ca.status === 'activating' || ca.status === 'starting';
     const main = `<tr class="clickable" data-char-row="${c.charId}">
       <td>${dot(charHealthKey(c))}</td>
-      <td>${esc(c.accountName || '—')}</td><td>${esc(c.name)}</td><td>${esc(jobName(c.classId))}</td><td class="num">${c.baseLevel} / ${c.jobLevel}</td><td>${esc(c.map)}</td>
+      <td>${esc(c.accountName || '—')}</td><td>${esc(c.name)}</td><td>${esc(jobName(c))}</td><td class="num">${c.baseLevel} / ${c.jobLevel}</td><td>${esc(c.map || '—')}</td><td>${esc(c.updatedAt ? fmtWhen(c.updatedAt) : '尚無資料')}</td>
       <td title="${esc(wp.idle ? fmtAgo(wp.idle) : '')}">${esc(wp.label)}</td>
       <td><span class="badge ${controlClass(cm.key)}">${esc(cm.label)}</span></td>
-      <td class="muted">—</td><td class="muted">—</td>
+      <td title="${esc(activityLabel(c, 'movement'))}">${esc(c.lastMovement?.at ? fmtWhen(c.lastMovement.at) : activityEmpty(c, 'movement'))}</td><td title="${esc(activityLabel(c, 'combat'))}">${esc(c.lastCombat?.at ? fmtWhen(c.lastCombat.at) : activityEmpty(c, 'combat'))}</td>
       <td>${esc(ORIGIN_LABELS[c.characterOrigin] ?? '未分類')}</td><td>${esc(ROLE_LABELS[c.characterRole] ?? '未分類')}</td>
       <td>${expanded ? '<button class="link" data-toggle>收起</button>' : '<button class="link" data-toggle>展開</button>'}</td>
     </tr>`;
     if (!expanded) return main;
-    const detail = `<tr class="drawer"><td colspan="13"><div class="kv">
-      <div class="row"><span>AID</span><span>${c.accountId}</span></div>
-      <div class="row"><span>CID</span><span>${c.charId}</span></div>
-      <div class="row"><span>Job ID</span><span>${c.classId}</span></div>
+    const detail = `<tr class="drawer"><td colspan="14"><div class="kv">
+      <div class="row"><span>基本資料</span><span>AID ${c.accountId} · CID ${c.charId} · ${esc(jobName(c))} (#${c.classId})</span></div>
       <div class="row"><span>HP / SP</span><span>${c.maxHp ? `${c.hp} / ${c.maxHp}` : '—'} · ${c.maxSp ? `${c.sp} / ${c.maxSp}` : '—'}</span></div>
-      <div class="row"><span>Map / X / Y</span><span>${esc(c.map)} ${c.x || c.y ? `/ ${c.x} / ${c.y}` : ''}</span></div>
-      <div class="row"><span>control_owner</span><span>${esc(c.controlOwner || '—')}</span></div>
-      <div class="row"><span>agent_mode</span><span>${esc(c.agentMode || '—')}</span></div>
-      <div class="row"><span>phase (runtime / task)</span><span>${esc(c.runtimePhase || '—')} / ${esc(c.taskPhase || '—')}</span></div>
-      <div class="row"><span>ownership_state</span><span>${esc(c.ownershipState || '—')}</span></div>
+      <div class="row"><span>位置 / 回存點</span><span>${esc(c.map || '尚無資料')} ${c.x || c.y ? `/ ${c.x} / ${c.y}` : ''} · ${esc(c.saveMap || '尚無資料')} ${c.saveX || c.saveY ? `/ ${c.saveX} / ${c.saveY}` : ''}</span></div>
+      <div class="row"><span>Zeny / 掛機目標</span><span>${Number.isFinite(c.zeny) ? c.zeny : '尚無資料'} · ${esc(c.farmTarget || '尚無資料')} · ${esc(labelStatus(c.farmTargetSource || 'UNCLASSIFIED'))}</span></div>
+      <div class="row"><span>控制擁有者</span><span>${esc(c.controlOwner || '—')}</span></div>
+      <div class="row"><span>自動模式</span><span>${esc(c.agentMode || '—')}</span></div>
+      <div class="row"><span>執行階段 / 任務階段</span><span>${esc(c.runtimePhase || '—')} / ${esc(c.taskPhase || '—')}</span></div>
+      <div class="row"><span>擁有權狀態</span><span>${esc(c.ownershipState || '—')}</span></div>
       <div class="row"><span>角色在線狀態</span><span>${c.online ? '線上（遊戲中）' : '離線'}</span></div>
-      <div class="row"><span>SERVER_AGENT resident</span><span>${c.resident ? 'YES' : 'NO'}</span></div>
-      <div class="row"><span>read-model age</span><span>${Number.isFinite(c.liveAgeMs) ? fmtAgo(c.liveAgeMs) : '—'}</span></div>
+      <div class="row"><span>SERVER_AGENT 常駐</span><span>${c.resident ? '是' : '否'}</span></div>
+      <div class="row"><span>資料新鮮度</span><span>${esc(freshnessLabel(c.freshness))} · ${Number.isFinite(c.liveAgeMs) ? fmtAgo(c.liveAgeMs) : '尚無資料'} · 更新於 ${esc(fmtWhen(c.updatedAt))}</span></div>
       <div class="row"><span>Admin 角色自主 / 掛機</span>
         <span><button class="action" data-agent-autonomy="${c.charId}"${agentBusy ? ' disabled' : ''}>啟動角色自主</button>
         <button class="action" data-agent-farm="${c.charId}"${agentBusy ? ' disabled' : ''}>啟動掛機</button>
@@ -343,10 +400,11 @@ function renderCharacters() {
       <div class="row"><span>Admin 執行狀態</span><span>${agentStatusBadge(ca)}</span></div>
       <div class="row"><span>目前 automation mode</span><span>${esc(cm.label)}${c.agentMode ? ` · ${esc(c.agentMode)}` : ''}</span></div>
       <div class="row"><span>最後 command 結果</span><span>${ca.command ? `<span class="mono">${esc(ca.command)}</span>` : '<span class="muted">—</span>'}</span></div>
-      <div class="row"><span>last move</span><span class="muted">— (LAST_MOVE_NATIVE_FIELD_REQUIRED)</span></div>
-      <div class="row"><span>last combat</span><span class="muted">— (LAST_COMBAT_NATIVE_FIELD_REQUIRED)</span></div>
-      <div class="row"><span>last transition</span><span class="muted">— (no API field)</span></div>
-      <div class="row"><span>last error</span><span>${esc(c.lastErrorCode || '—')}</span></div>
+      <div class="row"><span>最近活動</span><span>移動：${esc(activityLabel(c, 'movement'))}<br />戰鬥：${esc(activityLabel(c, 'combat'))}</span></div>
+      <div class="row"><span>最近攻擊 / 命中 / 擊殺 / 掉落 / 死亡</span><span>${[['lastAttack', '攻擊'], ['lastHit', '命中'], ['lastKill', '擊殺'], ['lastLoot', '掉落'], ['lastDeath', '死亡']].map(([key, label]) => `${label} ${c[key]?.occurredAt ? fmtWhen(c[key].occurredAt) : '尚無紀錄'}`).join(' · ')}</span></div>
+      <div class="row"><span>最近恢復</span><span>未支援，目前沒有 canonical 恢復事件</span></div>
+      <div class="row"><span>資料來源</span><span>職業：${esc(c.jobMappingSource)} · 活動：${c.activitySourceStatus === 'AVAILABLE' ? 'PA 事件紀錄' : '資料來源異常'}</span></div>
+      <div class="row"><span>最近錯誤</span><span>${esc(c.lastErrorCode || '—')}</span></div>
       <div class="row"><span>Web 活動</span><span>${esc(wp.label)}${c.lastWebLoginAt ? ` · 登入 ${fmtAgo(Date.now() - c.lastWebLoginAt)}` : ''}</span></div>
       <div class="row"><span>Origin / Role 修改</span>
         <span><select data-origin-edit>${ORIGINS.map((o) => `<option value="${o}"${o === c.characterOrigin ? ' selected' : ''}>${ORIGIN_LABELS[o]}</option>`).join('')}</select>
@@ -356,8 +414,8 @@ function renderCharacters() {
     return main + detail;
   }).join('');
   return `${filterBar}<div class="table-wrap"><table class="grid"><thead><tr>
-    ${th('characters', 'health', 'Health')}${th('characters', 'account', '帳號')}${th('characters', 'name', '角色名稱')}${th('characters', 'job', '職業')}${th('characters', 'level', 'Base / Job', 'num')}${th('characters', 'map', '地圖')}${th('characters', 'web', 'Web')}${th('characters', 'control', '控制模式')}<th class="no-sort muted">最後移動</th><th class="no-sort muted">最後戰鬥</th>${th('characters', 'origin', 'Origin')}${th('characters', 'role', 'Role')}<th class="no-sort">Actions</th>
-  </tr></thead><tbody>${body || '<tr><td colspan="13" class="empty">No characters match filters</td></tr>'}</tbody></table></div>`;
+    ${th('characters', 'health', '健康')}${th('characters', 'account', '帳號')}${th('characters', 'name', '角色名稱')}${th('characters', 'job', '職業')}${th('characters', 'level', '基礎 / 職業', 'num')}${th('characters', 'map', '地圖')}${th('characters', 'updatedAt', '最後更新')}${th('characters', 'web', 'Web')}${th('characters', 'control', '控制模式')}${th('characters', 'lastMovement', '最後移動')}${th('characters', 'lastCombat', '最後戰鬥')}${th('characters', 'origin', '角色來源')}${th('characters', 'role', '角色類型')}<th class="no-sort">操作</th>
+  </tr></thead><tbody>${body || '<tr><td colspan="14" class="empty">目前沒有符合條件的角色</td></tr>'}</tbody></table></div>`;
 }
 
 function renderConnectivity() {
