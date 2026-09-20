@@ -7,10 +7,11 @@ import {
   createSandbox,
   createSeededCharacters,
   deriveShadowSocialProximity,
-  deriveShadowEncounterTransitions,
+  deriveShadowCandidateTransitions,
   deriveSocialProximityTransitions,
   dispatchShadowIntent,
   encounter,
+  promoteSocialCandidate,
   reconcileDaily,
   reconcileDailyFromRuntime,
 } from './persistent-life-social-sandbox-v0.mjs';
@@ -275,7 +276,8 @@ function proximitySample({
 check('social proximity enters exactly at distance 7', () => {
   const result = proximitySample({ distance: 7, revision: 1, previousRevision: 0, previousUpdatedAt: undefined });
   assert.equal(result.ok, true);
-  assert.deepEqual(result.derivedLifeFacts.map((fact) => [fact.type, fact.distance]), [['ENCOUNTER', 7]]);
+  assert.deepEqual(result.derivedLifeFacts.map((fact) => [fact.type, fact.distance]), [['SOCIAL_CANDIDATE_ENTER', 7]]);
+  assert.equal(result.derivedLifeFacts[0].classification, 'SOCIAL_CANDIDATE');
   assert.equal(result.stateById['1002'], 'NEARBY');
 });
 
@@ -314,7 +316,7 @@ check('distance 10 while NEARBY leaves', () => {
     previousStateById: { 1002: 'NEARBY' },
     previousVisibleSet: [{ entity_kind: 'PLAYER', entity_id: 1002, map: 'pay_dun00', x: 9, y: 0 }],
   });
-  assert.deepEqual(result.presenceEnds.map((fact) => fact.type), ['ENCOUNTER_END']);
+  assert.deepEqual(result.presenceEnds.map((fact) => fact.type), ['SOCIAL_CANDIDATE_LEAVE']);
   assert.equal(result.stateById['1002'], 'OUTSIDE');
 });
 
@@ -326,7 +328,7 @@ check('10 to 7 re-enters exactly once', () => {
     previousStateById: outside.stateById,
     previousVisibleSet: [{ entity_kind: 'PLAYER', entity_id: 1002, map: 'pay_dun00', x: 10, y: 0 }],
   });
-  assert.deepEqual(returned.derivedLifeFacts.map((fact) => fact.type), ['ENCOUNTER']);
+  assert.deepEqual(returned.derivedLifeFacts.map((fact) => fact.type), ['SOCIAL_CANDIDATE_ENTER']);
 });
 
 check('repeated distance 7 samples do not duplicate encounters', () => {
@@ -438,21 +440,21 @@ const presenceArgs = {
   timestamp: 1234,
 };
 
-check('empty to present derives exactly one encounter', () => {
-  const result = deriveShadowEncounterTransitions({
+check('empty to present derives exactly one social candidate', () => {
+  const result = deriveShadowCandidateTransitions({
     ...presenceArgs,
     previousVisibleSet: [],
     currentVisibleSet: [{ id: 1002, x: 80, y: 92 }],
   });
   assert.equal(result.ok, true);
   assert.equal(result.derivedLifeFacts.length, 1);
-  assert.equal(result.derivedLifeFacts[0].type, 'ENCOUNTER');
-  assert.equal(result.derivedLifeFacts[0].classification, 'DERIVED_LIFE_FACT');
+  assert.equal(result.derivedLifeFacts[0].type, 'SOCIAL_CANDIDATE_ENTER');
+  assert.equal(result.derivedLifeFacts[0].classification, 'SOCIAL_CANDIDATE');
   assert.equal(result.derivedLifeFacts[0].projection_source, 'persistent_agent_live_entity');
 });
 
 check('continuous presence does not duplicate an encounter', () => {
-  const result = deriveShadowEncounterTransitions({
+  const result = deriveShadowCandidateTransitions({
     ...presenceArgs,
     previousVisibleSet: [{ id: 1002 }],
     currentVisibleSet: [{ id: 1002 }],
@@ -461,18 +463,18 @@ check('continuous presence does not duplicate an encounter', () => {
   assert.deepEqual(result.continuedPresence.map((fact) => fact.counterpart_id), ['1002']);
 });
 
-check('present to absent derives a presence end', () => {
-  const result = deriveShadowEncounterTransitions({
+check('present to absent closes the social candidate', () => {
+  const result = deriveShadowCandidateTransitions({
     ...presenceArgs,
     previousVisibleSet: [{ id: 1002 }],
     currentVisibleSet: [],
   });
-  assert.deepEqual(result.presenceEnds.map((fact) => fact.type), ['ENCOUNTER_END']);
+  assert.deepEqual(result.presenceEnds.map((fact) => fact.type), ['SOCIAL_CANDIDATE_LEAVE']);
   assert.deepEqual(result.presenceEnds.map((fact) => fact.counterpart_id), ['1002']);
 });
 
-check('absence followed by return derives a new encounter', () => {
-  const result = deriveShadowEncounterTransitions({
+check('absence followed by return derives a new candidate', () => {
+  const result = deriveShadowCandidateTransitions({
     ...presenceArgs,
     previousRevision: 12,
     currentRevision: 13,
@@ -484,7 +486,7 @@ check('absence followed by return derives a new encounter', () => {
 });
 
 check('two different characters enter independently', () => {
-  const result = deriveShadowEncounterTransitions({
+  const result = deriveShadowCandidateTransitions({
     ...presenceArgs,
     previousVisibleSet: [],
     currentVisibleSet: [{ id: 1002 }, { id: 1003 }],
@@ -492,8 +494,8 @@ check('two different characters enter independently', () => {
   assert.deepEqual(result.derivedLifeFacts.map((fact) => fact.counterpart_id), ['1002', '1003']);
 });
 
-check('stale revision produces no false encounter', () => {
-  const result = deriveShadowEncounterTransitions({
+check('stale revision produces no false candidate', () => {
+  const result = deriveShadowCandidateTransitions({
     ...presenceArgs,
     currentRevision: 10,
     previousVisibleSet: [],
@@ -504,8 +506,8 @@ check('stale revision produces no false encounter', () => {
   assert.deepEqual(result.derivedLifeFacts, []);
 });
 
-check('map change produces no false encounter', () => {
-  const result = deriveShadowEncounterTransitions({
+check('map change produces no false candidate', () => {
+  const result = deriveShadowCandidateTransitions({
     ...presenceArgs,
     previousMap: 'morocc',
     currentMap: 'pay_dun00',
@@ -516,8 +518,8 @@ check('map change produces no false encounter', () => {
   assert.deepEqual(result.derivedLifeFacts, []);
 });
 
-check('self entity is excluded from social encounter derivation', () => {
-  const result = deriveShadowEncounterTransitions({
+check('self entity is excluded from social candidate derivation', () => {
+  const result = deriveShadowCandidateTransitions({
     ...presenceArgs,
     previousVisibleSet: [],
     currentVisibleSet: [{ id: 1001 }, { id: 1002 }],
@@ -525,8 +527,8 @@ check('self entity is excluded from social encounter derivation', () => {
   assert.deepEqual(result.derivedLifeFacts.map((fact) => fact.counterpart_id), ['1002']);
 });
 
-check('derived encounter feeds Social Director shadow mode with default NONE', () => {
-  const derived = deriveShadowEncounterTransitions({
+check('social candidate feeds Social Director shadow mode with default NONE', () => {
+  const derived = deriveShadowCandidateTransitions({
     ...presenceArgs,
     previousVisibleSet: [],
     currentVisibleSet: [{ id: 1002 }],
@@ -560,6 +562,32 @@ check('derived encounter feeds Social Director shadow mode with default NONE', (
   });
   assert.equal(shadow.mode, 'SHADOW');
   assert.equal(shadow.intent.decision, 'NONE');
+  assert.equal(shadow.outcome, 'PASS_BY');
+  assert.equal(shadow.socialEncounter, null);
+});
+
+check('NONE and PASS_BY do not promote a candidate', () => {
+  const candidate = { type: 'SOCIAL_CANDIDATE_ENTER', counterpart_id: '1002' };
+  assert.equal(promoteSocialCandidate({ candidate, decision: 'NONE' }), null);
+  assert.equal(promoteSocialCandidate({ candidate, decision: 'PASS_BY' }), null);
+});
+
+check('GREETING and HELP promote only meaningful social encounters', () => {
+  const candidate = { type: 'SOCIAL_CANDIDATE_ENTER', counterpart_id: '1002', map: 'pay_dun00' };
+  assert.equal(promoteSocialCandidate({ candidate, decision: 'GREETING' }).type, 'SOCIAL_ENCOUNTER');
+  assert.equal(promoteSocialCandidate({ candidate, decision: 'HELP' }).type, 'SOCIAL_ENCOUNTER');
+  assert.equal(promoteSocialCandidate({ candidate, decision: 'HELP' }).intent, 'HELP');
+});
+
+check('social candidates stay out of permanent daily facts', () => {
+  const result = reconcileDaily({
+    dayStart: '2026-09-20T00:00:00.000Z',
+    dayEnd: '2026-09-21T00:00:00.000Z',
+    facts: [{ type: 'SOCIAL_CANDIDATE_ENTER', timestamp: '2026-09-20T10:00:00.000Z' }],
+  });
+  assert.deepEqual(result.meaningfulFacts, []);
+  assert.equal(result.ignoredOperationalCount, 1);
+  assert.equal(result.diaryEligible, false);
 });
 
 check('derived encounter keeps the HUNT parent goal unchanged', () => {

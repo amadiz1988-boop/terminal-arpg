@@ -23,6 +23,12 @@ const OPERATIONAL_EVENT_TYPES = new Set([
   'ROUTINE_SUPPLY',
 ]);
 
+const SOCIAL_CANDIDATE_TYPES = new Set([
+  'SOCIAL_CANDIDATE_ENTER',
+  'SOCIAL_CANDIDATE_CONTINUED',
+  'SOCIAL_CANDIDATE_LEAVE',
+]);
+
 const hash32 = (value) => {
   let hash = 2166136261;
   for (const char of String(value)) {
@@ -168,7 +174,7 @@ export function completeSocialInteraction(actor, decision) {
 }
 
 export function filterLifeRelevantFacts(events) {
-  return events.filter((event) => !OPERATIONAL_EVENT_TYPES.has(event.type));
+  return events.filter((event) => !OPERATIONAL_EVENT_TYPES.has(event.type) && !SOCIAL_CANDIDATE_TYPES.has(event.type));
 }
 
 export function reconcileDaily({ dayStart, dayEnd, facts }) {
@@ -473,9 +479,9 @@ export function deriveSocialProximityTransitions({
       projection_source: projectionSource,
     };
     if (priorState === SOCIAL_PROXIMITY_V1.stateNearby) {
-      continuedPresence.push({ type: 'CONTINUED_PRESENCE', ...fact });
+    continuedPresence.push({ ...fact, type: 'SOCIAL_CANDIDATE_CONTINUED', classification: 'SOCIAL_CANDIDATE' });
     } else {
-      derivedLifeFacts.push({ type: 'ENCOUNTER', ...fact });
+      derivedLifeFacts.push({ ...fact, type: 'SOCIAL_CANDIDATE_ENTER', classification: 'SOCIAL_CANDIDATE' });
     }
   }
 
@@ -483,8 +489,8 @@ export function deriveSocialProximityTransitions({
     if (stateById[id] !== SOCIAL_PROXIMITY_V1.stateNearby && previousStateById?.[id] === SOCIAL_PROXIMITY_V1.stateNearby) {
       const entity = priorEntities.get(id);
       presenceEnds.push({
-        type: 'ENCOUNTER_END',
-        classification: 'DERIVED_LIFE_FACT',
+        type: 'SOCIAL_CANDIDATE_LEAVE',
+        classification: 'SOCIAL_CANDIDATE',
         character_id: characterId,
         counterpart_id: id,
         map: previousMap ?? currentMap,
@@ -509,7 +515,7 @@ export function deriveSocialProximityTransitions({
   };
 }
 
-/** Feed only ENTER facts into the existing Social Director shadow policy. */
+/** Feed only candidate-enter facts into the existing Social Director shadow policy. */
 export function deriveShadowSocialProximity({
   context,
   previousContext,
@@ -546,11 +552,11 @@ export function deriveShadowSocialProximity({
 }
 
 /**
- * Derive observation-only social presence transitions from two canonical
+ * Derive observation-only social candidate transitions from two canonical
  * projections. This does not simulate a world and never emits gameplay
  * commands or authoritative events.
  */
-export function deriveShadowEncounterTransitions({
+export function deriveShadowCandidateTransitions({
   characterId,
   previousVisibleSet = [],
   currentVisibleSet = [],
@@ -590,17 +596,21 @@ export function deriveShadowEncounterTransitions({
   return {
     ok: true,
     reason: 'PRESENCE_DIFF',
-    derivedLifeFacts: entered.map((counterpartId) => derivedPresenceFact({
-      type: 'ENCOUNTER',
-      characterId,
-      counterpartId,
-      map: currentMap,
-      revision: current,
-      timestamp,
-      projectionSource,
+    derivedLifeFacts: entered.map((counterpartId) => ({
+      ...derivedPresenceFact({
+        type: 'SOCIAL_CANDIDATE_ENTER',
+        characterId,
+        counterpartId,
+        map: currentMap,
+        revision: current,
+        timestamp,
+        projectionSource,
+      }),
+      classification: 'SOCIAL_CANDIDATE',
     })),
     continuedPresence: continuedPresence.map((counterpartId) => ({
-      type: 'CONTINUED_PRESENCE',
+      type: 'SOCIAL_CANDIDATE_CONTINUED',
+      classification: 'SOCIAL_CANDIDATE',
       character_id: characterId,
       counterpart_id: counterpartId,
       map: currentMap,
@@ -608,17 +618,23 @@ export function deriveShadowEncounterTransitions({
       timestamp,
       projection_source: projectionSource,
     })),
-    presenceEnds: left.map((counterpartId) => derivedPresenceFact({
-      type: 'ENCOUNTER_END',
-      characterId,
-      counterpartId,
-      map: previousMap ?? currentMap,
-      revision: current,
-      timestamp,
-      projectionSource,
+    presenceEnds: left.map((counterpartId) => ({
+      ...derivedPresenceFact({
+        type: 'SOCIAL_CANDIDATE_LEAVE',
+        characterId,
+        counterpartId,
+        map: previousMap ?? currentMap,
+        revision: current,
+        timestamp,
+        projectionSource,
+      }),
+      classification: 'SOCIAL_CANDIDATE',
     })),
   };
 }
+
+/** @deprecated Use deriveShadowCandidateTransitions for proximity semantics. */
+export const deriveShadowEncounterTransitions = deriveShadowCandidateTransitions;
 
 function shadowActorFromContext(context, actor) {
   if (actor) return actor;
@@ -663,6 +679,15 @@ export function createShadowIntent({ context, actor, encounterCharacterId, times
   const reasonCodes = ['SHADOW_MODE', 'PARENT_GOAL_HUNT'];
   if (previousEncounters > 0) reasonCodes.push('REPEATED_ENCOUNTER');
   reasonCodes.push(decision.intent === 'NONE' ? 'NO_SOCIAL_INTENT' : 'SOCIAL_INTENT');
+  const candidate = {
+    type: 'SOCIAL_CANDIDATE_ENTER',
+    classification: 'SOCIAL_CANDIDATE',
+    character_id: context.character_id,
+    counterpart_id: encounterCharacterId,
+    map: context.map,
+    revision: context.revision,
+    timestamp,
+  };
   return {
     mode: 'SHADOW',
     accepted: true,
@@ -683,6 +708,22 @@ export function createShadowIntent({ context, actor, encounterCharacterId, times
       would_interrupt_hunt: decision.intent !== 'NONE',
       would_resume_hunt: true,
     },
+    outcome: decision.intent === 'NONE' ? 'PASS_BY' : 'SOCIAL_ENCOUNTER',
+    socialEncounter: promoteSocialCandidate({ candidate, decision: decision.intent }),
+  };
+}
+
+/** Promote a transient candidate only after a meaningful Social Director intent. */
+export function promoteSocialCandidate({ candidate, decision } = {}) {
+  const intent = typeof decision === 'string' ? decision : decision?.intent;
+  if (!candidate || candidate.type !== 'SOCIAL_CANDIDATE_ENTER') return null;
+  if (!intent || intent === 'NONE' || intent === 'PASS_BY') return null;
+  assert(SOCIAL_INTENTS.includes(intent), `unsupported Social Director intent: ${intent}`);
+  return {
+    ...candidate,
+    type: 'SOCIAL_ENCOUNTER',
+    classification: 'SOCIAL_ENCOUNTER',
+    intent,
   };
 }
 
