@@ -20,6 +20,10 @@ const STATUS_LABELS = {
   RECOVERING: '恢復中', SUCCESS: '成功', AVAILABLE: '可用', UNAVAILABLE: '不可用',
   MOVEMENT: '移動', COMBAT: '戰鬥', ERROR_ONLY: '錯誤',
   PLAYER_OVERRIDE: '玩家指定', DEFAULT_POLICY: '預設政策', UNCLASSIFIED: '未分類',
+  PLAYER: '玩家', WEB: 'Web', SERVER_AGENT: '伺服器代理', AUTO_FARM: '自動掛機',
+  PERSISTENT_IDLE: '持續待機', SUPPLY: '補給', RETURN_TO_FARM: '返回掛機地',
+  NAVIGATION: '導航中', FARM: '掛機中', IDLE: '待機', RUNNING: '執行中',
+  STOPPED: '已停止', RESIDENT: '常駐', ACTIVE: '啟用',
   YES: '是', NO: '否',
 };
 const EVENT_LABELS = {
@@ -386,10 +390,10 @@ function renderCharacters() {
       <div class="row"><span>HP / SP</span><span>${c.maxHp ? `${c.hp} / ${c.maxHp}` : '—'} · ${c.maxSp ? `${c.sp} / ${c.maxSp}` : '—'}</span></div>
       <div class="row"><span>位置 / 回存點</span><span>${esc(c.map || '尚無資料')} ${c.x || c.y ? `/ ${c.x} / ${c.y}` : ''} · ${esc(c.saveMap || '尚無資料')} ${c.saveX || c.saveY ? `/ ${c.saveX} / ${c.saveY}` : ''}</span></div>
       <div class="row"><span>Zeny / 掛機目標</span><span>${Number.isFinite(c.zeny) ? c.zeny : '尚無資料'} · ${esc(c.farmTarget || '尚無資料')} · ${esc(labelStatus(c.farmTargetSource || 'UNCLASSIFIED'))}</span></div>
-      <div class="row"><span>控制擁有者</span><span>${esc(c.controlOwner || '—')}</span></div>
-      <div class="row"><span>自動模式</span><span>${esc(c.agentMode || '—')}</span></div>
-      <div class="row"><span>執行階段 / 任務階段</span><span>${esc(c.runtimePhase || '—')} / ${esc(c.taskPhase || '—')}</span></div>
-      <div class="row"><span>擁有權狀態</span><span>${esc(c.ownershipState || '—')}</span></div>
+      <div class="row"><span>控制擁有者</span><span>${esc(labelStatus(c.controlOwner || '—'))}</span></div>
+      <div class="row"><span>自動模式</span><span>${esc(labelStatus(c.agentMode || '—'))}</span></div>
+      <div class="row"><span>執行階段 / 任務階段</span><span>${esc(labelStatus(c.runtimePhase || '—'))} / ${esc(labelStatus(c.taskPhase || '—'))}</span></div>
+      <div class="row"><span>擁有權狀態</span><span>${esc(labelStatus(c.ownershipState || '—'))}</span></div>
       <div class="row"><span>角色在線狀態</span><span>${c.online ? '線上（遊戲中）' : '離線'}</span></div>
       <div class="row"><span>SERVER_AGENT 常駐</span><span>${c.resident ? '是' : '否'}</span></div>
       <div class="row"><span>資料新鮮度</span><span>${esc(freshnessLabel(c.freshness))} · ${Number.isFinite(c.liveAgeMs) ? fmtAgo(c.liveAgeMs) : '尚無資料'} · 更新於 ${esc(fmtWhen(c.updatedAt))}</span></div>
