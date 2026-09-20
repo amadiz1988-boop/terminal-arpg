@@ -1,0 +1,112 @@
+taskId: ARCHITECTURE_CONTROL_CHAIN_RESPONSIBILITY_AUDIT_V1
+date: 2026-09-20
+mode: READ_ONLY_SOURCE_AND_REFERENCE_AUDIT
+syntheticFirstTriggered: true
+liveSyntheticRun: DEFERRED
+productionTouched: false
+gameplayChanged: false
+runtimeRestarted: false
+currentChain:
+  - PLAYER_WEB
+  - DASHBOARD_AUTH_OWNERSHIP_VALIDATION
+  - COMMAND_BRIDGE
+  - PERSISTENT_AGENT_COMMAND
+  - PA_NATIVE_RUNTIME
+  - RATHENA_AUTHORITY
+  - EVENT_LEDGER_LIVE_STATUS
+  - WEB_PROJECTION
+targetChain:
+  - PLAYER_INTENT
+  - DASHBOARD_AUTH_OWNERSHIP_BOUNDED_VALIDATION
+  - PA_GAMEPLAY_ORCHESTRATION
+  - RATHENA_WORLD_AUTHORITY
+  - OBSERVATION_ONLY_LEDGER_TRACE_RUM
+flows:
+  - START_FARM
+  - STOP_FARM
+  - CHANGE_FARM_MAP
+  - SUPPLY_RETURN
+  - FLY_WING
+  - BUTTERFLY_WING
+  - COMBAT
+  - QUEST
+findings:
+  - id: F-01
+    flow: START_FARM
+    verdict: MOVE_TO_PA
+    risk: HIGH
+    firstBrokenTransition: Controller -> Command creation
+    summary: Future supply route availability can block current start_farm command creation.
+    evidence:
+      - ops/ro-stack/dashboard.mjs:3255-3293
+      - docs/player-action-trace-foundation.md:1-41
+  - id: F-02
+    flow: CHANGE_FARM_MAP
+    verdict: MOVE_TO_PA
+    risk: HIGH
+    summary: Dashboard coordinates multi-stage relocation while Native executes it.
+    evidence:
+      - ops/ro-stack/dashboard.mjs:2403-2455
+      - ops/ro-stack/persistent-agent/relocation-policy.mjs:1-18
+  - id: F-03
+    flow: CHANGE_FARM_MAP
+    verdict: SAFE_SIMPLIFICATION
+    risk: LOW
+    summary: Expose farmEligible, relocationSupported and routeFound as separate predicates.
+    evidence:
+      - ops/ro-stack/dashboard.mjs:419-436
+      - ops/ro-stack/persistent-agent/relocation-policy.mjs:44-57
+  - id: F-04
+    flow: ALL_COMMANDS
+    verdict: KEEP
+    risk: LOW
+    summary: Dashboard and Native payload validation are intentional trust-boundary checks.
+    evidence:
+      - ops/ro-stack/dashboard.mjs:3006-3044
+      - src/map/persistent_agent.cpp:6354-6367
+  - id: F-05
+    flow: COMBAT
+    verdict: OBSERVATION_ONLY
+    risk: LOW
+    summary: Event Ledger facts are projected to Web text without a second combat engine.
+    evidence:
+      - ops/ro-stack/web-observation.mjs:715-792
+      - ops/ro-stack/dashboard.mjs:10184-10235
+  - id: F-06
+    flow: ALL_COMMANDS
+    verdict: UNKNOWN_NEEDS_EVIDENCE
+    risk: MEDIUM
+    summary: Trace id is not durably present across command and ledger rows.
+    evidence:
+      - docs/player-action-trace-foundation.md:9-41
+counts:
+  duplicatedValidationConfirmed: 1
+  gameplayOrchestrationLeakConfirmed: 2
+  observabilityExecutionCouplingConfirmed: 0
+  observabilityCorrelationRiskUnproven: 1
+  safeSimplification: 1
+  moveToPa: 2
+  removeCandidate: 0
+  highRisk: 2
+startFarm:
+  knownFixture: char_id=150075
+  knownResult: HTTP 409 supply_route_unavailable before command creation
+  currentSourceQualifier: same-map skip flag exists; live applicability not re-run in this audit
+  result: MOVE_TO_PA
+changeFarmMap:
+  farmEligible: Dashboard map metadata predicate
+  relocationSupported: relocation policy predicate
+  routeFound: route planner output
+  result: separate predicates; runtime orchestration belongs in PA
+openkore:
+  referenceRequired: true
+  gate: PASS
+  runtimeReturnRecommended: false
+  upstreamCommit: 51de1ddfc4449ae5217f6886de702f87ca934030
+rathena:
+  authorityCheck: PASS
+  upstreamCommit: e985006171d2eb320ee512a653f4c83aea3d81b6
+trace:
+  propagationGap: PRESENT
+  firstBrokenTransition: Controller -> Command creation
+  browserAcceptance: NOT_IN_SCOPE
