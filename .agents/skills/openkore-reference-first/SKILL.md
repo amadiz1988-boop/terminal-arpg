@@ -95,6 +95,41 @@ semantics. In this Project, Fly Wing and Butterfly Wing are `NON_CONSUMABLE`;
 reuse/adapt the mature `when`, `why`, state transition, retry and recovery
 knowledge without importing a conflicting consumption rule.
 
+## 2B. Continuous Reference Mining
+
+Reference lookup supports both reactive and proactive modes:
+
+```text
+REFERENCE_MINING_IS_CONTINUOUS = YES
+REACTIVE_LOOKUP = development / blocker lookup
+PROACTIVE_MINING = F follows docs/reference-mining/research-backlog.yml
+```
+
+For an OpenKore-era workline, record:
+
+```text
+REFERENCE_MINING_GAP = YES / NO / N/A
+PROACTIVE_BACKLOG = docs/reference-mining/research-backlog.yml
+STALE_REFERENCE = YES / NO / UNKNOWN
+MINING_DONE = YES / NO / N/A
+```
+
+If the relevant Atlas topic already provides current source pointers, Project
+Last-Good evidence and applicability, reuse it without repeating broad forum
+research. A semantic or high-risk gap routes to F. Low-risk local UI or CSS may
+use `REFERENCE_MINING_GAP = N/A`.
+
+Forum and community findings are secondary evidence. Verify them against current
+upstream source, compare Project Last-Good, classify `REUSE`, `ADAPT`, `IMPROVE`,
+`REJECT_LEGACY` or `NOT_APPLICABLE`, then update the Atlas/index. Preserve
+`UPSTREAM_BASELINE`, `LAST_REVIEWED`, `VERSION_CONFLICT` and `STALE_REFERENCE`;
+current source wins and silent inheritance is prohibited.
+
+`MINING_DONE = YES` requires the question, project relevance, authoritative
+source check, forum/wiki finding, current-version applicability, Project
+Last-Good check, classification, source pointers, risks, Atlas update and index
+update. This section does not change Quest Flow First or Synthetic First order.
+
 ## 3. Six-question core alignment veto
 
 Before source edit and again during Project Control acceptance, answer:

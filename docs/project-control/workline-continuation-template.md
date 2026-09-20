@@ -385,6 +385,29 @@ continuations may use `SYNTHETIC_FIRST_TRIGGERED = N/A`.
 
 ---
 
+## 9E. CONTINUOUS_REFERENCE_MINING_CONTINUATION
+
+Continuation must consume existing Atlas knowledge before requesting new research:
+
+```text
+REFERENCE_MINING_IS_CONTINUOUS = YES
+RATHENA_REFERENCE_TRIGGERED = YES / NO / N/A
+OPENKORE_REFERENCE_TRIGGERED = YES / NO / N/A
+REFERENCE_MINING_GAP = YES / NO / N/A
+REFERENCE_TOPIC =
+REFERENCE_CLASSIFICATION = REUSE / ADAPT / IMPROVE / REJECT_LEGACY / NOT_APPLICABLE
+PROACTIVE_BACKLOG = docs/reference-mining/research-backlog.yml
+STALE_REFERENCE = YES / NO / UNKNOWN
+MINING_DONE = YES / NO / N/A
+```
+
+If the topic is already indexed and its version, accepted contract and edge
+cases remain valid, inherit the exact source pointers and do not repeat research.
+If a semantic or high-risk gap remains, route `REFERENCE_MINING_GAP = YES` to F.
+Pure local UI, CSS, static content and documentation may use `N/A`.
+
+---
+
 ## 10. LIVE TEST INVALIDATION RULE
 
 If acceptance is disturbed by any of the following:
@@ -458,6 +481,12 @@ NEXT_MINIMAL_FIX
 SYNTHETIC_REGRESSION
 SYNTHETIC_LIVE_ACCEPTANCE
 BROWSER_FINAL_ACCEPTANCE
+RATHENA_REFERENCE_TRIGGERED
+OPENKORE_REFERENCE_TRIGGERED
+REFERENCE_MINING_GAP
+REFERENCE_TOPIC
+REFERENCE_CLASSIFICATION
+MINING_DONE
 ```
 
 For an OpenKore-relevant workline, also report:

@@ -532,6 +532,32 @@ Browser final acceptance or Git hygiene.
 
 ---
 
+## 10E. CONTINUOUS_REFERENCE_MINING_V1
+
+For a semantic, runtime or gameplay workline, include the reference startup
+record below. Existing Atlas coverage is consumed before any new research:
+
+```text
+REFERENCE_MINING_IS_CONTINUOUS = YES
+RATHENA_REFERENCE_TRIGGERED = YES / NO / N/A
+OPENKORE_REFERENCE_TRIGGERED = YES / NO / N/A
+REFERENCE_MINING_GAP = YES / NO / N/A
+REFERENCE_TOPIC =
+REFERENCE_CLASSIFICATION = REUSE / ADAPT / IMPROVE / REJECT_LEGACY / NOT_APPLICABLE
+PROACTIVE_BACKLOG = docs/reference-mining/research-backlog.yml
+STALE_REFERENCE = YES / NO / UNKNOWN
+MINING_DONE = YES / NO / N/A
+```
+
+If `REFERENCE_MINING_GAP = YES`, route the topic to F. If the relevant Atlas is
+already sufficient, reuse its exact source pointers and do not repeat broad
+forum research. Pure documentation, CSS/layout, static content and low-risk
+local UI may use `REFERENCE_MINING_GAP = N/A`. This section supplements and
+does not reorder Quest Flow First, either Reference Atlas, Synthetic First,
+Project Last-Good or Single Runtime gates.
+
+---
+
 ## 11. LAST_GOOD / CURRENT / FIRST_BROKEN_TRANSITION
 
 Regression / restore workline:
@@ -678,6 +704,12 @@ MINIMAL_FIX
 SYNTHETIC_REGRESSION
 SYNTHETIC_LIVE_ACCEPTANCE
 BROWSER_FINAL_ACCEPTANCE
+RATHENA_REFERENCE_TRIGGERED
+OPENKORE_REFERENCE_TRIGGERED
+REFERENCE_MINING_GAP
+REFERENCE_TOPIC
+REFERENCE_CLASSIFICATION
+MINING_DONE
 ```
 
 No chat-style retrospective.

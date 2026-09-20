@@ -34,6 +34,27 @@ rAthena source, project-specific server rules or authoritative config. Record
 correction. Declare `REFERENCE_GAP = CONFIRMED` only after all three checks
 above are proven. Atlas lookup does not replace this Skill.
 
+## Continuous Reference Mining Compatibility
+
+Reference mining supplements this Quest gate and never changes the canonical
+Quest sequence. Record:
+
+```text
+REFERENCE_MINING_IS_CONTINUOUS = YES
+REFERENCE_MINING_GAP = YES / NO / N/A
+REFERENCE_TOPIC =
+REFERENCE_CLASSIFICATION = REUSE / ADAPT / IMPROVE / REJECT_LEGACY / NOT_APPLICABLE
+PROACTIVE_BACKLOG = docs/reference-mining/research-backlog.yml
+STALE_REFERENCE = YES / NO / UNKNOWN
+MINING_DONE = YES / NO / N/A
+```
+
+Use the existing rAthena/OpenKore Atlas topic and exact source pointers when
+coverage is sufficient. Route a semantic or high-risk gap to F. Do not repeat
+the same research during continuation when version, accepted contract and edge
+cases remain unchanged. Forum evidence stays secondary to current authoritative
+source and Project Last-Good comparison.
+
 ## Purpose and Player Flow First
 
 The fixed order is:

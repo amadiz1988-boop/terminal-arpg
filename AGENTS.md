@@ -123,6 +123,72 @@ read model → G 與 Synthetic／Trace infrastructure → H 僅是 Project Contr
 Single Runtime Policy、nearest legal reproducible state、Browser final
 acceptance 或 Git hygiene。
 
+### CONTINUOUS_REFERENCE_MINING_V1
+
+```text
+REFERENCE_MINING_IS_CONTINUOUS = YES
+REFERENCE_LOOKUP_MODE = REACTIVE_LOOKUP / PROACTIVE_MINING
+F = REFERENCE_MINING_OWNER
+C = GOVERNANCE / PRIORITY / GATE
+OTHER_WORKLINES = ATLAS_CONSUMERS
+```
+
+Reference work has two valid modes. `REACTIVE_LOOKUP` runs before development or
+when a blocker appears. `PROACTIVE_MINING` lets F work the canonical
+`docs/reference-mining/research-backlog.yml` when no urgent request is active.
+An existing Atlas answer is reused; a semantic or high-risk gap becomes
+`REFERENCE_MINING_GAP = YES` and routes to F. A topic can be `CLOSED_TOPIC` while
+the F capability remains available.
+
+Evidence priority is fixed:
+
+```text
+CURRENT_PROJECT_CANONICAL_SOURCE
+→ CURRENT_AUTHORITATIVE_UPSTREAM_SOURCE
+→ OFFICIAL_DOCS / WIKI
+→ HIGH_VALUE_RATHENA_FORUM_TECHNICAL_EVIDENCE
+→ OPENKORE_AUTHORITATIVE_SOURCE / DOCS
+→ OTHER_COMMUNITY_MATERIAL
+```
+
+`FORUM != AUTHORITY`. Every forum or community finding must pass:
+
+```text
+FORUM_FINDING
+→ CURRENT_UPSTREAM_SOURCE_VERIFICATION
+→ PROJECT_LAST_GOOD_COMPARISON
+→ APPLICABILITY_CLASSIFICATION
+→ ATLAS_UPDATE
+```
+
+Use only `REUSE`, `ADAPT`, `IMPROVE`, `REJECT_LEGACY` or `NOT_APPLICABLE`.
+Every inheritable reference record carries `UPSTREAM_BASELINE`, `LAST_REVIEWED`,
+`VERSION_CONFLICT` and `STALE_REFERENCE`. Current source semantics win a stale
+or conflicting reference; record `ADAPT` or `REJECT_LEGACY`, never inherit
+silently.
+
+`REFERENCE_MINING_DONE = YES` requires a durable record containing:
+
+```text
+QUESTION
+PROJECT_RELEVANCE
+AUTHORITATIVE_SOURCE_CHECK
+FORUM/WIKI_FINDING
+CURRENT_VERSION_APPLICABILITY
+PROJECT_LAST_GOOD_CHECK
+CLASSIFICATION
+SOURCE_POINTERS
+RISKS
+ATLAS_UPDATE
+INDEX_UPDATE
+```
+
+Continuous mining applies to runtime semantics, server authority, navigation,
+combat, Quest, item, session, protocol, performance, security and high-risk
+architecture. It does not block low-risk local UI or CSS work. Synthetic First
+still diagnoses the actual runtime break before a broad semantic reference
+search; Quest Flow First and both Reference Atlas gates retain their order.
+
 ### 2. Project Control Migration
 
 Project Control 搬到新對話時，禁止只搬最後一條工作指示。必須建立完整 `PROJECT CONTROL MIGRATION BUNDLE`，至少包含：
@@ -1494,9 +1560,15 @@ authoritative source 為準並安排 Atlas correction。只有在
 `REFERENCE_GAP = CONFIRMED` 並提出 `NEW_IMPLEMENTATION`。
 
 預設只讀 reference-index、相關 topic 與必要的 lookup-playbook，不要求
-Worker 閱讀完整 Atlas。F 為按需的 rAthena／OpenKore Reference research、
-indexing、source mapping、provenance 與 conflict review workline，預設
-`WAITING / CLOSED`，不直接修改 gameplay。
+Worker 閱讀完整 Atlas。F 為 `REFERENCE_MINING_OWNER`，可處於
+`ON_DEMAND`、`PROACTIVE_RESEARCH`、`REFERENCE_GAP` 或 `CLOSED_TOPIC`；
+F 只做 research、indexing、source mapping、provenance 與 conflict review，
+不直接修改 gameplay。優先類別為 P0 debugging／logging／packet／crash、
+navigation／warp／portal／pathfinding、monster AI／combat／target／retarget、
+item／loot／inventory／storage／weight；P1 reconnect／lifecycle、NPC／Quest、
+performance／SQL／timers、client compatibility／PACKETVER；P2 extension、
+security 與 exploit mitigation。具體排序以
+`docs/reference-mining/research-backlog.yml` 為準。
 
 ## Quest Flow First Hard Gate
 

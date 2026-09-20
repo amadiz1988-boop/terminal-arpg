@@ -31,13 +31,14 @@ D = Persistent Agent / Native / Combat / Supply / Navigation / native capability
 E = Quest / Job Change / Quest integration
 ```
 
-`F = ON_DEMAND REFERENCE / RESEARCH WORKLINE` for rAthena and OpenKore Atlas
-research, indexing, source mapping, provenance and reference-conflict review.
-F is normally `WAITING` or `CLOSED`, is not permanently active, and does not
-directly modify gameplay. Reopen F only for an Atlas gap, stale reference,
-version conflict, new subsystem, upstream meaning change or high-value
-forum/community research.
-The fixed Project Control footer remains the A-E six-column table.
+`F = REFERENCE_MINING_OWNER` for rAthena and OpenKore Atlas research, indexing,
+source mapping, provenance and reference-conflict review. F capability remains
+available even when no topic is active. Valid topic states are `ON_DEMAND`,
+`PROACTIVE_RESEARCH`, `REFERENCE_GAP` and `CLOSED_TOPIC`; F does not directly
+modify gameplay. The active queue is
+`docs/reference-mining/research-backlog.yml` and is a proactive research queue,
+not the product roadmap. The fixed Project Control footer remains the A-E
+six-column table.
 
 ## 2. Workline states
 
@@ -496,6 +497,74 @@ FIRST_BROKEN_TRANSITION =
 OWNER =
 NEXT DIRECT ACTION =
 ```
+
+## 5F. CONTINUOUS_REFERENCE_MINING_V1
+
+Reference mining is continuous across two modes:
+
+```text
+REACTIVE_LOOKUP = development / blocker lookup against existing Atlas knowledge
+PROACTIVE_MINING = F follows the canonical Research Backlog without an urgent blocker
+REFERENCE_MINING_IS_CONTINUOUS = YES
+```
+
+For semantic, runtime or gameplay work, the Worker startup record includes:
+
+```text
+RATHENA_ATLAS_TRIGGERED = YES / NO / N/A
+OPENKORE_ATLAS_TRIGGERED = YES / NO / N/A
+REFERENCE_MINING_GAP = YES / NO
+REFERENCE_TOPIC =
+REFERENCE_CLASSIFICATION = REUSE / ADAPT / IMPROVE / REJECT_LEGACY / NOT_APPLICABLE
+PROACTIVE_BACKLOG = docs/reference-mining/research-backlog.yml
+STALE_REFERENCE = YES / NO / UNKNOWN
+MINING_DONE = YES / NO / N/A
+```
+
+If the relevant Atlas topic is sufficient, reuse its exact source pointers and
+do not repeat broad forum research. If coverage is missing and the domain is
+semantic or high-risk, set `REFERENCE_MINING_GAP = YES` and route the topic to F.
+Low-risk local UI, CSS and static work may use `REFERENCE_MINING_GAP = N/A` and
+must not be blocked by Continuous Mining.
+
+Evidence priority is:
+
+```text
+CURRENT_PROJECT_CANONICAL_SOURCE
+→ CURRENT_AUTHORITATIVE_UPSTREAM_SOURCE
+→ OFFICIAL_DOCS / WIKI
+→ HIGH_VALUE_RATHENA_FORUM_TECHNICAL_EVIDENCE
+→ OPENKORE_AUTHORITATIVE_SOURCE / DOCS
+→ OTHER_COMMUNITY_MATERIAL
+```
+
+`FORUM != AUTHORITY`. Forum or Wiki findings require current upstream
+verification, Project Last-Good comparison, applicability classification and an
+Atlas/index update. Current source semantics win stale or conflicting material;
+record `ADAPT` or `REJECT_LEGACY`, and preserve `UPSTREAM_BASELINE`,
+`LAST_REVIEWED`, `VERSION_CONFLICT` and `STALE_REFERENCE`.
+
+`MINING_DONE = YES` requires:
+
+```text
+QUESTION
+PROJECT_RELEVANCE
+AUTHORITATIVE_SOURCE_CHECK
+FORUM/WIKI_FINDING
+CURRENT_VERSION_APPLICABILITY
+PROJECT_LAST_GOOD_CHECK
+CLASSIFICATION
+SOURCE_POINTERS
+RISKS
+ATLAS_UPDATE
+INDEX_UPDATE
+```
+
+Continuous Mining supplements the existing rAthena Atlas, OpenKore Atlas,
+Quest Flow First, Synthetic First and Project Last-Good rules. Synthetic First
+must locate the runtime break before broad semantic mining; Quest Flow First
+retains its canonical sequence. F owns research; C owns governance; other
+worklines consume indexed topics.
 
 ## 6. Continuation discipline
 
