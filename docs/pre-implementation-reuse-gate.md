@@ -237,6 +237,18 @@ harvest registry / capability census
 → source drill-down only if needed
 ```
 
+For every OpenKore-relevant workline, this reuse gate is paired with the
+blocking `OPENKORE_REFERENCE_FIRST_HARD_GATE`. `PRE_IMPLEMENTATION_REUSE_GATE =
+PASS` alone does not authorize source edit until
+`OPENKORE_REFERENCE_GATE_V1.1` has also passed with the required Last-Good
+reconstruction and behavior mapping.
+
+The task-category exemptions in this document do not exempt the OpenKore
+reference-first hard gate. Any behavior-affecting `BUG_FIX`, `MAINTENANCE`,
+`REFACTOR` or `OPTIMIZATION` still requires `OPENKORE_REFERENCE_GATE_V1.1`.
+Only documentation, formatting, or pure presentation work with unchanged
+gameplay semantics may omit that hard gate.
+
 The rule expires only when `OPENKORE_REMOVED = YES`. Even after removal,
 preserved harvest knowledge remains a reusable reference.
 

@@ -1,5 +1,9 @@
 # OPENKORE_REFERENCE_GATE_V1.1
 
+HARD_GATE_POLICY: `OPENKORE_REFERENCE_FIRST_HARD_GATE`
+HARD_GATE_VERSION: `V1`
+HARD_GATE_SEVERITY: `MANDATORY / BLOCKING`
+
 VERSION: V1.1 (backward-compatible enhancement of V1)
 
 STATUS: CANONICAL
@@ -48,7 +52,23 @@ For any OpenKore-era capability, identify exact:
 OPENKORE_REFERENCE_FILES =
 OPENKORE_REFERENCE_SYMBOLS =
 OPENKORE_HISTORICAL_EVIDENCE =
+OPENKORE_REFERENCE_VERSION =
+OPENKORE_REFERENCE_COMMIT =
+OPENKORE_REFERENCE_SOURCE =
+OPENKORE_REFERENCE_DATE =
+PROJECT_LAST_GOOD_OPENKORE_CONFIG =
+PROJECT_LAST_GOOD_OPENKORE_CONFIG_SOURCE =
+PROJECT_LAST_GOOD_OPENKORE_CONFIG_VERSION =
+PROJECT_LAST_GOOD_OPENKORE_CONFIG_PROVENANCE =
+OPENKORE_REFERENCE_INHERITED = YES / NO
+REFERENCE_DOSSIER = <path or NONE>
 ```
+
+Reference priority is: project actual PASS evidence, project locked version,
+mature upstream implementation, then other evidence. If a dossier exists and its
+version, contract and covered edge cases are unchanged, the workline may inherit
+it with `OPENKORE_REFERENCE_INHERITED = YES`; it must still report
+`OPENKORE_BEHAVIOR_COMPARED = YES`.
 
 Acceptable evidence includes:
 
@@ -65,6 +85,23 @@ A statement such as:
 ```
 
 is **NOT** sufficient evidence.
+
+The pre-edit record must also identify:
+
+```text
+OPENKORE_CAPABILITY_EXISTS = YES / NO / UNKNOWN
+OPENKORE_CONFIG_KEYS =
+OPENKORE_TRIGGER_CONDITION =
+OPENKORE_STATE_MACHINE =
+OPENKORE_SUCCESS_PATH =
+OPENKORE_FAILURE_PATH =
+OPENKORE_RECOVERY_PATH =
+OPENKORE_RETRY_POLICY =
+OPENKORE_EDGE_CASES =
+OPENKORE_AUTHORITY_BOUNDARY =
+CURRENT_GHOST_ISLAND_BEHAVIOR =
+BEHAVIOR_DIFFERENCES =
+```
 
 Search must remain bounded.
 
@@ -205,6 +242,143 @@ PROJECT_CONTROL_DECISION_REQUIRED = YES
 
 Do not continue until approved.
 
+## 5A. BEHAVIOR MAPPING AND OPTIMIZATION REVIEW
+
+Every major behavior must be classified before source edit:
+
+```text
+REPRODUCE = retain OpenKore semantics
+ADAPT = retain semantics and move execution to PA / SERVER_AGENT → rAthena
+REJECT_LEGACY = record why the legacy behavior is unsuitable
+```
+
+Then complete the review:
+
+```text
+GHOST_ISLAND_OPTIMIZATION_REVIEWED = YES / NO
+OPTIMIZATION_APPLIED = YES / NO_NOT_NEEDED
+OPTIMIZATION_REASON =
+OPTIMIZATION_DIMENSIONS =
+```
+
+The optimization record covers invariants, PA authority boundaries, removable
+client/process/file transport, retained recovery/retry/edge cases, latency or
+duplicate-state gains, and player-flow equivalence. It cannot be used to skip
+reference reconstruction. `NO_NOT_NEEDED` is valid when the review confirms that
+changing mature behavior would add risk without player or architecture value.
+
+If the proposed behavior deliberately differs from OpenKore:
+
+```text
+OPENKORE_DEVIATION = YES
+OPENKORE_BEHAVIOR =
+PROPOSED_GHOST_ISLAND_BEHAVIOR =
+WHY_OPENKORE_IS_NOT_SUITABLE =
+PLAYER_VALUE_GAIN =
+ARCHITECTURE_GAIN =
+NEW_RISK =
+ROLLBACK_PATH =
+PROJECT_CONTROL_APPROVAL = REQUIRED
+```
+
+Without approval, the gate remains `FAIL` and source edit is prohibited.
+
+## 5B. SERVER AUTHORITY AND OBJECTIVE EQUIVALENCE
+
+OpenKore is a behavior reference, not world authority. The authority remains:
+
+```text
+PA / SERVER_AGENT → rAthena
+```
+
+The worker must prove:
+
+```text
+SERVER_AUTHORITY_INVARIANTS_PRESERVED = YES / NO
+REFERENCE_CONFLICT_RESOLVED = YES / NO
+```
+
+When OpenKore and rAthena or current architecture conflict, stop and report:
+
+```text
+OPENKORE_BEHAVIOR =
+RATHENA_BEHAVIOR =
+CURRENT_ARCHITECTURE_CONSTRAINT =
+PLAYER_VALUE_IMPACT =
+```
+
+The worker cannot select or blend the conflicting contracts.
+
+Objective equivalence requires evidence for all dimensions:
+
+```text
+EQUIVALENCE_EVIDENCE =
+PLAYER_VISIBLE_BEHAVIOR = PROVEN / UNPROVEN
+SUCCESS_PATH = PROVEN / UNPROVEN
+FAILURE_PATH = PROVEN / UNPROVEN
+RECOVERY = PROVEN / UNPROVEN
+RETRY = PROVEN / UNPROVEN
+RESTART_SAFETY = PROVEN / UNPROVEN
+RECONNECT_SAFETY = PROVEN / UNPROVEN
+AUTHORITY_CORRECTNESS = PROVEN / UNPROVEN
+STATE_CONSISTENCY = PROVEN / UNPROVEN
+RELIABILITY = PROVEN / UNPROVEN
+LATENCY = PROVEN / UNPROVEN
+SCALABILITY = PROVEN / UNPROVEN
+MAINTAINABILITY = PROVEN / UNPROVEN
+BETTER_DIMENSIONS =
+REGRESSED_DIMENSIONS = NONE
+UNPROVEN_DIMENSIONS =
+```
+
+Any regression or critical unproven dimension prevents
+`RESULT_EQUIVALENT_OR_BETTER = YES` and requires Project Control decision.
+
+Before the hard gate passes, only read-only diagnostics and isolated test-only
+instrumentation that preserves gameplay semantics are allowed. Gameplay source
+edit, state-machine redesign, production deploy, runtime mutation, new gameplay
+contract and permanent route/supply/combat/recovery implementation are prohibited.
+
+## 5C. OPENKORE_CORE_ALIGNMENT_VETO
+
+The gate is approved only when all six questions are independently confirmed:
+
+```text
+OPENKORE_REFERENCE_TRIGGERED = YES
+OPENKORE_BEHAVIOR_COMPARED = YES
+SERVER_AUTHORITY_INVARIANTS_PRESERVED = YES
+REFERENCE_CONFLICT_RESOLVED = YES
+GHOST_ISLAND_OPTIMIZATION_REVIEWED = YES
+RESULT_EQUIVALENT_OR_BETTER = YES
+```
+
+`OPTIMIZATION_APPLIED = NO_NOT_NEEDED` is valid after a completed review. Any
+other value, any regression, or any critical unproven dimension produces:
+
+```text
+OPENKORE_CORE_ALIGNMENT_VETO = FAIL
+CHANGE_APPROVED = NO
+PRODUCTION_DEPLOY = BLOCKED
+WORKLINE_DONE = NO
+```
+
+Project Control must repeat the six-question check independently during second
+acceptance. Worker self-report, source tests, build success and model confidence
+cannot override the veto.
+
+If one gameplay subsystem has at least two downstream blockers, pause the next
+fix and record:
+
+```text
+UPSTREAM_ASSUMPTION_RECHECK = YES
+DOWNSTREAM_BLOCKER_COUNT =
+CURRENT_CONTRACT_REVALIDATED = YES / NO
+OPENKORE_LAST_GOOD_RECHECKED = YES / NO
+CONTINUE_CURRENT_DIRECTION = YES / NO
+```
+
+No third downstream fix is authorized before that recheck.
+
 ---
 
 ## 6. RUNTIME AUTHORITY
@@ -300,10 +474,33 @@ Every applicable workline must include:
 AGENTS_POLICY_READ =
 OPENKORE_REFERENCE_POLICY_READ =
 REFERENCE_GATE_VERSION = V1.1
+OPENKORE_REFERENCE_FIRST_HARD_GATE = PASS / FAIL / BLOCKED
 
 OPENKORE_REFERENCE_FILES =
 OPENKORE_REFERENCE_SYMBOLS =
 OPENKORE_HISTORICAL_EVIDENCE =
+OPENKORE_REFERENCE_INHERITED = YES/NO
+REFERENCE_DOSSIER =
+OPENKORE_REFERENCE_VERSION =
+OPENKORE_REFERENCE_COMMIT =
+OPENKORE_REFERENCE_SOURCE =
+OPENKORE_REFERENCE_DATE =
+OPENKORE_CAPABILITY_EXISTS =
+OPENKORE_CONFIG_KEYS =
+PROJECT_LAST_GOOD_OPENKORE_CONFIG =
+PROJECT_LAST_GOOD_OPENKORE_CONFIG_SOURCE =
+PROJECT_LAST_GOOD_OPENKORE_CONFIG_VERSION =
+PROJECT_LAST_GOOD_OPENKORE_CONFIG_PROVENANCE =
+OPENKORE_TRIGGER_CONDITION =
+OPENKORE_STATE_MACHINE =
+OPENKORE_SUCCESS_PATH =
+OPENKORE_FAILURE_PATH =
+OPENKORE_RECOVERY_PATH =
+OPENKORE_RETRY_POLICY =
+OPENKORE_EDGE_CASES =
+OPENKORE_AUTHORITY_BOUNDARY =
+CURRENT_GHOST_ISLAND_BEHAVIOR =
+BEHAVIOR_DIFFERENCES =
 
 RATHENA_REFERENCE_APPLICABLE =
 RATHENA_REFERENCE_SOURCES =
@@ -330,6 +527,24 @@ ACTUAL =
 
 REUSED_PA_CAPABILITIES =
 MINIMAL_PORT_OR_GLUE =
+BEHAVIOR_MAPPING =
+OPENKORE_DEVIATION = YES/NO
+REFERENCE_CONFLICT_RESOLVED = YES/NO
+SERVER_AUTHORITY_INVARIANTS_PRESERVED = YES/NO
+GHOST_ISLAND_OPTIMIZATION_REVIEWED = YES/NO
+OPTIMIZATION_APPLIED = YES/NO_NOT_NEEDED
+OPTIMIZATION_REASON =
+OPTIMIZATION_DIMENSIONS =
+EQUIVALENCE_EVIDENCE =
+BETTER_DIMENSIONS =
+REGRESSED_DIMENSIONS = NONE
+UNPROVEN_DIMENSIONS =
+GHOST_ISLAND_OPTIMIZATION =
+OPENKORE_LAST_GOOD_PLAYER_RESULT =
+GHOST_ISLAND_CURRENT_PLAYER_RESULT =
+RESULT_EQUIVALENT_OR_BETTER = YES/NO
+OPENKORE_CORE_ALIGNMENT_VETO = PASS/FAIL
+PLAYER_FLOW_EQUIVALENCE = PASS/FAIL/NOT_TESTED
 
 DUPLICATE_ENGINE_CREATED = YES/NO
 NEW_STATE_MACHINE_CREATED = YES/NO

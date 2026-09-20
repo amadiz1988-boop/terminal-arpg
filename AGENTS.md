@@ -494,7 +494,7 @@ Do **not** search `C:\`, do **not** search sibling worktrees, do **not** guess a
 
 **搜尋範圍規則**：進入 ACTIVE_WORKTREE 後，所有 grep／glob／git／read／edit／build／test 預設只能在該 worktree。跨 worktree 操作只在 Source of Truth 明確引用或 Project Control 明確要求時，且必須使用 exact path。
 
-**Kilo 日常 workspace**：不應以 `C:\` 或整個 project root 開啟。應直接開 ACTIVE_WORKTREE（例如 Workline B → `.tmp-pa-gate3-live-status-integration-v1`（Persistent Agent canonical），Workline C → `terminal-arpg-phase4a-canonical`）。
+**Kilo 日常 workspace**：不應以 `C:\` 或整個 project root 開啟。應直接開 ACTIVE_WORKTREE（例如 Workline B → `.tmp-p2d-pa-equipment-action-v1`（Persistent Agent canonical），Workline C → `terminal-arpg-phase4a-canonical`）。
 
 ### Routing Extension — Shared Governance Exact-Path Access
 
@@ -607,13 +607,20 @@ Persistent Agent 只有一條 authoritative source lineage。此宣告取代其�
 
 ```
 PERSISTENT_AGENT_CANONICAL_SOURCE:
-C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\.tmp-pa-gate3-live-status-integration-v1
-PERSISTENT_AGENT_CANONICAL_BRANCH: canonical/persistent-agent-gate3-v1
-PERSISTENT_AGENT_CANONICAL_HEAD:   ba0e4433b310e6932464700d93bd37175d71077b
-PERSISTENT_AGENT_LINEAGE:          3ffdad1 -> 5ed8f0d -> 866f423 -> ea5b995 -> c41cc4c -> a3cea54 -> 1fd30bd -> ba0e443
+C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\.tmp-p2d-pa-equipment-action-v1
+PERSISTENT_AGENT_CANONICAL_BRANCH: canonical/persistent-agent-p2f-v1
+PERSISTENT_AGENT_CANONICAL_HEAD:   fd12d2a10ac0109a5f802be2c24107afd11f7419
+PERSISTENT_AGENT_LINEAGE:          3ffdad1 -> 5ed8f0d -> 866f423 -> ea5b995 -> c41cc4c -> a3cea54 -> 1fd30bd -> ba0e443 -> 704a4ac (P2B) -> b13a8e2 (P2C NAV4) -> ab44223 (P2D) -> fd12d2a (P2F)
+PERSISTENT_AGENT_SUPERSEDED_HEAD: ba0e4433b310e6932464700d93bd37175d71077b (superseded; MUST NOT be used as runtime truth)
 PERSISTENT_AGENT_MILESTONE_REF:    milestone/gate3-multimap-relocation-pass-20260917 -> ba0e4433b310e6932464700d93bd37175d71077b
+P2F_READ_MODEL_COMMIT:             fd12d2a10ac0109a5f802be2c24107afd11f7419
+P2F_READ_MODEL_BRANCH:             feature/p2d-pa-equipment-action-v1
+WEB_P2F_READ_MODEL_BRANCH:         feature/p2f-headless-web-read-model
+WEB_P2F_READ_MODEL_HEAD:           b6e5a6aafed39ac01eb411f1411e48c2d56a2400
 ```
 
+- P2F canonical advance 由 P2D worktree 升格：`.tmp-p2d-pa-equipment-action-v1` 同時承載 P2B（supply）、P2C NAV4 integration 與 P2D equip/unequip，並在其上加入 P2F authoritative read model。
+- `ba0e443` 為 P2B 之前的中間里程碑，已被 `ab44223` 取代；不得再作為 canonical runtime truth。
 - Persistent Agent source 變更一律從上列 canonical worktree 開始。
 - 舊 canonical worktree `.tmp-gate1a-player-flow-v1`（branch `canonical/persistent-agent-no-client-v1` @ `a3cea54`，工作樹 dirty）自 canonical advance 完成起降級為 `LEGACY_DIRTY_REFERENCE` / `SOURCE_AUTHORITY=NO`，唯讀保留；不得對它執行 reset／stash／clean／checkout／branch-switch／commit／delete。
 - `.tmp-server-agent-no-client-controller-v1`、`.tmp-pa-lifecycle-consolidation-v1` 為唯讀歷史 reference，不得刪除。
@@ -642,6 +649,38 @@ NEXT:           AUTOMATED_PRODUCTION_CANARY
 - `OPENKORE_REMOVED = NO`、`PRODUCTION_READY = NO`；不得因本 closure 宣稱 OpenKore Exit 完成。
 - `terminal-arpg` dirty web tree 維持 `READ_ONLY` 參照；其 web source 未被 closure 修改。
 - 詳細 provenance、限制與 accepted runtime hash 見 `docs/openkore-exit-source-of-truth.md` 的 W1–W4 SERVER_AGENT Web Integration Closure 節。
+
+## Single Runtime Policy 鐵律
+
+Project Control 於 2026-09-18 生效：`EXTRA_TEST_SERVER_ALLOWED = NO`、
+`SECOND_RATHENA_STACK_ALLOWED = NO`。唯一授權 runtime 為 canonical
+login 6901／char 6122／map 5122／dashboard 8788，DB `ragnarok`，穩態必須是
+login／char／map 各一。
+
+- 退休所有測試 runtime 慣例（6902／6123／5123／8792、6904／6124／5124、
+  6905／6125／5125）與 `.tmp-*` rAthena live stack；任何 Workline 不得自行重建。
+- 需要載入新版 binary 時，只允許受控重啟 canonical instance，不得 old + new
+  同時存活或建立第二套 parallel runtime。
+- 任何 canonical restart 前必須完成 `docs/single-runtime-policy.md` 的
+  RESTART SAFETY 清單（範圍、binary／config、PID、graceful stop、port released、
+  exactly one replacement、health gate、Persistent Agent resident gate、
+  OpenKore = 0、Web smoke test）。
+- destructive 測試（deliberate map crash、duplicate owner、quarantine、
+  stale runtime corruption、destructive DB mutation、competing physical
+  map-server）禁止在 production 進行；改用 unit／persistence-layer／
+  state-machine harness／controlled claimant fixture，無法證明時 STOP 回報
+  Project Control。
+- `ops/ro-stack/runtime-guard.ps1` 是唯一 runtime admission control 且
+  fail-closed；偵測到 login／char／map 超過一個、非 canonical runtime path 或
+  retired port listener 時固定標記 `UNAUTHORIZED_RATHENA_RUNTIME`。
+  `ops/ro-stack/ro-stack.ps1 start|restart` 啟動前必須通過此 guard。
+- `ops/ro-stack/runtime-sentinel.ps1` 由 hidden Scheduled Task
+  `GhostIslandRO-RuntimeSentinel`（`-Continuous -IntervalSeconds 10`）常駐，防止
+  從 VSCode／Kilo／CMD 直接啟動繞過 launcher；只檢查 live process + TCP
+  listener，不掃磁碟，fail-safe 不 kill canonical port holder，終止前寫 audit，
+  cloudflared 只稽核不 kill。
+
+完整決策、restart 清單與操作指令見 [Single Runtime Policy](docs/single-runtime-policy.md)。
 
 ## 第一性原理優先鐵律
 
@@ -906,6 +945,243 @@ Compliance requires:
 
 The Gate is operational procedure.
 `AGENTS.md` remains policy authority.
+
+### 12A. OPENKORE_REFERENCE_FIRST_HARD_GATE
+
+```text
+OPENKORE_REFERENCE_FIRST_HARD_GATE = MANDATORY / BLOCKING
+VERSION = V1
+```
+
+任何涉及 OpenKore-era gameplay capability、Web gameplay control、Controller、
+SERVER_AGENT、Persistent Agent、功能恢復、重構或新增能力的 workline，source edit
+前必須完成 `OPENKORE_REFERENCE_GATE_V1.1`，並回報完整 reconstruction evidence。
+缺少任一必要欄位時：
+
+```text
+OPENKORE_REFERENCE_GATE = FAIL
+SOURCE_EDIT = PROHIBITED
+```
+
+強制順序：
+
+```text
+OpenKore mature behavior
+→ Last-Good reconstruction
+→ Current Ghost Island behavior
+→ REPRODUCE / ADAPT / REJECT_LEGACY mapping
+→ GHOST_ISLAND_OPTIMIZATION_REVIEW
+→ source edit
+```
+
+適用範圍包含 AUTO_FARM、Combat、Target、Loot、Survival、Recovery、Supply、
+Fly Wing／Butterfly Wing、SaveMap／LockMap、Buy／Sell／Storage、Kafra、Navigation、
+Routing、NPC、Quest、Skill、Equipment、Inventory、Weight、Death、Restart、Reconnect、
+Party、Follow，以及控制或呈現上述能力的任何 Web button、API 或 controller action。
+
+`PRE_IMPLEMENTATION_REUSE_GATE` 的 `BUG_FIX`、`MAINTENANCE`、`REFACTOR`、
+`OPTIMIZATION` 或既有 implementation exemption，不豁免
+`OPENKORE_REFERENCE_FIRST_HARD_GATE`。只要會影響 gameplay semantics、state
+machine、authority、control、player-visible result 或 recovery，仍必須完成本
+hard gate。純文件、純格式、純 CSS/layout 且不改變上述行為者，才可標記
+`OPENKORE_REFERENCE_REQUIRED = NO`。
+
+Worker 在 source edit 前必須回報：
+
+```text
+OPENKORE_REFERENCE_GATE =
+FEATURE =
+OPENKORE_CAPABILITY_EXISTS = YES / NO / UNKNOWN
+OPENKORE_EXACT_REFERENCE_FILES =
+OPENKORE_EXACT_SYMBOLS =
+OPENKORE_CONFIG_KEYS =
+OPENKORE_LAST_GOOD_BEHAVIOR =
+OPENKORE_TRIGGER_CONDITION =
+OPENKORE_STATE_MACHINE =
+OPENKORE_SUCCESS_PATH =
+OPENKORE_FAILURE_PATH =
+OPENKORE_RECOVERY_PATH =
+OPENKORE_RETRY_POLICY =
+OPENKORE_EDGE_CASES =
+OPENKORE_AUTHORITY_BOUNDARY =
+CURRENT_GHOST_ISLAND_BEHAVIOR =
+BEHAVIOR_DIFFERENCES =
+OPENKORE_REFERENCE_VERSION =
+OPENKORE_REFERENCE_COMMIT =
+OPENKORE_REFERENCE_SOURCE =
+OPENKORE_REFERENCE_DATE =
+PROJECT_LAST_GOOD_OPENKORE_CONFIG =
+PROJECT_LAST_GOOD_OPENKORE_CONFIG_SOURCE =
+PROJECT_LAST_GOOD_OPENKORE_CONFIG_VERSION =
+PROJECT_LAST_GOOD_OPENKORE_CONFIG_PROVENANCE =
+OPENKORE_REFERENCE_INHERITED = YES / NO
+REFERENCE_DOSSIER =
+```
+
+每個主要行為必須明確分類：
+
+```text
+REPRODUCE = 保留 OpenKore 成熟 semantics
+ADAPT = 保留 semantics，改由 PA / SERVER_AGENT → rAthena 執行
+REJECT_LEGACY = 明確記錄 OpenKore 行為不適用的理由
+```
+
+`GHOST_ISLAND_OPTIMIZATION_REVIEW` 必須先回答不可破壞 invariant、PA authority
+邊界、可移除的 client／process／file transport、必須保留的 recovery／retry／edge
+cases，以及玩家可見結果是否與 OpenKore Last-Good 等價或更好。優化可以判定為
+`NO_NOT_NEEDED`，不得為了填欄位而強制改動成熟行為。完成 mapping 前，
+禁止以「比較簡單」、「比較乾淨」或「最小版本」作為跳過 reference 的理由。
+
+Web 只能呈現 authoritative state、收集 intent、呼叫 controller、呈現 command／
+runtime result。Web 不得自行建立 gameplay semantics。
+
+若 OpenKore 與成熟 rAthena reference 有差異，或 reference 與目前 server
+authority 發生衝突：
+
+```text
+OPENKORE_BEHAVIOR =
+RATHENA_BEHAVIOR =
+CURRENT_ARCHITECTURE_CONSTRAINT =
+PLAYER_VALUE_IMPACT =
+REFERENCE_CONFLICT_RESOLVED = NO
+PROJECT_CONTROL_DECISION_REQUIRED = YES
+```
+
+Worker 不得自行選擇其中一方。若找不到 reference：
+
+```text
+OPENKORE_REFERENCE_GATE = BLOCKED
+REFERENCE_NOT_FOUND = YES
+SOURCE_EDIT = PROHIBITED
+```
+
+任何故意偏離 OpenKore Last-Good behavior 的設計，都必須取得 Project Control
+approval，並記錄：OpenKore behavior、Proposed Ghost Island behavior、原因、玩家
+價值、architecture gain、new risk 與 rollback path。
+
+Supply 反例固定記錄為：
+
+```text
+ANTI_PATTERN_EXAMPLE = PA_SUPPLY_WALKING_REIMPLEMENTATION
+```
+
+Supply restoration 必須先重建：
+
+```text
+SUPPLY_LOW → RETURN_HOME → BUY → RETURN_FARM → RESUME
+```
+
+不得先修 PA walking route，再事後猜測 OpenKore semantics。
+
+相關 workline final report 必須包含：
+
+```text
+OPENKORE_REFERENCE_REQUIRED = YES / NO
+OPENKORE_REFERENCE_TRIGGERED = YES / NO
+OPENKORE_REFERENCE_GATE = PASS / FAIL / NOT_APPLICABLE
+OPENKORE_CAPABILITY_EXISTS = YES / NO / UNKNOWN
+OPENKORE_REFERENCE_FILES =
+OPENKORE_REFERENCE_SYMBOLS =
+OPENKORE_CONFIG_KEYS =
+OPENKORE_LAST_GOOD_BEHAVIOR =
+CURRENT_GHOST_ISLAND_BEHAVIOR =
+OPENKORE_BEHAVIOR_COMPARED = YES / NO
+BEHAVIOR_MAPPING =
+REFERENCE_CONFLICT = YES / NO
+REFERENCE_CONFLICT_RESOLVED = YES / NO
+SERVER_AUTHORITY_INVARIANTS_PRESERVED = YES / NO
+OPENKORE_DEVIATION = YES / NO
+GHOST_ISLAND_OPTIMIZATION_REVIEWED = YES / NO
+OPTIMIZATION_APPLIED = YES / NO_NOT_NEEDED
+OPTIMIZATION_REASON =
+OPTIMIZATION_DIMENSIONS =
+OPENKORE_LAST_GOOD_PLAYER_RESULT =
+GHOST_ISLAND_CURRENT_PLAYER_RESULT =
+EQUIVALENCE_EVIDENCE =
+BETTER_DIMENSIONS =
+REGRESSED_DIMENSIONS = NONE
+UNPROVEN_DIMENSIONS =
+RESULT_EQUIVALENT_OR_BETTER = YES / NO
+PLAYER_FLOW_EQUIVALENCE = PASS / FAIL / NOT_TESTED
+OPENKORE_CORE_ALIGNMENT_VETO = PASS / FAIL
+CHANGE_APPROVED = YES / NO
+CHANGE_REJECTED = YES / NO
+WORKLINE_DONE = YES / NO
+```
+
+缺少上述欄位時，`WORKLINE_DONE = NO`。
+
+### 12B. OPENKORE_CORE_ALIGNMENT_VETO
+
+任何 `OPENKORE_REFERENCE_REQUIRED = YES` 的 workline，都必須在 source edit
+前與 Project Control acceptance 時完成六問：
+
+```text
+OPENKORE_REFERENCE_TRIGGERED = YES
+OPENKORE_BEHAVIOR_COMPARED = YES
+SERVER_AUTHORITY_INVARIANTS_PRESERVED = YES
+REFERENCE_CONFLICT_RESOLVED = YES
+GHOST_ISLAND_OPTIMIZATION_REVIEWED = YES
+RESULT_EQUIVALENT_OR_BETTER = YES
+```
+
+任一欄位為 `NO`、`FAIL`、`UNKNOWN` 或 `NOT_PROVEN` 時，固定結果為：
+
+```text
+CHANGE_APPROVED = NO
+CHANGE_REJECTED = YES
+IMPLEMENTATION_ACCEPTANCE = FAIL
+PRODUCTION_DEPLOY = BLOCKED
+WORKLINE_DONE = NO
+```
+
+`OPTIMIZATION_APPLIED = NO_NOT_NEEDED` 在 `GHOST_ISLAND_OPTIMIZATION_REVIEWED = YES`
+時屬有效結果，不構成否決。`test pass`、`build pass`、`source pass`、較少程式碼、
+較簡單實作或模型信心不得覆蓋否決結果。Project Control 必須自行核對 reference、
+authority、objective equivalence 與玩家結果 evidence，不能只採用 Worker 自報。
+
+Objective equivalence 必須逐項回報：
+
+```text
+PLAYER_VISIBLE_BEHAVIOR = PROVEN / UNPROVEN
+SUCCESS_PATH = PROVEN / UNPROVEN
+FAILURE_PATH = PROVEN / UNPROVEN
+RECOVERY = PROVEN / UNPROVEN
+RETRY = PROVEN / UNPROVEN
+RESTART_SAFETY = PROVEN / UNPROVEN
+RECONNECT_SAFETY = PROVEN / UNPROVEN
+AUTHORITY_CORRECTNESS = PROVEN / UNPROVEN
+STATE_CONSISTENCY = PROVEN / UNPROVEN
+RELIABILITY = PROVEN / UNPROVEN
+LATENCY = PROVEN / UNPROVEN
+SCALABILITY = PROVEN / UNPROVEN
+MAINTAINABILITY = PROVEN / UNPROVEN
+```
+
+`REGRESSED_DIMENSIONS` 不得為空值以外的內容。任何 regression 或 critical
+dimension 未證明時，`RESULT_EQUIVALENT_OR_BETTER = NO`，並回到 Project Control
+決策。第二次 acceptance 必須由 Project Control 獨立重做六問，不得沿用 Worker
+結論。
+
+同一 gameplay subsystem 若累計至少兩個 downstream blockers，Project Control
+必須執行：
+
+```text
+UPSTREAM_ASSUMPTION_RECHECK = YES
+DOWNSTREAM_BLOCKER_COUNT =
+CURRENT_CONTRACT_REVALIDATED = YES / NO
+OPENKORE_LAST_GOOD_RECHECKED = YES / NO
+CONTINUE_CURRENT_DIRECTION = YES / NO
+```
+
+在 recheck 完成前不得進行第三個下游修補。Recheck 應分類目前實作為
+`LEGITIMATE_ADAPTATION / REGRESSION / WRONG_REIMPLEMENTATION / HISTORICAL_WORKAROUND`。
+
+Gate PASS 前只允許 read-only source/log/runtime/historical Git/OpenKore/rAthena
+inspection、bounded diagnostic reproduction，以及不改變 gameplay semantics 的
+isolated test-only instrumentation。禁止 gameplay source edit、state-machine
+redesign、production deploy、runtime mutation、新 gameplay contract 或永久 route/
+supply/combat/recovery implementation。
 
 ### 13. Mature rAthena Reference Policy
 

@@ -188,6 +188,54 @@ EXECUTE TO COMPLETION.
 The worker prompt body does not contain `WINDOW:`, `貼到：`, or `WORKLINE:` as
 routing instructions. The destination is shown to the user outside the block.
 
+## 5A. OpenKore reference-first hard gate
+
+For every workline involving an OpenKore-era gameplay capability or a Web /
+Controller action that controls or presents one, Project Control must persist:
+
+```text
+OPENKORE_REFERENCE_REQUIRED = YES
+DO_NOT_IMPLEMENT_BEFORE = OPENKORE_REFERENCE_GATE PASS
+REFERENCE_DOSSIER = <path or NONE>
+OPENKORE_REFERENCE_INHERITED = YES / NO
+```
+
+The worker must complete `OPENKORE_REFERENCE_GATE_V1.1` before source edit.
+The pre-edit report must include exact reference files, symbols, config keys,
+Last-Good behavior, trigger, state machine, success/failure/recovery paths,
+retry policy, edge cases, authority boundary, current behavior and differences.
+It must also include:
+
+```text
+BEHAVIOR_MAPPING = REPRODUCE / ADAPT / REJECT_LEGACY
+GHOST_ISLAND_OPTIMIZATION =
+OPENKORE_DEVIATION = YES / NO
+OPENKORE_REFERENCE_VERSION =
+OPENKORE_REFERENCE_COMMIT =
+OPENKORE_REFERENCE_SOURCE =
+OPENKORE_REFERENCE_DATE =
+PROJECT_LAST_GOOD_OPENKORE_CONFIG =
+PROJECT_LAST_GOOD_OPENKORE_CONFIG_SOURCE =
+PROJECT_LAST_GOOD_OPENKORE_CONFIG_VERSION =
+PROJECT_LAST_GOOD_OPENKORE_CONFIG_PROVENANCE =
+SERVER_AUTHORITY_INVARIANTS_PRESERVED = YES / NO
+REFERENCE_CONFLICT_RESOLVED = YES / NO
+GHOST_ISLAND_OPTIMIZATION_REVIEWED = YES / NO
+OPTIMIZATION_APPLIED = YES / NO_NOT_NEEDED
+OPTIMIZATION_REASON =
+OPTIMIZATION_DIMENSIONS =
+```
+
+Missing evidence blocks implementation. Reference conflict, missing reference,
+or deliberate deviation returns the workline to Project Control. Web may render
+authoritative state and submit intent; it does not define gameplay semantics.
+
+The exemption list in `PRE_IMPLEMENTATION_REUSE_GATE` does not exempt this hard
+gate. Any behavior-affecting bug fix, maintenance, refactor or optimization still
+requires the OpenKore reference-first gate. Before that gate passes, only bounded
+read-only diagnostics and isolated instrumentation that preserves gameplay
+semantics are allowed.
+
 ## 6. Continuation discipline
 
 Existing worklines continue through:
@@ -314,6 +362,110 @@ After every worker report, Project Control must:
 5. start independent worklines when ownership checks permit;
 6. update Full Web, Quest, Native, and Diary gates;
 7. append the current A-E six-column table.
+
+For an OpenKore-relevant workline, verify these completion fields before moving
+the line to `WAITING` or `CLOSED`:
+
+```text
+OPENKORE_REFERENCE_REQUIRED = YES / NO
+OPENKORE_REFERENCE_TRIGGERED = YES / NO
+OPENKORE_REFERENCE_GATE = PASS / FAIL / BLOCKED / NOT_APPLICABLE
+OPENKORE_REFERENCE_INHERITED = YES / NO
+REFERENCE_DOSSIER =
+OPENKORE_REFERENCE_VERSION =
+OPENKORE_REFERENCE_COMMIT =
+OPENKORE_REFERENCE_SOURCE =
+OPENKORE_REFERENCE_DATE =
+OPENKORE_CAPABILITY_EXISTS = YES / NO / UNKNOWN
+OPENKORE_REFERENCE_FILES =
+OPENKORE_REFERENCE_SYMBOLS =
+OPENKORE_CONFIG_KEYS =
+OPENKORE_LAST_GOOD_BEHAVIOR =
+CURRENT_GHOST_ISLAND_BEHAVIOR =
+OPENKORE_BEHAVIOR_COMPARED = YES / NO
+BEHAVIOR_MAPPING =
+REFERENCE_CONFLICT = YES / NO
+REFERENCE_CONFLICT_RESOLVED = YES / NO
+SERVER_AUTHORITY_INVARIANTS_PRESERVED = YES / NO
+OPENKORE_DEVIATION = YES / NO
+PROJECT_CONTROL_APPROVAL =
+GHOST_ISLAND_OPTIMIZATION_REVIEWED = YES / NO
+OPTIMIZATION_APPLIED = YES / NO_NOT_NEEDED
+OPTIMIZATION_REASON =
+OPTIMIZATION_DIMENSIONS =
+OPENKORE_LAST_GOOD_PLAYER_RESULT =
+GHOST_ISLAND_CURRENT_PLAYER_RESULT =
+EQUIVALENCE_EVIDENCE =
+BETTER_DIMENSIONS =
+REGRESSED_DIMENSIONS = NONE
+UNPROVEN_DIMENSIONS =
+RESULT_EQUIVALENT_OR_BETTER = YES / NO
+PLAYER_FLOW_EQUIVALENCE = PASS / FAIL / NOT_TESTED
+OPENKORE_CORE_ALIGNMENT_VETO = PASS / FAIL
+CHANGE_APPROVED = YES / NO
+CHANGE_REJECTED = YES / NO
+WORKLINE_DONE = YES / NO
+```
+
+Missing fields mean `WORKLINE_DONE = NO`.
+
+## 11A. OPENKORE_CORE_ALIGNMENT_VETO
+
+For every `OPENKORE_REFERENCE_REQUIRED = YES` workline, Project Control must
+independently verify all six questions:
+
+```text
+OPENKORE_REFERENCE_TRIGGERED = YES
+OPENKORE_BEHAVIOR_COMPARED = YES
+SERVER_AUTHORITY_INVARIANTS_PRESERVED = YES
+REFERENCE_CONFLICT_RESOLVED = YES
+GHOST_ISLAND_OPTIMIZATION_REVIEWED = YES
+RESULT_EQUIVALENT_OR_BETTER = YES
+```
+
+Any `NO`, `FAIL`, `UNKNOWN` or `NOT_PROVEN` sets:
+
+```text
+CHANGE_APPROVED = NO
+CHANGE_REJECTED = YES
+IMPLEMENTATION_ACCEPTANCE = FAIL
+PRODUCTION_DEPLOY = BLOCKED
+WORKLINE_DONE = NO
+```
+
+`OPTIMIZATION_APPLIED = NO_NOT_NEEDED` is valid when optimization was reviewed and
+no behavior change is needed. Source, unit, build and model-confidence results
+cannot override this veto. `REGRESSED_DIMENSIONS` must be `NONE`, and any critical
+unproven equivalence dimension blocks approval.
+
+The second acceptance is an independent Project Control verification. If the same
+gameplay subsystem has two or more downstream blockers, Project Control must run
+an upstream assumption recheck before authorizing a third fix:
+
+```text
+UPSTREAM_ASSUMPTION_RECHECK = YES
+DOWNSTREAM_BLOCKER_COUNT =
+CURRENT_CONTRACT_REVALIDATED = YES / NO
+OPENKORE_LAST_GOOD_RECHECKED = YES / NO
+CONTINUE_CURRENT_DIRECTION = YES / NO
+```
+
+For an OpenKore-relevant workline, verify these completion fields before moving
+the line to `WAITING` or `CLOSED`:
+
+```text
+OPENKORE_REFERENCE_GATE = PASS / FAIL / NOT_APPLICABLE
+OPENKORE_REFERENCE_FILES =
+OPENKORE_REFERENCE_SYMBOLS =
+OPENKORE_LAST_GOOD_BEHAVIOR =
+CURRENT_BEHAVIOR =
+BEHAVIOR_MAPPING =
+OPENKORE_DEVIATION = YES / NO
+GHOST_ISLAND_OPTIMIZATION =
+PLAYER_FLOW_EQUIVALENCE = PASS / FAIL / NOT_TESTED
+```
+
+Missing fields mean `WORKLINE_DONE = NO`.
 
 ## 12. Persistent invariants and routing
 

@@ -183,8 +183,11 @@ Do not paste the roadmap. For scopes listed in `AGENTS.md`
 Continue the policy already required by the original workline, for example:
 
 ```text
-Follow OPENKORE_REFERENCE_POLICY.
+OPENKORE_REFERENCE_REQUIRED = YES
+Follow OPENKORE_REFERENCE_POLICY and OPENKORE_REFERENCE_GATE_V1.1.
 Reference Gate already completed at <evidence>.
+REFERENCE_DOSSIER = <path or NONE>
+OPENKORE_REFERENCE_INHERITED = YES / NO
 ```
 
 If reference suitability has not yet been evaluated:
@@ -192,6 +195,17 @@ If reference suitability has not yet been evaluated:
 ```text
 Execute only the missing Gate subsection.
 ```
+
+Do not continue source work while the hard gate is `FAIL`, `BLOCKED`, or
+missing required reconstruction evidence. A continuation must preserve the
+existing behavior mapping and record any new reference conflict or deviation
+for Project Control approval.
+
+Continuation must preserve the pinned reference version, commit, source, date and
+project last-good config provenance. `PRE_IMPLEMENTATION_REUSE_GATE` exemptions
+do not exempt behavior-affecting bug fix, maintenance, refactor or optimization
+from this hard gate. Before the hard gate is complete, use only bounded read-only
+diagnostics or isolated instrumentation that preserves gameplay semantics.
 
 Do not rerun the entire Gate.
 
@@ -255,6 +269,41 @@ TESTS
 LIVE_PASS
 BROWSER_UI_PASS
 NEXT_ACTION / CLOSED
+```
+
+For an OpenKore-relevant workline, also report:
+
+```text
+OPENKORE_REFERENCE_GATE
+OPENKORE_REFERENCE_INHERITED
+REFERENCE_DOSSIER
+OPENKORE_REFERENCE_VERSION
+OPENKORE_REFERENCE_COMMIT
+OPENKORE_REFERENCE_SOURCE
+OPENKORE_REFERENCE_DATE
+OPENKORE_REFERENCE_FILES
+OPENKORE_REFERENCE_SYMBOLS
+PROJECT_LAST_GOOD_OPENKORE_CONFIG
+PROJECT_LAST_GOOD_OPENKORE_CONFIG_SOURCE
+PROJECT_LAST_GOOD_OPENKORE_CONFIG_VERSION
+PROJECT_LAST_GOOD_OPENKORE_CONFIG_PROVENANCE
+OPENKORE_LAST_GOOD_BEHAVIOR
+CURRENT_BEHAVIOR
+BEHAVIOR_MAPPING
+SERVER_AUTHORITY_INVARIANTS_PRESERVED
+REFERENCE_CONFLICT_RESOLVED
+OPENKORE_DEVIATION
+GHOST_ISLAND_OPTIMIZATION_REVIEWED
+OPTIMIZATION_APPLIED
+OPTIMIZATION_REASON
+OPTIMIZATION_DIMENSIONS
+EQUIVALENCE_EVIDENCE
+BETTER_DIMENSIONS
+REGRESSED_DIMENSIONS
+UNPROVEN_DIMENSIONS
+RESULT_EQUIVALENT_OR_BETTER
+OPENKORE_CORE_ALIGNMENT_VETO
+PLAYER_FLOW_EQUIVALENCE
 ```
 
 ---
