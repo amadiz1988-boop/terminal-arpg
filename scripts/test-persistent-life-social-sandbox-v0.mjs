@@ -6,7 +6,9 @@ import {
   createShadowWorldContext,
   createSandbox,
   createSeededCharacters,
+  deriveShadowSocialProximity,
   deriveShadowEncounterTransitions,
+  deriveSocialProximityTransitions,
   dispatchShadowIntent,
   encounter,
   reconcileDaily,
@@ -117,6 +119,8 @@ const realShapedPayload = {
     charId: 1001,
     fresh: true,
     map: 'pay_dun00',
+    x: 80,
+    y: 92,
     runtimePhase: 'AUTO_FARM',
     resident: true,
     players: [{ id: 1002, name: 'Other', map: 'pay_dun00', x: 80, y: 92 }],
@@ -134,12 +138,14 @@ check('real-shaped canonical context adapter returns the minimal contract', () =
   const result = createShadowWorldContext({ runtimePayload: realShapedPayload, now: Date.parse('2026-09-20T10:00:30.000Z') });
   assert.equal(result.ok, true);
   assert.deepEqual(Object.keys(result.context).sort(), [
-    'character_id', 'current_activity', 'hunt_active', 'macro_goal', 'map',
+    'character_id', 'current_activity', 'hunt_active', 'macro_goal', 'map', 'x', 'y',
     'nearby_relevant_characters', 'party_state', 'recent_encounters',
     'recent_social_events', 'revision', 'updated_at',
   ].sort());
   assert.equal(result.context.character_id, 1001);
   assert.equal(result.context.map, 'pay_dun00');
+  assert.equal(result.context.x, 80);
+  assert.equal(result.context.y, 92);
   assert.equal(result.context.current_activity, 'AUTO_FARM');
   assert.equal(result.context.hunt_active, true);
   assert.equal(result.context.nearby_relevant_characters[0].character_id, 1002);
@@ -236,6 +242,191 @@ check('daily reconciliation keeps structured life facts from a real-shaped conte
   assert.deepEqual(summary.meaningfulFacts.map((fact) => fact.type), ['ENCOUNTER']);
   assert.equal(summary.diaryEligible, true);
   assert.equal(summary.dayEnd.macroGoal, 'HUNT');
+});
+
+function proximitySample({
+  distance,
+  revision,
+  previousRevision = revision - 1,
+  previousStateById = {},
+  previousVisibleSet = [],
+  map = 'pay_dun00',
+  previousMap = map,
+  previousUpdatedAt = `2026-09-20T10:00:${String(previousRevision).padStart(2, '0')}.000Z`,
+} = {}) {
+  const currentUpdatedAt = `2026-09-20T10:00:${String(revision).padStart(2, '0')}.000Z`;
+  return deriveSocialProximityTransitions({
+    characterId: 1001,
+    observerX: 0,
+    observerY: 0,
+    previousVisibleSet,
+    currentVisibleSet: [{ entity_kind: 'PLAYER', entity_id: 1002, map, x: distance, y: 0, name: 'Other' }],
+    previousStateById,
+    previousMap,
+    currentMap: map,
+    previousRevision,
+    currentRevision: revision,
+    previousUpdatedAt,
+    currentUpdatedAt,
+    now: Date.parse(currentUpdatedAt) + 1000,
+  });
+}
+
+check('social proximity enters exactly at distance 7', () => {
+  const result = proximitySample({ distance: 7, revision: 1, previousRevision: 0, previousUpdatedAt: undefined });
+  assert.equal(result.ok, true);
+  assert.deepEqual(result.derivedLifeFacts.map((fact) => [fact.type, fact.distance]), [['ENCOUNTER', 7]]);
+  assert.equal(result.stateById['1002'], 'NEARBY');
+});
+
+check('distance 8 while OUTSIDE does not enter', () => {
+  const result = proximitySample({ distance: 8, revision: 1, previousRevision: 0, previousUpdatedAt: undefined });
+  assert.deepEqual(result.derivedLifeFacts, []);
+  assert.equal(result.stateById['1002'], 'OUTSIDE');
+});
+
+check('distance 8 while NEARBY remains nearby', () => {
+  const result = proximitySample({
+    distance: 8,
+    revision: 2,
+    previousStateById: { 1002: 'NEARBY' },
+    previousVisibleSet: [{ entity_kind: 'PLAYER', entity_id: 1002, map: 'pay_dun00', x: 7, y: 0 }],
+  });
+  assert.deepEqual(result.derivedLifeFacts, []);
+  assert.deepEqual(result.continuedPresence.map((fact) => fact.counterpart_id), ['1002']);
+});
+
+check('distance 9 while NEARBY remains nearby', () => {
+  const result = proximitySample({
+    distance: 9,
+    revision: 2,
+    previousStateById: { 1002: 'NEARBY' },
+    previousVisibleSet: [{ entity_kind: 'PLAYER', entity_id: 1002, map: 'pay_dun00', x: 8, y: 0 }],
+  });
+  assert.deepEqual(result.derivedLifeFacts, []);
+  assert.equal(result.stateById['1002'], 'NEARBY');
+});
+
+check('distance 10 while NEARBY leaves', () => {
+  const result = proximitySample({
+    distance: 10,
+    revision: 2,
+    previousStateById: { 1002: 'NEARBY' },
+    previousVisibleSet: [{ entity_kind: 'PLAYER', entity_id: 1002, map: 'pay_dun00', x: 9, y: 0 }],
+  });
+  assert.deepEqual(result.presenceEnds.map((fact) => fact.type), ['ENCOUNTER_END']);
+  assert.equal(result.stateById['1002'], 'OUTSIDE');
+});
+
+check('10 to 7 re-enters exactly once', () => {
+  const outside = proximitySample({ distance: 10, revision: 2, previousStateById: { 1002: 'NEARBY' } });
+  const returned = proximitySample({
+    distance: 7,
+    revision: 3,
+    previousStateById: outside.stateById,
+    previousVisibleSet: [{ entity_kind: 'PLAYER', entity_id: 1002, map: 'pay_dun00', x: 10, y: 0 }],
+  });
+  assert.deepEqual(returned.derivedLifeFacts.map((fact) => fact.type), ['ENCOUNTER']);
+});
+
+check('repeated distance 7 samples do not duplicate encounters', () => {
+  const first = proximitySample({ distance: 7, revision: 1, previousRevision: 0, previousUpdatedAt: undefined });
+  const second = proximitySample({
+    distance: 7,
+    revision: 2,
+    previousStateById: first.stateById,
+    previousVisibleSet: [{ entity_kind: 'PLAYER', entity_id: 1002, map: 'pay_dun00', x: 7, y: 0 }],
+  });
+  const third = proximitySample({
+    distance: 7,
+    revision: 3,
+    previousStateById: second.stateById,
+    previousVisibleSet: [{ entity_kind: 'PLAYER', entity_id: 1002, map: 'pay_dun00', x: 7, y: 0 }],
+  });
+  assert.equal(second.derivedLifeFacts.length, 0);
+  assert.equal(third.derivedLifeFacts.length, 0);
+});
+
+check('different map resets social state without an encounter', () => {
+  const result = proximitySample({
+    distance: 7,
+    revision: 2,
+    previousMap: 'morocc',
+    previousStateById: { 1002: 'NEARBY' },
+  });
+  assert.equal(result.reason, 'MAP_CHANGED');
+  assert.deepEqual(result.derivedLifeFacts, []);
+  assert.deepEqual(result.stateById, {});
+});
+
+check('self, non-player, and missing identity are ignored', () => {
+  const result = deriveSocialProximityTransitions({
+    characterId: 1001,
+    observerX: 0,
+    observerY: 0,
+    currentMap: 'pay_dun00',
+    previousRevision: 0,
+    currentRevision: 1,
+    currentUpdatedAt: '2026-09-20T10:00:01.000Z',
+    now: Date.parse('2026-09-20T10:00:02.000Z'),
+    currentVisibleSet: [
+      { entity_kind: 'PLAYER', entity_id: 1001, map: 'pay_dun00', x: 1, y: 0 },
+      { entity_kind: 'MONSTER', entity_id: 2001, map: 'pay_dun00', x: 1, y: 0 },
+      { entity_kind: 'PLAYER', map: 'pay_dun00', x: 1, y: 0 },
+    ],
+  });
+  assert.deepEqual(result.derivedLifeFacts, []);
+});
+
+check('stale revision and stale projection are rejected', () => {
+  const staleRevision = proximitySample({ distance: 7, revision: 1, previousRevision: 1, previousUpdatedAt: undefined });
+  assert.equal(staleRevision.reason, 'STALE_REVISION');
+  const staleProjection = proximitySample({
+    distance: 7,
+    revision: 2,
+    previousUpdatedAt: '2026-09-20T10:00:02.000Z',
+  });
+  assert.equal(staleProjection.reason, 'STALE_PROJECTION');
+});
+
+check('multiple nearby players maintain independent states', () => {
+  const result = deriveSocialProximityTransitions({
+    characterId: 1001,
+    observerX: 0,
+    observerY: 0,
+    currentMap: 'pay_dun00',
+    previousRevision: 0,
+    currentRevision: 1,
+    currentUpdatedAt: '2026-09-20T10:00:01.000Z',
+    now: Date.parse('2026-09-20T10:00:02.000Z'),
+    currentVisibleSet: [
+      { entity_kind: 'PLAYER', entity_id: 1002, map: 'pay_dun00', x: 7, y: 0 },
+      { entity_kind: 'PLAYER', entity_id: 1003, map: 'pay_dun00', x: 9, y: 0 },
+    ],
+  });
+  assert.deepEqual(result.derivedLifeFacts.map((fact) => fact.counterpart_id), ['1002']);
+  assert.equal(result.stateById['1002'], 'NEARBY');
+  assert.equal(result.stateById['1003'], 'OUTSIDE');
+});
+
+check('headless shadow wiring emits no social command', () => {
+  const context = {
+    character_id: 1001,
+    x: 0,
+    y: 0,
+    map: 'pay_dun00',
+    macro_goal: 'HUNT',
+    hunt_active: true,
+    nearby_relevant_characters: [{ entity_kind: 'PLAYER', entity_id: 1002, map: 'pay_dun00', x: 7, y: 0 }],
+    recent_encounters: [],
+    recent_social_events: [],
+    revision: 1,
+    updated_at: '2026-09-20T10:00:01.000Z',
+  };
+  const result = deriveShadowSocialProximity({ context, previousRevision: 0 });
+  assert.equal(result.socialCommandDispatch, 0);
+  assert.equal(result.shadowDispatches[0].dispatched, false);
+  assert.equal(result.shadowIntents[0].mode, 'SHADOW');
 });
 
 const presenceArgs = {

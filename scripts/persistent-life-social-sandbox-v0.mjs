@@ -191,6 +191,8 @@ export function reconcileDaily({ dayStart, dayEnd, facts }) {
 
 const SHADOW_CONTEXT_FIELDS = Object.freeze([
   'character_id',
+  'x',
+  'y',
   'map',
   'current_activity',
   'macro_goal',
@@ -252,6 +254,8 @@ export function createShadowWorldContext({
   const revision = Number(envelope.revision ?? source.revision);
   const updatedAt = envelope.updatedAt ?? envelope.updated_at ?? source.updatedAt ?? source.updated_at;
   const map = source.map ?? source.mapName ?? source.map_name;
+  const observerX = source.x ?? source.playerX ?? source.player_x ?? envelope.x ?? envelope.playerX;
+  const observerY = source.y ?? source.playerY ?? source.player_y ?? envelope.y ?? envelope.playerY;
   if (characterId === undefined || characterId === null) return shadowUnavailable('CHARACTER_ID_MISSING');
   if (!Number.isFinite(revision)) return shadowUnavailable('REVISION_MISSING');
   if (revision <= Number(previousRevision)) return shadowUnavailable('STALE_REVISION', { revision, previousRevision });
@@ -286,6 +290,8 @@ export function createShadowWorldContext({
   const inferredHuntActive = macroGoal === 'HUNT' && ['AUTO_FARM', 'HUNT', 'COMBAT'].includes(String(currentActivity).toUpperCase());
   const context = {
     character_id: characterId,
+    x: Number.isFinite(Number(observerX)) ? Number(observerX) : null,
+    y: Number.isFinite(Number(observerY)) ? Number(observerY) : null,
     map,
     current_activity: currentActivity,
     macro_goal: macroGoal,
@@ -322,6 +328,220 @@ function derivedPresenceFact({ type, characterId, counterpartId, map, revision, 
     revision,
     timestamp,
     projection_source: projectionSource,
+  };
+}
+
+export const SOCIAL_PROXIMITY_V1 = Object.freeze({
+  enterRadius: 7,
+  exitRadius: 9,
+  stateNearby: 'NEARBY',
+  stateOutside: 'OUTSIDE',
+});
+
+function projectionTimestamp(value) {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  const parsed = Date.parse(value ?? '');
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function playerEntity(entity, selfId, currentMap) {
+  const kind = entity?.entity_kind ?? entity?.entityKind ?? entity?.kind;
+  if (kind !== undefined && String(kind).toUpperCase() !== 'PLAYER') return null;
+  const id = visibleEntityId(entity);
+  if (id === null || id === String(selfId)) return null;
+  const map = entity?.map ?? entity?.mapName ?? entity?.map_name ?? currentMap;
+  const x = Number(entity?.x);
+  const y = Number(entity?.y);
+  if (typeof map !== 'string' || map.length === 0 || map !== currentMap) return null;
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+  return { id, map, x, y, name: entity?.name ?? null };
+}
+
+function chebyshevDistance(x1, y1, x2, y2) {
+  return Math.max(Math.abs(x1 - x2), Math.abs(y1 - y2));
+}
+
+function emptyProximityResult(reason, details = {}) {
+  return {
+    ok: false,
+    reason,
+    derivedLifeFacts: [],
+    continuedPresence: [],
+    presenceEnds: [],
+    stateById: {},
+    ...details,
+  };
+}
+
+/**
+ * Derive hysteretic Social Proximity V1 from the canonical PLAYER projection.
+ * The function is observation-only: it emits derived life facts and shadow
+ * inputs, never authoritative events or gameplay commands.
+ */
+export function deriveSocialProximityTransitions({
+  characterId,
+  observerX,
+  observerY,
+  previousVisibleSet = [],
+  currentVisibleSet = [],
+  previousStateById = {},
+  previousMap,
+  currentMap,
+  previousRevision,
+  currentRevision,
+  previousUpdatedAt,
+  currentUpdatedAt,
+  now = Date.now(),
+  maxAgeMs = 120000,
+  timestamp = now,
+  projectionSource = 'persistent_agent_live_entity',
+} = {}) {
+  if (characterId === undefined || characterId === null || characterId === '')
+    return emptyProximityResult('CHARACTER_ID_MISSING');
+  const x = Number(observerX);
+  const y = Number(observerY);
+  if (!Number.isFinite(x) || !Number.isFinite(y))
+    return emptyProximityResult('OBSERVER_POSITION_MISSING');
+  if (typeof currentMap !== 'string' || currentMap.length === 0)
+    return emptyProximityResult('MAP_MISSING');
+  const previous = Number(previousRevision);
+  const current = Number(currentRevision);
+  if (!Number.isFinite(previous) || !Number.isFinite(current))
+    return emptyProximityResult('REVISION_MISSING');
+  if (current <= previous)
+    return emptyProximityResult('STALE_REVISION', { revision: current, previousRevision: previous });
+
+  const currentAt = projectionTimestamp(currentUpdatedAt);
+  if (currentAt === null)
+    return emptyProximityResult('UPDATED_AT_MISSING', { revision: current });
+  const previousAt = previousUpdatedAt === undefined ? null : projectionTimestamp(previousUpdatedAt);
+  if (previousUpdatedAt !== undefined && previousAt === null)
+    return emptyProximityResult('PREVIOUS_UPDATED_AT_MISSING', { revision: current });
+  if (previousAt !== null && currentAt <= previousAt)
+    return emptyProximityResult('STALE_PROJECTION', { revision: current, previousUpdatedAt: previousAt, currentUpdatedAt: currentAt });
+  if (Number.isFinite(Number(maxAgeMs)) && Number(maxAgeMs) >= 0 && Number(now) - currentAt > Number(maxAgeMs))
+    return emptyProximityResult('STALE_PROJECTION', { revision: current, ageMs: Number(now) - currentAt });
+  if (previousMap !== undefined && previousMap !== currentMap)
+    return { ...emptyProximityResult('MAP_CHANGED'), ok: true, stateById: {} };
+
+  const priorEntities = new Map();
+  for (const entity of Array.isArray(previousVisibleSet) ? previousVisibleSet : []) {
+    const normalized = playerEntity(entity, characterId, previousMap ?? currentMap);
+    if (normalized) priorEntities.set(normalized.id, normalized);
+  }
+  const currentEntities = new Map();
+  for (const entity of Array.isArray(currentVisibleSet) ? currentVisibleSet : []) {
+    const normalized = playerEntity(entity, characterId, currentMap);
+    if (normalized) currentEntities.set(normalized.id, normalized);
+  }
+
+  const priorIds = new Set([
+    ...priorEntities.keys(),
+    ...Object.keys(previousStateById ?? {}),
+  ]);
+  const stateById = {};
+  for (const id of priorIds) stateById[id] = SOCIAL_PROXIMITY_V1.stateOutside;
+  const derivedLifeFacts = [];
+  const continuedPresence = [];
+  const presenceEnds = [];
+
+  for (const [id, entity] of currentEntities) {
+    const priorState = previousStateById?.[id] ?? (() => {
+      const prior = priorEntities.get(id);
+      if (!prior) return SOCIAL_PROXIMITY_V1.stateOutside;
+      return chebyshevDistance(x, y, prior.x, prior.y) <= SOCIAL_PROXIMITY_V1.enterRadius
+        ? SOCIAL_PROXIMITY_V1.stateNearby
+        : SOCIAL_PROXIMITY_V1.stateOutside;
+    })();
+    const distance = chebyshevDistance(x, y, entity.x, entity.y);
+    const nearby = priorState === SOCIAL_PROXIMITY_V1.stateNearby
+      ? distance <= SOCIAL_PROXIMITY_V1.exitRadius
+      : distance <= SOCIAL_PROXIMITY_V1.enterRadius;
+    stateById[id] = nearby ? SOCIAL_PROXIMITY_V1.stateNearby : SOCIAL_PROXIMITY_V1.stateOutside;
+    if (!nearby) continue;
+    const fact = {
+      classification: 'DERIVED_LIFE_FACT',
+      character_id: characterId,
+      counterpart_id: id,
+      map: currentMap,
+      x: entity.x,
+      y: entity.y,
+      distance,
+      revision: current,
+      updated_at: currentAt,
+      timestamp,
+      projection_source: projectionSource,
+    };
+    if (priorState === SOCIAL_PROXIMITY_V1.stateNearby) {
+      continuedPresence.push({ type: 'CONTINUED_PRESENCE', ...fact });
+    } else {
+      derivedLifeFacts.push({ type: 'ENCOUNTER', ...fact });
+    }
+  }
+
+  for (const id of priorIds) {
+    if (stateById[id] !== SOCIAL_PROXIMITY_V1.stateNearby && previousStateById?.[id] === SOCIAL_PROXIMITY_V1.stateNearby) {
+      const entity = priorEntities.get(id);
+      presenceEnds.push({
+        type: 'ENCOUNTER_END',
+        classification: 'DERIVED_LIFE_FACT',
+        character_id: characterId,
+        counterpart_id: id,
+        map: previousMap ?? currentMap,
+        x: entity?.x ?? null,
+        y: entity?.y ?? null,
+        revision: current,
+        updated_at: currentAt,
+        timestamp,
+        projection_source: projectionSource,
+      });
+    }
+  }
+  return {
+    ok: true,
+    reason: 'SOCIAL_PROXIMITY_DIFF',
+    derivedLifeFacts,
+    continuedPresence,
+    presenceEnds,
+    stateById,
+    revision: current,
+    updatedAt: currentAt,
+  };
+}
+
+/** Feed only ENTER facts into the existing Social Director shadow policy. */
+export function deriveShadowSocialProximity({
+  context,
+  previousContext,
+  previousStateById = {},
+  currentVisibleSet,
+  previousVisibleSet,
+  timestamp = Date.now(),
+} = {}) {
+  if (!context) return { ok: false, reason: 'CONTEXT_MISSING', shadowIntents: [], shadowDispatches: [], socialCommandDispatch: 0 };
+  const transition = deriveSocialProximityTransitions({
+    characterId: context.character_id,
+    observerX: context.x,
+    observerY: context.y,
+    previousVisibleSet: previousVisibleSet ?? previousContext?.nearby_relevant_characters ?? [],
+    currentVisibleSet: currentVisibleSet ?? context.nearby_relevant_characters ?? [],
+    previousStateById,
+    previousMap: previousContext?.map,
+    currentMap: context.map,
+    previousRevision: previousContext?.revision ?? 0,
+    currentRevision: context.revision,
+    previousUpdatedAt: previousContext?.updated_at,
+    currentUpdatedAt: context.updated_at,
+    timestamp,
+  });
+  const shadowIntents = transition.derivedLifeFacts.map((fact) =>
+    createShadowIntent({ context, encounterCharacterId: fact.counterpart_id, timestamp }),
+  );
+  return {
+    ...transition,
+    shadowIntents,
+    shadowDispatches: shadowIntents.map((intent) => dispatchShadowIntent(intent)),
+    socialCommandDispatch: 0,
   };
 }
 
