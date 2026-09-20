@@ -5,6 +5,9 @@ Dashboard to Controller to Native/PA to rAthena observations. It reuses the
 existing Dashboard endpoints and relocation helpers; it does not implement a
 second route planner, combat engine, farm policy or item authority.
 
+The shared action registry, trace schema, bounded trace store and Admin contract
+are defined in `docs/player-action-trace-foundation.md`.
+
 ## Layers
 
 ```text

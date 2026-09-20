@@ -77,6 +77,9 @@ assert.equal(dryRun.code, 2);
 const dryRunResult = JSON.parse(dryRun.stderr || dryRun.stdout);
 assert.equal(dryRunResult.result, RESULT.BLOCKED);
 assert.equal(dryRunResult.failReason, 'DRY_RUN_DEFAULT_USE_EXECUTE_FOR_LIVE_SCENARIO');
+assert.equal(dryRunResult.trace.actionKey, 'start_farm');
+assert.equal(dryRunResult.traceAnalysis.firstBrokenTransition, 'HTTP -> Controller');
+assert.equal(dryRunResult.tracePropagationGap.present, true);
 
 const matrix = await runCli([
   '--matrix', '--source', 'moc_pryd01', '--target', 'mjolnir_07',
@@ -90,4 +93,4 @@ assert.equal(matrixResult.matrix[0].farmEligible, true);
 assert.equal(matrixResult.matrix[0].relocationSupported, false);
 assert.equal(matrixResult.matrix[0].reason, 'RUNTIME_WARP_GRAPH_UNAVAILABLE');
 
-console.log('PLAYER_SCENARIO_RUNNER_TEST_PASS checks=20');
+console.log('PLAYER_SCENARIO_RUNNER_TEST_PASS checks=23');

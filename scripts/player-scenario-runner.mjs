@@ -20,6 +20,7 @@ import {
   exitCodeForResult,
   renderHuman,
 } from './lib/player-scenario/scenario-core.mjs';
+import { traceScenarioResult } from './lib/player-scenario/trace-adapter.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const DEFAULT_RATHENA_ROOT = 'C:\\Users\\Administrator\\source\\ghost-island-rathena';
@@ -603,6 +604,16 @@ async function run(options) {
     result = await executeEventScenario(options, traceId, scenario);
   }
   result.durationMs = boundedNow() - started;
+  const traced = traceScenarioResult(result, {
+    ...options,
+    startedAt: new Date(started).toISOString(),
+  });
+  result.trace = traced.trace;
+  result.traceAnalysis = traced.analysis;
+  result.firstBrokenTransition = traced.analysis.firstBrokenTransition ?? result.firstBrokenTransition ?? null;
+  result.failLayer = traced.analysis.failLayer;
+  result.failErrorCode = traced.analysis.failErrorCode;
+  result.tracePropagationGap = traced.trace.tracePropagationGap;
   return result;
 }
 
