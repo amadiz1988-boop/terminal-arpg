@@ -13,6 +13,17 @@ const SOCIAL_INTENTS = Object.freeze([
   'HELP',
 ]);
 
+const SOCIAL_ENCOUNTER_INTENTS = new Set([
+  'ACKNOWLEDGE',
+  'GREETING',
+  'REPLY',
+  'SHORT_CHAT',
+  'PARTY_INVITE',
+  'PARTY_ACCEPT',
+  'PARTY_DECLINE',
+  'HELP',
+]);
+
 const OPERATIONAL_EVENT_TYPES = new Set([
   'NORMAL_HIT',
   'NORMAL_DAMAGE',
@@ -637,7 +648,12 @@ export function deriveShadowCandidateTransitions({
 export const deriveShadowEncounterTransitions = deriveShadowCandidateTransitions;
 
 function shadowActorFromContext(context, actor) {
-  if (actor) return actor;
+  if (actor) {
+    return {
+      ...actor,
+      recognition: new Map(actor.recognition ?? []),
+    };
+  }
   const id = String(context.character_id);
   return {
     id,
@@ -667,7 +683,11 @@ export function createShadowIntent({ context, actor, encounterCharacterId, times
     macroGoal: 'HUNT',
     map: context.map,
   };
-  const previousEncounters = context.recent_encounters.filter((event) =>
+  const recentEncounters = Array.isArray(context.recent_encounters) ? context.recent_encounters : [];
+  const nearbyCharacters = Array.isArray(context.nearby_relevant_characters)
+    ? context.nearby_relevant_characters
+    : [];
+  const previousEncounters = recentEncounters.filter((event) =>
     String(event.actorId) === String(shadowActor.id) && String(event.targetId) === String(other.id),
   ).length;
   shadowActor.recognition.set(recognitionKey(shadowActor.id, other.id), previousEncounters);
@@ -698,17 +718,17 @@ export function createShadowIntent({ context, actor, encounterCharacterId, times
       encounter_character_id: encounterCharacterId,
       evidence_summary: {
         recognized_encounters: previousEncounters,
-        proximity_observed: context.nearby_relevant_characters.some(
+        proximity_observed: nearbyCharacters.some(
           (candidate) => String(candidate.character_id) === String(encounterCharacterId),
         ),
       },
       decision: decision.intent,
       reason_codes: reasonCodes,
       parent_macro_goal: 'HUNT',
-      would_interrupt_hunt: decision.intent !== 'NONE',
+      would_interrupt_hunt: SOCIAL_ENCOUNTER_INTENTS.has(decision.intent),
       would_resume_hunt: true,
     },
-    outcome: decision.intent === 'NONE' ? 'PASS_BY' : 'SOCIAL_ENCOUNTER',
+    outcome: SOCIAL_ENCOUNTER_INTENTS.has(decision.intent) ? 'SOCIAL_ENCOUNTER' : 'PASS_BY',
     socialEncounter: promoteSocialCandidate({ candidate, decision: decision.intent }),
   };
 }
@@ -718,7 +738,7 @@ export function promoteSocialCandidate({ candidate, decision } = {}) {
   const intent = typeof decision === 'string' ? decision : decision?.intent;
   if (!candidate || candidate.type !== 'SOCIAL_CANDIDATE_ENTER') return null;
   if (!intent || intent === 'NONE' || intent === 'PASS_BY') return null;
-  assert(SOCIAL_INTENTS.includes(intent), `unsupported Social Director intent: ${intent}`);
+  if (!SOCIAL_INTENTS.includes(intent) || !SOCIAL_ENCOUNTER_INTENTS.has(intent)) return null;
   return {
     ...candidate,
     type: 'SOCIAL_ENCOUNTER',

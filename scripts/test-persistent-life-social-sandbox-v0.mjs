@@ -431,6 +431,32 @@ check('headless shadow wiring emits no social command', () => {
   assert.equal(result.shadowIntents[0].mode, 'SHADOW');
 });
 
+check('proximity enters as a candidate and NONE ends as PASS_BY', () => {
+  const result = deriveShadowSocialProximity({
+    context: {
+      character_id: 1001,
+      x: 0,
+      y: 0,
+      map: 'pay_dun00',
+      macro_goal: 'HUNT',
+      hunt_active: true,
+      nearby_relevant_characters: [{ character_id: 1002, map: 'pay_dun00', x: 7, y: 0 }],
+      recent_encounters: [],
+      recent_social_events: [],
+      revision: 1,
+      updated_at: '2026-09-20T10:00:01.000Z',
+    },
+    previousStateById: {},
+    previousVisibleSet: [],
+    timestamp: 1000,
+  });
+  assert.deepEqual(result.derivedLifeFacts.map((fact) => fact.type), ['SOCIAL_CANDIDATE_ENTER']);
+  assert.equal(result.shadowIntents[0].outcome, 'PASS_BY');
+  assert.equal(result.shadowIntents[0].socialEncounter, null);
+  assert.equal(result.socialCommandDispatch, 0);
+  assert.equal(result.shadowDispatches[0].dispatched, false);
+});
+
 const presenceArgs = {
   characterId: 1001,
   previousMap: 'pay_dun00',
@@ -572,6 +598,12 @@ check('NONE and PASS_BY do not promote a candidate', () => {
   assert.equal(promoteSocialCandidate({ candidate, decision: 'PASS_BY' }), null);
 });
 
+check('non-meaningful social intent does not promote a candidate', () => {
+  const candidate = { type: 'SOCIAL_CANDIDATE_ENTER', counterpart_id: '1002' };
+  assert.equal(promoteSocialCandidate({ candidate, decision: 'WHISPER' }), null);
+  assert.equal(promoteSocialCandidate({ candidate, decision: 'UNSUPPORTED' }), null);
+});
+
 check('GREETING and HELP promote only meaningful social encounters', () => {
   const candidate = { type: 'SOCIAL_CANDIDATE_ENTER', counterpart_id: '1002', map: 'pay_dun00' };
   assert.equal(promoteSocialCandidate({ candidate, decision: 'GREETING' }).type, 'SOCIAL_ENCOUNTER');
@@ -603,6 +635,41 @@ check('derived encounter keeps the HUNT parent goal unchanged', () => {
   const shadow = createShadowIntent({ context, encounterCharacterId: '1002' });
   assert.equal(shadow.intent.parent_macro_goal, 'HUNT');
   assert.equal(shadow.intent.would_resume_hunt, true);
+});
+
+check('shadow evaluation does not mutate relationship recognition state', () => {
+  const actor = {
+    id: '1001',
+    macroGoal: 'HUNT',
+    map: 'pay_dun00',
+    genesisSeed: 'shadow-test',
+    hiddenGenesis: {
+      socialInitiative: 0,
+      strangerOpenness: 0,
+      partyPreference: 0,
+      riskTolerance: 0,
+      rejectionSensitivity: 0,
+      socialRewardSensitivity: 0,
+    },
+    recognition: new Map(),
+    lifeEvidence: [],
+  };
+  const before = [...actor.recognition.entries()];
+  const shadow = createShadowIntent({
+    context: {
+      character_id: '1001',
+      map: 'pay_dun00',
+      macro_goal: 'HUNT',
+      nearby_relevant_characters: [{ character_id: '1002' }],
+      recent_encounters: [],
+      revision: 1,
+    },
+    actor,
+    encounterCharacterId: '1002',
+  });
+  assert.equal(shadow.socialEncounter, null);
+  assert.deepEqual([...actor.recognition.entries()], before);
+  assert.deepEqual(actor.lifeEvidence, []);
 });
 
 const failed = checks.filter((entry) => !entry.ok);
