@@ -153,6 +153,7 @@ topics:
     pa_design_implication: "Use authoritative monster eligibility and ownership."
     pa_flexibility_allowed: "Yes, priority can include persistent character policy."
     common_misunderstandings: "Player map choice does not imply player monster choice."
+    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md]
   - id: 08
     topic: MOB_SEARCH
     keywords: [mob search, scan, aggressives, teleportAuto_search]
@@ -172,6 +173,7 @@ topics:
     pa_design_implication: "Separate scan policy from movement and teleport authority."
     pa_flexibility_allowed: "Yes, autonomous search may use server-side indexes."
     common_misunderstandings: "No visible target is evidence for search, not proof that no target exists."
+    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md]
   - id: 09
     topic: RETARGETING
     keywords: [retarget, targetGone, lost target, target timeout]
@@ -191,6 +193,7 @@ topics:
     pa_design_implication: "Make target invalidation observable and idempotent."
     pa_flexibility_allowed: "Yes, event ledger may replace polling flags."
     common_misunderstandings: "Repathing without target invalidation can create a no-progress loop."
+    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md]
   - id: 10
     topic: COMBAT
     keywords: [attack, combat, hit, damage, AI::Attack]
@@ -210,6 +213,7 @@ topics:
     pa_design_implication: "Retain combat invariants, improve observability and authority."
     pa_flexibility_allowed: "Yes, event-driven hit confirmation is preferred."
     common_misunderstandings: "A command sent is not a confirmed hit."
+    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md]
   - id: 11
     topic: ATTACK_AUTO
     keywords: [attackAuto, attackAuto_party, attackAuto_notInTown]
@@ -229,6 +233,7 @@ topics:
     pa_design_implication: "Represent mode transitions in durable state."
     pa_flexibility_allowed: "Yes, PA may use explicit state instead of config mutation."
     common_misunderstandings: "attackAuto=1 does not prove the agent is currently attacking."
+    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md]
   - id: 12
     topic: MONSTER_CONTROL
     keywords: [mon_control, avoid, KS, aggressive]
@@ -248,6 +253,7 @@ topics:
     pa_design_implication: "Keep policy data separate from rAthena monster state."
     pa_flexibility_allowed: "Yes, policy may be character-specific."
     common_misunderstandings: "Avoiding a monster is not the same as failing to find it."
+    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md]
   - id: 13
     topic: LOOT
     keywords: [itemsTakeAuto, pickupitems, item take, loot]
@@ -267,6 +273,7 @@ topics:
     pa_design_implication: "Inventory update must be authoritative before resume."
     pa_flexibility_allowed: "Yes, server event can replace item polling."
     common_misunderstandings: "Configured pickup list does not prove an item was picked."
+    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md]
   - id: 14
     topic: ITEM_USE
     keywords: [use, item, pc_useitem, item cooldown]
@@ -277,6 +284,7 @@ topics:
     state_transitions: "available -> requested -> confirmed or rejected"
     retry_policy: "Retry only after cooldown or timeout."
     recovery_policy: "Re-read inventory and state after rejection."
+    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md]
     edge_cases: "Non-consumable custom item, map change and stale inventory."
     project_last_good: "Gate 1B potion recovery and Fly Wing item 601 diagnostic; docs/reference-mining/topics/item-loot-inventory-storage-weight.md."
     project_acceptance_evidence: "Gate 1B HP recovery and Fly Wing diagnostic evidence."
@@ -457,6 +465,7 @@ topics:
     pa_design_implication: "Server respawn event is the transition authority."
     pa_flexibility_allowed: "Yes, state restoration may be more durable than config replay."
     common_misunderstandings: "Issuing respawn is not proof of respawned map."
+    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md]
   - id: 24
     topic: STUCK_RECOVERY
     keywords: [stuck, route failure, nudge, unstuck]
@@ -476,6 +485,7 @@ topics:
     pa_design_implication: "Prefer explicit progress telemetry over blind random walking."
     pa_flexibility_allowed: "Yes, recovery can be server-event driven."
     common_misunderstandings: "Repeated move commands are not recovery."
+    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md]
   - id: 25
     topic: TIMEOUT_RETRY_BACKOFF
     keywords: [timeout, retry, backoff, maxTries]
@@ -495,6 +505,7 @@ topics:
     pa_design_implication: "Every retry needs a reason, key, ceiling and next-at timestamp."
     pa_flexibility_allowed: "Yes, PA may improve timing with event signals."
     common_misunderstandings: "A timeout is a state transition, not permission to loop forever."
+    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md]
   - id: 26
     topic: TELEPORT
     keywords: [teleportAuto, Task::Teleport, random warp, respawn]
@@ -514,6 +525,7 @@ topics:
     pa_design_implication: "Record teleport reason and authoritative result."
     pa_flexibility_allowed: "Yes, PA can use non-consumable item semantics."
     common_misunderstandings: "Teleport command success does not prove reattachment or target reacquisition."
+    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md]
   - id: 27
     topic: FLY_WING
     keywords: [Fly Wing, item 601, random warp, teleport search]
@@ -533,6 +545,7 @@ topics:
     pa_design_implication: "Reuse reason, cooldown, result and reacquire semantics; preserve non-consumption."
     pa_flexibility_allowed: "Yes, roaming planner remains open."
     common_misunderstandings: "Fly Wing is not Butterfly Wing and does not select save point."
+    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md]
   - id: 28
     topic: BUTTERFLY_WING
     keywords: [Butterfly Wing, item 602, save point, return]
@@ -552,6 +565,7 @@ topics:
     pa_design_implication: "Project rule overrides item consumption while preserving save-point result."
     pa_flexibility_allowed: "Yes, route planning after save point is PA-owned."
     common_misunderstandings: "A non-consumable item can still have cooldown or state transition rules."
+    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md]
   - id: 29
     topic: SKILL_AUTOMATION
     keywords: [UseSkill, skill, raiseSkill, cast]

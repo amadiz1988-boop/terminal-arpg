@@ -138,7 +138,7 @@ topics:
     official_docs: [conf/battle, doc/script_commands.txt]
     official_samples: []
     forum_refs: []
-    project_refs: []
+    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md]
     authority: src-map
   - topic: '15 MONSTER / SPAWN'
     keywords: [monster, spawn, mob, areamonster]
@@ -147,7 +147,7 @@ topics:
     official_docs: [doc/script_commands.txt]
     official_samples: [doc/sample/instancing.txt]
     forum_refs: []
-    project_refs: []
+    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md]
     authority: mixed
   - topic: '16 LOOT / DROP'
     keywords: [drop, item drop, loot, mob_db]
@@ -156,7 +156,7 @@ topics:
     official_docs: [doc/mob_db.txt, doc/item_group.txt]
     official_samples: []
     forum_refs: []
-    project_refs: [docs/reference-mining/topics/item-loot-inventory-storage-weight.md]
+    project_refs: [docs/reference-mining/topics/item-loot-inventory-storage-weight.md, docs/reference-mining/topics/monster-ai-combat-target-retarget.md]
     authority: mixed
   - topic: '17 SKILL'
     keywords: [skill, skill_db, skill tree, cast]
@@ -165,7 +165,7 @@ topics:
     official_docs: [doc/skill_db.txt]
     official_samples: []
     forum_refs: []
-    project_refs: []
+    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md]
     authority: mixed
   - topic: '18 STATUS EFFECT'
     keywords: [status, sc_start, status change]
@@ -282,7 +282,7 @@ topics:
     official_docs: [doc/script_commands.txt, doc/status.txt]
     official_samples: [npc/custom/etc/penal_servitude.txt]
     forum_refs: []
-    project_refs: []
+    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md]
     authority: mixed
   - topic: '31 TELEPORT / FLY WING / BUTTERFLY WING'
     keywords: [Fly Wing, Butterfly Wing, teleport, savepoint]
@@ -291,7 +291,7 @@ topics:
     official_docs: [doc/script_commands.txt]
     official_samples: []
     forum_refs: []
-    project_refs: [docs/RO_FLY_WING_SOURCE_AUDIT.md]
+    project_refs: [docs/RO_FLY_WING_SOURCE_AUDIT.md, docs/reference-mining/topics/monster-ai-combat-target-retarget.md]
     authority: mixed
   - topic: '32 AUTONOMOUS QUEST SUPPORT'
     keywords: [SERVER_AGENT, quest runtime, GO_NPC, FARM_UNTIL]
