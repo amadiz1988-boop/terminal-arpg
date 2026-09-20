@@ -305,7 +305,8 @@ function webState(c) { return webPresence(c).state; }
 // never disagree.
 function charHealthKey(c) {
   if (controlMode(c).key === 'QUARANTINED') return 'DOWN';
-  if (Number.isFinite(c.liveAgeMs) && c.liveAgeMs > 60_000) return 'DEGRADED';
+  if (c.freshness === 'STALE') return 'DEGRADED';
+  if (c.freshness === 'OFFLINE') return 'OFFLINE';
   return c.resident ? 'HEALTHY' : 'OFFLINE';
 }
 function characterHealthRow(c) {
