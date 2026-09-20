@@ -1,8 +1,61 @@
-# OpenKore Reference Dossiers
+# OpenKore Reference Atlas
 
-This directory is the canonical index and schema for bounded OpenKore reference
-dossiers. It does not authorize runtime use of OpenKore. Production authority
-remains `PA / SERVER_AGENT -> rAthena`, and OpenKore process count remains zero.
+This directory is the bounded research atlas for mature OpenKore behavior. It
+does not authorize runtime use of OpenKore. Production authority remains
+`PA / SERVER_AGENT -> rAthena`, and OpenKore process count remains zero.
+
+Baseline provenance:
+
+```text
+UPSTREAM_OPENKORE_COMMIT = 51de1ddfc4449ae5217f6886de702f87ca934030
+UPSTREAM_BRANCH = master
+PROJECT_LAST_VERIFIED = 2026-09-20
+PROJECT_CANONICAL_ROOT = C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\terminal-arpg
+```
+
+Primary external provenance is the [OpenKore repository](https://github.com/OpenKore/openkore),
+the [current CoreLogic source](https://github.com/OpenKore/openkore/blob/master/src/AI/CoreLogic.pm),
+the [Route task](https://github.com/OpenKore/openkore/blob/master/src/Task/Route.pm),
+the [eventMacro plugin](https://github.com/OpenKore/openkore/blob/master/plugins/eventMacro/eventMacro.pl),
+and the [OpenKore configuration wiki](https://openkore.com/index.php?pageuntil=attackAuto+notWhile+buyAuto&title=Category%3Aconfig.txt).
+Community forum pages are bounded historical pattern references only; they do
+not override the locked source, project evidence or rAthena authority.
+
+Read the smallest exact reference first:
+
+- [project-last-good-map.md](project-last-good-map.md): historical accepted behavior and current PA status.
+- [navigation.md](navigation.md): route, portal, field, lockMap and pathfinding.
+- [combat-and-targeting.md](combat-and-targeting.md): combat, mob search, retarget and loot interruption.
+- [supply.md](supply.md): supply out, service transaction and farm resume.
+- [teleport.md](teleport.md): teleport, Fly Wing and Butterfly Wing semantics.
+- [npc-dialogue.md](npc-dialogue.md): NPC ownership, dialogue stages and timeout handling.
+- [quest-automation.md](quest-automation.md): upstream primitives separated from project quest logic.
+- [macro-eventmacro.md](macro-eventmacro.md): reusable condition and event patterns.
+- [recovery.md](recovery.md): death, respawn, stuck, timeout and reconnect.
+- [configuration.md](configuration.md): high-value configuration semantics.
+- [lookup-playbook.md](lookup-playbook.md): problem-to-reference routing.
+
+The machine-readable [reference-index.yml](reference-index.yml) contains all 45
+required topics. Each topic records the problem, exact upstream paths and
+symbols, configuration keys, behavior and states, retry and recovery, edge
+cases, project evidence, PA equivalent and gap, classification, design
+implication, flexibility and search keywords.
+
+Classification is behavioral, not architectural:
+
+```text
+REPRODUCE       preserve an accepted invariant or player-visible result
+ADAPT           preserve intent while moving authority into PA / rAthena
+IMPROVE         preserve outcome with a demonstrably stronger implementation
+REJECT_LEGACY   historical behavior is unsafe, obsolete or client-bot specific
+N/A             no useful mapping for this topic
+```
+
+OpenKore implementation style is reference material. It never becomes state
+authority, navigation executor, combat executor, supply executor, quest
+executor or a PA runtime dependency. Any divergence proposal must record why it
+deviates, what is better, how rAthena authority is preserved, regression risk,
+and whether the result is equivalent or better.
 
 ## Dossier Rule
 

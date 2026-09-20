@@ -238,6 +238,19 @@ OPENKORE_CORE_ALIGNMENT_VETO = PASS
 Runtime completion remains pending D implementation and bounded player-flow
 acceptance.
 
+## Atlas cross-reference
+
+This dossier is the canonical detailed record for topics `17 SHOP_BUY`,
+`18 SHOP_SELL`, `19 STORAGE`, `20 KAFRA`, `21 SUPPLY_AUTOMATION`,
+`22 WEIGHT_THRESHOLDS`, `28 BUTTERFLY_WING`, `40 RECONNECT_RECOVERY` and the
+related recovery topics. The shorter lookup path is
+`docs/openkore-reference/lookup-playbook.md`.
+
+The project-specific non-consumable rule is a deliberate authority boundary:
+item count stability can coexist with a successful rAthena relocation. Supply
+completion still requires authoritative inventory, Zeny, map and return-to-farm
+observations.
+
 ## Accepted Supply Contract
 
 ```text
