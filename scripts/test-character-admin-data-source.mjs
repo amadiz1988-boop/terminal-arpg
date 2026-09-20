@@ -25,6 +25,8 @@ assert.doesNotMatch(dashboard.slice(dashboard.indexOf('async function listAdminC
 
 for (const marker of ['data-filter="job"', 'data-filter="freshness"', 'data-filter="farmSource"', 'data-filter="activity"', 'data-clear-character-filters', "'lastMovement'", "'lastCombat'", "'updatedAt'"])
   assert.match(admin, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+for (const translated of ['資料過期', '目前離線', '自動掛機', '最近恢復', '角色來源', 'PA 事件紀錄'])
+  assert.match(admin, new RegExp(translated));
 
 for (const field of ['角色 ID', '職業', 'Last Movement', 'Last Combat', 'Last Recovery', 'Quest summary', 'Inventory state', 'Equipment state'])
   assert.match(matrix, new RegExp(field));
