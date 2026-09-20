@@ -231,11 +231,11 @@ CROSS_WORKTREE_ALLOWED: NO
 ```
 WORKLINE:        E
 STATUS:          READY
-ACTIVE_WORKTREE: C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\.tmp-quest-dialogue-runtime-v1
-ACTIVE_BRANCH:   feat/quest-dialogue-runtime-v1
-CANONICAL_HEAD:  31bc821257c47d0793fb3f2586d5eb9e17ad58cc
-BASE_HEAD:       31bc821257c47d0793fb3f2586d5eb9e17ad58cc
-SOURCE_OF_TRUTH: Quest/Web/Runtime = C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\.tmp-quest-dialogue-runtime-v1
+ACTIVE_WORKTREE: C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\.tmp-quest-dialogue-runtime-v1-canonical
+ACTIVE_BRANCH:   feat/quest-dialogue-runtime-v1-canonical
+CANONICAL_HEAD:  fae560807caaaa24419e0da5c441fd08fb9fc0ba
+BASE_HEAD:       fae560807caaaa24419e0da5c441fd08fb9fc0ba
+SOURCE_OF_TRUTH: Quest/Web/Runtime = C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\.tmp-quest-dialogue-runtime-v1-canonical
 NATIVE_AUTHORITY: C:\Users\Administrator\source\ghost-island-rathena (READ-ONLY; route Native defects to D)
 NAVIGATION_REFERENCE: 31bc821257c47d0793fb3f2586d5eb9e17ad58cc (REFERENCE_DEPENDENCY; not an implementation base requirement)
 LAST_VERIFIED:   2026-09-21
