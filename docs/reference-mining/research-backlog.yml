@@ -33,13 +33,15 @@ topics:
     upstreamBaseline: { rAthena: e985006171d2eb320ee512a653f4c83aea3d81b6, OpenKore: 51de1ddfc4449ae5217f6886de702f87ca934030 }
   - domain: navigation_warp_portal_pathfinding
     priority: P0
-    status: BACKLOG
+    status: COMPLETE
     whyHighValue: Change Farm Map, Supply Return, Quest navigation and persistent roaming depend on arrival authority.
     currentAtlasCoverage: rAthena navigation and OpenKore route/portal topics exist.
-    knownGaps: Portal table freshness, timeout branches and PA equivalence remain partial.
+    knownGaps: Scripted/service/instance edges, mapflag-aware planning, portal learning and full typed failure taxonomy remain partial.
     relatedProjectFlows: [Change Farm Map, Supply Return, Quest navigation, Persistent roaming]
-    lastReviewed: NOT_REVIEWED_THIS_CYCLE
+    lastReviewed: '2026-09-21'
     upstreamBaseline: { rAthena: e985006171d2eb320ee512a653f4c83aea3d81b6, OpenKore: 51de1ddfc4449ae5217f6886de702f87ca934030 }
+    dossier: docs/reference-mining/topics/navigation-warp-portal-pathfinding.md
+    machineReadableMatrix: docs/reference-mining/navigation-capability-matrix.yml
   - domain: monster_ai_combat_target_retarget
     priority: P0
     status: BACKLOG

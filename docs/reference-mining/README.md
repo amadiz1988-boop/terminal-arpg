@@ -77,3 +77,5 @@ REFERENCE_MINING_GAP = YES / NO
 `ITEM_LOOT_INVENTORY_STORAGE_WEIGHT` 已完成一次完整 mining cycle。它對應 AutoLoot、Auto-Identify、Inventory、Storage、Supply 與 Weight threshold，並回寫 rAthena / OpenKore Atlas 的 Project Last-Good pointers。
 
 `ADMIN_SUPPORT_IMPERSONATION_SECURITY` 已完成 security mining cycle。它對照 Project H contract、RFC 8693、OWASP、Cloudflare Access、GitLab 與 Keycloak，記錄 actor/effective identity、TTL、revocation、nested impersonation、CSRF、audit、secret handling 與立即修補規格。Dossier：`docs/reference-mining/admin-support-impersonation.md`。
+
+`NAVIGATION_WARP_PORTAL_PATHFINDING` 已完成 navigation mining cycle。它分離 static warp、OnTouch、script warp、NPC/service、instance、mapflag 與 client `navigateto` 語意，並將 `moc_pryd01` 到 `mjolnir_07`／`pay_fild04` 的 `no_direct_route` 定位為 scripted service edge 未進入 static graph。Dossier：`docs/reference-mining/topics/navigation-warp-portal-pathfinding.md`；機讀矩陣：`docs/reference-mining/navigation-capability-matrix.yml`。

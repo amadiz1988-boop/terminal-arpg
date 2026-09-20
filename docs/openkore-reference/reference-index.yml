@@ -73,6 +73,7 @@ topics:
     pa_design_implication: "Use rAthena map state and persisted destination intent."
     pa_flexibility_allowed: "Yes, server-side route planning can reduce polling."
     common_misunderstandings: "A configured route does not prove it was selected."
+    project_refs: [docs/reference-mining/topics/navigation-warp-portal-pathfinding.md]
   - id: 04
     topic: PORTAL_MAP_TRANSITION
     keywords: [portal, mapRoute, actorFinishedMovement, map change]
@@ -92,6 +93,7 @@ topics:
     pa_design_implication: "Treat map change as server event, not client movement completion."
     pa_flexibility_allowed: "Yes, route candidates may be generated from authoritative data."
     common_misunderstandings: "Same-map movement success is not cross-map success."
+    project_refs: [docs/reference-mining/topics/navigation-warp-portal-pathfinding.md]
   - id: 05
     topic: FIELD_PATHFINDING
     keywords: [Field, isWalkable, getRoute, avoidWalls]
@@ -111,6 +113,7 @@ topics:
     pa_design_implication: "Prefer authoritative movement outcome over client path replay."
     pa_flexibility_allowed: "Yes, planner may differ if arrival and safety are equivalent."
     common_misunderstandings: "A coordinate list alone is not a collision-aware path."
+    project_refs: [docs/reference-mining/topics/navigation-warp-portal-pathfinding.md]
   - id: 06
     topic: LOCKMAP_FARM
     keywords: [lockMap, lockMap_x, lockMap_y, farm]
@@ -130,6 +133,7 @@ topics:
     pa_design_implication: "Player selects map; server agent selects valid target."
     pa_flexibility_allowed: "Yes, target selection remains autonomous within the map."
     common_misunderstandings: "lockMap names the farm map, not a monster."
+    project_refs: [docs/reference-mining/topics/navigation-warp-portal-pathfinding.md]
   - id: 07
     topic: TARGET_SELECTION
     keywords: [target, attackID, priority, target selection]

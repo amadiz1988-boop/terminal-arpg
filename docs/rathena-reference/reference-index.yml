@@ -7,7 +7,7 @@ upstream:
   version_confidence: high
 project:
   native_source: C:/Users/Administrator/source/ghost-island-rathena
-  native_head: 1ffd06a07f8d997cf500334f92ccc7df6db354f7
+  native_head: ff72578f608935d1df5d664b3e9df9d436361043
   last_good_refs:
     - docs/EDEN_EQUIPMENT_SOURCE_DECISION.md
     - docs/eden-next-tier-source-audit.md
@@ -30,7 +30,7 @@ topics:
     official_docs: [doc/script_commands.txt]
     official_samples: [doc/sample/npc_test_duplicate.txt]
     forum_refs: [https://rathena.org/board/forum/28-script-releases/]
-    project_refs: []
+    project_refs: [docs/reference-mining/topics/navigation-warp-portal-pathfinding.md]
     authority: mixed
   - topic: '03 DIALOGUE'
     keywords: [mes, next, close, select, menu]
@@ -39,7 +39,7 @@ topics:
     official_docs: [doc/script_commands.txt]
     official_samples: [npc/jobs/2-1/blacksmith.txt]
     forum_refs: []
-    project_refs: []
+    project_refs: [docs/reference-mining/topics/navigation-warp-portal-pathfinding.md]
     authority: script
   - topic: '04 ONTOUCH / HIDDEN NPC'
     keywords: [OnTouch, OnTouch_, OnTouchNPC, hidden npc]
@@ -48,7 +48,7 @@ topics:
     official_docs: [doc/script_commands.txt]
     official_samples: [doc/sample/npc_test_duplicate.txt]
     forum_refs: [https://rathena.org/board/topic/108965-ontouch-npc-not-working-solved/]
-    project_refs: []
+    project_refs: [docs/reference-mining/topics/navigation-warp-portal-pathfinding.md]
     authority: mixed
   - topic: '05 WARP / MAP TRANSFER'
     keywords: [warp, mapwarp, areawarp, pc_setpos]
@@ -57,7 +57,7 @@ topics:
     official_docs: [doc/script_commands.txt]
     official_samples: [npc/warps/fields]
     forum_refs: [https://rathena.org/board/topic/71742-dungeon-quest/]
-    project_refs: []
+    project_refs: [docs/reference-mining/topics/navigation-warp-portal-pathfinding.md]
     authority: mixed
   - topic: '06 NAVIGATION / PATH'
     keywords: [path, walk, route, collision, navigateto]
@@ -66,7 +66,7 @@ topics:
     official_docs: [doc/script_commands.txt]
     official_samples: []
     forum_refs: []
-    project_refs: [ops/ro-stack/persistent-agent/quest-sequences/eden-course-a.json]
+    project_refs: [ops/ro-stack/persistent-agent/quest-sequences/eden-course-a.json, docs/reference-mining/topics/navigation-warp-portal-pathfinding.md]
     authority: src-map
   - topic: '07 MAP / MAPFLAG'
     keywords: [mapflag, mf_nosave, mf_noteleport, map index]
@@ -75,7 +75,7 @@ topics:
     official_docs: [doc/mapflags.txt, doc/script_commands.txt]
     official_samples: [doc/sample/npc_test_setmapflag.txt]
     forum_refs: []
-    project_refs: []
+    project_refs: [docs/reference-mining/topics/navigation-warp-portal-pathfinding.md]
     authority: mixed
   - topic: '08 SAVE POINT / RESPAWN'
     keywords: [savepoint, respawn, death, getsavepoint]
@@ -120,7 +120,7 @@ topics:
     official_docs: [doc/script_commands.txt]
     official_samples: [npc/kafras]
     forum_refs: []
-    project_refs: []
+    project_refs: [docs/reference-mining/topics/navigation-warp-portal-pathfinding.md]
     authority: mixed
   - topic: '13 STORAGE'
     keywords: [storage, guild storage, cart]
