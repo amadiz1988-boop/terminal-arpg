@@ -39,9 +39,9 @@ Reuse decisions:
 - [x] Source contains basic supply, quantity-based items, presence-based tools, loot handling, return/resume, journey preview, and advanced rules.
 - [x] Add-item dialog source blocks duplicate rules.
 - [x] Static validation covers weight 40–88, `min >= 0`, and `target >= min`.
-- [x] CSS contains a 390×844 vertical layout with bounded overflow rules.
+- [x] Actual Chrome 390×844 viewport has `scrollWidth = clientWidth = 375` and no overflowing element.
 - [x] Source saves only to `localStorage` and marks the page `PREVIEW DATA`.
-- [ ] Original Client behavior screenshot comparison: not available in this browser-only turn; visual fidelity remains bounded to verified assets and the existing RO kit.
+- [x] Actual Chrome desktop and 390×844 screenshots show the RO frame, verified skin assets, item rows, dialog, and responsive layout.
 
 ## Verification status
 
@@ -50,9 +50,21 @@ Reuse decisions:
 `JAVASCRIPT_SYNTAX = PASS`<br>
 `STATIC_UI_CONTRACT = PASS`
 
-`BROWSER_UI_PASS = REQUIRES_BROWSER`
+`ISOLATED_PREVIEW_SERVER = PASS`<br>
+`DESKTOP_BROWSER_UI = PASS`<br>
+`MOBILE_390X844 = PASS`<br>
+`QUANTITY_BASED_BROWSER = PASS`<br>
+`PRESENCE_BASED_BROWSER = PASS`<br>
+`ADD_ITEM_DIALOG = PASS`<br>
+`DUPLICATE_RULE_BLOCK = PASS`<br>
+`LOOT_RULE_UI = PASS`<br>
+`RETURN_RESUME_UI = PASS`<br>
+`SUPPLY_JOURNEY_PREVIEW = PASS`<br>
+`PRODUCTION_API_CALL_COUNT = 0`<br>
+`ISOLATED_SAVE_MODEL = PASS`<br>
+`BROWSER_UI_PASS = PASS`
 
-The canonical Dashboard on `127.0.0.1:8788` is the Production copy and does not contain this isolated source page, so its URL currently returns 404. The browser connector also blocks local `http://` and `file://` navigation in this session. No Production copy, runtime restart, or second runtime was created to bypass that boundary.
+The isolated host serves only this PoC directory plus read-only mappings to verified `public/ro` assets at `127.0.0.1:8791`. Browser activity contained static asset GETs and one local `/api/ro-assets` metadata GET from the resolver; no Production mutation endpoint, POST, command, DB, PA, or rAthena activity occurred. The canonical Dashboard on `127.0.0.1:8788` remains untouched.
 
 ## Files
 
@@ -63,9 +75,9 @@ The canonical Dashboard on `127.0.0.1:8788` is the Production copy and does not 
 - `RESULTS.md`
 
 TEST_PAGE = `ops/ro-stack/dashboard/poc/supply-settings-v2/index.html`
-PREVIEW_URL = `http://127.0.0.1:8788/poc/supply-settings-v2/index.html`
+PREVIEW_URL = `http://127.0.0.1:8791/poc/supply-settings-v2/index.html`
 GIT_CHECKPOINT = `CREATED_SEPARATELY; see final report for commit id`
-READY_FOR_PRODUCT_OWNER_REVIEW = NO · requires a browser-served isolated page
+READY_FOR_PRODUCT_OWNER_REVIEW = YES
 READY_FOR_PRODUCTION_INTEGRATION = NO
 PRODUCTION_TOUCHED = NO
 PA_TOUCHED = NO
