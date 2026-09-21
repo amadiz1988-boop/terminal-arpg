@@ -2424,6 +2424,7 @@ async function queueCanaryAutomation(account, controller, body) {
         ? controller.actionBlockers.startFarm
         : controller.actionBlockers.stopFarm) ?? 'invalid_transition',
     );
+  let skipSupplyRouteResolution = false;
   // A farm target that is not the character's authoritative current map is a
   // relocation, not a direct start: rAthena only accepts start_farm on the
   // target map, so reuse the W4 coordinator (STOP_FARM -> START_NAVIGATION ->
@@ -2438,6 +2439,7 @@ async function queueCanaryAutomation(account, controller, body) {
     const live = controller.liveStatus ?? null;
     const currentMap = live?.fresh && live.map ? String(live.map) : null;
     if (!currentMap) throw new HttpError(409, 'agent_position_unavailable');
+    skipSupplyRouteResolution = currentMap === targetMap;
     if (currentMap !== targetMap)
       return await queueServerAgentRelocation(account, controller, targetMap);
   }
@@ -2445,7 +2447,7 @@ async function queueCanaryAutomation(account, controller, body) {
     action,
     expectedRevision: controller.revision,
     ...buildW1CommandPayload(action, { farmTarget: controller.farmTarget }),
-  });
+  }, null, { skipSupplyRouteResolution });
   if (action === W1_ACTION.START_FARM || action === W1_ACTION.STOP_FARM)
     await clearPersistedRelocation(account);
   return {
@@ -3007,6 +3009,7 @@ async function queueOwnershipCommand(
   charId,
   body,
   serverResolvedPayload = null,
+  options = {},
 ) {
   if (Number(account.characterId) !== charId)
     throw new HttpError(403, 'ownership_conflict');
@@ -3256,7 +3259,11 @@ async function queueOwnershipCommand(
   // origin; there is no per-farm route table and no second planner. Farming on
   // the service map itself needs no farm-origin leg. A missing service leg is an
   // explicit blocker because Native requires it after authoritative Save Point.
-  if (action === 'start_farm' && payloadObject.targetMap) {
+  if (
+    options.skipSupplyRouteResolution !== true &&
+    action === 'start_farm' &&
+    payloadObject.targetMap
+  ) {
     const farmMap = String(payloadObject.targetMap);
     const graph = await serverAgentWarpGraph();
     const savePoint = await readCharacterSavePoint(account.accountId);
