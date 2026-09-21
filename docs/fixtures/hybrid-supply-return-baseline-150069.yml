@@ -1,0 +1,55 @@
+fixture_id: HYBRID_SUPPLY_RETURN_BASELINE_150069
+purpose: regression_baseline_for_local_hunting_authority_transfer
+status: REQUIRED_HARD_GATE
+character:
+  char_id: 150069
+  display_name: 賴清德
+  map: prt_fild08
+  ownership: SERVER_AGENT
+  resident: 1
+  runtime: ACTIVE
+  quarantine_recovery: PASS
+  start_farm: PASS
+  native_acceptance: PASS
+  target_selected: PASS
+baseline:
+  production_map_server_sha256: A931DE99551E55A418C6B1102FC9FA75821139D6FCAA9ED1031FFA3823F3D5AF
+  supply_service_route: ESTABLISHED
+  butterfly_wing_quantity_before: 3
+  butterfly_wing_quantity_after: 3
+  butterfly_quantity_unchanged: EXPECTED
+  authoritative_save_point_arrival: izlude:128,98
+  combat_occurred: YES
+  attack_events: 15
+  kill_events: 1
+  authoritative_hit_events: 0
+  authoritative_hit_requirement: at_least_3_MONSTER_HIT_or_authoritative_hp_decreases
+  three_authoritative_hits_pass: NOT_PROVEN
+ownership_invariants:
+  local_hunting_executor_must_not_own:
+    - butterfly_supply_decision
+    - cross_map_service_route
+    - supply_destination
+    - return_route
+    - farm_target
+    - auto_resume_parent_intent
+required_sequence:
+  - RETURN_TO_FARM
+  - START_LOCAL_COMBAT
+  - TARGET
+  - ATTACK
+  - AUTHORITATIVE_MONSTER_HIT
+required_preservation:
+  - pa_farm_target
+  - STOP_LOCAL_COMBAT
+  - butterfly_authoritative_arrival
+  - supply_journey
+  - service
+  - return_route
+  - farm_reentry
+  - auto_resume
+promotion_gates:
+  - SUPERSET_CHECK
+  - PROVENANCE_CHECK
+  - NO_SUPPLY_REGRESSION
+  - PA_OWNERSHIP_PRESERVED

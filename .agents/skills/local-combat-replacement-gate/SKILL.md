@@ -85,6 +85,14 @@ For Stage 1 shadow work, observer output is read-only and bounded in memory. It
 must not move, attack, cast, consume, teleport, loot, alter target authority,
 alter PA state, alter supply state, write Event Ledger rows or start Stage 2.
 
+The current bounded Stage 2 canary is recorded by
+`docs/fixtures/hybrid-supply-return-baseline-150069.yml`. It may exercise only
+the PA-authorized same-map melee lease and rAthena attack/result path. The
+fixture's PA supply, cross-map service, return-to-farm, farm-target and
+auto-resume invariants remain hard gates for any later promotion. A canary hit
+requires `MONSTER_HIT` or an authoritative monster HP decrease; `MONSTER_ATTACK`
+and `MONSTER_KILL` alone do not satisfy that gate.
+
 ## Decision output
 
 Report `SAFE_TO_REPLACE`, `SAFE_WITH_CONTRACT`, `KEEP_IN_PA`, `RESEARCH_MORE`,

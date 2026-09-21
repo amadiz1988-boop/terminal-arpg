@@ -12,6 +12,8 @@ GLOBAL_AUTOLOOT = PRODUCT_ACCEPTED_DIRECTION
 GLOBAL_AUTOLOOT_TO_INVENTORY = YES
 GLOBAL_AUTOSTORE = NO
 STAGE1_SHADOW_OBSERVER = IMPLEMENTATION_ACTIVE
+STAGE2_MELEE_CANARY = BOUNDED_LIVE_PROOF_COMPLETE_NOT_PROMOTED
+HYBRID_SUPPLY_RETURN_BASELINE = HYBRID_SUPPLY_RETURN_BASELINE_150069
 RATHENA_AUTOCOMBAT_REFERENCE_CHECKPOINT = 961ac3c
 RATHENA_MATURE_FLOOR = SAME_MAP_SERVER_SIDE_COMBAT
 ```
@@ -201,6 +203,22 @@ MONSTER_KILL
 
 在此 proof chain 完成前，`SUPPLY_RETURN_PROOF = DESIGN_ONLY`，且
 `NO_SUPPLY_REGRESSION = NOT_PROVEN`。
+
+### 4.1 Production regression fixture
+
+`docs/fixtures/hybrid-supply-return-baseline-150069.yml` 是 Local Hunting
+authority transfer 的固定 baseline。它保留 D 已驗證的 quarantine recovery、
+target map restore、supply service route、Butterfly authoritative arrival、
+return route、farm reentry 與 auto-resume 要求。`MONSTER_ATTACK` 只代表
+attack intent；`MONSTER_HIT` 或 authoritative monster HP decrease 才能計入
+命中 proof。Production baseline binary SHA256 必須保持
+`A931DE99551E55A418C6B1102FC9FA75821139D6FCAA9ED1031FFA3823F3D5AF`，任何
+candidate promotion 都必須先通過 `SUPERSET_CHECK` 與 `PROVENANCE_CHECK`。
+
+Stage 2 canary 只驗證 PA 已授權同地圖 melee lease、rAthena attack cadence、
+authoritative hit 與 idempotent stop。Supply、cross-map service、return route、
+farm target 與 parent auto-resume 仍屬 PA，canary 通過也不代表完整 replacement
+promotion。
 
 ## 5. Stage 1 shadow observer
 

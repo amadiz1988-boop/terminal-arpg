@@ -128,14 +128,15 @@ AFTER PL1:
    explicitly authorizes PL2)
 
 CROSS-CUTTING DESIGN:
-  HYBRID_LOCAL_COMBAT_MIGRATION — DESIGN_ACCEPTED / STAGE1_SHADOW_OBSERVER_ACTIVE
+  HYBRID_LOCAL_COMBAT_MIGRATION — DESIGN_ACCEPTED / STAGE2_MELEE_CANARY_BOUNDED_PROOF
   (Global AutoLoot to inventory is a product accepted direction; rAthena owns
    drop resolution and authoritative item add; PA keeps inventory lifecycle,
    weight, supply, storage/sell, navigation, quest, social and Life ownership;
    Stage 2 authority transfer remains unauthorized. Reference dependency is
    rAthena server-side autocombat checkpoint 961ac3c, whose mature floor is
    same-map server-side combat. Public evidence does not establish cross-map
-   Supply, return-to-farm or auto-resume after Supply; those remain PA-owned.)
+   Supply, return-to-farm or auto-resume after Supply; those remain PA-owned.
+   Regression fixture: `docs/fixtures/hybrid-supply-return-baseline-150069.yml`.)
 
 LONG TERM:
   Expanded autonomous Persistent Life society / social world — PLANNED /
@@ -162,7 +163,7 @@ by source inspection alone; each slice needs its own acceptance evidence.
 | `PL1-PERSISTENT-LIFE-DIARY` | `docs/roadmap/persistent-life-diary-v1.md` | `PLANNED` | `NO` |
 | `PL1-A-FACTUAL-DIARY` | `docs/roadmap/persistent-life-diary-v1.md#scoped-authorization-pl1-a-factual-diary-vertical-slice` | `ACTIVE` | `YES` |
 | `PL2-PERSISTENT-SOCIAL-PA` | `docs/roadmap/persistent-social-pa-v1.md` | `PLANNED` | `NO` |
-| `HYBRID-LOCAL-COMBAT-MIGRATION` | `docs/roadmap/hybrid-local-combat-migration.md` | `PLANNED (DESIGN_ACCEPTED, STAGE1_ACTIVE)` | `NO` |
+| `HYBRID-LOCAL-COMBAT-MIGRATION` | `docs/roadmap/hybrid-local-combat-migration.md` | `PLANNED (DESIGN_ACCEPTED, STAGE2_CANARY_BOUNDED)` | `NO` |
 
 Summary of PL1: characters live through a real in-world day, then produce at most
 one bounded LLM diary generation per in-world day, grounded in Event Ledger facts.
