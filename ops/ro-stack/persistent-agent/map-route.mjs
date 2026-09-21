@@ -14,12 +14,27 @@
 //     (`Warper`, `Warpra`, `duplicate(...)`) are NPC service scripts and are
 //     deliberately NOT part of the direct graph.
 //
-// Route policy (Phase 3): a Web map change is DIRECT. A hub / Kafra detour is
-// only ever justified by a real supply / storage / save-point need, and that
-// need is owned by the Persistent Agent supply subsystem, not by this resolver.
+// Route policy: a Web farm-map change uses one deterministic multimodal plan.
+// Physical portals remain rAthena-owned; Kafra dialogue and Butterfly Wing
+// steps reuse the existing Persistent Agent command contract. The planner never
+// becomes a movement engine and never reads OpenKore tables.
 
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import {
+  KAFRA_CONTENT,
+  resolveKafraDestination,
+} from './kafra-content.mjs';
+
+export const BUTTERFLY_WING_ITEM_ID = 602;
+export const FARM_ROUTE_EDGE = Object.freeze({
+  WALK: 'WALK',
+  PORTAL: 'PORTAL',
+  BUTTERFLY_WING: 'BUTTERFLY_WING',
+  SAVEPOINT: 'SAVEPOINT',
+  KAFRA_TRANSPORT: 'KAFRA_TRANSPORT',
+  DUNGEON_PORTAL: 'DUNGEON_PORTAL',
+});
 
 // rAthena map names may contain '-' (new_1-3, iz_int01-style variants excluded)
 // and '@' (instance maps). The native executor resolves maps via
@@ -217,6 +232,158 @@ export function planWebRelocation(graph, currentMap, targetMap, { needsService =
   const route = buildRouteSteps(path);
   if (!route) return { policy, route: null, reason: 'route_unrepresentable' };
   return { policy, route, hops: path.length };
+}
+
+function routeEdges(route) {
+  if (!Array.isArray(route) || route.length < 2) return [];
+  return route.slice(0, -1).map((step, index) => {
+    const next = route[index + 1];
+    const destination = String(next?.map ?? '');
+    const dungeon = /(?:_dun\d*|moc_pryd\d*)$/i.test(destination);
+    return dungeon ? FARM_ROUTE_EDGE.DUNGEON_PORTAL : FARM_ROUTE_EDGE.PORTAL;
+  });
+}
+
+function inventoryHasButterfly(inventory) {
+  return inventory?.butterflyWing === true ||
+    Number(inventory?.[String(BUTTERFLY_WING_ITEM_ID)] ?? 0) > 0;
+}
+
+function routeForPath(graph, fromMap, targetMap) {
+  const path = findWarpPath(graph, fromMap, targetMap);
+  if (fromMap === targetMap) return { path: [], route: [{ map: fromMap, x: 0, y: 0 }], hops: 0 };
+  if (!path || path.length === 0) return null;
+  const route = buildRouteSteps(path);
+  return route ? { path, route, hops: path.length } : null;
+}
+
+function candidateServicePlans(graph, currentMap, targetMap, { inventory = {}, savePoint = null } = {}) {
+  const candidates = [];
+  for (const origin of Object.values(KAFRA_CONTENT)) {
+    const toHub = routeForPath(graph, currentMap, origin.npcMap);
+    if (!toHub) continue;
+    const directPost = routeForPath(graph, origin.saveMap, targetMap);
+    const toHubStep = toHub.hops > 0
+      ? [{ kind: 'DIRECT_TO_HUB', route: toHub.route, hubId: origin.hubId }]
+      : [];
+    if (directPost) {
+      candidates.push({
+        mode: 'MULTIMODAL', policy: 'DIRECT', hubId: origin.hubId,
+        steps: [
+          ...toHubStep,
+          { kind: 'DIRECT_TO_TARGET', route: directPost.route },
+          { kind: 'START_FARM', targetMap },
+        ],
+        routeCost: toHub.hops + directPost.hops,
+        edgeTypes: [
+          ...routeEdges(toHub.route),
+          ...routeEdges(directPost.route),
+        ],
+      });
+    }
+
+    for (const destination of Object.values(KAFRA_CONTENT)) {
+      if (destination.hubId === origin.hubId) continue;
+      const transfer = resolveKafraDestination(origin.hubId, destination.hubId);
+      if (transfer.reason) continue;
+      const post = routeForPath(graph, destination.saveMap, targetMap);
+      if (!post) continue;
+      candidates.push({
+        mode: 'MULTIMODAL', policy: 'KAFRA_DIALOG_TRANSFER', hubId: origin.hubId,
+        steps: [
+          ...toHubStep,
+          { kind: 'KAFRA_DIALOG_TRANSFER', policy: 'DIALOG', npcMap: origin.npcMap,
+            destinationCity: destination.hubId },
+          { kind: 'VERIFY_SERVICE_ARRIVAL', expectedMap: destination.saveMap },
+          { kind: 'DIRECT_TO_TARGET', route: post.route },
+          { kind: 'START_FARM', targetMap },
+        ],
+        routeCost: toHub.hops + post.hops + 2,
+        edgeTypes: [
+          ...routeEdges(toHub.route),
+          FARM_ROUTE_EDGE.KAFRA_TRANSPORT,
+          ...routeEdges(post.route),
+        ],
+      });
+    }
+  }
+
+  // A permanent Butterfly Wing is useful when the authoritative save point is
+  // already a Kafra hub: return there directly, then use the real Kafra dialog.
+  // Presence is sufficient; the planner never decrements inventory item 602.
+  if (inventoryHasButterfly(inventory)) {
+    const savedHub = Object.values(KAFRA_CONTENT)
+      .find((hub) => hub.saveMap === savePoint?.map);
+    if (savedHub) {
+      const butterflySteps = [
+        { kind: 'VERIFY_SAVEPOINT', expectedMap: savedHub.saveMap },
+        { kind: 'BUTTERFLY_WING', itemId: BUTTERFLY_WING_ITEM_ID,
+          expectedMap: savedHub.saveMap, saveMap: savedHub.saveMap },
+      ];
+      const directPost = routeForPath(graph, savedHub.saveMap, targetMap);
+      if (directPost) {
+        candidates.push({
+          mode: 'MULTIMODAL', policy: 'RETURN_TO_SAVEPOINT_BUTTERFLY', hubId: savedHub.hubId,
+          usesButterfly: true,
+          steps: [...butterflySteps,
+            { kind: 'DIRECT_TO_TARGET', route: directPost.route },
+            { kind: 'START_FARM', targetMap }],
+          routeCost: 1 + directPost.hops,
+          edgeTypes: [FARM_ROUTE_EDGE.SAVEPOINT, FARM_ROUTE_EDGE.BUTTERFLY_WING,
+            ...routeEdges(directPost.route)],
+        });
+      }
+      for (const destination of Object.values(KAFRA_CONTENT)) {
+        if (destination.hubId === savedHub.hubId) continue;
+        const transfer = resolveKafraDestination(savedHub.hubId, destination.hubId);
+        if (transfer.reason) continue;
+        const post = routeForPath(graph, destination.saveMap, targetMap);
+        if (!post) continue;
+        candidates.push({
+          mode: 'MULTIMODAL', policy: 'RETURN_TO_SAVEPOINT_BUTTERFLY', hubId: savedHub.hubId,
+          usesButterfly: true,
+          steps: [...butterflySteps,
+            { kind: 'KAFRA_DIALOG_TRANSFER', policy: 'DIALOG', npcMap: savedHub.npcMap,
+              destinationCity: destination.hubId },
+            { kind: 'VERIFY_SERVICE_ARRIVAL', expectedMap: destination.saveMap },
+            { kind: 'DIRECT_TO_TARGET', route: post.route },
+            { kind: 'START_FARM', targetMap }],
+          routeCost: 1 + 2 + post.hops,
+          edgeTypes: [FARM_ROUTE_EDGE.SAVEPOINT, FARM_ROUTE_EDGE.BUTTERFLY_WING,
+            FARM_ROUTE_EDGE.KAFRA_TRANSPORT, ...routeEdges(post.route)],
+        });
+      }
+    }
+  }
+  return candidates;
+}
+
+// Single production planner for player-selected farm-map changes. It compares
+// the canonical rAthena physical warp graph with the existing Kafra content
+// and emits the same relocation step contract consumed by the coordinator.
+// It never reads OpenKore tables and never creates map-specific route logic.
+export function planFarmMapChange(graph, currentMap, targetMap, options = {}) {
+  if (!mapIdPattern.test(String(currentMap)) || !mapIdPattern.test(String(targetMap)))
+    return { mode: 'UNREACHABLE', reason: 'invalid_map', steps: [] };
+  if (currentMap === targetMap)
+    return { mode: 'ALREADY_AT_DESTINATION', policy: 'DIRECT', routeCost: 0,
+      edgeTypes: [], steps: [{ kind: 'START_FARM', targetMap }] };
+  const direct = planWebRelocation(graph, currentMap, targetMap);
+  const candidates = [];
+  if (direct.route) {
+    candidates.push({ mode: 'DIRECT', policy: 'DIRECT', routeCost: direct.hops,
+      edgeTypes: routeEdges(direct.route),
+      steps: [{ kind: 'DIRECT_TO_TARGET', route: direct.route }, { kind: 'START_FARM', targetMap }] });
+  }
+  candidates.push(...candidateServicePlans(graph, currentMap, targetMap, options));
+  candidates.sort((left, right) => left.routeCost - right.routeCost ||
+    (left.mode === 'DIRECT' ? -1 : right.mode === 'DIRECT' ? 1 : 0) ||
+    Number(Boolean(right.usesButterfly)) - Number(Boolean(left.usesButterfly)) ||
+    0);
+  const selected = candidates[0];
+  if (!selected)
+    return { mode: 'UNREACHABLE', policy: 'UNREACHABLE', reason: 'no_legal_route', steps: [] };
+  return { ...selected, targetMap, routeQuality: selected.mode === 'DIRECT' ? 'DIRECT' : 'MULTIMODAL' };
 }
 
 // Terminal-route adapter for controller-owned service destinations. Topology is
