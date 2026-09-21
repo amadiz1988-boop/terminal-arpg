@@ -236,11 +236,12 @@ export function planWebRelocation(graph, currentMap, targetMap, { needsService =
 
 function routeEdges(route) {
   if (!Array.isArray(route) || route.length < 2) return [];
-  return route.slice(0, -1).map((step, index) => {
+  return route.slice(0, -1).flatMap((step, index) => {
     const next = route[index + 1];
     const destination = String(next?.map ?? '');
     const dungeon = /(?:_dun\d*|moc_pryd\d*)$/i.test(destination);
-    return dungeon ? FARM_ROUTE_EDGE.DUNGEON_PORTAL : FARM_ROUTE_EDGE.PORTAL;
+    return [FARM_ROUTE_EDGE.WALK,
+      dungeon ? FARM_ROUTE_EDGE.DUNGEON_PORTAL : FARM_ROUTE_EDGE.PORTAL];
   });
 }
 
