@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Supply Settings V2 · RO 原廠風格隔離驗收頁</title>
+  <link rel="stylesheet" href="../../ro-ui-kit.css" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="supply-shell">
+    <header class="page-heading">
+      <div>
+        <p class="eyebrow">GHOST ISLAND · SUPPLY SETTINGS V2</p>
+        <h1>回城補給設定</h1>
+        <p class="lede">把補給條件、物品語義與預計旅程集中在同一個 RO 風格視窗中。</p>
+      </div>
+      <div class="preview-stamp" aria-label="預覽資料狀態">
+        <strong>ISOLATED PREVIEW</strong>
+        <span>PREVIEW DATA · 不寫入 Production</span>
+      </div>
+    </header>
+
+    <div class="source-ribbon" role="status">
+      <span class="lamp"></span>
+      <strong>資料來源：PREVIEW DATA</strong>
+      <span>唯讀旅程預覽；套用按鈕只保存此瀏覽器的 local PoC state。</span>
+      <button id="resetPreview" type="button" class="ro-button secondary" data-ro-primitive="RoButton">重設預覽</button>
+    </div>
+
+    <form id="supplySettingsForm" novalidate>
+      <section class="ro-window window" data-ro-primitive="RoWindow" aria-labelledby="basicTitle">
+        <header class="ro-titlebar titlebar" data-ro-primitive="RoTitleBar">
+          <h2 id="basicTitle">基本補給</h2><span class="section-state supported">SUPPORTED_NOW</span>
+        </header>
+        <div class="window-body basic-grid">
+          <label class="check-line primary-toggle">
+            <input id="supplyEnabled" type="checkbox" checked data-ro-primitive="RoCheckbox" />
+            <span>啟用自動回城補給</span>
+          </label>
+          <div class="field-grid">
+            <label class="field-block">
+              <span>補給觸發：負重達到</span>
+              <span class="input-suffix"><input id="weightTrigger" type="number" min="40" max="88" value="88" inputmode="numeric" data-ro-primitive="RoInput" />%</span>
+              <small class="field-help">目前 runtime 合法範圍 40–88%。</small>
+              <span id="weightError" class="inline-error" role="alert"></span>
+            </label>
+            <fieldset class="option-box">
+              <legend>供給條件</legend>
+              <label class="check-line"><input type="checkbox" checked data-ro-primitive="RoCheckbox" />補給品不足 <span class="mini-state supported">支援</span></label>
+              <label class="check-line"><input type="checkbox" checked data-ro-primitive="RoCheckbox" />彈藥不足 <span class="mini-state preview">預覽</span></label>
+              <label class="check-line"><input type="checkbox" checked data-ro-primitive="RoCheckbox" />必要工具缺少 <span class="mini-state preview">預覽</span></label>
+            </fieldset>
+          </div>
+          <div class="service-strip">
+            <div>
+              <span class="label-kicker">回城方式</span>
+              <strong>自動選擇合法方式</strong>
+              <small>由既有 Supply route / service 規則決定</small>
+            </div>
+            <div class="service-choices" aria-label="服務選擇">
+              <label class="radio-line"><input type="radio" name="service" checked data-ro-primitive="RoCheckbox" />自動選擇合法服務</label>
+              <label class="radio-line disabled"><input type="radio" name="service" disabled data-ro-primitive="RoCheckbox" />優先卡普拉 <span class="mini-state preview">概念預覽</span></label>
+              <label class="radio-line disabled"><input type="radio" name="service" disabled data-ro-primitive="RoCheckbox" />優先商店 <span class="mini-state preview">概念預覽</span></label>
+            </div>
+          </div>
+          <div class="route-readout"><span>目前可能使用</span><b>蝴蝶翅膀</b><span>→ walking / route</span><span>→ service</span><em>座標由系統保留</em></div>
+        </div>
+      </section>
+
+      <section class="ro-window window" data-ro-primitive="RoWindow" aria-labelledby="consumableTitle">
+        <header class="ro-titlebar titlebar" data-ro-primitive="RoTitleBar">
+          <h2 id="consumableTitle">補給品</h2><span class="section-state supported">QUANTITY_BASED</span>
+        </header>
+        <div class="window-body">
+          <p class="section-note">真正會消耗的補給品採用「目前／最低／補到」；觸發條件固定為 <code>current &lt; min</code>。</p>
+          <div id="consumableRows" class="item-table" aria-live="polite"></div>
+          <button id="addItem" type="button" class="ro-button" data-ro-primitive="RoButton">＋ 加入補給品</button>
+        </div>
+      </section>
+
+      <section class="ro-window window" data-ro-primitive="RoWindow" aria-labelledby="toolTitle">
+        <header class="ro-titlebar titlebar" data-ro-primitive="RoTitleBar">
+          <h2 id="toolTitle">必要工具</h2><span class="section-state supported">PRESENCE_BASED</span>
+        </header>
+        <div class="window-body">
+          <p class="section-note">NON_CONSUMABLE + WEIGHT = 0 的道具只判斷持有狀態。數量不下降不會被判定為失敗。</p>
+          <div id="toolRows" class="tool-grid"></div>
+        </div>
+      </section>
+
+      <section class="ro-window window" data-ro-primitive="RoWindow" aria-labelledby="lootTitle">
+        <header class="ro-titlebar titlebar" data-ro-primitive="RoTitleBar">
+          <h2 id="lootTitle">戰利品處理</h2><span class="section-state preview">PREVIEW_ONLY</span>
+        </header>
+        <div class="window-body">
+          <p class="section-note">以下規則沿用既有 supply item rule 語意；本頁套用只落在 local PoC state。</p>
+          <div id="lootRows" class="loot-table"></div>
+          <p class="not-supported"><strong>NOT_YET_SUPPORTED：</strong>未提供的倉庫、販售或特殊保留規則不會被假裝可用。</p>
+        </div>
+      </section>
+
+      <section class="ro-window window" data-ro-primitive="RoWindow" aria-labelledby="returnTitle">
+        <header class="ro-titlebar titlebar" data-ro-primitive="RoTitleBar">
+          <h2 id="returnTitle">返回與恢復</h2><span class="section-state supported">SUPPORTED_NOW</span>
+        </header>
+        <div class="window-body return-grid">
+          <div class="fixed-behavior"><span class="check-mark">✓</span><div><strong>補給完成後返回原練功地圖</strong><small>系統固定行為 · 由既有 supply route 決定</small></div></div>
+          <div class="fixed-behavior"><span class="check-mark">✓</span><div><strong>抵達後恢復自動練功</strong><small>系統固定行為 · 由 authoritative arrival 確認</small></div></div>
+        </div>
+      </section>
+
+      <section class="ro-window window journey-window" data-ro-primitive="RoWindow" aria-labelledby="journeyTitle">
+        <header class="ro-titlebar titlebar" data-ro-primitive="RoTitleBar">
+          <h2 id="journeyTitle">Supply Journey Preview</h2><span class="section-state readonly">READ-ONLY PLAN PREVIEW</span>
+        </header>
+        <div class="window-body journey-grid">
+          <div>
+            <div class="journey-subhead"><strong>若現在觸發補給</strong><span id="journeyState" class="status-warning">有待補項目</span></div>
+            <div id="journeyInventory" class="journey-inventory"></div>
+          </div>
+          <div class="plan-panel">
+            <span class="label-kicker">預計動作</span>
+            <ol id="journeyPlan" class="journey-plan"></ol>
+            <p class="plan-note">READ-ONLY：此區塊不會操作角色，也不會送出 API command。</p>
+          </div>
+        </div>
+      </section>
+
+      <details class="ro-window window advanced-window" data-ro-primitive="RoWindow">
+        <summary class="ro-titlebar titlebar" data-ro-primitive="RoTitleBar"><h2>進階補給與物品處理</h2><span class="section-state preview">LOCAL PREVIEW</span></summary>
+        <div class="window-body advanced-grid">
+          <label class="field-block"><span>取得方式</span><select data-ro-primitive="RoSelect"><option>AUTO</option><option>STORAGE_FIRST</option><option>NPC_BUY</option></select><small>僅對有既有 runtime 能力的項目啟用。</small></label>
+          <label class="field-block"><span>一般戰利品</span><select data-ro-primitive="RoSelect"><option>販售</option><option>存入倉庫</option><option>保留身上</option></select></label>
+          <label class="field-block"><span>材料</span><select data-ro-primitive="RoSelect"><option>存入倉庫</option><option>販售</option><option>保留身上</option></select></label>
+          <label class="field-block"><span>重要物品</span><select data-ro-primitive="RoSelect"><option>永不販售</option><option>保留身上</option></select></label>
+        </div>
+      </details>
+
+      <div class="form-actions">
+        <button id="applyPreview" type="submit" class="ro-button primary" data-ro-primitive="RoButton">套用預覽設定</button>
+        <span id="saveNotice" class="save-notice" role="status">只會保存至此瀏覽器 local PoC state。</span>
+      </div>
+    </form>
+
+    <dialog id="itemDialog" class="item-dialog">
+      <form method="dialog" class="dialog-window">
+        <header class="ro-titlebar titlebar" data-ro-primitive="RoTitleBar"><h2>加入補給品</h2><button value="cancel" class="close-button" aria-label="關閉">×</button></header>
+        <div class="dialog-body">
+          <p>從目前已知道具清單選擇，系統會依 authoritative metadata 判斷語義。</p>
+          <div id="itemChoices" class="item-choices"></div>
+          <p id="dialogError" class="inline-error" role="alert"></p>
+        </div>
+      </form>
+    </dialog>
+  </main>
+  <script src="../../ro-asset-resolver.js"></script>
+  <script src="../../ro-ui-kit.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>

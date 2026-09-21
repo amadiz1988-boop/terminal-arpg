@@ -1,0 +1,26 @@
+{
+  "PRE_IMPLEMENTATION_REUSE_GATE": {
+    "featureId": "SUPPLY_SETTINGS_V2_ISOLATED_UI_V1",
+    "featureName": "Supply Settings V2 isolated UI",
+    "scope": "ISOLATED_WEB_POC",
+    "taskCategory": "KNOWN_IMPLEMENTATION_TASK",
+    "categories": ["supply", "storage", "shop", "loot", "ro-original-ui", "item-semantics"],
+    "openKoreRelevant": true,
+    "checks": {
+      "currentProject": { "status": "CHECKED", "evidence": "ops/ro-stack/dashboard/index.html supply form; ops/ro-stack/dashboard/app.js setSupplyCycle and submit handler; ops/ro-stack/dashboard.mjs normalizeSupplyCycle/readSupplyCycle/saveSupplyCycle" },
+      "legacyProject": { "status": "CHECKED", "evidence": "docs/openkore-harvest-registry.md A8/B8/C9 and current supply-cycle migration notes" },
+      "reuseRegistry": { "status": "REGISTRY_HIT", "reference": "ra-storage, ra-shop, ok-storageauto, ok-buy-sell, oss-robrowserlegacy-reference" },
+      "rAthena": { "status": "CHECKED", "evidence": "C:/Users/Administrator/source/ghost-island-rathena/src/map/persistent_agent.cpp supply threshold, Butterfly Wing save-point route, and service route state" },
+      "openKore": { "status": "CHECKED", "evidence": "docs/openkore-harvest-registry.md#A8; ops/research/external-reuse-registry.json ok-storageauto and ok-buy-sell; behavior reused as reference only" },
+      "externalEcosystem": { "status": "NOT_APPLICABLE", "reason": "No new dependency or external source code is introduced; roBrowserLegacy remains reference-only." },
+      "genericOSS": { "status": "NOT_APPLICABLE", "reason": "No generic OSS dependency is introduced." }
+    },
+    "decision": "ADAPT_PATTERN",
+    "whyNotReuse": "The existing runtime and form own authoritative behavior, while the missing layer is an isolated player-facing presentation and local preview model. Existing RO kit primitives and central item resolver are reused.",
+    "freshResearchPerformed": false,
+    "freshResearchJustification": "Registry entries are fresh for this presentation-only task.",
+    "registryUpdateRequired": false,
+    "registryUpdate": { "status": "", "entryId": "", "evidence": "" },
+    "inheritedFrom": "CURRENT_SUPPLY_UI_AND_RUNTIME_REUSE_GATE:ops/ro-stack/dashboard/index.html+ops/ro-stack/dashboard.mjs"
+  }
+}
