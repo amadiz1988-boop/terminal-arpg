@@ -132,7 +132,10 @@ CROSS-CUTTING DESIGN:
   (Global AutoLoot to inventory is a product accepted direction; rAthena owns
    drop resolution and authoritative item add; PA keeps inventory lifecycle,
    weight, supply, storage/sell, navigation, quest, social and Life ownership;
-   Stage 2 authority transfer remains unauthorized)
+   Stage 2 authority transfer remains unauthorized. Reference dependency is
+   rAthena server-side autocombat checkpoint 961ac3c, whose mature floor is
+   same-map server-side combat. Public evidence does not establish cross-map
+   Supply, return-to-farm or auto-resume after Supply; those remain PA-owned.)
 
 LONG TERM:
   Expanded autonomous Persistent Life society / social world — PLANNED /

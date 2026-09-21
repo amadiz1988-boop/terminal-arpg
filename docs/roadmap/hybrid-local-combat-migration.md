@@ -12,6 +12,8 @@ GLOBAL_AUTOLOOT = PRODUCT_ACCEPTED_DIRECTION
 GLOBAL_AUTOLOOT_TO_INVENTORY = YES
 GLOBAL_AUTOSTORE = NO
 STAGE1_SHADOW_OBSERVER = IMPLEMENTATION_ACTIVE
+RATHENA_AUTOCOMBAT_REFERENCE_CHECKPOINT = 961ac3c
+RATHENA_MATURE_FLOOR = SAME_MAP_SERVER_SIDE_COMBAT
 ```
 
 ## 1. Audit boundary
@@ -37,6 +39,20 @@ shared seam、Production 或 runtime。
 - rAthena 與 OpenKore Atlas 已查核；OpenKore runtime count 為 `0`。
 - `rAthena auto combat showcase` 在 reuse registry 為 `REFERENCE_ONLY`，
   license `Unknown`，license risk `BLOCKER`，不得抄碼或直接導入。
+- Reference dependency checkpoint `961ac3c`：
+  `docs/reference-mining/topics/rathena-server-side-autocombat.md`、
+  `docs/reference-mining/rathena-autocombat-capability-matrix.yml` 與
+  `docs/reference-mining/rathena-autocombat-vs-project-pa.md`。此 reference
+  將成熟 floor 定義為 same-map server-side combat，涵蓋 target、retarget、
+  pathing、attack、skill、buff、potion、loot、teleport、death 與 partial
+  offline。分類為 `ADAPT`，reference 是 floor，不是 ceiling。
+- `CROSS_MAP_SUPPLY_PUBLIC_EVIDENCE = NO_PUBLIC_EVIDENCE`、
+  `RETURN_TO_FARM_MAP_PUBLIC_EVIDENCE = NO_PUBLIC_EVIDENCE`、
+  `AUTO_RESUME_AFTER_SUPPLY_PUBLIC_EVIDENCE = NO_PUBLIC_EVIDENCE`。因此
+  supply、cross-map navigation、service、return-to-farm、quest、social、
+  parent intent 與 recovery 繼續由 PA 保留。reference 中的
+  autoloot-to-storage hook 只作 public hook claim，不改變
+  `GLOBAL_AUTOLOOT_TO_INVENTORY = YES` 與 `GLOBAL_AUTOSTORE = NO`。
 
 ## 2. Current responsibility matrix
 
