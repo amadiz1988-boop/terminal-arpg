@@ -2,6 +2,8 @@
 
 ```text
 TASK_ID = PA_RATHENA_COMBAT_REPLACEMENT_IMPACT_AUDIT_V1
+PRODUCT_MILESTONE = M1_LOCAL_HUNTING_V1
+PRODUCT_MILESTONE_STATUS = IN_PROGRESS
 DESIGN_STATUS = ACCEPTED / MIGRATION_IN_PROGRESS
 PLANNING_STATE = PLANNED
 IMPLEMENTATION_AUTHORIZED = NO
@@ -30,6 +32,7 @@ SKILL_ONLY_IMPLEMENTED = NO
 PARTY_HEAL_IMPLEMENTED = NO
 PARTY_BUFF_IMPLEMENTED = NO
 PARTY_FOLLOW_IMPLEMENTED = NO
+M2_STARTS_AFTER_M1_EXIT_GATE = YES
 ```
 
 Canonical architecture decision:
@@ -485,3 +488,9 @@ NORMAL_ATTACK_EXECUTOR = GENERALIZED ONLY AFTER ALL THREE PASS
 
 `MELEE_EXECUTOR` remains the current bounded canary label and is not renamed in
 historical checkpoints. `NORMAL_ATTACK_CLASS_PARITY = NOT_YET_PROVEN`.
+
+M1 is the current product milestone. Its exit gate must cover generalized
+normal attack class parity, AutoSkill, Global AutoLoot with authoritative
+`LOOT_ACQUIRED`, and preserved PA Supply, cross-map navigation, service,
+return-to-farm and interrupt/resume behavior. Passing a bounded Stage 2 melee
+canary does not satisfy the M1 exit gate.

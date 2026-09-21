@@ -127,6 +127,99 @@ The profile catalog is `MELEE_DAMAGE`, `RANGED_DAMAGE`, `SKILL_CAST`,
 attack-type capabilities. This design does not authorize a new Skill Executor
 implementation or a hardcoded one-build-per-job table.
 
+## Product milestone order
+
+The accepted post-foundation product sequence is:
+
+```text
+M1 LOCAL_HUNTING_V1
+   -> hard gate
+M2 NOVICE_TO_EDEN_LV40_QUEST_AUTOMATION_V1 + QUEST_UI_V1
+   -> hard gate
+M3 CHARACTER_AUTONOMY_V1
+```
+
+### M1 LOCAL_HUNTING_V1
+
+```text
+GOAL = Make long-running server-authoritative Hunting and AutoSkill a usable
+       product capability.
+DEPENDENCIES = OpenKore Exit foundation, rAthena authority, PA intent/journey/
+               supply/return/interrupt/resume contracts, Local Hunting ADR.
+EXIT_GATE = Normal attack parity for melee, bow/ranged and gun/ranged;
+            AutoSkill target and ground execution with level, SP, range,
+            cooldown, cast time and effect proof; SKILL_ONLY and HYBRID modes;
+            Global AutoLoot to inventory with authoritative LOOT_ACQUIRED;
+            no Supply, cross-map navigation, return-to-farm or interrupt/resume
+            regression; Browser acceptance where UI is involved.
+NON_GOALS = Character Autonomy, Life Director, Social Director, unrestricted
+            Free Agent behavior, full Party Support completion and generational
+            simulation.
+CURRENT_STATUS = IN_PROGRESS
+```
+
+M1 detailed authority and staged gates remain in
+`docs/roadmap/hybrid-local-combat-migration.md` and
+`docs/architecture/local-hunting-hybrid-architecture.md`.
+
+### M2 NOVICE_TO_EDEN_LV40_QUEST_AUTOMATION_V1 + QUEST_UI_V1
+
+```text
+GOAL = Complete one continuous character progression flow from new-character
+       onboarding through novice and Eden equipment progression to the Lv40
+       milestone, with the accepted Quest Journal / dialogue / interaction /
+       minimap context / runtime log Web surface.
+DEPENDENCIES = M1 Hunting and AutoSkill stability, Quest Flow First, rAthena
+               quest authority, Quest Runtime, PA Journey, Supply, Return and
+               Player Interaction contracts, Quest and OpenKore reference Atlas.
+EXIT_GATE = Fresh-character flow reaches the Eden Lv40 milestone through
+            server-authoritative quest transitions, combat, NPC interaction,
+            required player choices and recovery; Quest UI renders authoritative
+            state; Supply, death, reconnect and interruption preserve the Quest
+            parent intent; Browser final acceptance passes for the Web surface.
+NON_GOALS = Character Autonomy decision layer, unrestricted agent behavior,
+            Life/Social simulation, relationship, romance and generational
+            systems.
+CURRENT_STATUS = DESIGN / EXISTING PARTIAL QUEST RUNTIME
+```
+
+Quest UI must keep dialogue authority, quiz judgment and quest state in
+rAthena / Quest Runtime. Web may expose required human choices and confirmations
+without becoming low-level quest execution authority.
+
+### M3 CHARACTER_AUTONOMY_V1
+
+```text
+GOAL = Add a bounded high-level decision layer that chooses the next legal
+       intent for persistent characters while reusing canonical executors.
+DEPENDENCIES = M1 accepted execution substrate, M2 continuous Quest progression,
+               PA intent/journey/interrupt/resume, Local Hunting, Supply, Quest
+               Runtime, Social foundations and canonical rAthena runtime.
+EXIT_GATE = Decision layer consumes character state, job, level, map, inventory,
+            supply, quest, available goals, parent intent, social candidates and
+            interruption state; emits a bounded NEXT_HIGH_LEVEL_INTENT; admin
+            autonomous characters and opted-in player characters execute through
+            PA/rAthena/Quest/Local Hunting; no second runtime or authority bypass;
+            reconnect, quarantine and resume evidence passes.
+NON_GOALS = Full Life Simulation, unrestricted Free Agent, direct attack or
+            teleport, direct quest or inventory mutation, LLM high-frequency
+            control, romance, generations and broad social simulation.
+CURRENT_STATUS = DESIGN_ACCEPTED / IMPLEMENTATION_NOT_STARTED
+```
+
+M3 autonomy is a decision layer only. `HUNT`, `QUEST`, `SUPPLY`, `TRAVEL`,
+`FOLLOW`, `SOCIAL`, `REST` and `IDLE` remain candidates subject to subsystem
+readiness; unavailable executors must not be advertised as runnable intents.
+
+```text
+LOCAL_HUNTING_BEFORE_AUTONOMY = YES
+QUEST_EXECUTION_BEFORE_AUTONOMY = YES
+AUTONOMY_REUSES_EXISTING_EXECUTORS = YES
+AUTONOMY_MUST_NOT_CREATE_SECOND_RUNTIME = YES
+ADMIN_AUTONOMOUS_CHARACTERS_USE_CANONICAL_RUNTIME = YES
+PLAYER_AUTONOMY_IS_HIGH_LEVEL_DECISION_LAYER = YES
+```
+
 Supply Journey, Quest, Social and Life remain parallel core systems with their
 own authority and acceptance gates.
 
@@ -256,7 +349,9 @@ Do not create parallel simulation systems.
 | Persistent Agent implementation roadmap | `docs/persistent-server-agent-roadmap.md` |
 | Production PA canary profile | `docs/PRODUCTION_PA_CANARY_CAPABILITY_PROFILE.md` |
 | Reuse gate | `docs/pre-implementation-reuse-gate.md` |
+| Character Life / Social long-term direction | `docs/character-life-social-simulation-roadmap.md` (M3 and later design dependency; implementation remains gated) |
 | Character Autonomy / Player Agency | `docs/roadmap/character-autonomy-player-agency.md` (`PLANNED`, `IMPLEMENTATION_AUTHORIZED = NO`) |
+| Quest Flow / reference authority | `docs/quest-reference/README.md`, `docs/rathena-reference/quest-automation.md`, `docs/openkore-reference/quest-automation.md` |
 | RO World Context / Character Autonomy Research | `docs/research/ro-world-context-autonomy-v1.md` (`RESEARCH_REFERENCE`, checkpoint `03c53a14a2187bd5c4c6752b409fb60ffa45db43`; context/bias/meaning only, no deterministic behavior or authority) |
 | Current status snapshot | `docs/CURRENT_STATUS.md` |
 | Actionable task list | `docs/TODO.md` |

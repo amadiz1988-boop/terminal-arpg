@@ -2,6 +2,8 @@
 
 ```text
 STATUS = ACCEPTED / MIGRATION_IN_PROGRESS
+PRODUCT_MILESTONE = M1_LOCAL_HUNTING_V1
+PRODUCT_MILESTONE_STATUS = IN_PROGRESS
 LOCAL_HUNTING_IS_PRIMARY_RUNTIME_LOOP = YES
 LOCAL_HUNTING_OPTIMIZATION_PRIORITY = VERY_HIGH
 PA_OWNS_INTENT_JOURNEY_INTERRUPT_RESUME = YES
@@ -18,6 +20,7 @@ SKILL_ONLY_IMPLEMENTED = NO
 PARTY_HEAL_IMPLEMENTED = NO
 PARTY_BUFF_IMPLEMENTED = NO
 PARTY_FOLLOW_IMPLEMENTED = NO
+M2_STARTS_AFTER_M1_EXIT_GATE = YES
 ```
 
 ## Context
@@ -31,6 +34,10 @@ for persistent intent, journeys, interruption and resume.
 The design goal is `USE_BETTER_MATURE_HUNTING_BEHAVIOR_WHERE_PROVEN`. Each
 authority transfer requires `RESULT_EQUIVALENT_OR_BETTER = YES` plus explicit
 proof of no Supply, return-to-farm, Quest, Social or parent-intent regression.
+
+This ADR defines the M1 execution substrate. M2 continuous Quest progression
+starts only after the M1 exit gate. M3 Character Autonomy remains a later
+bounded decision layer that reuses this executor and does not replace it.
 
 ## Decision
 

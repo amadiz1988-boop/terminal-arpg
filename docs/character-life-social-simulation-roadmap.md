@@ -527,3 +527,30 @@ Account Soul
 14. Life Director 必須可解釋「為什麼做這件事」，尤其是看似低效率但具有友情、任務或情緒動機的行為。
 
 這份文件目前是未來產品方向紀錄，不代表已進入 Production Implementation。
+
+## Product milestone dependency registration
+
+This canonical long-term direction is registered behind the current execution
+substrate order:
+
+```text
+M1 LOCAL_HUNTING_V1
+-> M2 NOVICE_TO_EDEN_LV40_QUEST_AUTOMATION_V1 + QUEST_UI_V1
+-> M3 CHARACTER_AUTONOMY_V1
+```
+
+`CHARACTER_AUTONOMY_V1` reuses the existing Local Hunting, PA Journey, Supply,
+Quest Runtime and Social capabilities. It is a bounded high-level decision
+layer that emits the next legal intent and delegates execution to the canonical
+runtime. It does not become a second combat, quest, navigation or world runtime.
+
+```text
+M3_STATUS = DESIGN_ACCEPTED / IMPLEMENTATION_NOT_STARTED
+PHASE4A_SOCIAL_NATIVE_LIFE_WORK = PAUSED / FUTURE_RECONNECT
+ADMIN_AUTONOMOUS_CHARACTERS = CANONICAL_RUNTIME_ONLY
+PLAYER_AUTONOMY = OFF / ON HIGH_LEVEL_DECISION_DIRECTION
+```
+
+Existing S｜Social Candidate / Encounter, N｜Native Projection / Acceptance and
+L｜WORLD_OWNED / Life Director work remain design dependencies for M3 and later
+Life/Social phases. This registration does not authorize their implementation.

@@ -10,6 +10,28 @@ combat-loop migration, or hybrid PA/rAthena combat design. It is an audit and
 gating skill. It does not authorize gameplay implementation, Production
 migration, runtime restart, or removal of existing PA combat.
 
+## Product milestone order
+
+```text
+PRODUCT_MILESTONE_ORDER_V1 =
+  M1 LOCAL_HUNTING_V1
+  -> M2 NOVICE_TO_EDEN_LV40_QUEST_AUTOMATION_V1 + QUEST_UI_V1
+  -> M3 CHARACTER_AUTONOMY_V1
+
+LOCAL_HUNTING_BEFORE_AUTONOMY = YES
+QUEST_EXECUTION_BEFORE_AUTONOMY = YES
+AUTONOMY_REUSES_EXISTING_EXECUTORS = YES
+AUTONOMY_MUST_NOT_CREATE_SECOND_RUNTIME = YES
+ADMIN_AUTONOMOUS_CHARACTERS_USE_CANONICAL_RUNTIME = YES
+PLAYER_AUTONOMY_IS_HIGH_LEVEL_DECISION_LAYER = YES
+```
+
+Local Hunting work must preserve the M1 exit dependencies and must not begin
+Character Autonomy implementation. Autonomy chooses a bounded high-level
+intent and delegates execution to PA, Quest Runtime, Local Hunting, Supply and
+rAthena. It never directly attacks, teleports, mutates quest or inventory state,
+or bypasses PA authority.
+
 ## Canonical hard gate
 
 ```text
