@@ -10,6 +10,14 @@ GLOBAL_AUTOLOOT = YES
 GLOBAL_AUTOSTORE = NO
 FULL_LOCAL_HUNTING_REPLACEMENT = NO
 STAGE2_GLOBAL_PROMOTION = NOT_YET_COMPLETE
+CLASS_AWARE_COMBAT_PROFILE = YES
+CLASS_AWARE_COMBAT_PROFILE_IMPLEMENTATION_STARTED = NO
+NORMAL_ATTACK_CLASS_PARITY = NOT_YET_PROVEN
+PARTY_SUPPORT_FIRST_CLASS = YES
+SKILL_ONLY_IMPLEMENTED = NO
+PARTY_HEAL_IMPLEMENTED = NO
+PARTY_BUFF_IMPLEMENTED = NO
+PARTY_FOLLOW_IMPLEMENTED = NO
 ```
 
 ## Context
@@ -34,6 +42,51 @@ director.
 
 Migration is capability-by-capability. Big Bang replacement is forbidden and
 the existing PA fallback remains available until each promotion gate passes.
+
+## Class-aware combat profiles
+
+The accepted product model is:
+
+```text
+JOB
+-> AVAILABLE COMBAT PROFILES / OPTIONS
+PLAYER
+-> PREFERRED PROFILE + PROFILE-SPECIFIC TACTICAL OPTIONS
+rAthena Local Hunting Executor
+-> LEGAL / AUTHORITATIVE EXECUTION
+PA
+-> INTENT / JOURNEY / INTERRUPT / RESUME
+```
+
+The profile model is `COMBAT_PROFILE + TACTICAL_OPTIONS`, not a collection of
+global booleans. The initial accepted catalog is `MELEE_DAMAGE`,
+`RANGED_DAMAGE`, `SKILL_CAST`, `HYBRID_DAMAGE`, `HEAL_SUPPORT`,
+`COMBAT_SUPPORT`, `FOLLOW_SUPPORT` and `PASSIVE_FOLLOW`.
+
+Availability is derived from canonical job, skill-tree, equipment or attack-type
+and available-skill capabilities. A job may expose multiple legal profiles.
+Examples are design guidance only and do not authorize a hardcoded final job
+table. `SKILL_CAST` must support `NORMAL_ATTACK_CAN_BE_DISABLED = YES`; a
+temporarily unavailable skill follows explicit wait, position, regeneration or
+approved fallback policy without silently forcing normal attack.
+
+`ONE_COMBAT_AI_FOR_ALL_JOBS = FORBIDDEN` and
+`JOB_HARDCODED_SINGLE_BUILD = FORBIDDEN`. This is design accepted and remains
+outside implementation authorization.
+
+Representative profile-specific options include:
+
+```text
+SKILL_CAST      = disable_normal_attack, offensive_skill, ground_skill,
+                  cast_distance, AoE_policy, SP_reserve, no-skill fallback
+HEAL_SUPPORT    = self_heal, party_heal, emergency_threshold, buffs,
+                  cleanse, follow_leader, follow_distance, SP_reserve
+RANGED_DAMAGE   = attack_range, avoid_melee_distance, ranged_attack,
+                  offensive_skill, close-enemy_reposition
+```
+
+The option set is selected by profile and legal capability. It is not a global
+cross-job checkbox list.
 
 ## Responsibility Boundary
 
@@ -69,6 +122,23 @@ retarget, approach, same-map pathing, attack-range handling, melee cadence,
 skills, buffs, ammo, same-map roaming, same-map stuck recovery, same-map Fly
 Wing or teleport and Global AutoLoot. Target authority transfers only after
 parity proof. Local Hunting cannot autonomously cross maps.
+
+Party support is a first-class Local Hunting capability. A bounded same-map
+executor may follow, reposition, heal, buff and maintain support range. A map
+exit or cross-map transition must stop local follow/combat and return to PA for
+the cross-map journey, authoritative arrival and resume. Cross-map follow
+remains PA-owned.
+
+Skill execution is split into independent future gates:
+
+```text
+STAGE_3A = OFFENSIVE_SKILL_EXECUTOR
+STAGE_3B = SELF_SUPPORT_EXECUTOR
+STAGE_3C = PARTY_SUPPORT_EXECUTOR
+```
+
+Stage 3 requires `AUTOSKILL_REFERENCE_FIRST = YES` and a completed
+`RATHENA_AUTOSKILL_AND_PARTY_SUPPORT_REFERENCE_MINING_V1` before implementation.
 
 ## PA Permanent Ownership
 
@@ -109,6 +179,11 @@ PA may navigate for a Quest, start a bounded Local Hunting lease, stop it before
 NPC dialogue or player interaction, then continue the Quest. Social or Life
 interruptions follow the same stop, interact and resume contract. Parent intent
 always wins over a Local Hunting lease.
+
+Quest kill objectives may apply a bounded target-policy override. Quest NPC
+dialogue, OnTouch, menu, quiz, input, confirmation and job-change orchestration
+remain PA-owned. The completed Quest flow may restore the appropriate selected
+Combat Profile.
 
 ## Global AutoLoot Decision
 
@@ -166,6 +241,17 @@ Further gates cover target and retarget parity, skill execution, Global
 AutoLoot authoritative item-add and Combat Log projection, same-map path and
 stuck recovery, ammo, buff, combat potion, party and kill-steal behavior.
 
+Normal attack terminology remains historical at Stage 2. The future gate is:
+
+```text
+NORMAL_ATTACK_CLASS_PARITY_GATE = REQUIRED
+NORMAL_ATTACK_CLASSES = melee, bow/ranged, gun/ranged
+NORMAL_ATTACK_EXECUTOR = GENERALIZED ONLY AFTER ALL THREE PASS
+```
+
+`MELEE_EXECUTOR` remains the current canary label and is not renamed in
+historical checkpoints. `NORMAL_ATTACK_CLASS_PARITY = NOT_YET_PROVEN`.
+
 ## Non-Goals
 
 This decision does not authorize Production deployment, runtime restart,
@@ -207,8 +293,11 @@ NO_PARENT_INTENT_REGRESSION = YES
 1. Preserve Stage 1 shadow observation and PA fallback.
 2. Complete Stage 2 return-to-farm reentry proof and bounded melee promotion.
 3. Prove target and retarget parity before authority transfer.
-4. Add skill execution as a separate lease and gate.
-5. Implement Global AutoLoot through authoritative inventory mutation and Event
+4. Add `NORMAL_ATTACK_CLASS_PARITY_GATE` for melee, bow/ranged and gun/ranged.
+5. Complete AutoSkill reference mining, then add Stage 3A offensive skills,
+   Stage 3B self support and Stage 3C party support as separate leases and
+   gates.
+6. Implement Global AutoLoot through authoritative inventory mutation and Event
    Ledger facts.
-6. Evaluate same-map roam and stuck recovery.
-7. Evaluate combat potion, ammo, party and kill-steal policy in separate gates.
+7. Evaluate same-map roam and stuck recovery.
+8. Evaluate combat potion, ammo, party and kill-steal policy in separate gates.

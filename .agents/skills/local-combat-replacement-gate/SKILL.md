@@ -26,10 +26,117 @@ GLOBAL_AUTOSTORE = NO
 AUTHORITATIVE_LOOT_REQUIRED_FOR_COMBAT_LOG = YES
 RESULT_EQUIVALENT_OR_BETTER_REQUIRED_BEFORE_REPLACEMENT = YES
 NO_BIG_BANG_MIGRATION = YES
+CLASS_AWARE_COMBAT_PROFILE = YES
+JOB_DETERMINES_AVAILABLE_OPTIONS = YES
+PLAYER_DETERMINES_PREFERRED_PROFILE = YES
+RATHENA_DETERMINES_LEGAL_EXECUTION = YES
+PA_DETERMINES_INTENT_AND_INTERRUPTION = YES
+SKILL_ONLY_NORMAL_ATTACK_OFF_SUPPORTED = REQUIRED
+PARTY_SUPPORT_FIRST_CLASS = YES
+SAME_MAP_PARTY_FOLLOW_CAN_BE_LOCAL_EXECUTOR = YES
+CROSS_MAP_PARTY_FOLLOW_REMAINS_PA = YES
+AUTOSKILL_REFERENCE_FIRST = YES
+DO_NOT_BUILD_ONE_AI_FOR_ALL_JOBS = YES
+PROFILE_SPECIFIC_TACTICAL_OPTIONS = YES
+NORMAL_ATTACK_CLASS_PARITY_GATE = REQUIRED
 ```
 
 Every capability transfer is a separate gate and keeps the PA fallback until
 promotion passes. Local Hunting is a child executor under PA parent intent.
+
+## Class-aware combat profile gate
+
+Combat configuration is modeled as:
+
+```text
+COMBAT_PROFILE + TACTICAL_OPTIONS
+```
+
+`JOB` and the canonical job/skill/equipment capability set determine the
+available profile candidates. The player selects a preferred legal profile and
+its profile-specific tactical options. rAthena determines legal execution and
+authoritative results. PA determines intent, journey, interruption and resume.
+
+The accepted initial catalog is:
+
+```text
+MELEE_DAMAGE
+RANGED_DAMAGE
+SKILL_CAST
+HYBRID_DAMAGE
+HEAL_SUPPORT
+COMBAT_SUPPORT
+FOLLOW_SUPPORT
+PASSIVE_FOLLOW
+```
+
+Availability must be derived from job, skill tree, equipment or attack type and
+available skills. Example job mappings are product direction only and must not
+become a hardcoded final job table. A single job may expose multiple legal
+profiles, including Priest offensive or hybrid choices where the build permits.
+
+Profile-specific tactical options must remain scoped to the selected profile.
+`SKILL_CAST` must support disabling normal attacks. When a required skill is
+temporarily unavailable, policy may wait, reposition, regenerate or use an
+explicitly approved fallback; it must not silently force normal attack.
+
+`ONE_COMBAT_AI_FOR_ALL_JOBS = FORBIDDEN` and `JOB_HARDCODED_SINGLE_BUILD =
+FORBIDDEN`. This section records design only. It does not authorize Skill
+Executor implementation.
+
+## Party support and follow boundary
+
+```text
+PARTY_SUPPORT_IS_FIRST_CLASS_HUNTING_CAPABILITY = YES
+```
+
+Future support policy must prioritize self-survival emergency, critical party
+HP, low party HP, critical buffs, status recovery, normal buff maintenance,
+follow or reposition, then optional offense. Thresholds remain policy or
+configuration values rather than scattered constants.
+
+A Local Hunting executor may evaluate same-map follow, support positioning,
+heal, buff and support range under a bounded lease. A map exit, portal or
+cross-map transition must stop local combat or follow and return to PA for the
+cross-map journey and authoritative arrival before resume.
+
+## Staged Skill Executor direction
+
+Skill work is split into independent gates:
+
+```text
+STAGE_3A = OFFENSIVE_SKILL_EXECUTOR
+  target skill, ground skill, skill level, SP, range, cooldown, cast time,
+  effect result, SKILL_ONLY and HYBRID mode
+
+STAGE_3B = SELF_SUPPORT_EXECUTOR
+  self heal, self buff, buff refresh, status-aware support
+
+STAGE_3C = PARTY_SUPPORT_EXECUTOR
+  party HP, party heal, party buff, status recovery, target priority,
+  same-map follow and support positioning
+```
+
+Before any Stage 3 implementation, run
+`RATHENA_AUTOSKILL_AND_PARTY_SUPPORT_REFERENCE_MINING_V1` and record mature
+reference behavior for target and ground skills, cooldown, cast time, SP
+fallback, pure-skill combat, buff refresh, self or party heal, party buff,
+status cleanse, same-map follow, target priority and death or revive support.
+Reuse or adapt proven behavior; do not reimplement a mature reference silently.
+
+## Normal attack parity gate
+
+Stage 2 historical names remain unchanged. The future generalized gate is:
+
+```text
+NORMAL_ATTACK_CLASS_PARITY_GATE = REQUIRED
+NORMAL_ATTACK_CLASSES = melee, bow/ranged, gun/ranged
+NORMAL_ATTACK_EXECUTOR = GENERALIZED ONLY AFTER ALL THREE PASS
+```
+
+`MELEE_EXECUTOR` remains the current bounded canary label. It must not be
+renamed in historical checkpoints. Class parity is unproven until melee,
+bow/ranged and gun/ranged each pass separate authoritative gates.
 
 ## Required evidence
 

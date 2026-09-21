@@ -21,6 +21,15 @@ FULL_LOCAL_HUNTING_REPLACEMENT = NO
 HYBRID_SUPPLY_RETURN_BASELINE = HYBRID_SUPPLY_RETURN_BASELINE_150069
 RATHENA_AUTOCOMBAT_REFERENCE_CHECKPOINT = 961ac3c
 RATHENA_MATURE_FLOOR = SAME_MAP_SERVER_SIDE_COMBAT
+CLASS_AWARE_COMBAT_PROFILE = YES
+CLASS_AWARE_COMBAT_PROFILE_IMPLEMENTATION_STARTED = NO
+NORMAL_ATTACK_CLASS_PARITY = NOT_YET_PROVEN
+PARTY_SUPPORT_FIRST_CLASS = YES
+AUTOSKILL_REFERENCE_FIRST = YES
+SKILL_ONLY_IMPLEMENTED = NO
+PARTY_HEAL_IMPLEMENTED = NO
+PARTY_BUFF_IMPLEMENTED = NO
+PARTY_FOLLOW_IMPLEMENTED = NO
 ```
 
 Canonical architecture decision:
@@ -44,6 +53,60 @@ NO_QUEST_REGRESSION = YES
 NO_SOCIAL_REGRESSION = YES
 NO_PARENT_INTENT_REGRESSION = YES
 ```
+
+## 0.1 Class-aware combat profile design
+
+The accepted product model is:
+
+```text
+JOB
+-> AVAILABLE COMBAT PROFILES / OPTIONS
+PLAYER
+-> PREFERRED PROFILE + PROFILE-SPECIFIC TACTICAL OPTIONS
+rAthena Local Hunting Executor
+-> LEGAL / AUTHORITATIVE EXECUTION
+PA
+-> INTENT / JOURNEY / INTERRUPT / RESUME
+```
+
+The profile model is `COMBAT_PROFILE + TACTICAL_OPTIONS`. The initial accepted
+catalog is `MELEE_DAMAGE`, `RANGED_DAMAGE`, `SKILL_CAST`, `HYBRID_DAMAGE`,
+`HEAL_SUPPORT`, `COMBAT_SUPPORT`, `FOLLOW_SUPPORT` and `PASSIVE_FOLLOW`.
+
+Availability derives from canonical job, skill-tree, equipment or attack-type
+and available-skill capabilities. A job may expose multiple legal profiles.
+Examples are design guidance only and do not authorize a hardcoded final job
+table. `SKILL_CAST` requires `NORMAL_ATTACK_CAN_BE_DISABLED = YES`; temporary
+skill unavailability follows explicit wait, position, regeneration or approved
+fallback policy without silently forcing normal attack.
+
+`ONE_COMBAT_AI_FOR_ALL_JOBS = FORBIDDEN` and
+`JOB_HARDCODED_SINGLE_BUILD = FORBIDDEN`. This design is accepted, while
+Skill Executor implementation remains unauthorized.
+
+Party Support is a first-class hunting capability. Self-survival emergency,
+critical party HP, low party HP, critical buffs, status recovery, normal buff
+maintenance, follow or reposition and optional offense are policy priorities.
+Thresholds remain policy or configuration values.
+
+Same-map follow, support positioning, heal and buff may be evaluated under a
+bounded Local Hunting lease. Map exit or cross-map transition stops local
+follow/combat and returns to PA for the cross-map journey, authoritative arrival
+and resume. Cross-map follow remains PA-owned.
+
+Skill execution is split into independent gates:
+
+```text
+STAGE_3A = OFFENSIVE_SKILL_EXECUTOR
+STAGE_3B = SELF_SUPPORT_EXECUTOR
+STAGE_3C = PARTY_SUPPORT_EXECUTOR
+```
+
+Before Stage 3 implementation, complete
+`RATHENA_AUTOSKILL_AND_PARTY_SUPPORT_REFERENCE_MINING_V1` for target and ground
+skills, cooldown, cast time, SP fallback, pure-skill combat, buffs, self or
+party heal, status cleanse, same-map follow, target priority and death or revive
+support.
 
 ## 1. Audit boundary
 
@@ -406,6 +469,19 @@ roaming, party/kill-steal, executor failover, authoritative item-add proof,
 Combat Log proof and supply regression proof`.
 
 Near-term P0/P1 sequence: Stage 2 reentry proof, bounded melee promotion,
-target and retarget parity, skill executor, Global AutoLoot with authoritative
-`LOOT_ACQUIRED`, then same-map path and stuck recovery. Combat potion, ammo,
-party and kill-steal policy remain later independent gates.
+target and retarget parity, `NORMAL_ATTACK_CLASS_PARITY_GATE`, AutoSkill
+reference mining, Stage 3A offensive skills, Stage 3B self support, Stage 3C
+party support or follow, Global AutoLoot with authoritative `LOOT_ACQUIRED`,
+then same-map path and stuck recovery. Combat potion, ammo, advanced roaming
+and party or kill-steal policy remain later independent gates.
+
+Normal attack terminology remains historical at Stage 2. The future gate is:
+
+```text
+NORMAL_ATTACK_CLASS_PARITY_GATE = REQUIRED
+NORMAL_ATTACK_CLASSES = melee, bow/ranged, gun/ranged
+NORMAL_ATTACK_EXECUTOR = GENERALIZED ONLY AFTER ALL THREE PASS
+```
+
+`MELEE_EXECUTOR` remains the current bounded canary label and is not renamed in
+historical checkpoints. `NORMAL_ATTACK_CLASS_PARITY = NOT_YET_PROVEN`.

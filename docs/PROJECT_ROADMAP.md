@@ -99,10 +99,33 @@ Near-term Local Hunting priority:
 
 ```text
 P0/P1 = Stage 2 reentry proof, bounded melee promotion, target/retarget parity,
-        skill executor, Global AutoLoot with authoritative LOOT_ACQUIRED,
-        same-map path and stuck recovery
-LATER = combat potion, ammo, party / kill-steal and advanced roaming policy
+        NORMAL_ATTACK_CLASS_PARITY_GATE, AutoSkill reference mining,
+        Stage 3A offensive skills, Stage 3B self support,
+        Stage 3C party support / follow, Global AutoLoot with authoritative
+        LOOT_ACQUIRED, same-map path and stuck recovery
+LATER = combat potion, ammo, advanced roaming, party / kill-steal policy
 ```
+
+Class-aware combat profiles are accepted design for Local Hunting:
+
+```text
+CLASS_AWARE_COMBAT_PROFILE = YES
+JOB_DETERMINES_AVAILABLE_OPTIONS = YES
+PLAYER_DETERMINES_PREFERRED_PROFILE = YES
+RATHENA_DETERMINES_LEGAL_EXECUTION = YES
+PA_DETERMINES_INTENT_AND_INTERRUPTION = YES
+PARTY_SUPPORT_FIRST_CLASS = YES
+SKILL_ONLY_NORMAL_ATTACK_OFF_SUPPORTED = REQUIRED
+AUTOSKILL_REFERENCE_FIRST = YES
+CLASS_AWARE_COMBAT_PROFILE_IMPLEMENTATION_STARTED = NO
+NORMAL_ATTACK_CLASS_PARITY = NOT_YET_PROVEN
+```
+
+The profile catalog is `MELEE_DAMAGE`, `RANGED_DAMAGE`, `SKILL_CAST`,
+`HYBRID_DAMAGE`, `HEAL_SUPPORT`, `COMBAT_SUPPORT`, `FOLLOW_SUPPORT` and
+`PASSIVE_FOLLOW`. Availability derives from canonical job, skill, equipment and
+attack-type capabilities. This design does not authorize a new Skill Executor
+implementation or a hardcoded one-build-per-job table.
 
 Supply Journey, Quest, Social and Life remain parallel core systems with their
 own authority and acceptance gates.
