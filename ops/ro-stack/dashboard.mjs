@@ -106,19 +106,20 @@ import {
 import {
   buildTerminalRoute,
   loadWarpGraph,
+  planFarmMapChange,
   planWebRelocation,
 } from './persistent-agent/map-route.mjs';
+import { kafraContextForPlan } from './persistent-agent/kafra-content.mjs';
 import {
   decideNormalizationAction,
   resolveSpawnEntry as resolveNoviceSpawnEntry,
 } from './persistent-agent/novice-onboarding-spawn.mjs';
 import {
   coordinatorDeadlineMsForRouteSteps,
-  planRelocation,
-  RELOCATION_POLICY,
   RELOCATION_REASON,
 } from './persistent-agent/relocation-policy.mjs';
 import {
+  createRelocationProgress,
   nextRelocationAction,
 } from './persistent-agent/relocation-executor.mjs';
 import {
@@ -2724,9 +2725,11 @@ async function reconcileRelocations() {
     pending.busy = true;
     try {
       const account = relocationAccount(pending);
-      const [stateRow, live] = await Promise.all([
+      const [stateRow, live, savePoint, dialog] = await Promise.all([
         readAgentStateRow(charId),
         readPersistentAgentLiveStatusView(charId),
+        readCharacterSavePoint(account.accountId),
+        readServerAgentDialog(charId),
       ]);
       if (
         !stateRow ||
@@ -2775,8 +2778,16 @@ async function reconcileRelocations() {
         // bump) between commands; one existing contract action at a time.
         if (pending.commandPending && revision === pending.commandRevision)
           continue;
+        const currentStep = pending.relocationPlan.steps[pending.relocationProgress.index];
+        if (mode !== 'PERSISTENT_IDLE' && currentStep?.kind !== 'START_FARM')
+          continue;
         pending.commandPending = false;
-        const observation = { currentMap, agentMode: mode };
+        const observation = {
+          currentMap,
+          agentMode: mode,
+          savePoint: savePoint?.map ?? null,
+          dialogClosed: dialog != null && dialog.active !== true,
+        };
         const next = nextRelocationAction(pending.relocationPlan,
           pending.relocationProgress, observation);
         if (next.reason) {
@@ -2786,6 +2797,7 @@ async function reconcileRelocations() {
         }
         if (next.done) {
           pendingRelocations.delete(charId);
+          await clearPersistedRelocation(account);
           continue;
         }
         if (!next.action)
@@ -2803,25 +2815,9 @@ async function reconcileRelocations() {
           continue; // stage commands sent; wait for authoritative confirmation
         const command = expanded.commands[sent];
         let payload = command.payload;
-        // The relocation planner's walking route is a list of MAP NAMES; the
-        // native start_navigation contract expects route[] elements to be
-        // objects { map, x, y, portalTo? }. Canonicalize through the SAME
-        // proven builder used by the DIRECT path (planWebRelocation /
-        // buildRouteSteps) instead of inventing a second route serializer.
-        if (command.action === 'start_navigation') {
-          const hops = Array.isArray(payload?.route) ? payload.route : [];
-          const fromMap = String(hops[0] ?? '');
-          const toMap = String(hops[hops.length - 1] ?? '');
-          const navPlan = fromMap && toMap
-            ? planWebRelocation(await serverAgentWarpGraph(), fromMap, toMap)
-            : null;
-          if (!navPlan?.route) {
-            console.warn(`WEB_RELOCATION_BLOCKED char=${charId} reason=route_unrepresentable`);
-            pendingRelocations.delete(charId);
-            continue;
-          }
-          payload = { ...payload, route: navPlan.route };
-        }
+        // The unified planner already emits canonical {map,x,y,portalTo}
+        // routes. Dispatch that exact route; no second route serializer or
+        // OpenKore-derived re-planning is allowed at execution time.
         await queueOwnershipCommand(
           account,
           charId,
@@ -2871,13 +2867,20 @@ async function queueServerAgentRelocation(account, controller, requestedMapId) {
   const currentMap = live?.fresh && live.map ? String(live.map) : null;
   if (!currentMap) throw new HttpError(409, 'agent_position_unavailable');
 
-  // Phase 3 route policy: a Web map change is DIRECT. Supply / storage /
-  // save-point needs are owned by the Persistent Agent supply subsystem; they
-  // are never turned into an automatic town / Kafra detour here.
-  const plan = planWebRelocation(
+  const readModel = await readServerAgentReadModel(charId);
+  const inventory = {};
+  for (const row of readModel?.inventory ?? []) {
+    const itemId = String(row.itemId);
+    inventory[itemId] = Number(inventory[itemId] ?? 0) + Number(row.amount ?? 0);
+  }
+  const savePoint = await readCharacterSavePoint(account.accountId);
+  // One unified planner compares the canonical rAthena physical topology with
+  // the existing Kafra content and emits one existing relocation step contract.
+  const plan = planFarmMapChange(
     await serverAgentWarpGraph(),
     currentMap,
     mapId,
+    { inventory, savePoint, mapSummary: map },
   );
   const grindTarget = {
     mapId,
@@ -2905,30 +2908,11 @@ async function queueServerAgentRelocation(account, controller, requestedMapId) {
     observationConfigCache.delete(`grind:${Number(account.accountId)}`);
   };
 
-  if (!plan.route) {
-    if (plan.reason !== 'already_at_destination') {
-      // The canonical rAthena warp resolver above found no walking route. The
-      // restored last-good planner can still return a plan, but every such plan
-      // needs either a Kafra/NPC service transfer (production disabled) or a
-      // pure walking route on the legacy portal table that the canonical
-      // topology rejects. Scheduling it would later be dropped by
-      // reconcileRelocations() with only a console.warn, so a valid but
-      // unreachable farm map is an explicit, player-visible blocker here.
-      const relocationPlan = planRelocation({
-        currentMap,
-        target: { targetMap: mapId, source: 'selected' },
-        graph: physicalMapGraph,
-        mapSummary: map,
-      });
-      console.warn(
-        `WEB_RELOCATION_UNREACHABLE char=${charId} map=${mapId} reason=${
-          relocationPlan.policy === RELOCATION_POLICY.UNREACHABLE
-            ? relocationPlan.reason ?? 'unknown'
-            : relocationPlan.policy
-        }`,
-      );
-      throw new HttpError(409, RELOCATION_REASON.FARM_ROUTE_UNAVAILABLE);
-    }
+  if (plan.mode === 'UNREACHABLE') {
+    console.warn(`WEB_RELOCATION_UNREACHABLE char=${charId} map=${mapId} reason=${plan.reason}`);
+    throw new HttpError(409, RELOCATION_REASON.FARM_ROUTE_UNAVAILABLE);
+  }
+  if (plan.mode === 'ALREADY_AT_DESTINATION') {
     pendingRelocations.delete(charId);
     await clearPersistedRelocation(account);
     await persistGrindTarget();
@@ -2953,6 +2937,28 @@ async function queueServerAgentRelocation(account, controller, requestedMapId) {
     };
   }
 
+  const directStep = plan.steps.find((step) => step.kind === 'DIRECT_TO_TARGET');
+  const isSimpleDirect = plan.mode === 'DIRECT' && directStep &&
+    plan.steps.length === 2;
+  if (isSimpleDirect) {
+    await persistGrindTarget();
+    await writePersistedRelocation(account, mapId);
+    const farmActive = Boolean(controller.agentMode) && controller.agentMode !== 'PERSISTENT_IDLE';
+    let command = null;
+    if (farmActive) {
+      command = await queueOwnershipCommand(account, charId, {
+        action: 'stop_farm', expectedRevision: Number(controller.revision),
+      });
+    }
+    pendingRelocations.set(charId, {
+      accountId: Number(account.accountId), charId, targetMap: mapId,
+      route: directStep.route, stage: 'WAIT_IDLE', attempts: 0,
+      busy: false,
+      deadline: Date.now() + coordinatorDeadlineMsForRouteSteps(directStep.route.length),
+    });
+    return { policy: plan.policy, route: directStep.route, targetMap: mapId, command, grindTarget };
+  }
+
   await persistGrindTarget();
   await writePersistedRelocation(account, mapId);
   const farmActive =
@@ -2968,20 +2974,30 @@ async function queueServerAgentRelocation(account, controller, requestedMapId) {
     accountId: Number(account.accountId),
     charId,
     targetMap: mapId,
-    route: plan.route,
-    stage: 'WAIT_IDLE',
+    route: null,
+    stage: 'RELOCATION',
+    relocationPlan: plan,
+    kafraContext: kafraContextForPlan(plan),
+    relocationProgress: createRelocationProgress(),
+    commandIndexByStage: {},
+    commandPending: false,
+    commandRevision: null,
     attempts: 0,
     busy: false,
     // Use the ALREADY RESOLVED route length; never re-plan a second route.
     deadline:
       Date.now() +
       coordinatorDeadlineMsForRouteSteps(
-        Array.isArray(plan.route) ? plan.route.length : 1,
+        Math.max(1, plan.steps.reduce((count, step) =>
+          count + (Array.isArray(step.route) ? step.route.length : 1), 0)),
       ),
   });
   return {
     policy: plan.policy,
-    route: plan.route,
+    route: directStep?.route ?? null,
+    mode: plan.mode,
+    routeCost: plan.routeCost,
+    edgeTypes: plan.edgeTypes,
     targetMap: mapId,
     command,
     grindTarget,
