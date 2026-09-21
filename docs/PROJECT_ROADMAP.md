@@ -127,6 +127,12 @@ AFTER PL1:
   (start condition: Diary V1 canonical acceptance complete AND Project Control
    explicitly authorizes PL2)
 
+CROSS-CUTTING DESIGN:
+  HYBRID_LOCAL_COMBAT_MIGRATION — DESIGN_ACCEPTED / IMPLEMENTATION_NOT_STARTED
+  (staged rAthena local-combat executor evaluation; PA supply, recovery, loot,
+   navigation, quest, social and Life ownership remain intact; implementation
+   authorization remains NO)
+
 LONG TERM:
   Expanded autonomous Persistent Life society / social world — PLANNED /
   NOT AUTHORIZED
@@ -152,6 +158,7 @@ by source inspection alone; each slice needs its own acceptance evidence.
 | `PL1-PERSISTENT-LIFE-DIARY` | `docs/roadmap/persistent-life-diary-v1.md` | `PLANNED` | `NO` |
 | `PL1-A-FACTUAL-DIARY` | `docs/roadmap/persistent-life-diary-v1.md#scoped-authorization-pl1-a-factual-diary-vertical-slice` | `ACTIVE` | `YES` |
 | `PL2-PERSISTENT-SOCIAL-PA` | `docs/roadmap/persistent-social-pa-v1.md` | `PLANNED` | `NO` |
+| `HYBRID-LOCAL-COMBAT-MIGRATION` | `docs/roadmap/hybrid-local-combat-migration.md` | `PLANNED (DESIGN_ACCEPTED)` | `NO` |
 
 Summary of PL1: characters live through a real in-world day, then produce at most
 one bounded LLM diary generation per in-world day, grounded in Event Ledger facts.
