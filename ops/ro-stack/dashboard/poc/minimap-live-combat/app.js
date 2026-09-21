@@ -11,6 +11,7 @@
   const MONSTER_BASE_SCALE = 0.62;
   const DAMAGE_LIFE_MS = 1300;
   const EFFECT_LIFE_MS = 260;
+  const HIT_RAY_ANGLES = [0, 45, 90, 135, 180, 225, 270, 315];
   const assetRoot = location.protocol === 'file:' ? '../../../../public/ro' : location.port === '8799' ? '/public/ro' : '/ro';
   const asset = {
     map: `${assetRoot}/client/maps/prt_fild08.png`,
@@ -255,7 +256,32 @@
   }
   function drawEffects(now) {
     effects = effects.filter((entry) => now - entry.born < EFFECT_LIFE_MS);
-    effects.forEach((entry) => { const track = tracks.get(entry.target); if (!track) return; const position = project(...Object.values(sampleTrack(track, now))); const age = now - entry.born; const image = entry.kind === 'critical' ? images.effects.criticalLens2 : images.effects.hitLens1; if (!image?.complete || !image.naturalWidth) return; const frame = Math.min(3, Math.floor(age / 65)); ctx.save(); ctx.globalAlpha = 1 - age / EFFECT_LIFE_MS; ctx.drawImage(image, 0, frame * 32, 32, 32, position.x - 28, position.y - 66, 56, 56); ctx.restore(); });
+    effects.forEach((entry) => {
+      const track = tracks.get(entry.target); if (!track) return;
+      const position = project(...Object.values(sampleTrack(track, now)));
+      const age = now - entry.born;
+      const image = entry.kind === 'critical' ? images.effects.criticalLens2 : images.effects.hitLens1;
+      if (!image?.complete || !image.naturalWidth) return;
+      const displayScale = Number(dom.playerScale.value);
+      const rayWidth = 14 * displayScale * 0.42;
+      const rayHeight = 14 * displayScale * 7.5;
+      ctx.save();
+      ctx.globalCompositeOperation = 'screen';
+      ctx.filter = 'brightness(1.65)';
+      HIT_RAY_ANGLES.forEach((angle, index) => {
+        const delay = index * 12;
+        const localLife = clamp((age - delay) / (EFFECT_LIFE_MS - delay), 0, 1);
+        if (localLife <= 0) return;
+        const grow = 0.08 + localLife * 0.92;
+        ctx.save();
+        ctx.globalAlpha = (1 - localLife) * 0.9;
+        ctx.translate(position.x, position.y);
+        ctx.rotate((angle * Math.PI) / 180);
+        ctx.drawImage(image, -rayWidth / 2, -rayHeight * grow, rayWidth, rayHeight * grow);
+        ctx.restore();
+      });
+      ctx.restore();
+    });
   }
 
   function soundSource(event) {

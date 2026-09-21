@@ -83,8 +83,9 @@ MISSING_PRESENTATION_CONTRACTS = target position, authoritative combat damage/cr
 ## Controls and audio
 
 ```text
-PLAYER_SCALE_CONTROL = 50%, 75%, 100%, 150%, 200%; default 100%
-MONSTER_SCALE_CONTROL = 50%, 75%, 100%, 150%, 200%; default 100%
+PLAYER_SCALE_CONTROL = 50%, 75%, 100%, 150%, 200%; default 150% for Product Owner review
+MONSTER_SCALE_CONTROL = 35%, 50%, 75%, 100%, 150%, 200%; default 35% for Product Owner review
+HIT_RAY_SCALE = follows player scale so player-hit and monster-hit rays remain visually equal
 DEFAULT_OTHER_PLAYERS = OFF
 DEFAULT_PLAYER_NAMES = OFF
 DEFAULT_MONSTER_NAMES = OFF
@@ -130,6 +131,8 @@ Browser: Codex In-app Browser against the loopback preview URL. The preview used
 | Monster presentation | PASS for verified idle asset | Poring and Lunatic WebP outputs were visible at the default 100% control; complete monster action fidelity remains blocked. |
 | Combat timeline | PASS for preview trace | TARGET → WALK → ATTACK → HIT → DAMAGE → KILL → DEATH events were visible in order. |
 | Original bitmap damage | PASS | Normal and critical number PNGs were rendered; critical preview showed the original critical background and lens2 asset. |
+| Eight-ray hit effect | PASS_FOR_EQUIVALENT_PRESENTATION | `lens1/lens2` full 32×128 strips are presented as eight narrow screen-blended rays; the former white square from a single 32×32 crop is gone. |
+| Hit-ray size equality | PASS_FOR_REVIEW | Product Owner review defaults are player 150% and monster 35%; both player-hit and monster-hit rays use the player-scale reference. |
 | Preview buttons | PASS | Normal Attack, Critical, Player Hit, Monster Hit, Monster Death and Level Up all produced a visible event or explicit blocked status. |
 | Names and scale controls | PASS | Other Players, Player Names and Monster Names defaulted off; Monster Names toggled on; 150% player and 50% monster controls changed visible settings. |
 | Sound set control | PASS | AX showed default `RO ORIGINAL`; CURRENT GHOST ISLAND and OFF are selectable. One event id plus sound-set guard prevents duplicate playback. |
@@ -166,10 +169,12 @@ OPENKORE_RUNTIME = 0
 BROWSER_UI_PASS = PASS_FOR_ISOLATED_PREVIEW_CONTROLS
 PRODUCT_OWNER_VISUAL_ACCEPTANCE = REQUIRES_USER_REVIEW
 FILES_CHANGED = index.html, app.js, styles.css, readonly-live-adapter.js, REFERENCE_NOTES.md, RO_ORIGINAL_ASSET_MATRIX.md, RESULTS.md
-GIT_CHECKPOINT = 7014145
+GIT_CHECKPOINT = 63dab43
 READY_FOR_PRODUCT_OWNER_REVIEW = YES
 READY_FOR_PRODUCTION_INTEGRATION = NO
 CHARACTER_LIFE_DIRECTION_COMPATIBILITY = PASS
 ```
 
 `CHARACTER_LIFE_DIRECTION_COMPATIBILITY = PASS` because the adapter consumes a typed read-only projection and the renderer remains a presentation layer. Life Director, Social Director, Persistent Agent ownership, and rAthena authority are untouched.
+
+`WHITE_SQUARE_HIT_EFFECT_REGRESSION = PASS`: Browser preview at 100% showed the normal hit as eight directional rays without the opaque square. Browser preview at 200% showed the same verified asset enlarged proportionally. Critical preview retained `critical-bg.png`, bitmap critical digits, and `lens2` rays.

@@ -12,8 +12,8 @@
 | PLAYER_ACT | 現有 showcase metadata | `stand 3×100ms`、`walk 8×75ms`、`attack 6×100ms`，每個 action 8 方向 | `public/ro/client/showcase/manifest.json` | YES，已用於 IDLE/WALK/ATTACK | YES |
 | MONSTER_ACT | `data0.grf` ACT source 已在 manifest 記錄 | ACT source 存在，Web action frame atlas 未輸出 | `monsters/manifest.json` 有 act path、SHA、idle frame counts | YES source，NO Web complete actions | NO，待轉檔 |
 | ATTACK_EFFECT_ASSET | 未找到已證明的普通攻擊專用 effect | N/A | 目前只有 hit lens asset | NO | NO |
-| HIT_EFFECT_ASSET | `data/texture/effect/lens1.tga` → `/ro/client/damage/lens1.png`；音效 `ef_hit2.wav` | PNG 32×128，4×32 frame strip | `public/ro/client/damage/manifest.json` | YES | YES |
-| CRITICAL_EFFECT_ASSET | `lens2.png`＋`critical-bg.png` | PNG 32×128、70×60 | `damage/manifest.json`：lens2 及 `msg.spr#frame-3` | YES，素材來源確認 | YES |
+| HIT_EFFECT_ASSET | `data/texture/effect/lens1.tga` → `/ro/client/damage/lens1.png`；音效 `ef_hit2.wav` | PNG 32×128 full ray strip | `public/ro/client/damage/manifest.json`；Canvas uses eight narrow screen-blended rays | YES | YES |
+| CRITICAL_EFFECT_ASSET | `lens2.png`＋`critical-bg.png` | PNG 32×128 full ray strip、70×60 | `damage/manifest.json`：lens2 及 `msg.spr#frame-3`；Canvas uses eight rays plus critical background | YES，素材來源確認 | YES |
 | DEATH_EFFECT_ASSET | 未找到本頁可核對的死亡視覺 effect | N/A | 只有怪物死亡 WAV | NO | NO |
 | LEVEL_UP_EFFECT_ASSET | 未找到 level-up visual effect；`lv_up_on.png` 是 status UI 狀態圖 | PNG UI state，非戰鬥特效 | `docs/ro-ui-asset-index.json` status pilot | NO | NO |
 | DAMAGE_NUMBER_ASSET / FONT STYLE | `數字.spr` frames 0–9 → `number-0..9.png`；crit numbers；`msg.spr#frame-3` | Bitmap digits，原始像素尺寸保留 | `damage/manifest.json`，font 原廠畫面未取得 | YES 素材，NO 原廠字體畫面 | YES |

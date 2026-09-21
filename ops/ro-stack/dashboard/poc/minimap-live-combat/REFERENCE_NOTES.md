@@ -34,3 +34,5 @@ Asset provenance used by the page:
 The strict original-asset audit is recorded in `RO_ORIGINAL_ASSET_MATRIX.md`. The current Web monster outputs are verified idle outputs; their source ACT/SPR pairs are recorded, while complete action frame atlases are not yet proven in Web form. The page therefore keeps monster action and death fidelity blocked and does not create replacement animation art.
 
 The read-only adapter follows the existing Dashboard contracts: `/api/live-position` is a minimal position projection, `/api/combat-snapshot` establishes the combat cursor, and `/api/combat-stream` or `/api/events` provides event delivery. A live `ATTACK` line is never promoted to a hit or damage effect without an authoritative damage value.
+
+The POC now follows the existing Dashboard `createOfficialHitRays` presentation pattern for the verified `lens1/lens2` assets: each 32×128 strip is drawn as eight narrow rays with screen blending and deterministic angles. The former single 32×32 source crop, which produced a white square, is no longer used.
