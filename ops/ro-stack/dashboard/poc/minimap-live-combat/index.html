@@ -3,85 +3,140 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RO Minimap Live Combat Prototype</title>
+  <title>RO 原廠小地圖與戰鬥呈現驗收頁</title>
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
   <main class="shell">
     <header class="header">
       <div>
-        <p class="eyebrow">ISOLATED WEB VISUAL POC</p>
-        <h1>RO Minimap · Live Combat View</h1>
-        <p class="lede">Deterministic presentation fixture. Browser render state never becomes gameplay authority.</p>
+        <p class="eyebrow">RO ORIGINAL · ISOLATED READ-ONLY POC</p>
+        <h1>小地圖＋人物戰鬥呈現</h1>
+        <p class="lede">Canvas 2D 與 requestAnimationFrame 呈現層。預覽資料與唯讀即時資料分開，瀏覽器不持有遊戲權威。</p>
       </div>
-      <div class="badge">NO PRODUCTION INTEGRATION</div>
+      <div class="badge">禁止 Production 整合</div>
     </header>
 
-    <section class="controls" aria-label="Prototype controls">
-      <button id="startButton" type="button">Start</button>
-      <button id="pauseButton" type="button" class="secondary">Pause</button>
-      <label>Latency
-        <select id="latencySelect">
-          <option value="0">0ms</option>
-          <option value="250">250ms</option>
-          <option value="500" selected>500ms</option>
-          <option value="1200">1200ms</option>
-          <option value="2000">2000ms</option>
+    <section class="controls" aria-label="Player Owner controls">
+      <button id="startButton" type="button">開始預覽</button>
+      <button id="pauseButton" type="button" class="secondary">暫停</button>
+      <button id="resetButton" type="button" class="secondary">重設</button>
+      <label>資料來源
+        <select id="sourceSelect">
+          <option value="live">LIVE READ-ONLY</option>
+          <option value="preview" selected>RO SCENARIO PREVIEW</option>
         </select>
       </label>
-      <label>Entity scale
-        <select id="scaleSelect">
-          <option value="0.35">0.35×</option>
-          <option value="0.5" selected>0.5×</option>
-          <option value="0.7">0.7×</option>
+      <label id="characterIdLabel" class="live-only">角色 ID
+        <input id="characterIdInput" type="number" min="1" inputmode="numeric" placeholder="登入後角色 ID" />
+      </label>
+      <label>玩家比例
+        <select id="playerScaleSelect">
+          <option value="0.5">50%</option>
+          <option value="0.75">75%</option>
+          <option value="1" selected>100%</option>
+          <option value="1.5">150%</option>
+          <option value="2">200%</option>
         </select>
       </label>
-      <label>Entities
-        <select id="entityCountSelect">
-          <option value="1">1 player + 1 monster</option>
-          <option value="5" selected>1 player + 5 monsters</option>
-          <option value="10">1 player + 10 monsters</option>
-          <option value="20">1 player + 20 monsters</option>
+      <label>怪物比例
+        <select id="monsterScaleSelect">
+          <option value="0.5">50%</option>
+          <option value="0.75">75%</option>
+          <option value="1" selected>100%</option>
+          <option value="1.5">150%</option>
+          <option value="2">200%</option>
         </select>
       </label>
-      <button id="resetButton" type="button" class="secondary">Reset</button>
+      <label>聲音
+        <select id="soundSelect">
+          <option value="ro" selected>RO ORIGINAL</option>
+          <option value="current">CURRENT GHOST ISLAND</option>
+          <option value="off">OFF</option>
+        </select>
+      </label>
     </section>
+
+    <section class="options" aria-label="Optional presentation controls">
+      <label class="check"><input id="otherPlayersToggle" type="checkbox" /> 其他玩家</label>
+      <label class="check"><input id="playerNamesToggle" type="checkbox" /> 玩家名稱</label>
+      <label class="check"><input id="monsterNamesToggle" type="checkbox" /> 怪物名稱</label>
+      <span class="option-note">預設：其他玩家關閉、玩家名稱關閉、怪物名稱關閉</span>
+    </section>
+
+    <section class="preview-controls" aria-label="Original presentation preview controls">
+      <span class="preview-label">視覺預覽</span>
+      <button type="button" data-preview="normal-attack">普通攻擊</button>
+      <button type="button" data-preview="critical">暴擊</button>
+      <button type="button" data-preview="player-hit">玩家受擊</button>
+      <button type="button" data-preview="monster-hit">怪物受擊</button>
+      <button type="button" data-preview="monster-death">怪物死亡</button>
+      <button type="button" data-preview="level-up">升級</button>
+      <span class="preview-note">VISUAL PREVIEW ONLY · 非即時遊戲資料</span>
+    </section>
+
+    <details class="diagnostics">
+      <summary>驗收診斷控制</summary>
+      <div class="diagnostic-grid">
+        <label>預覽延遲
+          <select id="latencySelect">
+            <option value="0">0ms</option>
+            <option value="250">250ms</option>
+            <option value="500" selected>500ms</option>
+            <option value="1200">1200ms</option>
+            <option value="2000">2000ms</option>
+          </select>
+        </label>
+        <label>預覽實體
+          <select id="entityCountSelect">
+            <option value="2" selected>自己＋目標</option>
+            <option value="6">自己＋5 怪物</option>
+            <option value="11">自己＋10 怪物</option>
+            <option value="21">自己＋20 怪物</option>
+          </select>
+        </label>
+      </div>
+    </details>
 
     <section class="stage-card">
       <div class="stage-heading">
-        <div>
-          <span class="status-dot" id="statusDot"></span>
-          <strong id="stageStatus">Paused · ready</strong>
-        </div>
-        <span class="map-label">prt_fild08 · 普隆德拉原野</span>
+        <div><span class="status-dot" id="statusDot"></span><strong id="stageStatus">RO SCENARIO PREVIEW · 已就緒</strong></div>
+        <span class="map-label">prt_fild08 · 普隆德拉原野 · 512×512</span>
       </div>
       <div class="stage-wrap">
-        <canvas id="minimap" width="960" height="620" aria-label="Live combat minimap"></canvas>
-        <div class="canvas-note">MOCK AUTHORITY SNAPSHOTS · rAF RENDER LOOP</div>
+        <canvas id="minimap" width="960" height="620" aria-label="RO 原廠小地圖戰鬥預覽"></canvas>
+        <div class="canvas-note" id="canvasNote">RO ORIGINAL ASSET · PREVIEW</div>
       </div>
       <div class="legend">
-        <span><i class="legend-player"></i>玩家</span>
+        <span><i class="legend-player"></i>自己</span>
         <span><i class="legend-target"></i>目前目標</span>
-        <span><i class="legend-monster"></i>相關怪物</span>
-        <span><i class="legend-damage">124</i>傷害浮字</span>
+        <span><i class="legend-monster"></i>怪物</span>
+        <span><i class="legend-damage">124</i>原廠傷害數字</span>
       </div>
     </section>
 
     <section class="telemetry" aria-label="Debug telemetry">
       <div><span>FPS</span><b id="fpsValue">—</b></div>
       <div><span>Frame time</span><b id="frameValue">—</b></div>
-      <div><span>Simulated latency</span><b id="latencyValue">500ms</b></div>
-      <div><span>Snapshot revision</span><b id="revisionValue">0</b></div>
-      <div><span>Current action</span><b id="actionValue">IDLE</b></div>
-      <div><span>Current target</span><b id="targetValue">—</b></div>
-      <div><span>Authority / render</span><b id="authorityValue">separate</b></div>
+      <div><span>預覽延遲</span><b id="latencyValue">500ms</b></div>
+      <div><span>Authority revision</span><b id="revisionValue">0</b></div>
+      <div><span>目前 action</span><b id="actionValue">IDLE</b></div>
+      <div><span>目前 target</span><b id="targetValue">—</b></div>
+      <div><span>來源狀態</span><b id="liveStatusValue">PREVIEW</b></div>
+      <div><span>呈現邊界</span><b id="authorityValue">獨立 rAF</b></div>
     </section>
 
     <section class="event-card">
-      <div class="event-heading"><h2>Combat event trace</h2><span id="eventClock">loop 0.0s</span></div>
+      <div class="event-heading"><h2>呈現事件追蹤</h2><span id="eventClock">loop 0.0s</span></div>
       <ol id="eventLog" aria-live="polite"></ol>
     </section>
+
+    <section class="evidence-card" aria-label="Original asset evidence status">
+      <div><b>原廠證據狀態</b><span id="evidenceStatus">讀取中</span></div>
+      <p id="evidenceMissing">此頁只使用已驗證的本機 RO 素材。未證明的 action 或效果會保持阻塞狀態。</p>
+    </section>
   </main>
+  <script src="./readonly-live-adapter.js"></script>
   <script src="./app.js"></script>
 </body>
 </html>

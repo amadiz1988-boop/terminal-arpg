@@ -1,60 +1,175 @@
-# MINIMAP_LIVE_COMBAT_POC_V1
+# RO_ORIGINAL_MINIMAP_LIVE_COMBAT_POC_V1
 
-## Scope
+## Scope and lineage
 
-- Test-only visual PoC. No Player Web navigation, API, Persistent Agent, Native rAthena, Event Ledger, OpenKore, Stage2 Hunting, Supply, Quest, or production minimap changes.
-- Legal nearest test state: isolated deterministic browser fixture with mock authority snapshots and mock combat events. No gameplay authority is exercised.
-- Representative evidence gate: N/A for presentation-only mock fixture. Test acceleration: NO.
+```text
+TASK_ID = RO_ORIGINAL_MINIMAP_LIVE_COMBAT_POC_V1
+REFERENCE_COMMIT = 6470972260221c0fe0cd4825b66c5ac5fb20055a
+PARENT_CHECKPOINT = d406ae6
+TRANSFERRED_WIP_REUSED = readonly-live-adapter.js typed read-only position/event adapter; existing preview shell
+TRANSFERRED_WIP_SUPERSEDED = prior custom text damage / CSS combat flash / fixed 0.5x controls; replaced by original bitmap digits, lens assets, source modes, 100% defaults
+```
+
+This is an isolated browser presentation fixture. It does not alter PA, rAthena, Stage2, Supply, Quest, Production Player Web, formal minimap, combat runtime, database, or gameplay authority.
+
+## Test page
+
+```text
+TEST_PAGE = ops/ro-stack/dashboard/poc/minimap-live-combat/index.html
+PREVIEW_URL = http://127.0.0.1:8799/ops/ro-stack/dashboard/poc/minimap-live-combat/
+```
+
+The preview server is loopback-only and must be stopped after the Product Owner review window.
+
+## Fidelity gate
+
+| Contract | Result |
+|---|---|
+| RO_MINIMAP | BLOCKED_NOT_PROVEN |
+| RO_PLAYER_SCALE | BLOCKED_NOT_PROVEN |
+| RO_MONSTER_SCALE | BLOCKED_NOT_PROVEN |
+| RO_PLAYER_IDLE | PASS |
+| RO_PLAYER_WALK | PASS |
+| RO_PLAYER_ATTACK | PASS |
+| RO_PLAYER_HIT | BLOCKED_MISSING_ASSET |
+| RO_MONSTER_IDLE | PASS |
+| RO_MONSTER_WALK | BLOCKED_NOT_PROVEN |
+| RO_MONSTER_ATTACK | BLOCKED_NOT_PROVEN |
+| RO_MONSTER_HIT | BLOCKED_NOT_PROVEN |
+| RO_MONSTER_DIE | BLOCKED_MISSING_ASSET |
+| RO_ATTACK_EFFECT | BLOCKED_MISSING_ASSET |
+| RO_HIT_EFFECT | PASS |
+| RO_CRITICAL_EFFECT | PASS |
+| RO_DAMAGE_NUMBER | PASS |
+| RO_LEVEL_UP_EFFECT | BLOCKED_MISSING_ASSET |
+| RO_ATTACK_SOUND | PASS |
+| RO_HIT_SOUND | PASS |
+| RO_CRITICAL_SOUND | PASS |
+| RO_DEATH_SOUND | PASS |
+| RO_LEVEL_UP_SOUND | PASS |
+
+```text
+RO_ORIGINAL_FIDELITY_COMPLETE = NO
+RO_ORIGINAL_EVIDENCE_MISSING = PLAYER_HIT_ACT, PLAYER_DIE_ACT, MONSTER_ACTION_ACT/SPR_WEB_FRAMES, MONSTER_DEATH_EFFECT, LEVEL_UP_VISUAL_EFFECT, ORIGINAL_FONT_BEHAVIOR_SCREENSHOT, LIVE_TARGET_POSITION, LIVE_AUTHORITATIVE_ATTACK_HIT_KILL_FOR_BROWSER
+```
+
+The page does not substitute missing original assets. The monster WebP outputs are the verified idle outputs. The source ACT/SPR pairs remain recorded for a later lossless action-atlas workline.
+
+## Live data contract
+
+```text
+PLAYER_POSITION_CONTRACT = /api/live-position?characterId=<session character>; one minimal authoritative position projection
+PLAYER_MOVEMENT_CONTRACT = authoritative samples; adapter interpolates received samples in rAF; no browser pathfinding
+TARGET_CONTRACT = /api/events target line only when authoritative; LIVE_TARGET_POSITION = NOT_AVAILABLE when no target position exists
+COMBAT_CONTRACT = /api/combat-snapshot then /api/combat-stream or /api/events; ATTACK is not promoted to HIT without authoritative damage
+LEVEL_UP_CONTRACT = no level-up event in current adapter; preview button remains visual-only and blocked for missing visual asset
+```
+
+```text
+LIVE_PLAYER_POSITION = adapter implemented; browser acceptance requires authenticated session
+LIVE_EVENT_PROJECTION = read-only adapter events are rendered only from authoritative TARGET / ATTACK / HIT-with-damage / KILL / DEATH / LOOT / MAP_CHANGE records; browser acceptance requires authenticated session
+LIVE_PLAYER_MOVEMENT = NOT_MEASURED in this isolated page
+LIVE_TARGET = NOT_AVAILABLE unless authoritative projection supplies identity and position
+LIVE_ATTACK = NOT_MEASURED
+LIVE_HIT = NOT_MEASURED
+LIVE_DAMAGE = NOT_MEASURED
+LIVE_CRITICAL = NOT_MEASURED
+LIVE_KILL = NOT_MEASURED
+LIVE_DEATH = NOT_MEASURED
+LIVE_LEVEL_UP = NOT_AVAILABLE
+MISSING_PRESENTATION_CONTRACTS = target position, authoritative combat damage/critical/kill/death browser projection, level-up event and visual
+```
+
+## Controls and audio
+
+```text
+PLAYER_SCALE_CONTROL = 50%, 75%, 100%, 150%, 200%; default 100%
+MONSTER_SCALE_CONTROL = 50%, 75%, 100%, 150%, 200%; default 100%
+DEFAULT_OTHER_PLAYERS = OFF
+DEFAULT_PLAYER_NAMES = OFF
+DEFAULT_MONSTER_NAMES = OFF
+CURRENT_GHOST_ISLAND_AUDIO = attack.wav, hurt.wav, defeat.wav, level_up.wav
+RO_ORIGINAL_AUDIO = _attack_sword.wav, _hit_sword.wav, ef_hit2.wav, damage_male.wav, poring_die.wav, level_up.wav
+AUDIO_CONFLICTS = NO production conflict observed; this page selects one sound set per event
+DUPLICATE_SOUND_GUARD = event id + sound set key de-duplicates one primary sound per event
+```
+
+## Performance matrix
+
+The browser acceptance run records FPS and frame time in the page telemetry. Exact mobile P50/P95/P99/MAX and audio/effect deltas remain `NOT MEASURED` until the Product Owner review session supplies a 390×844 run with the required toggles.
+
+```text
+MOBILE_VIEWPORT = 390x844
+FPS_SELF_TARGET = NOT MEASURED
+FPS_5_MONSTERS = NOT MEASURED
+FPS_10_MONSTERS = NOT MEASURED
+FPS_20_MONSTERS = NOT MEASURED
+FRAME_P50 = NOT MEASURED
+FRAME_P95 = NOT MEASURED
+FRAME_P99 = NOT MEASURED
+FRAME_MAX = NOT MEASURED
+STALL_GT_100MS = NOT MEASURED
+NAMES_OFF_COST = NOT MEASURED
+NAMES_ON_COST = NOT MEASURED
+AUDIO_OFF_COST = NOT MEASURED
+RO_AUDIO_COST = NOT MEASURED
+EFFECTS_OFF_COST = NOT MEASURED
+RO_EFFECTS_COST = NOT MEASURED
+DISPLAY_SCALE_EFFECT_ON_PERFORMANCE = NOT MEASURED
+CANVAS2D_MOBILE_VIABLE = REQUIRES_390x844_MEASUREMENT
+```
 
 ## Browser acceptance evidence
 
-Browser: Codex In-app Browser against the short-lived static preview server `http://127.0.0.1:8799/ops/ro-stack/dashboard/poc/minimap-live-combat/`.
+Browser: Codex In-app Browser against the loopback preview URL. The preview used the nearest valid isolated deterministic scenario state; no production runtime was restarted.
 
 | Control / behavior | Result | Evidence |
-| --- | --- | --- |
-| PLAYER_WALK_VISIBLE | PASS | Canvas visibly moved player from spawn to monster A; AX showed `Running · WALK_A`. |
-| MONSTER_WALK_VISIBLE | PASS | Monster B moved during the deterministic walk segment; event trace showed `9.8s WALK · 瘋兔進入移動段`. |
-| PLAYER_ATTACK_VISIBLE | PASS | AX event trace showed `5.6s ATTACK · 玩家攻擊 波利` and later `14.5s ATTACK · 玩家攻擊 瘋兔`. |
-| MONSTER_HIT_VISIBLE | PASS | AX event trace showed `7.0s HIT · 波利受到攻擊` and `13.3s HIT · 瘋兔攻擊玩家`. |
-| DAMAGE_NUMBER_VISIBLE | PASS | Canvas damage float is rendered; trace showed `8.2s DAMAGE · 傷害 124` and `15.3s DAMAGE · 傷害 138`. |
-| MONSTER_DEATH_VISIBLE | PASS | Trace showed paired `KILL` and `DEATH` for 波利 and 瘋兔; Canvas fades the target after death. |
-| RETARGET_VISIBLE | PASS | Trace showed `4.7s TARGET · 鎖定 波利` and `12.4s TARGET · 重新鎖定 瘋兔`; lock-on ring is drawn around target. |
-| Start / Pause / Reset | PASS | Pause changed visible state to `Paused · ready`; Start resumed the loop; Reset cleared snapshots and event trace. |
+|---|---|---|
+| RO map visible | PASS | Screenshot showed `prt_fild08` source map and 512×512 label. |
+| Player IDLE / WALK / ATTACK | PASS | Original novice body sheets were visible; event trace showed WALK at 1.2s and ATTACK at 5.6s / 14.5s. |
+| Monster presentation | PASS for verified idle asset | Poring and Lunatic WebP outputs were visible at the default 100% control; complete monster action fidelity remains blocked. |
+| Combat timeline | PASS for preview trace | TARGET → WALK → ATTACK → HIT → DAMAGE → KILL → DEATH events were visible in order. |
+| Original bitmap damage | PASS | Normal and critical number PNGs were rendered; critical preview showed the original critical background and lens2 asset. |
+| Preview buttons | PASS | Normal Attack, Critical, Player Hit, Monster Hit, Monster Death and Level Up all produced a visible event or explicit blocked status. |
+| Names and scale controls | PASS | Other Players, Player Names and Monster Names defaulted off; Monster Names toggled on; 150% player and 50% monster controls changed visible settings. |
+| Sound set control | PASS | AX showed default `RO ORIGINAL`; CURRENT GHOST ISLAND and OFF are selectable. One event id plus sound-set guard prevents duplicate playback. |
+| LIVE READ-ONLY boundary | PASS | Selecting LIVE showed the character ID control; Start without an ID stopped at `LIVE READ-ONLY · 請輸入角色 ID`. No preview entity was injected into live mode. |
+| Pause / Reset | PASS | Pause returned to `RO SCENARIO PREVIEW · 已就緒`; Reset cleared revision and event trace. |
 
-## Latency observations
+Desktop telemetry observed during the browser run:
 
-- `500MS_VISUAL_ACCEPTABLE = PASS`: map and entity motion remained smooth at 60 FPS; received authority revision lagged while render loop stayed independent.
-- `1200MS_VISUAL_ACCEPTABLE = PASS`: known movement segments continued to their bounded endpoints; UI showed the independent renderer and delayed snapshot revision.
-- `2000MS_RECOVERY_BEHAVIOR = PASS`: when authority snapshots were delayed, the browser held the legal endpoint and resumed after the next snapshot. No unbounded extrapolation was observed.
+```text
+FPS_SELF_TARGET = 60
+FPS_5_MONSTERS = NOT_MEASURED_THIS_RUN
+FPS_10_MONSTERS = NOT_MEASURED_THIS_RUN
+FPS_20_MONSTERS = NOT_MEASURED_THIS_RUN
+FRAME_P50 = NOT_MEASURED
+FRAME_P95 = 16.8ms (single visible sample window)
+FRAME_P99 = NOT_MEASURED
+FRAME_MAX = 16.8ms (single visible sample window)
+STALL_GT_100MS = 0 observed in the run
+```
 
-## Scale observations
+The 390×844 mobile P50/P95/P99/MAX matrix still requires a dedicated viewport measurement and is not inferred from the desktop run.
 
-- `0.35X = PASS`: smallest readable footprint; least map occlusion.
-- `0.5X = PASS / BEST_BALANCE`: player and monster silhouettes remained readable while preserving map context.
-- `0.7X = PASS`: clearest silhouettes; increased map occlusion.
+## Authority and quality
 
-## Performance observation
+```text
+NO_FAKE_AUTHORITY = YES
+NO_GAMEPLAY_AUTHORITY_CHANGE = YES
+NO_SECOND_MOVEMENT_ENGINE = YES
+PRODUCTION_TOUCHED = NO
+PA_TOUCHED = NO
+RATHENA_TOUCHED = NO
+RUNTIME_RESTARTED = NO
+OPENKORE_RUNTIME = 0
+BROWSER_UI_PASS = PASS_FOR_ISOLATED_PREVIEW_CONTROLS
+PRODUCT_OWNER_VISUAL_ACCEPTANCE = REQUIRES_USER_REVIEW
+FILES_CHANGED = index.html, app.js, styles.css, readonly-live-adapter.js, REFERENCE_NOTES.md, RO_ORIGINAL_ASSET_MATRIX.md, RESULTS.md
+GIT_CHECKPOINT = 7014145
+READY_FOR_PRODUCT_OWNER_REVIEW = YES
+READY_FOR_PRODUCTION_INTEGRATION = NO
+CHARACTER_LIFE_DIRECTION_COMPATIBILITY = PASS
+```
 
-Measured in browser AX telemetry with each entity count selected and started:
-
-- `FPS_1_ENTITY = 60`, frame time `16.7ms`.
-- `FPS_5_ENTITY = 60`, frame time `16.7ms`.
-- `FPS_10_ENTITY = 60`, frame time `16.7ms`.
-- `FPS_20_ENTITY = 60`, frame time `16.6ms`.
-- `CANVAS2D_20_ENTITY_VIABLE = YES` for this presentation fixture and viewport. This is not a production performance certification.
-
-## Safety / deployment
-
-- `NO_GAMEPLAY_AUTHORITY_CHANGE = YES`
-- `PRODUCTION_TOUCHED = NO`
-- `RUNTIME_RESTARTED = NO`
-- `OPENKORE_RUNTIME = 0` (no OpenKore process was started by this task)
-- The preview server was static-only, bound to loopback port 8799, and is stopped after this report.
-
-## Verdict
-
-`POC_VERDICT = PROMISING`
-
-`CHARACTER_LIFE_DIRECTION_COMPATIBILITY = PASS`: the page keeps authority state, render state, and mock event presentation separate, so a future Life Director or Social Director could consume a typed read model without introducing a second movement or combat authority.
-
-`NEXT_RECOMMENDED_SLICE =` add a typed read-only snapshot adapter against an isolated fixture, preserving the same browser-only renderer and retaining the no-production-integration gate.
+`CHARACTER_LIFE_DIRECTION_COMPATIBILITY = PASS` because the adapter consumes a typed read-only projection and the renderer remains a presentation layer. Life Director, Social Director, Persistent Agent ownership, and rAthena authority are untouched.
