@@ -190,8 +190,16 @@ export function createControllerStatus({
     owner === SERVER_AGENT_OWNER &&
     serverAgentOwnershipStates.has(ownershipState ?? '');
   const isLegacyOwner = owner === OPENKORE_OWNER;
+  // A persisted AUTO_FARM mode is historical intent while the live read model
+  // is non-resident. It must not make a quarantined character look actionable.
+  // Missing live status stays fail-soft and preserves the existing read path;
+  // an available non-resident snapshot is authoritative for this gate.
+  const nonResidentSnapshot =
+    liveStatus?.available === true && liveStatus.resident !== true;
   const farmActive =
-    farmRunning === null
+    nonResidentSnapshot
+      ? false
+      : farmRunning === null
       ? Boolean(agentMode) && agentMode !== 'PERSISTENT_IDLE'
       : farmRunning === true;
 
@@ -210,14 +218,22 @@ export function createControllerStatus({
       blockers.claim = 'agent_already_enabled';
 
     startFarm =
-      isServerAgent && agentEnabled && !farmActive && Boolean(farmTarget);
-    if (isServerAgent && agentEnabled && farmActive)
+      isServerAgent && !nonResidentSnapshot && agentEnabled && !farmActive && Boolean(farmTarget);
+    if (isServerAgent && nonResidentSnapshot)
+      blockers.startFarm = ownershipState === 'QUARANTINED'
+        ? 'agent_quarantined'
+        : 'not_resident';
+    else if (isServerAgent && agentEnabled && farmActive)
       blockers.startFarm = 'task_already_active';
     else if (isServerAgent && !farmTarget)
       blockers.startFarm = 'farm_target_unresolved';
 
-    stopFarm = isServerAgent && farmActive;
-    if (isServerAgent && !farmActive) blockers.stopFarm = 'nothing_to_stop';
+    stopFarm = isServerAgent && !nonResidentSnapshot && farmActive;
+    if (isServerAgent && nonResidentSnapshot)
+      blockers.stopFarm = ownershipState === 'QUARANTINED'
+        ? 'agent_quarantined'
+        : 'not_resident';
+    else if (isServerAgent && !farmActive) blockers.stopFarm = 'nothing_to_stop';
 
     release = isServerAgent;
     if (owner && !isServerAgent) blockers.release = 'agent_not_owner';
@@ -254,7 +270,7 @@ export function createControllerStatus({
     rolloutReason: rollout?.reason ?? null,
     farmTarget: farmTarget ?? null,
     liveStatus: liveStatus ?? null,
-    farmRunning: farmRunning === null ? null : farmRunning === true,
+    farmRunning: farmRunning === null ? null : farmActive,
     actions: { claim, startFarm, stopFarm, release },
     actionBlockers: blockers,
     unavailableReason,
