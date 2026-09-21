@@ -427,6 +427,7 @@ topics:
     pa_design_implication: "Preserve intent across supply substates and restart."
     pa_flexibility_allowed: "Yes, PA may improve persistence and observability."
     common_misunderstandings: "Walking fallback must not replace the primary save-point contract."
+    project_refs: [docs/openkore-reference/supply.md, docs/reference-mining/topics/reconnect-session-character-lifecycle.md]
   - id: 22
     topic: WEIGHT_THRESHOLDS
     keywords: [itemsMaxWeight, weight, overweight, capacity]
@@ -465,7 +466,7 @@ topics:
     pa_design_implication: "Server respawn event is the transition authority."
     pa_flexibility_allowed: "Yes, state restoration may be more durable than config replay."
     common_misunderstandings: "Issuing respawn is not proof of respawned map."
-    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md]
+    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md, docs/reference-mining/topics/reconnect-session-character-lifecycle.md]
   - id: 24
     topic: STUCK_RECOVERY
     keywords: [stuck, route failure, nudge, unstuck]
@@ -505,7 +506,7 @@ topics:
     pa_design_implication: "Every retry needs a reason, key, ceiling and next-at timestamp."
     pa_flexibility_allowed: "Yes, PA may improve timing with event signals."
     common_misunderstandings: "A timeout is a state transition, not permission to loop forever."
-    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md]
+    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md, docs/reference-mining/topics/reconnect-session-character-lifecycle.md]
   - id: 26
     topic: TELEPORT
     keywords: [teleportAuto, Task::Teleport, random warp, respawn]
@@ -525,7 +526,7 @@ topics:
     pa_design_implication: "Record teleport reason and authoritative result."
     pa_flexibility_allowed: "Yes, PA can use non-consumable item semantics."
     common_misunderstandings: "Teleport command success does not prove reattachment or target reacquisition."
-    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md]
+    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md, docs/reference-mining/topics/reconnect-session-character-lifecycle.md]
   - id: 27
     topic: FLY_WING
     keywords: [Fly Wing, item 601, random warp, teleport search]
@@ -545,7 +546,7 @@ topics:
     pa_design_implication: "Reuse reason, cooldown, result and reacquire semantics; preserve non-consumption."
     pa_flexibility_allowed: "Yes, roaming planner remains open."
     common_misunderstandings: "Fly Wing is not Butterfly Wing and does not select save point."
-    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md]
+    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md, docs/reference-mining/topics/reconnect-session-character-lifecycle.md]
   - id: 28
     topic: BUTTERFLY_WING
     keywords: [Butterfly Wing, item 602, save point, return]
@@ -565,7 +566,7 @@ topics:
     pa_design_implication: "Project rule overrides item consumption while preserving save-point result."
     pa_flexibility_allowed: "Yes, route planning after save point is PA-owned."
     common_misunderstandings: "A non-consumable item can still have cooldown or state transition rules."
-    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md]
+    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md, docs/reference-mining/topics/reconnect-session-character-lifecycle.md]
   - id: 29
     topic: SKILL_AUTOMATION
     keywords: [UseSkill, skill, raiseSkill, cast]
@@ -680,6 +681,7 @@ topics:
     pa_design_implication: "Reuse primitives and phase semantics; keep quest truth in rAthena."
     pa_flexibility_allowed: "Yes, generic phase machines may replace plugin branching."
     common_misunderstandings: "Project custom quest automation is not upstream OpenKore capability."
+    project_refs: [docs/openkore-reference/quest-automation.md, docs/reference-mining/topics/reconnect-session-character-lifecycle.md]
   - id: 35
     topic: MACRO
     keywords: [macro, macro plugin, macro command]
@@ -786,14 +788,15 @@ topics:
     retry_policy: "Delay and rate limit reconnect attempts."
     recovery_policy: "Restore owned phase only after authoritative state is loaded."
     edge_cases: "Duplicate session, stale map, service transaction and death."
-    project_last_good: "PA reconnect reconciliation events and job resume state."
-    project_acceptance_evidence: "Persistent-agent audit references; full OpenKore reconnect is historical."
-    current_pa: "Native PA lifecycle and persistent state."
-    current_pa_gap: "Production reconnect persistence acceptance remains outside this task."
+    project_last_good: "PA reconnect reconciliation events, job resume state and lifecycle dossier."
+    project_acceptance_evidence: "Persistent-agent audit references; full OpenKore reconnect is historical; see docs/reference-mining/topics/reconnect-session-character-lifecycle.md."
+    current_pa: "Native PA lifecycle, safe pause, runtime instance, execution epoch and persistent state."
+    current_pa_gap: "Production reconnect persistence acceptance, explicit SUPERSEDED status and service transaction ambiguity remain open."
     reuse_classification: ADAPT
     pa_design_implication: "Reconnect is reconciliation, not blind replay."
     pa_flexibility_allowed: "Yes, server-side lease/state can be stronger."
     common_misunderstandings: "A TCP reconnect does not prove gameplay resume."
+    project_refs: [docs/reference-mining/topics/reconnect-session-character-lifecycle.md, docs/reference-mining/reconnect-lifecycle-capability-matrix.yml]
   - id: 41
     topic: PARTY
     keywords: [party, attackAuto_party, party share]

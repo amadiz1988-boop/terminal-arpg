@@ -1,0 +1,157 @@
+schema: RECONNECT_LIFECYCLE_CAPABILITY_MATRIX_V1
+topic: RECONNECT_SESSION_CHARACTER_LIFECYCLE
+last_reviewed: '2026-09-21'
+authority: rAthena character/world state plus current PA command and read-model contracts
+source_dossier: docs/reference-mining/topics/reconnect-session-character-lifecycle.md
+classification_legend: [REUSE, ADAPT, IMPROVE, REJECT_LEGACY, NOT_APPLICABLE]
+capabilities:
+  - id: login_presence
+    openkore: login reconnect hook and network presence
+    rathena: login online database and char-server presence
+    current_project: Dashboard auth plus rAthena login/char authority
+    classification: ADAPT
+    gap: full end-to-end reconnect canary
+  - id: char_server_reconnect
+    openkore: re-authentication after transport loss
+    rathena: chrif disconnect, bounded retry and ready reconciliation
+    current_project: PA safe pause, char-server ready reconcile and save replay
+    classification: ADAPT
+    gap: production acceptance across every disconnect class
+  - id: map_attach
+    openkore: map login and map state observation
+    rathena: chrif_authreq_server_owned, pc_authok, pc_setpos
+    current_project: server-owned attach with authoritative map and position
+    classification: REUSE
+    gap: none for source contract; live reconnect proof remains separate
+  - id: character_save_load
+    openkore: state packets and local actor view
+    rathena: mmo_charstatus, char_db and MariaDB char row
+    current_project: char authority plus PA live read model
+    classification: REUSE
+    gap: save race evidence for every transaction class
+  - id: save_race_guard
+    openkore: reconnect and task retry patterns
+    rathena: save on char-server path and online conflict handling
+    current_project: runtime instance, revision and post-ready save replay
+    classification: ADAPT
+    gap: transaction-specific ambiguous result read model
+  - id: bounded_backoff
+    openkore: reconnect_backoff and reconnect_random
+    rathena: one-second char-server retry path
+    current_project: bounded runtime retry and SSE reconnect rate guard
+    classification: REUSE
+    gap: one shared policy across all PA operations
+  - id: safe_pause
+    openkore: stop queue or wait for connection
+    rathena: PA stops movement, combat, NPC and quest mutation on char disconnect
+    current_project: CHAR_DISCONNECT_SAFE_PAUSED and execution token invalidation
+    classification: REUSE
+    gap: complete Event Ledger coverage
+  - id: auto_farm_resume
+    openkore: restore lockMap and parent intent
+    rathena: persisted AUTO_FARM plus map/target checks
+    current_project: same-map activate; off-map defer to PERSISTENT_IDLE
+    classification: ADAPT
+    gap: PLAYER_OVERRIDE resume contract
+  - id: supply_resume
+    openkore: preserve supply intent through reconnect and service
+    rathena: inventory, Zeny, save point and map authority
+    current_project: PA supply parent intent and bounded recovery states
+    classification: ADAPT
+    gap: primary Butterfly Wing out leg and transaction ambiguity closure
+  - id: return_to_farm
+    openkore: route back and reacquire target
+    rathena: map arrival and target state
+    current_project: relocation executor and authoritative arrival checks
+    classification: ADAPT
+    gap: reconnect-specific arrival canary
+  - id: death_respawn
+    openkore: observe death, respawn and resume lockMap
+    rathena: pc_respawn, save point and map position
+    current_project: native death recovery capability and PA recovery states
+    classification: REUSE
+    gap: quest-specific live resume matrix
+  - id: map_change_reconcile
+    openkore: clear route and wait for map result
+    rathena: pc_setpos and map-change authority
+    current_project: navigation token, route reset and arrival observation
+    classification: ADAPT
+    gap: scripted service and instance edge result typing
+  - id: command_dedupe
+    openkore: bounded action retry pattern
+    rathena: native command admission
+    current_project: UUID command id, INSERT IGNORE and payload hash
+    classification: REUSE
+    gap: durable duplicate evidence in every Event Ledger path
+  - id: revision_cas
+    openkore: local queue ordering
+    rathena: persistent state revision and ownership CAS
+    current_project: expectedRevision on Dashboard and native state transitions
+    classification: REUSE
+    gap: explicit supersession status
+  - id: stale_command
+    openkore: timeout and stale task cancellation
+    rathena: ownership, revision and runtime instance checks
+    current_project: rejection reason codes and fail-closed dispatch
+    classification: ADAPT
+    gap: complete stale reason taxonomy schema
+  - id: superseded_command
+    openkore: parent task replacement or queue clear
+    rathena: revision makes old mutation ineligible
+    current_project: implicit via revision and rejection; no durable status
+    classification: IMPROVE
+    gap: first-class SUPERSEDED state and query result
+  - id: quest_checkpoint
+    openkore: phase and task recovery pattern
+    rathena: quest and inventory authority
+    current_project: durable frame-stack checkpoint and PAUSED_FOR_RECOVERY
+    classification: REUSE
+    gap: full player-flow reconnect acceptance
+  - id: player_required_checkpoint
+    openkore: stop for human dialogue or unresolved choice
+    rathena: quest/NPC state remains authoritative
+    current_project: preserve blocked reason and require player action
+    classification: ADAPT
+    gap: explicit web re-entry and notification contract
+  - id: support_session_expiry
+    openkore: not applicable to upstream bot session
+    rathena: world authority unaffected by Dashboard support token
+    current_project: TTL, revoke, dispatch revalidation and audit
+    classification: REUSE
+    gap: idle timeout and complete lifecycle canary
+  - id: disconnect_classification
+    openkore: network and game connection hooks
+    rathena: login, char, map and client disconnect paths
+    current_project: partial cross-layer taxonomy
+    classification: IMPROVE
+    gap: one durable reason code set across all layers
+  - id: freshness
+    openkore: packet timing and reconnect observation
+    rathena: live state timestamps
+    current_project: LIVE_STATUS_MAX_AGE_MS 15000 plus SSE bounded windows
+    classification: IMPROVE
+    gap: trace and Event Ledger freshness joins
+  - id: service_transaction_ambiguity
+    openkore: retry after service timeout
+    rathena: char save and item/Zeny transaction authority
+    current_project: SERVICE_RESTART_AMBIGUOUS guard
+    classification: ADAPT
+    gap: per-service authoritative outcome resolver
+  - id: blind_replay
+    openkore: historical retry risk when outcome is unknown
+    rathena: no authority for duplicate client replay
+    current_project: forbidden by command id, revision and result lookup
+    classification: REJECT_LEGACY
+    gap: none; keep policy explicit
+  - id: tcp_resume_as_gameplay_proof
+    openkore: transport reconnect only
+    rathena: attach and state load still required
+    current_project: synthetic and Browser acceptance require authority evidence
+    classification: REJECT_LEGACY
+    gap: none; preserve wording in future reports
+counts:
+  REUSE: 9
+  ADAPT: 10
+  IMPROVE: 3
+  REJECT_LEGACY: 2
+  NOT_APPLICABLE: 0

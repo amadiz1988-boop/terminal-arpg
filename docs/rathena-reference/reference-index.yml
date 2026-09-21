@@ -84,7 +84,7 @@ topics:
     official_docs: [doc/script_commands.txt]
     official_samples: [npc/custom/etc/penal_servitude.txt]
     forum_refs: []
-    project_refs: []
+    project_refs: [docs/reference-mining/topics/reconnect-session-character-lifecycle.md]
     authority: mixed
   - topic: '09 JOB CHANGE'
     keywords: [job change, Job_Change, JobLevel, SkillPoint]
@@ -246,7 +246,7 @@ topics:
     official_docs: [doc/source_doc.txt]
     official_samples: []
     forum_refs: []
-    project_refs: []
+    project_refs: [docs/reference-mining/topics/reconnect-session-character-lifecycle.md]
     authority: mixed
   - topic: '27 SCRIPT ENGINE'
     keywords: [script engine, BUILDIN_FUNC, variables, RID]
@@ -273,7 +273,7 @@ topics:
     official_docs: [doc/source_doc.txt]
     official_samples: []
     forum_refs: []
-    project_refs: [docs/RO_AUTOMATION_PRODUCT_CONSTITUTION.md]
+    project_refs: [docs/RO_AUTOMATION_PRODUCT_CONSTITUTION.md, docs/reference-mining/topics/reconnect-session-character-lifecycle.md]
     authority: mixed
   - topic: '30 RECOVERY / DEATH'
     keywords: [death, respawn, OnPCDieEvent, recovery]
@@ -282,7 +282,7 @@ topics:
     official_docs: [doc/script_commands.txt, doc/status.txt]
     official_samples: [npc/custom/etc/penal_servitude.txt]
     forum_refs: []
-    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md]
+    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md, docs/reference-mining/topics/reconnect-session-character-lifecycle.md]
     authority: mixed
   - topic: '31 TELEPORT / FLY WING / BUTTERFLY WING'
     keywords: [Fly Wing, Butterfly Wing, teleport, savepoint]
@@ -291,7 +291,7 @@ topics:
     official_docs: [doc/script_commands.txt]
     official_samples: []
     forum_refs: []
-    project_refs: [docs/RO_FLY_WING_SOURCE_AUDIT.md, docs/reference-mining/topics/monster-ai-combat-target-retarget.md]
+    project_refs: [docs/RO_FLY_WING_SOURCE_AUDIT.md, docs/reference-mining/topics/monster-ai-combat-target-retarget.md, docs/reference-mining/topics/reconnect-session-character-lifecycle.md]
     authority: mixed
   - topic: '32 AUTONOMOUS QUEST SUPPORT'
     keywords: [SERVER_AGENT, quest runtime, GO_NPC, FARM_UNTIL]

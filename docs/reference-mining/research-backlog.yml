@@ -64,13 +64,15 @@ topics:
     upstreamBaseline: { rAthena: e985006171d2eb320ee512a653f4c83aea3d81b6, OpenKore: 51de1ddfc4449ae5217f6886de702f87ca934030 }
   - domain: reconnect_session_character_lifecycle
     priority: P1
-    status: BACKLOG
+    status: COMPLETE
     whyHighValue: Reconnect and character lifecycle can invalidate ownership, leases, inventory snapshots and resume intent.
-    currentAtlasCoverage: OpenKore reconnect and rAthena character authority are present.
-    knownGaps: Production reconnect persistence acceptance remains open.
-    relatedProjectFlows: [Reconnect, character lifecycle, PA ownership, resume]
-    lastReviewed: NOT_REVIEWED_THIS_CYCLE
+    currentAtlasCoverage: rAthena login/char/map authority, save/load, PA safe pause/reconcile, OpenKore bounded backoff, command dedupe, PA/AUTO_FARM/Supply/Quest resume and support-session lifecycle are consolidated in the lifecycle dossier.
+    knownGaps: Production reconnect persistence canary, explicit SUPERSEDED command status, service transaction ambiguity resolver, PLAYER_OVERRIDE resume contract and complete cross-layer Event Ledger trace remain open.
+    relatedProjectFlows: [Reconnect, character lifecycle, PA ownership, AUTO_FARM, Supply, Quest, support session, resume]
+    lastReviewed: '2026-09-21'
     upstreamBaseline: { rAthena: e985006171d2eb320ee512a653f4c83aea3d81b6, OpenKore: 51de1ddfc4449ae5217f6886de702f87ca934030 }
+    dossier: docs/reference-mining/topics/reconnect-session-character-lifecycle.md
+    machineReadableMatrix: docs/reference-mining/reconnect-lifecycle-capability-matrix.yml
   - domain: npc_quest_ontouch_hidden_triggers
     priority: P1
     status: BACKLOG
