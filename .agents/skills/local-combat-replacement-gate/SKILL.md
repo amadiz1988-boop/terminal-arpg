@@ -40,13 +40,31 @@ Keep these in PA unless a separately approved contract proves otherwise:
 
 - supply trigger, service route, replenishment and return-to-farm;
 - HP/SP recovery policy, potion choice and quarantine;
-- loot policy, ownership, pickup ordering and overweight handling;
+- inventory lifecycle interpretation, weight threshold, supply trigger and
+  storage/sell policy;
 - cross-map navigation, parent intent, quest pause/resume;
 - Social Director and Life Director parent intent and factual event promotion.
 
-rAthena remains authoritative for HP/SP, damage, hit/miss, death, drops,
-inventory, position, skill legality, cooldown and map entities. A candidate
-executor may own only an ephemeral combat lease, action cadence and result relay.
+rAthena remains authoritative for HP/SP, damage, hit/miss, death, monster drop
+resolution, global autoloot execution, authoritative inventory add, loot
+acquisition result, position, skill legality, cooldown and map entities. A
+candidate executor may own only an ephemeral combat lease, action cadence and
+result relay. Ordinary hunting floor-item pickup orchestration is not a PA
+requirement after the Global AutoLoot decision.
+
+The product loot contract is fixed:
+
+```text
+GLOBAL_AUTOLOOT = PRODUCT_ACCEPTED_DIRECTION
+GLOBAL_AUTOLOOT_TO_INVENTORY = YES
+GLOBAL_AUTOSTORE = NO
+DROP != LOOT_ACQUIRED
+```
+
+Only a successful authoritative inventory add may emit `LOOT_ACQUIRED`. The
+event carries char, monster, item, amount, inventory delta, combat session,
+execution epoch and trace identifiers where authoritative data exists. Full
+inventory, overweight and item-add failures emit no success pickup.
 
 ## Mandatory contracts
 
@@ -58,9 +76,14 @@ Before implementation, define and test:
 3. `SUPPLY_LOW` signal carrying character, item, threshold, map, epoch and
    trace identifiers. PA performs all supply and return actions.
 4. Ordered authoritative events for target, approach, range, attack, hit/miss,
-   kill, loot candidate/acquisition and combat stop/failure.
+   kill, drop resolution, `LOOT_ADD_REJECTED`, `LOOT_ACQUIRED`, Combat Log
+   projection and combat stop/failure.
 5. Single-executor admission and stale-epoch rejection. Never create a second
    runtime or parallel combat authority.
+
+For Stage 1 shadow work, observer output is read-only and bounded in memory. It
+must not move, attack, cast, consume, teleport, loot, alter target authority,
+alter PA state, alter supply state, write Event Ledger rows or start Stage 2.
 
 ## Decision output
 

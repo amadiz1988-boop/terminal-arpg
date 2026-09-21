@@ -8,6 +8,10 @@ IMPLEMENTATION_AUTHORIZED = NO
 IMPLEMENTATION_STARTED = NO
 PRODUCTION_TOUCHED = NO
 RUNTIME_RESTARTED = NO
+GLOBAL_AUTOLOOT = PRODUCT_ACCEPTED_DIRECTION
+GLOBAL_AUTOLOOT_TO_INVENTORY = YES
+GLOBAL_AUTOSTORE = NO
+STAGE1_SHADOW_OBSERVER = IMPLEMENTATION_ACTIVE
 ```
 
 ## 1. Audit boundary
@@ -25,6 +29,11 @@ shared seam、Production 或 runtime。
 - `src/map/persistent_agent.cpp` 的 `persistent_agent_farm_tick` 目前每
   200 ms 依序處理 survival、supply、target、approach、attack、hit、kill、
   loot 與 relocation。
+- Native source reference：`src/map/mob.cpp::mob_item_drop` 進行 drop log、
+  autoloot 判定與 loot distribution；`src/map/pc.cpp::pc_additem` 是
+  authoritative inventory add，會拒絕 overweight、inventory capacity 與
+  item limit。這些函式目前只作 source reference，Stage 1 不改動 Production
+  loot path。
 - rAthena 與 OpenKore Atlas 已查核；OpenKore runtime count 為 `0`。
 - `rAthena auto combat showcase` 在 reuse registry 為 `REFERENCE_ONLY`，
   license `Unknown`，license risk `BLOCKER`，不得抄碼或直接導入。
@@ -39,16 +48,20 @@ shared seam、Production 或 runtime。
 | Attack cadence / attack request | PA issues `unit_attack` | rAthena accepts or rejects action | SAFE_WITH_CONTRACT |
 | Skill selection / fallback | PA policy, rAthena skill checks | `skill_check_condition_castbegin`, cooldown and SP | RESEARCH_MORE |
 | Damage, hit result, death and kill | rAthena | battle/status/mob authority | SAFE_TO_REPLACE = NO, KEEP_AUTHORITY_IN_RATHENA |
-| Loot policy / pickup ordering | PA | rAthena `pc_takeitem`, inventory | KEEP_IN_PA |
+| Drop resolution / global autoloot | rAthena | `mob_item_drop`, drop rules | SAFE_WITH_CONTRACT |
+| Authoritative inventory add / result | rAthena | `pc_additem`, inventory delta | SAFE_WITH_CONTRACT |
+| Ordinary hunting pickup orchestration | rAthena global autoloot | server drop path | SAFE_WITH_CONTRACT |
+| Inventory lifecycle interpretation | PA | authoritative inventory/weight observation | KEEP_IN_PA |
 | Potion choice and recovery policy | PA | rAthena item effect and cooldown | KEEP_IN_PA |
 | Supply trigger, service route, replenishment | PA | rAthena shop/storage/item transaction | KEEP_IN_PA |
 | Return-to-farm and resume | PA navigation and lifecycle | rAthena map/position | KEEP_IN_PA |
 | Quest pause and resume | PA quest runtime | rAthena quest/NPC state | KEEP_IN_PA |
 | Social / Life parent intent | Life/Social intent, PA capability | Event Ledger facts only | KEEP_IN_PA |
 
-結論：目前沒有整個 local combat component 可直接安全替換。可評估的最小
-替換單位是「PA 已授權、同地圖、已鎖定目標後的 melee attack cadence」，
-加上明確的 stop、epoch、結果事件與失敗回收契約。
+結論：目前沒有整個 local combat component 可直接安全替換。Stage 1 已啟動
+zero-authority shadow observer。可評估的最小替換單位是「PA 已授權、同地圖、
+已鎖定目標後的 melee attack cadence」，加上明確的 stop、epoch、結果事件與
+失敗回收契約。ordinary hunting pickup 不再列為 PA future ownership。
 
 ## 3. Contract required before any implementation
 
@@ -97,7 +110,7 @@ APPROACH_STARTED / ARRIVAL / IN_ATTACK_RANGE / APPROACH_FAILED
 ATTACK_ISSUED / HIT / MISS / NO_DAMAGE / ATTACK_TIMEOUT
 MONSTER_KILL
 COMBAT_PAUSED / COMBAT_STOPPED / COMBAT_FAILED
-LOOT_CANDIDATE / LOOT_ACQUIRED / LOOT_SKIPPED
+LOOT_CANDIDATE / LOOT_ADD_REJECTED / LOOT_ACQUIRED / LOOT_SKIPPED
 ```
 
 事件只記錄已由 rAthena 裁定的事實。H owned traceId propagation 保持整合
@@ -115,10 +128,36 @@ PA 保留 HP/SP threshold、item/skill 選擇、recovery mode、supply escalatio
 
 ### Loot boundary
 
-PA 保留 loot enabled policy、ownership、pickup ordering、overweight、
-unreachable、blocked cooldown 與 resume。executor 可發出
-`LOOT_CANDIDATE`，目前不取得物品。`pc_takeitem` 與 inventory delta 仍是
-rAthena authoritative path。
+`GLOBAL_AUTOLOOT = PRODUCT_ACCEPTED_DIRECTION`。rAthena owns monster drop
+resolution、global autoloot execution、authoritative inventory add 與 loot
+acquisition result。PA 不再負責 ordinary hunting 的 floor-item candidate
+selection、pickup ordering、走到 floor item 或 pickup orchestration。
+
+PA 永久保留 inventory lifecycle interpretation、weight threshold、supply
+decision、sell/storage policy、restock/withdraw、cross-map supply、
+return-to-farm 與 parent intent。`GLOBAL_AUTOLOOT_TO_INVENTORY = YES`，
+`GLOBAL_AUTOSTORE = NO`。autoloot 不得直接寫入 storage 以繞過 PA supply
+lifecycle。
+
+`DROP != ACQUIRED`。只有 authoritative inventory add 成功後才能 emit
+`LOOT_ACQUIRED`，至少包含 `charId`、monster id/name where available、
+`itemId`、`itemName`、`amount`、inventory delta、`combatSessionId`、
+`executionEpoch`、`traceId`。inventory full、weight rejection 或 item add
+failure 只能產生 `LOOT_ADD_REJECTED`，不得顯示成功拾取。
+
+Combat Log pipeline：
+
+```text
+MONSTER_KILL
+→ DROP_RESOLUTION
+→ GLOBAL_AUTOLOOT
+→ AUTHORITATIVE_INVENTORY_ADD
+→ LOOT_ACQUIRED
+→ EVENT_LEDGER
+→ PLAYER_COMBAT_LOG
+```
+
+Stage 1 只定義契約，不改動 Production loot execution。
 
 ### Supply and return proof
 
@@ -128,7 +167,12 @@ rAthena authoritative path。
 連續性，沒有證明新 executor 的連續性。新 executor 必須重現：
 
 ```text
-SUPPLY_LOW
+MONSTER_KILL
+→ DROP_RESOLUTION
+→ GLOBAL_AUTOLOOT_TO_INVENTORY
+→ AUTHORITATIVE_INVENTORY_ADD
+→ inventory/weight observation
+→ SUPPLY_REQUIRED
 → STOP_LOCAL_COMBAT
 → PA service / replenishment
 → SUPPLY_TARGET_REACHED
@@ -139,7 +183,38 @@ SUPPLY_LOW
 → MONSTER_KILL
 ```
 
-在此 proof chain 完成前，`SUPPLY_RETURN_PROOF = DESIGN_ONLY`。
+在此 proof chain 完成前，`SUPPLY_RETURN_PROOF = DESIGN_ONLY`，且
+`NO_SUPPLY_REGRESSION = NOT_PROVEN`。
+
+## 5. Stage 1 shadow observer
+
+```text
+STAGE1_SHADOW_OBSERVER = IMPLEMENTATION_ACTIVE
+ZERO_GAMEPLAY_AUTHORITY = YES
+```
+
+Observer 只建模 `TARGET_SCAN`、`TARGET_SELECTION`、`TARGET_REJECTION`、
+`RETARGET`、`APPROACH_DECISION`、`IN_ATTACK_RANGE`、`MELEE_ATTACK_READY`。
+它不移動、攻擊、施法、消耗道具、傳送、拾取、改變 target authority、PA
+state 或 supply state。每個 runtime 最多輸出 64 筆 bounded observation，
+不寫入 Event Ledger 或高頻資料庫。
+
+輸入包含 char/map/coord、PA target、visible monster eligibility、range、
+pathability、combat policy、execution epoch、shadow combat session id 與
+trace id。輸出包含 candidate/rejected count、shadow target、approach、
+attack-ready、decision reason、parity 與 mismatch class。
+
+Stage 1 comparison classes：`PA_BETTER`、`RATHENA_BETTER`、
+`POLICY_DIFFERENCE`、`REFERENCE_GAP`、`STATE_STALE`、
+`PATHABILITY_DIFFERENCE`、`UNKNOWN`。observer 不自動宣稱 rAthena better。
+
+Stage 1 bounded observer evidence：standalone comparison test covers eight
+deterministic cases: target parity, approach parity, attack-ready parity,
+shadow-only target, PA-only target, policy difference, stale target and
+pathability difference. Canonical Release|x64 `rAthena.sln` build includes the
+observer in `map-server`; no runtime or production instance was restarted.
+Reference-only capabilities remain waiting: skill execution, buff, potion,
+ammo, roaming/Fly Wing, party/KS and autonomous supply policy.
 
 ## 5. Quest, Social and Life impact
 
@@ -178,10 +253,12 @@ OPENKORE_BEHAVIOR_COMPARED = YES
 SERVER_AUTHORITY_INVARIANTS_PRESERVED = YES
 REFERENCE_CONFLICT_RESOLVED = YES
 GHOST_ISLAND_OPTIMIZATION_REVIEWED = YES
-RESULT_EQUIVALENT_OR_BETTER = NO  # migration proof not executed
+STAGE1_SHADOW_SOURCE_PASS = YES
+TARGET_APPROACH_ATTACK_PARITY_MEASURED = YES  # bounded deterministic cases
+RESULT_EQUIVALENT_OR_BETTER = NOT_APPLICABLE  # Stage 2 authority transfer not started
 CHANGE_APPROVED = NO
 CHANGE_REJECTED = YES
-WORKLINE_DONE = NO  # implementation gate remains closed; design audit is complete
+WORKLINE_DONE = NO  # Stage 1 observer complete; authority migration remains closed
 ```
 
 `RESULT_EQUIVALENT_OR_BETTER = NO` 是證據狀態，不代表候選設計永久淘汰。
@@ -194,8 +271,8 @@ admission proof。
 | Stage | Scope | Gate | Status |
 | --- | --- | --- | --- |
 | 0 | Contract、ownership、event schema、failure matrix | hard-gate review | DESIGN_ACCEPTED |
-| 1 | Shadow observer，完全不改 action authority | event ordering and trace audit | NOT_STARTED |
-| 2 | Same-map melee cadence only; PA retains target, stop, supply and loot | bounded combat parity + stop race | NOT_STARTED |
+| 1 | Shadow observer，完全不改 action authority；ordinary loot 只保留契約 | target/approach/attack parity + supply ownership | IMPLEMENTATION_ACTIVE |
+| 2 | Same-map melee cadence only; PA retains target, stop, supply and parent intent | bounded combat parity + stop race + loot proof gate | NOT_STARTED |
 | 3 | Skill executor under explicit skill lease | cooldown/SP/effect parity | NOT_STARTED |
 | 4 | Optional pickup assist only after ownership and overweight proof | loot boundary approval | NOT_STARTED |
 | 5 | Any roaming, party/KS or autonomous policy | separate Project Control decision | NOT_AUTHORIZED |
@@ -209,14 +286,22 @@ admission proof。
 | OpenKore reference gate | all six YES | RESULT equivalence NO |
 | Supply stop and return contract | proven | DESIGN_ONLY |
 | Potion autonomy removed from executor | YES | PASS by design |
-| Loot remains PA-owned | YES | PASS by design |
+| Global autoloot to inventory | YES | PRODUCT_ACCEPTED_DIRECTION |
+| Global autostore | NO | FORBIDDEN |
+| Loot acquisition after inventory add | proven | CONTRACT_DEFINED, PROOF_PENDING |
+| Combat Log pickup display | retained | CONTRACT_DEFINED, PROOF_PENDING |
+| Loot remains PA-owned | NO | ordinary pickup orchestration moved to rAthena contract |
+| PA inventory/supply interpretation | YES | PASS by design |
 | Quest pause/resume | proven | NOT_EXECUTED |
 | Social/Life parent intent | preserved | PASS by design |
 | Single runtime / single executor | proven | NOT_EXECUTED |
 | Production migration | explicitly authorized | NO |
 
 Overall: `HYBRID_LOCAL_COMBAT_MIGRATION_RECOMMENDED = YES` as a staged design
-direction only. `SAFE_TO_REPLACE = NONE_NOW`; `SAFE_WITH_CONTRACT = same-map
-melee cadence and server result relay`; `KEEP_IN_PA = supply, recovery/potion,
-loot policy, navigation/return, parent intent, quest, social/life`; `RESEARCH_MORE
-= skills, roaming, party/kill-steal, executor failover and full parity`.
+direction. `SAFE_TO_REPLACE = NONE_NOW`; `SAFE_WITH_CONTRACT = same-map melee
+cadence, global autoloot-to-inventory and authoritative result relay`;
+`KEEP_IN_PA = inventory lifecycle interpretation, weight threshold, supply,
+recovery/potion, sell/storage policy, restock/withdraw, cross-map navigation,
+return-to-farm, parent intent, quest, social/life`; `RESEARCH_MORE = skills,
+roaming, party/kill-steal, executor failover, authoritative item-add proof,
+Combat Log proof and supply regression proof`.
