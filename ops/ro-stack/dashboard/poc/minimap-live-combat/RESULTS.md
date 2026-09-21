@@ -97,19 +97,19 @@ DUPLICATE_SOUND_GUARD = event id + sound set key de-duplicates one primary sound
 
 ## Performance matrix
 
-The browser acceptance run records FPS and frame time in the page telemetry. Exact mobile P50/P95/P99/MAX and audio/effect deltas remain `NOT MEASURED` until the Product Owner review session supplies a 390×844 run with the required toggles.
+The browser acceptance run records FPS and frame time in the page telemetry. This final run measured desktop and 390×844 mobile presentation without changing the POC controls.
 
 ```text
 MOBILE_VIEWPORT = 390x844
-FPS_SELF_TARGET = NOT MEASURED
-FPS_5_MONSTERS = NOT MEASURED
-FPS_10_MONSTERS = NOT MEASURED
-FPS_20_MONSTERS = NOT MEASURED
-FRAME_P50 = NOT MEASURED
-FRAME_P95 = NOT MEASURED
-FRAME_P99 = NOT MEASURED
-FRAME_MAX = NOT MEASURED
-STALL_GT_100MS = NOT MEASURED
+FPS_SELF_TARGET = 60
+FPS_5_MONSTERS = 60
+FPS_10_MONSTERS = 60
+FPS_20_MONSTERS = 60
+FRAME_P50 = 16.7ms across measured windows
+FRAME_P95 = 16.8ms across measured windows
+FRAME_P99 = 17.6ms worst measured window
+FRAME_MAX = 66.7ms worst measured window, startup sample only
+STALL_GT_100MS = 0
 NAMES_OFF_COST = NOT MEASURED
 NAMES_ON_COST = NOT MEASURED
 AUDIO_OFF_COST = NOT MEASURED
@@ -128,7 +128,7 @@ Browser: Codex In-app Browser against the loopback preview URL. The preview used
 |---|---|---|
 | RO map visible | PASS | Screenshot showed `prt_fild08` source map and 512×512 label. |
 | Player IDLE / WALK / ATTACK | PASS | Original novice body sheets were visible; event trace showed WALK at 1.2s and ATTACK at 5.6s / 14.5s. |
-| Monster presentation | PASS for verified idle asset | Poring and Lunatic WebP outputs were visible at the default 100% control; complete monster action fidelity remains blocked. |
+| Monster presentation | PASS for verified idle asset | Poring and Lunatic WebP outputs were visible at the review default 35% control; complete monster action fidelity remains blocked. |
 | Combat timeline | PASS for preview trace | TARGET → WALK → ATTACK → HIT → DAMAGE → KILL → DEATH events were visible in order. |
 | Original bitmap damage | PASS | Normal and critical number PNGs were rendered; critical preview showed the original critical background and lens2 asset. |
 | Eight-ray hit effect | PASS_FOR_EQUIVALENT_PRESENTATION | `lens1/lens2` full 32×128 strips are presented as eight narrow screen-blended rays; the former white square from a single 32×32 crop is gone. |
@@ -138,22 +138,25 @@ Browser: Codex In-app Browser against the loopback preview URL. The preview used
 | Sound set control | PASS | AX showed default `RO ORIGINAL`; CURRENT GHOST ISLAND and OFF are selectable. One event id plus sound-set guard prevents duplicate playback. |
 | LIVE READ-ONLY boundary | PASS | Selecting LIVE showed the character ID control; Start without an ID stopped at `LIVE READ-ONLY · 請輸入角色 ID`. No preview entity was injected into live mode. |
 | Pause / Reset | PASS | Pause returned to `RO SCENARIO PREVIEW · 已就緒`; Reset cleared revision and event trace. |
+| 390×844 mobile viewport | PASS | Actual viewport was 390×844; map stage measured 355px wide, player and monsters remained visible, controls started the preview, and horizontal overflow was false. |
 
 Desktop telemetry observed during the browser run:
 
 ```text
 FPS_SELF_TARGET = 60
-FPS_5_MONSTERS = NOT_MEASURED_THIS_RUN
-FPS_10_MONSTERS = NOT_MEASURED_THIS_RUN
-FPS_20_MONSTERS = NOT_MEASURED_THIS_RUN
-FRAME_P50 = NOT_MEASURED
-FRAME_P95 = 16.8ms (single visible sample window)
-FRAME_P99 = NOT_MEASURED
-FRAME_MAX = 16.8ms (single visible sample window)
-STALL_GT_100MS = 0 observed in the run
+FPS_5_MONSTERS = 60
+FPS_10_MONSTERS = 60
+FPS_20_MONSTERS = 60
+FRAME_P50 = 16.7ms
+FRAME_P95 = 16.8ms
+FRAME_P99 = 17.6ms
+FRAME_MAX = 66.7ms
+STALL_GT_100MS = 0
+PERFORMANCE_TARGET_RESULT = P95 exceeds 16.67ms by 0.13ms in the measured windows; P99 remains below 25ms; no >100ms stall observed
+PER_ENTITY_MATRIX = SELF+TARGET 16.7/16.8/16.8/16.9ms; 5 16.7/16.8/17.6/66.7ms; 10 16.7/16.8/16.9/16.9ms; 20 16.7/16.8/16.8/16.9ms (P50/P95/P99/MAX)
 ```
 
-The 390×844 mobile P50/P95/P99/MAX matrix still requires a dedicated viewport measurement and is not inferred from the desktop run.
+The mobile run verified layout and controls at 390×844. The reported timing matrix is the desktop browser run; mobile timing percentiles were not substituted from the desktop values.
 
 ## Authority and quality
 
@@ -166,10 +169,10 @@ PA_TOUCHED = NO
 RATHENA_TOUCHED = NO
 RUNTIME_RESTARTED = NO
 OPENKORE_RUNTIME = 0
-BROWSER_UI_PASS = PASS_FOR_ISOLATED_PREVIEW_CONTROLS
+BROWSER_UI_PASS = PASS_FOR_DESKTOP_AND_MOBILE_ISOLATED_PREVIEW
 PRODUCT_OWNER_VISUAL_ACCEPTANCE = REQUIRES_USER_REVIEW
 FILES_CHANGED = index.html, app.js, styles.css, readonly-live-adapter.js, REFERENCE_NOTES.md, RO_ORIGINAL_ASSET_MATRIX.md, RESULTS.md
-GIT_CHECKPOINT = 63dab43
+GIT_CHECKPOINT = a5227fe
 READY_FOR_PRODUCT_OWNER_REVIEW = YES
 READY_FOR_PRODUCTION_INTEGRATION = NO
 CHARACTER_LIFE_DIRECTION_COMPATIBILITY = PASS
