@@ -685,6 +685,10 @@ let authenticated = false,
   minimapTerrain = null,
   minimapTerrainKey = '',
   minimapTracks = new Map(),
+  minimapMotionLastMap = '',
+  minimapMotionLastAuthoritativeAt = null,
+  minimapMotionLastReceivedAt = null,
+  minimapMotionGaps = [],
   minimapLastPaint = 0,
   minimapFreshness = null,
   minimapFreshnessTimer = null,
@@ -1009,6 +1013,63 @@ let minimapTelemetryLastAt = 0;
 let minimapTelemetryLastPosition = null;
 let minimapFreshnessTelemetryLastAt = 0;
 
+function minimapMotionApi() {
+  const api = globalThis.minimapPresence;
+  return api && typeof api.updateMotionTrack === 'function' ? api : null;
+}
+
+function minimapMotionRumSnapshot() {
+  const api = minimapMotionApi();
+  return api
+    ? {
+        ...api.summarizeMotionGaps(minimapMotionGaps),
+        spikeLayer: 'UNKNOWN',
+        model: 'SNAPSHOT_INTERPOLATION',
+        maxExtrapolationMs: api.motionConfig.maxExtrapolationMs,
+      }
+    : {
+        count: 0,
+        p50: null,
+        p95: null,
+        p99: null,
+        max: null,
+        countGt500Ms: 0,
+        countGt1000Ms: 0,
+        countGt2000Ms: 0,
+        spikeLayer: 'UNKNOWN',
+        model: 'SNAPSHOT_INTERPOLATION',
+        maxExtrapolationMs: 0,
+      };
+}
+globalThis.minimapRUM = minimapMotionRumSnapshot;
+
+function noteMinimapDeliveryGap(live, now) {
+  const map = String(live?.map ?? '');
+  const authoritativeAt = Number(
+    live?.freshness?.authoritativeAt ?? live?.updatedAt,
+  );
+  if (!map || !Number.isFinite(authoritativeAt)) return null;
+  if (
+    minimapMotionLastMap === map &&
+    minimapMotionLastAuthoritativeAt === authoritativeAt
+  )
+    return null;
+  const gapMs =
+    minimapMotionLastMap === map &&
+    Number.isFinite(minimapMotionLastReceivedAt)
+      ? Math.max(0, now - minimapMotionLastReceivedAt)
+      : null;
+  minimapMotionLastMap = map;
+  minimapMotionLastAuthoritativeAt = authoritativeAt;
+  minimapMotionLastReceivedAt = now;
+  if (gapMs === null) return null;
+  minimapMotionGaps.push(gapMs);
+  if (minimapMotionGaps.length > 240) minimapMotionGaps.shift();
+  globalThis.playerWebObservability?.record('MINIMAP', 'snapshot_gap_ms', gapMs, 'ms', { map });
+  if (gapMs >= 500) globalThis.playerWebObservability?.record('MINIMAP', gapMs >= 2000 ? 'snapshot_gap_gt2000_ms' : gapMs >= 1000 ? 'snapshot_gap_gt1000_ms' : 'snapshot_gap_gt500_ms', gapMs, 'ms', { map });
+  return gapMs;
+}
+
 function applyWebExperienceTelemetry(config = {}) {
   webExperienceTelemetry.enabled = config.enabled === true;
   webExperienceTelemetry.eligible = config.eligible === true;
@@ -1016,6 +1077,16 @@ function applyWebExperienceTelemetry(config = {}) {
     Array.isArray(config.actions) ? config.actions : [],
   );
   webExperienceTelemetry.deploymentId = config.deploymentId ?? null;
+  globalThis.__webExperienceTelemetryConfig = { enabled: webExperienceTelemetry.enabled, eligible: webExperienceTelemetry.eligible };
+  if (webExperienceTelemetry.enabled && webExperienceTelemetry.eligible && !globalThis.__playerWebObservabilityInitialRouteRecorded) {
+    const navigation = performance.getEntriesByType('navigation')[0];
+    const routeMs = Number(navigation?.loadEventEnd || navigation?.duration);
+    if (Number.isFinite(routeMs)) {
+      globalThis.playerWebObservability?.record('ROUTE_NAVIGATION', 'route_complete_ms', routeMs, 'ms', { source: 'navigation_timing' });
+      globalThis.__playerWebObservabilityInitialRouteRecorded = true;
+    }
+
+  }
 }
 
 function telemetryActionForInteraction(name) {
@@ -1120,6 +1191,27 @@ function sendWebExperienceTelemetry(event) {
   if (!webExperienceTelemetry.enabled || !webExperienceTelemetry.eligible)
     return;
   const actionId = telemetryActionForInteraction(event.name) ?? event.actionId;
+  try {
+    const actionDomain =
+      actionId === 'automation_start' || actionId === 'automation_stop'
+        ? 'FARM_STATUS'
+        : actionId === 'quest_open' || actionId === 'npc_dialog_action'
+          ? 'QUEST_UI'
+          : actionId === 'inventory_open' || actionId === 'equip_item' || actionId === 'unequip_item' || actionId === 'use_item'
+            ? 'INVENTORY'
+            : actionId === 'minimap_freshness'
+              ? 'MINIMAP'
+              : 'BROWSER_RENDER_HEALTH';
+    const duration = Number(event.durationMs);
+    if (Number.isFinite(duration))
+      globalThis.playerWebObservability?.record(
+        actionDomain,
+        'action_duration_ms',
+        duration,
+        'ms',
+        { actionId, success: event.success === true, error: event.error === true },
+      );
+  } catch {}
   if (!webExperienceTelemetry.actions.has(actionId)) return;
   const metric = (value) => (Number.isFinite(Number(value)) ? Number(value) : null);
   const payload = {
@@ -1393,6 +1485,15 @@ const api = async (url, options = {}) => {
   const r = await fetch(url, requestOptions),
     responseReceivedAt = performance.now(),
     traceEnabled = r.headers.get('x-web-latency-trace') === 'on';
+  try {
+    globalThis.playerWebObservability?.record(
+      'HTTP_API',
+      'request_duration_ms',
+      responseReceivedAt - requestStartedAt,
+      'ms',
+      { endpoint: new URL(url, location.href).pathname, status: r.status },
+    );
+  } catch {}
   if (traceEnabled) webLatencyTrace.enabled = true;
   const responseContentType = r.headers.get('content-type') ?? '',
     responseText = await r.text();
@@ -4182,6 +4283,7 @@ function updateMinimapTargets(live, options = {}) {
   const retainStale = !mapUnavailable
     && Boolean(playerStale)
     && Boolean(minimapLive?.map);
+  noteMinimapDeliveryGap(live, now);
   if (!retainStale) {
     updateMinimapTrack('self', live.playerX, live.playerY, now);
     for (const monster of monsters) {
@@ -4579,6 +4681,7 @@ function startCombatStream() {
     const data = JSON.parse(event.data);
     combatStreamActive = true;
     combatStreamFailures = 0;
+    globalThis.playerWebObservability?.record('SSE', 'reconnect_count', combatStreamFailures, 'count', { event: 'ready' });
     eventCursor = Number(data.cursor);
     combatStreamRevision = Number(data.combatRevision ?? combatStreamRevision);
     clearTimeout(eventTimer);
@@ -4588,6 +4691,9 @@ function startCombatStream() {
   source.addEventListener('combat_delta', (event) => {
     if (source !== combatStream) return;
     const data = JSON.parse(event.data);
+    const deliveryDelay = Date.now() - Number(data.timestamp ?? Date.now());
+    globalThis.playerWebObservability?.record('SSE', 'event_gap_ms', Math.max(0, deliveryDelay), 'ms', { eventId: data.eventId ?? null });
+    globalThis.playerWebObservability?.record('COMBAT_PRESENTATION', 'event_delivery_latency_ms', Math.max(0, deliveryDelay), 'ms', { event: 'combat_delta' });
     if (!rememberCombatEventId(data.eventId)) return;
     if (
       Number(data.characterId) !== Number(lastState?.character?.charId) ||
@@ -4613,6 +4719,7 @@ function startCombatStream() {
     combatStream = null;
     combatStreamActive = false;
     combatStreamFailures += 1;
+    globalThis.playerWebObservability?.record('SSE', 'reconnect_count', combatStreamFailures, 'count', { event: 'error' });
     $('#logLatency').textContent = '即時連線恢復中';
     restartEventPolling();
     scheduleCombatStreamReconnect();

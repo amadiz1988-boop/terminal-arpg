@@ -159,6 +159,10 @@ import {
 } from './web-experience/production-telemetry.mjs';
 import { createExperienceHealth } from './web-experience/experience-health.mjs';
 import {
+  buildObservatoryReport,
+  createPlayerWebObservatory,
+} from './web-experience/player-web-observatory.mjs';
+import {
   addWebLatencyDuration,
   runWithWebLatencyTrace,
   withWebLatencyStage,
@@ -475,6 +479,7 @@ const webExperienceTelemetry = createProductionTelemetry({
 // WEB_REAL_USER_EXPERIENCE_V1 rolling read model. Fed by the SAME ingest
 // endpoint and canary eligibility as production telemetry; no second transport.
 const webExperienceHealth = createExperienceHealth();
+const playerWebObservatory = createPlayerWebObservatory();
 
 async function loadSkillAutomationDefinitions() {
   const data = JSON.parse(await readFile(skillTreePath, 'utf8'));
@@ -9090,6 +9095,22 @@ async function handleDashboardRequest(request, response) {
         telemetryStatus: webExperienceTelemetry.status(),
       });
     }
+    if (url.pathname === '/api/admin/web-experience/observatory') {
+      if (!isAdminSurfaceHost(request) && !loopbackRequest(request))
+        return json(response, 404, { error: 'not_found' });
+      const snapshot = playerWebObservatory.snapshot({ windowMs: 15 * 60_000 });
+      const activeSessions = webPresenceSummary().viewers;
+      const production = process.env.WEB_DEPLOYMENT_GIT_SHA ?? process.env.GIT_SHA ?? 'CURRENT';
+      return json(response, 200, {
+        ...snapshot,
+        activeSessions,
+        production,
+        report: buildObservatoryReport(snapshot, {
+          production,
+          activeSessions,
+        }),
+      }, { 'cache-control': 'private, no-store' });
+    }
     const webExperienceActionMatch = url.pathname.match(
       /^\/api\/admin\/web-experience\/action\/([A-Za-z0-9._:-]{1,96})$/,
     );
@@ -9349,11 +9370,16 @@ async function handleDashboardRequest(request, response) {
       // legacy event object is still accepted. The batch is bounded so a hostile
       // or buggy client cannot amplify one request into unbounded work.
       const events = Array.isArray(body?.events) ? body.events.slice(0, 64) : [body];
+      const observatoryEvents = events.filter((event) => event?.kind === 'WEB_OBSERVABILITY');
+      const legacyEvents = events.filter((event) => event?.kind !== 'WEB_OBSERVABILITY');
+      const observatoryAccepted = webExperienceTelemetry.isEligible(identity)
+        ? playerWebObservatory.ingestBatch(observatoryEvents).filter((result) => result.ok).length
+        : 0;
       let accepted = 0;
       let rejected = 0;
       let lastResult = { accepted: false, reason: 'NO_EVENTS' };
       const eligible = webExperienceTelemetry.isEligible(identity);
-      for (const event of events) {
+      for (const event of legacyEvents) {
         try {
           lastResult = webExperienceTelemetry.record(event, identity);
         } catch {
@@ -9373,6 +9399,7 @@ async function handleDashboardRequest(request, response) {
         ok: accepted > 0,
         accepted,
         rejected,
+        observatoryAccepted,
         telemetry: lastResult,
       });
     }
