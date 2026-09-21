@@ -3716,6 +3716,12 @@ function eventNode(line) {
   row.append(time, message);
   return row;
 }
+function shouldRenderPlayerLog(line) {
+  const text = String(line ?? '');
+  if (!/^You attack Monster /i.test(text)) return true;
+  const damage = damageEvent(text);
+  return Boolean(damage && Number(damage.total) > 0);
+}
 function damageEvent(line) {
   if (!/You (?:attack|use)/.test(line)) return null;
   const target = line.match(/Monster (.+?) \((\d+)\)/),
@@ -3962,7 +3968,9 @@ function renderEventDelta(lines, reset = false) {
   }
   if (!lines.length) return;
   eventLines.push(...lines);
-  for (const line of lines) {
+  while (eventLines.length > 1000) eventLines.shift();
+  const playerLogLines = lines.filter(shouldRenderPlayerLog);
+  for (const line of playerLogLines) {
     const row = eventNode(line);
     log.append(row);
     playInterfaceEventSound(line);
@@ -3970,7 +3978,6 @@ function renderEventDelta(lines, reset = false) {
   }
   while (log.childElementCount > 220) {
     log.firstElementChild.remove();
-    eventLines.shift();
   }
   log.scrollTop = log.scrollHeight;
   lastEventAt = performance.now();
