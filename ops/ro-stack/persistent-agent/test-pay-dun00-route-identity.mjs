@@ -1,4 +1,7 @@
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 import { loadWarpGraph, planWebRelocation } from './map-route.mjs';
 
 const runtimeRoot = process.env.RATHENA_RUNTIME_ROOT;
@@ -28,6 +31,23 @@ const expectedMaps = [
 assert.deepEqual(plan.route.map((step) => step.map), expectedMaps);
 assert.equal(plan.route.at(-2).portalTo, 'pay_dun00');
 
+const stackConfigPath = join(dirname(fileURLToPath(import.meta.url)), '..', 'stack.config.psd1');
+const stackConfig = await readFile(stackConfigPath, 'utf8');
+function readJsonSetting(name) {
+  const match = stackConfig.match(new RegExp(`^\\s*${name}\\s*=\\s*'([^']+)'`, 'm'));
+  assert.ok(match, `${name} must exist`);
+  return JSON.parse(match[1]);
+}
+
+const returnToFarmRoute = readJsonSetting('PersistentAgentRouteDeath');
+const supplyReturnRoute = readJsonSetting('PersistentAgentRouteSupplyBack').pay_dun00;
+for (const [routeEntry, route] of [
+  ['return_to_farm', returnToFarmRoute],
+  ['supply_return', supplyReturnRoute],
+]) {
+  assert.deepEqual(route.at(-1), { map: 'pay_dun00', x: 73, y: 78 }, routeEntry);
+}
+
 console.log(JSON.stringify({
   result: 'PAY_DUN00_ROUTE_IDENTITY_PASS',
   requestedDestination: 'pay_dun00',
@@ -35,4 +55,9 @@ console.log(JSON.stringify({
   terminal,
   exitWarp: { map: exitWarp.map, x: exitWarp.x, y: exitWarp.y, xs: exitWarp.xs, ys: exitWarp.ys },
   immediateMapExitFromTerminal: false,
+  routes: [
+    { routeEntry: 'direct_farm', ...terminal, source: 'map-route.mjs' },
+    { routeEntry: 'return_to_farm', ...returnToFarmRoute.at(-1), source: 'PersistentAgentRouteDeath' },
+    { routeEntry: 'supply_return', ...supplyReturnRoute.at(-1), source: 'PersistentAgentRouteSupplyBack' },
+  ],
 }));

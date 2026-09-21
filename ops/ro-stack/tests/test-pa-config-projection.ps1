@@ -98,7 +98,7 @@ Assert-Equal 'canonical SERVICE_DESTINATIONS' ''   $defaultMap['PERSISTENT_AGENT
 Assert-Equal 'canonical SUPPLY_ENABLED'       '1'  $defaultMap['PERSISTENT_AGENT_SUPPLY_ENABLED']
 Assert-Equal 'canonical SUPPLY_ITEM'          '501' $defaultMap['PERSISTENT_AGENT_SUPPLY_ITEM']
 Assert-Equal 'canonical SUPPLY_GRACE_MS'      '3000' $defaultMap['PERSISTENT_AGENT_SUPPLY_GRACE_MS']
-Assert-Equal 'canonical ROUTE_DEATH'          '[{"map":"pay_arche","x":36,"y":131,"portalTo":"pay_dun00"},{"map":"pay_dun00","x":21,"y":183}]' $defaultMap['PERSISTENT_AGENT_ROUTE_DEATH']
+Assert-Equal 'canonical ROUTE_DEATH'          '[{"map":"pay_arche","x":36,"y":131,"portalTo":"pay_dun00"},{"map":"pay_dun00","x":73,"y":78}]' $defaultMap['PERSISTENT_AGENT_ROUTE_DEATH']
 Assert-Equal 'canonical LIVE_STATUS_ENABLED'  '1'  $defaultMap['PERSISTENT_AGENT_LIVE_STATUS_ENABLED']
 Assert-Equal 'canonical HUNT_RELOCATION_ITEMS' '601' $defaultMap['PERSISTENT_AGENT_HUNT_RELOCATION_ITEMS']
 
