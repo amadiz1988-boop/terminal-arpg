@@ -83,3 +83,10 @@ REFERENCE_MINING_GAP = YES / NO
 `MONSTER_AI_COMBAT_TARGET_RETARGET` 已完成 combat mining cycle。它分離 monster AI 與 PA Player AI，建立 target lock／retarget taxonomy，核對 rAthena damage、hit、kill、loot authority，並明確保留 `MONSTER_ATTACK` 與 `MONSTER_HIT` 的語意差異。Dossier：`docs/reference-mining/topics/monster-ai-combat-target-retarget.md`；機讀矩陣：`docs/reference-mining/combat-capability-matrix.yml`。
 
 `RECONNECT_SESSION_CHARACTER_LIFECYCLE` 已完成 lifecycle mining cycle。它核對 rAthena login／char／map authority、角色 save/load、OpenKore bounded reconnect、Ghost Island command dedupe、PA、AUTO_FARM、Supply、Quest、support session、death／respawn、map interruption 與 freshness。Dossier：`docs/reference-mining/topics/reconnect-session-character-lifecycle.md`；機讀矩陣：`docs/reference-mining/reconnect-lifecycle-capability-matrix.yml`。
+
+`RATHENA_SERVER_SIDE_AUTOCOMBAT` 已完成 reference checkpoint `961ac3c`。
+它將 public mature floor 定位為 same-map server-side combat，並保留
+cross-map Supply、return-to-farm、resume、Quest、Social 與 Life 給 PA。
+Dossier：`docs/reference-mining/topics/rathena-server-side-autocombat.md`；矩陣：
+`docs/reference-mining/rathena-autocombat-capability-matrix.yml`；Project 比較：
+`docs/reference-mining/rathena-autocombat-vs-project-pa.md`。

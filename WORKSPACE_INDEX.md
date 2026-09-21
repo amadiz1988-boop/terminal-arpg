@@ -233,11 +233,14 @@ WORKLINE:        E
 STATUS:          READY
 ACTIVE_WORKTREE: C:/Users/Administrator/.codex/.chatgpt-projects/g-p-6a9bcb57afdc8191966436643af8acdf/.tmp-quest-dialogue-runtime-v1-canonical
 ACTIVE_BRANCH:   feat/quest-dialogue-runtime-v1-canonical
-CANONICAL_HEAD:  fae560807caaaa24419e0da5c441fd08fb9fc0ba
+CANONICAL_HEAD:  16648143597a49482c787d308fd63943b4891716
 BASE_HEAD:       fae560807caaaa24419e0da5c441fd08fb9fc0ba
 SOURCE_OF_TRUTH: Quest/Web/Runtime = C:/Users/Administrator/.codex/.chatgpt-projects/g-p-6a9bcb57afdc8191966436643af8acdf/.tmp-quest-dialogue-runtime-v1-canonical
 NATIVE_AUTHORITY: C:\Users\Administrator\source\ghost-island-rathena (READ-ONLY; route Native defects to D)
 NAVIGATION_REFERENCE: 31bc821257c47d0793fb3f2586d5eb9e17ad58cc (REFERENCE_DEPENDENCY; not an implementation base requirement)
+LOCAL_HUNTING_ADR: docs/architecture/local-hunting-hybrid-architecture.md
+LOCAL_HUNTING_STATUS: ACCEPTED / MIGRATION_IN_PROGRESS / STAGE2_NOT_GLOBALLY_PROMOTED
+RATHENA_AUTOCOMBAT_REFERENCE: 961ac3c (REFERENCE_DEPENDENCY)
 LAST_VERIFIED:   2026-09-21
 DO_NOT_SEARCH:   Use the resolved E worktree only. Do not search sibling worktrees.
 SEARCH_SCOPE:    E worktree exact paths; Native authority read-only when explicitly required

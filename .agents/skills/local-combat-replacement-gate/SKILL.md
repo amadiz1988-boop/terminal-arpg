@@ -10,6 +10,27 @@ combat-loop migration, or hybrid PA/rAthena combat design. It is an audit and
 gating skill. It does not authorize gameplay implementation, Production
 migration, runtime restart, or removal of existing PA combat.
 
+## Canonical hard gate
+
+```text
+USE_MATURE_BEHAVIOR_WHERE_PROVEN = YES
+DO_NOT_REIMPLEMENT_BETTER_REFERENCE_BEHAVIOR = YES
+PA_OWNS_INTENT_JOURNEY_INTERRUPT_RESUME = YES
+LOCAL_HUNTING_CANNOT_CROSS_MAP_AUTONOMOUSLY = YES
+SUPPLY_OWNER_REMAINS_PA = YES
+RETURN_TO_FARM_OWNER_REMAINS_PA = YES
+QUEST_OWNER_REMAINS_PA = YES
+SOCIAL_OWNER_REMAINS_PA = YES
+GLOBAL_AUTOLOOT = YES
+GLOBAL_AUTOSTORE = NO
+AUTHORITATIVE_LOOT_REQUIRED_FOR_COMBAT_LOG = YES
+RESULT_EQUIVALENT_OR_BETTER_REQUIRED_BEFORE_REPLACEMENT = YES
+NO_BIG_BANG_MIGRATION = YES
+```
+
+Every capability transfer is a separate gate and keeps the PA fallback until
+promotion passes. Local Hunting is a child executor under PA parent intent.
+
 ## Required evidence
 
 Read the relevant rAthena and OpenKore Atlas topics first, then compare:
@@ -55,7 +76,7 @@ requirement after the Global AutoLoot decision.
 The product loot contract is fixed:
 
 ```text
-GLOBAL_AUTOLOOT = PRODUCT_ACCEPTED_DIRECTION
+GLOBAL_AUTOLOOT = YES
 GLOBAL_AUTOLOOT_TO_INVENTORY = YES
 GLOBAL_AUTOSTORE = NO
 DROP != LOOT_ACQUIRED
@@ -93,10 +114,16 @@ auto-resume invariants remain hard gates for any later promotion. A canary hit
 requires `MONSTER_HIT` or an authoritative monster HP decrease; `MONSTER_ATTACK`
 and `MONSTER_KILL` alone do not satisfy that gate.
 
+The bounded melee canary is `PASS` and is not a global promotion. The remaining
+promotion gate is `RETURN_TO_FARM -> NEW_LOCAL_COMBAT_LEASE -> TARGET -> ATTACK
+-> at least 3 authoritative MONSTER_HIT`. Do not classify the transition as
+broken without execution evidence.
+
 ## Decision output
 
 Report `SAFE_TO_REPLACE`, `SAFE_WITH_CONTRACT`, `KEEP_IN_PA`, `RESEARCH_MORE`,
 `POTION_BOUNDARY`, `LOOT_BOUNDARY`, `SUPPLY_SIGNAL_CONTRACT`,
 `STOP_LOCAL_COMBAT_CONTRACT`, `QUEST_IMPACT`, `SOCIAL_IMPACT`, top risks,
-staged migration and an explicit `IMPLEMENTATION_STARTED = NO` until all hard
-gates pass and Project Control authorizes the next stage.
+staged migration and `GLOBAL_PROMOTION_APPROVED = NO` until all hard gates pass
+and Project Control authorizes the next stage. Existing bounded Stage 1 and
+Stage 2 evidence may remain recorded as completed evidence.

@@ -89,6 +89,24 @@ runtime state beyond committed/current evidence):
 Boundary: `OPENKORE_REMOVED = NO` and `PRODUCTION_READY = NO`. Gate 1A/1B/2/3
 passing does not mean OpenKore Exit is complete.
 
+Local Hunting is the primary runtime loop for normal character activity and is
+a very high optimization priority. The accepted architecture keeps PA ownership
+of intent, journey, interruption and resume while migrating proven same-map
+combat capabilities to rAthena through separate gates. Canonical decision:
+`docs/architecture/local-hunting-hybrid-architecture.md`.
+
+Near-term Local Hunting priority:
+
+```text
+P0/P1 = Stage 2 reentry proof, bounded melee promotion, target/retarget parity,
+        skill executor, Global AutoLoot with authoritative LOOT_ACQUIRED,
+        same-map path and stuck recovery
+LATER = combat potion, ammo, party / kill-steal and advanced roaming policy
+```
+
+Supply Journey, Quest, Social and Life remain parallel core systems with their
+own authority and acceptance gates.
+
 ## 4. Roadmap order
 
 Intended high-level sequence:
@@ -128,11 +146,15 @@ AFTER PL1:
    explicitly authorizes PL2)
 
 CROSS-CUTTING DESIGN:
-  HYBRID_LOCAL_COMBAT_MIGRATION — DESIGN_ACCEPTED / STAGE2_MELEE_CANARY_BOUNDED_PROOF
-  (Global AutoLoot to inventory is a product accepted direction; rAthena owns
+  HYBRID_LOCAL_COMBAT_MIGRATION — ACCEPTED / MIGRATION_IN_PROGRESS /
+  STAGE2_MELEE_CANARY_BOUNDED_PASS_NOT_GLOBALLY_PROMOTED
+  (LOCAL_HUNTING_IS_PRIMARY_RUNTIME_LOOP = YES. Global AutoLoot to inventory is
+   accepted; Global AutoStore is forbidden. rAthena owns
    drop resolution and authoritative item add; PA keeps inventory lifecycle,
-   weight, supply, storage/sell, navigation, quest, social and Life ownership;
-   Stage 2 authority transfer remains unauthorized. Reference dependency is
+   weight, supply, storage/sell, navigation, return-to-farm, quest, social,
+   Life and parent-intent ownership. Stage 2 global promotion remains closed
+   until return-to-farm creates a new lease and produces at least three
+   authoritative MONSTER_HIT events. Reference dependency is
    rAthena server-side autocombat checkpoint 961ac3c, whose mature floor is
    same-map server-side combat. Public evidence does not establish cross-map
    Supply, return-to-farm or auto-resume after Supply; those remain PA-owned.
@@ -163,7 +185,7 @@ by source inspection alone; each slice needs its own acceptance evidence.
 | `PL1-PERSISTENT-LIFE-DIARY` | `docs/roadmap/persistent-life-diary-v1.md` | `PLANNED` | `NO` |
 | `PL1-A-FACTUAL-DIARY` | `docs/roadmap/persistent-life-diary-v1.md#scoped-authorization-pl1-a-factual-diary-vertical-slice` | `ACTIVE` | `YES` |
 | `PL2-PERSISTENT-SOCIAL-PA` | `docs/roadmap/persistent-social-pa-v1.md` | `PLANNED` | `NO` |
-| `HYBRID-LOCAL-COMBAT-MIGRATION` | `docs/roadmap/hybrid-local-combat-migration.md` | `PLANNED (DESIGN_ACCEPTED, STAGE2_CANARY_BOUNDED)` | `NO` |
+| `HYBRID-LOCAL-COMBAT-MIGRATION` | `docs/roadmap/hybrid-local-combat-migration.md` | `MIGRATION_IN_PROGRESS (STAGE2_CANARY_BOUNDED, GLOBAL_PROMOTION_PENDING)` | `NO` |
 
 Summary of PL1: characters live through a real in-world day, then produce at most
 one bounded LLM diary generation per in-world day, grounded in Event Ledger facts.

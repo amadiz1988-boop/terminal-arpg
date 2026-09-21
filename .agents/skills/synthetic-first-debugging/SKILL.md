@@ -267,6 +267,22 @@ MONSTER_ATTACK without MONSTER_HIT → damage UNCONFIRMED
 `SUPPLY_LOW`、`MAP_CHANGED`、`SUPPLY_RETURN` 與 combat resume；若合法前置狀態
 不存在，結果為 `BLOCKED`，不可宣稱 gameplay failure。
 
+### Local Hunting evidence boundary
+
+```text
+GUI_FREE_DIAGNOSIS_FIRST = YES
+BROWSER_AS_PRIMARY_DEBUGGER = NO
+BROWSER_FINAL_ACCEPTANCE_REQUIRED = YES
+MONSTER_ATTACK != MONSTER_HIT
+HTTP_200 != GAMEPLAY_SUCCESS
+NO_EVIDENCE != PASS
+```
+
+`MONSTER_HIT` requires authoritative monster HP decrease. Stage 2 promotion
+evidence must trace `RETURN_TO_FARM -> NEW_LOCAL_COMBAT_LEASE -> TARGET ->
+ATTACK -> at least 3 authoritative MONSTER_HIT`. Synthetic or source PASS does
+not replace Production canary and Browser final acceptance.
+
 ## 9. FIRST_BROKEN_TRANSITION 與 Owner
 
 依 trace layer 順序，只取第一個 `FAIL`、`TIMEOUT` 或 `BLOCKED`。典型邊界：

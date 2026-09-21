@@ -138,7 +138,7 @@ topics:
     official_docs: [conf/battle, doc/script_commands.txt]
     official_samples: []
     forum_refs: []
-    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md]
+    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md, docs/reference-mining/topics/rathena-server-side-autocombat.md, docs/reference-mining/rathena-autocombat-capability-matrix.yml, docs/reference-mining/rathena-autocombat-vs-project-pa.md, docs/architecture/local-hunting-hybrid-architecture.md]
     authority: src-map
   - topic: '15 MONSTER / SPAWN'
     keywords: [monster, spawn, mob, areamonster]

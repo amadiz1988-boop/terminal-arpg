@@ -2,20 +2,47 @@
 
 ```text
 TASK_ID = PA_RATHENA_COMBAT_REPLACEMENT_IMPACT_AUDIT_V1
-DESIGN_STATUS = DESIGN_ACCEPTED
+DESIGN_STATUS = ACCEPTED / MIGRATION_IN_PROGRESS
 PLANNING_STATE = PLANNED
 IMPLEMENTATION_AUTHORIZED = NO
-IMPLEMENTATION_STARTED = NO
+IMPLEMENTATION_STARTED = YES (STAGE1 / STAGE2 BOUNDED ONLY)
 PRODUCTION_TOUCHED = NO
 RUNTIME_RESTARTED = NO
-GLOBAL_AUTOLOOT = PRODUCT_ACCEPTED_DIRECTION
+LOCAL_HUNTING_IS_PRIMARY_RUNTIME_LOOP = YES
+LOCAL_HUNTING_OPTIMIZATION_PRIORITY = VERY_HIGH
+PA_OWNS_INTENT_JOURNEY_INTERRUPT_RESUME = YES
+RATHENA_OWNS_LOCAL_HUNTING_EXECUTION = TARGET_DIRECTION / STAGED_MIGRATION
+GLOBAL_AUTOLOOT = YES
 GLOBAL_AUTOLOOT_TO_INVENTORY = YES
 GLOBAL_AUTOSTORE = NO
-STAGE1_SHADOW_OBSERVER = IMPLEMENTATION_ACTIVE
-STAGE2_MELEE_CANARY = BOUNDED_LIVE_PROOF_COMPLETE_NOT_PROMOTED
+STAGE1_SHADOW_OBSERVER = PASS
+STAGE2_MELEE_CANARY = PASS / NOT_GLOBALLY_PROMOTED
+FULL_LOCAL_HUNTING_REPLACEMENT = NO
 HYBRID_SUPPLY_RETURN_BASELINE = HYBRID_SUPPLY_RETURN_BASELINE_150069
 RATHENA_AUTOCOMBAT_REFERENCE_CHECKPOINT = 961ac3c
 RATHENA_MATURE_FLOOR = SAME_MAP_SERVER_SIDE_COMBAT
+```
+
+Canonical architecture decision:
+`docs/architecture/local-hunting-hybrid-architecture.md`.
+
+## 0. Product principle
+
+Characters spend most normal runtime hunting, so Local Hunting optimization is
+a major near-term priority. Mature behavior is reused where evidence proves it
+equivalent or better. PA keeps why, where next, journey, interruption and
+resume. A staged rAthena executor may own how to fight on the current map.
+
+Each capability has a separate migration gate. Big Bang replacement is
+forbidden. Existing PA fallback remains available until promotion passes:
+
+```text
+RESULT_EQUIVALENT_OR_BETTER = YES
+NO_SUPPLY_REGRESSION = YES
+NO_RETURN_TO_FARM_REGRESSION = YES
+NO_QUEST_REGRESSION = YES
+NO_SOCIAL_REGRESSION = YES
+NO_PARENT_INTENT_REGRESSION = YES
 ```
 
 ## 1. Audit boundary
@@ -146,7 +173,7 @@ PA 保留 HP/SP threshold、item/skill 選擇、recovery mode、supply escalatio
 
 ### Loot boundary
 
-`GLOBAL_AUTOLOOT = PRODUCT_ACCEPTED_DIRECTION`。rAthena owns monster drop
+`GLOBAL_AUTOLOOT = YES`。rAthena owns monster drop
 resolution、global autoloot execution、authoritative inventory add 與 loot
 acquisition result。PA 不再負責 ordinary hunting 的 floor-item candidate
 selection、pickup ordering、走到 floor item 或 pickup orchestration。
@@ -201,8 +228,16 @@ MONSTER_KILL
 → MONSTER_KILL
 ```
 
-在此 proof chain 完成前，`SUPPLY_RETURN_PROOF = DESIGN_ONLY`，且
-`NO_SUPPLY_REGRESSION = NOT_PROVEN`。
+Existing PA Production evidence proves the Supply Journey from `prt_fild08`
+through Butterfly arrival at `izlude (128,98)`, service routing through
+`prt_fild05`, Red Potion `0 -> 15`, return through `prt_fild07` to
+`prt_fild08`, then `AUTO_FARM_STARTED`. The Web checkpoint is
+`66aff36fc04dff2f3796e9703b986852c591ff78`; Native Supply lineage is
+`774761417a91803ccc460628ac11619a1fc70ed2`.
+
+This proves the PA journey baseline. The new Local Hunting lease after
+return-to-farm remains pending, so global `NO_SUPPLY_REGRESSION` is not yet
+proven for promotion.
 
 ### 4.1 Production regression fixture
 
@@ -223,7 +258,7 @@ promotion。
 ## 5. Stage 1 shadow observer
 
 ```text
-STAGE1_SHADOW_OBSERVER = IMPLEMENTATION_ACTIVE
+STAGE1_SHADOW_OBSERVER = PASS
 ZERO_GAMEPLAY_AUTHORITY = YES
 ```
 
@@ -249,6 +284,36 @@ pathability difference. Canonical Release|x64 `rAthena.sln` build includes the
 observer in `map-server`; no runtime or production instance was restarted.
 Reference-only capabilities remain waiting: skill execution, buff, potion,
 ammo, roaming/Fly Wing, party/KS and autonomous supply policy.
+
+## 5.1 Stage 2 bounded melee canary
+
+```text
+STAGE2_MELEE_CANARY = PASS
+PA_TARGET_AUTHORITY_RETAINED = YES
+RATHENA_BOUNDED_MELEE_LEASE = PASS
+AUTHORITATIVE_MONSTER_HIT = PASS
+STOP_LOCAL_COMBAT = PASS
+POST_STOP_ATTACK_COUNT = 0
+STALE_EPOCH_REJECT = PASS
+MAP_EXIT_REJECT = PASS
+SUPPLY_INTERRUPT_CONTRACT = PASS
+QUEST_INTERRUPT_CONTRACT = PASS
+SOCIAL_INTERRUPT_CONTRACT = PASS
+STAGE2_GLOBAL_PROMOTION = NOT_YET_COMPLETE
+```
+
+Current unproven transition:
+
+```text
+RETURN_TO_FARM
+-> NEW_LOCAL_COMBAT_LEASE
+-> TARGET
+-> ATTACK
+-> at least 3 authoritative MONSTER_HIT
+```
+
+Do not classify this transition as broken until execution produces failure
+evidence.
 
 ## 5. Quest, Social and Life impact
 
@@ -288,25 +353,25 @@ SERVER_AUTHORITY_INVARIANTS_PRESERVED = YES
 REFERENCE_CONFLICT_RESOLVED = YES
 GHOST_ISLAND_OPTIMIZATION_REVIEWED = YES
 STAGE1_SHADOW_SOURCE_PASS = YES
-TARGET_APPROACH_ATTACK_PARITY_MEASURED = YES  # bounded deterministic cases
-RESULT_EQUIVALENT_OR_BETTER = NOT_APPLICABLE  # Stage 2 authority transfer not started
-CHANGE_APPROVED = NO
-CHANGE_REJECTED = YES
-WORKLINE_DONE = NO  # Stage 1 observer complete; authority migration remains closed
+STAGE2_BOUNDED_MELEE_CANARY = PASS
+TARGET_APPROACH_ATTACK_PARITY_MEASURED = YES
+RESULT_EQUIVALENT_OR_BETTER = BOUNDED_CANARY_PASS / GLOBAL_NOT_PROVEN
+CHANGE_APPROVED = STAGE2_BOUNDED_CANARY_ONLY
+GLOBAL_PROMOTION_APPROVED = NO
+WORKLINE_DONE = NO
 ```
 
-`RESULT_EQUIVALENT_OR_BETTER = NO` 是證據狀態，不代表候選設計永久淘汰。
-必須先完成 bounded shadow、contract regression、supply-return proof、
-quest pause/resume proof、loot exclusion proof 與 runtime single-executor
-admission proof。
+Global promotion still requires the return-to-farm reentry chain, target and
+retarget parity, authoritative loot proof, Quest and Social regression proof,
+and single-executor admission evidence.
 
 ## 8. Staged migration plan
 
 | Stage | Scope | Gate | Status |
 | --- | --- | --- | --- |
 | 0 | Contract、ownership、event schema、failure matrix | hard-gate review | DESIGN_ACCEPTED |
-| 1 | Shadow observer，完全不改 action authority；ordinary loot 只保留契約 | target/approach/attack parity + supply ownership | IMPLEMENTATION_ACTIVE |
-| 2 | Same-map melee cadence only; PA retains target, stop, supply and parent intent | bounded combat parity + stop race + loot proof gate | NOT_STARTED |
+| 1 | Shadow observer，完全不改 action authority；ordinary loot 只保留契約 | target/approach/attack parity + supply ownership | PASS |
+| 2 | Same-map melee cadence only; PA retains target, stop, supply and parent intent | bounded combat parity + stop race + reentry proof | BOUNDED_CANARY_PASS / GLOBAL_PROMOTION_PENDING |
 | 3 | Skill executor under explicit skill lease | cooldown/SP/effect parity | NOT_STARTED |
 | 4 | Optional pickup assist only after ownership and overweight proof | loot boundary approval | NOT_STARTED |
 | 5 | Any roaming, party/KS or autonomous policy | separate Project Control decision | NOT_AUTHORIZED |
@@ -318,7 +383,7 @@ admission proof。
 | Existing PA combat preserved | YES | PASS |
 | rAthena remains world authority | YES | PASS |
 | OpenKore reference gate | all six YES | RESULT equivalence NO |
-| Supply stop and return contract | proven | DESIGN_ONLY |
+| Supply stop and return contract | proven | PA_BASELINE_PASS / NEW_LEASE_REENTRY_PENDING |
 | Potion autonomy removed from executor | YES | PASS by design |
 | Global autoloot to inventory | YES | PRODUCT_ACCEPTED_DIRECTION |
 | Global autostore | NO | FORBIDDEN |
@@ -339,3 +404,8 @@ recovery/potion, sell/storage policy, restock/withdraw, cross-map navigation,
 return-to-farm, parent intent, quest, social/life`; `RESEARCH_MORE = skills,
 roaming, party/kill-steal, executor failover, authoritative item-add proof,
 Combat Log proof and supply regression proof`.
+
+Near-term P0/P1 sequence: Stage 2 reentry proof, bounded melee promotion,
+target and retarget parity, skill executor, Global AutoLoot with authoritative
+`LOOT_ACQUIRED`, then same-map path and stuck recovery. Combat potion, ammo,
+party and kill-steal policy remain later independent gates.
