@@ -16,7 +16,8 @@ supply_policy:
   target_count: 15
 trigger:
   type: authoritative_inventory_evaluation
-  initial_count: 0
+  expression: inventory_item_amount < supply_policy.min_count
+  prepared_count: 4
   expected: SUPPLY_LOW
   direct_gameplay_db_mutation: NO
   gm_item_mutation: NO
