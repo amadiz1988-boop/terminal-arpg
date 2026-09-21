@@ -32,6 +32,14 @@ const mapIdPattern = /^[a-z0-9_@-]{1,31}$/;
 // mob/spawn files are consulted.
 const ACTIVE_WARP_CONFS = ['npc/scripts_warps.conf', 'npc/re/scripts_warps.conf'];
 
+// A physical warp's destination cell is not always a safe farming handoff.
+// Payon's cave entrance lands at pay_dun00,21,183, immediately beside the
+// canonical pay_dun00 exit warp. Keep the existing last-good farm entry for
+// this map so arrival can settle in the destination instead of rewarping out.
+const SAFE_FARM_TERMINAL_LANDINGS = Object.freeze({
+  pay_dun00: Object.freeze({ x: 73, y: 78 }),
+});
+
 export function parseWarpConfPaths(text) {
   const paths = [];
   for (const rawLine of String(text).split(/\r?\n/)) {
@@ -172,6 +180,14 @@ export function buildRouteSteps(path) {
   }));
   const last = path[path.length - 1];
   steps.push({ map: last.to, x: last.toX, y: last.toY });
+  const safeLanding = SAFE_FARM_TERMINAL_LANDINGS[last.to];
+  if (safeLanding) {
+    steps[steps.length - 1] = {
+      map: last.to,
+      x: safeLanding.x,
+      y: safeLanding.y,
+    };
+  }
   return steps;
 }
 
