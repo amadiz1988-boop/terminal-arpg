@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RO Minimap Live Combat Prototype</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="shell">
+    <header class="header">
+      <div>
+        <p class="eyebrow">ISOLATED WEB VISUAL POC</p>
+        <h1>RO Minimap · Live Combat View</h1>
+        <p class="lede">Deterministic presentation fixture. Browser render state never becomes gameplay authority.</p>
+      </div>
+      <div class="badge">NO PRODUCTION INTEGRATION</div>
+    </header>
+
+    <section class="controls" aria-label="Prototype controls">
+      <button id="startButton" type="button">Start</button>
+      <button id="pauseButton" type="button" class="secondary">Pause</button>
+      <label>Latency
+        <select id="latencySelect">
+          <option value="0">0ms</option>
+          <option value="250">250ms</option>
+          <option value="500" selected>500ms</option>
+          <option value="1200">1200ms</option>
+          <option value="2000">2000ms</option>
+        </select>
+      </label>
+      <label>Entity scale
+        <select id="scaleSelect">
+          <option value="0.35">0.35×</option>
+          <option value="0.5" selected>0.5×</option>
+          <option value="0.7">0.7×</option>
+        </select>
+      </label>
+      <label>Entities
+        <select id="entityCountSelect">
+          <option value="1">1 player + 1 monster</option>
+          <option value="5" selected>1 player + 5 monsters</option>
+          <option value="10">1 player + 10 monsters</option>
+          <option value="20">1 player + 20 monsters</option>
+        </select>
+      </label>
+      <button id="resetButton" type="button" class="secondary">Reset</button>
+    </section>
+
+    <section class="stage-card">
+      <div class="stage-heading">
+        <div>
+          <span class="status-dot" id="statusDot"></span>
+          <strong id="stageStatus">Paused · ready</strong>
+        </div>
+        <span class="map-label">prt_fild08 · 普隆德拉原野</span>
+      </div>
+      <div class="stage-wrap">
+        <canvas id="minimap" width="960" height="620" aria-label="Live combat minimap"></canvas>
+        <div class="canvas-note">MOCK AUTHORITY SNAPSHOTS · rAF RENDER LOOP</div>
+      </div>
+      <div class="legend">
+        <span><i class="legend-player"></i>玩家</span>
+        <span><i class="legend-target"></i>目前目標</span>
+        <span><i class="legend-monster"></i>相關怪物</span>
+        <span><i class="legend-damage">124</i>傷害浮字</span>
+      </div>
+    </section>
+
+    <section class="telemetry" aria-label="Debug telemetry">
+      <div><span>FPS</span><b id="fpsValue">—</b></div>
+      <div><span>Frame time</span><b id="frameValue">—</b></div>
+      <div><span>Simulated latency</span><b id="latencyValue">500ms</b></div>
+      <div><span>Snapshot revision</span><b id="revisionValue">0</b></div>
+      <div><span>Current action</span><b id="actionValue">IDLE</b></div>
+      <div><span>Current target</span><b id="targetValue">—</b></div>
+      <div><span>Authority / render</span><b id="authorityValue">separate</b></div>
+    </section>
+
+    <section class="event-card">
+      <div class="event-heading"><h2>Combat event trace</h2><span id="eventClock">loop 0.0s</span></div>
+      <ol id="eventLog" aria-live="polite"></ol>
+    </section>
+  </main>
+  <script src="./app.js"></script>
+</body>
+</html>
