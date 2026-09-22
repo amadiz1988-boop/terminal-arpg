@@ -1452,6 +1452,56 @@ license 狀態、reference capability 缺口，並取得 Project Control 明確�
 Git hygiene 與 OpenKore Exit 驗收規則；若文字與既有規則重複，保留原規則，本節只
 引用與強化，不取代其中任何一條。
 
+### 13B. RO Ecosystem Reuse First
+
+任何 RO-domain substantial implementation 在 custom implementation 前，必須完成
+`ECOSYSTEM_REFERENCE_SWEEP`。適用範圍包含 Navigation、Combat、NPC、Quest、Items、
+Skills、Pathfinding、Warp、Kafra、AI、server automation、character lifecycle 與
+map/world data。掃描必須先讀既有 project research、historical accepted implementation
+與 reference atlas，再依適用性檢查 rAthena source、official docs/wiki、Forum、Issues/PR/
+Discussions、mature scripts/config/DB patterns，以及 OpenKore source、tables/data、docs/wiki
+與 community-established behavior。
+
+```text
+RO_ECOSYSTEM_REUSE_FIRST = YES
+REFERENCE_SWEEP_REQUIRED = YES
+ECOSYSTEM_REFERENCE_SWEEP_COMPLETED = YES / NO
+MATURE_SOLUTION_FOUND = YES / NO / PARTIAL
+REUSE_CLASSIFICATION = DIRECT_REUSE / PORT / ADAPTER / INTEGRATION_ONLY /
+                        PROJECT_POLICY / CUSTOM_REQUIRED
+CUSTOM_IMPLEMENTATION_APPROVED = YES / NO
+```
+
+來源層級為 `canonical source/runtime evidence`、`official maintained docs/data`、
+`maintainer PR/Issue/technical discussion`、`rAthena Forum/OpenKore community proven
+patterns`、`generic external articles`。低層級來源只能發現候選；採用前必須回驗目前
+source、runtime authority、Project Last-Good 與 license。`FORUM_POST != CANONICAL_TRUTH`，
+但找到成熟解法時不得忽略後自行建立簡化版本，必須追到可 reuse 的 implementation seam。
+
+施工前 worker 必須回報：
+
+```text
+PROJECT_EXISTING_CAPABILITY =
+RATHENA_SOURCE_CAPABILITY =
+RATHENA_DOCS_CAPABILITY =
+RATHENA_FORUM_CAPABILITY =
+RATHENA_ISSUE_PR_CAPABILITY =
+OPENKORE_SOURCE_CAPABILITY =
+OPENKORE_DATA_CAPABILITY =
+OPENKORE_COMMUNITY_CAPABILITY =
+REFERENCE_SOURCE =
+REUSE_SEAM =
+```
+
+若 `ECOSYSTEM_REFERENCE_SWEEP_COMPLETED != YES`，`IMPLEMENTATION_AUTHORIZATION = NO`。
+若既有 research checkpoint 新鮮可用，worker 必須沿用其 provenance；只有 stale、version
+mismatch 或缺少必要 evidence 時才能做 targeted incremental research，不得重跑同一問題的
+全量搜尋。Navigation 額外要求 rAthena world/map/warp/NPC authority、已知 routing pattern、
+OpenKore `MapRoute`/`CalcMapRoute`/`Route` 與成熟 map/portal/NPC/weight/recovery data 一起
+納入 reuse evaluation。此規則補充 `MATURE_CAPABILITY_REUSE_FIRST`，不取代 Quest Flow
+First、兩個 Reference Atlas、Single Runtime、Synthetic First、nearest legal state、
+Browser acceptance 與 Git hygiene。
+
 ## PLAYER WEB RESPONSE EXPERIENCE POLICY 鐵律
 
 Policy name：`PLAYER_WEB_RESPONSE_EXPERIENCE_POLICY`

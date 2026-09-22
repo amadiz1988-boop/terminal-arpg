@@ -253,6 +253,41 @@ OPTIMIZATION_REASON =
 Missing evidence blocks source edit. Reference conflict or deliberate deviation
 returns to Project Control for approval.
 
+### 10A.1. RO_ECOSYSTEM_REFERENCE_SWEEP_HARD_GATE
+
+Any substantial RO-domain implementation must complete the ecosystem sweep before
+custom source changes. Read existing project research and accepted history first;
+then check only applicable rAthena and OpenKore ecosystem sources. The dispatch
+must carry:
+
+```text
+RO_ECOSYSTEM_REUSE_FIRST = YES
+REFERENCE_SWEEP_REQUIRED = YES
+ECOSYSTEM_REFERENCE_SWEEP_COMPLETED = YES / NO
+PROJECT_EXISTING_CAPABILITY =
+RATHENA_SOURCE_CAPABILITY =
+RATHENA_DOCS_CAPABILITY =
+RATHENA_FORUM_CAPABILITY =
+RATHENA_ISSUE_PR_CAPABILITY =
+OPENKORE_SOURCE_CAPABILITY =
+OPENKORE_DATA_CAPABILITY =
+OPENKORE_COMMUNITY_CAPABILITY =
+MATURE_SOLUTION_FOUND = YES / NO / PARTIAL
+REFERENCE_SOURCE =
+REUSE_SEAM =
+REUSE_CLASSIFICATION = DIRECT_REUSE / PORT / ADAPTER /
+                        INTEGRATION_ONLY / PROJECT_POLICY / CUSTOM_REQUIRED
+CUSTOM_IMPLEMENTATION_APPROVED = YES / NO
+```
+
+Applicable sources are current project, historical accepted implementation,
+rAthena source/docs/wiki/forum/issues/PR/discussions/mature scripts or data, and
+OpenKore source/tables/docs/wiki/issues/discussions/community patterns. A forum or
+issue discovery must be verified against current source and authority before reuse.
+Existing research is inherited when fresh; only stale, version-mismatched or
+evidence-missing topics permit incremental research. If the sweep is incomplete,
+implementation authorization is `NO`.
+
 The required final report fields are:
 
 ```text

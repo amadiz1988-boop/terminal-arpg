@@ -232,6 +232,39 @@ diagnostics or isolated instrumentation that preserves gameplay semantics.
 
 Do not rerun the entire Gate.
 
+## 9A.1. RO_ECOSYSTEM_REFERENCE_SWEEP_CONTINUATION
+
+For a substantial RO-domain continuation, preserve the existing research
+checkpoint and reuse decision. Do not repeat a full ecosystem search. Read the
+project and historical evidence already recorded, then fill only a stale,
+version-mismatched or missing source seam:
+
+```text
+RO_ECOSYSTEM_REUSE_FIRST = YES
+REFERENCE_SWEEP_REQUIRED = YES
+ECOSYSTEM_REFERENCE_SWEEP_COMPLETED = YES / NO
+PROJECT_EXISTING_CAPABILITY =
+RATHENA_SOURCE_CAPABILITY =
+RATHENA_DOCS_CAPABILITY =
+RATHENA_FORUM_CAPABILITY =
+RATHENA_ISSUE_PR_CAPABILITY =
+OPENKORE_SOURCE_CAPABILITY =
+OPENKORE_DATA_CAPABILITY =
+OPENKORE_COMMUNITY_CAPABILITY =
+MATURE_SOLUTION_FOUND = YES / NO / PARTIAL
+REFERENCE_SOURCE =
+REUSE_SEAM =
+REUSE_CLASSIFICATION = DIRECT_REUSE / PORT / ADAPTER /
+                        INTEGRATION_ONLY / PROJECT_POLICY / CUSTOM_REQUIRED
+CUSTOM_IMPLEMENTATION_APPROVED = YES / NO
+```
+
+Navigation continuations must include rAthena world/map/warp/NPC authority and
+known routing patterns together with OpenKore MapRoute/CalcMapRoute/Route and
+mature map/portal/NPC/weight/recovery data. An incomplete sweep keeps source
+implementation blocked. This continuation gate supplements Quest Flow First,
+OpenKore Atlas, Synthetic First and the existing Last-Good mapping.
+
 ---
 
 ## 9A. RATHENA_REFERENCE_ATLAS_CONTINUATION

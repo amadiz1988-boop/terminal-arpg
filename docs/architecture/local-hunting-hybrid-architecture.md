@@ -181,6 +181,33 @@ The audit classifies overlapping custom code as `ADAPTER`, `PROJECT_POLICY`,
 `MIGRATE_TO_OPENKORE_CAPABILITY`, `REMOVE_DUPLICATE`, `KEEP` or `UNKNOWN`.
 Planner tests or provenance do not authorize Production promotion by themselves.
 
+### RO Ecosystem Evidence and Reuse Boundary
+
+The navigation boundary also requires an ecosystem sweep before any new custom
+implementation. Existing project research and accepted history are checked first;
+applicable evidence is then drawn from rAthena source, official docs/wiki,
+maintainer Issues/PRs, Forum patterns and mature scripts/data, plus OpenKore
+source, tables, docs/wiki and community-established behavior. Lower-tier findings
+are candidates only until verified against current source, server authority and
+license.
+
+```text
+RO_ECOSYSTEM_REUSE_FIRST = YES
+REFERENCE_SWEEP_REQUIRED = YES
+ECOSYSTEM_REFERENCE_SWEEP_COMPLETED = YES / NO
+MATURE_SOLUTION_FOUND = YES / NO / PARTIAL
+REUSE_CLASSIFICATION = DIRECT_REUSE / PORT / ADAPTER / INTEGRATION_ONLY /
+                        PROJECT_POLICY / CUSTOM_REQUIRED
+CUSTOM_IMPLEMENTATION_APPROVED = YES / NO
+```
+
+`FORUM_POST != CANONICAL_TRUTH`, while a verified mature forum or issue solution
+must still be traced to its implementation seam and evaluated for reuse. OpenKore
+and rAthena ecosystem work is part of the navigation reuse evaluation, not design
+inspiration only. A missing or incomplete sweep blocks custom navigation source
+changes. This rule preserves `OPENKORE_RUNTIME = 0`, the one-engine rule and the
+existing policy/authority boundaries.
+
 ## Local Hunting Scope
 
 Separate migration gates may evaluate target scan, target selection and
