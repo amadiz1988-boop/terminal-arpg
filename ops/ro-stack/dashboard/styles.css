@@ -2003,6 +2003,30 @@ body.world-map-open {
 .login-actions button {
   min-width: 76px;
 }
+.discord-login-button {
+  display: block;
+  margin: 8px auto 0;
+  width: auto !important;
+  min-width: 160px !important;
+  min-height: 28px;
+  padding: 4px 10px;
+  color: #315d89;
+  font-size: 13px;
+}
+.discord-account-settings {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+}
+.discord-account-settings > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.discord-avatar {
+  border-radius: 50%;
+  object-fit: cover;
+}
 .auth-body strong {
   color: #a02323;
 }

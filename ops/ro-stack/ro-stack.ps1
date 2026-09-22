@@ -265,6 +265,8 @@ function Setup-Stack {
   }
   $persistentAgentMigration = (Join-Path $scriptRoot 'sql\001-persistent-agent.sql').Replace('\', '/')
   Invoke-MariaDb $DatabaseRootPassword "source $persistentAgentMigration" $config.MainDatabase
+  $discordAccountLinkingMigration = (Join-Path $scriptRoot 'sql\011-discord-account-linking.sql').Replace('\', '/')
+  Invoke-MariaDb $DatabaseRootPassword "source $discordAccountLinkingMigration" $config.MainDatabase
   $interUser = [string]$secrets.interServerUser
   $interPassword = [string]$secrets.interServerPassword
   $internalSql = "INSERT INTO login (account_id,userid,user_pass,sex,email) VALUES (1,'$interUser','$interPassword','S','server@local.invalid') " +

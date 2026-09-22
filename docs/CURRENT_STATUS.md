@@ -1,5 +1,12 @@
 # 目前狀態
 
+## 2026-09-22 Discord OAuth Account Linking V1
+
+- 已加入 provider-neutral `account_external_identity` 與一次性 `web_oauth_state` migration，沿用既有 rAthena `login.account_id`、Web password credential 與 `web_sessions`，沒有建立第二套 account 或 character authority。
+- 已加入 server-side Discord authorization-code flow、`identify` 最小 scope、state／flow-cookie／原 session 綁定、callback replay 防護、session rotation、Discord unique identity mapping 與安全 unlink。未知 Discord identity fail closed，V1 限定既有帳號綁定與已綁定帳號登入。
+- `DISCORD_LINK_REQUIRED` 預設關閉；`DISCORD_GUILD_ID`／`DISCORD_GUILD_MEMBERSHIP_REQUIRED` 保留 extension seam，沒有 Bot、Role、踢人或 feedback bot。真實 Discord provider 尚未配置，因此 Browser OAuth callback acceptance 為 `REQUIRES_CONFIGURED_DISCORD_APP`。
+- 驗證：`node scripts/test-discord-oauth-account-linking.mjs` 通過 11 項 flow checks，`node --test scripts/test-discord-identity-store.mjs` 通過 19 項 persistence／route checks；Node syntax checks 通過。Production 未部署、未重啟。
+
 ## Future Roadmap
 
 長期方向與未來工作的唯一入口是 `docs/PROJECT_ROADMAP.md`；詳細未來系統置於 `docs/roadmap/`。以下僅為指標，不是現行實作狀態，且不代表已授權實作。

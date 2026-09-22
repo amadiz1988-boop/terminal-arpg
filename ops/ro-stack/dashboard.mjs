@@ -10,6 +10,11 @@ import {
 import { execFile } from 'node:child_process';
 import { createOpsControlPlane } from './ops-control-plane.mjs';
 import { createDashboardDatabase } from './dashboard-db.mjs';
+import { createExternalIdentityStore } from './account-external-identity.mjs';
+import {
+  createDiscordAccountAuth,
+  createDiscordRouteHandler,
+} from './discord-account-auth.mjs';
 import { createServer } from 'node:http';
 import { closeSync, openSync, readFileSync } from 'node:fs';
 import {
@@ -742,6 +747,22 @@ const databasePool = createDashboardDatabase({
   queueLimit: process.env.RO_DB_QUEUE_LIMIT,
   connectTimeoutMs: process.env.RO_DB_CONNECT_TIMEOUT_MS,
   idleTimeoutMs: process.env.RO_DB_IDLE_TIMEOUT_MS,
+});
+
+const discordIdentityStore = createExternalIdentityStore(databasePool.pool);
+const discordAccountAuth = createDiscordAccountAuth({
+  store: discordIdentityStore,
+  env: process.env,
+  invalidateSession: (hash) => sessionCache.delete(hash),
+});
+const discordRouteHandler = createDiscordRouteHandler({
+  auth: discordAccountAuth,
+  getAccount: (request) => sessionAccount(request),
+  originAllowed: (request) => mutationOriginAllowed(request),
+  allowStart: (request) => {
+    const key = clientAddress(request);
+    return consumeRateLimit(loginClientAttempts, 'discord:' + key, 300_000, 20);
+  },
 });
 
 const productionMetricsStartedAt = Date.now();
@@ -3425,6 +3446,31 @@ await sql(`CREATE TABLE IF NOT EXISTS web_accounts (
   password_salt CHAR(32) NOT NULL,
   password_hash CHAR(128) NOT NULL,
   migrated_at BIGINT UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`);
+await sql(`CREATE TABLE IF NOT EXISTS account_external_identity (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  account_id INT UNSIGNED NOT NULL,
+  provider VARCHAR(32) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  provider_user_id VARCHAR(128) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  display_name VARCHAR(128) NOT NULL,
+  avatar_url VARCHAR(512) NULL,
+  linked_at BIGINT UNSIGNED NOT NULL,
+  last_login_at BIGINT UNSIGNED NULL,
+  UNIQUE KEY uq_external_provider_user (provider,provider_user_id),
+  UNIQUE KEY uq_external_account_provider (account_id,provider)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`);
+await sql(`CREATE TABLE IF NOT EXISTS web_oauth_state (
+  state_hash CHAR(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL PRIMARY KEY,
+  browser_hash CHAR(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  session_hash CHAR(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  provider VARCHAR(32) NOT NULL,
+  intent ENUM('LOGIN','LINK') NOT NULL,
+  account_id INT UNSIGNED NULL,
+  redirect_uri VARCHAR(512) NOT NULL,
+  created_at BIGINT UNSIGNED NOT NULL,
+  expires_at BIGINT UNSIGNED NOT NULL,
+  consumed_at BIGINT UNSIGNED NULL,
+  KEY ix_oauth_state_expiry (expires_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`);
 await sql(`CREATE TABLE IF NOT EXISTS web_account_flags (
   account_id INT UNSIGNED NOT NULL PRIMARY KEY,
@@ -9061,6 +9107,7 @@ async function handleDashboardRequest(request, response) {
       `http://${request.headers.host ?? 'localhost'}`,
     );
     requestMetricUrl = url;
+    if (await discordRouteHandler(url, request, response)) return;
     if (
       mutationMethods.has(request.method ?? 'GET') &&
       Number(request.headers['content-length'] ?? 0) > 8192 &&
@@ -9348,6 +9395,7 @@ async function handleDashboardRequest(request, response) {
     }
     const account = await sessionAccount(request);
     if (url.pathname === '/api/session') {
+      const discord = await discordAccountAuth.view(account);
       const sessionView = String(url.searchParams.get('view') ?? 'full');
       const entryView = sessionView === 'entry';
       const equipment = !entryView && account?.characterId
@@ -9374,9 +9422,21 @@ async function handleDashboardRequest(request, response) {
         combatSse: entryView ? null : await combatSseStateForAccount(account, null),
 
         webExperienceTelemetry: webExperienceTelemetry.publicConfig(account ?? {}),
+        discord,
       });
     }
     if (!account) return json(response, 401, { error: '請先登入' });
+    const discord = discordAccountAuth.requiresAccessCheck
+      ? await discordAccountAuth.view(account)
+      : { accessGate: null };
+    if (
+      discord.accessGate &&
+      !['/api/session', '/api/account/discord', '/api/account/discord/link'].includes(url.pathname)
+    )
+      return json(response, 403, {
+        error: discord.accessGate,
+        code: discord.accessGate,
+      });
     if (url.pathname === '/api/config' && request.method === 'GET')
       return json(response, 200, await readPlayerConfig(account));
     if (url.pathname === '/api/config' && request.method === 'PUT') {

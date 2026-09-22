@@ -7593,6 +7593,84 @@ function syncAdminSurfaceLink(adminSurface) {
   else headerRow.append(link);
 }
 
+function syncDiscordUi(discord, { required = false } = {}) {
+  const state = discord ?? {};
+  const login = $('#discordLoginButton');
+  const link = $('#discordLinkButton');
+  const unlink = $('#discordUnlinkButton');
+  const summary = $('#discordIdentitySummary');
+  const notice = $('#discordSettingsNotice');
+  const requiredLink = $('#discordRequiredLink');
+  if (requiredLink) {
+    requiredLink.disabled = !state.configured || state.linked;
+    requiredLink.classList.toggle('hidden', Boolean(state.linked));
+  }
+  if (login) {
+    login.disabled = !state.configured;
+    login.title = state.configured ? '' : 'Discord 登入尚未設定';
+  }
+  if (link) {
+    link.disabled = !state.configured || !state.managementAllowed;
+    link.classList.toggle('hidden', Boolean(state.linked));
+  }
+  if (unlink) {
+    unlink.disabled = !state.managementAllowed;
+    unlink.classList.toggle('hidden', !state.linked);
+  }
+  if (summary) {
+    summary.replaceChildren();
+    if (state.identity) {
+      if (state.identity.avatarUrl) {
+        const image = document.createElement('img');
+        image.src = state.identity.avatarUrl;
+        image.alt = '';
+        image.width = 32;
+        image.height = 32;
+        image.className = 'discord-avatar';
+        summary.append(image);
+      }
+      const label = document.createElement('span');
+      label.textContent = state.identity.displayName + ' · 已綁定';
+      summary.append(label);
+    } else {
+      summary.textContent = state.configured ? '未綁定' : 'Discord 登入尚未設定';
+    }
+  }
+  if (notice) notice.textContent = state.guildMembershipRequired
+    ? '官方 Discord 公會資格會在啟用後由伺服器驗證。'
+    : 'Discord 名稱與頭像只用於顯示。';
+  const gate = $('#discordRequiredGate');
+  if (gate) gate.classList.toggle('hidden', !required);
+}
+
+const discordMessages = {
+  linked: 'Discord 已綁定。',
+  logged_in: 'Discord 登入成功。',
+  discord_oauth_cancelled: '已取消 Discord 授權。',
+  login_required: '請先登入 Ghost Island，再綁定 Discord。',
+  discord_oauth_not_configured: 'Discord 登入尚未設定。',
+  discord_oauth_state_invalid: '驗證已失效或已使用，請重新開始。',
+  discord_account_not_linked: '此 Discord 尚未綁定，請先用原帳號完成綁定。',
+  discord_identity_already_linked: '此 Discord 已綁定其他 Ghost Island 帳號。',
+  discord_link_session_required: '請以原帳號重新登入，再開始綁定。',
+  discord_unlink_requires_alternative_login: '請先建立另一種登入方式，再解除 Discord 綁定。',
+};
+function discordReturnNotice() {
+  const value = new URLSearchParams(location.search).get('discord');
+  if (!value) return null;
+  history.replaceState({}, document.title, location.pathname);
+  return discordMessages[value] ?? 'Discord 驗證未完成。';
+}
+async function beginDiscordLink() {
+  const result = await api('/api/account/discord/link', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: '{}',
+  });
+  if (!result.authorizationUrl) throw new Error('Discord 綁定尚未就緒');
+  location.assign(result.authorizationUrl);
+}
+
 async function refreshOnce(full, latencyTrace = null) {
   try {
     const interest = currentWebInterest(),
@@ -7837,6 +7915,8 @@ async function enter(latencyTrace = null) {
   $('#loginServerStatus').textContent = health.ok ? '伺服器正常' : '無法連線';
   applyObservationPolicy(session.observationPolicy);
   applyWebExperienceTelemetry(session.webExperienceTelemetry);
+  const returnNotice = discordReturnNotice();
+  syncDiscordUi(session.discord);
   authenticated = Boolean(session.account);
   restartWebActivityHeartbeat();
   applyCombatStreamState(session.combatSse);
@@ -7848,7 +7928,24 @@ async function enter(latencyTrace = null) {
     show($('#characterSelectForm'), false);
     syncAudioControls();
     $('#loginSubmit').disabled = false;
-    $('#authError').textContent = '';
+    $('#authError').textContent = returnNotice ?? '';
+    return;
+  }
+  if (session.discord?.accessGate) {
+    if (typeof setAuthLoading === 'function') setAuthLoading(false);
+    setMusicContext('title');
+    show($('#auth'));
+    show($('#loginForm'), false);
+    show($('#characterForm'), false);
+    show($('#characterSelectForm'), false);
+    show($('#game'), false);
+    syncDiscordUi(session.discord, { required: true });
+    $('#discordRequiredMessage').textContent =
+      session.discord.accessGate === 'discord_guild_membership_unavailable'
+        ? '官方 Discord 成員驗證尚未設定。'
+        : session.discord.accessGate === 'discord_guild_membership_required'
+        ? '此帳號需要官方 Discord 公會資格才能繼續。'
+        : '此帳號需要先完成 Discord 綁定。';
     return;
   }
   if (!session.account.characterId || !session.account.characterName) {
@@ -7865,7 +7962,7 @@ async function enter(latencyTrace = null) {
       currentCreateSex,
       $('#hair').value,
     );
-    $('#characterError').textContent = '請先建立角色';
+    $('#characterError').textContent = returnNotice ?? '請先建立角色';
     void loadAccountAudio();
     return;
   }
@@ -8457,6 +8554,33 @@ async function runEdenTask(taskId) {
   }
   setTimeout(refresh, 300);
 }
+
+$('#discordLoginButton')?.addEventListener('click', () => {
+  location.assign('/auth/discord');
+});
+$('#discordRequiredLink')?.addEventListener('click', () => {
+  void beginDiscordLink().catch((error) => {
+    $('#discordRequiredMessage').textContent = error.message;
+  });
+});
+$('#discordLinkButton')?.addEventListener('click', () => {
+  void beginDiscordLink().catch((error) => {
+    $('#discordSettingsNotice').textContent = error.message;
+  });
+});
+$('#discordUnlinkButton')?.addEventListener('click', async () => {
+  const button = $('#discordUnlinkButton');
+  button.disabled = true;
+  try {
+    const result = await api('/api/account/discord', { method: 'DELETE' });
+    syncDiscordUi(result.discord);
+    if (result.discord?.accessGate) await enter();
+  } catch (error) {
+    $('#discordSettingsNotice').textContent = error.message;
+  } finally {
+    button.disabled = false;
+  }
+});
 
 $('#loginForm').onsubmit = async (event) => {
   event.preventDefault();

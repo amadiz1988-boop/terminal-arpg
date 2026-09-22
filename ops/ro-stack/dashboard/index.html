@@ -53,6 +53,7 @@
           </div>
         </div>
         <div class="ro-login-options">
+          <button id="discordLoginButton" class="discord-login-button" type="button" disabled>使用 Discord 登入</button>
           <label class="ro-login-server">
             <input class="sr-only" type="radio" name="server" value="ghost-island" checked />
             <span>鬼島傳說</span>
@@ -73,6 +74,11 @@
           <strong id="authError" aria-live="polite">正在載入登入功能</strong>
         </div>
       </form>
+      <section id="discordRequiredGate" class="window hidden" aria-live="polite">
+        <div class="titlebar"><span>需要綁定 Discord 才能繼續</span><span>帳號安全</span></div>
+        <p id="discordRequiredMessage">此帳號需要先完成 Discord 綁定。</p>
+        <button id="discordRequiredLink" class="official-skin-button official-ok" type="button">綁定 Discord</button>
+      </section>
       <form id="characterForm" class="window auth-card hidden">
         <div class="titlebar"><span>建立初心者</span><span>創角</span></div>
         <div class="auth-body character-create">
@@ -963,6 +969,18 @@
         </div>
       </section>
       <section id="system" class="panel" data-pet-anchor="system">
+        <div class="window" id="accountSettings">
+          <div class="titlebar"><span>帳號設定</span><span>登入方式</span></div>
+          <div class="discord-account-settings" aria-live="polite">
+            <strong>Discord</strong>
+            <div id="discordIdentitySummary">未綁定</div>
+            <div class="login-actions">
+              <button id="discordLinkButton" class="official-skin-button official-ok" type="button">綁定 Discord</button>
+              <button id="discordUnlinkButton" class="official-skin-button official-cancel hidden" type="button">解除綁定</button>
+            </div>
+            <small id="discordSettingsNotice">Discord 名稱與頭像只用於顯示。</small>
+          </div>
+        </div>
         <div class="window">
           <div class="titlebar"><span>聲音設定</span><span>帳號共用</span></div>
           <div class="audio-settings">
