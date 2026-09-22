@@ -101,9 +101,12 @@ function commandStep(edge, index) {
     return { kind: 'VERIFY_SAVEPOINT', expectedMap: metadata.saveMap ?? edge.to, ...base };
   }
   if (ITEM_TYPES.has(type)) {
+    const itemId = Number.isSafeInteger(metadata.itemId) ? metadata.itemId : 602;
+    if (itemId === 601)
+      return { missing: 'fly_wing_is_local_hunting_only', ...base };
     return {
       kind: 'BUTTERFLY_WING',
-      itemId: Number.isSafeInteger(metadata.itemId) ? metadata.itemId : 602,
+      itemId,
       expectedMap: metadata.expectedMap ?? edge.to,
       saveMap: metadata.saveMap ?? edge.to,
       ...base,
