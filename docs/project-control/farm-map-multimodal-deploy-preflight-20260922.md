@@ -106,6 +106,12 @@ Dashboard plus its fixture path, while this repair also changes the relocation
 executor and adds its bounded test. `SUPERSET_PROVENANCE=BLOCKED` until an
 exact clean candidate lineage and authorized deploy manifest are established.
 
+Checkpoint `41ad8e2911b067ee78c712d1d7ab0d4b72a348c6` contains the repair and
+all required Web checkpoints by ancestry. A fresh deploy precheck against that
+candidate still failed closed at the Dashboard patch preimage because the
+Production Dashboard lineage differs. `SAFE_TO_DEPLOY=NO`, `RESTART=NOT_RUN`,
+and no Production file was changed.
+
 ## CONTEXT_REPORT
 
 NEXT_UNFINISHED_STEP = WEB_PLANNER_COORDINATOR_CONTRACT_REPAIR.
