@@ -541,73 +541,9 @@
           <div class="titlebar">
             <span>回城補給循環</span><span id="supplyStage">尚未啟用</span>
           </div>
-          <form id="supplyForm" class="supply-form">
-            <label class="check-row">
-              <input id="supplyEnabled" type="checkbox" />
-              <span>啟用自動回城補給</span>
-            </label>
-            <div class="supply-grid">
-              <label>
-                <span>負重達到</span>
-                <span
-                  ><input
-                    id="supplyWeight"
-                    type="number"
-                    min="40"
-                    max="88"
-                    value="75"
-                  />%</span
-                >
-              </label>
-              <label class="check-row">
-                <input id="supplyStore" type="checkbox" checked />
-                <span>卡普拉存倉</span>
-              </label>
-              <label class="check-row">
-                <input id="supplySell" type="checkbox" checked />
-                <span>販售戰利品</span>
-              </label>
-              <label class="check-row">
-                <input id="supplyBuy" type="checkbox" checked />
-                <span>補充紅色藥水</span>
-              </label>
-              <label>
-                <span>藥水低於</span>
-                <input
-                  id="redPotionMin"
-                  type="number"
-                  min="0"
-                  max="500"
-                  value="20"
-                />
-              </label>
-              <label>
-                <span>補到</span>
-                <input
-                  id="redPotionMax"
-                  type="number"
-                  min="0"
-                  max="1000"
-                  value="100"
-                />
-              </label>
-            </div>
-            <p class="supply-route">
-              普隆德拉道具商販售與補給 → 南門卡普拉存倉 → 自動返回原掛機地圖
-            </p>
-            <details class="supply-rules">
-              <summary>逐項拾取、丟棄、販售與存倉規則</summary>
-              <div id="supplyRuleList"><p>正在讀取背包道具</p></div>
-            </details>
-            <div class="controls">
-              <button id="saveSupply" type="submit" class="primary">
-                套用補給設定
-              </button>
-            </div>
-            <p id="supplyNotice" class="notice">
-              預設保留補品與傳送道具、販售一般戰利品、存放卡片及未穿裝備。
-            </p>
-          </form>
+          <div id="configEditor" class="config-editor" aria-live="polite">
+            <p class="notice">正在讀取角色設定契約…</p>
+          </div>
         </div>
         <section class="window combat-window" data-pet-anchor="combat-log">
           <div class="titlebar">
@@ -1375,6 +1311,7 @@
     ></audio>
     <script src="/ro-ui-kit.js?v=r013-item-quantity-detail" defer></script>
     <script src="/minimap-presence.js?v=ui5-1" defer></script>
+    <script type="module" src="/config-editor.js?v=config-v1"></script>
     <script
       src="/app.js?v=r088-inventory-item-actions"
       defer

@@ -1610,6 +1610,25 @@
       "evidenceLinks": [
         "https://github.com/crashkonijn/GOAP"
       ]
+    },
+    {
+      "id": "openkore-supply-combat-config-ui-v1",
+      "capability": "OpenKore supply/combat configuration UI replacement",
+      "sources": [
+        "docs/openkore-reference/config-ui-replacement-v1.md",
+        "docs/openkore-reference/reference-index.yml",
+        "https://github.com/OpenKore/openkore/blob/master/src/AI/Attack.pm",
+        "https://github.com/OpenKore/openkore/blob/master/src/Interface/Wx/ConfigEditor.pm"
+      ],
+      "upstream_commit": "51de1ddfc4449ae5217f6886de702f87ca934030",
+      "last_reviewed": "2026-09-22",
+      "findings": "attackAuto and attackUseWeapon are independent; skill maxCastTime is cast duration; item controls use keep/storage/sell/cart flags; pickup flags are -1/0/1/2; repeated skill blocks are first-class.",
+      "reuse_decision": "PORTABLE_LOGIC",
+      "license_provenance": "Reference behavior and field names only; no OpenKore runtime or GUI code copied.",
+      "project_owner": "Web / configuration contract",
+      "freshness": "CURRENT",
+      "stale_reference": false,
+      "version_conflict": "OpenKore executor is legacy and unavailable to SERVER_AGENT; adapter remains config-only."
     }
   ]
 }

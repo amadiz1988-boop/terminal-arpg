@@ -1,0 +1,102 @@
+import assert from 'node:assert/strict';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import {
+  COMBAT_PROFILES,
+  FIXED_POLICY,
+  applyProfileTemplate,
+  canonicalToOpenKorePreview,
+  defaultCanonicalConfig,
+  migrateLegacyConfig,
+  validateCanonicalConfig,
+} from '../ops/ro-stack/dashboard/config-schema.mjs';
+import { loadCanonicalConfig, saveCanonicalConfig } from '../ops/ro-stack/dashboard/config-storage.mjs';
+
+const expectValid = (config) => assert.deepEqual(validateCanonicalConfig(config), []);
+const base = defaultCanonicalConfig(0);
+expectValid(base);
+assert.deepEqual(base.supply.loot, FIXED_POLICY.loot);
+assert.deepEqual(base.combat.loot, FIXED_POLICY.loot);
+assert.equal(COMBAT_PROFILES.length, 8);
+
+const legacyText = [
+  'attackAuto 0', 'attackUseWeapon 0', 'attackDistance 2', 'attackMaxDistance 4',
+  'attackCheckLOS 1', 'attackCanSnipe 0', 'attackAuto_routeToLock 1',
+  'teleportAuto_hp 15%', 'teleportAuto_sp > 20%',
+  'attackSkillSlot_0 SM_BASH', 'attackSkillSlot_0_lvl 5', 'attackSkillSlot_0_dist 2',
+  'attackSkillSlot_0_maxDist 4', 'attackSkillSlot_0_maxCastTime 350',
+  'attackSkillSlot_0_minCastTime 25', 'attackSkillSlot_0_maxAttempts 2',
+  'useSelf_skill_0 AL_HEAL', 'useSelf_skill_0_lvl 3', 'useSelf_skill_0_hp < 70%',
+].join('\n');
+const migrated = migrateLegacyConfig({
+  source: 'test-legacy',
+  supplyCycle: { enabled: true, returnWeight: 68, store: true, sell: false, buy: true, redPotionMin: 5, redPotionMax: 20, withdraw: { enabled: true, itemId: 502, minAmount: 2, targetAmount: 30, batchSize: 10 },
+    rules: [{ itemId: 501, action: 'keep' }, { itemId: 909, action: 'sell' }, { itemId: 910, action: 'store' }, { itemId: 911, action: 'ignore' }, { itemId: 912, action: 'discard' }] },
+  configText: legacyText,
+  skillAutomation: { buff: { handle: 'AL_BLESSING', level: 10, minimumSp: 20 } },
+});
+expectValid(migrated.config);
+assert.equal(migrated.config.supply.enabled, true);
+assert.equal(migrated.config.supply.weightTriggerPercent, 68);
+assert.equal(migrated.config.supply.services.buy.minAmount, 5);
+assert.equal(migrated.config.supply.services.buy.targetAmount, 20);
+assert.equal(migrated.config.supply.services.sell.enabled, false);
+assert.equal(migrated.config.supply.services.withdraw.enabled, true);
+assert.equal(migrated.config.supply.services.withdraw.itemId, 502);
+assert.equal(migrated.config.supply.services.withdraw.minAmount, 2);
+assert.equal(migrated.config.supply.services.withdraw.targetAmount, 30);
+assert.equal(migrated.config.supply.services.withdraw.batchSize, 10);
+assert.equal(migrated.config.supply.itemRules.find((x) => x.itemId === 909).sell, 1);
+assert.equal(migrated.config.supply.itemRules.find((x) => x.itemId === 910).storage, 1);
+assert.equal(migrated.config.supply.itemRules.find((x) => x.itemId === 911).pickup, 0);
+assert.equal(migrated.config.supply.itemRules.find((x) => x.itemId === 912).pickup, -1);
+assert.equal(migrated.config.combat.attack.mode, 0);
+assert.equal(migrated.config.combat.attack.useWeapon, false);
+assert.equal(migrated.config.combat.attack.checkLOS, true);
+assert.equal(migrated.config.combat.skills.attackSlots[0].maxCastTime, 350);
+assert.equal(migrated.config.combat.skills.attackSlots[0].minCastTime, 25);
+assert.equal(migrated.config.combat.skills.selfSkills[0].conditions.hp, '< 70%');
+assert.equal(migrated.config.combat.profile, 'SKILL_CAST');
+assert.equal(migrated.config.supply.loot.autoLoot, true);
+assert.equal(migrated.config.supply.loot.autoStore, false);
+assert.ok(migrated.migration.mappings.some((entry) => entry.disposition === 'REMOVE_DUPLICATE'));
+
+for (const profile of COMBAT_PROFILES) {
+  const candidate = applyProfileTemplate(base, profile);
+  expectValid(candidate);
+  if (profile === 'SKILL_CAST') assert.equal(candidate.combat.attack.useWeapon, false);
+  if (profile === 'HEAL_SUPPORT' || profile === 'PASSIVE_FOLLOW') assert.equal(candidate.combat.attack.mode, -1);
+}
+const preview = canonicalToOpenKorePreview(migrated.config);
+assert.match(preview.configText, /attackAuto 0/);
+assert.match(preview.configText, /attackUseWeapon 0/);
+assert.match(preview.configText, /itemsTakeAuto 2/);
+assert.match(preview.configText, /getAuto 1/);
+assert.match(preview.pickupitems, /911 0/);
+assert.match(preview.itemsControl, /909 0 0 1 0 0/);
+
+const invalid = defaultCanonicalConfig(0);
+invalid.combat.attack.mode = 9;
+assert.ok(validateCanonicalConfig(invalid).some((entry) => entry.path === 'combat.attack.mode'));
+invalid.combat.attack.mode = 2;
+invalid.combat.loot.autoStore = true;
+assert.ok(validateCanonicalConfig(invalid).some((entry) => entry.path === 'combat.loot.autoStore'));
+invalid.combat.loot.autoStore = false;
+invalid.supply.tools.butterflyWing.itemId = 601;
+assert.ok(validateCanonicalConfig(invalid).some((entry) => entry.path === 'supply.tools.butterflyWing'));
+
+const root = await mkdtemp(join(tmpdir(), 'ghost-island-config-contract-'));
+try {
+  const first = await loadCanonicalConfig({ instancesRoot: root, accountId: 7, characterId: 70 });
+  assert.equal(first.source, 'default');
+  const saved = await saveCanonicalConfig({ instancesRoot: root, accountId: 7, characterId: 70, config: migrated.config, expectedRevision: first.config.revision });
+  assert.equal(saved.config.revision, 1);
+  const reloaded = await loadCanonicalConfig({ instancesRoot: root, accountId: 7, characterId: 70 });
+  assert.equal(reloaded.config.revision, 1);
+  assert.equal(reloaded.config.combat.skills.attackSlots[0].skill, 'SM_BASH');
+  await assert.rejects(() => saveCanonicalConfig({ instancesRoot: root, accountId: 7, characterId: 70, config: reloaded.config, expectedRevision: 0 }), (error) => error.code === 'CONFIG_REVISION_CONFLICT');
+  const raw = JSON.parse(await readFile(join(root, 'player_7', 'config', 'character_70.json'), 'utf8'));
+  assert.equal(raw.revision, 1);
+} finally { await rm(root, { recursive: true, force: true }); }
+console.log('OPENKORE_CONFIG_SCHEMA_TEST_PASS', JSON.stringify({ profiles: COMBAT_PROFILES.length, mappings: migrated.migration.mappings.length, checks: 21 }));

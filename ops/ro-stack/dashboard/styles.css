@@ -2898,6 +2898,151 @@ html {
   min-height: 32px;
   min-width: 0;
 }
+.config-editor {
+  padding: 8px;
+}
+.config-editor-header,
+.config-editor-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.config-editor-header h3,
+.config-panel h4,
+.config-group h5 {
+  margin: 0;
+}
+.config-editor-header h3 {
+  color: #234765;
+  font-size: 16px;
+}
+.config-editor-status {
+  color: #53616b;
+  font-size: 12px;
+  text-align: right;
+}
+.config-tabs {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+.config-panel {
+  padding: 7px;
+  border: 1px solid #9ba9b2;
+  background: #f8f8f4;
+}
+.config-panel h4 {
+  padding-bottom: 5px;
+  color: #31567e;
+  border-bottom: 1px solid #b2bcc1;
+}
+.config-group {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
+  margin-top: 7px;
+}
+.config-group h5 {
+  grid-column: 1 / -1;
+  color: #53616b;
+  font-size: 12px;
+}
+.config-field,
+.config-array-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  min-height: 34px;
+  padding: 4px 6px;
+  border: 1px solid #c1c8cb;
+  background: #eef1ee;
+}
+.config-field input:not([type='checkbox']),
+.config-field select,
+.config-array-field input {
+  min-width: 0;
+  width: 112px;
+  min-height: 28px;
+  border: 1px solid #7a8b99;
+  background: #fff;
+}
+.config-field input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  accent-color: #4f7194;
+}
+.config-array {
+  margin-top: 8px;
+  border: 1px solid #9ba9b2;
+  background: #f2f3ef;
+}
+.config-array > summary,
+.config-migration > summary {
+  padding: 7px;
+  color: #2868a7;
+  cursor: pointer;
+  font-weight: bold;
+}
+.config-array-list {
+  display: grid;
+  gap: 5px;
+  padding: 6px;
+  border-top: 1px solid #b2bcc1;
+}
+.config-array-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+  gap: 4px;
+  padding: 5px;
+  border: 1px solid #c1c8cb;
+  background: #fff;
+}
+.config-array-field {
+  display: grid;
+  align-items: start;
+  justify-content: stretch;
+  font-size: 11px;
+}
+.config-array-field input {
+  width: 100%;
+  box-sizing: border-box;
+}
+.config-add,
+.config-remove,
+.config-profile-apply {
+  min-height: 29px;
+  margin: 6px;
+  border: 1px solid #65768a;
+  background: linear-gradient(#fff, #cbd4dc);
+  color: #1f3954;
+  font: inherit;
+  font-weight: bold;
+}
+.config-remove {
+  align-self: end;
+  margin: 0;
+}
+.config-migration {
+  margin-top: 8px;
+  border: 1px solid #9ba9b2;
+  background: #fff;
+}
+.config-migration p {
+  margin: 0;
+  padding: 4px 7px;
+  border-top: 1px solid #d2d7d8;
+  font-size: 11px;
+}
+.config-warning {
+  color: #a12c24;
+  font-weight: bold;
+}
+.config-editor-actions {
+  justify-content: flex-end;
+  margin-top: 8px;
+}
 @media (max-width: 560px) {
   .supply-grid,
   #supplyRuleList {
@@ -2905,6 +3050,15 @@ html {
   }
   .supply-rule-row {
     grid-template-columns: minmax(0, 1fr) 112px;
+  }
+  .config-group {
+    grid-template-columns: 1fr;
+  }
+  .config-array-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .config-remove {
+    grid-column: 1 / -1;
   }
 }
 .status-layout {

@@ -127,6 +127,14 @@ import {
   existingCommandsForStep,
 } from './persistent-agent/relocation-command-surface.mjs';
 import {
+  canonicalToOpenKorePreview,
+  validateCanonicalConfig,
+} from './dashboard/config-schema.mjs';
+import {
+  loadCanonicalConfig,
+  saveCanonicalConfig,
+} from './dashboard/config-storage.mjs';
+import {
   CharacterProjectionCache,
   CharacterViewerRegistry,
   DomainRevisionTracker,
@@ -3917,9 +3925,8 @@ function publicErrorMessage(error) {
     ? message
     : '伺服器操作失敗';
 }
-function requestBody(request) {
+function requestBody(request, maximum = 8192) {
   return new Promise((resolve, reject) => {
-    const maximum = 8192;
     const declared = Number(request.headers['content-length'] ?? 0);
     if (declared > maximum) {
       reject(new HttpError(413, '請求內容過大'));
@@ -7799,6 +7806,63 @@ async function saveSupplyCycle(account, input) {
   await queueCharacterCommand(account, 'supply_cycle_reload', '1');
   return settings;
 }
+// Player configuration replacement boundary. This adapter persists a
+// character-scoped policy and returns a preview of mature OpenKore keys. It
+// deliberately does not call ensureWorker, write .cmd/.result files, reload a
+// controller, or mutate rAthena. Execution capability remains an explicit
+// response field until a native command contract exists.
+async function readPlayerConfig(account) {
+  if (!account?.characterId) throw new HttpError(409, '請先建立角色');
+  const result = await loadCanonicalConfig({
+    instancesRoot,
+    accountId: account.accountId,
+    characterId: account.characterId,
+    persistMigration: true,
+  });
+  return {
+    config: result.config,
+    migration: result.migration,
+    source: result.source,
+    schemaVersion: result.config.version,
+    adapter: canonicalToOpenKorePreview(result.config),
+    execution: {
+      applied: false,
+      controller: 'CONFIG_ONLY',
+      reason: 'CONFIG_ONLY_NO_EXECUTOR_COMMAND',
+    },
+  };
+}
+
+async function savePlayerConfig(account, body) {
+  if (!account?.characterId) throw new HttpError(409, '請先建立角色');
+  const config = body?.config;
+  const errors = validateCanonicalConfig(config);
+  if (errors.length) {
+    const exception = new HttpError(422, '設定驗證失敗');
+    exception.details = errors;
+    throw exception;
+  }
+  const result = await saveCanonicalConfig({
+    instancesRoot,
+    accountId: account.accountId,
+    characterId: account.characterId,
+    config,
+    expectedRevision: body?.expectedRevision,
+  });
+  return {
+    config: result.config,
+    migration: result.migration,
+    source: result.source,
+    schemaVersion: result.config.version,
+    adapter: canonicalToOpenKorePreview(result.config),
+    execution: {
+      applied: false,
+      controller: 'CONFIG_ONLY',
+      reason: 'CONFIG_ONLY_NO_EXECUTOR_COMMAND',
+    },
+  };
+}
+
 // SERVER_AGENT stat allocation: explicit player intent executed by rAthena's
 // native status-up path over persistent_agent_command. The browser supplies only
 // the stat name; the command revision is read from persistent_agent_state.
@@ -8997,6 +9061,13 @@ async function handleDashboardRequest(request, response) {
       `http://${request.headers.host ?? 'localhost'}`,
     );
     requestMetricUrl = url;
+    if (
+      mutationMethods.has(request.method ?? 'GET') &&
+      Number(request.headers['content-length'] ?? 0) > 8192 &&
+      url.pathname !== '/api/config'
+    ) {
+      await requestBody(request);
+    }
     if (!url.pathname.startsWith('/api/')) {
       if (await serveFile(url.pathname, response, request)) return;
       return json(response, 404, { error: 'not_found' });
@@ -9306,6 +9377,19 @@ async function handleDashboardRequest(request, response) {
       });
     }
     if (!account) return json(response, 401, { error: '請先登入' });
+    if (url.pathname === '/api/config' && request.method === 'GET')
+      return json(response, 200, await readPlayerConfig(account));
+    if (url.pathname === '/api/config' && request.method === 'PUT') {
+      try {
+        return json(response, 200, await savePlayerConfig(account, await requestBody(request, 262144)));
+      } catch (error) {
+        if (error?.code === 'CONFIG_REVISION_CONFLICT')
+          return json(response, 409, { error: error.code, config: error.current });
+        if (error?.details)
+          return json(response, 422, { error: error.message, details: error.details });
+        throw error;
+      }
+    }
     const persistentLifeLatestMatch = url.pathname.match(
       /^\/api\/ro\/agents\/(\d+)\/persistent-life\/latest$/,
     );

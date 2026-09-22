@@ -1,4 +1,15 @@
 const $ = (s) => document.querySelector(s);
+let configEditorCharacterId = null;
+function mountCharacterConfigEditor(characterId) {
+  const root = $('#configEditor');
+  const id = Number(characterId);
+  if (!root || !Number.isSafeInteger(id) || id <= 0 || configEditorCharacterId === id) return;
+  configEditorCharacterId = id;
+  root.dataset.configEditorMounted = '';
+  root.replaceChildren();
+  if (window.GhostIslandConfigEditor?.mount)
+    void window.GhostIslandConfigEditor.mount(root);
+}
 const rememberedAccountStorageKey = 'ghost-island.remembered-account.v1';
 function hydrateRememberedAccount() {
   try {
@@ -5750,6 +5761,7 @@ function setSupplyCycle(settings, live, inventory = []) {
   $('#supplyStage').textContent = enabled
     ? (phaseLabel ?? supplyStageLabels[stage] ?? '掛機循環待命')
     : '尚未啟用';
+  if (!$('#supplyForm')) return;
   const editing = $('#supplyForm').contains(document.activeElement);
   if (!editing) {
     $('#supplyEnabled').checked = enabled;
@@ -7606,6 +7618,7 @@ async function refreshOnce(full, latencyTrace = null) {
     sessionEndedAt = state.endedAt ?? null;
     currentRunning = state.running;
     $('#accountName').textContent = `帳號：${state.account.username}`;
+    mountCharacterConfigEditor(state.character?.charId ?? state.account?.characterId);
     syncAdminSurfaceLink(state.account?.adminSurface === true);
     const activeTask = taskInProgress(state.derived);
     $('#status').textContent = activeTask
@@ -9556,44 +9569,7 @@ $('#npcActions').onclick = (event) => {
       beginExperienceTrace('npc_dialog_action'),
     );
 };
-$('#supplyForm').onsubmit = async (event) => {
-  event.preventDefault();
-  const save = $('#saveSupply');
-  save.disabled = true;
-  $('#supplyNotice').textContent = '正在套用自動補給設定';
-  try {
-    const rules = [...document.querySelectorAll('[data-supply-item-id]')]
-        .map((select) => ({
-          itemId: Number(select.dataset.supplyItemId),
-          action: select.value,
-        }))
-        .filter((rule) => rule.action !== 'default'),
-      result = await api('/api/supply-cycle', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          enabled: $('#supplyEnabled').checked,
-          returnWeight: Number($('#supplyWeight').value),
-          store: $('#supplyStore').checked,
-          sell: $('#supplySell').checked,
-          buy: $('#supplyBuy').checked,
-          redPotionMin: Number($('#redPotionMin').value),
-          redPotionMax: Number($('#redPotionMax').value),
-          rules,
-        }),
-      });
-    supplyCycleSettings = result.supplyCycle;
-    supplyRuleSignature = '';
-    $('#supplyNotice').textContent = result.supplyCycle.enabled
-      ? '設定已生效，達到條件會自動回城並在完成後返回掛機地圖'
-      : '回城補給循環已關閉';
-    await refresh();
-  } catch (error) {
-    $('#supplyNotice').textContent = error.message;
-  } finally {
-    save.disabled = false;
-  }
-};
+// Configuration is owned by config-editor.js and /api/config.
 $('#start').onclick = () => act('start');
 $('#stop').onclick = () => act('stop');
 $('#canaryClaim').onclick = () => void actCanary('claim_agent');
