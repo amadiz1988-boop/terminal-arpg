@@ -3,8 +3,10 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import {
+  CAPABILITY_DELTA_TRIGGERS,
   FRESH_RESEARCH_JUSTIFICATIONS,
   GATE_DECISIONS,
+  MATURE_REFERENCE_MATRIX_FIELDS,
   OPENKORE_INCUMBENT_CATEGORIES,
   REUSE_GATE_EXEMPT_CATEGORIES,
   REUSE_GATE_FAILURE_CODES,
@@ -69,6 +71,11 @@ const baseGate = (overrides: Json = {}): Json => ({
   whyNotReuse: '',
   freshResearchPerformed: false,
   registryUpdateRequired: false,
+  capabilityScope: 'test mature capability surface',
+  matureReferenceApplicable: true,
+  referenceGate: 'PASS',
+  deltaReferenceAuditRequired: true,
+  matureReferenceMatrix: matureReferenceMatrix(),
   ...overrides,
 });
 
@@ -84,6 +91,23 @@ const openKoreChecked = (): Record<string, Json> =>
       evidence: 'docs/openkore-harvest-registry.md#A3 FollowActor',
     };
   });
+
+const matureReferenceMatrix = (): Json => ({
+  currentGiCapability: 'existing Ghost Island capability and parent contract',
+  openKoreCapability: 'OpenKore mature behavior or NOT_APPLICABLE with reason',
+  rAthenaCapability: 'rAthena authoritative primitive or data contract',
+  otherMatureReference: 'NOT_APPLICABLE: no additional source required',
+  matureExceptionBehavior: 'exceptions preserved by bounded policy',
+  matureRecoveryBehavior: 'retry, resume and failure behavior preserved',
+  matureConfigSemantics: 'configuration meanings preserved',
+  matureUiSemantics: 'visible control semantics preserved',
+  directReuse: 'reuse current project and native primitives',
+  adapt: 'adapter owns transport and projection differences',
+  projectPolicy: 'Ghost Island authority and product policy remain canonical',
+  improvements: 'no regression; bounded observability improvement only',
+  matureCapabilityLoss: 'NONE',
+  resultEquivalentOrBetter: 'PASS',
+});
 
 describe('reuse gate — scope classification (Phase 14)', () => {
   it('A: new subsystem with no gate fails REUSE_GATE_MISSING', () => {
@@ -491,6 +515,11 @@ describe('reuse gate — redundant research and loops (Phase 10, 15)', () => {
         'REQUIRED_CHECK_INCOMPLETE',
         'REGISTRY_UPDATE_MISSING',
         'REUSE_GATE_INHERITANCE_MISSING',
+        'REUSE_GATE_INHERITANCE_SCOPE_UNPROVEN',
+        'CAPABILITY_DELTA_AUDIT_MISSING',
+        'MATURE_REFERENCE_MATRIX_INCOMPLETE',
+        'MATURE_CAPABILITY_LOSS',
+        'RESULT_NOT_EQUIVALENT_OR_BETTER',
         'TASK_CATEGORY_UNKNOWN',
         'DISCOVERY_STALLED',
       ]),
@@ -503,6 +532,13 @@ describe('reuse gate — inheritance (Phase 14)', () => {
     const result = evaluateReuseGate({
       taskCategory: 'KNOWN_IMPLEMENTATION_TASK',
       REUSE_GATE_INHERITED_FROM: 'res-life-party-follow-gate-v1',
+      SAME_CAPABILITY_SCOPE: 'YES',
+      REFERENCE_COVERAGE_STILL_COMPLETE: 'YES',
+      NO_NEW_CAPABILITY_SURFACE: 'YES',
+      CAPABILITY_SCOPE: 'same approved party-follow implementation slice',
+      MATURE_REFERENCE_APPLICABLE: 'NO',
+      REFERENCE_GATE: 'INHERITED_PASS',
+      DELTA_REFERENCE_AUDIT_REQUIRED: 'NO',
     });
     expect(result.passed).toBe(true);
     expect(result.gateRequired).toBe(true);
@@ -515,6 +551,111 @@ describe('reuse gate — inheritance (Phase 14)', () => {
     });
     expect(result.passed).toBe(false);
     expect(result.failureCodes).toContain('REUSE_GATE_INHERITANCE_MISSING');
+  });
+
+  it('scope expansion cannot inherit without a delta audit', () => {
+    const result = evaluateReuseGate({
+      taskCategory: 'KNOWN_IMPLEMENTATION_TASK',
+      REUSE_GATE_INHERITED_FROM: 'navigation-parent-v1',
+      SAME_CAPABILITY_SCOPE: 'NO',
+      REFERENCE_COVERAGE_STILL_COMPLETE: 'NO',
+      NO_NEW_CAPABILITY_SURFACE: 'NO',
+      DELTA_REFERENCE_AUDIT_REQUIRED: 'NO',
+      changesCapabilityUi: 'YES',
+    });
+    expect(result.passed).toBe(false);
+    expect(result.failureCodes).toContain('CAPABILITY_DELTA_AUDIT_MISSING');
+    expect(result.failureCodes).toContain(
+      'REUSE_GATE_INHERITANCE_SCOPE_UNPROVEN',
+    );
+  });
+});
+
+describe('mature capability delta gate — automatic historical triggers', () => {
+  const deltaGate = (
+    featureId: string,
+    categories: string[],
+    delta: Json,
+  ): Json =>
+    wrap(
+      baseGate({
+        featureId,
+        taskCategory: 'KNOWN_IMPLEMENTATION_TASK',
+        scope: 'KNOWN_IMPLEMENTATION_TASK',
+        categories,
+        openKoreRelevant: true,
+        checks: openKoreChecked(),
+        decision: 'PORTABLE_LOGIC',
+        inheritedFrom: 'parent-capability-gate-v1',
+        sameCapabilityScope: false,
+        referenceCoverageStillComplete: false,
+        noNewCapabilitySurface: false,
+        deltaReferenceAuditRequired: true,
+        capabilityDelta: delta,
+      }),
+    );
+
+  it.each([
+    ['Navigation', ['navigation', 'routing'], { changesBehavior: true }],
+    ['Minimap original-color replacement', ['minimap', 'capability_ui'], { changesCapabilityUi: true }],
+    ['Supply settings UI', ['supply', 'supply_settings', 'configuration_semantics'], { changesConfigurationSemantics: true, changesCapabilityUi: true }],
+    ['Combat AutoSkill', ['combat', 'autoskill', 'skills'], { addsCapability: true, changesExceptionRecovery: true }],
+    ['Party Support', ['combat', 'party_support', 'party'], { addsCapability: true, changesBehavior: true }],
+  ])('%s triggers a bounded delta reference gate', (_name, categories, delta) => {
+    const result = evaluateReuseGate(
+      deltaGate(String(_name), categories as string[], delta as Json),
+    );
+    expect(result.passed).toBe(true);
+    expect(result.gateMode).toBe('DELTA');
+    expect(result.openKoreRelevant).toBe(true);
+  });
+
+  it('capability-changing BUG_FIX does not use the exemption', () => {
+    const result = evaluateReuseGate({
+      taskCategory: 'BUG_FIX',
+      changesBehavior: 'YES',
+    });
+    expect(result.passed).toBe(false);
+    expect(result.gateRequired).toBe(true);
+    expect(result.failureCodes).toContain('REUSE_GATE_MISSING');
+  });
+
+  it('mature capability loss blocks acceptance', () => {
+    const result = evaluateReuseGate(
+      wrap(
+        baseGate({
+          matureReferenceMatrix: {
+            ...matureReferenceMatrix(),
+            matureCapabilityLoss: 'OpenKore no-target recovery',
+          },
+        }),
+      ),
+    );
+    expect(result.passed).toBe(false);
+    expect(result.failureCodes).toContain('MATURE_CAPABILITY_LOSS');
+  });
+
+  it('UNKNOWN matrix values and non-PASS equivalence fail closed', () => {
+    const result = evaluateReuseGate(
+      wrap(
+        baseGate({
+          matureReferenceMatrix: {
+            ...matureReferenceMatrix(),
+            matureUiSemantics: 'UNKNOWN',
+            resultEquivalentOrBetter: 'UNKNOWN',
+          },
+        }),
+      ),
+    );
+    expect(result.failureCodes).toContain('MATURE_REFERENCE_MATRIX_INCOMPLETE');
+    expect(result.failureCodes).toContain('RESULT_NOT_EQUIVALENT_OR_BETTER');
+  });
+
+  it('publishes stable trigger and matrix field catalogues', () => {
+    expect(CAPABILITY_DELTA_TRIGGERS).toContain('changesCapabilityUi');
+    expect(CAPABILITY_DELTA_TRIGGERS).toContain('changesExceptionRecovery');
+    expect(MATURE_REFERENCE_MATRIX_FIELDS).toContain('matureUiSemantics');
+    expect(MATURE_REFERENCE_MATRIX_FIELDS).toContain('matureRecoveryBehavior');
   });
 });
 
@@ -619,6 +760,9 @@ describe('reuse gate — governance integration', () => {
     ]) {
       expect(spec).toContain(category);
     }
+    expect(spec).toContain('MATURE_CAPABILITY_DELTA_GATE');
+    expect(spec).toContain('MATURE_CAPABILITY_LOSS = NONE');
+    expect(spec).toContain('RESULT_EQUIVALENT_OR_BETTER = PASS');
   });
 
   it('the existing reuse Skill states the six gate rules', () => {
@@ -629,6 +773,27 @@ describe('reuse gate — governance integration', () => {
     expect(skill).toContain('OPENKORE IS INCUMBENT UNTIL EXIT');
     expect(skill).toContain('BUILD_NEW REQUIRES WHY_NOT_REUSE');
     expect(skill).toContain('NEW RESEARCH MUST WRITE BACK TO REGISTRY');
+    expect(skill).toContain('MATURE_CAPABILITY_DELTA_GATE');
+    expect(skill).toContain('MATURE_CAPABILITY_LOSS = NONE');
+  });
+
+  it('roadmap and worker templates auto-trigger the mature reference delta gate', () => {
+    const roadmap = read('docs/PROJECT_ROADMAP.md');
+    expect(roadmap).toContain('MATURE_REFERENCE_FIRST = REQUIRED');
+    expect(roadmap).toContain(
+      'RESULT_EQUIVALENT_OR_BETTER_THAN_MATURE_REFERENCE = REQUIRED',
+    );
+
+    for (const template of [
+      read('docs/project-control/workline-dispatch-template.md'),
+      read('docs/project-control/workline-continuation-template.md'),
+    ]) {
+      expect(template).toContain('CAPABILITY_SCOPE');
+      expect(template).toContain('DELTA_REFERENCE_AUDIT_REQUIRED');
+      expect(template).toContain('MATURE_REFERENCE_AUDIT');
+      expect(template).toContain('MATURE_CAPABILITY_LOSS');
+      expect(template).toContain('RESULT_EQUIVALENT_OR_BETTER');
+    }
   });
 
   it('the reuse registry declares the gate and invalidation rules', () => {

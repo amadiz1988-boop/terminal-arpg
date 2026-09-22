@@ -91,9 +91,22 @@ REFERENCE_DOSSIER = <path or NONE>
 
 Reference priority is: project actual PASS evidence, project locked version,
 mature upstream implementation, then other evidence. If a dossier exists and its
-version, contract and covered edge cases are unchanged, the workline may inherit
-it with `OPENKORE_REFERENCE_INHERITED = YES`; it must still report
-`OPENKORE_BEHAVIOR_COMPARED = YES`.
+version, capability scope, contract, config/UI semantics and covered edge cases
+are unchanged, the workline may inherit it with
+`OPENKORE_REFERENCE_INHERITED = YES`; it must still report
+`OPENKORE_BEHAVIOR_COMPARED = YES`. Inheritance additionally requires:
+
+```text
+SAME_CAPABILITY_SCOPE = YES
+REFERENCE_COVERAGE_STILL_COMPLETE = YES
+NO_NEW_CAPABILITY_SURFACE = YES
+DELTA_REFERENCE_AUDIT_REQUIRED = NO
+```
+
+Any capability, behavior, config, mature-capability UI, exception/recovery or
+data-model delta sets `DELTA_REFERENCE_AUDIT_REQUIRED = YES`. The Worker audits
+only that delta while preserving valid parent evidence. A Web/UI label does not
+make an OpenKore-era capability change presentation-only.
 
 Acceptable evidence includes:
 
@@ -513,6 +526,13 @@ OPENKORE_REFERENCE_FILES =
 OPENKORE_REFERENCE_SYMBOLS =
 OPENKORE_HISTORICAL_EVIDENCE =
 OPENKORE_REFERENCE_INHERITED = YES/NO
+CAPABILITY_SCOPE =
+MATURE_REFERENCE_APPLICABLE = YES/NO
+REFERENCE_GATE = PASS/INHERITED_PASS/FAIL/BLOCKED
+DELTA_REFERENCE_AUDIT_REQUIRED = YES/NO
+SAME_CAPABILITY_SCOPE = YES/NO
+REFERENCE_COVERAGE_STILL_COMPLETE = YES/NO
+NO_NEW_CAPABILITY_SURFACE = YES/NO
 REFERENCE_DOSSIER =
 OPENKORE_REFERENCE_VERSION =
 OPENKORE_REFERENCE_COMMIT =
@@ -576,6 +596,10 @@ GHOST_ISLAND_OPTIMIZATION =
 OPENKORE_LAST_GOOD_PLAYER_RESULT =
 GHOST_ISLAND_CURRENT_PLAYER_RESULT =
 RESULT_EQUIVALENT_OR_BETTER = YES/NO
+MATURE_REFERENCE_AUDIT =
+MATURE_EXCEPTION_BEHAVIOR_REVIEWED = YES/NO
+MATURE_UI_CONFIG_REVIEWED = YES/NO
+MATURE_CAPABILITY_LOSS = NONE / <exact loss>
 OPENKORE_CORE_ALIGNMENT_VETO = PASS/FAIL
 PLAYER_FLOW_EQUIVALENCE = PASS/FAIL/NOT_TESTED
 
@@ -593,6 +617,10 @@ BROWSER_UI_PASS =
 
 POLICY_COMPLIANCE = PASS/FAIL
 ```
+
+`MATURE_CAPABILITY_LOSS != NONE`, any applicable `UNKNOWN`, or
+`RESULT_EQUIVALENT_OR_BETTER != YES` forces `POLICY_COMPLIANCE = FAIL` and
+blocks implementation acceptance.
 
 ---
 

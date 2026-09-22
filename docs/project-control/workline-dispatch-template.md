@@ -519,10 +519,20 @@ rAthena authority and Current PA, then identify `FIRST_BROKEN_TRANSITION`.
 
 Every substantial implementation workline must complete this gate before any
 source change. It applies to capability restoration, refactor, optimization and
-new feature work. Navigation additionally requires OpenKore route parity.
+new feature work. A UI, Web or presentation task also triggers when it exposes
+or configures a mature capability. Navigation additionally requires OpenKore
+route parity.
 
 ```text
 MATURE_CAPABILITY_REUSE_FIRST = YES
+CAPABILITY_SCOPE =
+MATURE_REFERENCE_APPLICABLE = YES / NO
+REFERENCE_GATE = PASS / INHERITED_PASS / FAIL / BLOCKED
+DELTA_REFERENCE_AUDIT_REQUIRED = YES / NO
+REUSE_GATE_INHERITED_FROM =
+SAME_CAPABILITY_SCOPE = YES / NO
+REFERENCE_COVERAGE_STILL_COMPLETE = YES / NO
+NO_NEW_CAPABILITY_SURFACE = YES / NO
 OPENKORE_EXISTING_CAPABILITY =
 OPENKORE_REFERENCE =
 OPENKORE_REUSE_SEAM =
@@ -534,6 +544,29 @@ REFERENCE_SOURCE =
 CURRENT_PROJECT_CAPABILITY =
 REUSE_CLASSIFICATION = DIRECT_REUSE / PORT / ADAPTER / PROJECT_POLICY_LAYER / INTEGRATION_ONLY / CUSTOM_IMPLEMENTATION_REQUIRED
 ```
+
+Parent inheritance is accepted only when all three inheritance predicates are
+`YES`. Otherwise the Worker must complete the bounded delta audit and report:
+
+```text
+CURRENT_GI_CAPABILITY =
+OPENKORE_CAPABILITY =
+RATHENA_CAPABILITY =
+OTHER_MATURE_REFERENCE =
+MATURE_EXCEPTION_BEHAVIOR =
+MATURE_RECOVERY_BEHAVIOR =
+MATURE_CONFIG_SEMANTICS =
+MATURE_UI_SEMANTICS =
+DIRECT_REUSE =
+ADAPT =
+PROJECT_POLICY =
+IMPROVEMENTS =
+MATURE_CAPABILITY_LOSS = NONE
+RESULT_EQUIVALENT_OR_BETTER = PASS
+```
+
+Applicable values cannot be `UNKNOWN`. Any capability loss or result below the
+mature reference blocks source change and acceptance.
 
 When `CUSTOM_IMPLEMENTATION_REQUIRED`, the Worker must also provide:
 
@@ -790,6 +823,23 @@ REFERENCE_TOPIC
 REFERENCE_CLASSIFICATION
 MINING_DONE
 ```
+
+For every capability-changing workline, also report:
+
+```text
+CAPABILITY_SCOPE
+MATURE_REFERENCE_AUDIT
+OPENKORE_REFERENCE
+RATHENA_REFERENCE
+MATURE_EXCEPTION_BEHAVIOR_REVIEWED
+MATURE_UI_CONFIG_REVIEWED
+DELTA_REFERENCE_AUDIT_REQUIRED
+MATURE_CAPABILITY_LOSS
+RESULT_EQUIVALENT_OR_BETTER
+```
+
+PASS requires `MATURE_CAPABILITY_LOSS = NONE`,
+`RESULT_EQUIVALENT_OR_BETTER = PASS` and no `UNKNOWN` applicable value.
 
 No chat-style retrospective.
 

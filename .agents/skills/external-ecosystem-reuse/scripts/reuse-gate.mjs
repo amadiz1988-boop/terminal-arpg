@@ -98,6 +98,37 @@ export const OPENKORE_INCUMBENT_CATEGORIES = [
   'observability',
   'status_export',
   'task_scheduling',
+  'minimap',
+  'capability_ui',
+  'configuration_semantics',
+  'supply_settings',
+  'autoskill',
+  'party_support',
+];
+
+export const CAPABILITY_DELTA_TRIGGERS = [
+  'addsCapability',
+  'replacesCapability',
+  'changesBehavior',
+  'changesConfigurationSemantics',
+  'changesCapabilityUi',
+  'changesExceptionRecovery',
+  'changesMatureCapabilityDataModel',
+];
+
+export const MATURE_REFERENCE_MATRIX_FIELDS = [
+  'currentGiCapability',
+  'openKoreCapability',
+  'rAthenaCapability',
+  'otherMatureReference',
+  'matureExceptionBehavior',
+  'matureRecoveryBehavior',
+  'matureConfigSemantics',
+  'matureUiSemantics',
+  'directReuse',
+  'adapt',
+  'projectPolicy',
+  'improvements',
 ];
 
 export const RESEARCH_INVALIDATION_RULES = [
@@ -137,6 +168,16 @@ export const REUSE_GATE_FAILURE_CODES = {
     'Research was performed but no registry write-back / no-change evidence exists.',
   REUSE_GATE_INHERITANCE_MISSING:
     'KNOWN_IMPLEMENTATION_TASK without REUSE_GATE_INHERITED_FROM.',
+  REUSE_GATE_INHERITANCE_SCOPE_UNPROVEN:
+    'Inherited gate requires same capability scope, complete reference coverage and no new capability surface.',
+  CAPABILITY_DELTA_AUDIT_MISSING:
+    'Capability scope changed but DELTA_REFERENCE_AUDIT_REQUIRED is not YES.',
+  MATURE_REFERENCE_MATRIX_INCOMPLETE:
+    'Applicable capability change has an incomplete mature reference matrix.',
+  MATURE_CAPABILITY_LOSS:
+    'Candidate loses a capability present in the mature reference.',
+  RESULT_NOT_EQUIVALENT_OR_BETTER:
+    'Candidate has not proven an equivalent or better result.',
   TASK_CATEGORY_UNKNOWN: 'Task category missing or unrecognized.',
   DISCOVERY_STALLED:
     'Equivalent discovery exhausted without new material evidence.',
@@ -170,6 +211,105 @@ function isTrue(value) {
 
 function isFalse(value) {
   return value === false || value === 'NO' || value === 'FALSE' || value === 'false';
+}
+
+function valueFrom(raw, gate, ...names) {
+  for (const name of names) {
+    if (raw && raw[name] !== undefined) return raw[name];
+    if (gate && gate[name] !== undefined) return gate[name];
+  }
+  return undefined;
+}
+
+function capabilityDeltaOf(raw, gate) {
+  const nested =
+    (gate && gate.capabilityDelta) || (raw && raw.capabilityDelta) || {};
+  const values = {};
+  for (const field of CAPABILITY_DELTA_TRIGGERS) {
+    values[field] =
+      nested[field] ?? valueFrom(raw, gate, field, field.toUpperCase());
+  }
+  return values;
+}
+
+export function hasCapabilityDelta(raw, gate) {
+  return Object.values(capabilityDeltaOf(raw, gate)).some(isTrue);
+}
+
+function matureReferenceMatrixOf(raw, gate) {
+  return (
+    (gate && gate.matureReferenceMatrix) ||
+    (raw && raw.matureReferenceMatrix) ||
+    {}
+  );
+}
+
+function validateMatureReferenceMatrix(raw, gate, addFailure) {
+  const capabilityScope = valueFrom(
+    raw,
+    gate,
+    'CAPABILITY_SCOPE',
+    'capabilityScope',
+  );
+  const applicable = valueFrom(
+    raw,
+    gate,
+    'MATURE_REFERENCE_APPLICABLE',
+    'matureReferenceApplicable',
+  );
+  const referenceGate = valueFrom(raw, gate, 'REFERENCE_GATE', 'referenceGate');
+  const deltaAudit = valueFrom(
+    raw,
+    gate,
+    'DELTA_REFERENCE_AUDIT_REQUIRED',
+    'deltaReferenceAuditRequired',
+  );
+
+  if (!hasText(capabilityScope) || (!isTrue(applicable) && !isFalse(applicable))) {
+    addFailure(
+      'MATURE_REFERENCE_MATRIX_INCOMPLETE',
+      'CAPABILITY_SCOPE and MATURE_REFERENCE_APPLICABLE classification are required',
+    );
+  }
+  if (!['PASS', 'INHERITED_PASS'].includes(referenceGate)) {
+    addFailure(
+      'MATURE_REFERENCE_MATRIX_INCOMPLETE',
+      'REFERENCE_GATE must be PASS or INHERITED_PASS',
+    );
+  }
+  if (!isTrue(deltaAudit) && !isFalse(deltaAudit)) {
+    addFailure(
+      'MATURE_REFERENCE_MATRIX_INCOMPLETE',
+      'DELTA_REFERENCE_AUDIT_REQUIRED must be YES or NO',
+    );
+  }
+  if (hasCapabilityDelta(raw, gate) && !isTrue(deltaAudit)) {
+    addFailure(
+      'CAPABILITY_DELTA_AUDIT_MISSING',
+      'capability delta requires DELTA_REFERENCE_AUDIT_REQUIRED=YES',
+    );
+  }
+  if (!isTrue(applicable)) return;
+
+  const matrix = matureReferenceMatrixOf(raw, gate);
+  for (const field of MATURE_REFERENCE_MATRIX_FIELDS) {
+    const value = matrix[field];
+    if (!hasText(value) || normalizeCategory(value) === 'UNKNOWN') {
+      addFailure('MATURE_REFERENCE_MATRIX_INCOMPLETE', `${field} is missing or UNKNOWN`);
+    }
+  }
+
+  const loss = matrix.matureCapabilityLoss;
+  if (!hasText(loss) || normalizeCategory(loss) !== 'NONE') {
+    addFailure('MATURE_CAPABILITY_LOSS', `matureCapabilityLoss=${loss ?? ''}`);
+  }
+  const result = matrix.resultEquivalentOrBetter;
+  if (!hasText(result) || normalizeCategory(result) !== 'PASS') {
+    addFailure(
+      'RESULT_NOT_EQUIVALENT_OR_BETTER',
+      `resultEquivalentOrBetter=${result ?? ''}`,
+    );
+  }
 }
 
 function extractGate(raw) {
@@ -259,7 +399,7 @@ function validateNonOpenKoreCheck(check, addFailure) {
  *   featureId: string|null,
  *   taskCategory: string,
  *   gateRequired: boolean,
- *   gateMode: 'FULL'|'INHERITED'|'EXEMPT',
+ *   gateMode: 'FULL'|'DELTA'|'INHERITED'|'EXEMPT',
  *   decision: string|null,
  *   openKoreRelevant: boolean,
  *   passed: boolean,
@@ -275,6 +415,7 @@ export function evaluateReuseGate(raw) {
     (raw && (raw.REUSE_GATE_INHERITED_FROM || raw.inheritedFrom)) ||
       (gate && (gate.REUSE_GATE_INHERITED_FROM || gate.inheritedFrom)),
   );
+  const capabilityDelta = hasCapabilityDelta(raw, gate);
 
   const result = {
     featureId: (gate && gate.featureId) || null,
@@ -299,9 +440,18 @@ export function evaluateReuseGate(raw) {
     result.gateRequired = true;
     result.gateMode = 'FULL';
     addFailure('TASK_CATEGORY_UNKNOWN', 'task category is missing');
-  } else if (REUSE_GATE_EXEMPT_CATEGORIES.includes(normalizedCategory)) {
+  } else if (
+    REUSE_GATE_EXEMPT_CATEGORIES.includes(normalizedCategory) &&
+    !capabilityDelta
+  ) {
     result.passed = true;
     return result;
+  } else if (
+    REUSE_GATE_EXEMPT_CATEGORIES.includes(normalizedCategory) &&
+    capabilityDelta
+  ) {
+    result.gateRequired = true;
+    result.gateMode = 'DELTA';
   } else if (normalizedCategory === REUSE_GATE_INHERITING_CATEGORY) {
     result.gateRequired = true;
     result.gateMode = 'INHERITED';
@@ -312,8 +462,51 @@ export function evaluateReuseGate(raw) {
       );
       return result;
     }
-    result.passed = true;
-    return result;
+    const sameScope = valueFrom(
+      raw,
+      gate,
+      'SAME_CAPABILITY_SCOPE',
+      'sameCapabilityScope',
+    );
+    const coverageComplete = valueFrom(
+      raw,
+      gate,
+      'REFERENCE_COVERAGE_STILL_COMPLETE',
+      'referenceCoverageStillComplete',
+    );
+    const noNewSurface = valueFrom(
+      raw,
+      gate,
+      'NO_NEW_CAPABILITY_SURFACE',
+      'noNewCapabilitySurface',
+    );
+    const inheritanceValid =
+      isTrue(sameScope) && isTrue(coverageComplete) && isTrue(noNewSurface);
+    if (inheritanceValid && !capabilityDelta) {
+      validateMatureReferenceMatrix(raw, gate, addFailure);
+      result.passed = result.failureCodes.length === 0;
+      return result;
+    }
+    const deltaAuditRequired = valueFrom(
+      raw,
+      gate,
+      'DELTA_REFERENCE_AUDIT_REQUIRED',
+      'deltaReferenceAuditRequired',
+    );
+    if (!isTrue(deltaAuditRequired)) {
+      addFailure(
+        'CAPABILITY_DELTA_AUDIT_MISSING',
+        'inheritance scope changed or is unproven; set DELTA_REFERENCE_AUDIT_REQUIRED=YES',
+      );
+      if (!isTrue(sameScope) || !isTrue(coverageComplete) || !isTrue(noNewSurface)) {
+        addFailure(
+          'REUSE_GATE_INHERITANCE_SCOPE_UNPROVEN',
+          'all three inheritance predicates must be YES',
+        );
+      }
+      return result;
+    }
+    result.gateMode = 'DELTA';
   } else if (REUSE_GATE_REQUIRED_CATEGORIES.includes(normalizedCategory)) {
     result.gateRequired = true;
     result.gateMode = 'FULL';
@@ -327,6 +520,8 @@ export function evaluateReuseGate(raw) {
     addFailure('REUSE_GATE_MISSING', 'no PRE_IMPLEMENTATION_REUSE_GATE record');
     return result;
   }
+
+  validateMatureReferenceMatrix(raw, gate, addFailure);
 
   if (!hasText(gate.decision)) {
     addFailure('REUSE_DECISION_MISSING', 'decision is empty');

@@ -103,6 +103,21 @@ Navigation work must use `OPENKORE_NAVIGATION_REUSE_FIRST = YES`, preserve
 Production promotion. The adoption audit classifies overlapping code as an
 adapter, project policy, migration target, duplicate removal, keep or unknown.
 
+Global implementation acceptance rule:
+
+```text
+MATURE_REFERENCE_FIRST = REQUIRED
+RESULT_EQUIVALENT_OR_BETTER_THAN_MATURE_REFERENCE = REQUIRED
+MATURE_CAPABILITY_LOSS = NONE
+```
+
+This rule applies to current and future M1, M2, M3, OpenKore Exit, Web/UI
+capability replacement and Life/Social work. Parent-gate inheritance is valid
+only for the same capability scope with complete reference coverage and no new
+capability surface. Any behavior, configuration, exposed UI, exception/recovery
+or mature-capability data-model delta triggers the bounded
+`MATURE_CAPABILITY_DELTA_GATE` before source change.
+
 Near-term Local Hunting priority:
 
 ```text
@@ -319,12 +334,16 @@ with their own lives, multidimensional relationships derived from real shared
 events, proactive social behavior, and PA-to-PA social graph — without dependency
 engineering.
 
-## 7. Mandatory reuse gate for all future PL1 / PL2 work
+## 7. Mandatory mature-reference gate for all product work
 
-Every implementation slice of PL1 and PL2 MUST run:
+Every capability-changing implementation slice of M1, M2, M3, OpenKore Exit,
+Web/UI replacement, PL1, PL2 and later product work MUST run:
 
 ```text
 PRE_IMPLEMENTATION_REUSE_GATE = PASS
+MATURE_CAPABILITY_DELTA_GATE = PASS / NOT_APPLICABLE
+MATURE_CAPABILITY_LOSS = NONE
+RESULT_EQUIVALENT_OR_BETTER = PASS
 ```
 
 Canonical gate authority: `docs/pre-implementation-reuse-gate.md`.

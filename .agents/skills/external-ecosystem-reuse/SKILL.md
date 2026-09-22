@@ -38,8 +38,28 @@ node .agents/skills/external-ecosystem-reuse/scripts/reuse-gate.mjs "<gate-recor
 ```
 
 `BUG_FIX`、`TEST_ONLY`、`DOC_ONLY`、`PROVENANCE_ONLY`、`FORMAT_ONLY`、
-`MAINTENANCE`／`TYPO_FIX` 不需要 gate。`KNOWN_IMPLEMENTATION_TASK` 以
-`REUSE_GATE_INHERITED_FROM` 繼承 parent gate，不重跑同一份 audit。
+`MAINTENANCE`／`TYPO_FIX` 只有在沒有 mature capability delta 時才不需要 gate。
+`KNOWN_IMPLEMENTATION_TASK` 只有在 `SAME_CAPABILITY_SCOPE = YES`、
+`REFERENCE_COVERAGE_STILL_COMPLETE = YES`、`NO_NEW_CAPABILITY_SURFACE = YES`
+時才能用 `REUSE_GATE_INHERITED_FROM`。任一條件不成立或不明時，執行
+`MATURE_CAPABILITY_DELTA_GATE`，只補 changed surface 的 reference audit。
+
+Delta 自動觸發條件：新增／替換 capability、改變 behavior、config semantics、
+exposed mature-capability UI、exception/recovery，或 mature capability 使用的 data
+model。任務名稱寫成 Web、UI、presentation、bug fix 或 maintenance 不構成豁免。
+
+施工前固定分類：
+
+```text
+CAPABILITY_SCOPE =
+MATURE_REFERENCE_APPLICABLE = YES / NO
+REFERENCE_GATE = PASS / INHERITED_PASS / FAIL / BLOCKED
+DELTA_REFERENCE_AUDIT_REQUIRED = YES / NO
+```
+
+適用時必須完成 `docs/pre-implementation-reuse-gate.md` 的 mature reference
+matrix，且 `MATURE_CAPABILITY_LOSS = NONE`、
+`RESULT_EQUIVALENT_OR_BETTER = PASS`。任何 applicable 欄位為 `UNKNOWN` 時不得 PASS。
 
 ## 固定流程
 
@@ -56,6 +76,8 @@ node .agents/skills/external-ecosystem-reuse/scripts/reuse-gate.mjs "<gate-recor
 6. 沒有匹配時，只對該需求做 targeted new research。
 7. 準備導入 dependency 時，以 `--intent adopt` 強制 fresh verification。
 8. 增量研究完成後，更新 registry；只有摘要或結論改變時才同步更新 audit 文件。
+9. 在 source change 前比較 mature exception、recovery、config 與 UI semantics；
+   候選可 MATCH 或 IMPROVE，不得 `SIMPLIFY_BELOW_REFERENCE`。
 
 流程狀態：
 
@@ -193,4 +215,7 @@ OPENKORE_ACCEPTANCE_MODE = PASS
 INCREMENTAL_ONLY = PASS
 FULL_SCAN_RETRIGGER = 0
 PRODUCTION_CORE_MODIFICATIONS = 0
+MATURE_CAPABILITY_DELTA_GATE = PASS / NOT_APPLICABLE
+MATURE_CAPABILITY_LOSS = NONE
+RESULT_EQUIVALENT_OR_BETTER = PASS / NOT_APPLICABLE
 ```

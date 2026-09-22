@@ -55,6 +55,23 @@ The gate is required for work that creates or replaces capability:
 | `NEW_MAJOR_ALGORITHM` | REQUIRED |
 | `REPLACEMENT_OF_EXISTING_SUBSYSTEM` | REQUIRED |
 
+`MATURE_CAPABILITY_DELTA_GATE` also triggers when any task, including an
+otherwise exempt or inherited task, does one of the following:
+
+```text
+adds a capability
+replaces a capability
+changes behavior
+changes configuration semantics
+changes UI that exposes an existing mature capability
+changes exception or recovery behavior
+changes a data model used by a mature capability
+```
+
+The task label does not override the capability delta. A Web, UI, presentation,
+bug-fix, maintenance or `KNOWN_IMPLEMENTATION_TASK` label remains gated when its
+actual scope changes a mature capability surface.
+
 The gate is not required for work that does not create capability:
 
 | Task category | Gate |
@@ -68,9 +85,12 @@ The gate is not required for work that does not create capability:
 | `KNOWN_IMPLEMENTATION_TASK` | NOT_REQUIRED, but must inherit |
 
 `KNOWN_IMPLEMENTATION_TASK` is a slice of an already-approved parent design. It
-does not repeat the audit; it references the parent gate through
-`REUSE_GATE_INHERITED_FROM`. A `KNOWN_IMPLEMENTATION_TASK` without
-`REUSE_GATE_INHERITED_FROM` fails with `REUSE_GATE_INHERITANCE_MISSING`.
+may inherit through `REUSE_GATE_INHERITED_FROM` only when all three predicates
+are `YES`: `SAME_CAPABILITY_SCOPE`, `REFERENCE_COVERAGE_STILL_COMPLETE` and
+`NO_NEW_CAPABILITY_SURFACE`. Any other value requires
+`DELTA_REFERENCE_AUDIT_REQUIRED = YES` and a bounded delta gate before source
+change. A missing parent fails with `REUSE_GATE_INHERITANCE_MISSING`; an
+unreviewed scope expansion fails with `CAPABILITY_DELTA_AUDIT_MISSING`.
 
 A missing or unrecognized task category fails closed with
 `TASK_CATEGORY_UNKNOWN`; classify the work explicitly.
@@ -171,10 +191,66 @@ acceptable when the same fields exist.
     "freshResearchJustification": "",
     "registryUpdateRequired": false,
     "registryUpdate": { "status": "", "entryId": "", "evidence": "" },
-    "inheritedFrom": ""
+    "inheritedFrom": "",
+    "capabilityScope": "party support action and UI surface",
+    "matureReferenceApplicable": true,
+    "referenceGate": "PASS",
+    "deltaReferenceAuditRequired": true,
+    "capabilityDelta": {
+      "addsCapability": true,
+      "replacesCapability": false,
+      "changesBehavior": true,
+      "changesConfigurationSemantics": false,
+      "changesCapabilityUi": true,
+      "changesExceptionRecovery": true,
+      "changesMatureCapabilityDataModel": false
+    },
+    "matureReferenceMatrix": {
+      "currentGiCapability": "...",
+      "openKoreCapability": "...",
+      "rAthenaCapability": "...",
+      "otherMatureReference": "NOT_APPLICABLE: ...",
+      "matureExceptionBehavior": "...",
+      "matureRecoveryBehavior": "...",
+      "matureConfigSemantics": "...",
+      "matureUiSemantics": "...",
+      "directReuse": "...",
+      "adapt": "...",
+      "projectPolicy": "...",
+      "improvements": "...",
+      "matureCapabilityLoss": "NONE",
+      "resultEquivalentOrBetter": "PASS"
+    }
   }
 }
 ```
+
+For dispatch and final-report text, the canonical field names are:
+
+```text
+CAPABILITY_SCOPE =
+MATURE_REFERENCE_APPLICABLE = YES / NO
+REFERENCE_GATE = PASS / INHERITED_PASS / FAIL / BLOCKED
+DELTA_REFERENCE_AUDIT_REQUIRED = YES / NO
+
+CURRENT_GI_CAPABILITY =
+OPENKORE_CAPABILITY =
+RATHENA_CAPABILITY =
+OTHER_MATURE_REFERENCE =
+MATURE_EXCEPTION_BEHAVIOR =
+MATURE_RECOVERY_BEHAVIOR =
+MATURE_CONFIG_SEMANTICS =
+MATURE_UI_SEMANTICS =
+DIRECT_REUSE =
+ADAPT =
+PROJECT_POLICY =
+IMPROVEMENTS =
+MATURE_CAPABILITY_LOSS = NONE
+RESULT_EQUIVALENT_OR_BETTER = PASS
+```
+
+Applicable fields cannot be `UNKNOWN` when PASS is claimed. `NOT_APPLICABLE`
+must include a reason.
 
 Check status enum:
 
@@ -206,6 +282,11 @@ are stable and machine-checkable.
 | `REQUIRED_CHECK_INCOMPLETE` | A required check is missing, `RESEARCH_REQUIRED`, or lacks evidence / NOT_APPLICABLE reason. |
 | `REGISTRY_UPDATE_MISSING` | Fresh research was performed or `registryUpdateRequired = true`, but no registry update/no-change evidence exists. |
 | `REUSE_GATE_INHERITANCE_MISSING` | `KNOWN_IMPLEMENTATION_TASK` without `REUSE_GATE_INHERITED_FROM`. |
+| `REUSE_GATE_INHERITANCE_SCOPE_UNPROVEN` | One or more inheritance predicates are not `YES`. |
+| `CAPABILITY_DELTA_AUDIT_MISSING` | Capability scope changed or is unproven without a delta audit. |
+| `MATURE_REFERENCE_MATRIX_INCOMPLETE` | Applicable matrix field is missing or `UNKNOWN`. |
+| `MATURE_CAPABILITY_LOSS` | Candidate loses mature-reference capability. |
+| `RESULT_NOT_EQUIVALENT_OR_BETTER` | Candidate does not prove `PASS`. |
 | `TASK_CATEGORY_UNKNOWN` | Task category missing or unrecognized; classify the work. |
 | `DISCOVERY_STALLED` | Equivalent discovery exhausted without new evidence (max 3 attempts, or 5 minutes without new material evidence). |
 
@@ -291,10 +372,16 @@ Small slices of an approved design must not repeat the audit. A child task sets:
 
 ```text
 REUSE_GATE_INHERITED_FROM = <parent featureId / gate id>
+SAME_CAPABILITY_SCOPE = YES
+REFERENCE_COVERAGE_STILL_COMPLETE = YES
+NO_NEW_CAPABILITY_SURFACE = YES
+DELTA_REFERENCE_AUDIT_REQUIRED = NO
 ```
 
-The child inherits the parent decision. Only the changed capability needs a new
-gate. Do not re-run the same audit per slice.
+Only this exact state inherits the parent decision. A new UI/config surface,
+behavior, exception/recovery path, capability, replacement or mature-capability
+data model sets `DELTA_REFERENCE_AUDIT_REQUIRED = YES`. Audit only the changed
+surface and reuse the unchanged parent evidence. Do not re-run the same audit.
 
 ## 10. Research Loop Prevention
 
@@ -340,6 +427,21 @@ A developer starting a new cross-map route planner without checking OpenKore
 After checking the OpenKore harvest, existing Gate 3 and rAthena, and recording
 a decision, the same gate passes. This is the exact historical failure the gate
 prevents.
+
+### Automatic trigger regression matrix
+
+| Historical scope | Trigger | Required gate |
+| --- | --- | --- |
+| Navigation | routing capability and recovery semantics | Full mature/OpenKore/rAthena reference gate |
+| Minimap original-color replacement | UI exposes mature map/navigation data | Delta reference audit |
+| Supply settings UI | configuration and UI semantics | Delta reference audit |
+| Combat AutoSkill | new skill behavior and exception/recovery paths | Full or delta reference audit |
+| Party Support | new capability surface beyond base combat | Full or delta reference audit |
+
+All five require the reference matrix. A parent Navigation, Supply or Combat
+gate cannot cover the child solely through inheritance. Acceptance requires
+`MATURE_CAPABILITY_LOSS = NONE` and
+`RESULT_EQUIVALENT_OR_BETTER = PASS`; `SIMPLIFY_BELOW_REFERENCE` is rejected.
 
 ## 12. Adoption Rule
 

@@ -1422,6 +1422,8 @@ logic。
 
 ```text
 MATURE_CAPABILITY_REUSE_FIRST = YES
+MATURE_REFERENCE_FIRST = REQUIRED
+RESULT_EQUIVALENT_OR_BETTER_THAN_MATURE_REFERENCE = REQUIRED
 CUSTOM_IMPLEMENTATION_APPROVAL_GATE = REQUIRED
 CUSTOM_IMPLEMENTATION_ALLOWED = NO_UNTIL_PROJECT_CONTROL_APPROVES
 NAVIGATION_ROUTE_ENGINE_COUNT = 1
@@ -1446,6 +1448,22 @@ WHY =
 
 若 `CUSTOM_IMPLEMENTATION_REQUIRED`，必須同時提供 reuse 不可行原因、架構衝突、
 license 狀態、reference capability 缺口，並取得 Project Control 明確批准。
+
+`MATURE_CAPABILITY_DELTA_GATE` 自動套用於新增／替換 capability、behavior、config
+semantics、exposed mature-capability UI、exception/recovery 或 mature capability data
+model 變更。`REUSE_GATE_INHERITED_FROM` 只有在下列三項均為 `YES` 時有效：
+
+```text
+SAME_CAPABILITY_SCOPE = YES
+REFERENCE_COVERAGE_STILL_COMPLETE = YES
+NO_NEW_CAPABILITY_SURFACE = YES
+```
+
+否則必須設定 `DELTA_REFERENCE_AUDIT_REQUIRED = YES`。Web、UI、presentation、
+bug-fix、maintenance 或 `KNOWN_IMPLEMENTATION_TASK` 標籤不豁免 capability delta。
+適用 workline source change 前必須依 `docs/pre-implementation-reuse-gate.md`
+完成 mature reference matrix，且 `MATURE_CAPABILITY_LOSS = NONE`、
+`RESULT_EQUIVALENT_OR_BETTER = PASS`；applicable 欄位含 `UNKNOWN` 時不得 PASS。
 
 本節強化既有 `Single Runtime Policy`、`PC-DISPATCH-STANDARD`、
 `LAST_GOOD → CURRENT → FIRST_BROKEN_TRANSITION`、Browser UI acceptance、
