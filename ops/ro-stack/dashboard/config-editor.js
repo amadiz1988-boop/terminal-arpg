@@ -1,9 +1,12 @@
 import {
   CONFIG_FORM_SCHEMA,
+  CONFIG_ROW_SCHEMAS,
   COMBAT_PROFILES,
   PROFILE_DEFINITIONS,
+  applyProfileTemplate,
   assertCanonicalConfig,
   clone,
+  defaultConfigRow,
   defaultCanonicalConfig,
   validateCanonicalConfig,
 } from './config-schema.mjs';
@@ -33,7 +36,7 @@ function fieldInput(field, value) {
     for (const optionValue of field.options ?? []) {
       const option = document.createElement('option');
       option.value = String(optionValue);
-      option.textContent = PROFILE_DEFINITIONS[optionValue]?.label ?? String(optionValue);
+      option.textContent = field.labels?.[field.options.indexOf(optionValue)] ?? PROFILE_DEFINITIONS[optionValue]?.label ?? String(optionValue);
       select.append(option);
     }
     select.value = String(value);
@@ -77,18 +80,10 @@ function rowField(root, state, field, onChange) {
   return label;
 }
 
-function arrayDefaults(kind) {
-  if (kind === 'itemRule') return { itemId: 501, pickup: 1, storage: 0, sell: 0, cartAdd: 0, cartGet: 0, legacyAction: 'default' };
-  if (kind === 'attackSkill') return { skill: '', level: 1, dist: 1, maxDist: 1, maxCastTime: 0, minCastTime: 0, maxAttempts: 0, maxUses: 0, monsters: '', notMonsters: '', previousDamage: '', isSelfSkill: 0, isStartSkill: 0, conditions: { sp: '', hp: '' } };
-  if (kind === 'selfSkill') return { skill: '', level: 1, maxCastTime: 0, minCastTime: 0, smartEncore: 0, noSmartHeal: 0, conditions: { sp: '', hp: '' } };
-  return { skill: '', level: 1, dist: 1, maxDist: 8, maxCastTime: 0, minCastTime: 0, target: '', notPartyOnly: 0, isSelfSkill: 0, noSmartHeal: 0, conditions: { sp: '', hp: '' } };
-}
+function arrayDefaults(kind) { return defaultConfigRow(kind); }
 
 function arrayFieldNames(kind) {
-  if (kind === 'itemRule') return [['itemId', '道具 ID', 'number'], ['pickup', '拾取旗標', 'number'], ['storage', '存倉', 'number'], ['sell', '販售', 'number'], ['cartAdd', '入車', 'number'], ['cartGet', '出車', 'number']];
-  if (kind === 'attackSkill') return [['skill', '技能', 'text'], ['level', '等級', 'number'], ['dist', '距離', 'number'], ['maxDist', '最大距離', 'number'], ['maxCastTime', '施法上限毫秒', 'number'], ['minCastTime', '施法下限毫秒', 'number'], ['maxAttempts', '最大嘗試', 'number'], ['maxUses', '每目標上限', 'number'], ['monsters', '限定怪物', 'text'], ['notMonsters', '排除怪物', 'text'], ['previousDamage', '前次傷害條件', 'text'], ['sp', 'SP 條件', 'text'], ['hp', 'HP 條件', 'text']];
-  if (kind === 'selfSkill') return [['skill', '技能', 'text'], ['level', '等級', 'number'], ['maxCastTime', '施法上限毫秒', 'number'], ['minCastTime', '施法下限毫秒', 'number'], ['smartEncore', 'Smart Encore', 'number'], ['noSmartHeal', '停用 Smart Heal', 'number'], ['sp', 'SP 條件', 'text'], ['hp', 'HP 條件', 'text']];
-  return [['skill', '技能', 'text'], ['level', '等級', 'number'], ['dist', '距離', 'number'], ['maxDist', '最大距離', 'number'], ['maxCastTime', '施法上限毫秒', 'number'], ['minCastTime', '施法下限毫秒', 'number'], ['target', '目標', 'text'], ['notPartyOnly', '不限隊伍', 'number'], ['isSelfSkill', '自身技能', 'number'], ['noSmartHeal', '停用 Smart Heal', 'number'], ['sp', 'SP 條件', 'text'], ['hp', 'HP 條件', 'text']];
+  return (CONFIG_ROW_SCHEMAS[kind] ?? []).map((field) => [field.path, field.label, field.type, field]);
 }
 
 function makeArrayEditor(root, state, descriptor, render) {
@@ -111,21 +106,29 @@ function makeArrayEditor(root, state, descriptor, render) {
   for (const [index, item] of getPath(state, descriptor.path).entries()) {
     const row = document.createElement('div');
     row.className = 'config-array-row';
-    for (const [key, label, type] of arrayFieldNames(descriptor.kind)) {
+    for (const [key, label, type, descriptorField] of arrayFieldNames(descriptor.kind)) {
       const field = document.createElement('label');
       field.className = 'config-array-field';
       const caption = document.createElement('span');
       caption.textContent = label;
-      const input = document.createElement('input');
-      input.type = type;
-      input.value = key === 'sp' || key === 'hp' ? text(item.conditions?.[key]) : text(item[key]);
+      const input = type === 'select' ? document.createElement('select') : document.createElement('input');
+      if (type !== 'select') input.type = type;
+      if (type === 'select') {
+        for (const optionValue of descriptorField.options ?? []) {
+          const option = document.createElement('option');
+          option.value = String(optionValue);
+          option.textContent = descriptorField.labels?.[descriptorField.options.indexOf(optionValue)] ?? String(optionValue);
+          input.append(option);
+        }
+        input.value = text(getPath(item, key));
+      } else if (type === 'checkbox') input.checked = getPath(item, key) === true;
+      else input.value = text(getPath(item, key));
+      if (descriptorField.min !== undefined) input.min = String(descriptorField.min);
+      if (descriptorField.max !== undefined) input.max = String(descriptorField.max);
       if (type === 'number') input.inputMode = 'numeric';
       const update = () => {
-        const next = type === 'number' ? Number(input.value) : input.value;
-        if (key === 'sp' || key === 'hp') {
-          item.conditions ??= {};
-          item.conditions[key] = next;
-        } else item[key] = next;
+        const next = type === 'checkbox' ? input.checked : type === 'number' ? Number(input.value) : type === 'select' && typeof descriptorField.default === 'number' ? Number(input.value) : input.value;
+        setPath(item, key, next);
       };
       input.addEventListener('input', update);
       input.addEventListener('change', () => { update(); render(); });

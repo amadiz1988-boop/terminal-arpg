@@ -44,19 +44,26 @@ function legacyConfigPaths(instancesRoot, accountId) {
   return {
     supply: join(folder, 'supply-cycle.json'),
     openKore: join(folder, 'control', 'config.txt'),
+    itemsControl: join(folder, 'control', 'items_control.txt'),
+    pickup: join(folder, 'control', 'pickupitems.txt'),
+    monControl: join(folder, 'control', 'mon_control.txt'),
   };
 }
 
 async function readLegacy(instancesRoot, accountId) {
   const paths = legacyConfigPaths(instancesRoot, accountId);
-  const [supply, configText] = await Promise.all([
+  const [supply, configText, itemsControlText, pickupText, monControlText] = await Promise.all([
     readJson(paths.supply),
     readFile(paths.openKore, 'utf8').catch((error) => {
       if (error?.code === 'ENOENT') return '';
       throw error;
     }),
+    ...['itemsControl', 'pickup', 'monControl'].map((key) => readFile(paths[key], 'utf8').catch((error) => {
+      if (error?.code === 'ENOENT') return '';
+      throw error;
+    })),
   ]);
-  return { supplyCycle: supply ?? {}, configText, paths };
+  return { supplyCycle: supply ?? {}, configText, itemsControlText, pickupText, monControlText, paths };
 }
 
 export async function loadCanonicalConfig({ instancesRoot, accountId, characterId, persistMigration = true }) {

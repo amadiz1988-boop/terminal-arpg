@@ -1,495 +1,313 @@
-/**
- * Player configuration contract shared by the Dashboard server and browser.
- *
- * This file describes configuration only. It never starts an executor, writes
- * an OpenKore command, mutates rAthena state, or claims that a setting is live.
- * The field names intentionally follow the harvested OpenKore configuration
- * names where a direct mature equivalent exists.
- */
-
+/** Configuration contract only. rAthena remains execution authority. */
 export const CONFIG_VERSION = 1;
-
-export const SUPPLY_RULE_ACTIONS = Object.freeze([
-  'default',
-  'ignore',
-  'discard',
-  'sell',
-  'store',
-  'keep',
-]);
-
-export const PICKUP_FLAGS = Object.freeze({
-  DROP: -1,
-  SKIP: 0,
-  PICKUP: 1,
-  PRIORITY: 2,
-});
-
-export const COMBAT_PROFILES = Object.freeze([
-  'MELEE_DAMAGE',
-  'RANGED_DAMAGE',
-  'SKILL_CAST',
-  'HYBRID_DAMAGE',
-  'HEAL_SUPPORT',
-  'COMBAT_SUPPORT',
-  'FOLLOW_SUPPORT',
-  'PASSIVE_FOLLOW',
-]);
-
+export const clone = (value) => JSON.parse(JSON.stringify(value));
+export const SUPPLY_RULE_ACTIONS = Object.freeze(['default', 'ignore', 'discard', 'sell', 'store', 'keep']);
+export const PICKUP_FLAGS = Object.freeze({ DROP: -1, SKIP: 0, PICKUP: 1, PRIORITY: 2 });
+export const COMBAT_PROFILES = Object.freeze(['MELEE_DAMAGE', 'RANGED_DAMAGE', 'SKILL_CAST', 'HYBRID_DAMAGE', 'HEAL_SUPPORT', 'COMBAT_SUPPORT', 'FOLLOW_SUPPORT', 'PASSIVE_FOLLOW']);
 export const FIXED_POLICY = Object.freeze({
   loot: Object.freeze({ autoLoot: true, autoStore: false }),
-  butterflyWing: Object.freeze({
-    itemId: 602,
-    presenceBased: true,
-    nonConsumable: true,
-    weight: 0,
-  }),
-  flyWing: Object.freeze({
-    itemId: 601,
-    presenceBased: true,
-    nonConsumable: true,
-    weight: 0,
-  }),
+  butterflyWing: Object.freeze({ itemId: 602, presenceBased: true, nonConsumable: true, weight: 0, required: true }),
+  flyWing: Object.freeze({ itemId: 601, presenceBased: true, nonConsumable: true, weight: 0 }),
 });
-
-export const PROFILE_DEFINITIONS = Object.freeze({
-  MELEE_DAMAGE: {
-    label: '近戰普攻',
-    attackMode: 2,
-    useWeapon: true,
-    needsAttackSkill: false,
-    needsSupportSkill: false,
-  },
-  RANGED_DAMAGE: {
-    label: '遠程普攻',
-    attackMode: 2,
-    useWeapon: true,
-    needsAttackSkill: false,
-    needsSupportSkill: false,
-  },
-  SKILL_CAST: {
-    label: '純技能攻擊',
-    attackMode: 2,
-    useWeapon: false,
-    needsAttackSkill: true,
-    needsSupportSkill: false,
-  },
-  HYBRID_DAMAGE: {
-    label: '普攻加技能',
-    attackMode: 2,
-    useWeapon: true,
-    needsAttackSkill: false,
-    needsSupportSkill: false,
-  },
-  HEAL_SUPPORT: {
-    label: '治療支援',
-    attackMode: -1,
-    useWeapon: false,
-    needsAttackSkill: false,
-    needsSupportSkill: true,
-  },
-  COMBAT_SUPPORT: {
-    label: '戰鬥支援',
-    attackMode: -1,
-    useWeapon: false,
-    needsAttackSkill: false,
-    needsSupportSkill: true,
-  },
-  FOLLOW_SUPPORT: {
-    label: '跟隨支援',
-    attackMode: -1,
-    useWeapon: false,
-    needsAttackSkill: false,
-    needsSupportSkill: true,
-  },
-  PASSIVE_FOLLOW: {
-    label: '被動跟隨',
-    attackMode: -1,
-    useWeapon: false,
-    needsAttackSkill: false,
-    needsSupportSkill: false,
-  },
+export const PROFILE_DEFINITIONS = Object.freeze(Object.fromEntries([
+  ['MELEE_DAMAGE','近戰普攻',2,true], ['RANGED_DAMAGE','遠程普攻',2,true],
+  ['SKILL_CAST','純技能攻擊',2,false], ['HYBRID_DAMAGE','普攻加技能',2,true],
+  ['HEAL_SUPPORT','治療支援',-1,false], ['COMBAT_SUPPORT','戰鬥支援',-1,false],
+  ['FOLLOW_SUPPORT','跟隨支援',-1,false], ['PASSIVE_FOLLOW','被動跟隨',-1,false],
+].map(([key,label,attackMode,useWeapon]) => [key,{label,attackMode,useWeapon}])));
+export const getConfigPath = (value, path) => path.split('.').reduce((node,key) => node?.[key],value);
+export function setConfigPath(value, path, next) {
+  const keys = path.split('.'); const last = keys.pop(); let cursor = value;
+  for (const key of keys) cursor = cursor[key] ??= {};
+  cursor[last] = next;
+}
+const field = (path,label,type,value,options={}) => ({path,label,type,default:value,...options});
+const num = (path,label,value=0,options={}) => field(path,label,'number',value,{min:0,max:30000,...options});
+const txt = (path,label,value='',options={}) => field(path,label,'text',value,options);
+const flag = (path,label,value=false,options={}) => field(path,label,'checkbox',value,options);
+const select = (path,label,value,options,labels) => field(path,label,'select',value,{options,labels});
+const conditions = [txt('conditions.hp','HP 條件'),txt('conditions.sp','SP 條件'),
+  txt('conditions.whenStatusActive','持有狀態'),txt('conditions.whenStatusInactive','缺少狀態'),
+  num('conditions.timeout','施放間隔（秒）',0,{step:0.1,max:3600000}),
+  txt('conditions.onAction','目前動作'), txt('conditions.notOnAction','排除動作'),
+  txt('conditions.inInventory','背包條件'),txt('conditions.aggressives','敵人數條件'),
+  flag('conditions.inLockOnly','限掛機地圖'),flag('conditions.notInTown','限城鎮外')];
+const skillBase = [txt('skill','技能名稱／代碼','',{required:true}),num('level','等級',1,{matureKey:'lvl',max:100}),
+  flag('disabled','停用此列'),num('maxCastTime','最長施法時間（秒）',0,{max:3600000,step:0.1}),
+  num('minCastTime','最短施法時間（秒）',0,{max:3600000,step:0.1})];
+const distanceFields = [txt('dist','距離條件','1'),txt('maxDist','最大距離條件','1')];
+const quantityFields = [txt('item','道具名稱／ID','501',{required:true}),flag('disabled','停用此列'),
+  num('minAmount','低於數量',2,{nullable:true}),num('maxAmount','補到數量',100),num('batchSize','每批數量',100,{nullable:true})];
+export const CONFIG_ROW_SCHEMAS = Object.freeze({
+  buy: [...quantityFields,txt('npc','商人位置'),txt('npc_steps','商店對話','b'),num('distance','互動距離',3),
+    txt('standpoint','站位'),num('price','單價',0,{nullable:true,max:2000000000}),txt('zeny','Zeny 條件'),flag('isMarket','市場商店'),flag('onlyIdentified','只買已鑑定'),...conditions],
+  withdraw: [...quantityFields,flag('passive','只在存倉時提領'),...conditions],
+  itemRule: [txt('item','道具名稱／ID','501',{required:true}),num('keepAmount','最少保留量'),
+    select('pickup','拾取',1,[-1,0,1,2],['丟棄','略過','拾取','優先拾取']),
+    flag('storage','存倉'),flag('sell','販售'),flag('cartAdd','入車'),flag('cartGet','出車')],
+  attackSkill: [...skillBase,...distanceFields,num('maxAttempts','最大嘗試'),num('maxUses','每目標上限'),
+    txt('monsters','限定怪物'),txt('notMonsters','排除怪物'),txt('previousDamage','前次傷害條件'),
+    flag('isSelfSkill','對自身施放'),flag('isStartSkill','起手技能'),txt('target_hp','目標 HP'),
+    txt('target_whenStatusInactive','目標缺少狀態'),num('target_timeout','同目標間隔（秒）',0,{step:0.1,max:3600000}),...conditions],
+  selfSkill: [...skillBase,flag('smartEncore','Smart Encore'),flag('noSmartHeal','停用 Smart Heal'),...conditions],
+  partySkill: [...skillBase,...distanceFields,txt('target','隊友名稱'),txt('target_hp','隊友 HP'),
+    txt('target_whenStatusInactive','隊友缺少狀態'),flag('notPartyOnly','不限隊伍'),flag('isSelfSkill','對自身施放'),flag('noSmartHeal','停用 Smart Heal'),...conditions],
+  itemUse: [txt('item','補品名稱／ID','501',{required:true}),flag('disabled','停用此列'),...conditions],
+  target: [txt('monster','怪物名稱／ID','',{required:true}),select('attack','攻擊策略',1,[-1,0,1,2,3],['忽略','反擊','主動','強制主動','挑釁一次']),
+    num('teleport','傳送策略',0,{min:-100,max:3600}),flag('search','只在搜尋時攻擊'),flag('skillcancel','中斷施法'),
+    num('lv','角色等級下限'),num('joblv','職業等級下限'),num('hp','HP 絕對值下限',0,{max:2000000000}),num('sp','SP 絕對值下限',0,{max:2000000000}),num('weight','敵人數權重',1,{step:0.1})],
 });
-
-// The form renderer consumes this descriptor. Keeping labels and paths here
-// prevents a second browser-only schema from becoming authoritative.
-export const CONFIG_FORM_SCHEMA = Object.freeze({
-  supply: Object.freeze({
-    title: '補給設定',
-    fields: Object.freeze([
-      { path: 'supply.enabled', label: '啟用自動補給', type: 'checkbox', group: '基本' },
-      { path: 'supply.weightTriggerPercent', label: '負重觸發', type: 'number', min: 40, max: 88, group: '基本', matureKey: 'itemsMaxWeight_sellOrStore' },
-      { path: 'supply.services.storage.enabled', label: '存倉', type: 'checkbox', group: '服務', matureKey: 'storageAuto' },
-      { path: 'supply.services.withdraw.enabled', label: '提領', type: 'checkbox', group: '服務', matureKey: 'getAuto' },
-      { path: 'supply.services.sell.enabled', label: '販售', type: 'checkbox', group: '服務', matureKey: 'sellAuto' },
-      { path: 'supply.services.buy.enabled', label: '補給品採購', type: 'checkbox', group: '服務', matureKey: 'buyAuto' },
-      { path: 'supply.services.buy.itemId', label: '採購道具 ID', type: 'number', min: 1, max: 1000000, group: '採購', matureKey: 'buyAuto' },
-      { path: 'supply.services.buy.minAmount', label: '低於數量', type: 'number', min: 0, max: 30000, group: '採購', matureKey: 'buyAuto_minAmount' },
-      { path: 'supply.services.buy.targetAmount', label: '補到數量', type: 'number', min: 0, max: 30000, group: '採購', matureKey: 'buyAuto_maxAmount' },
-      { path: 'supply.services.buy.batchSize', label: '每批數量', type: 'number', min: 1, max: 30000, group: '採購', matureKey: 'buyAuto_batchSize' },
-      { path: 'supply.services.buy.price', label: '單價', type: 'number', min: 0, max: 2000000000, group: '進階', matureKey: 'buyAuto_price', advanced: true },
-      { path: 'supply.services.buy.zenyMinimum', label: '最低 Zeny', type: 'number', min: 0, max: 2000000000, group: '進階', matureKey: 'buyAuto_zeny', advanced: true },
-      { path: 'supply.services.withdraw.itemId', label: '提領道具 ID', type: 'number', min: 1, max: 1000000, group: '提領', matureKey: 'getAuto', advanced: true },
-      { path: 'supply.services.withdraw.minAmount', label: '提領低於數量', type: 'number', min: 0, max: 30000, group: '提領', matureKey: 'getAuto_minAmount', advanced: true },
-      { path: 'supply.services.withdraw.targetAmount', label: '提領到數量', type: 'number', min: 0, max: 30000, group: '提領', matureKey: 'getAuto_maxAmount', advanced: true },
-      { path: 'supply.services.withdraw.batchSize', label: '提領每批數量', type: 'number', min: 1, max: 30000, group: '提領', matureKey: 'getAuto_batchSize', advanced: true },
-      { path: 'supply.tools.butterflyWing.required', label: '蝴蝶翅膀需存在', type: 'checkbox', group: '道具', fixed: true },
-      { path: 'supply.tools.flyWing.enabled', label: '允許蒼蠅翅膀', type: 'checkbox', group: '道具', fixed: true },
-      { path: 'supply.loot.autoLoot', label: '自動拾取', type: 'checkbox', group: '拾取', fixed: true },
-      { path: 'supply.loot.autoStore', label: '自動存放拾取物', type: 'checkbox', group: '拾取', fixed: true },
-    ]),
-    arrays: Object.freeze([
-      { path: 'supply.itemRules', title: '道具規則', kind: 'itemRule', advanced: false },
-    ]),
-  }),
-  combat: Object.freeze({
-    title: '戰鬥設定',
-    fields: Object.freeze([
-      { path: 'combat.profile', label: '戰鬥模式', type: 'select', options: COMBAT_PROFILES, group: '模式' },
-      { path: 'combat.attack.mode', label: '攻擊模式', type: 'select', options: [-1, 0, 1, 2], group: '目標', matureKey: 'attackAuto' },
-      { path: 'combat.attack.useWeapon', label: '使用武器普攻', type: 'checkbox', group: '目標', matureKey: 'attackUseWeapon' },
-      { path: 'combat.attack.distance', label: '攻擊距離', type: 'number', min: 0, max: 30, group: '目標', matureKey: 'attackDistance' },
-      { path: 'combat.attack.maxDistance', label: '最大攻擊距離', type: 'number', min: 0, max: 30, group: '目標', matureKey: 'attackMaxDistance' },
-      { path: 'combat.attack.routeToLock', label: '返回鎖定地圖', type: 'checkbox', group: '目標', matureKey: 'attackAuto_routeToLock' },
-      { path: 'combat.attack.checkLOS', label: '檢查視線', type: 'checkbox', group: '進階', matureKey: 'attackCheckLOS', advanced: true },
-      { path: 'combat.attack.canSnipe', label: '允許遠距穿透', type: 'checkbox', group: '進階', matureKey: 'attackCanSnipe', advanced: true },
-      { path: 'combat.attack.changeTarget', label: '允許改換目標', type: 'checkbox', group: '進階', matureKey: 'attackChangeTarget', advanced: true },
-      { path: 'combat.travel.flyWing.enabled', label: '戰鬥中允許蒼蠅翅膀', type: 'checkbox', group: '生存', fixed: true },
-      { path: 'combat.travel.teleport.hp', label: '低 HP 傳送條件', type: 'text', group: '生存', matureKey: 'teleportAuto_hp' },
-      { path: 'combat.travel.teleport.sp', label: '低 SP 傳送條件', type: 'text', group: '生存', matureKey: 'teleportAuto_sp' },
-      { path: 'combat.travel.teleport.lostTarget', label: '失去目標時傳送', type: 'checkbox', group: '生存', matureKey: 'teleportAuto_lostTarget' },
-      { path: 'combat.travel.teleport.dropTarget', label: '放棄目標時傳送', type: 'checkbox', group: '生存', matureKey: 'teleportAuto_dropTarget' },
-    ]),
-    arrays: Object.freeze([
-      { path: 'combat.skills.attackSlots', title: '攻擊技能', kind: 'attackSkill' },
-      { path: 'combat.skills.selfSkills', title: '自身技能', kind: 'selfSkill' },
-      { path: 'combat.skills.partySkills', title: '隊伍技能', kind: 'partySkill' },
-    ]),
-  }),
+const serviceFields = (name,label,key) => [flag(`supply.services.${name}.enabled`,label,true,{group:'服務',matureKey:key}),
+  txt(`supply.services.${name}.npc`,`${label} NPC`, '',{group:'NPC 進階',advanced:true,matureKey:`${key}_npc`}),
+  txt(`supply.services.${name}.npc_steps`,`${label} 對話`,name==='sell'?'s':'',{group:'NPC 進階',advanced:true,matureKey:`${key}_npc_steps`}),
+  num(`supply.services.${name}.distance`,`${label} 距離`,3,{group:'NPC 進階',advanced:true,matureKey:`${key}_distance`})];
+export const GHOST_ISLAND_SUPPLY_CONFIG_SCHEMA = Object.freeze({
+  title:'補給設定', fields:[
+    flag('supply.enabled','啟用自動補給',false,{group:'基本'}),
+    num('supply.weightTriggerPercent','負重觸發',75,{min:40,max:88,group:'基本',matureKey:'itemsMaxWeight_sellOrStore'}),
+    num('supply.inventorySlotTrigger','背包格數觸發',99,{max:1000,group:'基本',matureKey:'itemsMaxNum_sellOrStore'}),
+    ...serviceFields('storage','存倉','storageAuto'),...serviceFields('sell','販售','sellAuto'),
+    flag('supply.services.buy.enabled','採購',true,{group:'服務'}),flag('supply.services.withdraw.enabled','提領',false,{group:'服務'}),
+    num('supply.services.storage.minZeny','存倉最低 Zeny',50,{max:2000000000,group:'NPC 進階',advanced:true,matureKey:'minStorageZeny'}),
+    flag('supply.services.storage.keepOpen','保持倉庫開啟',false,{group:'NPC 進階',advanced:true,matureKey:'storageAuto_keepOpen'}),
+    flag('supply.tools.butterflyWing.required','蝴蝶翅膀需存在',true,{group:'固定政策',fixed:true}),
+    flag('supply.loot.autoLoot','自動拾取',true,{group:'固定政策',fixed:true}),flag('supply.loot.autoStore','自動存放拾取物',false,{group:'固定政策',fixed:true}),
+  ], arrays:[
+    {path:'supply.services.buy.rules',title:'採購道具',kind:'buy',matureKey:'buyAuto'},
+    {path:'supply.services.withdraw.rules',title:'提領道具',kind:'withdraw',matureKey:'getAuto',advanced:true},
+    {path:'supply.itemRules',title:'道具保護與拾取規則',kind:'itemRule'},
+  ],
 });
-
-const clone = (value) => JSON.parse(JSON.stringify(value));
-const isRecord = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);
-const integer = (value, min, max) => Number.isInteger(value) && value >= min && value <= max;
-const text = (value) => typeof value === 'string' && value.length <= 240;
-
-export function defaultCanonicalConfig(revision = 0) {
-  return {
-    version: CONFIG_VERSION,
-    revision,
-    supply: {
-      enabled: false,
-      weightTriggerPercent: 75,
-      services: {
-        storage: { enabled: true },
-        withdraw: { enabled: false, itemId: 501, minAmount: 0, targetAmount: 100, batchSize: 100 },
-        sell: { enabled: true },
-        buy: { enabled: true, itemId: 501, minAmount: 20, targetAmount: 100, batchSize: 100, price: 10, zenyMinimum: 10 },
-      },
-      itemRules: [],
-      tools: {
-        butterflyWing: { ...clone(FIXED_POLICY.butterflyWing), required: true },
-        flyWing: { ...clone(FIXED_POLICY.flyWing), enabled: true },
-      },
-      loot: clone(FIXED_POLICY.loot),
-    },
-    combat: {
-      profile: 'MELEE_DAMAGE',
-      attack: { mode: 2, useWeapon: true, distance: 1, maxDistance: 1, routeToLock: true, checkLOS: true, canSnipe: false, changeTarget: true },
-      skills: { attackSlots: [], selfSkills: [], partySkills: [] },
-      conditions: { hp: '', sp: '' },
-      travel: { flyWing: { ...clone(FIXED_POLICY.flyWing), enabled: true }, teleport: { hp: '10%', sp: '', lostTarget: false, dropTarget: false, maxTries: 3 } },
-      loot: clone(FIXED_POLICY.loot),
-    },
-  };
+export const GHOST_ISLAND_COMBAT_CONFIG_SCHEMA = Object.freeze({
+  title:'戰鬥設定',fields:[
+    {...select('combat.profile','戰鬥模式','MELEE_DAMAGE',COMBAT_PROFILES),group:'模式'},
+    {...select('combat.attack.mode','攻擊策略',2,[-1,0,1,2],['完全停攻','只反擊','協助攻擊','主動攻擊']),group:'攻擊',matureKey:'attackAuto'},
+    flag('combat.attack.useWeapon','使用武器普攻',true,{group:'攻擊',matureKey:'attackUseWeapon'}),
+    num('combat.attack.distance','攻擊距離',1,{max:30,step:0.1,group:'攻擊',matureKey:'attackDistance'}),
+    num('combat.attack.maxDistance','最大攻擊距離',1,{max:30,step:0.1,group:'攻擊',matureKey:'attackMaxDistance'}),
+    flag('combat.attack.routeToLock','返回鎖定地圖',true,{group:'目標進階',advanced:true,matureKey:'attackAuto_routeToLock'}),
+    flag('combat.attack.checkLOS','檢查視線',true,{group:'目標進階',advanced:true,matureKey:'attackCheckLOS'}),
+    flag('combat.attack.canSnipe','允許狙擊',false,{group:'目標進階',advanced:true,matureKey:'attackCanSnipe'}),
+    flag('combat.attack.changeTarget','允許改換目標',true,{group:'目標進階',advanced:true,matureKey:'attackChangeTarget'}),
+    num('combat.attack.maxRouteDistance','最大追擊距離',100,{group:'目標進階',advanced:true,matureKey:'attackMaxRouteDistance'}),
+    num('combat.attack.maxRouteTime','最大追擊時間（秒）',4,{step:0.1,group:'目標進階',advanced:true,matureKey:'attackMaxRouteTime'}),
+    flag('combat.follow.enabled','跟隨隊友',false,{group:'跟隨',matureKey:'follow'}),txt('combat.follow.target','跟隨對象','',{group:'跟隨',matureKey:'followTarget'}),
+    num('combat.follow.distanceMin','最小跟隨距離',3,{max:30,group:'跟隨',matureKey:'followDistanceMin'}),num('combat.follow.distanceMax','最大跟隨距離',6,{max:30,group:'跟隨',matureKey:'followDistanceMax'}),
+    flag('combat.travel.flyWing.enabled','允許蒼蠅翅膀',true,{group:'生存'}),
+    txt('combat.travel.teleport.hp','低 HP 傳送條件','10%',{group:'生存',matureKey:'teleportAuto_hp'}),
+    txt('combat.travel.teleport.sp','低 SP 傳送條件','',{group:'生存',matureKey:'teleportAuto_sp'}),
+    flag('combat.travel.teleport.lostTarget','失去目標時傳送',false,{group:'生存',matureKey:'teleportAuto_lostTarget'}),
+    flag('combat.travel.teleport.dropTarget','放棄目標時傳送',false,{group:'生存',matureKey:'teleportAuto_dropTarget'}),
+  ],arrays:[
+    {path:'combat.skills.attackSlots',title:'攻擊技能',kind:'attackSkill',matureKey:'attackSkillSlot'},
+    {path:'combat.skills.selfSkills',title:'自身恢復與 Buff',kind:'selfSkill',matureKey:'useSelf_skill'},
+    {path:'combat.skills.partySkills',title:'隊伍治療與 Buff',kind:'partySkill',matureKey:'partySkill',advanced:true},
+    {path:'combat.itemUse',title:'補品使用條件',kind:'itemUse',matureKey:'useSelf_item',advanced:true},
+    {path:'combat.targets',title:'怪物目標策略',kind:'target',advanced:true},
+  ],
+});
+export const CONFIG_FORM_SCHEMA = Object.freeze({supply:GHOST_ISLAND_SUPPLY_CONFIG_SCHEMA,combat:GHOST_ISLAND_COMBAT_CONFIG_SCHEMA});
+const allFields = Object.values(CONFIG_FORM_SCHEMA).flatMap(section=>section.fields);
+const allArrays = Object.values(CONFIG_FORM_SCHEMA).flatMap(section=>section.arrays);
+export function defaultConfigRow(kind) {
+  const row = {}; for (const descriptor of CONFIG_ROW_SCHEMAS[kind]) setConfigPath(row,descriptor.path,clone(descriptor.default)); return row;
 }
-
-function error(path, message) {
-  return { path, message };
-}
-
-function checkFixed(errors, config) {
-  if (config.supply.loot.autoLoot !== true) errors.push(error('supply.loot.autoLoot', '政策固定為自動拾取'));
-  if (config.supply.loot.autoStore !== false) errors.push(error('supply.loot.autoStore', '政策固定為不自動存放拾取物'));
-  if (config.combat.loot.autoLoot !== true) errors.push(error('combat.loot.autoLoot', '政策固定為自動拾取'));
-  if (config.combat.loot.autoStore !== false) errors.push(error('combat.loot.autoStore', '政策固定為不自動存放拾取物'));
-  for (const [path, expectedItemId] of [['supply.tools.butterflyWing', 602], ['supply.tools.flyWing', 601], ['combat.travel.flyWing', 601]]) {
-    const tool = path.split('.').reduce((node, key) => node?.[key], config);
-    if (!tool || tool.itemId !== expectedItemId || tool.presenceBased !== true || tool.nonConsumable !== true || tool.weight !== 0)
-      errors.push(error(path, '傳送翅膀必須使用存在性、不可消耗、重量 0 的固定政策'));
-  }
-  if (typeof config.supply.tools.butterflyWing.required !== 'boolean') errors.push(error('supply.tools.butterflyWing.required', '蝴蝶翅膀需存在必須是布林值'));
-  if (typeof config.supply.tools.flyWing.enabled !== 'boolean') errors.push(error('supply.tools.flyWing.enabled', '蒼蠅翅膀開關必須是布林值'));
-  if (typeof config.combat.travel.flyWing.enabled !== 'boolean') errors.push(error('combat.travel.flyWing.enabled', '戰鬥蒼蠅翅膀開關必須是布林值'));
-}
-
-function checkSkill(errors, path, value, kind) {
-  if (!isRecord(value) || !text(value.skill) || !value.skill.trim()) errors.push(error(path, '技能名稱必須存在'));
-  for (const field of ['level']) if (!integer(value[field], 1, 10)) errors.push(error(`${path}.${field}`, '技能等級必須為 1 至 10'));
-  for (const field of ['maxCastTime', 'minCastTime']) if (!integer(value[field], 0, 3600000)) errors.push(error(`${path}.${field}`, '施法時間必須為非負整數毫秒'));
-  if (kind === 'attackSkill' && (!integer(value.dist, 0, 30) || !integer(value.maxDist, 0, 30))) errors.push(error(path, '攻擊技能距離必須為 0 至 30'));
-  if (kind === 'partySkill' && (!integer(value.dist, 0, 30) || !integer(value.maxDist, 0, 30))) errors.push(error(path, '隊伍技能距離必須為 0 至 30'));
-  if (value.conditions && !isRecord(value.conditions)) errors.push(error(`${path}.conditions`, '技能條件格式錯誤'));
-}
-
-export function validateCanonicalConfig(config) {
-  const errors = [];
-  if (!isRecord(config)) return [error('$', '設定必須是物件')];
-  if (config.version !== CONFIG_VERSION) errors.push(error('version', `只支援設定版本 ${CONFIG_VERSION}`));
-  if (!integer(config.revision, 0, Number.MAX_SAFE_INTEGER)) errors.push(error('revision', 'revision 必須為非負整數'));
-  if (!isRecord(config.supply) || !isRecord(config.combat)) return [...errors, error('$', '供給與戰鬥設定必須同時存在')];
-  if (typeof config.supply.enabled !== 'boolean') errors.push(error('supply.enabled', '必須是布林值'));
-  if (!integer(config.supply.weightTriggerPercent, 40, 88)) errors.push(error('supply.weightTriggerPercent', '負重觸發必須為 40 至 88'));
-  for (const path of ['supply.services.storage', 'supply.services.withdraw', 'supply.services.sell', 'supply.services.buy']) {
-    const service = path.split('.').reduce((node, key) => node?.[key], config);
-    if (!isRecord(service) || typeof service.enabled !== 'boolean') errors.push(error(path, '服務必須包含 enabled'));
-  }
-  for (const serviceName of ['buy', 'withdraw']) {
-    const service = config.supply.services?.[serviceName];
-    if (isRecord(service)) {
-      const prefix = `supply.services.${serviceName}`;
-      if (!integer(service.itemId, 1, 1000000)) errors.push(error(`${prefix}.itemId`, '道具 ID 無效'));
-      for (const field of ['minAmount', 'targetAmount', 'batchSize']) if (!integer(service[field], field === 'batchSize' ? 1 : 0, 30000)) errors.push(error(`${prefix}.${field}`, '數量必須在合法範圍'));
-      if (service.targetAmount < service.minAmount) errors.push(error(`${prefix}.targetAmount`, '目標數量不可低於觸發數量'));
-      if (serviceName === 'buy') for (const field of ['price', 'zenyMinimum']) if (!integer(service[field], 0, 2000000000)) errors.push(error(`${prefix}.${field}`, '金額無效'));
-    }
-  }
-  if (!Array.isArray(config.supply.itemRules) || config.supply.itemRules.length > 300) errors.push(error('supply.itemRules', '道具規則必須是 300 筆以內陣列'));
-  for (const [index, rule] of (config.supply.itemRules ?? []).entries()) {
-    if (!isRecord(rule) || !integer(rule.itemId, 1, 1000000)) errors.push(error(`supply.itemRules[${index}]`, '道具 ID 無效'));
-    if (![...Object.values(PICKUP_FLAGS)].includes(rule.pickup)) errors.push(error(`supply.itemRules[${index}].pickup`, '拾取旗標無效'));
-    for (const field of ['storage', 'sell', 'cartAdd', 'cartGet']) if (![0, 1].includes(rule[field])) errors.push(error(`supply.itemRules[${index}].${field}`, '道具控制旗標必須為 0 或 1'));
-  }
-  if (!COMBAT_PROFILES.includes(config.combat.profile)) errors.push(error('combat.profile', '戰鬥模式無效'));
-  const attack = config.combat.attack;
-  if (!isRecord(attack) || ![-1, 0, 1, 2].includes(attack.mode)) errors.push(error('combat.attack.mode', 'attackAuto 模式必須為 -1、0、1 或 2'));
-  if (isRecord(attack)) {
-    if (typeof attack.useWeapon !== 'boolean') errors.push(error('combat.attack.useWeapon', 'attackUseWeapon 必須是布林值'));
-    for (const field of ['distance', 'maxDistance']) if (!integer(attack[field], 0, 30)) errors.push(error(`combat.attack.${field}`, '距離必須為 0 至 30'));
-    for (const field of ['routeToLock', 'checkLOS', 'canSnipe', 'changeTarget']) if (typeof attack[field] !== 'boolean') errors.push(error(`combat.attack.${field}`, '必須是布林值'));
-  }
-  for (const [kind, values] of [['attackSkill', config.combat.skills?.attackSlots], ['selfSkill', config.combat.skills?.selfSkills], ['partySkill', config.combat.skills?.partySkills]]) {
-    if (!Array.isArray(values) || values.length > 100) errors.push(error(`combat.skills.${kind}`, '技能設定必須是 100 筆以內陣列'));
-    for (const [index, value] of (values ?? []).entries()) checkSkill(errors, `combat.skills.${kind}[${index}]`, value, kind);
-  }
-  if (!isRecord(config.combat.travel?.teleport) || !integer(config.combat.travel.teleport.maxTries, 0, 99)) errors.push(error('combat.travel.teleport', '傳送設定無效'));
-  checkFixed(errors, config);
-  return errors;
-}
-
-export function assertCanonicalConfig(config) {
-  const errors = validateCanonicalConfig(config);
-  if (errors.length) {
-    const exception = new Error('設定驗證失敗');
-    exception.code = 'CONFIG_VALIDATION_FAILED';
-    exception.details = errors;
-    throw exception;
-  }
+export function defaultCanonicalConfig(revision=0) {
+  const config = {version:CONFIG_VERSION,revision};
+  for (const descriptor of allFields) setConfigPath(config,descriptor.path,clone(descriptor.default));
+  for (const descriptor of allArrays) setConfigPath(config,descriptor.path,[]);
+  config.supply.services.buy.rules.push({...defaultConfigRow('buy'),minAmount:20,maxAmount:100});
+  config.supply.tools.butterflyWing = clone(FIXED_POLICY.butterflyWing);
+  config.combat.travel.flyWing = {...clone(FIXED_POLICY.flyWing),enabled:true};
+  config.combat.loot = clone(FIXED_POLICY.loot);
   return config;
 }
-
-function scalar(textValue, key) {
-  const match = String(textValue ?? '').match(new RegExp(`^${key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[\\t ]+([^\\r\\n]*)$`, 'm'));
-  return match ? match[1].trim() : undefined;
+const isRecord = value => value !== null && typeof value==='object' && !Array.isArray(value);
+function validateField(errors,descriptor,value,path) {
+  const fail = message => errors.push({path,message});
+  if (descriptor.nullable && value===null) return;
+  if (descriptor.type==='checkbox' && typeof value!=='boolean') fail(`${descriptor.label}必須是布林值`);
+  if (descriptor.type==='number' && (!Number.isFinite(value) || value<descriptor.min || value>descriptor.max || (!descriptor.step && !Number.isInteger(value)))) fail(`${descriptor.label}數值超出範圍`);
+  if (descriptor.type==='select' && !descriptor.options.includes(value)) fail(`${descriptor.label}選項無效`);
+  if (descriptor.type==='text' && (typeof value!=='string' || value.length>240 || /[\r\n{}\x00-\x1f]/.test(value) || descriptor.required && !value.trim())) fail(`${descriptor.label}格式無效`);
+  if (descriptor.fixed && value!==descriptor.default) fail(`${descriptor.label}是固定政策`);
 }
-
-function numberScalar(textValue, key) {
-  const value = scalar(textValue, key);
-  return value === undefined || value === '' ? undefined : Number(value);
+export function validateCanonicalConfig(config) {
+  const errors=[]; const fail=(path,message)=>errors.push({path,message});
+  if (!isRecord(config)) return [{path:'$',message:'設定必須是物件'}];
+  if (config.version!==CONFIG_VERSION) fail('version','不支援的設定版本');
+  if (!Number.isSafeInteger(config.revision) || config.revision<0) fail('revision','設定版本必須是非負整數');
+  for(const descriptor of allFields) validateField(errors,descriptor,getConfigPath(config,descriptor.path),descriptor.path);
+  for(const descriptor of allArrays) {
+    const rows=getConfigPath(config,descriptor.path);
+    if (!Array.isArray(rows) || rows.length>300) { fail(descriptor.path,'設定列必須是最多 300 筆的陣列'); continue; }
+    const identities=new Set();
+    rows.forEach((row,index)=>{
+      const path=`${descriptor.path}[${index}]`;
+      if (!isRecord(row)) { fail(path,'設定列必須是物件'); return; }
+      for(const field of CONFIG_ROW_SCHEMAS[descriptor.kind]) validateField(errors,field,getConfigPath(row,field.path),`${path}.${field.path}`);
+      if(['buy','withdraw'].includes(descriptor.kind) && row.minAmount!==null && row.maxAmount<row.minAmount) fail(path,'補到數量不可低於觸發數量');
+      if(descriptor.kind==='itemRule') {
+        if(identities.has(row.item)) fail(path,'道具規則重複'); identities.add(row.item);
+        if(['601','602'].includes(row.item) && (row.pickup<1 || row.storage || row.sell || row.cartAdd)) fail(path,'永久傳送道具必須保留在背包');
+      }
+    });
+  }
+  for(const [path,fixed] of [['supply.tools.butterflyWing',FIXED_POLICY.butterflyWing],['combat.travel.flyWing',FIXED_POLICY.flyWing],['combat.loot',FIXED_POLICY.loot]]) {
+    for(const [key,value] of Object.entries(fixed)) if(getConfigPath(config,`${path}.${key}`)!==value) fail(`${path}.${key}`,'固定政策不可變更');
+  }
+  return errors;
 }
-
-function boolScalar(textValue, key) {
-  const value = numberScalar(textValue, key);
-  return value === undefined ? undefined : value !== 0;
+export function assertCanonicalConfig(config) {
+  const details=validateCanonicalConfig(config); if(details.length) { const error=new Error('設定驗證失敗'); error.code='CONFIG_VALIDATION_FAILED'; error.details=details; throw error; } return config;
 }
-
-function condition(value) {
-  return value === undefined || value === '' ? '' : String(value).trim();
-}
-
-function parseRepeatedBlocks(configText, blockName) {
-  const values = [];
-  const pattern = new RegExp(`${blockName}(?:[\\t ]+([^\\s{]+))?[\\t ]*\\{([\\s\\S]*?)^\\}`, 'gm');
-  let match;
-  while ((match = pattern.exec(String(configText ?? '')))) {
-    const block = {};
-    for (const line of match[2].split(/\r?\n/)) {
-      const pair = line.trim().match(/^([^\s#]+)(?:\s+(.+?))?\s*(?:#.*)?$/);
-      if (pair) block[pair[1]] = pair[2]?.trim() ?? '';
+function parseConfig(configText) {
+  const scalars={}; const blocks=[]; let current=null;
+  for(const raw of String(configText??'').split(/\r?\n/)) {
+    const line=raw.replace(/\s*#.*$/,'').trim(); if(!line) continue;
+    if(current) {
+      if(line==='}') { blocks.push(current); current=null; continue; }
+      const pair=line.match(/^(\S+)(?:\s+(.*))?$/); if(pair) current.values[pair[1]]=pair[2]??'';
+    } else {
+      const block=line.match(/^(\w+)(?:\s+(.+?))?\s*\{$/);
+      if(block) current={kind:block[1],name:(block[2]??'').trim(),values:{}};
+      else { const pair=line.match(/^(\S+)(?:\s+(.*))?$/); if(pair) scalars[pair[1]]=pair[2]??''; }
     }
-    values.push({ name: match[1] ?? '', block });
   }
-  return values;
+  if(current) throw new Error('legacy_config_unclosed_block');
+  return {scalars,blocks};
 }
-
-function itemRuleFromLegacy(itemId, action) {
-  const rule = { itemId, pickup: PICKUP_FLAGS.PICKUP, storage: 0, sell: 0, cartAdd: 0, cartGet: 0, legacyAction: action };
-  if (action === 'ignore') rule.pickup = PICKUP_FLAGS.SKIP;
-  if (action === 'discard') rule.pickup = PICKUP_FLAGS.DROP;
-  if (action === 'sell') rule.sell = 1;
-  if (action === 'store') rule.storage = 1;
-  return rule;
+const decode = (descriptor,value) => descriptor.type==='checkbox' ? Number(value)!==0 : descriptor.type==='number' ? value==='' && descriptor.nullable ? null : Number(value) : descriptor.type==='select' && typeof descriptor.default==='number' ? Number(value) : String(value);
+const gameplayKey = key => /^(?:attack|useSelf_|partySkill|buyAuto|sellAuto|storageAuto|getAuto|items(?:Take|Gather|Max)|teleportAuto|follow|minStorageZeny|relogAfterStorage)/.test(key) && !/password|encrypt|token|secret/i.test(key);
+export function migrateLegacyConfig({supplyCycle={},configText='',skillAutomation={},itemsControlText='',pickupText='',monControlText='',source='legacy'}={}) {
+  const config=defaultCanonicalConfig(0); const mappings=[]; const unmapped=[];
+  const parsed=parseConfig(configText); const retained={supplyCycle:clone(supplyCycle),scalars:{},blocks:[],itemsControl:[],pickup:[],monControl:[]};
+  const add=(legacy,canonical,disposition='MIGRATE',reason='沿用成熟欄位語意')=>mappings.push({legacy,canonical,disposition,reason});
+  const knownKeys=new Set();
+  for(const descriptor of allFields) {
+    const key=descriptor.matureKey;
+    if(!key || parsed.scalars[key]===undefined) continue;
+    knownKeys.add(key); setConfigPath(config,descriptor.path,decode(descriptor,parsed.scalars[key])); add(`config.txt ${key}`,descriptor.path);
+  }
+  for(const [key,value] of Object.entries(parsed.scalars)) if(gameplayKey(key)) {
+    retained.scalars[key]=value;
+    if(!knownKeys.has(key) && !/^(attackSkillSlot|useSelf_skill|partySkill|buyAuto|getAuto|useSelf_item)_\d+(?:_|$)/.test(key)) unmapped.push(`config.txt ${key} 已保留，尚未提供欄位映射`);
+  }
+  for(const [legacy,path] of Object.entries({enabled:'supply.enabled',returnWeight:'supply.weightTriggerPercent',store:'supply.services.storage.enabled',sell:'supply.services.sell.enabled',buy:'supply.services.buy.enabled'})) {
+    if(supplyCycle[legacy]!==undefined) { setConfigPath(config,path,supplyCycle[legacy]); add(`supply-cycle.json.${legacy}`,path); }
+  }
+  const arrayByMature=new Map(allArrays.filter(x=>x.matureKey).map(x=>[x.matureKey,x]));
+  const blocks=[...parsed.blocks]; const flattened=new Map();
+  for(const [key,value] of Object.entries(parsed.scalars)) {
+    const match=key.match(/^(attackSkillSlot|useSelf_skill|partySkill|buyAuto|getAuto|useSelf_item)_(\d+)(?:_(.+))?$/); if(!match) continue;
+    const id=`${match[1]}:${match[2]}`; const block=flattened.get(id)??{kind:match[1],name:'',values:{}};
+    if(match[3]) block.values[match[3]]=value; else block.name=value;
+    flattened.set(id,block);
+  }
+  blocks.push(...flattened.values());
+  const seenArrays=new Set();
+  for(const block of blocks) {
+    if(!arrayByMature.has(block.kind)) { if(gameplayKey(block.kind)) { retained.blocks.push(block); unmapped.push(`${block.kind} 區塊已保留待映射`); } continue; }
+    if(!block.name) continue; // Empty upstream template, no player policy.
+    retained.blocks.push(block);
+    const descriptor=arrayByMature.get(block.kind); const row=defaultConfigRow(descriptor.kind); const consumed=new Set();
+    row[descriptor.kind.endsWith('Skill')?'skill':'item']=block.name;
+    for(const field of CONFIG_ROW_SCHEMAS[descriptor.kind]) {
+      const key=field.matureKey??field.path.replace(/^conditions\./,'');
+      if(block.values[key]!==undefined) { setConfigPath(row,field.path,decode(field,block.values[key])); consumed.add(key); }
+    }
+    for(const key of Object.keys(block.values)) if(!consumed.has(key) && block.values[key]!=='') unmapped.push(`${block.kind} ${block.name}.${key} 已保留待映射`);
+    if(!seenArrays.has(descriptor.path)) { setConfigPath(config,descriptor.path,[]); seenArrays.add(descriptor.path); }
+    getConfigPath(config,descriptor.path).push(row); add(`${block.kind} ${block.name}`,descriptor.path,'ADAPT');
+  }
+  if(supplyCycle.redPotionMin!==undefined || supplyCycle.redPotionMax!==undefined) {
+    const rules=config.supply.services.buy.rules; let row=rules.find(row=>row.item==='501');
+    if(!row) { row=defaultConfigRow('buy'); rules.push(row); }
+    if(supplyCycle.redPotionMin!==undefined) row.minAmount=Number(supplyCycle.redPotionMin);
+    if(supplyCycle.redPotionMax!==undefined) row.maxAmount=Number(supplyCycle.redPotionMax);
+    add('supply-cycle.json.redPotionMin/redPotionMax','supply.services.buy.rules[item=501].minAmount/maxAmount','ADAPT');
+  }
+  const policyRows=new Map();
+  const parseControls=(input,kind)=>String(input??'').split(/\r?\n/).map(line=>line.replace(/\s*#.*$/,'').trim()).filter(Boolean).map(line=>{
+    retained[kind].push(line); return line;
+  });
+  for(const line of parseControls(itemsControlText,'itemsControl')) {
+    const match=line.match(/^(.+?)\s+(\d+)\s+([01])\s+([01])(?:\s+([01]))?(?:\s+([01]))?$/);
+    if(!match) { unmapped.push(`items_control 無法映射：${line}`); continue; }
+    const row={...defaultConfigRow('itemRule'),item:match[1],keepAmount:Number(match[2]),storage:match[3]==='1',sell:match[4]==='1',cartAdd:match[5]==='1',cartGet:match[6]==='1'};
+    policyRows.set(row.item,row); add(`items_control ${row.item}`,'supply.itemRules[]','ADAPT');
+  }
+  for(const line of parseControls(pickupText,'pickup')) {
+    const match=line.match(/^(.+?)\s+(-1|0|1|2)$/); if(!match) { unmapped.push(`pickupitems 無法映射：${line}`); continue; }
+    const row=policyRows.get(match[1])??{...defaultConfigRow('itemRule'),item:match[1]}; row.pickup=Number(match[2]); policyRows.set(row.item,row); add(`pickupitems ${row.item}`,'supply.itemRules[].pickup','ADAPT');
+  }
+  for(const rule of Array.isArray(supplyCycle.rules)?supplyCycle.rules:[]) {
+    if(!SUPPLY_RULE_ACTIONS.includes(rule.action)) { unmapped.push(`未知道具規則 ${rule.itemId} 已保留`); continue; }
+    const row={...defaultConfigRow('itemRule'),item:String(rule.itemId)};
+    if(rule.action==='ignore') row.pickup=0; if(rule.action==='discard') row.pickup=-1;
+    row.storage=rule.action==='store'; row.sell=rule.action==='sell';
+    if(rule.action!=='default') policyRows.set(row.item,row);
+    add(`supply-cycle.json.rules[${rule.itemId}]=${rule.action}`,'supply.itemRules[]','ADAPT');
+  }
+  // Global policy suppresses automatic deposit defaults; explicit service rules remain configurable.
+  const allRule=policyRows.get('all'); if(allRule?.storage) { allRule.storage=false; add('items_control all autostore','supply.loot.autoStore','ADAPT','GLOBAL_AUTOSTORE=NO'); }
+  for(const item of ['601','602']) if(policyRows.has(item)) { Object.assign(policyRows.get(item),{pickup:1,storage:false,sell:false,cartAdd:false,keepAmount:1}); add(`items_control ${item}`,'permanent travel tool policy','ADAPT','永久道具固定保留，原值保留於遷移記錄'); }
+  config.supply.itemRules=[...policyRows.values()];
+  for(const line of parseControls(monControlText,'monControl')) {
+    const match=line.match(/^(.+?)\s+(-?\d+)((?:\s+-?[\d.]+)*)$/); if(!match) {unmapped.push(`mon_control 無法映射：${line}`);continue;}
+    const row=defaultConfigRow('target'); row.monster=match[1]; const values=[match[2],...match[3].trim().split(/\s+/).filter(Boolean)];
+    ['attack','teleport','search','skillcancel','lv','joblv','hp','sp','weight'].forEach((key,i)=>{if(values[i]!==undefined) row[key]=['search','skillcancel'].includes(key)?Number(values[i])!==0:Number(values[i]);});
+    config.combat.targets.push(row);add(`mon_control ${row.monster}`,'combat.targets[]','ADAPT');
+  }
+  for(const [key,kind,path] of [['attack','attackSkill','attackSlots'],['self','selfSkill','selfSkills'],['buff','selfSkill','selfSkills']]) {
+    const slot=skillAutomation[key]; if(!slot) continue;
+    const row=defaultConfigRow(kind); row.skill=String(slot.handle??slot.skill??''); row.level=Number(slot.level??slot.lvl??1);
+    if(slot.minimumSp!==undefined) row.conditions.sp=`> ${slot.minimumSp}%`;
+    if(slot.hpBelow!==undefined) row.conditions.hp=`< ${slot.hpBelow}%`;
+    if(slot.status) row.conditions.whenStatusInactive=String(slot.status);
+    const rows=config.combat.skills[path]; if(!rows.some(existing=>existing.skill===row.skill)) rows.push(row);
+    add(`skillAutomation.${key}`,`combat.skills.${path}`,'REMOVE_DUPLICATE','舊技能入口併入唯一設定契約');
+  }
+  for(const key of Object.keys(supplyCycle)) if(!['enabled','returnWeight','store','sell','buy','redPotionMin','redPotionMax','rules'].includes(key)) unmapped.push(`supply-cycle.json.${key} 已保留待映射`);
+  if(config.combat.attack.mode===-1) config.combat.profile=config.combat.skills.selfSkills.some(row=>/heal/i.test(row.skill))?'HEAL_SUPPORT':config.combat.skills.partySkills.length?'COMBAT_SUPPORT':'PASSIVE_FOLLOW';
+  else config.combat.profile=!config.combat.attack.useWeapon?'SKILL_CAST':config.combat.skills.attackSlots.length?'HYBRID_DAMAGE':config.combat.attack.maxDistance>2?'RANGED_DAMAGE':'MELEE_DAMAGE';
+  add('GLOBAL_AUTOLOOT/GLOBAL_AUTOSTORE','supply.loot','KEEP','專案固定政策');
+  const migration={source,sourceVersion:'legacy-openkore-web-v1',mappings,unmapped:[...new Set(unmapped)],retained,policy:{fixedOverlays:['GLOBAL_AUTOLOOT=YES','GLOBAL_AUTOSTORE=NO','Butterfly presence/non-consumable/weight=0','Fly default=ON']}};
+  assertCanonicalConfig(config); return {config,migration};
 }
-
-function profileFor(attack, skills) {
-  if (attack.mode === -1) {
-    if ((skills.selfSkills ?? []).some((skill) => /heal|recovery/i.test(skill.skill))) return 'HEAL_SUPPORT';
-    return (skills.partySkills ?? []).length ? 'COMBAT_SUPPORT' : 'PASSIVE_FOLLOW';
-  }
-  if (!attack.useWeapon && skills.attackSlots.length) return 'SKILL_CAST';
-  return skills.attackSlots.length ? 'HYBRID_DAMAGE' : 'MELEE_DAMAGE';
-}
-
-function skillFromCurrent(slot = {}, kind) {
-  const base = {
-    skill: String(slot.handle ?? slot.skill ?? '').trim(),
-    level: Number(slot.level ?? slot.lv ?? 1),
-    maxCastTime: Number(slot.maxCastTime ?? 0),
-    minCastTime: Number(slot.minCastTime ?? 0),
-    conditions: {},
-  };
-  if (slot.minimumSp !== undefined) base.conditions.sp = `> ${Number(slot.minimumSp)}%`;
-  if (slot.hpBelow !== undefined) base.conditions.hp = `< ${Number(slot.hpBelow)}%`;
-  if (slot.sp !== undefined) base.conditions.sp = String(slot.sp).trim();
-  if (slot.hp !== undefined) base.conditions.hp = String(slot.hp).trim();
-  if (isRecord(slot.conditions)) {
-    if (slot.conditions.sp !== undefined) base.conditions.sp = String(slot.conditions.sp).trim();
-    if (slot.conditions.hp !== undefined) base.conditions.hp = String(slot.conditions.hp).trim();
-  }
-  if (kind !== 'selfSkill') {
-    base.dist = Number(slot.dist ?? slot.range ?? 1);
-    base.maxDist = Number(slot.maxDist ?? slot.range ?? (kind === 'partySkill' ? 8 : 1));
-  }
-  if (kind === 'attackSkill') Object.assign(base, { maxAttempts: Number(slot.maxAttempts ?? 0), maxUses: Number(slot.maxUses ?? 0), monsters: String(slot.monsters ?? ''), notMonsters: String(slot.notMonsters ?? ''), previousDamage: String(slot.previousDamage ?? ''), isSelfSkill: Number(slot.isSelfSkill ?? 0), isStartSkill: Number(slot.isStartSkill ?? 0) });
-  if (kind === 'partySkill') Object.assign(base, { target: String(slot.target ?? ''), notPartyOnly: Number(slot.notPartyOnly ?? 0), isSelfSkill: Number(slot.isSelfSkill ?? 0), noSmartHeal: Number(slot.noSmartHeal ?? 0) });
-  if (kind === 'selfSkill') Object.assign(base, { smartEncore: Number(slot.smartEncore ?? 0), noSmartHeal: Number(slot.noSmartHeal ?? 0) });
-  return base;
-}
-
-export function migrateLegacyConfig({ supplyCycle = {}, configText = '', skillAutomation = {}, source = 'legacy' } = {}) {
-  const config = defaultCanonicalConfig(0);
-  const mappings = [];
-  const unmapped = [];
-  const supply = config.supply;
-  const add = (legacy, canonical, disposition, reason) => mappings.push({ legacy, canonical, disposition, reason });
-  if (supplyCycle.enabled !== undefined) {
-    supply.enabled = supplyCycle.enabled === true;
-    add('supply-cycle.json.enabled', 'supply.enabled', 'MIGRATE', '保留原補給循環開關');
-  }
-  if (supplyCycle.returnWeight !== undefined) { supply.weightTriggerPercent = Number(supplyCycle.returnWeight); add('supply-cycle.json.returnWeight', 'supply.weightTriggerPercent', 'MIGRATE', '保留原 Web 負重門檻'); }
-  for (const service of ['store', 'sell', 'buy']) if (supplyCycle[service] !== undefined) { supply.services[{ store: 'storage', sell: 'sell', buy: 'buy' }[service]].enabled = supplyCycle[service] !== false; add(`supply-cycle.json.${service}`, `supply.services.${service === 'store' ? 'storage' : service}.enabled`, 'MIGRATE', '保留原服務開關'); }
-  if (isRecord(supplyCycle.withdraw)) {
-    supply.services.withdraw = { ...supply.services.withdraw, ...supplyCycle.withdraw, enabled: supplyCycle.withdraw.enabled !== false };
-    add('supply-cycle.json.withdraw', 'supply.services.withdraw', 'ADAPT', '保留 getAuto 提領的數量與開關欄位');
-  }
-  if (supplyCycle.redPotionMin !== undefined) supply.services.buy.minAmount = Number(supplyCycle.redPotionMin);
-  if (supplyCycle.redPotionMax !== undefined) { supply.services.buy.targetAmount = Number(supplyCycle.redPotionMax); supply.services.buy.batchSize = Math.max(1, Number(supplyCycle.redPotionMax)); }
-  if (supplyCycle.redPotionMin !== undefined || supplyCycle.redPotionMax !== undefined) add('supply-cycle.json.redPotionMin/redPotionMax', 'supply.services.buy.minAmount/targetAmount/batchSize', 'ADAPT', '對應 buyAuto 數量欄位');
-  for (const rule of Array.isArray(supplyCycle.rules) ? supplyCycle.rules : []) {
-    const itemId = Number(rule?.itemId);
-    if (Number.isSafeInteger(itemId) && itemId > 0 && itemId !== 601 && itemId !== 602) supply.itemRules.push(itemRuleFromLegacy(itemId, String(rule.action ?? 'default')));
-  }
-  if (Array.isArray(supplyCycle.rules) && supplyCycle.rules.length) add('supply-cycle.json.rules[]', 'supply.itemRules[]', 'ADAPT', '保留原規則並改用成熟 pickup/items_control 旗標');
-  const attack = config.combat.attack;
-  const attackMode = numberScalar(configText, 'attackAuto');
-  const useWeapon = boolScalar(configText, 'attackUseWeapon');
-  if (attackMode !== undefined && [-1, 0, 1, 2].includes(attackMode)) { attack.mode = attackMode; add('config.txt attackAuto', 'combat.attack.mode', 'MIGRATE', '保留成熟攻擊模式'); }
-  if (useWeapon !== undefined) { attack.useWeapon = useWeapon; add('config.txt attackUseWeapon', 'combat.attack.useWeapon', 'MIGRATE', '保留獨立武器開關'); }
-  for (const [key, path, target] of [['attackDistance', 'distance', 'combat.attack.distance'], ['attackMaxDistance', 'maxDistance', 'combat.attack.maxDistance']]) { const value = numberScalar(configText, key); if (Number.isInteger(value)) { attack[path] = value; add(`config.txt ${key}`, target, 'MIGRATE', '保留成熟距離欄位'); } }
-  for (const [key, field] of [['attackAuto_routeToLock', 'routeToLock'], ['attackCheckLOS', 'checkLOS'], ['attackCanSnipe', 'canSnipe'], ['attackChangeTarget', 'changeTarget']]) { const value = boolScalar(configText, key); if (value !== undefined) { attack[field] = value; add(`config.txt ${key}`, `combat.attack.${field}`, 'MIGRATE', '保留成熟布林欄位'); } }
-  const hp = scalar(configText, 'teleportAuto_hp'); const sp = scalar(configText, 'teleportAuto_sp');
-  if (hp !== undefined) config.combat.travel.teleport.hp = condition(hp);
-  if (sp !== undefined) config.combat.travel.teleport.sp = condition(sp);
-  for (const [key, field] of [['teleportAuto_lostTarget', 'lostTarget'], ['teleportAuto_dropTarget', 'dropTarget']]) { const value = boolScalar(configText, key); if (value !== undefined) config.combat.travel.teleport[field] = value; }
-  if (hp !== undefined || sp !== undefined) add('config.txt teleportAuto_hp/sp', 'combat.travel.teleport.hp/sp', 'MIGRATE', '保留 checkSelfCondition 字串語意');
-  const itemsTake = numberScalar(configText, 'itemsTakeAuto');
-  if (itemsTake !== undefined) add('config.txt itemsTakeAuto', 'supply.loot.autoLoot', 'KEEP', '固定政策已是自動拾取');
-  const attackBlocks = parseRepeatedBlocks(configText, 'attackSkillSlot');
-  for (const entry of attackBlocks) {
-    const skill = entry.name || entry.block.skill;
-    if (skill) config.combat.skills.attackSlots.push(skillFromCurrent({ ...entry.block, skill }, 'attackSkill'));
-    else unmapped.push('config.txt attackSkillSlot block without a skill name');
-  }
-  const selfBlocks = parseRepeatedBlocks(configText, 'useSelf_skill');
-  for (const entry of selfBlocks) {
-    const skill = entry.name || entry.block.skill;
-    if (skill) config.combat.skills.selfSkills.push(skillFromCurrent({ ...entry.block, skill }, 'selfSkill'));
-    else unmapped.push('config.txt useSelf_skill block without a skill name');
-  }
-  const partyBlocks = parseRepeatedBlocks(configText, 'partySkill');
-  for (const entry of partyBlocks) {
-    const skill = entry.name || entry.block.skill;
-    if (skill) config.combat.skills.partySkills.push(skillFromCurrent({ ...entry.block, skill }, 'partySkill'));
-    else unmapped.push('config.txt partySkill block without a skill name');
-  }
-  const flattenedSkills = new Map();
-  for (const line of String(configText ?? '').split(/\r?\n/)) {
-    const match = line.match(/^\s*(attackSkillSlot|useSelf_skill|partySkill)_(\d+)(?:_([^\s]+))?\s+(.+?)\s*$/);
-    if (!match) continue;
-    const kind = match[1] === 'attackSkillSlot' ? 'attackSkill' : match[1] === 'useSelf_skill' ? 'selfSkill' : 'partySkill';
-    const index = Number(match[2]);
-    const current = flattenedSkills.get(`${kind}:${index}`) ?? {};
-    if (!match[3]) current.skill = match[4].trim();
-    else current[match[3]] = match[4].trim();
-    flattenedSkills.set(`${kind}:${index}`, current);
-  }
-  for (const [key, slot] of flattenedSkills) {
-    const [kind] = key.split(':');
-    if (kind === 'attackSkill') config.combat.skills.attackSlots.push(skillFromCurrent(slot, kind));
-    if (kind === 'selfSkill') config.combat.skills.selfSkills.push(skillFromCurrent(slot, kind));
-    if (kind === 'partySkill') config.combat.skills.partySkills.push(skillFromCurrent(slot, kind));
-  }
-  if (attackBlocks.length || selfBlocks.length || partyBlocks.length) add('config.txt repeated skill blocks', 'combat.skills.*[]', 'ADAPT', '保留重複技能編輯能力與成熟欄位');
-  if (skillAutomation.attack) { config.combat.skills.attackSlots.push(skillFromCurrent(skillAutomation.attack, 'attackSkill')); add('live skillAutomation.attack', 'combat.skills.attackSlots[]', 'ADAPT', '保存既有 Web 技能設定'); }
-  if (skillAutomation.self) { config.combat.skills.selfSkills.push(skillFromCurrent(skillAutomation.self, 'selfSkill')); add('live skillAutomation.self', 'combat.skills.selfSkills[]', 'ADAPT', '保存既有 Web 技能設定'); }
-  if (skillAutomation.buff) { config.combat.skills.partySkills.push(skillFromCurrent(skillAutomation.buff, 'partySkill')); add('live skillAutomation.buff', 'combat.skills.partySkills[]', 'ADAPT', '保存既有 Web 技能設定'); }
-  if (skillAutomation.attack || skillAutomation.self || skillAutomation.buff) add('live skillAutomation', 'combat.skills.*[]', 'REMOVE_DUPLICATE', '合併舊版技能表，避免相同技能在兩個編輯入口重複保存');
-  config.combat.profile = profileFor(config.combat.attack, config.combat.skills);
-  if (config.combat.attack.mode === -1 && config.combat.attack.useWeapon) config.combat.attack.useWeapon = false;
-  config.supply.loot = clone(FIXED_POLICY.loot);
-  config.combat.loot = clone(FIXED_POLICY.loot);
-  const migration = { source, sourceVersion: 'legacy-openkore-web-v1', mappings, unmapped, policy: { fixedOverlays: ['loot.autoLoot=true', 'loot.autoStore=false', 'Butterfly/Fly presence based'] } };
-  assertCanonicalConfig(config);
-  return { config, migration };
-}
-
+const encode=value=>typeof value==='boolean'?value?1:0:value===null?'':value;
 export function canonicalToOpenKorePreview(config) {
   assertCanonicalConfig(config);
-  const lines = [
-    `attackAuto ${config.combat.attack.mode}`,
-    `attackUseWeapon ${config.combat.attack.useWeapon ? 1 : 0}`,
-    `attackDistance ${config.combat.attack.distance}`,
-    `attackMaxDistance ${config.combat.attack.maxDistance}`,
-    `attackAuto_routeToLock ${config.combat.attack.routeToLock ? 1 : 0}`,
-    `attackCheckLOS ${config.combat.attack.checkLOS ? 1 : 0}`,
-    `attackCanSnipe ${config.combat.attack.canSnipe ? 1 : 0}`,
-    `attackChangeTarget ${config.combat.attack.changeTarget ? 1 : 0}`,
-    `teleportAuto_hp ${config.combat.travel.teleport.hp}`,
-    `teleportAuto_sp ${config.combat.travel.teleport.sp}`,
-    `teleportAuto_lostTarget ${config.combat.travel.teleport.lostTarget ? 1 : 0}`,
-    `teleportAuto_dropTarget ${config.combat.travel.teleport.dropTarget ? 1 : 0}`,
-    `itemsTakeAuto 2`,
-    `itemsMaxWeight_sellOrStore ${config.supply.weightTriggerPercent}`,
-    `storageAuto ${config.supply.enabled && config.supply.services.storage.enabled ? 1 : 0}`,
-    `getAuto ${config.supply.enabled && config.supply.services.withdraw.enabled ? 1 : 0}`,
-    `sellAuto ${config.supply.enabled && config.supply.services.sell.enabled ? 1 : 0}`,
-  ];
-  return {
-    configText: `${lines.join('\n')}\n`,
-    pickupitems: ['all 1', '601 1 # Permanent Fly Wing', '602 1 # Permanent Butterfly Wing', ...config.supply.itemRules.map((rule) => `${rule.itemId} ${rule.pickup}`)].join('\n') + '\n',
-    itemsControl: config.supply.itemRules.map((rule) => `${rule.itemId} 0 ${rule.storage} ${rule.sell} ${rule.cartAdd} ${rule.cartGet}`).join('\n') + (config.supply.itemRules.length ? '\n' : ''),
-    applied: false,
-    capability: 'CONFIG_ONLY_ADAPTER_PREVIEW',
-  };
+  const lines=allFields.filter(field=>field.matureKey).map(field=>`${field.matureKey} ${encode(getConfigPath(config,field.path))}`);
+  lines.push('itemsTakeAuto 2');
+  for(const service of ['storage','sell']) if(!config.supply.enabled) lines.push(`${service==='storage'?'storageAuto':'sellAuto'} 0`);
+  for(const descriptor of allArrays.filter(array=>array.matureKey)) {
+    for(const row of getConfigPath(config,descriptor.path)) {
+      const identity=row.skill??row.item; lines.push(`${descriptor.matureKey} ${identity} {`);
+      for(const field of CONFIG_ROW_SCHEMAS[descriptor.kind]) {
+        if(['skill','item'].includes(field.path))continue;
+        const key=field.matureKey??field.path.replace(/^conditions\./,'');
+        let value=getConfigPath(row,field.path);
+        if(key==='disabled' && descriptor.path.startsWith('supply.')) value=value || !config.supply.enabled || !getConfigPath(config,descriptor.path.replace(/\.rules$/,'.enabled'));
+        lines.push(`\t${key} ${encode(value)}`);
+      }
+      lines.push('}');
+    }
+  }
+  const items=config.supply.itemRules.filter(row=>!['601','602','all'].includes(row.item));
+  const all=config.supply.itemRules.find(row=>row.item==='all');
+  return {configText:lines.join('\n')+'\n',
+    pickupitems:[`all ${all?.pickup??1}`,...items.map(row=>`${row.item} ${row.pickup}`),'601 1','602 1'].join('\n')+'\n',
+    itemsControl:[`all ${all?.keepAmount??0} 0 ${all?.sell?1:0} 0 0`,...items.map(row=>`${row.item} ${row.keepAmount} ${encode(row.storage)} ${encode(row.sell)} ${encode(row.cartAdd)} ${encode(row.cartGet)}`),'601 1 0 0 0 0','602 1 0 0 0 0'].join('\n')+'\n',
+    monControl:config.combat.targets.map(row=>`${row.monster} ${['attack','teleport','search','skillcancel','lv','joblv','hp','sp','weight'].map(key=>encode(row[key])).join(' ')}`).join('\n'),
+    policy:{flyWingEnabled:config.combat.travel.flyWing.enabled,butterflyWing:FIXED_POLICY.butterflyWing},
+    applied:false,capability:'CONFIG_ONLY_ADAPTER_PREVIEW',
+    unsupported:['PA native supply/combat configuration command is unavailable; preview is never dispatched']};
 }
-
-export function applyProfileTemplate(config, profile) {
-  if (!COMBAT_PROFILES.includes(profile)) throw new Error(`未知戰鬥模式：${profile}`);
-  const next = clone(config);
-  next.combat.profile = profile;
-  next.combat.attack.mode = PROFILE_DEFINITIONS[profile].attackMode;
-  next.combat.attack.useWeapon = PROFILE_DEFINITIONS[profile].useWeapon;
+export function applyProfileTemplate(config,profile) {
+  if(!COMBAT_PROFILES.includes(profile))throw new Error('戰鬥模式無效');
+  const next=clone(config); next.combat.profile=profile;
+  next.combat.attack.mode=PROFILE_DEFINITIONS[profile].attackMode; next.combat.attack.useWeapon=PROFILE_DEFINITIONS[profile].useWeapon;
+  next.combat.follow.enabled=['FOLLOW_SUPPORT','PASSIVE_FOLLOW'].includes(profile);
   return next;
 }
-
-export { clone };

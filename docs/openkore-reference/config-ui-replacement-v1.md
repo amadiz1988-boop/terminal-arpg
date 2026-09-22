@@ -59,6 +59,26 @@
 `REMOVE_DUPLICATE`。無法由舊資料證實的值進入 `migration.unmapped`，不以預設值
 靜默吞掉。保存採角色檔案與 revision，使用暫存檔加 rename，並拒絕過期 revision。
 
+## Canonical schema 與 UI 來源
+
+Supply 的 canonical path 為 `supply.enabled`、`supply.weightTriggerPercent`、
+`supply.inventorySlotTrigger`、`supply.services.storage/sell/buy/withdraw`、
+`supply.itemRules`、`supply.tools.butterflyWing` 與 `supply.loot`。採購與提領
+使用 `CONFIG_ROW_SCHEMAS.buy`、`CONFIG_ROW_SCHEMAS.withdraw` 的重複列，逐項道具
+政策使用 `CONFIG_ROW_SCHEMAS.itemRule`，因此 `items_control.txt` 與
+`pickupitems.txt` 可共同遷移至同一份 item rule。
+
+Combat 的 canonical path 為 `combat.profile`、`combat.attack`、`combat.follow`、
+`combat.travel`、`combat.skills.attackSlots/selfSkills/partySkills`、
+`combat.itemUse`、`combat.targets` 與固定 `combat.loot`。八個 profile 只套用
+基礎攻擊行為，成熟技能、條件、目標與支援列仍由同一份 schema 編輯。表單由
+`CONFIG_FORM_SCHEMA` 與 `CONFIG_ROW_SCHEMAS` 產生，DOM 只呈現與收集輸入，保存
+前一定會重新驗證 canonical object。
+
+`control/config.txt`、`items_control.txt`、`pickupitems.txt`、`mon_control.txt`
+的未知欄位會進入 `migration.retained` 與 `migration.unmapped`。這保留人工確認
+所需的原始證據，也避免以預設值覆寫未證實的 gameplay 語意。
+
 ## 執行邊界
 
 `canonicalToOpenKorePreview()` 只輸出可稽核的成熟欄位預覽。後端不呼叫
