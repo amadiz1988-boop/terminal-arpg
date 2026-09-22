@@ -480,6 +480,50 @@ topic, follow Project Last-Good links, compare locked OpenKore behavior,
 rAthena authority and Current PA, then identify `FIRST_BROKEN_TRANSITION`.
 `UNKNOWN` does not prove absence. Do not read the full Atlas by default.
 
+### 10C.1. MATURE_CAPABILITY_REUSE_FIRST_HARD_GATE
+
+Every substantial implementation workline must complete this gate before any
+source change. It applies to capability restoration, refactor, optimization and
+new feature work. Navigation additionally requires OpenKore route parity.
+
+```text
+MATURE_CAPABILITY_REUSE_FIRST = YES
+OPENKORE_EXISTING_CAPABILITY =
+OPENKORE_REFERENCE =
+OPENKORE_REUSE_SEAM =
+CUSTOM_CODE_REQUIRED = YES / NO / UNKNOWN
+WHY =
+REFERENCE_SEARCH_COMPLETED = YES / NO
+MATURE_CAPABILITY_EXISTS = YES / NO / PARTIAL
+REFERENCE_SOURCE =
+CURRENT_PROJECT_CAPABILITY =
+REUSE_CLASSIFICATION = DIRECT_REUSE / PORT / ADAPTER / PROJECT_POLICY_LAYER / INTEGRATION_ONLY / CUSTOM_IMPLEMENTATION_REQUIRED
+```
+
+When `CUSTOM_IMPLEMENTATION_REQUIRED`, the Worker must also provide:
+
+```text
+WHY_REUSE_NOT_POSSIBLE =
+ARCHITECTURAL_CONFLICT =
+LICENSE_CONSTRAINT =
+MISSING_REFERENCE_CAPABILITY =
+PROJECT_CONTROL_APPROVAL_REQUIRED = YES
+```
+
+Without explicit Project Control approval, `CUSTOM_IMPLEMENTATION_ALLOWED = NO`.
+For Navigation, require:
+
+```text
+OPENKORE_NAVIGATION_REUSE_FIRST = YES
+OPENKORE_ROUTE_PARITY_REQUIRED = YES
+NAVIGATION_ROUTE_ENGINE_COUNT = 1
+PER_MAP_NAVIGATION_HARDCODE = FORBIDDEN
+```
+
+The gate precedes implementation and does not supersede Quest Flow First,
+either Reference Atlas, Synthetic First, Single Runtime Policy, nearest legal
+reproducible state, Browser final acceptance or Git hygiene.
+
 ---
 
 ## 10D. SYNTHETIC_FIRST_DEBUGGING_GATE_V1

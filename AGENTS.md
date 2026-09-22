@@ -1411,6 +1411,42 @@ DIRECT_CODE_REUSE_ALLOWED = YES/NO/UNKNOWN
 若 `LICENSE = UNKNOWN`，則 `DIRECT_CODE_REUSE_ALLOWED = NO`：可以研究行為，但不得
 直接 copy source。OpenKore 亦同樣適用。
 
+### 13A. Mature Capability Reuse First
+
+所有 substantial implementation workline 在 SOURCE CHANGE 前必須完成
+`MATURE_CAPABILITY_REUSE_FIRST` gate：先查 current project capability、historical
+Last-Good、成熟 rAthena server-side capability、OpenKore mature capability 與
+Project Control 指定 reference。成熟能力存在時，預設採 `REUSE / PORT / ADAPT`，
+不得直接建立第二套核心 engine、planner、state machine、world data 或 recovery
+logic。
+
+```text
+MATURE_CAPABILITY_REUSE_FIRST = YES
+CUSTOM_IMPLEMENTATION_APPROVAL_GATE = REQUIRED
+CUSTOM_IMPLEMENTATION_ALLOWED = NO_UNTIL_PROJECT_CONTROL_APPROVES
+NAVIGATION_ROUTE_ENGINE_COUNT = 1
+PER_MAP_NAVIGATION_HARDCODE = FORBIDDEN
+```
+
+Navigation 必須使用 `OPENKORE_NAVIGATION_REUSE_FIRST = YES` 與
+`OPENKORE_ROUTE_PARITY_REQUIRED = YES`。OpenKore 保持 runtime 0；
+`RUNTIME_REUSE != CAPABILITY_REUSE`。完整 authority boundary、adapter seam、
+custom planner migration status 與 adoption audit 見
+`docs/architecture/local-hunting-hybrid-architecture.md`。
+
+任何 dispatch 必須記錄：
+
+```text
+OPENKORE_EXISTING_CAPABILITY =
+OPENKORE_REFERENCE =
+OPENKORE_REUSE_SEAM =
+CUSTOM_CODE_REQUIRED =
+WHY =
+```
+
+若 `CUSTOM_IMPLEMENTATION_REQUIRED`，必須同時提供 reuse 不可行原因、架構衝突、
+license 狀態、reference capability 缺口，並取得 Project Control 明確批准。
+
 本節強化既有 `Single Runtime Policy`、`PC-DISPATCH-STANDARD`、
 `LAST_GOOD → CURRENT → FIRST_BROKEN_TRANSITION`、Browser UI acceptance、
 Git hygiene 與 OpenKore Exit 驗收規則；若文字與既有規則重複，保留原規則，本節只

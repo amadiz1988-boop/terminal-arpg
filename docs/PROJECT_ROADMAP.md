@@ -95,6 +95,14 @@ of intent, journey, interruption and resume while migrating proven same-map
 combat capabilities to rAthena through separate gates. Canonical decision:
 `docs/architecture/local-hunting-hybrid-architecture.md`.
 
+Project-wide architecture rule: `MATURE_CAPABILITY_REUSE_FIRST = YES`.
+Navigation work must use `OPENKORE_NAVIGATION_REUSE_FIRST = YES`, preserve
+`OPENKORE_ROUTE_PARITY_REQUIRED = YES`, and keep
+`NAVIGATION_ROUTE_ENGINE_COUNT = 1`. The current custom multimodal planner is
+`HOLD_PENDING_OPENKORE_ADOPTION_AUDIT`; its tests and provenance do not authorize
+Production promotion. The adoption audit classifies overlapping code as an
+adapter, project policy, migration target, duplicate removal, keep or unknown.
+
 Near-term Local Hunting priority:
 
 ```text

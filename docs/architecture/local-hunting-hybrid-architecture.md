@@ -122,6 +122,65 @@ rAthena remains world authority for map entities, position, path legality,
 attack timing, skill legality, damage, hit, miss, death, drop resolution and
 inventory mutation. Event Ledger records authoritative facts only.
 
+## Mature Navigation Capability Boundary
+
+Navigation follows `MATURE_CAPABILITY_REUSE_FIRST = YES` and
+`OPENKORE_NAVIGATION_REUSE_FIRST = YES`. OpenKore navigation is a mature
+capability reference and reuse baseline. The production boundary is:
+
+```text
+OpenKore mature routing capability / semantics
+                -> Ghost Island Adapter
+                -> Ghost Island Policy Layer
+                -> Persistent Agent Journey
+                -> rAthena authoritative execution
+```
+
+The reusable capability includes route calculation, same-map pathing, portal and
+world graph semantics, NPC and Kafra transport, Save Point and item-warp routing,
+weights, restrictions, missing-portal and unreachable handling, retry, re-plan,
+stuck recovery, transport confirmation, arrival confirmation and multi-step NPC
+interaction. OpenKore remains outside Production runtime: `OPENKORE_RUNTIME = 0`.
+Capability reuse may use behavior, data semantics, state semantics or a clean
+adapter; runtime reuse is a separate decision.
+
+The Ghost Island adapter converts mature route output into canonical actions. It
+does not create a second route engine. The Ghost Island policy layer owns player
+map selection, farm-map eligibility, Butterfly Wing semantics, Quest, Instance,
+Event, Supply, Recovery and Journey restrictions. Persistent Agent owns intent,
+Journey, interruption and resume. rAthena owns movement, NPC result and item
+result.
+
+```text
+NAVIGATION_ROUTE_ENGINE_COUNT = 1
+OPENKORE_ROUTE_PARITY_REQUIRED = YES
+PER_MAP_NAVIGATION_HARDCODE = FORBIDDEN
+```
+
+Normal farmable maps are data-driven: permanent map, legal monster spawn,
+normally reachable RO world and no unsupported special-instance requirement.
+World graph, transport data, requirements and a generic planner determine
+eligibility. A map-specific workaround requires Project Control approval and a
+generic requirement-bearing edge, scripted transport type, quest requirement,
+instance requirement or event-availability contract.
+
+Mature reference is the floor for reliability. Retry, re-plan, missing portal,
+unreachable and stuck recovery behavior cannot be permanently omitted under a
+V1 simplification while the feature is reported complete. Any deviation records
+`WHY_DEVIATE`, `WHAT_IS_BETTER`, `SERVER_AUTHORITY_PRESERVED` and
+`RESULT_EQUIVALENT_OR_BETTER`.
+
+The current custom multimodal planner remains:
+
+```text
+CUSTOM_MULTIMODAL_PLANNER_PRODUCTION_DEPLOY = HOLD_PENDING_OPENKORE_ADOPTION_AUDIT
+OPENKORE_ROUTE_CAPABILITY_ADOPTION_AUDIT = REQUIRED
+```
+
+The audit classifies overlapping custom code as `ADAPTER`, `PROJECT_POLICY`,
+`MIGRATE_TO_OPENKORE_CAPABILITY`, `REMOVE_DUPLICATE`, `KEEP` or `UNKNOWN`.
+Planner tests or provenance do not authorize Production promotion by themselves.
+
 ## Local Hunting Scope
 
 Separate migration gates may evaluate target scan, target selection and
