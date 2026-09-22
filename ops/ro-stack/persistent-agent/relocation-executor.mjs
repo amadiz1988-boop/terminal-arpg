@@ -39,6 +39,20 @@ export function createRelocationProgress() {
   return { index: 0, dispatched: {}, done: false, reason: null };
 }
 
+// Route terminals are canonical {map,x,y} objects in multimodal plans, while
+// older direct plans may still contain map-id strings. Keep this normalization
+// at the executor seam so arrival checks never compare unlike representations.
+export function routeStepDestinationMap(step) {
+  if (typeof step === 'string') return step;
+  return String(step?.map ?? step?.expectedMap ?? step?.saveMap ?? '');
+}
+
+export function relocationStageNeedsCommand(step, progress, commandCursor = 0, commandCount = 0) {
+  return step != null &&
+    progress?.dispatched?.[progress.index] === true &&
+    Number(commandCursor) < Number(commandCount);
+}
+
 function actionForStep(step) {
   switch (step.kind) {
     case 'DIRECT_TO_HUB':
@@ -66,22 +80,24 @@ function stepConfirmed(step, plan, observation) {
     case 'DIRECT_TO_HUB':
     case 'DIRECT_TO_TARGET': {
       const destination = step.route?.[step.route.length - 1];
-      return currentMap != null && currentMap === destination;
+      return currentMap != null && currentMap === routeStepDestinationMap(destination);
     }
     case 'KAFRA_SAVE':
-      return observation.savePoint === step.saveMap;
+      return observation.commandSequenceComplete !== false &&
+        observation.savePoint === routeStepDestinationMap(step);
     case 'CLOSE_NPC':
       return observation.dialogClosed === true;
     case 'VERIFY_SAVEPOINT':
-      return observation.savePoint === step.expectedMap;
+      return observation.savePoint === routeStepDestinationMap(step);
     case 'BUTTERFLY_WING':
-      return currentMap != null && currentMap === step.expectedMap;
+      return currentMap != null && currentMap === routeStepDestinationMap(step);
     case 'KAFRA_DIALOG_TRANSFER': {
       const arrival = plan.steps.find((s) => s.kind === 'VERIFY_SERVICE_ARRIVAL');
-      return arrival != null && currentMap === arrival.expectedMap;
+      return observation.commandSequenceComplete === true &&
+        arrival != null && currentMap === routeStepDestinationMap(arrival);
     }
     case 'VERIFY_SERVICE_ARRIVAL':
-      return currentMap === step.expectedMap;
+      return currentMap === routeStepDestinationMap(step);
     case 'START_FARM':
       return observation.agentMode === 'AUTO_FARM';
     default:

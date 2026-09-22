@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { planRelocation, selectFarmTarget, RELOCATION_POLICY, STEP,
   BUTTERFLY_WING_ITEM_ID, FLY_WING_ITEM_ID } from './relocation-policy.mjs';
 import { nextRelocationAction, createRelocationProgress, RELOCATION_ACTION,
-  RELOCATION_ACTION as ACTION } from './relocation-executor.mjs';
+  RELOCATION_ACTION as ACTION, routeStepDestinationMap,
+  relocationStageNeedsCommand } from './relocation-executor.mjs';
 
 let executed = 0; let failures = 0;
 function check(id, fn) {
@@ -190,6 +191,67 @@ check('case_20_no_autofarm_implementation_change', () => {
   assert.deepEqual(actions, ['claim_and_navigate', 'kafra_save_dialogue', 'close_dialogue',
     'butterfly_wing', 'kafra_transfer_dialogue', 'start_farm', 'wait', 'fail']);
   assert.ok(!JSON.stringify(crossPlan).match(/attack|monster|combat|killMonster/i));
+});
+
+check('case_21_terminal_route_object_arrival', () => {
+  const plan = {
+    policy: 'DIRECT',
+    steps: [{ kind: 'DIRECT_TO_TARGET', route: [
+      { map: 'pay_arche', x: 10, y: 20 },
+      { map: 'pay_dun00', x: 73, y: 78 },
+    ] }, { kind: 'START_FARM', targetMap: 'pay_dun00' }],
+  };
+  const p = createRelocationProgress();
+  assert.equal(nextRelocationAction(plan, p, {}).action, RELOCATION_ACTION.CLAIM_AND_NAVIGATE);
+  assert.equal(nextRelocationAction(plan, p, { currentMap: 'pay_dun00' }).stageIndex, 1);
+  assert.equal(routeStepDestinationMap(plan.steps[0].route.at(-1)), 'pay_dun00');
+});
+
+check('case_22_multimodal_terminal_and_dungeon_arrival', () => {
+  const plan = {
+    policy: 'MULTIMODAL',
+    steps: [
+      { kind: 'BUTTERFLY_WING', expectedMap: 'payon', itemId: 602 },
+      { kind: 'DIRECT_TO_TARGET', route: [
+        { map: 'payon', x: 1, y: 1 },
+        { map: 'pay_arche', x: 2, y: 2 },
+        { map: 'pay_dun00', x: 3, y: 3 },
+      ] },
+    ],
+  };
+  const p = createRelocationProgress();
+  assert.equal(nextRelocationAction(plan, p, {}).action, RELOCATION_ACTION.BUTTERFLY_WING);
+  assert.equal(nextRelocationAction(plan, p, { currentMap: 'payon' }).stageIndex, 1);
+  assert.equal(nextRelocationAction(plan, p, {}).action, RELOCATION_ACTION.CLAIM_AND_NAVIGATE);
+  assert.equal(nextRelocationAction(plan, p, { currentMap: 'pay_dun00' }).done, true);
+});
+
+check('case_23_kafra_command_cursor_requires_sequence_ack', () => {
+  const plan = {
+    steps: [
+      { kind: 'KAFRA_DIALOG_TRANSFER' },
+      { kind: 'VERIFY_SERVICE_ARRIVAL', expectedMap: 'payon' },
+    ],
+  };
+  const p = createRelocationProgress();
+  const first = nextRelocationAction(plan, p, { commandSequenceComplete: false });
+  assert.equal(first.action, RELOCATION_ACTION.KAFRA_TRANSFER_DIALOGUE);
+  assert.equal(relocationStageNeedsCommand(plan.steps[0], p, 1, 6), true);
+  assert.equal(nextRelocationAction(plan, p, {
+    currentMap: 'payon', commandSequenceComplete: false,
+  }).action, null);
+  assert.equal(p.index, 0);
+  assert.equal(nextRelocationAction(plan, p, {
+    currentMap: 'payon', commandSequenceComplete: true,
+  }).stageIndex, 1);
+});
+
+check('case_24_already_on_target_start_farm_only', () => {
+  const plan = { policy: 'DIRECT', steps: [{ kind: 'START_FARM', targetMap: 'mjolnir_07' }] };
+  const p = createRelocationProgress();
+  assert.equal(nextRelocationAction(plan, p, { currentMap: 'mjolnir_07' }).action,
+    RELOCATION_ACTION.START_FARM);
+  assert.equal(nextRelocationAction(plan, p, { agentMode: 'AUTO_FARM' }).done, true);
 });
 
 if (failures !== 0) {

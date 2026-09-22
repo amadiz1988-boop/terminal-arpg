@@ -120,6 +120,7 @@ import {
 } from './persistent-agent/relocation-policy.mjs';
 import {
   createRelocationProgress,
+  relocationStageNeedsCommand,
   nextRelocationAction,
 } from './persistent-agent/relocation-executor.mjs';
 import {
@@ -2776,17 +2777,35 @@ async function reconcileRelocations() {
       } else if (pending.stage === 'RELOCATION' && pending.relocationPlan) {
         // Cross-region relocation: wait for authoritative progress (revision
         // bump) between commands; one existing contract action at a time.
-        if (pending.commandPending && revision === pending.commandRevision)
-          continue;
+        if (pending.commandPending) {
+          const acknowledged = await getOwnershipCommand(account, charId, pending.commandId);
+          if (['REJECTED', 'FAILED'].includes(acknowledged?.status)) {
+            console.warn(`WEB_RELOCATION_BLOCKED char=${charId} reason=${acknowledged.reasonCode ?? acknowledged.status}`);
+            pendingRelocations.delete(charId);
+            await clearPersistedRelocation(account);
+            continue;
+          }
+          if (acknowledged?.status !== 'CONFIRMED') continue;
+        }
         const currentStep = pending.relocationPlan.steps[pending.relocationProgress.index];
         if (mode !== 'PERSISTENT_IDLE' && currentStep?.kind !== 'START_FARM')
           continue;
         pending.commandPending = false;
+        const stageIndex = pending.relocationProgress.index;
+        const step = pending.relocationPlan.steps[stageIndex];
+        const expanded = existingCommandsForStep(step, { kafra: pending.kafraContext });
+        if (expanded.missing) {
+          console.warn(`WEB_RELOCATION_BLOCKED char=${charId} reason=kafra_dialog_failed missing=${expanded.missing ?? 'none'}`);
+          pendingRelocations.delete(charId);
+          continue;
+        }
+        const sent = pending.commandIndexByStage[stageIndex] ?? 0;
         const observation = {
           currentMap,
           agentMode: mode,
           savePoint: savePoint?.map ?? null,
           dialogClosed: dialog != null && dialog.active !== true,
+          commandSequenceComplete: sent >= expanded.commands.length,
         };
         const next = nextRelocationAction(pending.relocationPlan,
           pending.relocationProgress, observation);
@@ -2800,17 +2819,11 @@ async function reconcileRelocations() {
           await clearPersistedRelocation(account);
           continue;
         }
-        if (!next.action)
+        const needsNextCommand = relocationStageNeedsCommand(
+          step, pending.relocationProgress, sent, expanded.commands.length,
+        );
+        if (!next.action && !needsNextCommand)
           continue; // waiting for an authoritative observation
-        const stageIndex = next.stageIndex;
-        const step = pending.relocationPlan.steps[stageIndex];
-        const expanded = existingCommandsForStep(step, { kafra: pending.kafraContext });
-        if (expanded.missing || expanded.commands.length === 0) {
-          console.warn(`WEB_RELOCATION_BLOCKED char=${charId} reason=kafra_dialog_failed missing=${expanded.missing ?? 'none'}`);
-          pendingRelocations.delete(charId);
-          continue;
-        }
-        const sent = pending.commandIndexByStage[stageIndex] ?? 0;
         if (sent >= expanded.commands.length)
           continue; // stage commands sent; wait for authoritative confirmation
         const command = expanded.commands[sent];
@@ -2818,7 +2831,7 @@ async function reconcileRelocations() {
         // The unified planner already emits canonical {map,x,y,portalTo}
         // routes. Dispatch that exact route; no second route serializer or
         // OpenKore-derived re-planning is allowed at execution time.
-        await queueOwnershipCommand(
+        const queued = await queueOwnershipCommand(
           account,
           charId,
           { action: command.action, expectedRevision: revision },
@@ -2826,6 +2839,7 @@ async function reconcileRelocations() {
         );
         pending.commandIndexByStage[stageIndex] = sent + 1;
         pending.commandPending = true;
+        pending.commandId = queued.commandId;
         pending.commandRevision = revision;
       }
     } catch (error) {
