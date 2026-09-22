@@ -1629,6 +1629,26 @@
       "freshness": "CURRENT",
       "stale_reference": false,
       "version_conflict": "OpenKore executor is legacy and unavailable to SERVER_AGENT; adapter remains config-only."
+    },
+    {
+      "id": "openkore-minimap-field-wx-map-v1",
+      "capability": "OpenKore Field and Wx minimap presentation model",
+      "sources": [
+        "docs/openkore-reference/minimap-field-wx-map-v1.md",
+        ".local/ro-stack/openkore/src/Field.pm",
+        ".local/ro-stack/openkore/src/Interface/Wx/MapViewer.pm",
+        ".local/ro-stack/openkore/src/Interface/Wx.pm",
+        ".local/ro-stack/openkore/control/config.txt"
+      ],
+      "upstream_commit": "51de1ddfc4449ae5217f6886de702f87ca934030",
+      "last_reviewed": "2026-09-23",
+      "findings": "Field/rawMap remains collision authority; image() selects JPG, PNG, BMP or XPM and generates collision XPM when absent; Wx overlays and coordinate transforms remain independent from the background.",
+      "reuse_decision": "PORTABLE_LOGIC",
+      "license_provenance": "GPL-2.0 behavior reference only; no Perl or Wx source copied into Dashboard runtime.",
+      "project_owner": "Web / minimap presentation",
+      "freshness": "CURRENT",
+      "stale_reference": false,
+      "version_conflict": "OpenKore runtime remains disabled; Ghost Island uses rAthena/PA coordinates and Canvas presentation."
     }
   ]
 }

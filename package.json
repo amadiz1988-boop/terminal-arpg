@@ -61,6 +61,8 @@
     "test:social-ui": "node scripts/test-social-ui.mjs",
     "test:character-showcase": "node scripts/test-character-showcase.mjs",
     "test:class-rankings": "node scripts/test-class-rankings.mjs",
+    "assets:minimaps:build": "node scripts/build-ro-original-minimaps.mjs",
+    "test:minimap-original": "node scripts/test-original-minimap.mjs",
     "test:minimap-terrain": "node scripts/test-minimap-terrain.mjs",
     "test:map-info": "node scripts/test-map-info-sync.mjs",
     "test:map-bgm": "node scripts/test-map-bgm.mjs",

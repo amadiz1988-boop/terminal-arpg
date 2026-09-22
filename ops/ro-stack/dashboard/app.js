@@ -695,6 +695,7 @@ let authenticated = false,
   minimapFrame = null,
   minimapTerrain = null,
   minimapTerrainKey = '',
+  minimapOriginalManager = null,
   minimapTracks = new Map(),
   minimapMotionLastMap = '',
   minimapMotionLastAuthoritativeAt = null,
@@ -4135,8 +4136,58 @@ function parseFld2(bytes) {
     throw new Error('地圖尺寸不符');
   return { width, height, cells: bytes.slice(4) };
 }
+function originalMinimapApi() {
+  return globalThis.roOriginalMinimap ?? null;
+}
+function ensureOriginalMinimapManager() {
+  const api = originalMinimapApi();
+  if (!api) return null;
+  if (!minimapOriginalManager) {
+    minimapOriginalManager = api.createManager({
+      onChange: () => {
+        minimapTerrain = null;
+        minimapTerrainKey = '';
+        if (minimapLive && !minimapFrame)
+          minimapFrame = requestAnimationFrame(paintMinimap);
+      },
+    });
+    const canvas = $('#minimap');
+    canvas?.addEventListener(
+      'wheel',
+      (event) => {
+        event.preventDefault();
+        const direction = event.deltaY < 0 ? 2 : 0.5;
+        minimapOriginalManager.setZoom(
+          minimapOriginalManager.getZoom() * direction,
+        );
+      },
+      { passive: false },
+    );
+    globalThis.RO_MINIMAP_DEBUG = Object.freeze({
+      setMode(mode) {
+        return minimapOriginalManager.setMode(mode);
+      },
+      getMode() {
+        return minimapOriginalManager.getMode();
+      },
+      setZoom(zoom) {
+        return minimapOriginalManager.setZoom(zoom);
+      },
+      getZoom() {
+        return minimapOriginalManager.getZoom();
+      },
+      getState(map = minimapLive?.map) {
+        return minimapOriginalManager.state(map);
+      },
+    });
+  }
+  return minimapOriginalManager;
+}
 async function ensureMap(name) {
-  if (!name || mapFieldName === name) return;
+  if (!name) return;
+  const originalManager = ensureOriginalMinimapManager();
+  void originalManager?.load(name);
+  if (mapFieldName === name) return;
   mapFieldName = name;
   mapField = null;
   mapFieldError = '';
@@ -4384,8 +4435,17 @@ function updateMinimapTargets(live, options = {}) {
 function syncMinimapCanvas(canvas) {
   const available = Math.floor(canvas.parentElement.clientWidth - 12);
   if (available < 240) return;
+  const original = ensureOriginalMinimapManager()?.state(mapFieldName),
+    originalWidth = Number(original?.entry?.width),
+    originalHeight = Number(original?.entry?.height),
+    useOriginal =
+      original?.mode === 'RO_ORIGINAL' &&
+      Number.isFinite(originalWidth) &&
+      Number.isFinite(originalHeight),
+    naturalWidth = useOriginal ? originalWidth : mapField?.width,
+    naturalHeight = useOriginal ? originalHeight : mapField?.height;
   const width = available,
-    ratio = mapField ? mapField.height / mapField.width : 1,
+    ratio = naturalWidth && naturalHeight ? naturalHeight / naturalWidth : 1,
     height = Math.max(240, Math.round(width * ratio));
   canvas.style.height = `${height}px`;
   if (canvas.width !== width || canvas.height !== height) {
@@ -4395,28 +4455,20 @@ function syncMinimapCanvas(canvas) {
     minimapTerrainKey = '';
   }
 }
-function terrainLayer(width, height) {
-  const key = `${mapFieldName}:${width}:${height}`;
+function terrainLayer() {
+  const key = `${mapFieldName}:${mapField?.width}:${mapField?.height}`;
   if (minimapTerrain && minimapTerrainKey === key) return minimapTerrain;
   const layer = document.createElement('canvas');
-  layer.width = width;
-  layer.height = height;
-  const ctx = layer.getContext('2d'),
-    scale = Math.min(width / mapField.width, height / mapField.height),
-    ox = (width - mapField.width * scale) / 2,
-    oy = (height - mapField.height * scale) / 2;
+  layer.width = mapField.width;
+  layer.height = mapField.height;
+  const ctx = layer.getContext('2d');
   ctx.fillStyle = '#050805';
-  ctx.fillRect(0, 0, width, height);
+  ctx.fillRect(0, 0, layer.width, layer.height);
   ctx.fillStyle = '#617365';
   for (let y = 0; y < mapField.height; y++)
     for (let x = 0; x < mapField.width; x++)
       if (mapField.cells[y * mapField.width + x] & 1)
-        ctx.fillRect(
-          ox + x * scale,
-          oy + (mapField.height - 1 - y) * scale,
-          Math.max(1, scale + 0.2),
-          Math.max(1, scale + 0.2),
-        );
+        ctx.fillRect(x, mapField.height - 1 - y, 1, 1);
   minimapTerrain = layer;
   minimapTerrainKey = key;
   return layer;
@@ -4438,22 +4490,56 @@ function paintMinimap(now) {
   ctx.fillStyle = '#050805';
   ctx.fillRect(0, 0, width, height);
   if (mapField) {
-    ctx.drawImage(terrainLayer(width, height), 0, 0);
-    const scale = Math.min(width / mapField.width, height / mapField.height),
-      ox = (width - mapField.width * scale) / 2,
-      oy = (height - mapField.height * scale) / 2;
+    const originalApi = originalMinimapApi(),
+      originalManager = ensureOriginalMinimapManager(),
+      background = originalManager?.state(mapFieldName),
+      sourceWidth =
+        background?.mode === 'RO_ORIGINAL'
+          ? Number(background.entry?.width)
+          : mapField.width,
+      sourceHeight =
+        background?.mode === 'RO_ORIGINAL'
+          ? Number(background.entry?.height)
+          : mapField.height,
+      baseRect = originalApi
+        ? originalApi.fitRect(width, height, sourceWidth, sourceHeight)
+        : { x: 0, y: 0, width, height },
+      rect = originalApi
+        ? originalApi.viewportRect(
+            baseRect,
+            mapField,
+            { x: live.playerX, y: live.playerY },
+            originalManager?.getZoom() ?? 1,
+            { width, height },
+          )
+        : baseRect;
+    if (background?.mode === 'RO_ORIGINAL' && background.image)
+      ctx.drawImage(background.image, rect.x, rect.y, rect.width, rect.height);
+    else
+      ctx.drawImage(terrainLayer(), rect.x, rect.y, rect.width, rect.height);
+    canvas.dataset.backgroundMode = background?.mode ?? 'COLLISION_MAP';
+    canvas.dataset.fallbackReason = background?.reason ?? '';
+    canvas.title =
+      background?.mode === 'RO_ORIGINAL'
+        ? 'RO 原廠彩色小地圖'
+        : `碰撞地圖${background?.reason ? `：${background.reason}` : ''}`;
+    const projected = (x, y) =>
+      originalApi
+        ? originalApi.worldMapCoordinate({ x, y }, mapField, rect)
+        : { x: rect.x + x, y: rect.y + mapField.height - y };
     const point = (x, y, size, color) => {
+      const pixel = projected(x, y);
       ctx.fillStyle = color;
       ctx.beginPath();
-      ctx.arc(
-        ox + x * scale,
-        oy + (mapField.height - 1 - y) * scale,
-        size / 2,
-        0,
-        Math.PI * 2,
-      );
+      ctx.arc(pixel.x, pixel.y, size / 2, 0, Math.PI * 2);
       ctx.fill();
     };
+    const route = Array.isArray(live.route) ? live.route : [];
+    for (const step of route) point(step.x, step.y, 2, '#fff2a8');
+    for (const portal of live.portals ?? [])
+      point(portal.x ?? portal.pos?.x, portal.y ?? portal.pos?.y, 6, '#ff9854');
+    for (const npc of live.npcs ?? [])
+      point(npc.x ?? npc.pos?.x, npc.y ?? npc.pos?.y, 5, '#c873ff');
     if (minimapCombatObserved) {
       for (const monster of live.monsters ?? []) {
         const position = sampleMinimapTrack(
@@ -4469,8 +4555,9 @@ function paintMinimap(now) {
       }
     }
     const self = sampleMinimapTrack(minimapTracks.get('self'), now);
-    const selfX = ox + self.x * scale,
-      selfY = oy + (mapField.height - 1 - self.y) * scale,
+    const selfPixel = projected(self.x, self.y),
+      selfX = selfPixel.x,
+      selfY = selfPixel.y,
       presence = minimapPresenceApi();
     if (
       minimapCombatObserved &&
@@ -4486,8 +4573,9 @@ function paintMinimap(now) {
           minimapTracks.get(`player:${player.id}`),
           now,
         );
-        const playerX = ox + position.x * scale,
-          playerY = oy + (mapField.height - 1 - position.y) * scale;
+        const playerPixel = projected(position.x, position.y),
+          playerX = playerPixel.x,
+          playerY = playerPixel.y;
         ctx.fillStyle = '#70b8ff';
         ctx.strokeStyle = '#0b2a45';
         ctx.lineWidth = 1;

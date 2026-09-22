@@ -892,3 +892,22 @@ topics:
     pa_design_implication: "Reference semantics are a floor; PA may be more authoritative and observable."
     pa_flexibility_allowed: "Yes, with WHY_DEVIATE and equivalence evidence."
     common_misunderstandings: "Server authority migration does not mean OpenKore runtime returns."
+  - id: 46
+    topic: MINIMAP_FIELD_WX_MAP
+    keywords: [minimap, Field.pm, fld2, rawMap, XPM, Wx MapViewer, wx_map]
+    upstream_paths: [src/Field.pm, src/Interface/Wx/MapViewer.pm, src/Interface/Wx.pm, control/config.txt]
+    symbols: [Field::image, Field::loadFile, _updateBitmap, _posXYToView, setRoute, updateMapViewer]
+    config_keys: [wx_map_maxAutoSize, wx_map_monsterSticking, wx_map_npcSticking, wx_map_playersSticking, wx_map_portalSticking, wx_map_route, wx_map_namesDetail, wx_map_playerNameZoom, wx_map_partyNameZoom, wx_map_portalDestinations]
+    mature_behavior: "Keep FLD2 collision authority separate from best-available map imagery and render independent actor, portal and route overlays."
+    state_transitions: "field load -> image select or rawMap fallback -> coordinate scale -> overlays"
+    retry_policy: "No image retry loop; regenerate collision XPM and rebuild on field or zoom change."
+    recovery_policy: "Missing image falls back to rawMap collision without disabling overlays."
+    edge_cases: "Map alias, instance base name, non-square Field, missing image, viewport clamping and interaction sticking."
+    project_last_good: "Current Dashboard FLD2 collision renderer and authoritative live markers."
+    project_acceptance_evidence: "docs/openkore-reference/minimap-field-wx-map-v1.md"
+    current_pa: "rAthena live status supplies coordinates; Dashboard owns presentation only."
+    current_pa_gap: "NPC, portal, route and zoom projections are not currently supplied to the Player minimap."
+    reuse_classification: ADAPT
+    pa_design_implication: "Select original imagery independently while retaining collision fallback and marker authority."
+    pa_flexibility_allowed: "Yes, the Web renderer may improve labels and fallback diagnostics without changing gameplay authority."
+    common_misunderstandings: "A color minimap image is not pathfinding or collision authority."
