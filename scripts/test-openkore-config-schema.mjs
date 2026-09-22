@@ -3,7 +3,7 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
-  COMBAT_PROFILES, FIXED_POLICY, applyProfileTemplate, canonicalToOpenKorePreview,
+  COMBAT_PROFILES, CONFIG_FORM_SCHEMA, FIXED_POLICY, applyProfileTemplate, canonicalToOpenKorePreview,
   defaultCanonicalConfig, migrateLegacyConfig, validateCanonicalConfig,
 } from '../ops/ro-stack/dashboard/config-schema.mjs';
 import { loadCanonicalConfig, saveCanonicalConfig } from '../ops/ro-stack/dashboard/config-storage.mjs';
@@ -17,8 +17,11 @@ assert.equal(base.supply.tools.butterflyWing.nonConsumable, true);
 assert.equal(base.supply.tools.butterflyWing.weight, 0);
 assert.equal(base.combat.travel.flyWing.enabled, true);
 assert.equal(COMBAT_PROFILES.length, 8);
+assert.equal(CONFIG_FORM_SCHEMA.supply.arrays.find((row) => row.kind === 'buy').path, 'supply.services.buy.rules');
+assert.equal(CONFIG_FORM_SCHEMA.combat.arrays.find((row) => row.kind === 'attackSkill').path, 'combat.skills.attackSlots');
 const legacyText = [
   'attackAuto 0', 'attackUseWeapon 0', 'attackDistance 2', 'attackMaxDistance 4',
+  'itemsMaxNum_sellOrStore 88',
   'attackCheckLOS 1', 'attackCanSnipe 0', 'attackAuto_routeToLock 1',
   'teleportAuto_hp 15%', 'teleportAuto_sp > 20%',
   'attackSkillSlot_0 SM_BASH', 'attackSkillSlot_0_lvl 5', 'attackSkillSlot_0_dist 2',
@@ -38,6 +41,7 @@ const migrated = migrateLegacyConfig({
 expectValid(migrated.config);
 assert.equal(migrated.config.supply.enabled, true);
 assert.equal(migrated.config.supply.weightTriggerPercent, 68);
+assert.equal(migrated.config.supply.inventorySlotTrigger, 88);
 assert.equal(migrated.config.supply.services.buy.enabled, true);
 assert.equal(migrated.config.supply.services.sell.enabled, false);
 assert.equal(migrated.config.supply.services.buy.rules[0].minAmount, 5);
@@ -54,6 +58,7 @@ assert.equal(migrated.config.combat.attack.checkLOS, true);
 assert.equal(migrated.config.combat.skills.attackSlots[0].maxCastTime, 350);
 assert.equal(migrated.config.combat.skills.attackSlots[0].minCastTime, 25);
 assert.equal(migrated.config.combat.skills.selfSkills[0].conditions.hp, '< 70%');
+assert.ok(migrated.config.combat.skills.selfSkills.some((row) => row.skill === 'AL_BLESSING'));
 assert.equal(migrated.config.combat.profile, 'SKILL_CAST');
 assert.equal(migrated.config.combat.travel.teleport.sp, '> 20%');
 assert.equal(migrated.config.combat.attack.distance, 2);
