@@ -23,7 +23,7 @@ assert.match(css, /\.world-map-region\.fogged[\s\S]*filter: grayscale\(1\) brigh
 const farmableIds = Object.entries(mapInfo.maps)
   .filter(([, summary]) => summary.farmSelectionAvailable === true)
   .map(([mapId]) => mapId);
-assert.equal(farmableIds.length, 136);
+assert.equal(farmableIds.length, 251);
 assert.equal(
   registry.maps.filter((row) => row.farmSelectionAvailable).length,
   136,
@@ -34,7 +34,7 @@ assert.ok(farmableIds.includes('prt_fild07'));
 assert.ok(farmableIds.includes('mjo_dun01'));
 assert.ok(!farmableIds.includes('prontera'));
 assert.ok(!farmableIds.includes('moc_fild20'));
-assert.ok(!farmableIds.includes('iz_dun02'));
+assert.ok(farmableIds.includes('iz_dun02'));
 assert.ok(mapInfo.worldMap.regions.some((region) => region.mapId === 'prontera'));
 assert.equal(mapInfo.worldMap.regions.filter((region) => region.labelKind === 'red').length, 29);
 assert.equal(mapInfo.worldMap.regions.flatMap((region) => region.mapIds)

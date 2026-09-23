@@ -6,7 +6,7 @@ export const WORLD_MAP_FREE_FARM_LEVEL_MAX = 66;
 
 const NORMAL_HABITATS = new Set(['NORMAL_FIELD', 'NORMAL_DUNGEON']);
 const BLOCKED_CATEGORIES = new Set([
-  'INSTANCE', 'EVENT', 'QUEST_GATED', 'SCRIPT_GATED', 'TEST', 'UNUSED',
+  'INSTANCE', 'EVENT', 'TEST', 'UNUSED',
 ]);
 const BLOCKED_FLAGS = new Set(['nowarpto', 'restricted', 'gvg', 'battleground']);
 

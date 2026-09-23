@@ -10,7 +10,7 @@ import {
   defaultCanonicalConfig,
   validateCanonicalConfig,
 } from './config-schema.mjs';
-import { CONFIG_SECTIONS, configCapability, configCapabilityCounts, configSection } from './config-capabilities.mjs';
+import { CONFIG_SECTIONS, configCapability, configCapabilityCounts, configControlVisible, configSection } from './config-capabilities.mjs';
 
 const $ = (root, selector) => root.querySelector(selector);
 const text = (value) => String(value ?? '');
@@ -196,7 +196,7 @@ function render(root, state, context) {
     title.textContent = sectionName;
     panel.append(title);
     const groups = new Map();
-    for (const field of descriptors.flatMap((schema) => schema.fields).filter((entry) => configSection(entry.path) === sectionName)) {
+    for (const field of descriptors.flatMap((schema) => schema.fields).filter((entry) => configControlVisible(entry.path) && configSection(entry.path) === sectionName)) {
       const group = groups.get(field.group) ?? document.createElement('div');
       group.className = `config-group${field.group === '進階' ? ' config-advanced' : ''}`;
       if (!groups.has(field.group)) {

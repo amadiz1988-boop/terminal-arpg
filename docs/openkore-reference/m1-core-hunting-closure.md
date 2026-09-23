@@ -94,8 +94,11 @@ single `config-capabilities.mjs` adapter. `SUPPORTED` requires both an explicit
 per-path capability attestation and `execution.applied=true`; otherwise the
 control is `PARTIAL`, or `UNAVAILABLE` for first-release-excluded party/follow
 settings. Three fixed-policy displays remain read-only. The current response
-thus enables zero of 43 adjustable schema controls, and
-the save action is disabled. This removes the enabled-but-no-op UI behavior
+thus enables zero of 42 visible adjustable schema controls, and
+the save action is disabled. The obsolete cross-map `combat.attack.routeToLock`
+control is now hidden from Player settings while its stored schema remains
+available for migration; this leaves 42 adjustable visible schema controls.
+This removes the enabled-but-no-op UI behavior
 without claiming any runtime acceptance. OpenKore field evidence remains in
 the parent census, especially C01/C04/C13 and R01-R05; the UI delta reuse gate
 is `m1-settings-ui-reuse-gate.json`. Browser desktop and 390×844 acceptance

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { CONFIG_FORM_SCHEMA } from '../ops/ro-stack/dashboard/config-schema.mjs';
 import {
-  CONFIG_SECTIONS, configCapability, configCapabilityCounts, configSection,
+  CONFIG_SECTIONS, configCapability, configCapabilityCounts, configControlVisible, configSection,
 } from '../ops/ro-stack/dashboard/config-capabilities.mjs';
 
 const all = Object.values(CONFIG_FORM_SCHEMA).flatMap((schema) => [...schema.fields, ...(schema.arrays ?? [])]);
@@ -12,7 +12,9 @@ for (const descriptor of all) assert.ok(CONFIG_SECTIONS.includes(configSection(d
 const unaccepted = { applied: false, reason: 'CONFIG_ONLY_NO_EXECUTOR_COMMAND' };
 const initial = configCapabilityCounts(unaccepted);
 assert.equal(initial.SUPPORTED, 0);
-assert.equal(initial.PARTIAL + initial.UNAVAILABLE, all.filter((descriptor) => !descriptor.fixed).length);
+assert.equal(initial.PARTIAL + initial.UNAVAILABLE, all.filter((descriptor) =>
+  !descriptor.fixed && configControlVisible(descriptor.path)).length);
+assert.equal(configControlVisible('combat.attack.routeToLock'), false);
 assert.equal(configCapability(unaccepted, 'combat.skills.attackSlots'), 'PARTIAL');
 assert.equal(configCapability(unaccepted, 'combat.skills.partySkills'), 'UNAVAILABLE');
 assert.equal(configCapability({ applied: false, capabilities: { 'combat.profile': 'SUPPORTED' } }, 'combat.profile'), 'PARTIAL');

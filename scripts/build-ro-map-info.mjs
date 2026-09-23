@@ -355,7 +355,7 @@ function monsterRecord(mobId, spawn) {
 
 await mkdir(detailRoot, { recursive: true });
 const index = {
-  generatedAt: new Date().toISOString(),
+  generatedAt: null,
   sources: {
     ruleset: 'Renewal',
     locale: 'zh-Hant',
@@ -545,3 +545,4 @@ await writeFile(
 console.log(
   `RO_MAP_INFO_BUILT maps=${publicMaps.length} monsters=${Object.values(index.maps).reduce((sum, map) => sum + map.totalMonsters, 0)}`,
 );
+await import('./sync-map-info-world-map.mjs');

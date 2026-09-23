@@ -7,6 +7,12 @@ export const CONFIG_SECTIONS = Object.freeze([
   '蝴蝶翅膀 / 回城補給', '恢復', '進階功能 / 尚未支援',
 ]);
 
+export function configControlVisible(path) {
+  // Cross-map travel is controlled by the World Map action, not Player
+  // Navigation settings. Retain the stored schema field for migration only.
+  return path !== 'combat.attack.routeToLock';
+}
+
 export function configSection(path) {
   if (path.startsWith('combat.follow.') || path === 'combat.skills.partySkills') return CONFIG_SECTIONS[8];
   if (path.startsWith('combat.travel.flyWing.') || path.startsWith('combat.travel.teleport.')) return CONFIG_SECTIONS[5];
@@ -14,7 +20,7 @@ export function configSection(path) {
   if (path === 'combat.skills.selfSkills') return CONFIG_SECTIONS[7];
   if (path === 'combat.itemUse') return CONFIG_SECTIONS[3];
   if (path === 'combat.skills.attackSlots') return CONFIG_SECTIONS[2];
-  if (path === 'combat.profile' || path === 'combat.attack.routeToLock') return CONFIG_SECTIONS[0];
+  if (path === 'combat.profile') return CONFIG_SECTIONS[0];
   if (path.startsWith('combat.')) return CONFIG_SECTIONS[1];
   if (path.startsWith('supply.')) return CONFIG_SECTIONS[4];
   return CONFIG_SECTIONS[8];
@@ -34,7 +40,7 @@ export function configCapabilityCounts(execution) {
   const counts = { SUPPORTED: 0, PARTIAL: 0, UNAVAILABLE: 0 };
   for (const schema of Object.values(CONFIG_FORM_SCHEMA)) {
     for (const descriptor of [...schema.fields, ...(schema.arrays ?? [])]) {
-      if (descriptor.fixed) continue;
+      if (descriptor.fixed || !configControlVisible(descriptor.path)) continue;
       counts[configCapability(execution, descriptor.path)]++;
     }
   }

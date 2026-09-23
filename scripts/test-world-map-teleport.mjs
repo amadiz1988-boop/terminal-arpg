@@ -50,6 +50,8 @@ assert.equal(classifyFarmTeleport({ inventory: loaded,
   detail: { monsters: [resource] }, landing }).reason,
   'NO_ELIGIBLE_NORMAL_FARM_MONSTER');
 assert.equal(classifyFarmTeleport({ inventory: { ...loaded, category: 'QUEST_GATED' },
+  detail: { monsters: [normal] }, landing }).reason, 'SUPPORTED');
+assert.equal(classifyFarmTeleport({ inventory: { ...loaded, category: 'INSTANCE' },
   detail: { monsters: [normal] }, landing }).reason, 'MAP_ACCESS_RESTRICTED');
 assert.equal(classifyFarmTeleport({ inventory: { ...loaded, category: 'TOWN' },
   detail: { monsters: [normal] }, landing }).reason, 'TOWN_NOT_FARMABLE');
@@ -95,12 +97,20 @@ for (const region of visibleRegions) {
     const row = catalog.get(mapId);
     if (!row || (!row.farmSelectionAvailable && !row.townTeleportAvailable &&
         !row.availabilityReason)) visibleFloorUnclassified += 1;
+    assert.equal(mapInfo.maps[mapId].farmSelectionAvailable,
+      row.farmSelectionAvailable === true, `${mapId}: map-info farm projection`);
+    assert.equal(mapInfo.maps[mapId].townTeleportAvailable,
+      row.townTeleportAvailable === true, `${mapId}: map-info town projection`);
   }
+  assert.deepEqual(new Set(region.availableMapIds), new Set(region.mapIds.filter(
+    (mapId) => catalog.get(mapId)?.farmSelectionAvailable === true)),
+  `${region.regionId}: map-info region projection`);
 }
 assert.equal(visibleFloorUnclassified, 0);
 assert.equal([...visibleIds].length, 360);
 const visibleAudit = JSON.parse(await readFile(join(root,
   'docs/openkore-reference/world-map-visible-coverage.json'), 'utf8'));
+assert.equal(visibleAudit.blockedByReason.QUEST_ACCESS_REVIEW_REQUIRED ?? 0, 0);
 assert.equal(visibleAudit.counts.visibleLabelsTotal, visibleRegions.length);
 assert.equal(visibleAudit.counts.visibleUniqueFloors, visibleIds.size);
 assert.equal(visibleAudit.counts.visibleLabelUnclassified, 0);
@@ -115,6 +125,10 @@ for (const region of visibleAudit.regions)
     assert.equal(floor.reason, row.farmSelectionAvailable || row.townTeleportAvailable
       ? 'SUPPORTED' : row.availabilityReason, floor.mapId);
   }
+const deferred = [...catalog.values()].filter((row) => row.kind === 'farm' &&
+  !visibleIds.has(row.map));
+assert.ok(deferred.every((row) =>
+  row.availabilityReason === 'OUT_OF_CURRENT_WORLD_MAP_SCOPE'));
 const baselineNewlyEnabled = [
   'abyss_01', 'abyss_02', 'beach_dun', 'cmd_fild02', 'cmd_fild03',
   'cmd_fild04', 'cmd_fild06', 'cmd_fild07', 'cmd_fild09', 'in_sphinx1',

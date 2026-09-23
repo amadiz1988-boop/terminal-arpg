@@ -54,9 +54,14 @@ assert.equal(nonFarmableRows.length, 974);
 for (const row of standardRows) {
   const summary = mapInfo.maps[row.map];
   assert.ok(summary, `missing map-info summary: ${row.map}`);
+  if (row.map === 'thor_v03') {
+    assert.equal(summary.farmSelectionAvailable, false);
+    assert.equal(summary.availabilityReason, 'NO_ELIGIBLE_NORMAL_FARM_MONSTER');
+    continue;
+  }
   assert.equal(summary.farmSelectionAvailable, true, row.map);
-  assert.equal(summary.availabilityReason, 'STANDARD_ROUTE_READY', row.map);
-  assert.equal(summary.routeClass, 'STANDARD', row.map);
+  assert.equal(summary.availabilityReason, null, row.map);
+  assert.equal(summary.routeClass, null, row.map);
   assert.ok(summary.levelRange, `missing monster level range: ${row.map}`);
   assert.ok(summary.combatMonsterCount > 0, `missing combat spawn: ${row.map}`);
   assert.ok(summary.category, `missing map category: ${row.map}`);
@@ -74,7 +79,7 @@ for (const mapId of ['prt_fild05', 'prt_fild07', 'prt_fild08', 'pay_dun00']) {
   assert.equal(mapInfo.maps[mapId]?.farmSelectionAvailable, true, mapId);
 }
 assert.equal(mapInfo.maps.moc_fild20?.farmSelectionAvailable, false);
-assert.equal(mapInfo.maps.iz_dun02?.farmSelectionAvailable, false);
+assert.equal(mapInfo.maps.iz_dun02?.farmSelectionAvailable, true);
 assert.equal(mapInfo.maps.prontera?.farmSelectionAvailable, false);
 
 const selectorSource = appSource.slice(
@@ -364,7 +369,7 @@ try {
   assert.equal(visibleRegions.redSelected, 'tha_t01');
   assert.equal(visibleRegions.floors.length, 12);
   assert.ok(visibleRegions.floors.every((row) => row.selected === row.id));
-  assert.ok(visibleRegions.floors.some((row) => /QUEST_ACCESS_REVIEW_REQUIRED/.test(row.reason)));
+  assert.ok(visibleRegions.floors.every((row) => !/QUEST_ACCESS_REVIEW_REQUIRED/.test(row.reason)));
   assert.match(visibleRegions.townDetail, /類型：主城/);
   assert.ok(visibleRegions.townButtons.some((row) => row.text === '設為儲存主城' && !row.disabled));
   assert.equal(visibleRegions.liveTargets, 249);
@@ -472,16 +477,16 @@ try {
 
   assert.equal(desktop.visible, true);
   assert.equal(desktop.regionCount, 249);
-  assert.equal(desktop.standardCount, 183);
+  assert.equal(desktop.standardCount, 251);
   assert.equal(desktop.standardReachable, true);
-  assert.match(desktop.status, /183 張可掛機地圖/);
+  assert.match(desktop.status, /251 張可掛機地圖/);
   assert.ok(desktop.shellRight <= 1024);
   assert.ok(desktop.overflow <= 0);
   assert.equal(mobile.width, 390);
   assert.ok(mobile.shellLeft >= 0);
   assert.ok(mobile.shellRight <= 390);
   assert.ok(mobile.overflow <= 0);
-  assert.match(mobile.status, /183 張可掛機地圖/);
+  assert.match(mobile.status, /251 張可掛機地圖/);
   assert.equal(mobileTargets.normalSelected, 'prt_fild05');
   assert.equal(mobileTargets.redSelected, 'tha_t01');
   assert.equal(mobileTargets.floorSelected, 'tha_t01');

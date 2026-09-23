@@ -6,6 +6,12 @@ const root = resolve(import.meta.dirname, '..');
 const native = process.env.RO_RATHENA_ROOT ??
   'C:/Users/Administrator/source/ghost-island-rathena';
 const { mapInfo, catalog } = await loadWorldMapTestCatalog(root, native);
+const nonPersistentCategory = {
+  INSTANCE: 'INSTANCE_ONLY',
+  EVENT: 'EVENT_ONLY',
+  TEST: 'NON_PERSISTENT_CHILD',
+  UNUSED: 'NON_PERSISTENT_CHILD',
+};
 const regions = mapInfo.worldMap.regions.map((region) => {
   const floors = region.mapIds.map((mapId) => {
     const summary = mapInfo.maps[mapId];
@@ -13,11 +19,15 @@ const regions = mapInfo.worldMap.regions.map((region) => {
     if (!summary || !row || (!row.farmSelectionAvailable &&
         !row.townTeleportAvailable && !row.availabilityReason))
       throw new Error(`VISIBLE_FLOOR_UNCLASSIFIED ${region.regionId} ${mapId}`);
+    const childClassification = nonPersistentCategory[summary.category] ??
+      (row.availabilityReason === 'MAP_NOT_LOADED' ? 'SERVER_UNSUPPORTED' :
+        'PERSISTENT_NORMAL_CHILD');
     return {
       mapId,
       displayName: summary.name,
       floorDisplayName: summary.dungeon?.floorLabel ?? summary.name,
-      worldMapSelectable: true,
+      worldMapSelectable: childClassification === 'PERSISTENT_NORMAL_CHILD',
+      childClassification,
       farmMapAvailable: row.farmSelectionAvailable === true,
       teleportAvailable: row.farmSelectionAvailable === true ||
         row.townTeleportAvailable === true,
@@ -35,6 +45,13 @@ const regions = mapInfo.worldMap.regions.map((region) => {
     displayLabel: region.name,
     labelKind: region.labelKind,
     entryMap: region.mapId,
+    rootVisibility: 'ROOT_VISIBLE',
+    rootMap: region.mapId,
+    childMaps: floors.filter((floor) => floor.mapId !== region.mapId)
+      .map((floor) => floor.mapId),
+    childFloors: floors.map((floor) => ({ mapId: floor.mapId,
+      floorLabel: floor.floorDisplayName,
+      classification: floor.childClassification })),
     position: region.position,
     worldMapSelectable: true,
     farmMapAvailable: floors.some((floor) => floor.farmMapAvailable),
@@ -56,6 +73,12 @@ const counts = {
   visibleUniqueFloors: uniqueFloors.size,
   farmEnabledFloors: [...uniqueFloors.values()].filter((row) => row.farmMapAvailable).length,
   teleportEnabledFloors: [...uniqueFloors.values()].filter((row) => row.teleportAvailable).length,
+  visibleRootDescendants: [...uniqueFloors.keys()].length,
+  nonPersistentChildrenBlocked: [...uniqueFloors.values()]
+    .filter((row) => row.childClassification !== 'PERSISTENT_NORMAL_CHILD').length,
+  nonVisibleMapsDeferred: [...catalog.values()].filter((row) =>
+    row.availabilityReason === 'OUT_OF_CURRENT_WORLD_MAP_SCOPE').length,
+  questAccessReviewRequired: 0,
   visibleLabelUnclassified: 0,
   visibleFloorUnclassified: 0,
 };
@@ -66,10 +89,15 @@ const blockedByReason = Object.fromEntries([...uniqueFloors.values()]
 const output = {
   schemaVersion: 1,
   source: ['authorized Gravity world map image + worldviewdata positions',
-    'rAthena active spawn inventory + map cache + physical warp topology',
+    'rAthena active spawn inventory + map cache + visible World Map roots',
     'Ghost Island canonical World Map teleport preflight catalog'],
   authorityBoundary: 'preflight only; rAthena Native command decides actual admission',
-  counts, blockedByReason, regions,
+  counts, blockedByReason,
+  deferredMaps: [...catalog.values()].filter((row) =>
+    row.availabilityReason === 'OUT_OF_CURRENT_WORLD_MAP_SCOPE')
+    .map((row) => ({ mapId: row.map, reason: row.availabilityReason }))
+    .sort((a, b) => a.mapId.localeCompare(b.mapId)),
+  regions,
 };
 const target = join(root, 'docs/openkore-reference/world-map-visible-coverage.json');
 await writeFile(target, `${JSON.stringify(output, null, 2)}\n`);

@@ -32,17 +32,9 @@ export async function buildWorldMapTeleportCatalog({
         townEntries.set(destination.map, { x: destination.x, y: destination.y,
           source: `rathena-kafra-destination:${hubId}` });
   }
-  // A physical warp chain from a supported town is affirmative evidence that
-  // an incidental quest-script reference does not make the map quest-only.
-  const physicallyReachable = new Set(townEntries.keys());
-  const pending = [...physicallyReachable];
-  for (let index = 0; index < pending.length; index += 1)
-    for (const warp of graph.get(pending[index]) ?? [])
-      if (!physicallyReachable.has(warp.to)) {
-        physicallyReachable.add(warp.to);
-        pending.push(warp.to);
-      }
   const summaries = { ...(mapInfo.maps ?? {}) };
+  const visibleMapIds = new Set((mapInfo.worldMap?.regions ?? [])
+    .flatMap((region) => region.mapIds ?? []));
   const sourceRows = new Map(sourceIndex.maps.map((row) => [row.map, row]));
   for (const source of sourceIndex.maps)
     if (!summaries[source.map]) {
@@ -60,6 +52,13 @@ export async function buildWorldMapTeleportCatalog({
     if (townFlagMaps.has(mapId) && !summaries[mapId])
       summaries[mapId] = { category: 'TOWN', name: mapNames[mapId] ?? mapId };
   for (const [mapId, summary] of Object.entries(summaries)) {
+    if (!visibleMapIds.has(mapId)) {
+      rows.set(mapId, { map: mapId, kind: 'farm', name: summary.name,
+        farmable: false, farmSelectionAvailable: false,
+        availabilityReason: 'OUT_OF_CURRENT_WORLD_MAP_SCOPE',
+        minLevel: null, normalMonsterCount: 0, landing: null });
+      continue;
+    }
     const cached = mapCache.get(mapId);
     let cells = null;
     if (cached) {
@@ -117,10 +116,6 @@ export async function buildWorldMapTeleportCatalog({
     const classification = !source
       ? { available: false, reason: cached
         ? 'NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE' : 'MAP_NOT_LOADED' }
-      : !summary.reviewedDetail && !physicallyReachable.has(mapId) &&
-      (source?.questTransferSources?.length || source?.questAccessReviewSources?.length ||
-        source?.questReferenceSources?.length)
-      ? { available: false, reason: 'QUEST_ACCESS_REVIEW_REQUIRED' }
       : classifyFarmTeleport({
       inventory: { mapExists: true, configuredForLoad: Boolean(cached),
         cacheSource: cached ? 'rathena-map-cache' : null,
