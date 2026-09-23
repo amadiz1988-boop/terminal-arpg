@@ -21,6 +21,7 @@ Browser acceptance、真實使用者 evidence 與 Git checkpoint 操作規則，
 - 平行施工以不發生 file、runtime、fixture、Browser session、deploy collision 為前提。
 - Browser Web 驗收採 control-by-control；真實使用者 Browser FAIL 優先於其他 fixture PASS。
 - Git checkpoint 必須精確對應本次 patch；mixed file 無法隔離時標記 `BLOCKED_BY_MIXED_FILE`。
+- Production Web 多檔部署只走 manifest-driven `deploy-dashboard-manifest.ps1`；先通過唯讀 precheck，保留完整 rollback 與 receipt，僅由 `dashboard-service.ps1` 管理單一 Dashboard。不得直接複製檔案或重啟 rAthena；完整契約與驗收狀態見 `docs/project-control/web-production-deployment.md`。
 
 本節固定 Project Control 1／2／3 歸納出的開發方法，避免更換 Project Control 對話後：開發方向遺失、已完成能力被重新實作、派工格式退化、工作線 scope 失控、大量 recursive search、infrastructure／refactor 蓋過玩家功能恢復，或功能恢復而沒有 Git checkpoint。
 
