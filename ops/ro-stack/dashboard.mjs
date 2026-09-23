@@ -139,6 +139,7 @@ import {
   loadCanonicalConfig,
   saveCanonicalConfig,
 } from './dashboard/config-storage.mjs';
+import { resolveFarmExecutionProfile } from './dashboard/farm-execution-profile.mjs';
 import {
   CharacterProjectionCache,
   CharacterViewerRegistry,
@@ -3311,6 +3312,20 @@ async function queueOwnershipCommand(
       payloadObject.destinationX = destinationX;
       payloadObject.destinationY = destinationY;
     }
+  }
+  if (action === 'start_farm') {
+    // Resolve only from the authenticated character's persisted config. Every
+    // start path, including relocation resume, crosses this same command seam.
+    const { config } = await loadCanonicalConfig({
+      instancesRoot,
+      accountId: account.accountId,
+      characterId: charId,
+      persistMigration: false,
+    });
+    const executionProfile = resolveFarmExecutionProfile(config, payloadObject);
+    if (!executionProfile.ok)
+      throw new HttpError(409, executionProfile.reason);
+    payloadObject = { ...payloadObject, ...executionProfile.payload };
   }
   // GLOBAL_SUPPLY generic relocation delivery: resolve the canonical supply legs
   // with the SAME server-side resolver used by the Player Web start_navigation

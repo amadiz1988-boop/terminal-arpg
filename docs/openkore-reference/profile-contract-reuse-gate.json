@@ -1,0 +1,73 @@
+{
+  "PRE_IMPLEMENTATION_REUSE_GATE": {
+    "featureId": "runtime-state-profile-contract-v1",
+    "featureName": "Thin profile to existing farm executor contract",
+    "taskCategory": "NEW_CAPABILITY",
+    "categories": ["combat", "skills", "recovery"],
+    "openKoreRelevant": true,
+    "capabilityScope": "Persisted combat profile identity and attack-use-weapon option carried through the existing start_farm command and PA session",
+    "matureReferenceApplicable": true,
+    "referenceGate": "PASS",
+    "deltaReferenceAuditRequired": true,
+    "capabilityDelta": {
+      "addsCapability": true,
+      "replacesCapability": false,
+      "changesBehavior": true,
+      "changesConfigurationSemantics": false,
+      "changesCapabilityUi": false,
+      "changesExceptionRecovery": true,
+      "changesMatureCapabilityDataModel": true
+    },
+    "checks": {
+      "currentProject": {
+        "status": "CHECKED",
+        "evidence": "dashboard/config-schema.mjs COMBAT_PROFILES and attack.useWeapon; dashboard/config-storage.mjs character-scoped config; dashboard.mjs queueOwnershipCommand; persistent_agent.cpp parse_farm_payload, activate_farm_runtime, existing skill/melee branch",
+        "implementationFound": true
+      },
+      "legacyProject": {
+        "status": "CHECKED",
+        "evidence": "docs/openkore-reference/project-last-good-map.md Gate 1A combat and Gate 1B/2 resume; no prior profile command contract"
+      },
+      "reuseRegistry": {
+        "status": "REGISTRY_HIT",
+        "reference": "ops/research/external-reuse-registry.json ra-skill-status and ok-combat-loot-recovery"
+      },
+      "rAthena": {
+        "status": "CHECKED",
+        "evidence": "persistent_agent.cpp uses pc_checkskill, skill_get_requirement, skill_check_condition_castbegin, unit_skilluse_id, unit_attack and battle_check_target"
+      },
+      "openKore": {
+        "status": "CHECKED",
+        "evidence": "Pinned 51de1dd control/config.txt attackAuto=2 attackUseWeapon=1 sitAuto_sp_lower=0; src/AI/Attack.pm Attack::process 725-754; src/Misc.pm checkSelfCondition 5660-5674; src/AI/CoreLogic.pm processSitAuto 2909-2962; docs/openkore-harvest-registry.md and docs/openkore-reference/combat-and-targeting.md"
+      },
+      "externalEcosystem": {
+        "status": "NOT_APPLICABLE",
+        "reason": "Existing project command and rAthena primitives cover the thin contract; no external executor is adopted"
+      },
+      "genericOSS": {
+        "status": "NOT_APPLICABLE",
+        "reason": "Enum validation and command persistence use existing project facilities"
+      }
+    },
+    "decision": "PORTABLE_LOGIC",
+    "whyNotReuse": "",
+    "freshResearchPerformed": false,
+    "registryUpdateRequired": false,
+    "matureReferenceMatrix": {
+      "currentGiCapability": "One optional Native skill and unconditional skill-failure melee fallback; eight Web profiles currently config-only",
+      "openKoreCapability": "Attack::process starts with configurable attackUseWeapon, then chooses eligible attackSkillSlot; checkSelfCondition limits SP to the skill action",
+      "rAthenaCapability": "Existing Native skill and unit attack methods retain legality and result authority",
+      "otherMatureReference": "NOT_APPLICABLE: no additional source is needed for the thin contract",
+      "matureExceptionBehavior": "When attackUseWeapon is false and no eligible skill exists, no weapon attack is selected; unknown profile or unimplemented executor is rejected",
+      "matureRecoveryBehavior": "PA retains intent and existing recovery; global default SP sit remains off and the profile is persisted with farm target rules",
+      "matureConfigSemantics": "Pinned attackUseWeapon=1, attackAuto=2 and sitAuto_sp_lower=0 defaults; character canonical config keeps profile and useWeapon",
+      "matureUiSemantics": "Existing profile selector and weapon-attack checkbox remain the only player settings; no new UI",
+      "directReuse": "Reuse character config storage, queueOwnershipCommand, persistent_agent_state target_rules, existing Native skill and unit attack paths",
+      "adapt": "Carry validated profile and useWeapon as small command payload fields; apply eligibility to existing fallback branch",
+      "projectPolicy": "Eight profile labels are accepted Ghost Island catalog; unsupported Stage3 profile execution must fail closed",
+      "improvements": "Typed unknown/unsupported result and persisted profile identity prevent silent melee fallback after resume",
+      "matureCapabilityLoss": "NONE",
+      "resultEquivalentOrBetter": "PASS"
+    }
+  }
+}

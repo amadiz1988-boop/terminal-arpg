@@ -2,22 +2,21 @@
 
 ```text
 TASK_ID = OPENKORE_RUNTIME_STATE_POLICY_PARITY_AUDIT_AND_CLOSURE_V1
-STATUS = BLOCKED_AT_PC_STOP_4
+STATUS = IN_PROGRESS / SOURCE_ONLY
 PINNED_OPENKORE = 51de1ddfc4449ae5217f6886de702f87ca934030
 OPENKORE_RUNTIME_REQUIRED = NO
 RATHENA_WORLD_AUTHORITY = YES
 ```
 
-This is a source-evidence inventory, not a parity certificate. The present
-`start_farm` command carries one optional skill ID and the Native farm loop
-falls back to weapon attack for every skill failure. The canonical eight-profile
-configuration is `CONFIG_ONLY_NO_EXECUTOR_COMMAND`. Completing skill-only,
-support, follow, and profile-specific state policy requires a new executor
-command contract and a Local Hunting capability promotion. The accepted M1
-architecture records `SKILL_ONLY_IMPLEMENTED = NO` and says the profile design
-remains outside its implementation authorization. This is the exact
-`PC_STOP_4` boundary; no live parity claim or Native activation follows from
-the source-only SP correction below.
+This is a source-evidence inventory, not a parity certificate. Project Control
+authorized the bounded thin profile-to-executor contract after the original
+`PC_STOP_4`. Source checkpoint `8000bbc` adds Native command fields and a
+fail-closed attack-method guard; Web source now resolves those fields from the
+authenticated character config. This does not complete ranged, multi-slot,
+self-buff, support, follow, recovery, navigation or teleport policy parity.
+The 135 condition keys are classified; action-level semantic port and proof
+remain open.
+No live parity claim or Native activation follows from these source changes.
 
 ## Proven default and first broken transition
 
@@ -64,7 +63,7 @@ means the exact behavior still lacks full implementation and proof.
 | Recovery item | No configured `useSelf_item` row | YES | Per-row condition, possession and timeout | Global allowlist and HP/SP threshold | NO | PARTIAL_PARITY | Transport item rows to executor; retain rAthena item authority |
 | Recovery skill | No configured `useSelf_skill` row | YES | Per-row condition, learned skill and SP check | Global recovery skill allowlist | NO | PARTIAL_PARITY | Transport self-skill rows to executor |
 | Critical HP teleport | `teleportAuto_hp=10` | YES | Separate emergency trigger in `processAutoTeleport` | Web config preview has 10%; no proven execution bridge | NO | MISSING | Typed emergency policy/command and bounded proof |
-| Skill insufficient SP | No attack skill slot by default | YES | Skip unavailable slot, retain configured weapon method | Native one-skill fallback always attempts melee | NO | PARTIAL_PARITY | Apply profile `useWeapon` and typed unavailable outcome |
+| Skill insufficient SP | No attack skill slot by default | YES | Skip unavailable slot, retain configured weapon method | Source thin contract guards skill-only melee, Native binary unchanged | NO | PARTIAL_PARITY | Live no-melee proof; complete per-slot conditions |
 | Skill learned/cooldown/cast | Server state observed per skill | YES | Candidate conditions and action timing | Native learned/SP/cooldown/castbegin checks for one skill | NO | PARTIAL_PARITY | Extend profile contract; retain rAthena legality |
 | Skill range/target | Configured per slot | YES | Chase, retry, give-up under attack policy | Native range walk and target validity checks | NO | PARTIAL_PARITY | Compare bounded retry and profile behavior |
 | Death/respawn | Recovery/return policies configurable | YES | Stop dead actions; resume through configured route | Native death, respawn and return path exist | NO | PARTIAL_PARITY | Full same-fixture live death-to-hit proof |
@@ -117,11 +116,13 @@ whenShieldEquipped, whenStatusActive, whenStatusInactive,
 whenWeaponEquipped, whileBeingCasted
 ```
 
-The 135 keys are discovered but are not individually classified against every
-Ghost Island action. `OPENKORE_STATE_PREDICATES_CLASSIFIED = 0/135` under the
-task's strict per-predicate closure definition. `UNCLASSIFIED = 135` is explicit;
-claiming zero would manufacture completeness. Homunculus, mercenary, and AP
-keys have not been silently discarded as `NOT_APPLICABLE`.
+All 135 keys now have a capability-stage classification and exact pinned
+predicate location in `condition-key-census-v1.md`:
+`OPENKORE_STATE_PREDICATES_CLASSIFIED = 135/135`, `UNCLASSIFIED = 0`.
+This is classification only. The 76 `PARTIAL` keys still lack complete
+per-action GI port/proof, and the 38 later-stage keys are not implemented.
+Homunculus and mercenary predicates are explicitly outside current M1 player
+hunting; AP and class-specific resource predicates remain later-stage work.
 
 ## Current decision sites inspected
 
@@ -136,9 +137,10 @@ repository-wide decision-site count. The total is unmeasured and must not be
 reported as `UNKNOWN_GI_STATE_DECISION_SITE = 0`.
 
 Web `ops/ro-stack/dashboard/config-schema.mjs` defines the eight profiles;
-`docs/openkore-reference/config-ui-replacement-v1.md:82-94` confirms
-`CONFIG_ONLY_NO_EXECUTOR_COMMAND`. Native accepts one optional `skillId`
-and globally falls back to melee in `persistent_agent.cpp:8353-8420`.
+`docs/openkore-reference/config-ui-replacement-v1.md:82-94` recorded the
+pre-contract `CONFIG_ONLY_NO_EXECUTOR_COMMAND` state. Source now adds the
+thin profile fields to `start_farm`; Native still accepts one optional
+`skillId`, and wider profile capability remains absent.
 
 ## Intent-blocking rule and next gate
 
@@ -149,8 +151,9 @@ explicit opt-in that can pause an intent; threshold 0 disables that pause.
 The current Native correction proves this seam in source and a policy unit
 test only. It does not prove the full action-by-state matrix or Production.
 
-Closure requires a Project Control decision for `PC_STOP_4`: authorize the
-missing profile-to-executor command contract and staged Local Hunting
-capabilities, then classify all parser and non-parser decisions, add the
-requested deterministic family/profile tests, and perform controlled live
-acceptance. Keep OpenKore runtime at zero throughout.
+The thin contract's `PC_STOP_4` authorization was supplied. Closure now
+requires per-action closure of 76 partially mapped parser predicates, non-parser
+decision-site inventory, deterministic family/profile tests, all currently
+authorized mature capability gaps closed, and controlled live acceptance.
+Keep OpenKore runtime at zero throughout. The broader census and remaining
+classified gaps are tracked in `mature-capability-census-v1.md`.
