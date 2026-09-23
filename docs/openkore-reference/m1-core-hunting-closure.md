@@ -184,6 +184,13 @@ exercise the complete executable PA return-to-HIT chain; `H13/R14` remain open.
 The nine-section settings capability gate passes source tests with zero
 adjustable controls enabled and no enabled no-op; Browser acceptance is open.
 
+The ordered skill selector checkpoint `2e7d4fb` skips unavailable learned
+level, SP-cost and skill-cooldown rows before choosing a later row. The Native
+command contract, recovery policy and 38 Supply checks pass. Final rAthena
+cast-condition rejection still prevents same-tick fallthrough to a later row;
+`C04/C05/C13` remain source-partial. The Web evidence checkpoint is `5bd5da4`.
+The source-closed count remains 1/38 and product-closed remains 0/38.
+
 ## Bounded diagnostic checkpoint
 
 The scenario matrix previously called `planWebRelocation`, which checks only
