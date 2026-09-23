@@ -27,6 +27,8 @@ const mapInfo = JSON.parse(
 );
 const { catalog } = await loadWorldMapTestCatalog(root,
   process.env.RO_RATHENA_ROOT ?? 'C:/Users/Administrator/source/ghost-island-rathena');
+const expectedFarmCount = [...catalog.values()].filter((row) =>
+  row.farmSelectionAvailable && mapInfo.maps[row.map]).length;
 const appSource = await readFile(join(dashboardRoot, 'app.js'), 'utf8');
 const dashboardSource = await readFile(
   join(root, 'ops', 'ro-stack', 'dashboard.mjs'),
@@ -477,16 +479,16 @@ try {
 
   assert.equal(desktop.visible, true);
   assert.equal(desktop.regionCount, 249);
-  assert.equal(desktop.standardCount, 251);
+  assert.equal(desktop.standardCount, expectedFarmCount);
   assert.equal(desktop.standardReachable, true);
-  assert.match(desktop.status, /251 張可掛機地圖/);
+  assert.match(desktop.status, new RegExp(`${expectedFarmCount} 張可掛機地圖`));
   assert.ok(desktop.shellRight <= 1024);
   assert.ok(desktop.overflow <= 0);
   assert.equal(mobile.width, 390);
   assert.ok(mobile.shellLeft >= 0);
   assert.ok(mobile.shellRight <= 390);
   assert.ok(mobile.overflow <= 0);
-  assert.match(mobile.status, /251 張可掛機地圖/);
+  assert.match(mobile.status, new RegExp(`${expectedFarmCount} 張可掛機地圖`));
   assert.equal(mobileTargets.normalSelected, 'prt_fild05');
   assert.equal(mobileTargets.redSelected, 'tha_t01');
   assert.equal(mobileTargets.floorSelected, 'tha_t01');
