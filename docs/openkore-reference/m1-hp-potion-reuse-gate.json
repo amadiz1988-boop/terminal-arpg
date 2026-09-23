@@ -1,0 +1,73 @@
+{
+  "PRE_IMPLEMENTATION_REUSE_GATE": {
+    "featureId": "m1-hp-potion-pa-seam",
+    "featureName": "M1 HP-conditioned potion through existing PA and rAthena",
+    "scope": "NEW_CAPABILITY",
+    "taskCategory": "NEW_CAPABILITY",
+    "categories": ["combat", "inventory", "failure_recovery", "configuration_semantics"],
+    "openKoreRelevant": true,
+    "checks": {
+      "currentProject": {
+        "status": "CHECKED",
+        "implementationFound": true,
+        "evidence": "dashboard/config-schema.mjs stores combat.itemUse; dashboard.mjs start_farm omits it; Native persistent_agent.cpp handle_survival and try_recovery_item already call pc_useitem from a global allowlist. Adapt this seam, no new scheduler."
+      },
+      "legacyProject": {
+        "status": "CHECKED",
+        "evidence": "docs/openkore-reference/mature-capability-census-v1.md R04 and docs/openkore-harvest-registry.md preserve the legacy row contract."
+      },
+      "reuseRegistry": {
+        "status": "REGISTRY_HIT",
+        "reference": "ops/research/external-reuse-registry.json ra-item-use and ok-combat-loot-recovery; docs/external-ecosystem-reuse-audit.md"
+      },
+      "rAthena": {
+        "status": "CHECKED",
+        "evidence": "C:/Users/Administrator/source/ghost-island-rathena/src/map/pc.cpp:6460 pc_useitem is the authoritative item legality, effect and consumption primitive, already called by PA try_recovery_item."
+      },
+      "openKore": {
+        "status": "CHECKED",
+        "evidence": "Pinned 51de1ddfc4449ae5217f6886de702f87ca934030 control/config.txt:727 useSelf_item; src/AI/CoreLogic.pm:2982 processAutoItemUse; src/Misc.pm:5487 checkSelfCondition; src/Utils.pm:1454 getRange. Exact defaults, order, predicates and transition recorded in m1-hp-potion-source-gate.md."
+      },
+      "externalEcosystem": {
+        "status": "NOT_APPLICABLE",
+        "reason": "Current native primitive and pinned OpenKore semantic source suffice; no external runtime or dependency is introduced."
+      },
+      "genericOSS": {
+        "status": "NOT_APPLICABLE",
+        "reason": "Generic item engines cannot replace rAthena item authority."
+      }
+    },
+    "decision": "PORTABLE_LOGIC",
+    "freshResearchPerformed": false,
+    "registryUpdateRequired": false,
+    "capabilityScope": "Per-character ordered HP potion rows transported to existing PA survival item use",
+    "matureReferenceApplicable": true,
+    "referenceGate": "PASS",
+    "deltaReferenceAuditRequired": true,
+    "capabilityDelta": {
+      "addsCapability": true,
+      "replacesCapability": false,
+      "changesBehavior": true,
+      "changesConfigurationSemantics": true,
+      "changesCapabilityUi": false,
+      "changesExceptionRecovery": true,
+      "changesMatureCapabilityDataModel": false
+    },
+    "matureReferenceMatrix": {
+      "currentGiCapability": "Native global HP item allowlist and threshold via handle_survival; character combat.itemUse rows are persisted but not delivered.",
+      "openKoreCapability": "processAutoItemUse scans numbered useSelf_item rows in order, evaluates checkSelfCondition HP/timeout, uses first present inventory item, stamps time and skips absent item by default.",
+      "rAthenaCapability": "pc_useitem verifies legality and performs authoritative item use, count and HP effects.",
+      "otherMatureReference": "NOT_APPLICABLE: no external item runner is needed.",
+      "matureExceptionBehavior": "Unsupported row predicates fail typed at command construction; absent item falls through; Native rejection remains visible and does not create success.",
+      "matureRecoveryBehavior": "Existing PA global HP/SP recovery, sit, supply arbitration and resume remain intact when no applicable potion succeeds.",
+      "matureConfigSemantics": "Only enabled rows with numeric item ID, HP < N% and timeout are admitted for M1; other stored rows remain disabled in Player UI.",
+      "matureUiSemantics": "Config capability remains PARTIAL and disabled until Native authoritative HP/item proof and Browser acceptance.",
+      "directReuse": "Reuse combat.itemUse storage, start_farm payload, handle_survival, try_recovery_item and pc_useitem.",
+      "adapt": "Thin ordered row parser/transport and native per-character predicate check; no item legality implementation.",
+      "projectPolicy": "OpenKore behavior reference, PA intent/interrupt/resume, rAthena authority, M1 source-only authorization.",
+      "improvements": "Per-character row can be observed without changing global runtime policy or adding an engine.",
+      "matureCapabilityLoss": "NONE",
+      "resultEquivalentOrBetter": "PASS"
+    }
+  }
+}

@@ -99,6 +99,19 @@ the parent census, especially C01/C04/C13 and R01-R05; the UI delta reuse gate
 is `m1-settings-ui-reuse-gate.json`. Browser desktop and 390×844 acceptance
 remains unmeasured.
 
+### HP potion source seam
+
+`m1-hp-potion-source-gate.md` records the pinned OpenKore default, row order,
+HP `< N%` condition, 0.5-second global item-use interval, row timeout and
+absent-item fallthrough. The persisted character rows now add an optional
+`hpPotionRules` field to the existing `start_farm` command. Native validates
+the bounded rows, attempts the first present matching item in the existing PA
+survival tick and delegates legality/effect to rAthena `pc_useitem`. Unsupported
+configured predicates and item names fail with typed source errors. Current
+UI remains disabled; Native build and command-shape tests are source-only.
+The exact `R04` runtime HP/inventory delta, overlap with global HP recovery,
+resume and Browser proof remain open, so `AUTO_POTION=PARTIAL`.
+
 The requested sequence is source implementation and bounded tests, then a
 coherent candidate. No Production file, runtime restart or live-player mutation
 is authorized here. A source `PASS` does not turn any row into a released UI

@@ -1,5 +1,7 @@
 // Thin command adapter. The persisted player config selects the already
 // accepted GI profile; rAthena remains the skill and attack authority.
+import { resolveHpPotionProfile } from './hp-potion-profile.mjs';
+
 export function resolveFarmExecutionProfile(config, farmPayload) {
   const profile = config?.combat?.profile;
   const attackMode = config?.combat?.attack?.mode;
@@ -22,10 +24,15 @@ export function resolveFarmExecutionProfile(config, farmPayload) {
     return { ok: false, reason: 'PROFILE_HYBRID_REQUIRES_BOTH' };
   if (profile === 'MELEE_DAMAGE' && !attackUseWeapon)
     return { ok: false, reason: 'PROFILE_NO_ATTACK_METHOD' };
+  const hpPotion = resolveHpPotionProfile(config);
+  if (!hpPotion.ok) return hpPotion;
+  if (hpPotion.rules.length && farmPayload.survivalEnabled !== true)
+    return { ok: false, reason: 'HP_POTION_REQUIRES_SURVIVAL' };
   return { ok: true, payload: {
     combatProfile: profile,
     attackMode,
     attackUseWeapon,
     huntRelocationEnabled,
+    ...(hpPotion.rules.length ? { hpPotionRules: hpPotion.rules } : {}),
   } };
 }
