@@ -155,6 +155,35 @@ control. Existing interactive controls require separate current runtime and
 Browser evidence; unsupported controls must be disabled during the settings UI
 phase. Life Director and Social Director remain outside this scope.
 
+## Source closure checkpoint, 2026-09-23
+
+```text
+M1_REQUIRED_SOURCE_CLOSED = 1 / 38
+M1_REQUIRED_SOURCE_CLOSED_IDS = C01
+M1_REQUIRED_SOURCE_REMAINING = 37 / 38
+M1_REQUIRED_PRODUCT_CLOSED = 0 / 38
+M1_REQUIRED_PRODUCT_REMAINING = 38 / 38
+M1_SOURCE_CANDIDATE_READY = NO
+```
+
+`C01` is source-closed for the authorized active `attackAuto=2` subset: the
+pinned OpenKore default/config/context is recorded in the census, the existing
+farm-profile adapter rejects every other mode, the Native command contract
+passes, and the settings UI keeps the control disabled while execution is
+`CONFIG_ONLY_NO_EXECUTOR_COMMAND`. This does not authorize route/party attack
+modes, live combat acceptance or an enabled settings control.
+
+Cross-cutting `FARM_START_STOP` is source-closed outside the 38 census IDs;
+the source gate is [m1-farm-lifecycle-source-gate.md](m1-farm-lifecycle-source-gate.md).
+`FARM_MAP_SWITCH` remains source-partial because an in-flight replacement is
+currently rejected rather than superseded. Fly Wing's pinned search distinction,
+GI override and unresolved rejection/re-arm policy are in
+[m1-fly-wing-source-gate.md](m1-fly-wing-source-gate.md). Supply route and
+Butterfly source checks passed, but the existing simulated route test does not
+exercise the complete executable PA return-to-HIT chain; `H13/R14` remain open.
+The nine-section settings capability gate passes source tests with zero
+adjustable controls enabled and no enabled no-op; Browser acceptance is open.
+
 ## Bounded diagnostic checkpoint
 
 The scenario matrix previously called `planWebRelocation`, which checks only
