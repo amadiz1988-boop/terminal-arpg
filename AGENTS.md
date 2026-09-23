@@ -18,6 +18,10 @@ CANONICAL_TEST_CONTROL = ADMIN / TEST TRANSPORT → SERVER_AGENT / TEST FIXTURE 
 
 Native Client 可保留為歷史參考或選用傳輸。測試與管理控制使用已認證的伺服器端傳輸，由 rAthena 裁定指令權限及世界狀態。Fixture 設定使用 TEST_SUPERUSER；最終玩家流程驗收使用 TEST_PLAYER，GM fixture 結果不得計入玩家流程 PASS。
 
+## Admin Access Boundary
+
+`ADMIN_ACCESS_BOUNDARY_FROZEN = YES`。Admin Browser 的登入與身分權威為 `CLOUDFLARE_ACCESS_EDGE`；Dashboard 不另建 Admin Browser 身分系統、不要求重新登入，也不要求 Cloudflare identity header、JWT 或 Gmail 地址映射。Player host、普通 Player 與 Support-only 均不得讀取 Admin data。`server_admin_api` 的無憑證 loopback `GET /api/admin/server/status` 以 HTTP 403 視為健康，沒有 Admin data 或寫入權限。未符合明定重啟條件，不得重開 Admin Browser identity 深查。完整邊界、六項重啟條件與免密碼測試規則見 `docs/project-control/admin-access-boundary.md`；本文件仍為 policy authority。
+
 執行 substantial Repository 工作前，先依 `.agents/skills/task-model-router/SKILL.md` 判斷建議模型、推理強度與速度，並在施工前提醒使用者。該 Skill 只負責建議，不得改變任務 scope，也不得自行宣稱已切換模型。
 
 ## Project Control Dispatch Standard
