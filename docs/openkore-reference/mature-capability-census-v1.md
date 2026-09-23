@@ -113,6 +113,17 @@ allowlists are `A: BUG_OR_ACCIDENTAL_DEVIATION` until corrected and tested.
 invent a replacement. Full non-parser site discovery is still open, so
 `UNEXPLAINED_DEVIATION=0` has not been certified.
 
+## First broken transitions still open
+
+| Capability | FIRST_BROKEN_TRANSITION | Gate |
+|---|---|---|
+| Emergency teleport `H06` | Config `combat.travel.teleport.hp/sp` → `start_farm` payload: no emergency-policy fields; Native has no corresponding condition path | Exact OpenKore non-city, aggression, safety and cooldown port; source and safe fixture test |
+| Per-row skill `C04` | Stored `combat.skills.attackSlots` → command: only one optional `skillId` from action body; no slot/condition transport | M1 Stage 3A implementation authorization and effect proof |
+| HP/sit `R01/R03` | Pinned `processSitAuto` action/safety/weight gate → Native `handle_survival`: global interruption with divergent threshold | Action-level policy and safe combat/recovery test |
+| Recovery rows `R04/R05` | Stored `useSelf_item/useSelf_skill` conditions → Native: global item/skill allowlists | Condition adapter, rAthena execution proof |
+| Navigation `H04` | Pinned `Task::MapRoute` failure/replan semantics → GI planner/PA retry: adoption audit unfinished | One-engine parity audit and route fixtures |
+| Profile live acceptance `C05/H05` | New source payload/guard → current Production binary: deployment intentionally deferred | Full source exit gate, controlled deploy, synthetic then Browser final acceptance |
+
 First bounded closure slice: `attackUseWeapon` and `attackSkillSlot` map through
 the authenticated player config to `start_farm` payload, Native acceptance and
 the existing farm loop. Unknown/unavailable profiles fail closed. Persisted
