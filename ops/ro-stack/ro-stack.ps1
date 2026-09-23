@@ -145,9 +145,57 @@ function Get-TrackedProcess {
 function Stop-TrackedProcesses {
   if (-not (Test-Path $statePath)) { return }
   $state = Get-Content $statePath -Raw | ConvertFrom-Json
-  foreach ($entry in @($state.processes)) {
+  # Safe stop order: map (5122) -> char (6122) -> login (6901), so downstream
+  # servers disconnect before their upstream. Any other tracked entry is
+  # stopped afterwards. Each stop waits for clean exit and port release.
+  $shutdownOrder = @('map', 'char', 'login')
+  $entries = @($state.processes)
+  $ordered = @()
+  foreach ($name in $shutdownOrder) {
+    $ordered += @($entries | Where-Object { $_.name -eq $name })
+  }
+  $ordered += @($entries | Where-Object { $_.name -notin $shutdownOrder })
+  foreach ($entry in $ordered) {
     $process = Get-TrackedProcess $entry ([long]$state.startedAt)
-    if ($process) { Stop-Process -Id $process.Id -Force }
+    if ($process) {
+      $helper = Join-Path $scriptRoot 'graceful-console-signal.ps1'
+      if (-not (Test-Path -LiteralPath $helper)) { throw 'GRACEFUL_SHUTDOWN_HELPER_MISSING' }
+      $signalOut = Join-Path $logsRoot ('graceful-signal-{0}-{1}.out.log' -f $entry.name, $process.Id)
+      $signalErr = Join-Path $logsRoot ('graceful-signal-{0}-{1}.err.log' -f $entry.name, $process.Id)
+      $signalArgs = @{
+        FilePath = (Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe')
+        ArgumentList = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File',
+          ('"{0}"' -f $helper), '-TargetPid', [string]$process.Id,
+          '-ExpectedPath', ('"{0}"' -f [string]$entry.path))
+        WindowStyle = 'Hidden'
+        RedirectStandardOutput = $signalOut
+        RedirectStandardError = $signalErr
+        Wait = $true
+        PassThru = $true
+      }
+      $signal = Start-Process @signalArgs
+      if ($signal.ExitCode -ne 0) {
+        throw ('GRACEFUL_SHUTDOWN_SIGNAL_FAILED name={0} pid={1}' -f $entry.name, $process.Id)
+      }
+      $timeout = if ($entry.name -eq 'map') { 40 } else { 20 }
+      $deadline = [DateTime]::UtcNow.AddSeconds($timeout)
+      while ([DateTime]::UtcNow -lt $deadline) {
+        if (-not (Get-Process -Id $process.Id -ErrorAction SilentlyContinue)) { break }
+        Start-Sleep -Milliseconds 200
+      }
+      if (Get-Process -Id $process.Id -ErrorAction SilentlyContinue) {
+        throw ('GRACEFUL_SHUTDOWN_TIMEOUT name={0} pid={1}' -f $entry.name, $process.Id)
+      }
+      $port = switch ($entry.name) {
+        'map' { $config.MapPort }
+        'char' { $config.CharacterPort }
+        'login' { $config.LoginPort }
+      }
+      if ($port -and @(Get-NetTCPConnection -State Listen -LocalPort $port -ErrorAction SilentlyContinue).Count -ne 0) {
+        throw ('GRACEFUL_SHUTDOWN_PORT_OCCUPIED name={0} port={1}' -f $entry.name, $port)
+      }
+      Write-Host ('GRACEFUL_SHUTDOWN_CONFIRMED name={0} pid={1} port={2}' -f $entry.name, $process.Id, $port)
+    }
   }
   Remove-Item -LiteralPath $statePath -Force
 }
