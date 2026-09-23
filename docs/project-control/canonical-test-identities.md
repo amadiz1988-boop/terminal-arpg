@@ -1,0 +1,69 @@
+# 固定測試身分契約
+
+`TASK_ID = CANONICAL_TEST_SUPERUSER_AND_PLAYER_FIXTURE_V1`
+
+## 權威與用途
+
+兩種身分是 canonical `ragnarok` runtime 中的永久測試 fixture。`TEST_SUPERUSER` 建立合法前置條件；`TEST_PLAYER` 透過一般玩家登入、ownership、Web 操作與 rAthena 權威執行被測行為。Fixture 與診斷成功不得計入 Player-flow PASS。兩組身分不得改配給真實玩家、作為例行清理刪除，或用於轉移真實玩家 ownership。
+
+非機密對照表見 [canonical-test-fixtures.json](canonical-test-fixtures.json)。憑證僅存於 Git 忽略的 `.local/ro-stack/`，不得複製到原始碼、治理文件、日誌或 receipt。`TEST_PLAYER` 沿用既有 `fresh-e2e-credentials.json`；`TEST_SUPERUSER` 使用 `canonical-test-superuser-credentials.json`。兩檔均含機密，只能留在本機。
+
+## 已查證身分，2026-09-23
+
+| 角色 | 帳號 ID | 角色 ID | rAthena 群組 | 測試旗標 | 用途 |
+| --- | ---: | ---: | ---: | ---: | --- |
+| `TEST_SUPERUSER` | 2000164 | 150106 | 99，Admin | 1 | 僅建立 fixture 與診斷 |
+| `TEST_PLAYER` | 2000163 | 150105 | 0，Player | 1 | 一般玩家流程驗收 |
+
+兩組帳號及角色已從 canonical MariaDB 讀回。管理員帳號採用既有 Dashboard Web 密碼雜湊格式新增，角色透過一般 Web 建角端點建立；玩家帳號與角色沿用既有 fixture。兩組憑證均通過正常 `/api/account` 登入；玩家 session 沒有 Support Session。沒有提升任何真實玩家帳號權限。
+
+Canonical native 來源與現行 map-server 所在 runtime 的 `conf/groups.yml` 均設定群組 99 `all_commands: true` 並記錄指令；現行 runtime 群組 0 是一般 Player，沒有 `all_commands`。這是設定與 DB 權限檢查。兩組身分尚未完成原生 `@warp`、`@heal`、`@item`、角色狀態與生成指令實測，因此 `SUPERUSER_COMMAND_PERMISSION = PENDING_LIVE_COMMAND_TEST`、`TEST_PLAYER_NO_GM_PERMISSION = PENDING_NATIVE_COMMAND_TEST`。玩家向 Player Web item-action 送出原始 `@item` 得到 HTTP 400，僅證明 Web 輸入邊界。Native `run_server_command` 僅接受 allowlist 中的玩家 NPC 綁定指令，不能用作通用 GM 指令入口。
+
+## 使用規則
+
+1. 每輪測試先核對 registry ID、`login.group_id`、`web_account_flags.is_test`、角色 ownership 與 canonical runtime。對照漂移即停止。
+2. 管理員僅在測試政策允許時，對測試 fixture 執行定位、治療、物品或等級準備、有限生成、清理與恢復。須透過已驗證的 rAthena GM 登入指令路徑。Local admin token 與直接 SQL 準備本身均不能證明這組帳號的 GM 指令權限。
+3. 記錄起始狀態與管理員準備動作，再以 `TEST_PLAYER` 正常登入並執行被測行為。核對伺服器權威結果；可見 UI 行為另以實際 Browser 驗收。
+4. 測試資源不得進入真實玩家交易、市場、公會、排行榜與公開統計。Dashboard 職業排行榜查詢排除 `web_account_flags.is_test=1`；實際 class-0 排行榜回應也沒有兩隻 fixture 角色。這尚未證明交易或市場存在硬隔離，`ECONOMY_ISOLATED` 維持待驗證。
+5. 未來 Life Director 與 Social Director 必須排除這兩組 ID。目前 Native Persistent Agent 已替兩隻角色建立 `persistent_life_session` 並寫入 `SESSION_STARTED`，因此不得宣稱現行 Life／Event Ledger 已完全排除。未來模擬排除仍待權威檢查。
+
+### 加速紀錄
+
+每次測試加速都要隨證據記錄：
+
+```text
+TEST_ACCELERATION = YES
+ACCELERATION_REASON =
+SUPERUSER_ACTIONS =
+PRE_ACCELERATION_REAL_EVIDENCE =
+WHAT_REMAINS_REAL =
+PRODUCTION_VALIDITY_IMPACT =
+```
+
+遵守 `.agents/skills/nearest-valid-test-state/SKILL.md` 的 Representative Evidence Gate。被加速動作若正是本輪被測功能，即停止。GM 發物品不證明掉落；GM 治療不證明恢復；GM 傳送不證明導航；直接改 Quest 狀態不證明任務。Source、synthetic、Browser 與 Production 驗收分開標記。
+
+## 已驗證項目與未完成閘門
+
+2026-09-23，`TEST_PLAYER` 透過 `/api/account` 正常登入，取得帳號 2000163、角色 150105，沒有 Support Session；以認證後的 Player 路徑修改一項 Web 偏好，讀回變更並還原，最終值也從 MariaDB 讀回。這是有界的一般玩家 Web 動作，並非 gameplay 功能或 Browser UI PASS。Player Web 原始 GM 動作請求回覆 HTTP 400。所有明確指定的帳號、角色與偏好資料修改目標均為這兩組測試 ID；未執行全域的附帶 session 清理稽核。
+
+管理員帳號首次建立時，正常註冊端點回覆 HTTP 429，因此使用政策允許的 DB fixture provisioning。這是帳號前置條件，並非 gameplay 驗收：
+
+```text
+TEST_ACCELERATION = YES
+ACCELERATION_REASON = 測試身分建立時註冊端點回覆 HTTP 429
+SUPERUSER_ACTIONS = NONE；當時專用管理員帳號尚未存在
+PRE_ACCELERATION_REAL_EVIDENCE = 既有 TEST_PLAYER 已透過 /api/account 正常登入
+WHAT_REMAINS_REAL = 管理員正常 Web 登入與建角；玩家正常登入與 Web 動作
+PRODUCTION_VALIDITY_IMPACT = 本輪未證明新帳號註冊流程
+```
+
+下列閘門仍須完成，才能將本任務標為完整 DONE：
+
+- 以 `TEST_SUPERUSER` 實際登入 rAthena，有限執行安全的 warp、heal、item、角色狀態與允許的環境 fixture 指令，核對權威結果與 command log。不得以 Browser 原始指令輸入或 Quest `run_server_command` 代替。
+- 以 `TEST_PLAYER` 確認同類 GM 指令在原生權限層被拒絕，並確認狀態沒有變動。
+- 管理員準備合法 fixture 後，由一般玩家完成一段真正的 gameplay 權威行為。上述 Web 偏好操作不滿足這項 gameplay 鏈。
+- 經驗證的測試專用交易與市場邊界，或等效硬隔離。目前 `is_test` 僅在職業排行榜查詢得到驗證。
+- 明確的 Life 與 Social 模擬排除決策，包含現存 Event Ledger session 的處理。
+- 被測功能依賴可見 UI 時，完成實際 Browser 驗收。
+
+兩種角色的 `READY` 均以適用的現場閘門通過為前提。來源設定、DB ID 與單一 Web API 動作只能提供部分證據。本次未修改 Production gameplay 程式、Navigation、Combat 或 Quest。

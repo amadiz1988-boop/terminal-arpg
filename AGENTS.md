@@ -888,6 +888,8 @@ Canonical schema、decision taxonomy、failure codes 與 evaluator 只在
 5. 玩家會走路、使用蒼蠅翅膀、回城、補給、使用 Kafra、找 NPC、換地圖、找怪、戰鬥、撿物或死亡後恢復時，主要驗收優先覆蓋同一條真實行為鏈。
 6. Diagnostic test 可以高度人工化，只用於定位底層問題，不能取代 Player-flow acceptance。
 
+固定測試身分契約見 `docs/project-control/canonical-test-identities.md`：`TEST_SUPERUSER` 僅建立測試前置條件，`TEST_PLAYER` 以一般玩家權限執行最終驗收。`GM_FIXTURE_RESULT != PLAYER_FLOW_PASS`；每次測試加速必須揭露原因、管理員動作、先前真實證據與有效性限制。測試帳號須排除公開排名與正式經濟、Life／Social 模擬；帳密、token、cookie 與 secret 只存放本機受控憑證機制，禁止寫入 Git、治理文件或測試回報。
+
 ## OPENKORE-REFERENCE / PA-RUNTIME POLICY 鐵律
 
 Policy name：`OPENKORE_REFERENCE_POLICY`
