@@ -9,6 +9,7 @@ param(
   [string]$ReceiptDirectory,
   [switch]$TestMode,
   [int]$SimulateFailureAfter = 0,
+  [switch]$SimulateStartFailure,
   [switch]$SimulateDashboardDown
 )
 
@@ -18,6 +19,7 @@ $watchdogName = 'GhostIslandRO-WebInfraWatchdog'
 $script:fixtureDashboardPid = 9000
 $script:watchdogWasEnabled = $false
 $script:watchdogChanged = $false
+$script:simulatedStartFailureConsumed = $false
 
 function Get-Sha256([string]$Path) {
   return (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToUpperInvariant()
@@ -31,6 +33,8 @@ function Assert-WithinRoot([string]$Root, [string]$RelativePath) {
   $webPath = $RelativePath -eq 'ops/ro-stack/dashboard.mjs' -or
     $RelativePath -match '^ops/ro-stack/dashboard/[A-Za-z0-9_./-]+\.(js|mjs|css|html|json)$' -or
     $RelativePath -match '^ops/ro-stack/web-experience/[A-Za-z0-9_./-]+\.(mjs|json)$' -or
+    $RelativePath -match '^ops/ro-stack/persistent-agent/[A-Za-z0-9_-]+\.mjs$' -or
+    $RelativePath -match '^public/ro/data/map-info/[A-Za-z0-9_-]+\.json$' -or
     $RelativePath -in @('ops/ro-stack/support-session.mjs', 'ops/ro-stack/ops-control-plane.mjs',
       'ops/ro-stack/web-observation.mjs', 'public/ro/data/map-info.json')
   if (-not $webPath) { throw "UNAUTHORIZED_WEB_PATH:$RelativePath" }
@@ -61,6 +65,9 @@ function Read-Plan {
   }
   if ($SimulateDashboardDown -and (-not $TestMode -or -not $Rollback)) {
     throw 'SIMULATED_DASHBOARD_DOWN_TEST_MODE_ONLY'
+  }
+  if ($SimulateStartFailure -and (-not $TestMode -or -not $Deploy)) {
+    throw 'SIMULATED_START_FAILURE_TEST_MODE_ONLY'
   }
   $manifestInput = if ($Rollback -and -not $Manifest -and $ReceiptPath) {
     Join-Path (Split-Path -Parent $ReceiptPath) 'manifest.json'
@@ -93,35 +100,43 @@ function Read-Plan {
     throw 'PRODUCTION_ROOT_NOT_CANONICAL'
   }
   $files = @($data.files)
-  if ($files.Count -lt 1 -or $files.Count -gt 64) { throw 'MANIFEST_FILE_COUNT_OUT_OF_BOUNDS' }
+  if ($files.Count -lt 1 -or $files.Count -gt 256) { throw 'MANIFEST_FILE_COUNT_OUT_OF_BOUNDS' }
   $seen = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
   $entries = @()
   foreach ($file in $files) {
     $relative = [string]$file.path
     if (-not $seen.Add($relative)) { throw "DUPLICATE_MANIFEST_PATH:$relative" }
+    $preimageAbsent = [string]$file.production_preimage -ceq 'ABSENT'
     if ([string]$file.candidate_sha256 -notmatch '^[0-9a-fA-F]{64}$' -or
-        [string]$file.production_preimage_sha256 -notmatch '^[0-9a-fA-F]{64}$') {
+        (-not $preimageAbsent -and [string]$file.production_preimage_sha256 -notmatch '^[0-9a-fA-F]{64}$') -or
+        ($preimageAbsent -and $file.production_preimage_sha256)) {
       throw "MANIFEST_HASH_INVALID:$relative"
     }
     $source = if ($Rollback) { $null } else { Assert-WithinRoot -Root $candidate -RelativePath $relative }
     $target = Assert-WithinRoot -Root $production -RelativePath $relative
     if ((-not $Rollback -and -not (Test-Path -LiteralPath $source -PathType Leaf)) -or
-        -not (Test-Path -LiteralPath $target -PathType Leaf)) {
+        -not (Test-Path -LiteralPath (Split-Path -Parent $target) -PathType Container) -or
+        ($Rollback -and -not (Test-Path -LiteralPath $target -PathType Leaf)) -or
+        (-not $Rollback -and -not $preimageAbsent -and -not (Test-Path -LiteralPath $target -PathType Leaf))) {
       throw "MANIFEST_FILE_MISSING:$relative"
     }
     $candidateHash = ([string]$file.candidate_sha256).ToUpperInvariant()
-    $preimageHash = ([string]$file.production_preimage_sha256).ToUpperInvariant()
+    $preimageHash = if ($preimageAbsent) { 'ABSENT' } else { ([string]$file.production_preimage_sha256).ToUpperInvariant() }
     if ($file.backup_sha256 -and ([string]$file.backup_sha256).ToUpperInvariant() -ne $preimageHash) {
       throw "MANIFEST_BACKUP_HASH_MISMATCH:$relative"
     }
     if (-not $Rollback -and (Get-Sha256 $source) -ne $candidateHash) {
       throw "CANDIDATE_HASH_MISMATCH:$relative"
     }
-    $expectedCurrent = if ($Rollback) { $candidateHash } else { $preimageHash }
-    if ((Get-Sha256 $target) -ne $expectedCurrent) { throw "CURRENT_HASH_MISMATCH:$relative" }
+    if ($preimageAbsent -and -not $Rollback) {
+      if (Test-Path -LiteralPath $target) { throw "TARGET_EXPECTED_ABSENT:$relative" }
+    } else {
+      $expectedCurrent = if ($Rollback) { $candidateHash } else { $preimageHash }
+      if ((Get-Sha256 $target) -ne $expectedCurrent) { throw "CURRENT_HASH_MISMATCH:$relative" }
+    }
     $entries += [pscustomobject]@{
       Path = $relative; Source = $source; Target = $target
-      CandidateHash = $candidateHash; PreimageHash = $preimageHash
+      CandidateHash = $candidateHash; PreimageHash = $preimageHash; PreimageAbsent = $preimageAbsent
     }
   }
   if (-not $TestMode -and -not $Rollback) {
@@ -132,9 +147,23 @@ function Read-Plan {
     $dirty = @(& git -C $candidate status --porcelain --untracked-files=all 2>&1)
     if ($LASTEXITCODE -ne 0 -or $dirty.Count -gt 0) { throw 'CANDIDATE_WORKTREE_DIRTY' }
   }
+  $closure = $null
+  if (-not $Rollback) {
+    $closureScript = Join-Path $PSScriptRoot 'manifest-runtime-closure.mjs'
+    if (-not (Test-Path -LiteralPath $closureScript -PathType Leaf)) { throw 'DEPLOYMENT_CLOSURE_TOOL_MISSING' }
+    $closureOutput = & node $closureScript $manifestPath $candidate $production 2>&1 | Out-String
+    $closureExit = $LASTEXITCODE
+    $closure = try { $closureOutput | ConvertFrom-Json } catch { throw 'DEPLOYMENT_CLOSURE_REPORT_INVALID' }
+    if ($closureExit -ne 0 -or -not $closure.candidate_source_closure -or
+        -not $closure.post_deploy_import_closure -or -not $closure.runtime_delivery_closure) {
+      $first = @($closure.missing | Select-Object -First 1 -ExpandProperty target_path)
+      if (-not $first) { $first = @($closure.errors | Select-Object -First 1) }
+      throw "DEPLOYMENT_RUNTIME_CLOSURE_FAILED:$($first -join ',')"
+    }
+  }
   return [pscustomobject]@{
     ManifestPath = $manifestPath; ManifestHash = Get-Sha256 $manifestPath
-    Commit = ([string]$data.candidate_commit).ToLowerInvariant()
+    Commit = ([string]$data.candidate_commit).ToLowerInvariant(); Closure = $closure
     Candidate = $candidate; Production = $production; Entries = $entries
   }
 }
@@ -204,11 +233,42 @@ function Replace-FileAtomic([string]$Source, [string]$Target) {
   }
 }
 
+function Place-NewFileAtomic([string]$Source, [string]$Target) {
+  $temporary = "$Target.deploy-$([guid]::NewGuid().ToString('N')).tmp"
+  try {
+    [IO.File]::WriteAllBytes($temporary, [IO.File]::ReadAllBytes($Source))
+    [IO.File]::Move($temporary, $Target)
+  } finally {
+    if (Test-Path -LiteralPath $temporary) { Remove-Item -LiteralPath $temporary -Force }
+  }
+}
+
+function Invoke-DashboardService([string]$Action) {
+  $service = Join-Path $plan.Production 'ops\ro-stack\dashboard-service.ps1'
+  $startInfo = [Diagnostics.ProcessStartInfo]::new()
+  $startInfo.FileName = (Get-Command pwsh -ErrorAction Stop).Source
+  $startInfo.ArgumentList.Add('-NoProfile')
+  $startInfo.ArgumentList.Add('-File')
+  $startInfo.ArgumentList.Add($service)
+  $startInfo.ArgumentList.Add('-Action')
+  $startInfo.ArgumentList.Add($Action)
+  $startInfo.UseShellExecute = $false
+  $startInfo.CreateNoWindow = $true
+  $startInfo.RedirectStandardOutput = $true
+  $startInfo.RedirectStandardError = $true
+  $process = [Diagnostics.Process]::Start($startInfo)
+  try {
+    if (-not $process.WaitForExit(30000)) {
+      $process.Kill()
+      throw "DASHBOARD_SERVICE_${Action}_TIMEOUT"
+    }
+    if ($process.ExitCode -ne 0) { throw "DASHBOARD_SERVICE_${Action}_FAILED:$($process.ExitCode)" }
+  } finally { $process.Dispose() }
+}
+
 function Invoke-DashboardStop([int]$OldPid) {
   if ($TestMode) { $script:fixtureDashboardPid = 0; return }
-  $service = Join-Path $plan.Production 'ops\ro-stack\dashboard-service.ps1'
-  & pwsh -NoProfile -File $service -Action stop | Out-Null
-  if ($LASTEXITCODE -ne 0) { throw 'DASHBOARD_STOP_FAILED' }
+  Invoke-DashboardService 'stop'
   $deadline = (Get-Date).AddSeconds(10)
   do {
     $listeners = @(Get-NetTCPConnection -State Listen -LocalPort 8788 -ErrorAction SilentlyContinue)
@@ -220,10 +280,15 @@ function Invoke-DashboardStop([int]$OldPid) {
 }
 
 function Invoke-DashboardStart {
-  if ($TestMode) { $script:fixtureDashboardPid = 9001; return }
-  $service = Join-Path $plan.Production 'ops\ro-stack\dashboard-service.ps1'
-  & pwsh -NoProfile -File $service -Action start | Out-Null
-  if ($LASTEXITCODE -ne 0) { throw 'DASHBOARD_START_FAILED' }
+  if ($TestMode) {
+    if ($SimulateStartFailure -and -not $script:simulatedStartFailureConsumed) {
+      $script:simulatedStartFailureConsumed = $true
+      throw 'SIMULATED_DASHBOARD_START_FAILURE'
+    }
+    $script:fixtureDashboardPid = 9001
+    return
+  }
+  Invoke-DashboardService 'start'
   $deadline = (Get-Date).AddSeconds(15)
   do {
     try {
@@ -260,12 +325,31 @@ function Copy-Validated([string]$Source, [string]$Target, [string]$Expected) {
 
 function Restore-All($Entries, [string]$RunRoot) {
   foreach ($entry in $Entries) {
-    $backup = Join-Path $RunRoot ('backup\' + $entry.Path.Replace('/', '\'))
-    if ((Get-Sha256 $backup) -ne $entry.PreimageHash) { throw "BACKUP_HASH_MISMATCH:$($entry.Path)" }
-    Replace-FileAtomic -Source $backup -Target $entry.Target
-    if ((Get-Sha256 $entry.Target) -ne $entry.PreimageHash) { throw "ROLLBACK_HASH_MISMATCH:$($entry.Path)" }
+    if ($entry.PreimageAbsent) {
+      if (Test-Path -LiteralPath $entry.Target) {
+        if ((Get-Sha256 $entry.Target) -ne $entry.CandidateHash) { throw "NEW_FILE_DRIFT:$($entry.Path)" }
+        Remove-Item -LiteralPath $entry.Target -Force
+      }
+      if (Test-Path -LiteralPath $entry.Target) { throw "NEW_FILE_ROLLBACK_FAILED:$($entry.Path)" }
+    } else {
+      $backup = Join-Path $RunRoot ('backup\' + $entry.Path.Replace('/', '\'))
+      if ((Get-Sha256 $backup) -ne $entry.PreimageHash) { throw "BACKUP_HASH_MISMATCH:$($entry.Path)" }
+      Replace-FileAtomic -Source $backup -Target $entry.Target
+      if ((Get-Sha256 $entry.Target) -ne $entry.PreimageHash) { throw "ROLLBACK_HASH_MISMATCH:$($entry.Path)" }
+    }
     $script:restoredPaths += $entry.Path
   }
+}
+
+function Test-Preimages($Entries) {
+  $matched = 0
+  foreach ($entry in $Entries) {
+    if ($entry.PreimageAbsent) {
+      if (-not (Test-Path -LiteralPath $entry.Target)) { $matched++ }
+    } elseif ((Test-Path -LiteralPath $entry.Target -PathType Leaf) -and
+            (Get-Sha256 $entry.Target) -eq $entry.PreimageHash) { $matched++ }
+  }
+  return [ordered]@{ matched = $matched; total = @($Entries).Count; pass = $matched -eq @($Entries).Count }
 }
 
 $plan = $null
@@ -274,11 +358,13 @@ $before = $null
 $dashboardStopped = $false
 $productionTouched = $false
 $failure = $null
+$failurePhase = 'READ_PLAN'
 $script:changedPaths = @()
 $script:restoredPaths = @()
 try {
   if ($SimulateDashboardDown) { $script:fixtureDashboardPid = 0 }
   $plan = Read-Plan
+  $failurePhase = 'TOPOLOGY_PRECHECK'
   $before = Get-Topology
   Assert-Topology $before -AllowDashboardDown:$Rollback
   if ($Precheck) {
@@ -286,6 +372,9 @@ try {
       result = 'PRECHECK_PASS'; manifest_sha256 = $plan.ManifestHash;
       candidate_commit = $plan.Commit; candidate_root = $plan.Candidate;
       file_count = $plan.Entries.Count;
+      post_deploy_import_closure = $plan.Closure.post_deploy_import_closure;
+      runtime_delivery_closure = $plan.Closure.runtime_delivery_closure;
+      runtime_dependency_count = @($plan.Closure.dependencies).Count;
       files = @($plan.Entries | ForEach-Object { [ordered]@{ path = $_.Path;
         candidate_sha256 = $_.CandidateHash; production_preimage_sha256 = $_.PreimageHash } });
       dashboard_pid_before = $before.DashboardPid; dashboard_pid_after = $before.DashboardPid;
@@ -296,6 +385,7 @@ try {
     exit 0
   }
   if ($Deploy) {
+    $failurePhase = 'STAGING'
     $directory = if ($ReceiptDirectory) { [IO.Path]::GetFullPath($ReceiptDirectory) } else {
       Join-Path $plan.Production '.local\ro-stack\dashboard\deploy-receipts' }
     if (-not $TestMode -and $directory -ine (Join-Path $plan.Production '.local\ro-stack\dashboard\deploy-receipts')) {
@@ -307,25 +397,37 @@ try {
     Copy-Validated -Source $plan.ManifestPath -Target (Join-Path $runRoot 'manifest.json') -Expected $plan.ManifestHash
     foreach ($entry in $plan.Entries) {
       Copy-Validated -Source $entry.Source -Target (Join-Path $runRoot ('staged\' + $entry.Path.Replace('/', '\'))) -Expected $entry.CandidateHash
-      Copy-Validated -Source $entry.Target -Target (Join-Path $runRoot ('backup\' + $entry.Path.Replace('/', '\'))) -Expected $entry.PreimageHash
+      if (-not $entry.PreimageAbsent) {
+        Copy-Validated -Source $entry.Target -Target (Join-Path $runRoot ('backup\' + $entry.Path.Replace('/', '\'))) -Expected $entry.PreimageHash
+      }
     }
     Suspend-WebWatchdog
     $productionTouched = $true
     $dashboardStopped = $true
+    $failurePhase = 'DASHBOARD_STOP'
     Invoke-DashboardStop $before.DashboardPid
+    $failurePhase = 'PREIMAGE_RECHECK'
     foreach ($entry in $plan.Entries) {
-      if ((Get-Sha256 $entry.Target) -ne $entry.PreimageHash) { throw "PREIMAGE_DRIFT_AFTER_STOP:$($entry.Path)" }
+      if ($entry.PreimageAbsent) {
+        if (Test-Path -LiteralPath $entry.Target) { throw "PREIMAGE_DRIFT_AFTER_STOP:$($entry.Path)" }
+      } elseif ((Get-Sha256 $entry.Target) -ne $entry.PreimageHash) {
+        throw "PREIMAGE_DRIFT_AFTER_STOP:$($entry.Path)"
+      }
     }
     $index = 0
+    $failurePhase = 'FILE_REPLACEMENT'
     foreach ($entry in $plan.Entries) {
       $staged = Join-Path $runRoot ('staged\' + $entry.Path.Replace('/', '\'))
-      Replace-FileAtomic -Source $staged -Target $entry.Target
+      if ($entry.PreimageAbsent) { Place-NewFileAtomic -Source $staged -Target $entry.Target }
+      else { Replace-FileAtomic -Source $staged -Target $entry.Target }
       if ((Get-Sha256 $entry.Target) -ne $entry.CandidateHash) { throw "DEPLOYED_HASH_MISMATCH:$($entry.Path)" }
       $script:changedPaths += $entry.Path
       $index++
       if ($SimulateFailureAfter -eq $index) { throw 'SIMULATED_MID_DEPLOY_FAILURE' }
     }
+    $failurePhase = 'DASHBOARD_START'
     Invoke-DashboardStart
+    $failurePhase = 'POST_DEPLOY_TOPOLOGY'
     $after = Get-Topology
     Assert-Topology $after $before.NativePids
     if ($after.DashboardPid -eq $before.DashboardPid) { throw 'DASHBOARD_PID_UNCHANGED' }
@@ -341,6 +443,7 @@ try {
       native_pids_before = $before.NativePids; native_pids_after = $after.NativePids;
       listener_counts_before = $before.Counts; listener_counts_after = $after.Counts;
       rollback_performed = $false; final_state = 'CANDIDATE_ACTIVE' }
+    $failurePhase = 'FINALIZATION'
     Resume-WebWatchdog
     $receiptFile = Join-Path $runRoot 'deploy-receipt.json'
     Write-Receipt -Path $receiptFile -Value $receipt
@@ -371,18 +474,25 @@ try {
     if ($row.Count -ne 1 -or $row[0].candidate_sha256 -ne $entry.CandidateHash -or
         $row[0].production_preimage_sha256 -ne $entry.PreimageHash) { throw 'ROLLBACK_FILE_RECEIPT_MISMATCH' }
     if ((Get-Sha256 $entry.Target) -ne $entry.CandidateHash) { throw "ROLLBACK_CURRENT_HASH_MISMATCH:$($entry.Path)" }
-    $backup = Join-Path $runRoot ('backup\' + $entry.Path.Replace('/', '\'))
-    if ((Get-Sha256 $backup) -ne $entry.PreimageHash) { throw "BACKUP_HASH_MISMATCH:$($entry.Path)" }
+    if (-not $entry.PreimageAbsent) {
+      $backup = Join-Path $runRoot ('backup\' + $entry.Path.Replace('/', '\'))
+      if ((Get-Sha256 $backup) -ne $entry.PreimageHash) { throw "BACKUP_HASH_MISMATCH:$($entry.Path)" }
+    }
   }
   Suspend-WebWatchdog
   $productionTouched = $true
   $dashboardStopped = $true
+  $failurePhase = 'ROLLBACK_DASHBOARD_STOP'
   Invoke-DashboardStop $before.DashboardPid
+  $failurePhase = 'ROLLBACK_CANDIDATE_RECHECK'
   foreach ($entry in $plan.Entries) {
     if ((Get-Sha256 $entry.Target) -ne $entry.CandidateHash) { throw "CANDIDATE_DRIFT_AFTER_STOP:$($entry.Path)" }
   }
+  $failurePhase = 'ROLLBACK_RESTORE'
   Restore-All -Entries $plan.Entries -RunRoot $runRoot
+  $failurePhase = 'ROLLBACK_DASHBOARD_START'
   Invoke-DashboardStart
+  $failurePhase = 'ROLLBACK_FINALIZATION'
   $after = Get-Topology
   Assert-Topology $after $before.NativePids
   $rollbackReceipt = [ordered]@{ timestamp = [DateTimeOffset]::UtcNow.ToString('o'); mode = 'ROLLBACK';
@@ -404,7 +514,9 @@ try {
 } catch {
   $failure = $_.Exception.Message
   $recovery = 'NOT_REQUIRED'
+  $rollbackAttempted = $false
   if ($dashboardStopped -and $runRoot -and $plan) {
+    $rollbackAttempted = $true
     try {
       Suspend-WebWatchdog
       $current = Get-Topology
@@ -412,17 +524,29 @@ try {
       Restore-All -Entries $plan.Entries -RunRoot $runRoot
       Invoke-DashboardStart
       Assert-Topology (Get-Topology) $before.NativePids
+      $validation = Test-Preimages $plan.Entries
+      if (-not $validation.pass) { throw 'AUTOMATIC_ROLLBACK_PREIMAGE_VALIDATION_FAILED' }
       $recovery = 'PREIMAGE_RESTORED'
     } catch { $recovery = "ROLLBACK_FAILED:$($_.Exception.Message)" }
   }
   $final = try { Get-Topology } catch { $null }
+  $finalValidation = if ($plan) { Test-Preimages $plan.Entries } else { $null }
+  $failureReceiptFile = $null
+  $receiptError = $null
   if ($runRoot -and (Test-Path -LiteralPath $runRoot)) {
-    try { Write-Receipt -Path (Join-Path $runRoot "failure-$([guid]::NewGuid().ToString('N')).json") -Value ([ordered]@{
+    $failureReceiptFile = Join-Path $runRoot "failure-$([guid]::NewGuid().ToString('N')).json"
+    try { Write-Receipt -Path $failureReceiptFile -Value ([ordered]@{
       timestamp = [DateTimeOffset]::UtcNow.ToString('o'); mode = if ($Deploy) { 'DEPLOY' } else { 'ROLLBACK' };
-      result = 'FAIL_CLOSED'; manifest_sha256 = if ($plan) { $plan.ManifestHash } else { $null };
+      status = 'FAILED'; result = 'FAIL_CLOSED'; failure_phase = $failurePhase; failure_reason = $failure;
+      manifest_hash = if ($plan) { $plan.ManifestHash } else { $null };
+      manifest_sha256 = if ($plan) { $plan.ManifestHash } else { $null };
       candidate_commit = if ($plan) { $plan.Commit } else { $null };
       candidate_root = if ($plan) { $plan.Candidate } else { $null };
-      files_changed = @($script:changedPaths); files_restored = @($script:restoredPaths);
+      files_mutated = @($script:changedPaths); files_changed = @($script:changedPaths);
+      files_restored = @($script:restoredPaths);
+      automatic_rollback_attempted = $rollbackAttempted;
+      automatic_rollback_result = $recovery;
+      final_preimage_validation = $finalValidation;
       files = if ($plan) { @($plan.Entries | ForEach-Object { [ordered]@{ path = $_.Path;
         production_preimage_sha256 = $_.PreimageHash; candidate_sha256 = $_.CandidateHash } }) } else { @() };
       dashboard_pid_before = if ($before) { $before.DashboardPid } else { $null };
@@ -433,9 +557,12 @@ try {
       native_pids_after = if ($final) { $final.NativePids } else { @() };
       listener_counts_before = if ($before) { $before.Counts } else { @() };
       listener_counts_after = if ($final) { $final.Counts } else { @() };
-      rollback_performed = $recovery -eq 'PREIMAGE_RESTORED'; final_state = $recovery; error = $failure }) } catch {}
+      rollback_performed = $recovery -eq 'PREIMAGE_RESTORED'; final_state = $recovery; error = $failure }) }
+    catch { $receiptError = $_.Exception.Message; $failureReceiptFile = $null }
   }
   [ordered]@{ result = 'FAIL_CLOSED'; error = $failure; rollback = $recovery;
+    failure_receipt = $failureReceiptFile; receipt_error = $receiptError;
+    final_preimage_validation = $finalValidation;
     production_touched = $productionTouched } | ConvertTo-Json -Depth 5
   exit 1
 } finally {

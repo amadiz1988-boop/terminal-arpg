@@ -24,8 +24,8 @@ function New-Fixture([string]$Name) {
     $source = Join-Path $candidate ($path.Replace('/', '\'))
     $target = Join-Path $production ($path.Replace('/', '\'))
     New-Item -ItemType Directory -Force -Path (Split-Path -Parent $source), (Split-Path -Parent $target) | Out-Null
-    [IO.File]::WriteAllText($source, "candidate:$Name`:$path")
-    [IO.File]::WriteAllText($target, "preimage:$Name`:$path")
+    [IO.File]::WriteAllText($source, "export const fixture = 'candidate:$Name`:$path';")
+    [IO.File]::WriteAllText($target, "export const fixture = 'preimage:$Name`:$path';")
     $files += [ordered]@{
       path = $path
       candidate_sha256 = (Get-FileHash -LiteralPath $source -Algorithm SHA256).Hash
@@ -52,6 +52,27 @@ function Invoke-Tool($Fixture, [string[]]$Arguments) {
   $code = $LASTEXITCODE
   $json = try { ($output -join "`n") | ConvertFrom-Json } catch { $null }
   return [pscustomobject]@{ ExitCode = $code; Json = $json; Output = $output -join "`n" }
+}
+
+function Add-NewDependency($Fixture, [bool]$IncludeInManifest) {
+  $relative = 'ops/ro-stack/persistent-agent/fixture-dependency.mjs'
+  $source = Join-Path $Fixture.Candidate ($relative.Replace('/', '\'))
+  New-Item -ItemType Directory -Force -Path (Split-Path -Parent $source) | Out-Null
+  New-Item -ItemType Directory -Force -Path (Join-Path $Fixture.Production 'ops\ro-stack\persistent-agent') | Out-Null
+  [IO.File]::WriteAllText($source, "export const dependency = true;")
+  $entry = Join-Path $Fixture.Candidate 'ops\ro-stack\dashboard.mjs'
+  [IO.File]::WriteAllText($entry, "import { dependency } from './persistent-agent/fixture-dependency.mjs';`nexport const fixture = dependency;")
+  $manifest = Get-Content -LiteralPath $Fixture.Manifest -Raw | ConvertFrom-Json
+  $manifest.files[0].candidate_sha256 = (Get-FileHash -LiteralPath $entry -Algorithm SHA256).Hash
+  if ($IncludeInManifest) {
+    $manifest.files += [pscustomobject]@{
+      path = $relative
+      candidate_sha256 = (Get-FileHash -LiteralPath $source -Algorithm SHA256).Hash
+      production_preimage = 'ABSENT'
+    }
+  }
+  $manifest | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $Fixture.Manifest -Encoding utf8
+  return $relative
 }
 
 function Assert-Preimage($Fixture) {
@@ -102,11 +123,14 @@ try {
     $f = New-Fixture 'mid-failure'
     $r = Invoke-Tool $f @('-Deploy', '-SimulateFailureAfter', '1')
     Assert ($r.ExitCode -ne 0 -and $r.Json.rollback -eq 'PREIMAGE_RESTORED') $r.Output
+    Assert ($r.Json.failure_receipt -and (Test-Path -LiteralPath $r.Json.failure_receipt)) 'failure receipt path not returned'
     Assert-Preimage $f
     $failures = @(Get-ChildItem -LiteralPath (Join-Path $f.Production '.local\ro-stack\dashboard\deploy-receipts') -Recurse -File -Filter 'failure-*.json')
     Assert ($failures.Count -eq 1) 'failure receipt missing'
     $failureReceipt = Get-Content -LiteralPath $failures[0].FullName -Raw | ConvertFrom-Json
     Assert ($failureReceipt.candidate_root -ceq $f.Candidate) 'failure receipt candidate root differs from manifest source'
+    Assert ($failureReceipt.status -eq 'FAILED' -and $failureReceipt.failure_phase -eq 'FILE_REPLACEMENT') 'failure phase missing'
+    Assert ($failureReceipt.automatic_rollback_attempted -and $failureReceipt.final_preimage_validation.pass) 'automatic rollback proof missing'
   }
   Run-Test 'successful deploy and full rollback preserve unlisted files' {
     $f = New-Fixture 'full-cycle'
@@ -157,6 +181,69 @@ try {
     Assert ($code -eq 0 -and $rollback.result -eq 'ROLLBACK_PASS') ($output -join "`n")
     Assert ($rollback.runtime.Counts[3] -eq 1 -and $rollback.runtime.Health) 'Dashboard was not restored'
     Assert-Preimage $f
+  }
+  Run-Test 'missing imported module rejects precheck before mutation' {
+    $f = New-Fixture 'missing-import'
+    $dependency = Add-NewDependency $f $false
+    $r = Invoke-Tool $f @('-Precheck')
+    Assert ($r.ExitCode -ne 0 -and $r.Json.error -match 'DEPLOYMENT_RUNTIME_CLOSURE_FAILED') $r.Output
+    Assert (-not $r.Json.production_touched) 'precheck mutated Production fixture'
+    Assert (-not (Test-Path -LiteralPath (Join-Path $f.Production $dependency))) 'missing dependency appeared in Production fixture'
+    Assert-Preimage $f
+  }
+  Run-Test 'new dependency deploys and explicit rollback removes only listed new file' {
+    $f = New-Fixture 'new-dependency'
+    $dependency = Add-NewDependency $f $true
+    $precheck = Invoke-Tool $f @('-Precheck')
+    Assert ($precheck.ExitCode -eq 0 -and $precheck.Json.post_deploy_import_closure) $precheck.Output
+    $deploy = Invoke-Tool $f @('-Deploy')
+    Assert ($deploy.ExitCode -eq 0 -and $deploy.Json.result -eq 'DEPLOY_PASS') $deploy.Output
+    Assert (Test-Path -LiteralPath (Join-Path $f.Production $dependency)) 'new dependency not delivered'
+    $output = @(& pwsh -NoProfile -File $tool -ProductionRoot $f.Production -TestMode -Rollback -ReceiptPath $deploy.Json.receipt 2>&1)
+    $rollback = try { ($output -join "`n") | ConvertFrom-Json } catch { $null }
+    Assert ($LASTEXITCODE -eq 0 -and $rollback.result -eq 'ROLLBACK_PASS') ($output -join "`n")
+    Assert (-not (Test-Path -LiteralPath (Join-Path $f.Production $dependency))) 'new dependency remained after rollback'
+    Assert-Preimage $f
+  }
+  Run-Test 'failed start writes bounded failure receipt and removes new file' {
+    $f = New-Fixture 'failed-start'
+    $dependency = Add-NewDependency $f $true
+    $watch = [Diagnostics.Stopwatch]::StartNew()
+    $r = Invoke-Tool $f @('-Deploy', '-SimulateStartFailure')
+    $watch.Stop()
+    Assert ($r.ExitCode -ne 0 -and $watch.Elapsed.TotalSeconds -lt 30) $r.Output
+    Assert ($r.Json.failure_receipt -and (Test-Path -LiteralPath $r.Json.failure_receipt)) 'failed start receipt path not returned'
+    $failures = @(Get-ChildItem -LiteralPath (Join-Path $f.Production '.local\ro-stack\dashboard\deploy-receipts') -Recurse -File -Filter 'failure-*.json')
+    Assert ($failures.Count -eq 1) 'failure receipt missing'
+    $receipt = Get-Content -LiteralPath $failures[0].FullName -Raw | ConvertFrom-Json
+    Assert ($receipt.status -eq 'FAILED' -and $receipt.failure_phase -eq 'DASHBOARD_START') 'failure receipt phase invalid'
+    Assert ($receipt.candidate_root -ceq $f.Candidate -and $receipt.manifest_hash) 'failure provenance incomplete'
+    Assert ($receipt.automatic_rollback_result -eq 'PREIMAGE_RESTORED' -and $receipt.final_preimage_validation.pass) 'automatic rollback proof missing'
+    Assert (-not (Test-Path -LiteralPath (Join-Path $f.Production $dependency))) 'new dependency remained after failed deploy'
+    Assert-Preimage $f
+  }
+  Run-Test 'occupied new-file target is rejected before mutation' {
+    $f = New-Fixture 'occupied-target'
+    $dependency = Add-NewDependency $f $true
+    $target = Join-Path $f.Production $dependency
+    [IO.File]::WriteAllText($target, 'unlisted-owner')
+    $r = Invoke-Tool $f @('-Precheck')
+    Assert ($r.ExitCode -ne 0 -and $r.Json.error -match 'TARGET_EXPECTED_ABSENT') $r.Output
+    Assert ([IO.File]::ReadAllText($target) -eq 'unlisted-owner') 'occupied target changed'
+    Assert-Preimage $f
+  }
+  Run-Test 'rollback refuses changed new file without deleting it' {
+    $f = New-Fixture 'new-file-drift'
+    $dependency = Add-NewDependency $f $true
+    $deploy = Invoke-Tool $f @('-Deploy')
+    Assert ($deploy.ExitCode -eq 0 -and $deploy.Json.result -eq 'DEPLOY_PASS') $deploy.Output
+    $target = Join-Path $f.Production $dependency
+    [IO.File]::WriteAllText($target, 'changed-after-deploy')
+    $output = @(& pwsh -NoProfile -File $tool -ProductionRoot $f.Production -TestMode -Rollback -ReceiptPath $deploy.Json.receipt 2>&1)
+    $rollback = try { ($output -join "`n") | ConvertFrom-Json } catch { $null }
+    Assert ($LASTEXITCODE -ne 0 -and $rollback.error -match 'CURRENT_HASH_MISMATCH') ($output -join "`n")
+    Assert ([IO.File]::ReadAllText($target) -eq 'changed-after-deploy') 'unknown changed file deleted'
+    Assert ([IO.File]::ReadAllText($f.Unlisted) -eq 'keep-this-exact') 'unlisted file changed'
   }
 } finally {
   $resolved = [IO.Path]::GetFullPath($testRoot)

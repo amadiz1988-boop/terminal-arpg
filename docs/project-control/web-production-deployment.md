@@ -1,17 +1,21 @@
 # Canonical Production Web Deployment
 
 Status: `CANONICAL_DEPLOYMENT_POLICY=ACTIVE`; `SOURCE_VALIDATED=YES`;
-`OFFLINE_VALIDATED=YES (8/8)`; `PRODUCTION_VALIDATED=NO`;
-`PRODUCTION_VALIDATION_STATUS=NOT_REACHED`.
+`OFFLINE_VALIDATED=YES (13/13)`; `PRODUCTION_VALIDATED=NO`;
+`PRODUCTION_VALIDATION_STATUS=FAILED_CANARY_DEPENDENCY_CLOSURE`.
 
-Policy authority: `AGENTS.md`. Source checkpoint:
-`8f3073079e075771cd63c2a830da100e722068a7` on
-`codex/manifest-web-only-deploy-v1` at
-`C:\Users\Administrator\.codex\worktrees\manifest-web-only-deploy-v1\terminal-arpg`.
+Policy authority: `AGENTS.md`. Initial tool source checkpoint:
+`8f3073079e075771cd63c2a830da100e722068a7`; canonical integration
+checkpoint: `855c1bc180f6844e4077c9ea6c5ed0504bfad387`.
 The accepted tool and its tests are integrated into the canonical shared
 `terminal-arpg` checkout. Source integration and Production validation remain
-separate gates. No V3 real deploy,
-candidate activation, or real rollback has passed as of this status record.
+separate gates. V3 executed a real deploy attempt; the candidate Dashboard
+failed startup because an imported local module was omitted from the manifest.
+Automatic recovery restored 16/16 preimages and health, but a durable failure
+receipt and bounded transaction finalization were missing. V3 did not pass.
+The original V3 manifest now fails read-only precheck on the omitted module;
+the corrected 195-file manifest passes read-only Production precheck with
+307 resolved runtime dependencies. No corrected-candidate deploy occurred.
 
 ## Entrypoints
 
@@ -30,13 +34,16 @@ candidate activation, or real rollback has passed as of this status record.
 `WEB_DEPLOY_RECEIPT_REQUIRED=YES`; `WEB_DEPLOY_FAIL_CLOSED=YES`;
 `WEB_DEPLOY_WEB_ONLY=YES`.
 
-The manifest names 1-64 unique, authorized Web-relative paths, a clean
-candidate commit/root, Production root, and exact candidate and Production
-preimage SHA256 values. No wildcard or implicit file discovery is allowed.
-Before mutation, require valid schema and paths, every source and target file,
-both sets of matching hashes, clean candidate worktree, healthy Production,
-one Dashboard, and no second runtime. Any failure forbids deploy and leaves
-Production file mutation at zero.
+The manifest names 1-256 unique, authorized Web-relative paths, a clean
+candidate commit/root, Production root, and exact candidate SHA256 values.
+Existing targets require their preimage SHA256; new targets require the explicit
+`production_preimage: "ABSENT"` marker. No wildcard or implicit file discovery
+is allowed. Before mutation, require valid schema and paths, matching hashes,
+clean candidate worktree, healthy Production, one Dashboard, no second runtime,
+and simulated post-deploy runtime delivery closure. Missing local imports,
+direct Web resources, or map-info detail data fail precheck with no Dashboard
+stop and no Production file mutation. `DEPLOYMENT_RUNTIME_CLOSURE_REQUIRED=YES`;
+`SOURCE_IMPORT_PASS != DEPLOYMENT_CLOSURE_PASS`.
 
 ## Required sequence
 
@@ -60,9 +67,11 @@ DEPLOY RECEIPT + SAVED MANIFEST -> DASHBOARD STOP
 -> VERIFY 6901/6122/5122 PIDs UNCHANGED -> ROLLBACK RECEIPT
 ```
 
-Rollback restores the complete manifest, including files not yet replaced
-when a deploy fails. Keep backups and receipts as operational evidence;
-Production runtime copies are not source authority.
+Rollback restores all existing manifest preimages. An `ABSENT` preimage is
+removed only when its file is manifest-owned and still matches the deployed
+candidate hash. Unlisted files, directories, and runtime-created files remain
+untouched. Keep backups and receipts as operational evidence; Production
+runtime copies are not source authority.
 
 ## Receipt and acceptance
 
@@ -72,10 +81,16 @@ changed files, Dashboard PID before/after, 6901/6122/5122/8788 listener
 counts and PIDs, health before/after, rollback performed, and final state.
 Receipts contain no secrets. The saved manifest belongs to the receipt bundle.
 
-The integrated tool records `candidate_root` independently in deploy and
-rollback receipts from the validated manifest source root. Rollback rejects a
-deploy receipt whose root differs from the saved manifest. This source contract
-has offline test coverage; Production validation remains open.
+The integrated tool records `candidate_root` independently in deploy,
+rollback, and failure receipts from the validated manifest source root.
+Rollback rejects a deploy receipt whose root differs from the saved manifest.
+A failed post-mutation deploy must exit after either verified automatic
+rollback or an explicit unsafe-state failure receipt. Its receipt records
+failure phase/reason, mutated files, topology and health before/after, rollback
+attempt/result, and final preimage validation. Verified automatic rollback
+uses the failure receipt as its completion evidence; explicit `-Rollback`
+requires a successful deploy receipt. This source contract has offline test
+coverage; Production validation remains open.
 The current tool writes its runtime deploy receipt after health validation;
 Player/API and Browser acceptance must be recorded separately before a release
 can pass the full policy sequence.
