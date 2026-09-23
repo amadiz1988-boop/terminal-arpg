@@ -3071,8 +3071,16 @@ async function queueServerAgentRelocationPrepared(account, controller, requested
           deathRecoveryEnabled: true,
         },
       ),
-      false,
+      true,
     );
+    // A queued command is not an authoritative farm transition. Keep the
+    // durable intent and let the same coordinator confirm AUTO_FARM.
+    pendingRelocations.set(charId, {
+      accountId: Number(account.accountId), charId, targetMap: mapId,
+      stage: 'WAIT_FARM', commandId: command.commandId,
+      attempts: 0, busy: false,
+      deadline: Date.now() + coordinatorDeadlineMsForRouteSteps(1),
+    });
     return {
       policy: plan.policy,
       route: null,

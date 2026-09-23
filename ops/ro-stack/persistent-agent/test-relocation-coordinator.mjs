@@ -143,7 +143,7 @@ const selectionBody = source.slice(
   source.indexOf('async function queueServerAgentRelocationPrepared('),
   source.indexOf('// ---------------------------------------------------------------------------', source.indexOf('async function queueServerAgentRelocationPrepared(')),
 );
-function selectionFixture(rejectCommand) {
+function selectionFixture(rejectCommand, agentMode = 'AUTO_FARM') {
   const path = join('fixture-root', '1', 'grind-target.json');
   const oldTarget = { mapId: 'moc_pryd01', source: 'PLAYER_OVERRIDE' };
   const files = new Map([[path, JSON.stringify(oldTarget)]]);
@@ -169,9 +169,9 @@ function selectionFixture(rejectCommand) {
     randomUUID: () => 'fixture-rollback',
     writePersistedRelocation: async () => { marker = true; },
     clearPersistedRelocation: async () => { marker = false; },
-    queueOwnershipCommand: async () => {
+    queueOwnershipCommand: async (_account, _char, command) => {
       if (rejectCommand) throw new Error('bounded dispatch failure');
-      return { commandId: 'fixture-stop', action: 'stop_farm' };
+      return { commandId: 'fixture-command', action: command.action };
     },
     coordinatorDeadlineMsForRouteSteps: () => 60_000,
     console: { warn() {} },
@@ -180,7 +180,7 @@ function selectionFixture(rejectCommand) {
     `${selectionBody}; return queueServerAgentRelocationPrepared;`)(...Object.values(dependencies));
   return {
     select: () => select({ accountId: 1, characterId: 1 }, {
-      liveStatus: { fresh: true, map: 'prontera' }, agentMode: 'AUTO_FARM', revision: 7,
+      liveStatus: { fresh: true, map: 'prontera' }, agentMode, revision: 7,
     }, 'prontera'),
     files, path, pendingRelocations, marker: () => marker,
   };
@@ -196,4 +196,15 @@ await assert.rejects(rejectedSelection.select(), /bounded dispatch failure/);
 assert.equal(JSON.parse(rejectedSelection.files.get(rejectedSelection.path)).mapId, 'moc_pryd01');
 assert.equal(rejectedSelection.marker(), false);
 assert.equal(rejectedSelection.pendingRelocations.size, 0);
+const idleSelection = selectionFixture(false, 'PERSISTENT_IDLE');
+const idleResult = await idleSelection.select();
+assert.equal(idleResult.command.action, 'start_farm');
+assert.equal(idleSelection.pendingRelocations.get(1)?.stage, 'WAIT_FARM');
+assert.equal(idleSelection.pendingRelocations.get(1)?.commandId, 'fixture-command');
+assert.equal(idleSelection.marker(), true, 'idle start retains durable intent until authoritative farm');
+const rejectedIdleSelection = selectionFixture(true, 'PERSISTENT_IDLE');
+await assert.rejects(rejectedIdleSelection.select(), /bounded dispatch failure/);
+assert.equal(JSON.parse(rejectedIdleSelection.files.get(rejectedIdleSelection.path)).mapId, 'moc_pryd01');
+assert.equal(rejectedIdleSelection.marker(), false);
+assert.equal(rejectedIdleSelection.pendingRelocations.size, 0);
 console.log('PASS map_selection_dispatch_rollback_and_intent_preservation');
