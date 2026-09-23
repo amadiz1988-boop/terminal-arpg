@@ -67,3 +67,27 @@ PRODUCTION_VALIDITY_IMPACT = 本輪未證明新帳號註冊流程
 - 被測功能依賴可見 UI 時，完成實際 Browser 驗收。
 
 兩種角色的 `READY` 均以適用的現場閘門通過為前提。來源設定、DB ID 與單一 Web API 動作只能提供部分證據。本次未修改 Production gameplay 程式、Navigation、Combat 或 Quest。
+
+## 續作查核，2026-09-23
+
+`TASK_ID = CANONICAL_TEST_IDENTITIES_LIVE_ACCEPTANCE_AND_ISOLATION_V1`。固定 ID 與憑證位置沿用上表，未重建帳號。`FIXTURE_SETUP_IDENTITY = TEST_SUPERUSER`，`FINAL_ACCEPTANCE_IDENTITY = TEST_PLAYER`。群組 99 的 `all_commands` 是 fixture 準備權限契約；原生已認證指令尚未實測，故 `SUPERUSER_NATIVE_GM_PATH = PENDING`，`TEST_PLAYER_NATIVE_GM_REJECTION = PENDING`。Web 的 HTTP 400 不算原生拒絕證據。GM 準備結果不算玩家流程通過。
+
+### Superuser 安全界線
+
+`TEST_SUPERUSER_FULL_COMMAND_AUTHORITY = YES` 表示測試身分的群組設定授予完整指令集合。實際使用固定為 `TEST_FIXTURE_SCOPE_ONLY`，真實玩家目標、世界範圍破壞性指令及全域伺服器設定變更均禁止。每次執行記錄指令、操作者、測試目標、權威結果及清理結果。玩家驗收由 `TEST_PLAYER` 以正常權限單獨完成。
+
+### Life 與 Social
+
+Native `src/map/persistent_agent.cpp` 在 attach 時呼叫 `persistent_agent_life_start_session`；原入口沒有檢查 `web_account_flags.is_test`。這直接導致兩筆測試角色的 ACTIVE session 與各一筆 `SESSION_STARTED`。Native canonical source 已加入通用 `is_test` 檢查，測試帳號走現有 `persistent_agent_life_interrupt_session(..., "TEST_FIXTURE_EXCLUDED")`，保留歷史事件並阻止新建 session。來源編譯通過；現行 Production map-server 尚未載入此來源，因此 `FUTURE_TEST_LIFE_ADMISSION = PENDING_DEPLOY`。2026-09-23 讀回 `TEST_SUPERUSER_ACTIVE_LIFE_SESSION = 1`、`TEST_PLAYER_ACTIVE_LIFE_SESSION = 1`。Dashboard 在一般 runtime 禁止 `release_agent`，現有正常生命週期入口無法在 Production 關閉這兩筆 session。同時有兩隻非測試角色在線，本輪沒有重啟 canonical runtime 或執行 session 清理。
+
+目前 Life Director 與 Social Director 均未在 Production 啟用。未來兩者的 enrollment 與 encounter admission 必須以 `web_account_flags.is_test = 1` 排除測試帳號，並在啟用前以權威狀態驗證。現況 `CURRENT_SOCIAL_RUNTIME = NOT_ACTIVE`；未來 gate 為治理契約，尚無執行證據。
+
+### Economy
+
+已定位 Native 的玩家交易、販售商店、收購商店、郵件附件、有限庫存 market shop、公會倉庫與丟棄物品入口；auction 設定為 off。Native canonical source 已在上述入口加入通用 `is_test` 阻擋，郵件送達目標也查詢帳號旗標。Debug Win32 build 通過，Production 尚未部署，未進行原生交易驗收。`ECONOMY_ISOLATION = PARTIAL`，`TEST_IDENTITIES_REAL_ECONOMY_IMPACT = NOT_PROVEN_ZERO`。部署前不得讓 fixture 參與真實玩家經濟。
+
+### 本輪證據界線
+
+本輪對 canonical DB 只做 SELECT。讀回兩組 fixture 的群組與 `is_test`、兩筆 ACTIVE Life session，以及兩隻非測試角色在線。沒有執行 GM 指令、玩家 gameplay 動作、直接 DB 寫入、PA release、Production 部署或 runtime 重啟；因此本輪由工作動作造成的 `NON_TEST_ACCOUNT_MUTATIONS = 0` 與 `NON_TEST_CHARACTER_MUTATIONS = 0`。其他常駐玩家活動仍由既有 runtime 自行執行，此數字不代表全域資料未變。
+
+Native source checkpoint 為 `cb1dd250fbda4109364647943c72749646b924d4`。`CANONICAL_TEST_IDENTITIES_READY = NO`。尚需原生 GM 正反權限實測、Superuser 準備後的玩家權威行為、受控部署、既有測試 Life session 的現場終止，以及 Economy 的原生與 Production 驗收。

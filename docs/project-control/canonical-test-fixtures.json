@@ -26,5 +26,17 @@
       "credentialKey": "fresh-e2e-credentials",
       "status": "PROVISIONED_PENDING_NATIVE_DENIAL_AND_GAMEPLAY_ACCEPTANCE"
     }
-  ]
+  ],
+  "acceptance": {
+    "nativeGmSuperuser": "PENDING",
+    "nativeGmPlayerRejection": "PENDING",
+    "superuserPrepPlayerExecution": "PENDING",
+    "rankingExclusion": "PASS",
+    "lifeSourceGate": "BUILD_PASS_PENDING_DEPLOY",
+    "lifeRuntimeGate": "FAIL_ACTIVE_SESSIONS",
+    "socialRuntime": "NOT_ACTIVE",
+    "futureSocialGate": "REQUIRED_IS_TEST_EXCLUSION",
+    "economyIsolation": "PARTIAL_SOURCE_ONLY",
+    "ready": false
+  }
 }
