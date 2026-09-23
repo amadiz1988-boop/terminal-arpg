@@ -92,7 +92,9 @@ names the existing GI seam, or `HOLD` when the executor is not authorized.
 ## Closure accounting
 
 This is a discovered-capability classification, not a full parity certificate.
-The table has 52 rows: 14 H, 16 C, 22 R. Every displayed row has exactly one
+The table has 52 rows: 14 H, 16 C, 22 R. Classification counts are
+`PARTIAL=33`, `MISSING=1`, `NOT_IMPLEMENTED=8`, `NOT_APPLICABLE=1`,
+`GI_EXPLICIT_OVERRIDE=9`, and `ALIGNED=0`. Every displayed row has exactly one
 classification. All 135 condition-predicate keys have a stage classification
 and source pointer in `condition-key-census-v1.md`; their action-level parity
 and unenumerated Native decision sites are explicit outstanding work. Therefore
@@ -100,6 +102,16 @@ and unenumerated Native decision sites are explicit outstanding work. Therefore
 gate remains `NO`. `CURRENTLY_AUTHORIZED_PARTIAL` and
 `CURRENTLY_AUTHORIZED_MISSING` remain nonzero. Production and Browser proof are
 not implied by source changes.
+
+Known deviation decisions are explicit. `R01` HP 30/60 source and 70/80 stack
+versus pinned 40/100, `R03` missing sit gates, and `R04/R05` global recovery
+allowlists are `A: BUG_OR_ACCIDENTAL_DEVIATION` until corrected and tested.
+`H05/H12/H13/H14`, `R13`, and `R17/R19/R20/R21` are
+`B: GI_EXPLICIT_OVERRIDE` with the cited GI authority. `R19` also carries
+`NO_MATURE_REFERENCE=YES` and needs no fabricated OpenKore behavior. Other
+`PARTIAL` rows identify unported or unproven action behavior, not a license to
+invent a replacement. Full non-parser site discovery is still open, so
+`UNEXPLAINED_DEVIATION=0` has not been certified.
 
 First bounded closure slice: `attackUseWeapon` and `attackSkillSlot` map through
 the authenticated player config to `start_farm` payload, Native acceptance and
