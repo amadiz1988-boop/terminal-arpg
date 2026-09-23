@@ -22,8 +22,10 @@ Source checks passed: `scripts/test-farm-execution-profile.mjs`, `scripts/test-p
 ```text
 NO_MATURE_REFERENCE = YES for the GI-specific NO_TARGET → FLY trigger
 EXPLICIT_GI_CANONICAL_OVERRIDE = docs/RO_FLY_WING_SOURCE_AUDIT.md:19
-SOURCE_GAP = rejected item use retries every 1500 ms while no target persists; the pinned Teleport task has a bounded 3 s give-up, but a GI no-target cycle terminal/re-arm policy is not specified
-PROJECT_POLICY_REQUIRED = YES for rejection terminal/re-arm behavior
+PROJECT_POLICY_REQUIRED = NO for rejection terminal/re-arm behavior; Project Control explicitly authorized the rule in OPENKORE_MATURE_CAPABILITY_GAP_CENSUS_AND_CLOSURE_V1
+FLY_REJECTION_SOURCE = Native 4aed632; authoritative map-flag rejection records a map-local suppression until the map or restriction changes; no-item exits before item use; opaque item failures return only on a later normal scheduler cycle
+FLY_REJECTION_TEST = tools/pa-fly-rejection/build-and-test-fly-rejection.ps1 PASS source/policy checks; x64 Release Solution Build PASS; Native command contract 486 PASS
+SOURCE_GAP = authoritative post-warp target, HIT, and live inventory/count observation remain unproven
 FLY_WING_M1_SOURCE_CLOSED = NO
 PRODUCT_CLOSED = NO
 ```
