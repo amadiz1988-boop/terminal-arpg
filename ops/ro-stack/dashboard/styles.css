@@ -3063,6 +3063,21 @@ html {
   color: #a12c24;
   font-weight: bold;
 }
+.config-disabled {
+  color: #68727a;
+  background: #e5e8e7;
+}
+.config-disabled input,
+.config-disabled select,
+.config-disabled button {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+.config-capability-status {
+  color: #8a3d25;
+  font-size: 11px;
+  margin: 3px 6px;
+}
 .config-editor-actions {
   justify-content: flex-end;
   margin-top: 8px;

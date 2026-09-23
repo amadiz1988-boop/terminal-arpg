@@ -81,6 +81,24 @@ that row's real runtime capability and Player Web wiring are accepted.
 
 ## Source and Production boundary
 
+### Settings UI source gate
+
+The existing `/api/config` read/save response currently reports
+`execution.applied=false` and `CONFIG_ONLY_NO_EXECUTOR_COMMAND` for its
+configuration contract. The existing editor had 46 schema controls, most
+interactive despite that execution result. The M1 source candidate now groups
+them into nine Player settings sections and derives control enablement from a
+single `config-capabilities.mjs` adapter. `SUPPORTED` requires both an explicit
+per-path capability attestation and `execution.applied=true`; otherwise the
+control is `PARTIAL`, or `UNAVAILABLE` for first-release-excluded party/follow
+settings. Three fixed-policy displays remain read-only. The current response
+thus enables zero of 43 adjustable schema controls, and
+the save action is disabled. This removes the enabled-but-no-op UI behavior
+without claiming any runtime acceptance. OpenKore field evidence remains in
+the parent census, especially C01/C04/C13 and R01-R05; the UI delta reuse gate
+is `m1-settings-ui-reuse-gate.json`. Browser desktop and 390×844 acceptance
+remains unmeasured.
+
 The requested sequence is source implementation and bounded tests, then a
 coherent candidate. No Production file, runtime restart or live-player mutation
 is authorized here. A source `PASS` does not turn any row into a released UI

@@ -10,6 +10,7 @@ import {
   defaultCanonicalConfig,
   validateCanonicalConfig,
 } from './config-schema.mjs';
+import { CONFIG_SECTIONS, configCapability, configCapabilityCounts, configSection } from './config-capabilities.mjs';
 
 const $ = (root, selector) => root.querySelector(selector);
 const text = (value) => String(value ?? '');
@@ -51,13 +52,22 @@ function fieldInput(field, value) {
   return input;
 }
 
-function rowField(root, state, field, onChange) {
+function capabilityHint(status) {
+  const hint = document.createElement('small');
+  hint.className = 'config-capability-status';
+  hint.textContent = status === 'UNAVAILABLE' ? '尚未開放' : '尚未支援';
+  return hint;
+}
+
+function rowField(root, state, field, onChange, capability) {
+  const locked = field.fixed || capability !== 'SUPPORTED';
   const label = document.createElement('label');
-  label.className = `config-field${field.advanced ? ' config-advanced-field' : ''}`;
+  label.className = `config-field${field.advanced ? ' config-advanced-field' : ''}${locked ? ' config-disabled' : ''}`;
   const caption = document.createElement('span');
   caption.textContent = field.label;
   const input = fieldInput(field, getPath(state, field.path));
   input.dataset.configPath = field.path;
+  input.disabled = locked;
   if (field.fixed && field.path.endsWith('autoLoot')) {
     input.checked = true;
     input.disabled = true;
@@ -77,6 +87,12 @@ function rowField(root, state, field, onChange) {
   input.addEventListener('input', update);
   input.addEventListener('change', () => { update(); onChange(); });
   label.append(caption, input);
+  if (field.fixed) {
+    const fixed = document.createElement('small');
+    fixed.className = 'config-capability-status';
+    fixed.textContent = '固定政策';
+    label.append(fixed);
+  } else if (capability !== 'SUPPORTED') label.append(capabilityHint(capability));
   return label;
 }
 
@@ -86,19 +102,21 @@ function arrayFieldNames(kind) {
   return (CONFIG_ROW_SCHEMAS[kind] ?? []).map((field) => [field.path, field.label, field.type, field]);
 }
 
-function makeArrayEditor(root, state, descriptor, render) {
+function makeArrayEditor(root, state, descriptor, render, capability) {
   const section = document.createElement('details');
-  section.className = 'config-array';
+  section.className = `config-array${capability !== 'SUPPORTED' ? ' config-disabled' : ''}`;
   section.open = !descriptor.advanced;
   const summary = document.createElement('summary');
   summary.textContent = descriptor.title;
   section.append(summary);
+  if (capability !== 'SUPPORTED') section.append(capabilityHint(capability));
   const list = document.createElement('div');
   list.className = 'config-array-list';
   const add = document.createElement('button');
   add.type = 'button';
   add.className = 'secondary config-add';
   add.textContent = '新增一列';
+  add.disabled = capability !== 'SUPPORTED';
   add.addEventListener('click', () => {
     getPath(state, descriptor.path).push(arrayDefaults(descriptor.kind));
     render();
@@ -126,6 +144,7 @@ function makeArrayEditor(root, state, descriptor, render) {
       if (descriptorField.min !== undefined) input.min = String(descriptorField.min);
       if (descriptorField.max !== undefined) input.max = String(descriptorField.max);
       if (type === 'number') input.inputMode = 'numeric';
+      input.disabled = capability !== 'SUPPORTED';
       const update = () => {
         const next = type === 'checkbox' ? input.checked : type === 'number' ? Number(input.value) : type === 'select' && typeof descriptorField.default === 'number' ? Number(input.value) : input.value;
         setPath(item, key, next);
@@ -139,6 +158,7 @@ function makeArrayEditor(root, state, descriptor, render) {
     remove.type = 'button';
     remove.className = 'secondary config-remove';
     remove.textContent = '刪除';
+    remove.disabled = capability !== 'SUPPORTED';
     remove.addEventListener('click', () => {
       getPath(state, descriptor.path).splice(index, 1);
       render();
@@ -161,16 +181,22 @@ function render(root, state, context) {
   status.textContent = context.status;
   header.append(heading, status);
   root.append(header);
+  const counts = configCapabilityCounts(context.execution);
+  const capabilityNote = document.createElement('p');
+  capabilityNote.className = 'config-editor-status';
+  capabilityNote.textContent = `可設定 ${counts.SUPPORTED} 項；待支援 ${counts.PARTIAL} 項；尚未開放 ${counts.UNAVAILABLE} 項。停用欄位不會送出變更。`;
+  root.append(capabilityNote);
   const tabs = document.createElement('div');
   tabs.className = 'config-tabs';
-  for (const [sectionName, sectionSchema] of Object.entries(CONFIG_FORM_SCHEMA)) {
+  const descriptors = Object.values(CONFIG_FORM_SCHEMA);
+  for (const sectionName of CONFIG_SECTIONS) {
     const panel = document.createElement('section');
-    panel.className = `config-panel config-${sectionName}`;
+    panel.className = 'config-panel';
     const title = document.createElement('h4');
-    title.textContent = sectionSchema.title;
+    title.textContent = sectionName;
     panel.append(title);
     const groups = new Map();
-    for (const field of sectionSchema.fields) {
+    for (const field of descriptors.flatMap((schema) => schema.fields).filter((entry) => configSection(entry.path) === sectionName)) {
       const group = groups.get(field.group) ?? document.createElement('div');
       group.className = `config-group${field.group === '進階' ? ' config-advanced' : ''}`;
       if (!groups.has(field.group)) {
@@ -180,14 +206,22 @@ function render(root, state, context) {
         groups.set(field.group, group);
         panel.append(group);
       }
-      group.append(rowField(root, state, field, () => render(root, state, context)));
+      group.append(rowField(root, state, field, () => render(root, state, context), configCapability(context.execution, field.path)));
     }
-    for (const descriptor of sectionSchema.arrays ?? []) panel.append(makeArrayEditor(root, state, descriptor, () => render(root, state, context)));
-    if (sectionName === 'combat') {
+    for (const descriptor of descriptors.flatMap((schema) => schema.arrays ?? []).filter((entry) => configSection(entry.path) === sectionName))
+      panel.append(makeArrayEditor(root, state, descriptor, () => render(root, state, context), configCapability(context.execution, descriptor.path)));
+    if (sectionName === 'HP / SP') {
+      const note = document.createElement('p');
+      note.className = 'config-capability-status';
+      note.textContent = 'HP / SP 門檻與自動坐下：尚未支援角色設定。';
+      panel.append(note);
+    }
+    if (sectionName === '戰鬥') {
       const apply = document.createElement('button');
       apply.type = 'button';
       apply.className = 'secondary config-profile-apply';
       apply.textContent = '套用目前模式的基礎行為';
+      apply.disabled = configCapability(context.execution, 'combat.profile') !== 'SUPPORTED';
       apply.addEventListener('click', () => {
         const profile = state.combat.profile;
         state.combat.attack.mode = PROFILE_DEFINITIONS[profile].attackMode;
@@ -225,8 +259,8 @@ function render(root, state, context) {
   save.type = 'button';
   save.className = 'primary';
   save.textContent = context.saving ? '保存中…' : '保存角色設定';
-  save.disabled = context.saving;
-  save.addEventListener('click', () => context.save(state));
+  save.disabled = context.saving || counts.SUPPORTED === 0;
+  save.addEventListener('click', () => { if (counts.SUPPORTED > 0) context.save(state); });
   actions.append(save);
   root.append(actions);
 }
@@ -234,7 +268,7 @@ function render(root, state, context) {
 async function mount(root) {
   if (!root || root.dataset.configEditorMounted === '1') return;
   root.dataset.configEditorMounted = '1';
-  const context = { status: '讀取設定中…', saving: false, migration: null, save: async () => {} };
+  const context = { status: '讀取設定中…', saving: false, migration: null, execution: null, save: async () => {} };
   let state = defaultCanonicalConfig(0);
   render(root, state, context);
   try {
@@ -243,6 +277,7 @@ async function mount(root) {
     if (!response.ok) throw new Error(payload.error ?? '設定讀取失敗');
     state = payload.config;
     context.migration = payload.migration;
+    context.execution = payload.execution;
     context.status = payload.source === 'migrated' ? '已完成舊設定遷移，請檢查後保存' : '設定已讀取';
     context.save = async () => {
       const errors = validateCanonicalConfig(state);
@@ -256,6 +291,7 @@ async function mount(root) {
         if (!result.ok) throw new Error(body.error ?? '設定保存失敗');
         state = body.config;
         context.migration = body.migration;
+        context.execution = body.execution;
         context.status = '設定已保存，執行器套用狀態請由後端能力回報確認';
       } catch (error) {
         context.status = error.message;
