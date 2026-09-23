@@ -2,7 +2,6 @@ import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
-import sharp from 'sharp';
 import { resolveSkillAsset } from '../ops/ro-stack/ro-asset-resolver.mjs';
 
 const root = process.cwd();
@@ -24,9 +23,9 @@ for (const record of index.entries) {
   const iconPath = path.join(root, 'public', record.icon.slice(1));
   const png = fs.readFileSync(iconPath);
   assert.equal(crypto.createHash('sha256').update(png).digest('hex'), asset.outputSha256, record.internalName);
-  const metadata = await sharp(png).metadata();
-  assert.equal(metadata.width, 24, record.internalName);
-  assert.equal(metadata.height, 24, record.internalName);
+  assert.equal(png.toString('hex', 0, 8), '89504e470d0a1a0a', record.internalName);
+  assert.equal(png.readUInt32BE(16), 24, record.internalName);
+  assert.equal(png.readUInt32BE(20), 24, record.internalName);
   assert.equal(resolveSkillAsset(record.skillId).assetStatus, 'ready', record.internalName);
 }
 assert.equal(resolveSkillAsset(318).name, '冷笑話');
