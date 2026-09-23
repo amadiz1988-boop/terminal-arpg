@@ -12,7 +12,7 @@
       "allowedUse": ["test-only setup", "diagnostic", "environment recovery"],
       "forbiddenUse": ["player-flow acceptance", "real-player mutation", "real-player economy", "public ranking", "life-social simulation"],
       "credentialKey": "canonical-test-superuser-credentials",
-      "status": "PROVISIONED_PENDING_LIVE_COMMAND_ACCEPTANCE"
+      "status": "PROVISIONED_PENDING_SERVER_COMMAND_ACCEPTANCE"
     },
     {
       "logicalRole": "TEST_PLAYER",
@@ -24,12 +24,13 @@
       "allowedUse": ["normal player login", "player web action", "authoritative gameplay acceptance"],
       "forbiddenUse": ["GM fixture setup", "admin bypass", "real-player economy", "public ranking", "life-social simulation"],
       "credentialKey": "fresh-e2e-credentials",
-      "status": "PROVISIONED_PENDING_NATIVE_DENIAL_AND_GAMEPLAY_ACCEPTANCE"
+      "status": "PROVISIONED_PENDING_SERVER_COMMAND_DENIAL_AND_GAMEPLAY_ACCEPTANCE"
     }
   ],
   "acceptance": {
-    "nativeGmSuperuser": "PENDING",
-    "nativeGmPlayerRejection": "PENDING",
+    "serverCommandSuperuser": "PENDING",
+    "serverCommandPlayerRejection": "PENDING",
+    "clientRequiredForTesting": false,
     "superuserPrepPlayerExecution": "PENDING",
     "rankingExclusion": "PASS",
     "lifeSourceGate": "BUILD_PASS_PENDING_DEPLOY",

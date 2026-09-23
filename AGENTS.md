@@ -1,6 +1,22 @@
 ﻿# 鬼島傳說工作規則
 
-本文件是每個 Work／Codex 工作的第一份上下文。專案目前以 `ops/ro-stack/dashboard.mjs` 提供的 8788 Dashboard 為唯一玩家入口，rAthena Renewal、OpenKore 與 MariaDB 為現行服務。Vinext 瀏覽器 demo 與 D1 API 原型只保留為封存程式碼，接手時依 `docs/CURRENT_STATUS.md` 判斷實際執行環境。
+本文件是每個 Work／Codex 工作的第一份上下文。專案目前以 `ops/ro-stack/dashboard.mjs` 提供的 8788 Dashboard 為唯一玩家入口，rAthena Renewal、SERVER_AGENT／PA 與 MariaDB 為現行服務。OpenKore 保留為歷史參考，runtime count 維持 0。Vinext 瀏覽器 demo 與 D1 API 原型只保留為封存程式碼，接手時依 `docs/CURRENT_STATUS.md` 判斷實際執行環境。
+
+## Headless Control Authority
+
+```text
+CLIENT_REQUIRED_FOR_PRODUCT_RUNTIME = NO
+CLIENT_REQUIRED_FOR_TESTING = NO
+CLIENT_REQUIRED_FOR_ADMIN_CONTROL = NO
+NATIVE_CLIENT_REQUIRED_FOR_ACCEPTANCE = NO
+OPENKORE_RUNTIME_REQUIRED = NO
+OPENKORE_RUNTIME_FOR_TESTING = FORBIDDEN
+TEST_CONTROL_MUST_BE_HEADLESS = YES
+CANONICAL_PLAYER_CONTROL = WEB → SERVER_AGENT / PA → rAthena
+CANONICAL_TEST_CONTROL = ADMIN / TEST TRANSPORT → SERVER_AGENT / TEST FIXTURE ADAPTER → rAthena authority
+```
+
+Native Client 可保留為歷史參考或選用傳輸。測試與管理控制使用已認證的伺服器端傳輸，由 rAthena 裁定指令權限及世界狀態。Fixture 設定使用 TEST_SUPERUSER；最終玩家流程驗收使用 TEST_PLAYER，GM fixture 結果不得計入玩家流程 PASS。
 
 執行 substantial Repository 工作前，先依 `.agents/skills/task-model-router/SKILL.md` 判斷建議模型、推理強度與速度，並在施工前提醒使用者。該 Skill 只負責建議，不得改變任務 scope，也不得自行宣稱已切換模型。
 

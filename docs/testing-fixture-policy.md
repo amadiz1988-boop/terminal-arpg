@@ -4,6 +4,18 @@
 
 本政策將功能驗收與底層診斷分開。Fixture 是建立合法前置條件與縮短等待時間的工具，核心被測行為仍須由真實 runtime、伺服器權威與玩家可採取的行為鏈完成。
 
+## Headless 測試權威
+
+```text
+CLIENT_REQUIRED_FOR_TESTING = NO
+NATIVE_CLIENT_REQUIRED_FOR_ACCEPTANCE = NO
+OPENKORE_RUNTIME_FOR_TESTING = FORBIDDEN
+CANONICAL_PLAYER_CONTROL = WEB → SERVER_AGENT / PA → rAthena
+CANONICAL_TEST_CONTROL = ADMIN / TEST TRANSPORT → SERVER_AGENT / TEST FIXTURE ADAPTER → rAthena authority
+```
+
+測試 fixture 由已認證的伺服器端傳輸建立，指令權限與狀態變更由 rAthena 裁定。使用 TEST_SUPERUSER 準備前置條件，使用 TEST_PLAYER 完成最終玩家流程驗收。Native Client 可作歷史參考或選用工具。
+
 ## 測試類型
 
 ### A. `PLAYER_FLOW_TEST`
