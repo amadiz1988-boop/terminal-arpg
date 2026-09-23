@@ -1,5 +1,10 @@
 # 目前狀態
 
+## 2026-09-23 更換掛機地圖的大地圖迷霧移除
+
+- 原廠世界地圖取消底圖暗化與區域明暗拼貼，保留既有可選地圖條件與停用狀態；未變更掛機或換圖指令。
+- Source checkpoint `a5efb93`，整合部署 checkpoint `a342c0c`。正式 manifest 部署通過，Browser 重整後確認地圖無迷霧、可選區域仍能開啟資訊、不可選區域維持停用，`/api/health` 為 `ok:true`，OpenKore 執行數為 0。
+
 ## 2026-09-23 M1 Local Hunting 來源閉合進度
 
 - 已將 pinned OpenKore 59 項成熟能力完整分派至 M1 必要 38、M1 選用 14、後續 6、不適用 1；每個 M1 必要項的現況、PA seam、首個斷點、修正與 UI 啟用條件記於 `docs/openkore-reference/m1-core-hunting-closure.md`。這是來源盤點，尚非玩家流程驗收。
