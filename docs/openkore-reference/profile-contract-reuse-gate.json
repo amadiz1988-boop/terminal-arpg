@@ -5,7 +5,7 @@
     "taskCategory": "NEW_CAPABILITY",
     "categories": ["combat", "skills", "recovery"],
     "openKoreRelevant": true,
-    "capabilityScope": "Persisted combat profile identity and attack-use-weapon option carried through the existing start_farm command and PA session",
+    "capabilityScope": "Persisted combat profile identity, attack-use-weapon option and explicit GI no-target Fly toggle carried through the existing start_farm command and PA session",
     "matureReferenceApplicable": true,
     "referenceGate": "PASS",
     "deltaReferenceAuditRequired": true,
@@ -64,7 +64,7 @@
       "matureUiSemantics": "Existing profile selector and weapon-attack checkbox remain the only player settings; no new UI",
       "directReuse": "Reuse character config storage, queueOwnershipCommand, persistent_agent_state target_rules, existing Native skill and unit attack paths",
       "adapt": "Carry validated profile and useWeapon as small command payload fields; apply eligibility to existing fallback branch",
-      "projectPolicy": "Eight profile labels are accepted Ghost Island catalog; unsupported Stage3 profile execution must fail closed",
+      "projectPolicy": "Eight profile labels are accepted Ghost Island catalog; unsupported Stage3 profile execution must fail closed. docs/RO_FLY_WING_SOURCE_AUDIT.md:19 is the explicit GI no-target Fly override; pinned teleportAuto_search is only a monster-count attack gate",
       "improvements": "Typed unknown/unsupported result and persisted profile identity prevent silent melee fallback after resume",
       "matureCapabilityLoss": "NONE",
       "resultEquivalentOrBetter": "PASS"

@@ -6,8 +6,13 @@ const config = defaultCanonicalConfig();
 const farm = { skillEnabled: false };
 assert.deepEqual(resolveFarmExecutionProfile(config, farm), {
   ok: true,
-  payload: { combatProfile: 'MELEE_DAMAGE', attackMode: 2, attackUseWeapon: true },
+  payload: { combatProfile: 'MELEE_DAMAGE', attackMode: 2, attackUseWeapon: true, huntRelocationEnabled: true },
 });
+config.combat.travel.flyWing.enabled = false;
+assert.equal(resolveFarmExecutionProfile(config, farm).payload.huntRelocationEnabled, false);
+config.combat.travel.flyWing.enabled = 'false';
+assert.equal(resolveFarmExecutionProfile(config, farm).reason, 'FARM_FLY_WING_POLICY_INVALID');
+config.combat.travel.flyWing.enabled = true;
 config.combat.profile = 'SKILL_CAST';
 config.combat.attack.useWeapon = false;
 assert.equal(resolveFarmExecutionProfile(config, farm).reason, 'PROFILE_SKILL_ONLY_REQUIRES_SKILL');
