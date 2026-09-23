@@ -1,0 +1,532 @@
+{
+  "id": "moc_pryd05",
+  "name": "夢羅克金字塔 地下1樓",
+  "dungeon": {
+    "id": "morocc_pyramid",
+    "name": "夢羅克金字塔",
+    "entranceMapId": "moc_pryd01",
+    "floorLabel": "地下1樓",
+    "order": 5
+  },
+  "totalMonsters": 158,
+  "normalMonsterCount": 158,
+  "levelRange": {
+    "min": 52,
+    "max": 58
+  },
+  "fullLevelRange": {
+    "min": 52,
+    "max": 58
+  },
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [
+    {
+      "id": 1149,
+      "name": "米洛斯",
+      "level": 58,
+      "count": 78
+    },
+    {
+      "id": 1032,
+      "name": "畢萊特",
+      "level": 52,
+      "count": 65
+    }
+  ],
+  "resourceMonsters": [],
+  "bossMonsters": [],
+  "monsters": [
+    {
+      "id": 1032,
+      "aegisName": "VERIT",
+      "name": "畢萊特",
+      "count": 65,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 52,
+      "hp": 1642,
+      "baseExp": 479,
+      "jobExp": 362,
+      "attackMin": 111,
+      "attackMax": 20,
+      "defense": 63,
+      "magicDefense": 10,
+      "size": "中型",
+      "race": "不死",
+      "element": "不死 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/moc_pryd.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 929,
+          "aegisName": "Immortal_Heart",
+          "name": "不死心臟",
+          "ratePerTenThousand": 4500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "擁有不死的神秘力量,永不停止跳動的心臟。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 912,
+          "aegisName": "Zargon",
+          "name": "剎勒空結晶",
+          "ratePerTenThousand": 350,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從一部份怪物身上得來的結晶,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 930,
+          "aegisName": "Rotten_Bandage",
+          "name": "腐爛繃帶",
+          "ratePerTenThousand": 550,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "老舊看起來沒有任何價值的繃帶。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 509,
+          "aegisName": "White_Herb",
+          "name": "白色藥草",
+          "ratePerTenThousand": 300,
+          "type": "恢復道具",
+          "weight": 7,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在治療傷處上功效相當顯著的珍貴藥草,可恢復少量的HP。\n\n重量: 7"
+        },
+        {
+          "itemId": 2609,
+          "aegisName": "Skul_Ring",
+          "name": "骷髏戒指",
+          "ratePerTenThousand": 1,
+          "type": "防具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "骷髏頭模樣的戒指,內部刻有 '死後也將永遠。'的字樣在上面。\n系列: 飾品\n防禦: 0  重量: 10\n裝備: 全職業"
+        },
+        {
+          "itemId": 2612,
+          "aegisName": "Flower_Ring",
+          "name": "花戒指",
+          "ratePerTenThousand": 100,
+          "type": "防具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "花邊戒指,淳樸的鄉下姑娘的收集品。\n系列: 飾品\n防禦: 0  重量: 10\n裝備: 全職業"
+        },
+        {
+          "itemId": 639,
+          "aegisName": "Armlet_Of_Obedience",
+          "name": "馴服手鐲",
+          "ratePerTenThousand": 10,
+          "type": "消耗品",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "看起來華麗但是令人感覺悲傷的手鐲。怪物伊絲蛇女非常喜愛此項物品。\n種類: 認養寵物之物品\n重量: 5"
+        },
+        {
+          "itemId": 4107,
+          "aegisName": "Verit_Card",
+          "name": "木乃伊犬卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "MHP/MSP8% 增加\n系列: 卡片\n裝置: 鞋類\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1041,
+      "aegisName": "MUMMY",
+      "name": "木乃伊",
+      "count": 13,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 55,
+      "hp": 1899,
+      "baseExp": 512,
+      "jobExp": 390,
+      "attackMin": 126,
+      "attackMax": 21,
+      "defense": 95,
+      "magicDefense": 3,
+      "size": "中型",
+      "race": "不死",
+      "element": "不死 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/moc_pryd.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 930,
+          "aegisName": "Rotten_Bandage",
+          "name": "腐爛繃帶",
+          "ratePerTenThousand": 4500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "老舊看起來沒有任何價值的繃帶。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 756,
+          "aegisName": "Oridecon_Stone",
+          "name": "神之金屬原石",
+          "ratePerTenThousand": 50,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "是被稱為神之金屬的礦石。相當稀少,且得來不易,可以說是相當珍貴的物品。\n\n重量: 20"
+        },
+        {
+          "itemId": 934,
+          "aegisName": "Mementos",
+          "name": "亡者遺物",
+          "ratePerTenThousand": 275,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "亡者要赴黃泉時相伴一起埋葬的寶物,大部分的價值都相當高。\n\n重量: 1"
+        },
+        {
+          "itemId": 2604,
+          "aegisName": "Glove",
+          "name": "防禦手套",
+          "ratePerTenThousand": 1,
+          "type": "防具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "穿戴在手上,可做細活的手套。\nDEX+2。\n系列: 飾品\n防禦: 0  重量: 10\n要求等級: 20\n裝備: 初學者以外的全職業"
+        },
+        {
+          "itemId": 2611,
+          "aegisName": "Silver_Ring",
+          "name": "銀戒指",
+          "ratePerTenThousand": 5,
+          "type": "防具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "銀製的戒指。\n系列: 飾品\n防禦: 0  重量: 10\n裝備: 全職業"
+        },
+        {
+          "itemId": 525,
+          "aegisName": "Panacea",
+          "name": "萬能藥",
+          "ratePerTenThousand": 125,
+          "type": "恢復道具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "幾乎可以恢復所有陷入異常狀態的神秘藥水。\n\n重量: 10"
+        },
+        {
+          "itemId": 508,
+          "aegisName": "Yellow_Herb",
+          "name": "黃色藥草",
+          "ratePerTenThousand": 425,
+          "type": "恢復道具",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在治療傷處上有相當功效的珍貴藥草,可恢復少量的HP。\n\n重量: 5"
+        },
+        {
+          "itemId": 4106,
+          "aegisName": "Mummy_Card",
+          "name": "木乃伊卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "命中率+20\n系列: 卡片\n裝置: 武器\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1149,
+      "aegisName": "MINOROUS",
+      "name": "米洛斯",
+      "count": 78,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 58,
+      "hp": 1729,
+      "baseExp": 499,
+      "jobExp": 446,
+      "attackMin": 155,
+      "attackMax": 36,
+      "defense": 100,
+      "magicDefense": 10,
+      "size": "大型",
+      "race": "動物",
+      "element": "火 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/moc_pryd.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 941,
+          "aegisName": "Nose_Ring",
+          "name": "牛鼻環",
+          "ratePerTenThousand": 2668,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "為了方便牽著牛到處走, 打在牛鼻子上的環。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 756,
+          "aegisName": "Oridecon_Stone",
+          "name": "神之金屬原石",
+          "ratePerTenThousand": 98,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "是被稱為神之金屬的礦石。相當稀少,且得來不易,可以說是相當珍貴的物品。\n\n重量: 20"
+        },
+        {
+          "itemId": 1361,
+          "aegisName": "Two_Handed_Axe_",
+          "name": "雙手斧",
+          "ratePerTenThousand": 1,
+          "type": "武器",
+          "weight": 250,
+          "attack": 185,
+          "defense": 0,
+          "slots": 2,
+          "description": "利用重量與加速度的配合,產生極大的破壞力,非常厲害的雙手斧。\n系列: 斧  攻擊: 185\n重量: 250\n武器等級: 3\n要求等級: 30\n裝備: 劍士系列/商人系列"
+        },
+        {
+          "itemId": 1005,
+          "aegisName": "Hammer_Of_Blacksmith",
+          "name": "高級鐵砧",
+          "ratePerTenThousand": 5,
+          "type": "其他",
+          "weight": 80,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "偉大的鐵匠大多數所使用的鐵砧。\n\n重量: 80"
+        },
+        {
+          "itemId": 6254,
+          "aegisName": "Beef_Head_Meat",
+          "name": "牛頭肉",
+          "ratePerTenThousand": 50,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "煮熟壓扁後再切, 又叫作扁肉。\n重量: 1"
+        },
+        {
+          "itemId": 1301,
+          "aegisName": "Axe",
+          "name": "斧",
+          "ratePerTenThousand": 100,
+          "type": "武器",
+          "weight": 80,
+          "attack": 38,
+          "defense": 0,
+          "slots": 3,
+          "description": "簡單的使用方法,方便任何人使用的斧。\n系列: 斧  攻擊: 38\n重量: 80\n武器等級: 1\n要求等級: 3\n裝備: 初學者/劍士系列/商人系列/刺客"
+        },
+        {
+          "itemId": 568,
+          "aegisName": "Lemon",
+          "name": "檸檬",
+          "ratePerTenThousand": 150,
+          "type": "恢復道具",
+          "weight": 4,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "屬橢圓形,成熟時變成黃色有香味的水果,光用想像的,嘴裡就有一股酸溜溜的感覺而產生口水!恢復少量的SP\n\n重量: 4"
+        },
+        {
+          "itemId": 4126,
+          "aegisName": "Minorous_Card",
+          "name": "米洛斯卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "對大型的傷害+15%。\nATK+5。\n系列: 卡片\n裝置: 武器\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2748,
+      "aegisName": "C5_MINOROUS",
+      "name": "狡猾米洛斯",
+      "count": 2,
+      "respawnMinMs": 180000,
+      "respawnMaxMs": 180000,
+      "level": 58,
+      "hp": 8645,
+      "baseExp": 2495,
+      "jobExp": 6690,
+      "attackMin": 186,
+      "attackMax": 36,
+      "defense": 100,
+      "magicDefense": 10,
+      "size": "大型",
+      "race": "動物",
+      "element": "火 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/championmobs.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 941,
+          "aegisName": "Nose_Ring",
+          "name": "牛鼻環",
+          "ratePerTenThousand": 10000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "為了方便牽著牛到處走, 打在牛鼻子上的環。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 756,
+          "aegisName": "Oridecon_Stone",
+          "name": "神之金屬原石",
+          "ratePerTenThousand": 490,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "是被稱為神之金屬的礦石。相當稀少,且得來不易,可以說是相當珍貴的物品。\n\n重量: 20"
+        },
+        {
+          "itemId": 1361,
+          "aegisName": "Two_Handed_Axe_",
+          "name": "雙手斧",
+          "ratePerTenThousand": 5,
+          "type": "武器",
+          "weight": 250,
+          "attack": 185,
+          "defense": 0,
+          "slots": 2,
+          "description": "利用重量與加速度的配合,產生極大的破壞力,非常厲害的雙手斧。\n系列: 斧  攻擊: 185\n重量: 250\n武器等級: 3\n要求等級: 30\n裝備: 劍士系列/商人系列"
+        },
+        {
+          "itemId": 1005,
+          "aegisName": "Hammer_Of_Blacksmith",
+          "name": "高級鐵砧",
+          "ratePerTenThousand": 25,
+          "type": "其他",
+          "weight": 80,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "偉大的鐵匠大多數所使用的鐵砧。\n\n重量: 80"
+        },
+        {
+          "itemId": 6254,
+          "aegisName": "Beef_Head_Meat",
+          "name": "牛頭肉",
+          "ratePerTenThousand": 250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "煮熟壓扁後再切, 又叫作扁肉。\n重量: 1"
+        },
+        {
+          "itemId": 1301,
+          "aegisName": "Axe",
+          "name": "斧",
+          "ratePerTenThousand": 500,
+          "type": "武器",
+          "weight": 80,
+          "attack": 38,
+          "defense": 0,
+          "slots": 3,
+          "description": "簡單的使用方法,方便任何人使用的斧。\n系列: 斧  攻擊: 38\n重量: 80\n武器等級: 1\n要求等級: 3\n裝備: 初學者/劍士系列/商人系列/刺客"
+        },
+        {
+          "itemId": 568,
+          "aegisName": "Lemon",
+          "name": "檸檬",
+          "ratePerTenThousand": 750,
+          "type": "恢復道具",
+          "weight": 4,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "屬橢圓形,成熟時變成黃色有香味的水果,光用想像的,嘴裡就有一股酸溜溜的感覺而產生口水!恢復少量的SP\n\n重量: 4"
+        },
+        {
+          "itemId": 4126,
+          "aegisName": "Minorous_Card",
+          "name": "米洛斯卡片",
+          "ratePerTenThousand": 5,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "對大型的傷害+15%。\nATK+5。\n系列: 卡片\n裝置: 武器\n重量: 1"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,669 @@
+{
+  "id": "iz_dun05",
+  "name": "海底洞穴 6樓",
+  "dungeon": {
+    "id": "undersea_tunnel",
+    "name": "海底洞穴",
+    "entranceMapId": "iz_dun00",
+    "floorLabel": "6樓",
+    "order": 6
+  },
+  "totalMonsters": 167,
+  "normalMonsterCount": 142,
+  "levelRange": {
+    "min": 110,
+    "max": 115
+  },
+  "fullLevelRange": {
+    "min": 110,
+    "max": 115
+  },
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [
+    {
+      "id": 2204,
+      "name": "賽杜拉",
+      "level": 110,
+      "count": 60
+    },
+    {
+      "id": 2201,
+      "name": "深海電鰻",
+      "level": 113,
+      "count": 50
+    },
+    {
+      "id": 2203,
+      "name": "醬缸章魚",
+      "level": 115,
+      "count": 30
+    }
+  ],
+  "resourceMonsters": [],
+  "bossMonsters": [
+    {
+      "id": 2198,
+      "name": "大腳龍蝦",
+      "level": 117,
+      "count": 25,
+      "isMvp": false
+    }
+  ],
+  "monsters": [
+    {
+      "id": 2204,
+      "aegisName": "SEDORA",
+      "name": "賽杜拉",
+      "count": 60,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 110,
+      "hp": 16740,
+      "baseExp": 1908,
+      "jobExp": 1822,
+      "attackMin": 525,
+      "attackMax": 444,
+      "defense": 92,
+      "magicDefense": 55,
+      "size": "中型",
+      "race": "魚貝",
+      "element": "水 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/iz_dun.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 962,
+          "aegisName": "Tentacle",
+          "name": "觸鬚",
+          "ratePerTenThousand": 2500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "濕濕地還殘留水分的觸鬚,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 2424,
+          "aegisName": "Tidal_Shoes",
+          "name": "防水長靴",
+          "ratePerTenThousand": 3,
+          "type": "防具",
+          "weight": 30,
+          "attack": 0,
+          "defense": 13,
+          "slots": 1,
+          "description": "經過特殊考究的防水處理和底部收邊,在滑滑的冰地或溼溼的道路上最適合穿的靴子\n對水屬性攻擊的抗性有5%, \n當和羊毛領巾裝備時, 增加HP恢復力+5%, 增加MHP 10%。\n系列: 鞋類 防禦: 13\n重量: 30\n要求等級: 55\n裝備: 除了初學者之外所有進階職業群"
+        },
+        {
+          "itemId": 6256,
+          "aegisName": "Ice_Fragment",
+          "name": "碎冰塊",
+          "ratePerTenThousand": 15,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "將大冰塊打碎而成的碎塊\n重量: 1"
+        },
+        {
+          "itemId": 7939,
+          "aegisName": "Elder_Branch",
+          "name": "古老樹枝",
+          "ratePerTenThousand": 15,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "生長在聖地的古老樹上採的小樹枝。\n\n重量: 1"
+        },
+        {
+          "itemId": 1024,
+          "aegisName": "Chinese_Ink",
+          "name": "墨汁",
+          "ratePerTenThousand": 1500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "怪物烏賊噴出的黑色液體。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 603,
+          "aegisName": "Old_Blue_Box",
+          "name": "神秘箱子",
+          "ratePerTenThousand": 5,
+          "type": "消耗品",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "會散發出神秘藍色光芒的舊箱子,打開的話好像有什麼東西會跑出來似的。\n\n重量: 20"
+        },
+        {
+          "itemId": 991,
+          "aegisName": "Crystal_Blue",
+          "name": "水靈礦石",
+          "ratePerTenThousand": 25,
+          "type": "其他",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "藍色的小礦石塊。擁有水屬性,提煉後可以製作出水靈原石。\n\n重量: 5"
+        },
+        {
+          "itemId": 4521,
+          "aegisName": "Sedora_Card",
+          "name": "賽杜拉卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "暴擊時傷害+15%。\n系列: 卡片\n裝備: 武器\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2669,
+      "aegisName": "C4_SEDORA",
+      "name": "憤怒賽杜拉",
+      "count": 2,
+      "respawnMinMs": 180000,
+      "respawnMaxMs": 180000,
+      "level": 110,
+      "hp": 83700,
+      "baseExp": 9540,
+      "jobExp": 27330,
+      "attackMin": 630,
+      "attackMax": 444,
+      "defense": 92,
+      "magicDefense": 55,
+      "size": "中型",
+      "race": "魚貝",
+      "element": "水 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/championmobs.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 962,
+          "aegisName": "Tentacle",
+          "name": "觸鬚",
+          "ratePerTenThousand": 10000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "濕濕地還殘留水分的觸鬚,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 2424,
+          "aegisName": "Tidal_Shoes",
+          "name": "防水長靴",
+          "ratePerTenThousand": 15,
+          "type": "防具",
+          "weight": 30,
+          "attack": 0,
+          "defense": 13,
+          "slots": 1,
+          "description": "經過特殊考究的防水處理和底部收邊,在滑滑的冰地或溼溼的道路上最適合穿的靴子\n對水屬性攻擊的抗性有5%, \n當和羊毛領巾裝備時, 增加HP恢復力+5%, 增加MHP 10%。\n系列: 鞋類 防禦: 13\n重量: 30\n要求等級: 55\n裝備: 除了初學者之外所有進階職業群"
+        },
+        {
+          "itemId": 6256,
+          "aegisName": "Ice_Fragment",
+          "name": "碎冰塊",
+          "ratePerTenThousand": 75,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "將大冰塊打碎而成的碎塊\n重量: 1"
+        },
+        {
+          "itemId": 7939,
+          "aegisName": "Elder_Branch",
+          "name": "古老樹枝",
+          "ratePerTenThousand": 75,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "生長在聖地的古老樹上採的小樹枝。\n\n重量: 1"
+        },
+        {
+          "itemId": 1024,
+          "aegisName": "Chinese_Ink",
+          "name": "墨汁",
+          "ratePerTenThousand": 7500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "怪物烏賊噴出的黑色液體。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 603,
+          "aegisName": "Old_Blue_Box",
+          "name": "神秘箱子",
+          "ratePerTenThousand": 25,
+          "type": "消耗品",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "會散發出神秘藍色光芒的舊箱子,打開的話好像有什麼東西會跑出來似的。\n\n重量: 20"
+        },
+        {
+          "itemId": 991,
+          "aegisName": "Crystal_Blue",
+          "name": "水靈礦石",
+          "ratePerTenThousand": 125,
+          "type": "其他",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "藍色的小礦石塊。擁有水屬性,提煉後可以製作出水靈原石。\n\n重量: 5"
+        },
+        {
+          "itemId": 4521,
+          "aegisName": "Sedora_Card",
+          "name": "賽杜拉卡片",
+          "ratePerTenThousand": 5,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "暴擊時傷害+15%。\n系列: 卡片\n裝備: 武器\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2201,
+      "aegisName": "SROPHO",
+      "name": "深海電鰻",
+      "count": 50,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 113,
+      "hp": 20805,
+      "baseExp": 2202,
+      "jobExp": 2106,
+      "attackMin": 578,
+      "attackMax": 565,
+      "defense": 44,
+      "magicDefense": 91,
+      "size": "中型",
+      "race": "魚貝",
+      "element": "水 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/iz_dun.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 951,
+          "aegisName": "Fin",
+          "name": "背鰭",
+          "ratePerTenThousand": 2500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從魚類或是部份怪物身上得來的背鰭。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 1972,
+          "aegisName": "Electric_Eel",
+          "name": "電鰻鞭",
+          "ratePerTenThousand": 2,
+          "type": "武器",
+          "weight": 200,
+          "attack": 100,
+          "defense": 0,
+          "slots": 2,
+          "description": "用施放強力電力能量的生物所做成的鞭,滑溜溜的讓人很不舒服,\nInt+2,Agi+2。\n攻擊時以有機率觸發雷鳴術3級和奧義箭亂舞,\n發動奧義箭亂舞的技能等級根據精煉值改變。\n(精煉11級以上時發動Lv.10)\n系列: 鞭  攻擊: 100\n重量: 200\n武器等級: 4\n要求等級: 70\n裝備: 冷豔舞姬"
+        },
+        {
+          "itemId": 1971,
+          "aegisName": "Electric_Wire",
+          "name": "電線",
+          "ratePerTenThousand": 2,
+          "type": "武器",
+          "weight": 70,
+          "attack": 110,
+          "defense": 0,
+          "slots": 0,
+          "description": "流著電流的鞭, 請注意不要自己觸到電!\n系列: 鞭    攻擊: 110\n重量: 70 屬性: 風\n武器等級: 3\n要求等級: 30\n裝備: 舞孃"
+        },
+        {
+          "itemId": 12012,
+          "aegisName": "Crystal_Arrow_Container",
+          "name": "水靈箭矢筒",
+          "ratePerTenThousand": 50,
+          "type": "消耗品",
+          "weight": 25,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "\"※注意:背包中保管的道具超過3萬個時，道具有可能會消失。\"\n\n裝有水靈箭矢500支。\n\n重量 : 25"
+        },
+        {
+          "itemId": 756,
+          "aegisName": "Oridecon_Stone",
+          "name": "神之金屬原石",
+          "ratePerTenThousand": 50,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "是被稱為神之金屬的礦石。相當稀少,且得來不易,可以說是相當珍貴的物品。\n\n重量: 20"
+        },
+        {
+          "itemId": 7938,
+          "aegisName": "Light_Granule",
+          "name": "光粒",
+          "ratePerTenThousand": 50,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "金光的結晶體, 猶如裝著太陽般的感覺。\n\n重量: 1"
+        },
+        {
+          "itemId": 991,
+          "aegisName": "Crystal_Blue",
+          "name": "水靈礦石",
+          "ratePerTenThousand": 25,
+          "type": "其他",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "藍色的小礦石塊。擁有水屬性,提煉後可以製作出水靈原石。\n\n重量: 5"
+        },
+        {
+          "itemId": 4522,
+          "aegisName": "Sropho_Card",
+          "name": "深海電鰻卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "近距離物理攻擊時有機率對敵人施展冷凍。\n系列: 卡片\n裝備: 武器\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2203,
+      "aegisName": "POT_DOFLE",
+      "name": "醬缸章魚",
+      "count": 30,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 115,
+      "hp": 19235,
+      "baseExp": 2246,
+      "jobExp": 2150,
+      "attackMin": 537,
+      "attackMax": 212,
+      "defense": 122,
+      "magicDefense": 55,
+      "size": "小型",
+      "race": "魚貝",
+      "element": "水 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/iz_dun.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 6257,
+          "aegisName": "Ice_Crystal",
+          "name": "冰結晶",
+          "ratePerTenThousand": 5,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "透明的冰結晶\n重量: 1"
+        },
+        {
+          "itemId": 7013,
+          "aegisName": "Coral_Reef",
+          "name": "珊瑚",
+          "ratePerTenThousand": 500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "海裡剪下的珊瑚。可向收集商人購買。\n\n重量 :1"
+        },
+        {
+          "itemId": 969,
+          "aegisName": "Gold",
+          "name": "黃金",
+          "ratePerTenThousand": 1,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "會發出如太陽般燦爛光芒的金屬,十分堅硬並且安定性高。雖然不易加工,但因為很稀少的關係,毫無疑問在金屬當中是非常有價值的東西,可以高價賣給收集商。\n\n重量: 20"
+        },
+        {
+          "itemId": 1056,
+          "aegisName": "Grit",
+          "name": "黃玉碎片",
+          "ratePerTenThousand": 500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "黃玉碎片。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 1024,
+          "aegisName": "Chinese_Ink",
+          "name": "墨汁",
+          "ratePerTenThousand": 500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "怪物烏賊噴出的黑色液體。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 617,
+          "aegisName": "Old_Violet_Box",
+          "name": "神秘紫箱",
+          "ratePerTenThousand": 10,
+          "type": "消耗品",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "透著神秘的紫色光芒且年代久遠的老舊箱子。打開來看的話好像有什麼東西會跑出來的樣子。\n\n重量: 20"
+        },
+        {
+          "itemId": 991,
+          "aegisName": "Crystal_Blue",
+          "name": "水靈礦石",
+          "ratePerTenThousand": 25,
+          "type": "其他",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "藍色的小礦石塊。擁有水屬性,提煉後可以製作出水靈原石。\n\n重量: 5"
+        },
+        {
+          "itemId": 4523,
+          "aegisName": "Pot_Dofle_Card",
+          "name": "醬缸章魚卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "使鎧甲的屬性為水屬性。\n來自魚貝類的傷害-10%。\n系列: 卡片\n裝備: 鎧甲\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2198,
+      "aegisName": "KING_DRAMOH",
+      "name": "大腳龍蝦",
+      "count": 25,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 117,
+      "hp": 28453,
+      "baseExp": 2583,
+      "jobExp": 2475,
+      "attackMin": 731,
+      "attackMax": 330,
+      "defense": 480,
+      "magicDefense": 22,
+      "size": "大型",
+      "race": "魚貝",
+      "element": "水 2",
+      "isBoss": true,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/iz_dun.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 6256,
+          "aegisName": "Ice_Fragment",
+          "name": "碎冰塊",
+          "ratePerTenThousand": 50,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "將大冰塊打碎而成的碎塊\n重量: 1"
+        },
+        {
+          "itemId": 960,
+          "aegisName": "Nipper",
+          "name": "鉗子",
+          "ratePerTenThousand": 2500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "螃蟹的鉗子,比想像中還要堅硬,注意一旦被夾到,就不容易甩開,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 943,
+          "aegisName": "Solid_Shell",
+          "name": "堅硬外皮",
+          "ratePerTenThousand": 2500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "怪物身上堅硬的外皮,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 1523,
+          "aegisName": "Spike",
+          "name": "闇盲之錘",
+          "ratePerTenThousand": 25,
+          "type": "武器",
+          "weight": 70,
+          "attack": 85,
+          "defense": 0,
+          "slots": 0,
+          "description": "覆蓋著兇暴的鐵釘所做成的恐怖鈍器。不小心被擊中後可能會導致失明。\n必殺攻擊+40\n裝備者的所有防禦力,會下降到1/3\n系列: 鈍器  攻擊: 85\n重量: 70\n武器等級: 4\n要求等級: 40\n裝備: 服事系列"
+        },
+        {
+          "itemId": 7938,
+          "aegisName": "Light_Granule",
+          "name": "光粒",
+          "ratePerTenThousand": 100,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "金光的結晶體, 猶如裝著太陽般的感覺。\n\n重量: 1"
+        },
+        {
+          "itemId": 995,
+          "aegisName": "Mistic_Frozen",
+          "name": "水靈原石",
+          "ratePerTenThousand": 25,
+          "type": "其他",
+          "weight": 30,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "擁有水屬性的礦石。\n\n重量: 30"
+        },
+        {
+          "itemId": 991,
+          "aegisName": "Crystal_Blue",
+          "name": "水靈礦石",
+          "ratePerTenThousand": 25,
+          "type": "其他",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "藍色的小礦石塊。擁有水屬性,提煉後可以製作出水靈原石。\n\n重量: 5"
+        },
+        {
+          "itemId": 4524,
+          "aegisName": "King_Dramoh_Card",
+          "name": "大腳龍蝦卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "STR+2,若是劍士系列,則精煉每+3時 STR再+ 1。\n系列: 卡片\n裝備: 頭具\n重量: 1"
+        }
+      ]
+    }
+  ]
+}
