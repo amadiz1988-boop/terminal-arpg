@@ -175,8 +175,12 @@ modes, live combat acceptance or an enabled settings control.
 
 Cross-cutting `FARM_START_STOP` is source-closed outside the 38 census IDs;
 the source gate is [m1-farm-lifecycle-source-gate.md](m1-farm-lifecycle-source-gate.md).
-`FARM_MAP_SWITCH` remains source-partial because an in-flight replacement is
-currently rejected rather than superseded. Fly Wing's pinned search distinction,
+`FARM_MAP_SWITCH` uses the Project Control World Map teleport override; the
+old player cross-map Navigation requirement is superseded. Supply world return
+Navigation is also superseded, while city-local Supply and Quest Navigation
+remain required. Source evidence and open live gates are in
+[m1-world-map-supply-cutover-source.md](m1-world-map-supply-cutover-source.md).
+Fly Wing's pinned search distinction,
 GI override and unresolved rejection/re-arm policy are in
 [m1-fly-wing-source-gate.md](m1-fly-wing-source-gate.md). Supply route and
 Butterfly source checks passed, but the existing simulated route test does not

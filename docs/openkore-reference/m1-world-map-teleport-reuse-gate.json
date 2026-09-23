@@ -1,0 +1,43 @@
+{
+  "PRE_IMPLEMENTATION_REUSE_GATE": {
+    "featureId": "m1-player-world-map-teleport",
+    "featureName": "Player World Map farm and major-town teleport",
+    "scope": "NEW_CAPABILITY",
+    "taskCategory": "NEW_CAPABILITY",
+    "categories": ["navigation", "teleport", "farm", "failure_recovery"],
+    "openKoreRelevant": true,
+    "checks": {
+      "currentProject": {"status": "CHECKED", "implementationFound": true, "evidence": "dashboard.mjs queueServerAgentRelocation and reconcileRelocations already own authenticated map selection, command dispatch and authoritative arrival observation; standard-farm-map-availability.mjs and map-info.json classify map spawns."},
+      "legacyProject": {"status": "CHECKED", "evidence": "docs/openkore-reference/m1-farm-lifecycle-source-gate.md records existing direct/route selection; current Project Control supersedes Player World Map and automatic Supply world relocation, while retaining city-local Supply and Quest navigation."},
+      "reuseRegistry": {"status": "REGISTRY_HIT", "reference": "ops/research/external-reuse-registry.json ok-routing, ra-cell-pathfinding, ra-unit-movement, ra-item-use."},
+      "rAthena": {"status": "CHECKED", "evidence": "Pinned native src/map/pc.cpp pc_setpos and pc_payzeny, src/map/map.hpp map_getcell, src/map/persistent_agent.cpp command transport and resident authority."},
+      "openKore": {"status": "CHECKED", "evidence": "Pinned 51de1dd src/AI/CoreLogic.pm processLockMap, src/Task/Teleport.pm onItemUseAck and iterate, control/config.txt lockMap, route_teleport, teleportAuto_search; OpenKore has no paid Player World Map teleport contract."},
+      "externalEcosystem": {"status": "NOT_APPLICABLE", "reason": "No additional external runtime or dependency is authorized; pinned rAthena and OpenKore sources cover the relevant primitives and mature failure transition."},
+      "genericOSS": {"status": "NOT_APPLICABLE", "reason": "Generic packages cannot decide loaded rAthena maps, walkability, Zeny or PA ownership."}
+    },
+    "decision": "PORTABLE_LOGIC",
+    "freshResearchPerformed": false,
+    "registryUpdateRequired": false,
+    "capabilityScope": "Player World Map and automatic Supply world teleport, while preserving city-local Supply and Quest navigation and rAthena authority",
+    "matureReferenceApplicable": true,
+    "referenceGate": "PASS",
+    "deltaReferenceAuditRequired": true,
+    "capabilityDelta": {"addsCapability": true, "replacesCapability": true, "changesBehavior": true, "changesConfigurationSemantics": false, "changesCapabilityUi": true, "changesExceptionRecovery": true, "changesMatureCapabilityDataModel": false},
+    "matureReferenceMatrix": {
+      "currentGiCapability": "Authenticated World Map selection currently invokes PA cross-map route coordinator; Native item-use and farm runtime already exist.",
+      "openKoreCapability": "processLockMap routes to a configured map; Task::Teleport handles item acknowledgment, timeout, retry and rejected use. It does not define GI paid World Map teleport.",
+      "rAthenaCapability": "pc_setpos decides relocation, map_getcell decides landing walkability, pc_payzeny and character status decide Zeny, PA command/state decide ownership and mode.",
+      "otherMatureReference": "NOT_APPLICABLE: no separate teleport runtime is authorized.",
+      "matureExceptionBehavior": "A rejected OpenKore teleport item attempt terminates that attempt without reporting relocation success; GI Fly Wing resumes bounded scanning.",
+      "matureRecoveryBehavior": "Existing PA tick/backoff remains the retry scheduler; failed World Map relocation preserves money and cooldown.",
+      "matureConfigSemantics": "Existing OpenKore route_teleport defaults remain reference-only; no OpenKore setting becomes a GI runtime dependency.",
+      "matureUiSemantics": "GI explicit product override adds one-click farm map selection and distinct major-town teleport; route eligibility text is superseded for this action.",
+      "directReuse": "Authenticated dashboard controller, PA command transport, map-info spawn classification, rAthena teleport/money/cell primitives, existing route engine for city-local Supply and Quest.",
+      "adapt": "A narrow Player teleport command and World Map coordinator replace manual farm-map route execution; the same authoritative teleport primitive handles Supply world return. Fly rejection returns to scan through existing tick.",
+      "projectPolicy": "Explicit user decision: 60-second shared per-character cooldown, level gate from minimum eligible normal farm monster, Lv<=66 free, higher-level cost minLevel*10, same-map no-op, towns free.",
+      "improvements": "Removes route-only farm-map exclusions while keeping authoritative server access restrictions and safe landing checks.",
+      "matureCapabilityLoss": "NONE",
+      "resultEquivalentOrBetter": "PASS"
+    }
+  }
+}

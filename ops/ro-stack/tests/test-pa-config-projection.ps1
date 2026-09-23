@@ -91,8 +91,8 @@ function Invoke-Projection {
 # 3a. Canonical production profile.
 $defaultMap = Invoke-Projection -Label 'default' -Overrides @()
 Assert-Equal 'canonical SERVICE_ENABLED'      '1'  $defaultMap['PERSISTENT_AGENT_SERVICE_ENABLED']
-Assert-Equal 'canonical SERVICE_MAPS'         'prt_fild05' $defaultMap['PERSISTENT_AGENT_SERVICE_MAPS']
-Assert-Equal 'canonical SERVICE_NPCS'         'Tool Dealer#Extended_Prt' $defaultMap['PERSISTENT_AGENT_SERVICE_NPCS']
+Assert-Equal 'canonical SERVICE_MAPS'         'prt_fild05,prt_in,geffen_in,izlude_in,payon,alberta_in,cmd_in01,aldeba_in' $defaultMap['PERSISTENT_AGENT_SERVICE_MAPS']
+Assert-Equal 'canonical SERVICE_NPCS'         'Tool Dealer#Extended_Prt,Tool Dealer#Extended_Prt1,Tool Dealer#Extended_Gef,Tool Dealer#iz,Tool Dealer#pay3,Tool Dealer#Extended_Alb2,Tool Dealer#Extended_Cmd,Tool Dealer#Extended_Alde' $defaultMap['PERSISTENT_AGENT_SERVICE_NPCS']
 Assert-Equal 'canonical SERVICE_ITEMS'        '501' $defaultMap['PERSISTENT_AGENT_SERVICE_ITEMS']
 Assert-Equal 'canonical SERVICE_DESTINATIONS' ''   $defaultMap['PERSISTENT_AGENT_SERVICE_DESTINATIONS']
 Assert-Equal 'canonical SUPPLY_ENABLED'       '1'  $defaultMap['PERSISTENT_AGENT_SUPPLY_ENABLED']

@@ -44,8 +44,8 @@
   PersistentAgentNpcTimeoutMilliseconds = 15000
   PersistentAgentNpcMaxRetries = 3
   PersistentAgentServiceEnabled = $true
-  PersistentAgentServiceMapAllowlist = @('prt_fild05')
-  PersistentAgentServiceNpcAllowlist = @('Tool Dealer#Extended_Prt')
+  PersistentAgentServiceMapAllowlist = @('prt_fild05','prt_in','geffen_in','izlude_in','payon','alberta_in','cmd_in01','aldeba_in')
+  PersistentAgentServiceNpcAllowlist = @('Tool Dealer#Extended_Prt','Tool Dealer#Extended_Prt1','Tool Dealer#Extended_Gef','Tool Dealer#iz','Tool Dealer#pay3','Tool Dealer#Extended_Alb2','Tool Dealer#Extended_Cmd','Tool Dealer#Extended_Alde')
   PersistentAgentServiceItemAllowlist = @(501)
   PersistentAgentServiceDestinationAllowlist = @()
   PersistentAgentServiceTimeoutMilliseconds = 15000
