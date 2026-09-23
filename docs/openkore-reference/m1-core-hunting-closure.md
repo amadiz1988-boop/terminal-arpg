@@ -1,5 +1,7 @@
 # M1 core hunting capability closure
 
+> 本文件是能力與來源證據。世界移動、補給與 M1 UI 的產品決策以 [canonical-m1-world-travel-supply-ui-v1.md](../project-control/canonical-m1-world-travel-supply-ui-v1.md) 為唯一權威。下方 H04/H16 的歷史跨圖路線欄位保留作 OpenKore 對照；`SUPERSEDED_BY = canonical-m1-world-travel-supply-ui-v1.md`。
+
 ```text
 TASK_ID = OPENKORE_MATURE_CAPABILITY_GAP_CENSUS_AND_CLOSURE_V1
 PINNED_OPENKORE = 51de1ddfc4449ae5217f6886de702f87ca934030
@@ -43,12 +45,12 @@ that row's real runtime capability and Player Web wiring are accepted.
 | H01 Target | PARTIAL | H01 `processAutoAttack` | Native target scan | Target policy and authoritative target cycle unproven | Gate target eligibility; target-to-HIT fixture | 掛機自動找怪 | YES |
 | H02 Retarget | PARTIAL | H02 `giveUp` | Native blocked target scan | Give-up reasons and TTL differ | Reason-specific bounded retarget proof | 掛機自動找怪 | YES |
 | H03 Same-map path | PARTIAL | H03 `Task::Route` | Native path and rAthena walk | Deviation/repath parity unproven | Bounded no-progress fixtures | 掛機地圖 | YES |
-| H04 Cross-map route | PARTIAL | H04 `Task::MapRoute` | PA journey and canonical planner | Adoption and arrival-to-resume proof open | Preserve one planner; route/arrival tests | 切換掛機地圖 | YES |
+| H04 Farm-map switch, historical cross-map route | PARTIAL | H04 `Task::MapRoute` (historical) | Direct World Map teleport and PA farm intent | Authoritative arrival-to-AUTO_FARM proof open | Direct teleport, arrival and farm-resume test; historical portal route `SUPERSEDED_BY = canonical-m1-world-travel-supply-ui-v1.md` | 切換掛機地圖 | YES |
 | H05 No-target Fly search | PARTIAL | H05 `processAutoAttack` plus GI policy | `try_hunt_relocation` | Pinned `teleportAuto_search` is not no-target Fly; GI user policy controls it | Prove no-target trigger, legal Fly, rescan | 蒼蠅翅膀搜尋 | YES |
 | H12 Fly item | PARTIAL | H12 `Task::Teleport` plus GI override | Native item 601 | Authoritative same-map move after accepted command unproven | Item/position/count observation | 蒼蠅翅膀搜尋 | YES |
 | H13 Butterfly | PARTIAL | H13 `Task::MapRoute` plus GI override | Supply item 602 | Save Point arrival and unchanged count unproven | Item/arrival/count observation | 回城補給 | YES |
 | H15 Farm-map return | PARTIAL | H15 `processLockMap` | Persisted farm target and PA return | Service interruption to same selected map unproven | Return-to-target fixture | 掛機地圖 | YES |
-| H16 Route replan | PARTIAL | H16 `processReAddMissingPortals` | Canonical graph and PA retry | Missing-edge fallback parity unproven | Safe bounded replan/fail fixture | NONE | NO |
+| H16 Route replan | PARTIAL | H16 `processReAddMissingPortals` | City-local/Quest Navigation retry | Missing-edge fallback parity unproven for retained Navigation | Safe bounded local/Quest replan fixture; player farm-map portal route `SUPERSEDED_BY = canonical-m1-world-travel-supply-ui-v1.md` | NONE | NO |
 | C01 Attack mode | PARTIAL | C01 `getAttackAutoMode` | Farm profile payload | Only active mode 2 supported | Validate UI exposes only accepted mode | 戰鬥模式 | YES |
 | C02 Normal attack | PARTIAL | C02 `Attack::main` | `issue_melee_attack` | Class and authoritative HIT evidence incomplete | Melee/ranged legal attack matrix | 普攻 | YES |
 | C03 Ranged attack | PARTIAL | C03 `Attack::main` | Native `rhw.range` | Ranged profile intentionally rejected | Bow/gun ammo/range/LOS proof | 普攻 | YES |

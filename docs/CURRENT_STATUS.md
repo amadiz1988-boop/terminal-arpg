@@ -1,5 +1,10 @@
 # 目前狀態
 
+## 2026-09-24 M1 世界移動與掛機規格
+
+- 產品決策唯一權威：[M1 世界移動、補給與介面產品決策 V1](project-control/canonical-m1-world-travel-supply-ui-v1.md)，狀態 `CANONICAL / ACTIVE`。玩家換掛機地圖與 Supply 世界段採直接權威傳送；城內補給仍用既有 Navigation。可見根及其正常常駐樓層依新規格分類，舊 STANDARD、28/136 與泛用 `QUEST_ACCESS_REVIEW_REQUIRED` 限制只保留歷史證據。
+- 此項為規格固化；來源實作、合成測試、本機 Browser 與 Production 玩家 Browser 的完成狀態各自核定，本段不宣告 M1 產品驗收通過。
+
 ## 2026-09-23 更換掛機地圖的大地圖迷霧移除
 
 - 原廠世界地圖取消底圖暗化與區域明暗拼貼，保留既有可選地圖條件與停用狀態；未變更掛機或換圖指令。

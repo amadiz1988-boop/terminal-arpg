@@ -1,5 +1,7 @@
 # M1 World Map and Supply source cutover, 2026-09-24
 
+> `SOURCE_EVIDENCE`。M1 世界移動、補給與 UI 的產品決策以 [canonical-m1-world-travel-supply-ui-v1.md](../project-control/canonical-m1-world-travel-supply-ui-v1.md) 為唯一權威。本文件保留來源快照與測試數字；舊 STANDARD registry、portal 前提及泛用 `QUEST_ACCESS_REVIEW_REQUIRED` 產品限制皆為 `HISTORICAL / SUPERSEDED_BY = canonical-m1-world-travel-supply-ui-v1.md`。
+
 ```text
 TASK_ID = OPENKORE_MATURE_CAPABILITY_GAP_CENSUS_AND_CLOSURE_V1
 PINNED_OPENKORE = 51de1ddfc4449ae5217f6886de702f87ca934030
