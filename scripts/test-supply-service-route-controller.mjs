@@ -7,28 +7,21 @@ const dashboard = await readFile(
   'utf8',
 );
 
-const graph = new Map([
-  ['save_map', [{ map: 'save_map', x: 10, y: 20, name: 'to_hub', to: 'service_hub', toX: 30, toY: 40, xs: 1, ys: 1 }]],
-  ['service_hub', [{ map: 'service_hub', x: 30, y: 40, name: 'to_service', to: 'prt_fild05', toX: 100, toY: 200, xs: 1, ys: 1 }]],
-]);
-
-const route = buildTerminalRoute(graph, 'save_map', 'prt_fild05', 289, 219);
+// Supply Navigation remains a city-local service leg. Farm return uses the
+// separate authoritative World Map teleport command.
+const graph = new Map();
+const route = buildTerminalRoute(graph, 'prontera', 'prontera', 146, 89);
 assert.ok(Array.isArray(route));
-assert.equal(route[0].map, 'save_map');
-assert.equal(route.at(-1).map, 'prt_fild05');
-assert.deepEqual(route.at(-1), { map: 'prt_fild05', x: 289, y: 219 });
+assert.deepEqual(route, [{ map: 'prontera', x: 146, y: 89 }]);
 
-const sameMapRoute = buildTerminalRoute(new Map(), 'prt_fild05', 'prt_fild05', 289, 219);
-assert.deepEqual(sameMapRoute, [{ map: 'prt_fild05', x: 289, y: 219 }]);
-
-assert.equal(buildTerminalRoute(graph, 'missing_save_map', 'prt_fild05', 289, 219), null);
-assert.equal(buildTerminalRoute(graph, 'save_map', 'prt_fild05', -1, 219), null);
+assert.equal(buildTerminalRoute(graph, 'unsupported_town', 'prontera', 146, 89), null);
+assert.equal(buildTerminalRoute(graph, 'prontera', 'prontera', -1, 89), null);
 
 assert.match(dashboard, /readCharacterSavePoint\(account\.accountId\)/);
 assert.match(dashboard, /buildTerminalRoute\(/);
 assert.match(dashboard, /payloadObject\.supplyServiceRoute = supplyServiceRoute/);
-assert.match(dashboard, /payloadObject\.supplyRouteOut = supplyRouteOut/);
-assert.match(dashboard, /payloadObject\.supplyRouteBack = inbound\.route/);
-assert.match(dashboard, /throw new HttpError\(409, 'supply_route_unavailable'\)/);
+assert.match(dashboard, /throw new HttpError\(409, 'SAVED_TOWN_SERVICE_UNAVAILABLE'\)/);
+assert.doesNotMatch(dashboard, /payloadObject\.supplyRouteOut\s*=/);
+assert.doesNotMatch(dashboard, /payloadObject\.supplyRouteBack\s*=/);
 
-console.log('SUPPLY_SERVICE_ROUTE_CONTROLLER_PASS checks=13');
+console.log('SUPPLY_SERVICE_ROUTE_CONTROLLER_PASS checks=10');
