@@ -195,6 +195,18 @@ cast-condition rejection still prevents same-tick fallthrough to a later row;
 `C04/C05/C13` remain source-partial. The Web evidence checkpoint is `5bd5da4`.
 The source-closed count remains 1/38 and product-closed remains 0/38.
 
+The 2026-09-24 World Map continuation checkpoints are Web `3418b39a` and
+`a815a82f`, plus Native `1865cea`. `H04` no longer waits for the historical
+player cross-map route planner: the authorized direct World Map teleport
+supersedes that leg. Its remaining source gate is a bounded
+Dashboard-command-Native-arrival-to-AUTO_FARM transition test. `H15/R14`
+similarly require a complete Save Point service return and renewed combat
+source fixture. The World Map policy/matrix, 68 Supply assertions, Native full
+x64 link and 472 command-contract checks pass; none exercises that full
+transition. Therefore the 38-row source count remains 1 closed, 37 open, and
+the product count remains zero. The generated map-info output is mixed with
+another workline and must be regenerated before a fresh-checkout UI test.
+
 ## Bounded diagnostic checkpoint
 
 The scenario matrix previously called `planWebRelocation`, which checks only
