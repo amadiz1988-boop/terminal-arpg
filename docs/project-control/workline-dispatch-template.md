@@ -38,6 +38,25 @@ Continue from CURRENT_PHASE.
 Do not restart audit.
 ```
 
+Every substantial dispatch inherits the execution contract in
+`workline-continuation-template.md` section 0A:
+
+```text
+EXECUTE_TO_COMPLETION = YES
+CONTINUE_IN_PLACE_FIRST = YES
+BOUNDED_BLOCKER_AUTONOMY = REQUIRED
+RETURN_TO_PC_ONLY_ON_STOP_CONDITION = YES
+USER_INTERRUPTION_MINIMIZATION = REQUIRED
+```
+
+The original window owns a same-owner, same-scope bounded blocker. Resolve it,
+checkpoint the bounded fix and resume the original objective. Missing local
+operational detail is reconstructed and validated through existing authority.
+Do not use manual Player login or passwords as default test prerequisites;
+follow `docs/testing-fixture-policy.md` and retain real Browser acceptance
+where required. Stop for the canonical `PC_STOP_*` conditions or an immediate
+Production safety halt, not for routine same-scope blockers.
+
 ---
 
 ## 1. WINDOW
@@ -728,16 +747,13 @@ Rules:
 
 ## 14. STOP_CONDITIONS
 
-```text
-scope insufficient
-requires unrelated architecture rewrite
-external runtime restart invalidates test
-mixed-file Git conflict
-reference conflict requires Project Control
-second runtime would be required
-```
-
-On STOP: return the blocker only. Do not expand scope to work around it.
+Use `PROJECT_CONTROL_STOP_CONDITIONS` (`PC_STOP_1` through `PC_STOP_10`) in
+`workline-continuation-template.md` section 0A. The dispatch must add any
+task-specific safety or authorization stop. A same-owner bounded blocker with
+an existing canonical path stays in the original window. Scope expansion,
+authority changes, unrelated architecture, security bypass and a second
+runtime remain prohibited. An invalidated live test requires a stable retest
+window; it does not by itself make source fail.
 
 ---
 
@@ -802,6 +818,19 @@ EXPECTED =
 ACTUAL =
 evidence (as required) =
 ```
+
+Every final report also includes:
+
+```text
+BOUNDED_BLOCKERS_FOUND =
+BOUNDED_BLOCKERS_RESOLVED_IN_PLACE =
+PROJECT_CONTROL_STOP_TRIGGERED = YES / NO
+PROJECT_CONTROL_STOP_REASON =
+USER_MANUAL_ACTION_REQUIRED = YES / NO
+```
+
+Explain a required manual step by naming why existing authorized automation
+or fixture control cannot lawfully complete it.
 
 For a runtime or control-flow workline, also report:
 

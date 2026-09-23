@@ -534,6 +534,24 @@ Continue from CURRENT_PHASE.
 Do not restart audit.
 ```
 
+### CONTINUE_IN_PLACE_EXECUTION_POLICY
+
+```text
+CONTINUE_IN_PLACE_FIRST = YES
+ORIGINAL_WINDOW_OWNS_BOUNDED_BLOCKERS = YES
+BOUNDED_BLOCKER_AUTONOMOUS_RESOLUTION_REQUIRED = YES
+WORKER_MUST_EXECUTE_TO_COMPLETION_WITHIN_SCOPE = YES
+```
+
+既有工作線遇到同一 owner、同一 capability scope、可由既有架構處理的 bounded blocker，
+須在原視窗依 `FIRST_BROKEN_TRANSITION → ROOT_CAUSE → MINIMAL_FIX → BOUNDED_TEST
+→ CHECKPOINT → RESUME ORIGINAL TASK` 處理。例行同範圍 blocker 不送回 Project Control；
+僅觸發 canonical `PROJECT_CONTROL_STOP_CONDITIONS` 時回報決策。缺少舊指令或本機參數
+應先依既有文件與工具安全重建。人工 Player login／密碼不得作為預設測試前置；
+優先使用已授權的 headless fixture／test control，並保留正式 Browser 驗收要求。
+完整執行與停止條件見 `docs/project-control/workline-continuation-template.md`；
+既有 routing、security、Single Runtime 與 no-progress 安全閥仍有效。
+
 ## Short-Term Product North Star
 
 SHORT-TERM PRODUCT NORTH STAR:
@@ -1890,7 +1908,7 @@ git diff --check
 - discovery tool calls (grep/glob/find/read-for-location/git-archaeology) <= 10 per blocker -> checkpoint: `NEW_EVIDENCE_FOUND YES/NO`
 - repeated-search loop self-detection: 3 consecutive equivalent intent -> `SEARCH_LOOP_DETECTED`, STOP
 - silent/opaque work >= 5 min without observable progress -> STOP; all shell commands must have bounded timeout
-- stuck -> return evidence to Project Control, do not self-expand scope or attempt invalid acceptance shortcut
+- stuck -> halt unsafe or repeated attempts, preserve evidence and seek new bounded evidence in place; return to Project Control only on `PC_STOP_*`, without scope expansion or invalid acceptance shortcuts
 
 Complete definitions: [RO Automation Product Constitution](docs/RO_AUTOMATION_PRODUCT_CONSTITUTION.md#execution-budget--no-progress-circuit-breaker)
 

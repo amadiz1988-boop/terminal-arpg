@@ -41,6 +41,114 @@ Do not restart audit.
 
 ---
 
+## 0A. CONTINUE-IN-PLACE EXECUTION CONTRACT
+
+Every substantial continuation inherits these defaults without repeating them
+in each prompt:
+
+```text
+EXECUTE_TO_COMPLETION = YES
+CONTINUE_IN_PLACE_FIRST = YES
+ORIGINAL_WINDOW_OWNS_BOUNDED_BLOCKERS = YES
+BOUNDED_BLOCKER_AUTONOMY = REQUIRED
+RETURN_TO_PC_ONLY_ON_STOP_CONDITION = YES
+USER_INTERRUPTION_MINIMIZATION = REQUIRED
+```
+
+Keep the original workline and current window. Own a new blocker in place only
+when all of these are established:
+
+```text
+SAME_OWNER = YES
+SAME_CAPABILITY_SCOPE = YES
+EXISTING_ARCHITECTURE_SUFFICIENT = YES
+NO_NEW_SUBSYSTEM = YES
+NO_NEW_AUTHORITY_BOUNDARY = YES
+NO_NEW_DESTRUCTIVE_PRODUCTION_SCOPE = YES
+CANONICAL_DIRECTION_CLEAR = YES
+```
+
+Then execute the unfinished chain without a Project Control round-trip:
+
+```text
+LAST_CONFIRMED_GOOD
+→ FIRST_BROKEN_TRANSITION
+→ OWNER
+→ ROOT_CAUSE
+→ MINIMAL_FIX
+→ BOUNDED_TEST / REGRESSION
+→ CLEAN_CHECKPOINT
+→ NEXT_UNFINISHED_STEP
+→ RESUME ORIGINAL TASK
+```
+
+Record intermediate blockers in work context. Send a final report when the
+original task is done, a `PC_STOP_*` condition is triggered, Production safety
+requires an immediate halt, or canonical evidence needs a decision. A blocker
+directly exposed by the previous step stays in this execution chain while its
+owner and authority remain unchanged. Do not reopen completed discovery or
+repeat accepted PASS evidence. Existing no-progress circuit breakers remain
+active; a safety halt never authorizes a workaround or broader search.
+
+Canonical `PROJECT_CONTROL_STOP_CONDITIONS`:
+
+```text
+PC_STOP_1  = another explicit owner / workline is required
+PC_STOP_2  = established product specification must change
+PC_STOP_3  = world / authority ownership boundary must change
+PC_STOP_4  = new subsystem, engine or major architecture is required
+PC_STOP_5  = new destructive Production mutation exceeds original authorization
+PC_STOP_6  = security, auth or Single Runtime hard rule would be bypassed or changed
+PC_STOP_7  = unrelated historical defect is not causal to this task's first break
+PC_STOP_8  = canonical evidence conflicts and source of truth cannot be resolved
+PC_STOP_9  = a product decision cannot be derived from canonical policy
+PC_STOP_10 = correction materially exceeds original task scope
+```
+
+Missing operational detail is not an automatic stop. Reconstruct a lost command,
+test invocation, local tool argument, PID or temporary path from canonical docs,
+installed tool help, accepted logs, official tool documentation, bounded isolated
+tests or existing source contract. Validate the reconstruction, record it, and
+continue. A missing authority or an unresolved contradiction still follows the
+applicable stop condition.
+
+An original task's controlled-deploy authorization remains valid after a bounded
+same-scope fix when deployment surface, destructive behavior, security boundary
+and Single Runtime policy stay unchanged. Complete fix, build and precheck, then
+continue that authorized deployment. A material deployment-scope change follows
+`PC_STOP_5`, `PC_STOP_6` or `PC_STOP_10`.
+
+Use `docs/testing-fixture-policy.md` for legal headless test authority. Unless
+login UX itself is under test, manual Player login, a Player password, an RO
+Client or OpenKore runtime is not a default prerequisite. Reuse authorized
+Support Session, fixed fixture identity, headless transport, SERVER_AGENT,
+synthetic harness or test bootstrap within their existing permissions. Browser
+UI acceptance still requires real Browser evidence when the feature demands it.
+Ask the user to act only for a product decision, credential consent, an external
+human-only step or UI acceptance that cannot be automated lawfully. The user is
+not a command relay or worker-to-worker message bus.
+
+```text
+PASSWORD_REQUIRED_FOR_TEST_FIXTURE = NO
+MANUAL_PLAYER_LOGIN_AS_TEST_PREREQUISITE = FORBIDDEN_BY_DEFAULT
+PASSWORDLESS_AUTHORIZED_TEST_CONTROL_REUSE_FIRST = YES
+```
+
+Final reports add:
+
+```text
+BOUNDED_BLOCKERS_FOUND =
+BOUNDED_BLOCKERS_RESOLVED_IN_PLACE =
+PROJECT_CONTROL_STOP_TRIGGERED = YES / NO
+PROJECT_CONTROL_STOP_REASON =
+USER_MANUAL_ACTION_REQUIRED = YES / NO
+```
+
+If manual action is required, state why existing authorized automation and
+fixtures cannot complete that step.
+
+---
+
 ## 1. CONTINUE EXISTING WINDOW
 
 ```text
@@ -531,9 +639,12 @@ Do not judge the source FAIL. Re-obtain a stable window and retest.
 
 ---
 
-## 11. FAIL RULE
+## 11. STOP REPORT RULE
 
-On continuation failure report only:
+Report an unresolved continuation blocker only when `PC_STOP_*`, an immediate
+Production safety halt or an unresolved canonical contradiction applies. Keep
+routine same-scope blockers in the original execution chain. The stop report
+contains only:
 
 ```text
 CURRENT_PHASE =
@@ -567,6 +678,11 @@ TESTS
 LIVE_PASS
 BROWSER_UI_PASS
 NEXT_ACTION / CLOSED
+BOUNDED_BLOCKERS_FOUND
+BOUNDED_BLOCKERS_RESOLVED_IN_PLACE
+PROJECT_CONTROL_STOP_TRIGGERED
+PROJECT_CONTROL_STOP_REASON
+USER_MANUAL_ACTION_REQUIRED
 ```
 
 For a runtime or control-flow continuation, also report:
