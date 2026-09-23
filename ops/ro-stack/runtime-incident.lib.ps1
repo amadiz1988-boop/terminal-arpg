@@ -112,6 +112,7 @@ function Get-RuntimeExitRecords($tracked, $live, $events, [string]$detectedAt, $
     try { if ($start) { $lifetime = [long]([DateTimeOffset]::Parse($time) - [DateTimeOffset]::Parse($start)).TotalMilliseconds } } catch {}
     $records += [pscustomobject]@{
       service = $service; pid = $pidValue; processStartTime = $start; at = $time
+      atUnixMs = ([DateTimeOffset]::Parse($time)).ToUnixTimeMilliseconds()
       timeSource = if ($stop -and $stop[0].at) { 'PROCESS_HANDLE_EXIT_TIME' } else { 'POLL_DETECTION' }
       exitCode = if ($stop) { $stop[0].exitCode } else { $null }
       lifetimeMs = $lifetime; classification = 'UNKNOWN'
@@ -202,6 +203,39 @@ function Test-IncidentTcpReachable([int]$port) {
     $client.EndConnect($pending)
     return $true
   } catch { return $false } finally { $client.Dispose() }
+}
+
+function Get-IncidentImpactSnapshot([string]$runtimeRoot) {
+  $unavailable = [pscustomobject]@{
+    dbReachable = 'UNAVAILABLE'; onlinePlayerCount = 'UNAVAILABLE'; onlineCharacterCount = 'UNAVAILABLE'
+    persistentAgentResidentCount = 'UNAVAILABLE'; persistentAgentModeCounts = 'UNAVAILABLE'
+    activeFarmCount = 'UNAVAILABLE'; activeJourneyCount = 'UNAVAILABLE'; activeQuestCount = 'UNAVAILABLE'
+    affectedCharacterIds = 'UNAVAILABLE'; affectedCharacterIdsTruncated = 'UNAVAILABLE'
+    unavailableReason = 'IMPACT_SOURCE_UNAVAILABLE'
+  }
+  $helper = Join-Path $PSScriptRoot 'runtime-impact-snapshot.mjs'
+  if (-not (Test-Path -LiteralPath $helper)) { return $unavailable }
+  try {
+    $node = (Get-Command node.exe -ErrorAction SilentlyContinue).Source
+    if (-not $node) { $node = 'C:\Program Files\nodejs\node.exe' }
+    if (-not (Test-Path -LiteralPath $node -PathType Leaf)) { return $unavailable }
+    $start = New-Object Diagnostics.ProcessStartInfo
+    $start.FileName = $node
+    $start.Arguments = ('"{0}" "{1}"' -f $helper, $runtimeRoot)
+    $start.UseShellExecute = $false
+    $start.CreateNoWindow = $true
+    $start.RedirectStandardOutput = $true
+    $start.RedirectStandardError = $true
+    $process = [Diagnostics.Process]::Start($start)
+    try {
+      if (-not $process.WaitForExit(5000)) { $process.Kill(); return $unavailable }
+      if ($process.ExitCode -ne 0) { return $unavailable }
+      $output = $process.StandardOutput.ReadToEnd()
+      $result = $output | ConvertFrom-Json
+      if (-not $result -or $null -eq $result.onlinePlayerCount) { return $unavailable }
+      return $result
+    } finally { $process.Dispose() }
+  } catch { return $unavailable }
 }
 
 function Protect-IncidentDirectory([string]$path) {
@@ -313,20 +347,25 @@ function Set-IncidentRecovery([string]$runtimeRoot, [string]$incidentId, $state,
   return $true
 }
 
-function Invoke-RuntimeIncidentTick([string]$runtimeRoot, $live, $events) {
+function Invoke-RuntimeIncidentTick([string]$runtimeRoot, $live, $events, $stateOverride = $null) {
   $statePath = Join-Path $runtimeRoot 'state.json'
   $observerPath = Join-Path $runtimeRoot 'incident-observer-state.json'
-  $state = Read-IncidentJson $statePath
+  $state = if ($stateOverride) { $stateOverride } else { Read-IncidentJson $statePath }
   if (-not $state -and (Test-Path -LiteralPath $statePath)) { return }
   $previous = Read-IncidentJson $observerPath
   $generation = Get-RuntimeGenerationId $state
   $pendingRecoveryId = if ($previous.pendingRecoveryIncidentId) { [string]$previous.pendingRecoveryIncidentId } else { $null }
   if (-not $generation) {
-    if ($previous) {
-      if ($previous.incidentId) { $pendingRecoveryId = [string]$previous.incidentId }
-      Write-IncidentJson $observerPath ([pscustomobject]@{ generationId = $null; tracked = @(); exits = @(); incidentId = $null; pendingRecoveryIncidentId = $pendingRecoveryId })
-    }
+    # Retain the old generation until the next state appears. Exit handles may
+    # report after state.json disappears during a controlled restart.
     return
+  }
+  if (-not $stateOverride -and $previous -and $previous.generationId -and $previous.generationId -ne $generation) {
+    $oldStartedAt = [long](([string]$previous.generationId) -replace '^ro-', '')
+    $oldState = [pscustomobject]@{ startedAt = $oldStartedAt; processes = @($previous.tracked) }
+    Invoke-RuntimeIncidentTick $runtimeRoot $live $events $oldState
+    $previous = Read-IncidentJson $observerPath
+    $pendingRecoveryId = if ($previous.pendingRecoveryIncidentId) { [string]$previous.pendingRecoveryIncidentId } else { $null }
   }
   $tracked = @($state.processes | Where-Object { $_.name -in @('login', 'char', 'map') })
   if (-not $previous -or $previous.generationId -ne $generation) {
@@ -372,21 +411,25 @@ function Invoke-RuntimeIncidentTick([string]$runtimeRoot, $live, $events) {
   if (-not $incidentId) { return }
   $root = Join-Path $runtimeRoot 'runtime-incidents'
   $existing = Find-IncidentFolder $runtimeRoot $incidentId
+  $priorIncident = if ($existing) { Read-IncidentJson (Join-Path $existing 'incident.json') } else { $null }
   $folder = if ($existing) { $existing } else { Join-Path $root (('{0}-{1}' -f $now.ToString('yyyyMMddTHHmmssZ'), $incidentId)) }
   Protect-IncidentDirectory $root
   Protect-IncidentDirectory $folder
-  $ordered = @($all | Sort-Object at, service)
+  $ordered = @($all | Sort-Object atUnixMs, service)
   $unexpectedOrdered = @($ordered | Where-Object classification -ne 'GRACEFUL_STOP')
   $firstUnexpected = $unexpectedOrdered[0]
-  $firstTime = [string]$firstUnexpected.at
-  $tied = @($unexpectedOrdered | Where-Object { $_.at -eq $firstTime -and $_.timeSource -eq 'POLL_DETECTION' })
+  $firstTime = if ($null -ne $firstUnexpected.atUnixMs) { [DateTimeOffset]::FromUnixTimeMilliseconds([long]$firstUnexpected.atUnixMs).ToString('o') } else { [string]$firstUnexpected.at }
+  $tied = @($unexpectedOrdered | Where-Object { $_.atUnixMs -eq $firstUnexpected.atUnixMs -and $_.timeSource -eq 'POLL_DETECTION' })
   $newUnexpected = @($fresh | Where-Object classification -ne 'GRACEFUL_STOP')
   $priorUnexpected = @($previous.exits | Where-Object classification -ne 'GRACEFUL_STOP')
   $ambiguousBatch = $priorUnexpected.Count -eq 0 -and $newUnexpected.Count -gt 1 -and @($newUnexpected | Where-Object timeSource -eq 'POLL_DETECTION').Count -gt 0
   $firstService = if ($tied.Count -gt 1 -or $ambiguousBatch) { 'UNDETERMINED' } else { [string]$firstUnexpected.service }
   for ($index = 0; $index -lt $ordered.Count; $index++) {
     $delta = $null
-    try { $delta = [long]([DateTimeOffset]::Parse([string]$ordered[$index].at) - [DateTimeOffset]::Parse($firstTime)).TotalMilliseconds } catch {}
+    try {
+      if ($null -ne $ordered[$index].atUnixMs -and $null -ne $firstUnexpected.atUnixMs) { $delta = [long]$ordered[$index].atUnixMs - [long]$firstUnexpected.atUnixMs }
+      else { $delta = [long]([DateTimeOffset]::Parse([string]$ordered[$index].at) - [DateTimeOffset]::Parse($firstTime)).TotalMilliseconds }
+    } catch {}
     $ordered[$index] | Add-Member -NotePropertyName exitOrder -NotePropertyValue ($index + 1) -Force
     $ordered[$index] | Add-Member -NotePropertyName exitTimeDeltaMs -NotePropertyValue $delta -Force
   }
@@ -406,14 +449,26 @@ function Invoke-RuntimeIncidentTick([string]$runtimeRoot, $live, $events) {
       }
     } catch {}
   }
+  $impact = if ($priorIncident) {
+    [pscustomobject]@{
+      capturedAt = $priorIncident.impactCapturedAt; dbReachable = $priorIncident.dbReachable
+      onlinePlayerCount = $priorIncident.onlinePlayerCount; onlineCharacterCount = $priorIncident.onlineCharacterCount
+      persistentAgentResidentCount = $priorIncident.persistentAgentResidentCount; persistentAgentModeCounts = $priorIncident.persistentAgentModeCounts
+      activeFarmCount = $priorIncident.activeFarmCount; activeJourneyCount = $priorIncident.activeJourneyCount; activeQuestCount = $priorIncident.activeQuestCount
+      affectedCharacterIds = $priorIncident.affectedCharacterIds; affectedCharacterIdsTruncated = $priorIncident.affectedCharacterIdsTruncated
+      unavailableReason = $priorIncident.impactUnavailableReason
+    }
+  } else { Get-IncidentImpactSnapshot $runtimeRoot }
   $snapshot = [pscustomobject]@{
     capturedAt = [DateTimeOffset]::UtcNow.ToString('o')
     portStates = $ports; loginPid = (@($tracked | Where-Object name -eq 'login' | Select-Object -First 1).id); charPid = (@($tracked | Where-Object name -eq 'char' | Select-Object -First 1).id)
     mapPid = (@($tracked | Where-Object name -eq 'map' | Select-Object -First 1).id); dashboardPid = if ($dashboard) { [int]$dashboard[0] } else { $null }
     dashboardIdentity = $dashboardIdentity
-    dbReachable = (Test-IncidentTcpReachable 3307); dbReachabilitySource = 'TCP_127.0.0.1_3307'; paResidentCount = $null; paRuntimeModeCounts = $null; playerSessionCount = $null; onlineCharacterCount = $null
-    activeFarmCount = $null; activeJourneyCount = $null; activeQuestCount = $null; affectedCharacterIds = $null
-    unavailableReason = 'No incident-safe authoritative projection is wired; values remain unavailable.'
+    dbReachable = $impact.dbReachable; dbReachabilitySource = 'READ_ONLY_MARIADB_QUERY'
+    paResidentCount = $impact.persistentAgentResidentCount; paRuntimeModeCounts = $impact.persistentAgentModeCounts
+    playerSessionCount = $impact.onlinePlayerCount; onlineCharacterCount = $impact.onlineCharacterCount
+    activeFarmCount = $impact.activeFarmCount; activeJourneyCount = $impact.activeJourneyCount; activeQuestCount = $impact.activeQuestCount
+    affectedCharacterIds = $impact.affectedCharacterIds; unavailableReason = $impact.unavailableReason
   }
   Write-IncidentJson (Join-Path $folder 'runtime-state.json') $snapshot
   Write-IncidentJson (Join-Path $folder 'timeline.json') $ordered
@@ -430,7 +485,7 @@ function Invoke-RuntimeIncidentTick([string]$runtimeRoot, $live, $events) {
     [IO.File]::WriteAllText((Join-Path $folder "$($pair[0])-tail.log"), $tail, [Text.UTF8Encoding]::new($false))
   }
   $incident = [pscustomobject]@{
-    incidentId = $incidentId; runtimeGenerationId = $generation; detectedAt = $now.ToString('o')
+    incidentId = $incidentId; runtimeGenerationId = $generation; detectedAt = if ($priorIncident) { $priorIncident.detectedAt } else { $now.ToString('o') }
     firstExitService = $firstService; firstExitPid = if ($firstService -eq 'UNDETERMINED') { $null } else { $firstUnexpected.pid }
     firstExitAt = if ($firstService -eq 'UNDETERMINED') { $null } else { $firstTime }
     firstExitCode = if ($firstService -eq 'UNDETERMINED') { 'UNAVAILABLE' } elseif ($null -ne $firstUnexpected.exitCode) { $firstUnexpected.exitCode } else { 'UNAVAILABLE' }
@@ -438,7 +493,13 @@ function Invoke-RuntimeIncidentTick([string]$runtimeRoot, $live, $events) {
     exitOrder = $ordered; serviceStates = $snapshot; serviceIdentities = $known; portStates = $ports
     sentinelAction = $firstUnexpected.sentinelAction; guardAction = 'NONE'; launcherAction = $firstUnexpected.launcherAction
     crashDump = [pscustomobject]@{ created = if ($dumps.Count) { 'YES' } else { 'NO' }; references = $dumps }
-    windowsEvidence = $windows; onlinePlayerCount = $null; onlineCharacterCount = $null; onlinePlayerCountBeforeFailure = $null; onlinePlayerCountAfterFailure = $null; persistentAgentState = $null
+    windowsEvidence = $windows; dbReachable = $impact.dbReachable; impactCapturedAt = $impact.capturedAt
+    onlinePlayerCount = $impact.onlinePlayerCount; onlineCharacterCount = $impact.onlineCharacterCount
+    persistentAgentResidentCount = $impact.persistentAgentResidentCount; persistentAgentModeCounts = $impact.persistentAgentModeCounts
+    activeFarmCount = $impact.activeFarmCount; activeJourneyCount = $impact.activeJourneyCount; activeQuestCount = $impact.activeQuestCount
+    affectedCharacterIds = $impact.affectedCharacterIds; affectedCharacterIdsTruncated = $impact.affectedCharacterIdsTruncated
+    impactUnavailableReason = $impact.unavailableReason
+    onlinePlayerCountBeforeFailure = 'UNAVAILABLE'; onlinePlayerCountAfterFailure = $impact.onlinePlayerCount
     recoveryPerformed = $false; recoveryResult = 'NONE'; rootCauseStatus = 'UNKNOWN'
   }
   Write-IncidentJson (Join-Path $folder 'incident.json') $incident

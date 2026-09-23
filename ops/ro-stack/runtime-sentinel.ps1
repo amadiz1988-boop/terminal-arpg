@@ -17,6 +17,7 @@ param(
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'runtime-sentinel.lib.ps1')
 . (Join-Path $PSScriptRoot 'runtime-incident.lib.ps1')
+. (Join-Path $PSScriptRoot 'runtime-procdump-sidecar.lib.ps1')
 
 $scriptRoot = $PSScriptRoot
 $projectRoot = (Resolve-Path (Join-Path $scriptRoot '..\..')).Path
@@ -122,6 +123,12 @@ function Invoke-SentinelTick {
     Invoke-RuntimeIncidentTick (Join-Path $projectRoot '.local\ro-stack') $liveAfter $stopEvents
   } catch {
     Write-Audit @{ timestamp = [DateTimeOffset]::UtcNow.ToString('o'); action = 'INCIDENT_EVIDENCE_ERROR'; reason = [string]$_.Exception.Message }
+  }
+  try {
+    $guardAfter = Get-RAthenaProcessDecision -Servers $liveAfter -CanonicalRoot $canonicalRoot -CanonicalPorts $canonicalPorts -ServerNames $serverNames -CanonicalPids @(Get-CanonicalPids)
+    [void](Invoke-MapProcDumpTick (Join-Path $projectRoot '.local\ro-stack') $canonicalRoot $liveAfter $guardAfter ($Mode -eq 'Enforce' -and -not $DryRun))
+  } catch {
+    Write-Audit @{ timestamp = [DateTimeOffset]::UtcNow.ToString('o'); action = 'PROCDUMP_ATTACH_ERROR'; reason = (Protect-IncidentText ([string]$_.Exception.Message)) }
   }
   function Count-Name($all, $name) { return @($all | Where-Object { $_.name -eq $name }).Count }
   $loginCount = Count-Name $liveAfter 'login-server.exe'

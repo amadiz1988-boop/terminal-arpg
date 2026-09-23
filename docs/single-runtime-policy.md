@@ -182,8 +182,16 @@ Evidence lives under the existing Production root at
 Each incident has `incident.json`, `timeline.json`, `runtime-state.json`, bounded
 stdout/stderr tails, sentinel and map launcher tails, Windows Application Error
 or WER matches, and ProcDump references with SHA256 and size. A map dump remains
-under the accepted `crash-capture` sidecar path. The collector does not alter
-the map ProcDump arguments or attach ProcDump to login/char. Dump and incident
+under the accepted `crash-capture` sidecar path. The sentinel reattaches the
+approved ProcDump sidecar when the canonical map PID changes. It validates
+`state.json`, the map path and start time, the sole map process and 5122 listener,
+and the existing single-runtime guard decision. It adopts an already running
+approved sidecar and records it in `procdump-attachment-state.json`; repeated
+ticks do not spawn duplicates. A failed attachment records `FAILED` and retries
+after one minute without stopping the map. Arguments remain those in
+`docs/project-control/canonical-procdump-map-crash-sidecar-v1.md`; login and char
+are never attached. The old generation is evaluated for exits before its
+observer state is replaced. Dump and incident
 directories grant access to SYSTEM and Administrators only; Player Web has no
 evidence route. Text evidence redacts known credential fields and authorization
 headers. Dumps can contain process memory and remain sensitive.
@@ -212,17 +220,26 @@ deleted. Windows events are queried within two minutes of first exit, and
 late events/dumps are checked for three minutes. Log tails contain at most 200
 lines and 256 KiB per source.
 
-The snapshot records canonical ports/PIDs and TCP reachability of MariaDB on
-3307. Player session, character, PA mode, and active work counts remain
-`UNAVAILABLE` until an incident safe authoritative read model is connected.
+On incident only, `runtime-impact-snapshot.mjs` reads MariaDB with the existing
+Dashboard DB credential kept in memory. `char.online=1` supplies online
+character and distinct account counts, plus bounded character IDs. The existing
+`persistent_agent_live_status` read model supplies resident PA modes and active
+farm, journey, and quest counts. Supply and recovery phases take priority over
+the enclosing agent mode. A resident PA row older than 15 seconds makes PA
+counts `UNAVAILABLE`; DB or PA query failure also yields `UNAVAILABLE`, never
+an inferred zero. The bundle remains writable when this read fails. At most 100
+character IDs are stored, without names or private messages. Counts describe DB
+state at capture time; they do not reconstruct the population before failure.
 Process handles cannot report exits that occurred before observation; those
 times and codes remain `UNAVAILABLE`. The operator should inspect the bundle,
 confirm the first broken transition, then use the existing `ro-stack.ps1`
 recovery procedure and the Production restart safety checklist above. Recovery
 health is recorded after the existing runtime returns to one PID per game port.
 
-Source regression: `ops/ro-stack/tests/test-runtime-incident.ps1`. It uses
-synthetic process identities and temporary files; it does not crash Production.
+Source regressions: `ops/ro-stack/tests/test-runtime-incident.ps1`,
+`ops/ro-stack/tests/test-runtime-procdump-sidecar.ps1`, and
+`ops/ro-stack/tests/test-runtime-impact-snapshot.mjs`. They use
+synthetic process identities and temporary files; they do not crash Production.
 
 ## FINAL POLICY
 

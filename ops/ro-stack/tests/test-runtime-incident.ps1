@@ -58,6 +58,12 @@ try {
   Check ((Latest $one).windowsEvidence.exceptionCode -eq '0xc0000005') 'fault exception captured'
   $summary = & (Join-Path $PSScriptRoot '..\show-runtime-incident.ps1') -RuntimeRoot $one.root | Out-String
   Check ($summary -match [regex]::Escape($incident.incidentId) -and $summary -match 'FIRST_EXIT_SERVICE') 'operator latest summary'
+  Check ($summary -match 'RUNTIME_GENERATION' -and $summary -match 'PA_MODE_COUNTS' -and $summary -match 'ONLINE_CHARACTERS') 'operator impact fields'
+  $firstBundle = @(Get-ChildItem -LiteralPath (Join-Path $one.root 'runtime-incidents') -Directory | Select-Object -First 1)[0]
+  $firstPath = Join-Path $firstBundle.FullName 'incident.json'
+  $firstSnapshot = Read-IncidentJson $firstPath
+  $firstSnapshot.onlinePlayerCount = 7
+  Write-IncidentJson $firstPath $firstSnapshot
   $charEvent = [pscustomobject]@{ name = 'char-server.exe'; pid = 102; at = $when.AddMilliseconds(307).ToString('o'); exitCode = 0 }
   $loginEvent = [pscustomobject]@{ name = 'login-server.exe'; pid = 101; at = $when.AddMilliseconds(418).ToString('o'); exitCode = 0 }
   Invoke-RuntimeIncidentTick $one.root @() @($charEvent, $loginEvent)
@@ -65,6 +71,7 @@ try {
   Check (($cascade.exitOrder | ForEach-Object service) -join ',' -eq 'map,char,login') 'three process ordering'
   Check ($cascade.exitOrder[1].exitTimeDeltaMs -eq 307 -and $cascade.exitOrder[2].exitTimeDeltaMs -eq 418) 'exit time deltas'
   Check ($cascade.incidentId -eq $incident.incidentId) 'cascade same incident'
+  Check ($cascade.onlinePlayerCount -eq 7) 'first impact snapshot preserved through cascade'
   Invoke-RuntimeIncidentTick $one.root @() @()
   Check (@(Get-ChildItem -LiteralPath (Join-Path $one.root 'runtime-incidents') -Directory).Count -eq 1) 'duplicate suppression'
   $tailFile = @(Get-ChildItem -LiteralPath (Join-Path $one.root 'runtime-incidents') -Directory | Select-Object -First 1)[0]
@@ -104,6 +111,21 @@ try {
   Check ($null -eq (Latest $mixed)) 'launcher stop alone no incident'
   Invoke-RuntimeIncidentTick $mixed.root @($mixed.live | Where-Object { $_.pid -in @(101) }) @()
   Check ((Latest $mixed).firstExitService -eq 'char') 'first unexpected excludes graceful predecessor'
+
+  $replacement = New-Fixture 'replacement-before-poll'
+  Invoke-RuntimeIncidentTick $replacement.root $replacement.live @()
+  $oldGeneration = (Read-IncidentJson (Join-Path $replacement.root 'incident-observer-state.json')).generationId
+  $replacementState = Read-IncidentJson (Join-Path $replacement.root 'state.json')
+  $replacementState.startedAt = [long]$replacementState.startedAt + 1
+  $replacementState.processes[2].id = 104
+  Write-IncidentJson (Join-Path $replacement.root 'state.json') $replacementState
+  $newLive = @($replacement.live | Where-Object pid -ne 103) + @([pscustomobject]@{ name = 'map-server.exe'; pid = 104; path = $replacementState.processes[2].path; start = [DateTimeOffset]::UtcNow.ToString('o') })
+  $oldMapExit = [pscustomobject]@{ name = 'map-server.exe'; pid = 103; at = [DateTimeOffset]::UtcNow.ToString('o'); exitCode = 3221225477 }
+  Invoke-RuntimeIncidentTick $replacement.root $newLive @($oldMapExit)
+  $oldIncident = Latest $replacement
+  Check ($oldIncident.runtimeGenerationId -eq $oldGeneration -and $oldIncident.firstExitPid -eq 103) 'old map incident finalized before new generation'
+  Check ((Read-IncidentJson (Join-Path $replacement.root 'incident-observer-state.json')).generationId -eq ('ro-{0}' -f $replacementState.startedAt)) 'new generation tracked'
+  Check ($oldIncident.onlineCharacterCount -eq 'UNAVAILABLE' -and $oldIncident.persistentAgentResidentCount -eq 'UNAVAILABLE') 'missing DB source not recorded as zero'
 
   $sentinel = New-Fixture 'sentinel'
   Invoke-RuntimeIncidentTick $sentinel.root $sentinel.live @()
