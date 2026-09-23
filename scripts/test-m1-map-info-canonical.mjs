@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync } from 'node:fs';
 import { join, resolve, sep } from 'node:path';
 
 const root = resolve(import.meta.dirname, '..');
+mkdirSync(join(root, '.local'), { recursive: true });
 const auditRoot = realpathSync(join(root, '.local'));
 const outputs = [0, 1].map(() => mkdtempSync(join(auditRoot, 'm1-map-info-repro-')));
 

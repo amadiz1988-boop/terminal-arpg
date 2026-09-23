@@ -1,0 +1,28 @@
+# M1 map-info input provenance
+
+This is the input manifest for `scripts/build-ro-map-info.mjs` and
+`scripts/test-m1-map-info-canonical.mjs`. Product scope is fixed by
+`docs/project-control/canonical-m1-world-travel-supply-ui-v1.md` at
+`38cf0bb2`. The generated index is Web preflight data; rAthena remains the
+world, spawn, map-flag, item and teleport authority.
+
+| Exact path or dependency | Classification | Provenance and disposition |
+|---|---|---|
+| `public/ro/client/world-map/world-map.webp` | M1_REQUIRED_INPUT | Authorized Gravity World Map derivative, 442560 bytes, SHA256 `302b8889c4e886a6a7aa6ebca1c92f0d14768c7e3d706665c2a67a0a409c6fef`; its manifest hash matches. Commit the exact file. |
+| `public/ro/client/world-map/positions.json` | M1_REQUIRED_INPUT | Gravity `worldviewdata_table.lub` derivative, 363 source rows, SHA256 `8ccb109d972cd9a1405f12247ac39ad64b33bb3cd115ec3018049acafe4e9106`. Commit the exact file. |
+| `public/ro/client/world-map/manifest.json` | M1_REQUIRED_INPUT | Records client authorization, source archive/image hashes, conversion, position count and image output hash. Commit the exact file. |
+| `public/ro/data/monster-names-tw.json` | M1_REQUIRED_INPUT | Shared RO asset output from client `navi_mob_tw.lub`, 1447 names, SHA256 `8515320ceb9b0ed5501f32400012c691a9e0658b281b31cc2c93a637f477265c`. The M1 map-info generator reads only `names`; adopt and commit the existing bytes without editing the other asset workline's source. |
+| `public/ro/maps/*.fld2.gz` | M1_REQUIRED_INPUT | 51 previously indexed field files, already tracked and clean. |
+| `ops/ro-stack/persistent-agent/standard-farm-map-release-registry.json`, `public/ro/client/world-map/positions.json`, `ops/ro-stack/persistent-agent/world-map-teleport-source.json`, `scripts/lib/ro-yaml-records.mjs` | M1_REQUIRED_INPUT | Committed preflight, source metadata and shared resource classification; the old STANDARD flag is not current product eligibility. |
+| Canonical Native source `C:/Users/Administrator/source/ghost-island-rathena` | M1_REQUIRED_INPUT | Separate committed authority at audit baseline `9672f31a768a0fd6d6d42050928dc4303bbbe3f3`; passed as `RO_RATHENA_ROOT` in a fresh checkout. Do not copy its runtime or DB into Web Git. |
+| Pinned OpenKore source `51de1ddfc4449ae5217f6886de702f87ca934030` | M1_REQUIRED_INPUT | Reference and localized table source only; passed as `RO_OPENKORE_ROOT`. OpenKore process/runtime remains absent. |
+| `public/ro/data/map-info.json` and `public/ro/data/map-info/*.json` | GENERATED_OUTPUT | 394 files regenerated from the committed inputs and external pinned sources; stage only after byte equality is proven. |
+| `.local/ro-stack/*`, installed `node_modules`, RO client and GRF extraction tools | LOCAL_ONLY | Build/reference dependencies and provenance tools. Never stage runtime, client archives, binaries or dependency trees. |
+| `scripts/import-ro-world-map.mjs`, `scripts/extract-ro-world-map.ps1`, `scripts/extract-ro-monster-names.ps1` | OTHER_WORKLINE_INPUT | Existing untracked asset-extraction helpers. They are not invoked by map-info generation and are left untouched and uncommitted by M1. |
+
+`UNKNOWN = 0` for this generator's inputs and outputs. The two external
+source roots are explicit parameters, so a Git archive of the Web checkpoint
+can regenerate without copying `.local/ro-stack` into it. Fresh-checkout
+verification still requires the accepted Native and pinned OpenKore source
+checkouts and the installed package dependencies; it does not deploy or
+restart any runtime.

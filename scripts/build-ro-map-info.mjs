@@ -5,8 +5,8 @@ import { parseYamlRecords, rathenaFarmMonsterFlags } from './lib/ro-yaml-records
 import sharp from 'sharp';
 
 const root = process.cwd();
-const rathena = join(root, '.local', 'ro-stack', 'rathena');
-const openkore = join(root, '.local', 'ro-stack', 'openkore');
+const rathena = process.env.RO_RATHENA_ROOT ?? join(root, '.local', 'ro-stack', 'rathena');
+const openkore = process.env.RO_OPENKORE_ROOT ?? join(root, '.local', 'ro-stack', 'openkore');
 const mapRoot = join(root, 'public', 'ro', 'maps');
 const outputPublicRoot = process.env.RO_MAP_INFO_PUBLIC_ROOT ?? join(root, 'public');
 const outputRoot = join(outputPublicRoot, 'ro', 'data');
