@@ -11,8 +11,19 @@ $script:attachCount = 0
 $script:failAttach = $false
 $count = 0
 function Check([bool]$condition, [string]$label) { if (-not $condition) { throw "FAIL $label" }; $script:count++ }
-function Get-CimInstance { return @($script:sidecars) }
-function Get-NetTCPConnection { return @([pscustomobject]@{ OwningProcess = [int](Read-IncidentJson (Join-Path $runtimeRoot 'state.json')).processes[0].id }) }
+function Get-CimInstance {
+  param($ClassName, $Filter, $ErrorAction)
+  if ($Filter -match 'ProcessId=(\d+)') { return [pscustomobject]@{ ExecutablePath = (Join-Path $canonicalRoot 'map-server.exe') } }
+  if ($Filter -match 'perl.exe') { return @() }
+  return @($script:sidecars)
+}
+function Get-NetTCPConnection {
+  param($State, $LocalPort, $ErrorAction)
+  $entries = (Read-IncidentJson (Join-Path $runtimeRoot 'state.json')).processes
+  $name = @{ 6901 = 'login'; 6122 = 'char'; 5122 = 'map' }[[int]$LocalPort]
+  return @([pscustomobject]@{ OwningProcess = [int](@($entries | Where-Object name -eq $name)[0].id) })
+}
+function Invoke-RestMethod { return [pscustomobject]@{ ok = $true } }
 function Test-Path {
   param($LiteralPath, $PathType)
   if ($LiteralPath -eq $script:approvedProcDumpPath -or $LiteralPath -eq (Join-Path $canonicalRoot 'map-server.exe')) { return $true }
@@ -29,6 +40,10 @@ function Start-Process {
   $script:attachCount++
   if ($script:failAttach) { throw 'SYNTHETIC_ATTACH_FAILURE' }
   $id = 40000 + $script:attachCount
+  $mapPid = [int]$ArgumentList[-2]
+  $folder = [string]$ArgumentList[-1]
+  $filterLines = @($script:approvedProcDumpFilter.Split(',') | ForEach-Object { "                       $_" }) -join "`n"
+  "Process: map-server.exe ($mapPid)`nProcess image: $(Join-Path $canonicalRoot 'map-server.exe')`nException monitor: First Chance+Unhandled`n$filterLines`nNumber of dumps: 2`nDump folder: $folder" | Set-Content -LiteralPath $RedirectStandardOutput -Encoding Unicode
   $script:sidecars += [pscustomobject]@{
     ProcessId = $id; ExecutablePath = $script:approvedProcDumpPath
     CommandLine = ('"{0}" {1}' -f $script:approvedProcDumpPath, ($ArgumentList -join ' '))
@@ -36,7 +51,11 @@ function Start-Process {
   return [pscustomobject]@{ Id = $id; HasExited = $false }
 }
 function State([int]$mapPid, [long]$generation) {
-  return [pscustomobject]@{ startedAt = $generation; processes = @([pscustomobject]@{ name = 'map'; id = $mapPid; path = (Join-Path $canonicalRoot 'map-server.exe') }) }
+  return [pscustomobject]@{ startedAt = $generation; processes = @(
+    [pscustomobject]@{ name = 'login'; id = 101; path = (Join-Path $canonicalRoot 'login-server.exe') },
+    [pscustomobject]@{ name = 'char'; id = 102; path = (Join-Path $canonicalRoot 'char-server.exe') },
+    [pscustomobject]@{ name = 'map'; id = $mapPid; path = (Join-Path $canonicalRoot 'map-server.exe') }
+  ) }
 }
 function Server([int]$mapPid, [string]$path) {
   return [pscustomobject]@{ name = 'map-server.exe'; pid = $mapPid; path = $path; start = '2026-09-23T00:00:00Z'; ports = @(5122) }
@@ -62,6 +81,7 @@ try {
   Check ($invalid.status -eq 'MAP_PROCDUMP_REATTACH_BLOCKED') 'noncanonical PID denied'
   $blind = Get-MapProcDumpDecision (State 105 1002) @((Server 105 $mapPath)) $guard @([pscustomobject]@{ ProcessId = 999; ExecutablePath = $script:approvedProcDumpPath; CommandLine = $null }) $canonicalRoot $runtimeRoot
   Check ($blind.status -eq 'MAP_PROCDUMP_REATTACH_BLOCKED' -and $blind.reason -eq 'SIDECAR_INVENTORY_INCOMPLETE') 'incomplete sidecar inventory denied'
+  Check (-not (Test-MapProcDumpOutput 'bad output' 105 $mapPath 'C:\dump')) 'unverified ProcDump output denied'
   $duplicate = Get-MapProcDumpDecision (State 105 1002) @((Server 105 $mapPath), (Server 106 $mapPath)) $guard @() $canonicalRoot $runtimeRoot
   Check ($duplicate.status -eq 'MAP_PROCDUMP_REATTACH_BLOCKED') 'second map denied'
   Write-IncidentJson (Join-Path $runtimeRoot 'state.json') (State 105 1002)

@@ -21,6 +21,18 @@ function Get-ProcDumpHistoricalState($prior) {
   }
 }
 
+function Test-MapProcDumpOutput([string]$output, [int]$mapPid, [string]$mapPath, [string]$dumpFolder) {
+  if ($output -notmatch ('(?m)^Process:\s+map-server\.exe\s+\({0}\)' -f $mapPid)) { return $false }
+  if ($output -notmatch [regex]::Escape($mapPath)) { return $false }
+  if ($output -notmatch 'Exception monitor:\s+First Chance\+Unhandled') { return $false }
+  if ($output -notmatch 'Number of dumps:\s+2') { return $false }
+  if ($output.IndexOf($dumpFolder, [StringComparison]::OrdinalIgnoreCase) -lt 0) { return $false }
+  foreach ($filter in $script:approvedProcDumpFilter.Split(',')) {
+    if ($output.IndexOf($filter, [StringComparison]::OrdinalIgnoreCase) -lt 0) { return $false }
+  }
+  return $true
+}
+
 function Get-MapProcDumpDecision($state, $servers, $guard, $sidecars, [string]$canonicalRoot, [string]$runtimeRoot) {
   $map = @($state.processes | Where-Object name -eq 'map')
   $liveMaps = @($servers | Where-Object name -eq 'map-server.exe')
@@ -74,6 +86,11 @@ function Invoke-MapProcDumpTick([string]$runtimeRoot, [string]$canonicalRoot, $s
   $sameMap = $prior -and [int]$prior.mapPid -eq [int]$map.pid -and $sameStart -and [string]$prior.runtimeGenerationId -eq $generation
   if ($decision.status -eq 'ALREADY_ATTACHED') {
     if ($sameMap -and [int]$prior.procdumpProcessId -eq [int]$decision.sidecar.ProcessId -and $prior.procdumpAttachStatus -eq 'ATTACHED') { return $prior }
+    if ($sameMap -and $prior.procdumpAttachStatus -eq 'FAILED' -and $prior.dumpDirectory) {
+      $outPath = Join-Path ([string]$prior.dumpDirectory) 'procdump.stdout.log'
+      $out = if (Test-Path -LiteralPath $outPath) { Get-Content -LiteralPath $outPath -Raw -Encoding Unicode -ErrorAction SilentlyContinue } else { '' }
+      if (-not (Test-MapProcDumpOutput $out ([int]$map.pid) ([string]$map.path) ([string]$prior.dumpDirectory))) { return $prior }
+    }
     $record = [pscustomobject]@{ runtimeGenerationId = $generation; mapPid = [int]$map.pid; mapProcessStartTime = [string]$map.start; mapBinaryPath = [string]$map.path; procdumpAttachedPid = [int]$map.pid; procdumpAttachedAt = [DateTimeOffset]::UtcNow.ToString('o'); procdumpProcessId = [int]$decision.sidecar.ProcessId; procdumpAttachStatus = 'ATTACHED'; procdumpAttachError = $null; mapRuntimeUnaffected = 'YES'; previous = if ($sameMap) { $prior.previous } else { Get-ProcDumpHistoricalState $prior } }
     Write-IncidentJson $statePath $record
     return $record
@@ -84,15 +101,41 @@ function Invoke-MapProcDumpTick([string]$runtimeRoot, [string]$canonicalRoot, $s
   }
   $record = [pscustomobject]@{ runtimeGenerationId = $generation; mapPid = [int]$map.pid; mapProcessStartTime = [string]$map.start; mapBinaryPath = [string]$map.path; procdumpAttachedPid = $null; procdumpAttachedAt = $null; procdumpProcessId = $null; procdumpAttachStatus = 'FAILED'; procdumpAttachError = $null; attemptedAt = [DateTimeOffset]::UtcNow.ToString('o'); mapRuntimeUnaffected = 'YES'; previous = if ($sameMap) { $prior.previous } else { Get-ProcDumpHistoricalState $prior } }
   try {
+    $expectedPorts = @{ login = 6901; char = 6122; map = 5122 }
+    $preOwners = @{}
+    foreach ($service in @('login', 'char', 'map')) {
+      $entry = @($runtimeState.processes | Where-Object name -eq $service)
+      $owners = @(Get-NetTCPConnection -State Listen -LocalPort $expectedPorts[$service] -ErrorAction Stop | ForEach-Object { [int]$_.OwningProcess } | Select-Object -Unique)
+      if ($entry.Count -ne 1 -or $owners.Count -ne 1 -or $owners[0] -ne [int]$entry[0].id) { throw ('CANONICAL_PORT_UNHEALTHY:{0}' -f $service) }
+      $preOwners[$service] = $owners[0]
+    }
+    $health = Invoke-RestMethod -Uri 'http://127.0.0.1:8788/api/health' -Method Get -TimeoutSec 2 -ErrorAction Stop
+    if ($health.ok -ne $true) { throw 'DASHBOARD_HEALTH_UNAVAILABLE' }
+    $openKore = @(Get-CimInstance Win32_Process -Filter "Name='perl.exe'" -ErrorAction Stop | Where-Object { $_.CommandLine -match 'openkore' })
+    if ($openKore.Count -gt 0) { throw 'OPENKORE_RUNTIME_PRESENT' }
     if (-not (Test-Path -LiteralPath $script:approvedProcDumpPath) -or (Get-FileHash -LiteralPath $script:approvedProcDumpPath -Algorithm SHA256).Hash -ne $script:approvedProcDumpHash) { throw 'PROCDUMP_IDENTITY_MISMATCH' }
     if (-not (Test-Path -LiteralPath $map.path -PathType Leaf)) { throw 'MAP_BINARY_MISSING' }
     $record | Add-Member -NotePropertyName mapBinarySha256 -NotePropertyValue ((Get-FileHash -LiteralPath $map.path -Algorithm SHA256).Hash) -Force
     $folder = Join-Path (Join-Path $runtimeRoot 'crash-capture') ('canonical-map-{0}-{1}' -f $map.pid, [DateTimeOffset]::UtcNow.ToString('yyyyMMdd-HHmmss'))
     Protect-IncidentDirectory $folder
+    $record | Add-Member -NotePropertyName dumpDirectory -NotePropertyValue $folder -Force
     $args = @('-ma', '-n', '2', '-e', '1', '-f', $script:approvedProcDumpFilter, [string]$map.pid, $folder)
     $sidecar = Start-Process -FilePath $script:approvedProcDumpPath -ArgumentList $args -WindowStyle Hidden -RedirectStandardOutput (Join-Path $folder 'procdump.stdout.log') -RedirectStandardError (Join-Path $folder 'procdump.stderr.log') -PassThru -ErrorAction Stop
-    Start-Sleep -Milliseconds 500
-    if ($sidecar.HasExited) { throw 'PROCDUMP_EXITED_DURING_ATTACH' }
+    $outputVerified = $false
+    $outputPath = Join-Path $folder 'procdump.stdout.log'
+    for ($attempt = 0; $attempt -lt 12; $attempt++) {
+      Start-Sleep -Milliseconds 250
+      if ($sidecar.HasExited) { throw 'PROCDUMP_EXITED_DURING_ATTACH' }
+      $output = if (Test-Path -LiteralPath $outputPath) { Get-Content -LiteralPath $outputPath -Raw -Encoding Unicode -ErrorAction SilentlyContinue } else { '' }
+      if (Test-MapProcDumpOutput $output ([int]$map.pid) ([string]$map.path) $folder) { $outputVerified = $true; break }
+    }
+    if (-not $outputVerified) { throw 'PROCDUMP_OUTPUT_UNVERIFIED' }
+    $currentMap = Get-CimInstance Win32_Process -Filter "ProcessId=$([int]$map.pid)" -ErrorAction Stop
+    if (-not $currentMap -or [string]$currentMap.ExecutablePath -ine [string]$map.path) { throw 'MAP_POST_ATTACH_IDENTITY_CHANGED' }
+    foreach ($service in @('login', 'char', 'map')) {
+      $owners = @(Get-NetTCPConnection -State Listen -LocalPort $expectedPorts[$service] -ErrorAction Stop | ForEach-Object { [int]$_.OwningProcess } | Select-Object -Unique)
+      if ($owners.Count -ne 1 -or $owners[0] -ne $preOwners[$service]) { throw ('PORT_CHANGED_AFTER_ATTACH:{0}' -f $service) }
+    }
     $record.procdumpAttachedPid = [int]$map.pid
     $record.procdumpAttachedAt = [DateTimeOffset]::UtcNow.ToString('o')
     $record.procdumpProcessId = [int]$sidecar.Id

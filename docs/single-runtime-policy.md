@@ -185,7 +185,10 @@ or WER matches, and ProcDump references with SHA256 and size. A map dump remains
 under the accepted `crash-capture` sidecar path. The sentinel reattaches the
 approved ProcDump sidecar when the canonical map PID changes. It validates
 `state.json`, the map path and start time, the sole map process and 5122 listener,
-and the existing single-runtime guard decision. It adopts an already running
+and the existing single-runtime guard decision. Before a new attachment it also
+checks login/char/map port owners, Dashboard health, and OpenKore count zero.
+After launch it verifies ProcDump's PID, process image, dump folder, ten exact
+filters, and unchanged service port owners. It adopts an already running
 approved sidecar and records it in `procdump-attachment-state.json`; repeated
 ticks do not spawn duplicates. A failed attachment records `FAILED` and retries
 after one minute without stopping the map. Arguments remain those in
