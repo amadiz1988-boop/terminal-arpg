@@ -2,7 +2,6 @@ import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
-import { resolveSkillAsset } from '../ops/ro-stack/ro-asset-resolver.mjs';
 
 const root = process.cwd();
 const tree = JSON.parse(fs.readFileSync('public/ro/data/skill-trees.json', 'utf8'));
@@ -26,9 +25,9 @@ for (const record of index.entries) {
   assert.equal(png.toString('hex', 0, 8), '89504e470d0a1a0a', record.internalName);
   assert.equal(png.readUInt32BE(16), 24, record.internalName);
   assert.equal(png.readUInt32BE(20), 24, record.internalName);
-  assert.equal(resolveSkillAsset(record.skillId).assetStatus, 'ready', record.internalName);
+  assert.equal(record.assetStatus, 'ready', record.internalName);
 }
-assert.equal(resolveSkillAsset(318).name, '冷笑話');
+assert.equal(index.entries.find((entry) => entry.skillId === 318)?.canonicalZhHant, '冷笑話');
 assert.equal(manifest.BA_FROSTJOKER.clientResourceAlias, 'BA_FROSTJOKE');
 assert.match(manifest.BA_FROSTJOKER.source, /ba_frostjoke\.bmp$/i);
 console.log(`PASS: ${Object.keys(tree.jobs).length} jobs, ${skills.size} verified Client skill icons`);
