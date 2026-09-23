@@ -75,6 +75,24 @@ function Add-NewDependency($Fixture, [bool]$IncludeInManifest) {
   return $relative
 }
 
+function Set-ManifestFileCount($Fixture, [int]$Count) {
+  $manifest = Get-Content -LiteralPath $Fixture.Manifest -Raw | ConvertFrom-Json
+  for ($index = $manifest.files.Count; $index -lt $Count; $index++) {
+    $relative = 'ops/ro-stack/dashboard/capacity-{0:D3}.js' -f $index
+    $source = Join-Path $Fixture.Candidate ($relative.Replace('/', '\'))
+    $target = Join-Path $Fixture.Production ($relative.Replace('/', '\'))
+    [IO.File]::WriteAllText($source, "export const fixture = $index;")
+    [IO.File]::WriteAllText($target, "export const fixture = -$index;")
+    $manifest.files += [pscustomobject]@{
+      path = $relative
+      candidate_sha256 = (Get-FileHash -LiteralPath $source -Algorithm SHA256).Hash
+      production_preimage_sha256 = (Get-FileHash -LiteralPath $target -Algorithm SHA256).Hash
+    }
+  }
+  $manifest | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $Fixture.Manifest -Encoding utf8
+  $Fixture.Files = @($manifest.files)
+}
+
 function Assert-Preimage($Fixture) {
   foreach ($file in $Fixture.Files) {
     $target = Join-Path $Fixture.Production ($file.path.Replace('/', '\'))
@@ -154,6 +172,22 @@ try {
     $rollbackReceipt = Get-Content -LiteralPath $rollback.Json.receipt -Raw | ConvertFrom-Json
     Assert ($rollbackReceipt.rollback_performed -and $rollbackReceipt.final_state -eq 'ORIGINAL_PREIMAGE') 'rollback receipt incomplete'
     Assert ($rollbackReceipt.candidate_root -ceq $f.Candidate) 'rollback receipt candidate root differs from manifest source'
+    Assert-Preimage $f
+  }
+  Run-Test '256 explicit files pass precheck without mutation' {
+    $f = New-Fixture 'capacity-256'
+    Set-ManifestFileCount $f 256
+    $r = Invoke-Tool $f @('-Precheck')
+    Assert ($r.ExitCode -eq 0 -and $r.Json.result -eq 'PRECHECK_PASS') $r.Output
+    Assert ($r.Json.file_count -eq 256 -and -not $r.Json.production_touched) 'capacity precheck receipt invalid'
+    Assert-Preimage $f
+  }
+  Run-Test '257 explicit files fail bounded manifest gate' {
+    $f = New-Fixture 'capacity-257'
+    Set-ManifestFileCount $f 257
+    $r = Invoke-Tool $f @('-Precheck')
+    Assert ($r.ExitCode -ne 0 -and $r.Json.error -eq 'MANIFEST_FILE_COUNT_OUT_OF_BOUNDS') $r.Output
+    Assert (-not $r.Json.production_touched) 'out-of-bounds precheck mutated Production fixture'
     Assert-Preimage $f
   }
   Run-Test 'rollback rejects receipt candidate root mismatch' {
