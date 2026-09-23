@@ -1,15 +1,16 @@
 # Canonical Production Web Deployment
 
 Status: `CANONICAL_DEPLOYMENT_POLICY=ACTIVE`; `SOURCE_VALIDATED=YES`;
-`OFFLINE_VALIDATED=YES (7/7)`; `PRODUCTION_VALIDATED=NO`;
+`OFFLINE_VALIDATED=YES (8/8)`; `PRODUCTION_VALIDATED=NO`;
 `PRODUCTION_VALIDATION_STATUS=NOT_REACHED`.
 
 Policy authority: `AGENTS.md`. Source checkpoint:
 `8f3073079e075771cd63c2a830da100e722068a7` on
 `codex/manifest-web-only-deploy-v1` at
 `C:\Users\Administrator\.codex\worktrees\manifest-web-only-deploy-v1\terminal-arpg`.
-The shared `terminal-arpg` checkout does not yet contain the tool file. Source
-integration and Production validation remain separate gates. No V3 real deploy,
+The accepted tool and its tests are integrated into the canonical shared
+`terminal-arpg` checkout. Source integration and Production validation remain
+separate gates. No V3 real deploy,
 candidate activation, or real rollback has passed as of this status record.
 
 ## Entrypoints
@@ -71,11 +72,10 @@ changed files, Dashboard PID before/after, 6901/6122/5122/8788 listener
 counts and PIDs, health before/after, rollback performed, and final state.
 Receipts contain no secrets. The saved manifest belongs to the receipt bundle.
 
-Checkpoint `8f307307` persists `candidate_root` in its saved `manifest.json`,
-but not as a field in `deploy-receipt.json` or `rollback-receipt.json`. This
-receipt-field gap remains open; do not declare the strict per-file receipt
-contract complete or Production-validated until a separately authorized,
-backward-compatible tool change and real acceptance prove it.
+The integrated tool records `candidate_root` independently in deploy and
+rollback receipts from the validated manifest source root. Rollback rejects a
+deploy receipt whose root differs from the saved manifest. This source contract
+has offline test coverage; Production validation remains open.
 The current tool writes its runtime deploy receipt after health validation;
 Player/API and Browser acceptance must be recorded separately before a release
 can pass the full policy sequence.

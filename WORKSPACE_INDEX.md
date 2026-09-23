@@ -59,20 +59,21 @@ SHARED_SUPPORT_ROOTS:
 CANONICAL_WEB_DEPLOY_TOOL: ops/ro-stack/deploy-dashboard-manifest.ps1
 CANONICAL_DASHBOARD_LIFECYCLE: ops/ro-stack/dashboard-service.ps1
 DEPLOY_TOOL_CHECKPOINT: 8f3073079e075771cd63c2a830da100e722068a7
-DEPLOY_TOOL_SOURCE_WORKTREE: C:\Users\Administrator\.codex\worktrees\manifest-web-only-deploy-v1\terminal-arpg
-DEPLOY_TOOL_SOURCE_BRANCH: codex/manifest-web-only-deploy-v1
-DEPLOY_TOOL_IN_SHARED_HEAD: NO (source integration pending)
+DEPLOY_TOOL_SOURCE_OF_TRUTH: terminal-arpg canonical shared checkout
+DEPLOY_TOOL_ACCEPTED_BASELINE_WORKTREE: C:\Users\Administrator\.codex\worktrees\manifest-web-only-deploy-v1\terminal-arpg
+DEPLOY_TOOL_IN_SHARED_HEAD: YES
 CANONICAL_DEPLOYMENT_POLICY: ACTIVE
 SOURCE_VALIDATED: YES
-OFFLINE_VALIDATED: YES (7/7)
+OFFLINE_VALIDATED: YES (8/8)
 PRODUCTION_VALIDATED: NO
 PRODUCTION_VALIDATION_STATUS: NOT_REACHED
 ```
 
 `deploy-dashboard-checkpoint.ps1` and `deploy-web-journey-atomic.ps1` are
 `LEGACY_BOUNDED_DEPLOY_TOOL` / `SOURCE_REFERENCE=YES`, not general Production
-release entrypoints. Read the exact checkpoint worktree above for tool source;
-do not substitute the dirty shared checkout or a Production runtime copy.
+release entrypoints. The accepted checkpoint worktree is provenance, while the
+integrated tool in `terminal-arpg` is source authority. Do not use a Production
+runtime copy as source.
 Policy, release gates, receipt contract, and current gaps:
 `docs/project-control/web-production-deployment.md`.
 
