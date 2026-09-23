@@ -1,5 +1,5 @@
 :root {
-  --ro-floor-image: url('/ro/client/floors/prontera-stone.png');
+  --ro-floor-image: url('/ro/client/floors/prontera-stone.png?v=aed87291');
   --ro-floor-shade: rgb(0 0 0 / 42%);
   background-color: #414445;
 }
