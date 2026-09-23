@@ -40,6 +40,23 @@
   image-rendering: pixelated;
 }
 
+.ro-login-loading {
+  position: absolute;
+  inset: 12.5% 0 0;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  padding: 8%;
+  background: rgb(255 255 255 / 92%) url('/ro/client/skin/default/sysbox_bg.png') repeat;
+  color: #263954;
+  text-align: center;
+  font: clamp(10px, 1.8vw, 15px)/1.25 Tahoma, 'Microsoft JhengHei', sans-serif;
+}
+
+.ro-login-loading strong {
+  font-weight: 400;
+}
+
 .ro-login-field {
   position: absolute;
   display: block;
@@ -269,7 +286,10 @@
 .ro-select-character-level {
   position: absolute;
   left: 11.3%;
-  width: 17%;
+  width: calc(17% - 4px);
+  min-width: 0;
+  box-sizing: border-box;
+  padding-right: 2px;
   overflow: hidden;
   color: #263954;
   font: 700 clamp(8px, 1.35vw, 13px)/1 Tahoma, 'Microsoft JhengHei', sans-serif;
@@ -290,6 +310,97 @@
 .ro-select-character-level {
   top: 68.6%;
   font-weight: 400;
+}
+
+.ro-select-character-summary {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  color: #263954;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.ro-select-character-value,
+.ro-select-character-stat-values b {
+  position: absolute;
+  overflow: hidden;
+  min-width: 0;
+  box-sizing: border-box;
+  padding-right: 2px;
+  color: #263954;
+  font: 400 clamp(7px, 1.35vw, 11px)/1 Tahoma, 'Microsoft JhengHei', sans-serif;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ro-select-character-exp {
+  left: 11.3%;
+  top: 72.8%;
+  width: calc(16.5% - 4px);
+}
+
+.ro-select-character-hp {
+  left: 11.3%;
+  top: 77.3%;
+  width: calc(16.5% - 4px);
+}
+
+.ro-select-character-sp {
+  left: 11.3%;
+  top: 81.8%;
+  width: calc(16.5% - 4px);
+}
+
+.ro-select-character-map {
+  left: 11.3%;
+  top: 86.3%;
+  width: calc(16.5% - 4px);
+}
+
+.ro-select-character-stat-values {
+  position: absolute;
+  inset: 0;
+}
+
+.ro-select-character-stat-values b {
+  left: 36.5%;
+  width: calc(16.5% - 4px);
+}
+
+.ro-select-character-stat-values b:nth-child(1) { top: 57.6%; }
+.ro-select-character-stat-values b:nth-child(2) { top: 62.1%; }
+.ro-select-character-stat-values b:nth-child(3) { top: 66.6%; }
+.ro-select-character-stat-values b:nth-child(4) { top: 71.0%; }
+.ro-select-character-stat-values b:nth-child(5) { top: 75.5%; }
+.ro-select-character-stat-values b:nth-child(6) { top: 80.0%; }
+
+.ro-select-character-supplement {
+  position: absolute;
+  left: 3%;
+  right: 3%;
+  bottom: 1.6%;
+  display: flex;
+  gap: 10px;
+  overflow: hidden;
+  color: #536779;
+  font: 400 clamp(6px, 1.05vw, 8px)/1 Tahoma, 'Microsoft JhengHei', sans-serif;
+  white-space: nowrap;
+}
+
+.ro-select-character-supplement span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ro-select-character-supplement b {
+  color: #263954;
+  font-weight: 400;
+}
+
+.ro-select-character-data-mirror {
+  display: none;
 }
 
 .ro-character-select-stage .character-select-actions {
@@ -326,6 +437,16 @@
 
   .ro-character-single-slot .select-character-paperdoll {
     transform: translateX(-50%) scale(0.66);
+  }
+
+  .ro-select-character-value,
+  .ro-select-character-stat-values b {
+    font-size: clamp(7px, 2vw, 10px);
+  }
+
+  .ro-select-character-supplement {
+    gap: 5px;
+    font-size: 7px;
   }
 
   .ro-character-select-stage .official-skin-button {

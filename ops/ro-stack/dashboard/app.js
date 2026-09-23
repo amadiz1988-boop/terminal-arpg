@@ -441,13 +441,15 @@ const monsterSoundProfiles = Object.freeze({
     death: [],
   },
 });
+const uiSoundKeys = new Set(['uiConfirm', 'uiCancel', 'uiOpen', 'uiClose']);
 const combatAudio = Object.fromEntries(
   Object.entries(combatSounds).map(([key, source]) => [
     key,
     Array.from({ length: 4 }, () => {
       const audio = new Audio(source);
-      audio.preload = 'none';
+      audio.preload = uiSoundKeys.has(key) ? 'auto' : 'none';
       audio.setAttribute('playsinline', '');
+      if (uiSoundKeys.has(key)) audio.load();
       return audio;
     }),
   ]),
@@ -2565,9 +2567,8 @@ function rotateShowcase(step) {
   selectShowcaseAction('stand', remaining);
 }
 
-async function loadCharacterShowcase() {
-  if (characterShowcase.manifest) return characterShowcase.manifest;
-  if (!characterShowcase.loading) {
+async function loadCharacterShowcase({ preload = true } = {}) {
+  if (!characterShowcase.loading && !characterShowcase.manifest) {
     characterShowcase.loading = fetch('/ro/client/showcase/manifest.json', {
       cache: 'no-store',
     })
@@ -2577,12 +2578,112 @@ async function loadCharacterShowcase() {
       })
       .then((manifest) => {
         characterShowcase.manifest = manifest;
-        void preloadCharacterShowcase();
         return manifest;
       })
       .catch(() => null);
   }
-  return characterShowcase.loading;
+  const manifest = characterShowcase.manifest ?? (await characterShowcase.loading);
+  if (preload && manifest) await preloadCharacterShowcase();
+  return manifest;
+}
+
+async function preloadCharacterSelectionFrame(character) {
+  if (!characterShowcase.manifest) return false;
+  const layers = rankingLayerAsset(
+    {
+      classId: character.classId,
+      appearance: character,
+      equipment: character.equipment ?? [],
+    },
+    'stand',
+  );
+  const sources = new Set();
+  for (const asset of Object.values(layers)) {
+    for (const source of [asset?.src, asset?.backSrc, asset?.frontSrc])
+      if (source) sources.add(source);
+  }
+  await Promise.all([...sources].map(preloadShowcaseSource));
+  return sources.size > 0;
+}
+
+function setAuthLoading(visible, message = '登入中，請稍候……') {
+  const loading = $('#authLoading');
+  if (!loading) return;
+  loading.classList.toggle('hidden', !visible);
+  loading.setAttribute('aria-busy', String(visible));
+  $('#authLoadingMessage').textContent = message;
+}
+
+async function prepareCharacterSelectionCore(character) {
+  characterShowcase.character = character;
+  characterShowcase.equipment = character.equipment ?? [];
+  let paperdollReady = false;
+  try {
+    await loadCharacterSelectionAssets();
+    await loadCharacterShowcase({ preload: false });
+    paperdollReady = await preloadCharacterSelectionFrame(character);
+  } catch {
+    paperdollReady = false;
+  }
+  if (!paperdollReady) await preloadShowcaseSource(bodyAsset(character));
+  const selectPaperdoll = $('#selectPaperdoll');
+  selectPaperdoll.style.backgroundImage = paperdollReady
+    ? ''
+    : `url("${bodyAsset(character)}")`;
+  selectPaperdoll.style.backgroundPosition = 'center bottom';
+  selectPaperdoll.style.backgroundRepeat = 'no-repeat';
+  paintRankingCharacter(
+    selectPaperdoll,
+    {
+      classId: character.classId,
+      appearance: character,
+      equipment: character.equipment ?? [],
+    },
+    'stand',
+    0,
+  );
+  return true;
+}
+
+function renderCharacterSelectionSummary(character) {
+  const value = (input, fallback = '未提供') =>
+    input === null || input === undefined || input === ''
+      ? fallback
+      : Number.isFinite(Number(input))
+        ? Number(input).toLocaleString()
+        : String(input);
+  const baseExp = value(character.baseExp);
+  const jobExp = value(character.jobExp);
+  $('#selectCharacterExp').textContent = baseExp;
+  $('#selectCharacterJobExp').textContent = jobExp;
+  $('#selectCharacterJobExpDisplay').textContent = jobExp;
+  $('#selectCharacterHp').textContent = `${value(character.hp)} / ${value(character.maxHp)}`;
+  $('#selectCharacterSp').textContent = `${value(character.sp)} / ${value(character.maxSp)}`;
+  const stats = [
+    ['STR', character.str],
+    ['AGI', character.agi],
+    ['VIT', character.vit],
+    ['INT', character.int],
+    ['DEX', character.dex],
+    ['LUK', character.luk],
+  ];
+  $('#selectCharacterStats').textContent = stats
+    .map(([name, stat]) => `${name} ${value(stat)}`)
+    .join('　');
+  stats.forEach(([name, stat]) => {
+    const key = name[0] + name.slice(1).toLowerCase();
+    $(`#selectCharacter${key}`).textContent = value(stat);
+  });
+  $('#selectCharacterMap').textContent = value(character.map);
+  const zeny = value(character.zeny);
+  $('#selectCharacterZeny').textContent = zeny;
+  $('#selectCharacterZenyDisplay').textContent = zeny;
+  const weight =
+    character.weight === null || character.weight === undefined
+      ? '未提供'
+      : `${value(character.weight.current)} / ${value(character.weight.max)}`;
+  $('#selectCharacterWeight').textContent = weight;
+  $('#selectCharacterWeightDisplay').textContent = weight;
 }
 
 function setupCharacterShowcase() {
@@ -3351,12 +3452,13 @@ function unlockAudio(fromUserGesture = false) {
     $('#bgm')
       .play()
       .catch(() => {});
-  if (!fromUserGesture || $('#game').classList.contains('hidden')) return;
+  if (!fromUserGesture) return;
   const AudioContextClass = window.AudioContext || window.webkitAudioContext;
   if (AudioContextClass) {
     combatAudioContext ||= new AudioContextClass();
     if (combatAudioContext.state === 'suspended')
       void combatAudioContext.resume().catch(() => {});
+    for (const key of uiSoundKeys) void prepareCombatAudio(key);
   }
 }
 function setMusicContext(context) {
@@ -8009,6 +8111,7 @@ async function enter(latencyTrace = null) {
   restartWebActivityHeartbeat();
   applyCombatStreamState(session.combatSse);
   if (!session.account) {
+    setAuthLoading(false);
     setMusicContext('title');
     show($('#auth'));
     show($('#loginForm'));
@@ -8037,6 +8140,7 @@ async function enter(latencyTrace = null) {
     return;
   }
   if (!session.account.characterId || !session.account.characterName) {
+    setAuthLoading(false);
     setMusicContext('title');
     currentCreateSex = session.account.sex === 'F' ? 'F' : 'M';
     document.querySelector(
@@ -8054,15 +8158,21 @@ async function enter(latencyTrace = null) {
     void loadAccountAudio();
     return;
   }
+  setAuthLoading(true, '登入成功，正在準備角色資料……');
+  const requiredCharacterFields = [
+    'baseExp', 'jobExp', 'zeny', 'str', 'agi', 'vit', 'int', 'dex', 'luk',
+    'hp', 'maxHp', 'sp', 'maxSp', 'map',
+  ];
+  if (!session.character || requiredCharacterFields.some(
+    (field) => session.character[field] === null || session.character[field] === undefined,
+  )) throw new Error('角色資料尚未完整，請重試登入');
   const character = {
     charId: session.account.characterId,
     name: session.account.characterName,
-    classId: session.account.classId,
-    sex: session.account.sex,
-    hair: session.account.hair,
-    hairColor: session.account.hairColor,
-    baseLevel: session.account.baseLevel,
-    jobLevel: session.account.jobLevel,
+    ...session.account,
+    ...(session.character ?? {}),
+    name: session.character?.name ?? session.account.characterName,
+    equipment: session.equipment ?? [],
   };
   gameEntryBootstrap = {
     account: { username: session.account.username },
@@ -8070,59 +8180,33 @@ async function enter(latencyTrace = null) {
     derived: {
       ...character,
       jobId: character.classId,
-      playerX: session.account.x,
-      playerY: session.account.y,
-      hp: session.account.hp,
-      maxHp: session.account.maxHp,
-      sp: session.account.sp,
-      maxSp: session.account.maxSp,
-      map: session.account.map,
+      playerX: character.x,
+      playerY: character.y,
+      hp: character.hp,
+      maxHp: character.maxHp,
+      sp: character.sp,
+      maxSp: character.maxSp,
+      map: character.map,
     },
   };
   const selectPaperdoll = $('#selectPaperdoll');
   selectPaperdoll.dataset.direction = '0';
-  characterShowcase.character = character;
-  characterShowcase.equipment = session.equipment ?? [];
-  paintRankingCharacter(
-    selectPaperdoll,
-    {
-      classId: character.classId,
-      appearance: character,
-      equipment: session.equipment ?? [],
-    },
-    'stand',
-    0,
-  );
   $('#selectCharacterName').textContent = character.name;
   $('#selectCharacterMeta').textContent =
     jobNames[character.classId] ?? `職業 ${character.classId}`;
   $('#selectCharacterLevel').textContent =
     `Base ${character.baseLevel} / Job ${character.jobLevel}`;
+  renderCharacterSelectionSummary(character);
+  setMusicContext('title');
+  await prepareCharacterSelectionCore(character);
   show($('#auth'));
   show($('#loginForm'), false);
   show($('#characterForm'), false);
   show($('#characterSelectForm'));
   show($('#game'), false);
-  setTimeout(() => {
-    void hydrateCharacterSelectionEquipment(character.charId);
-    void loadAccountAudio();
-    setMusicContext('title');
-    void loadCharacterSelectionAssets()
-      .then(() => loadCharacterShowcase())
-      .then(() => {
-        paintRankingCharacter(
-          selectPaperdoll,
-          {
-            classId: character.classId,
-            appearance: character,
-            equipment: characterShowcase.equipment,
-          },
-          'stand',
-          0,
-        );
-      })
-      .catch(() => {});
-  }, 0);
+  setAuthLoading(false);
+  void hydrateCharacterSelectionEquipment(character.charId);
+  void loadAccountAudio();
   scheduleGameplayModuleWarmup();
 }
 const persistentLifeState = { charId: null, data: null, timelineOpen: false };
@@ -8675,6 +8759,7 @@ $('#loginForm').onsubmit = async (event) => {
   const latencyTrace = beginLatencyInteraction('login');
   const submit = $('#loginSubmit');
   submit.disabled = true;
+  setAuthLoading(true, '登入中，請稍候……');
   $('#authError').textContent = '正在連線，首次登入會建立帳號';
   try {
     await api('/api/account', {
@@ -8691,6 +8776,7 @@ $('#loginForm').onsubmit = async (event) => {
     await enter(latencyTrace);
   } catch (error) {
     $('#authError').textContent = error.message;
+    setAuthLoading(false);
   } finally {
     submit.disabled = false;
     void completeLatencyInteraction(latencyTrace, {
@@ -9220,7 +9306,7 @@ document.addEventListener('click', (event) => {
           : 'uiOpen'
         : 'uiConfirm';
   playCombatSound(key, 0, '', 0, 0.38);
-});
+}, true);
 document.querySelectorAll('[data-inventory]').forEach((button) =>
   button.addEventListener('click', () => {
     playCombatSound('uiTab', 0, '', 0, 0.42);
@@ -9790,11 +9876,11 @@ $('#openWorldMap').onclick = () =>
     $('#grindTargetSummary').textContent = error.message;
   });
 $('#closeWorldMap').onclick = closeWorldMap;
-$('#persistentLifeTimelineToggle').onclick = () => {
+$('#persistentLifeTimelineToggle')?.addEventListener('click', () => {
   persistentLifeState.timelineOpen = !persistentLifeState.timelineOpen;
   renderPersistentLife();
-};
-$('#persistentLifeDismiss').onclick = () => void dismissPersistentLife();
+});
+$('#persistentLifeDismiss')?.addEventListener('click', () => void dismissPersistentLife());
 $('#worldMapOverlay').addEventListener('click', (event) => {
   if (event.target === $('#worldMapOverlay')) closeWorldMap();
 });
@@ -9827,6 +9913,7 @@ enter(initialEntryTrace).then(
       visibleTarget: authenticated ? 'character-select' : 'login',
     }),
 ).catch((error) => {
+  setAuthLoading(false);
   $('#loginServerStatus').textContent = '無法連線';
   $('#authError').textContent = error.message;
   $('#loginSubmit').disabled = false;

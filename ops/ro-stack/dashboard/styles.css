@@ -51,12 +51,45 @@ button {
   color: #caffdb;
 }
 .quick-audio {
-  margin-left: 5px;
+  margin: 0 5px;
   border: 1px solid #6d8094;
   background: linear-gradient(#fff, #d6dde2);
   color: #315d89;
-  padding: 5px 9px;
+  padding: 4px 6px;
   font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+}
+.quick-audio-icon {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+.quick-audio-speaker {
+  fill: currentColor;
+}
+.quick-audio-wave,
+.quick-audio-mute {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.quick-audio-mute {
+  display: none;
+}
+.quick-audio[data-audio-state="muted"] {
+  background: linear-gradient(#efe4e4, #cdbcbc);
+  color: #8a4f4f;
+}
+.quick-audio[data-audio-state="muted"] .quick-audio-wave {
+  display: none;
+}
+.quick-audio[data-audio-state="muted"] .quick-audio-mute {
+  display: inline;
 }
 .window {
   border: 1px solid #273a51;
@@ -3765,6 +3798,10 @@ html {
     margin-left: 0;
     padding: 5px 7px;
   }
+  .quick-audio {
+    min-width: 32px;
+    min-height: 32px;
+  }
   .basic {
     padding: 5px;
     grid-template-columns: 44px 126px 1fr;
@@ -4369,31 +4406,4 @@ html {
     min-height: 96px;
     max-height: 96px;
   }
-}
-
-/* Persistent Life V1 — return surface (factual timeline, no LLM narration) */
-.persistent-life-window .persistent-life-body {
-  display: grid;
-  gap: 8px;
-  padding: 10px 12px;
-}
-.persistent-life-highlights,
-.persistent-life-timeline {
-  display: grid;
-  gap: 4px;
-  margin: 0;
-  padding-left: 20px;
-}
-.persistent-life-timeline {
-  max-height: 220px;
-  overflow-y: auto;
-  font-size: 0.85em;
-  opacity: 0.9;
-}
-.persistent-life-actions {
-  display: flex;
-  gap: 8px;
-}
-.persistent-life-actions button {
-  cursor: pointer;
 }

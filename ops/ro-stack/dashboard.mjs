@@ -9413,6 +9413,9 @@ async function handleDashboardRequest(request, response) {
       const discord = await discordAccountAuth.view(account);
       const sessionView = String(url.searchParams.get('view') ?? 'full');
       const entryView = sessionView === 'entry';
+      const character = entryView && account?.characterId
+        ? await queryCharacter(account.accountId)
+        : null;
       const equipment = !entryView && account?.characterId
         ? await queryEquipment(account.characterId)
         : [];
@@ -9432,6 +9435,7 @@ async function handleDashboardRequest(request, response) {
               adminSurface: true,
             }
           : null,
+        ...(entryView ? { character } : {}),
         ...(entryView ? {} : { equipment }),
         observationPolicy: publicObservationPolicy(),
         combatSse: entryView ? null : await combatSseStateForAccount(account, null),

@@ -9,14 +9,17 @@
     <meta name="theme-color" content="#566d8b" />
     <title>鬼島傳說｜冒險掛機</title>
     <link rel="icon" href="/ro/client/paperdoll/novice-male.png" />
-    <link rel="stylesheet" href="/styles.css?v=r068-inventory-item-actions" />
-    <link rel="stylesheet" href="/ro-ui-kit.css?v=r011-character-select-scale" />
+    <link rel="stylesheet" href="/styles.css?v=r071-lost-ui-restoration" />
+    <link rel="stylesheet" href="/ro-ui-kit.css?v=r014-lost-ui-restoration" />
   </head>
   <body>
     <section id="auth" class="auth">
       <form id="loginForm" class="auth-card ro-login-card">
         <div class="ro-login-scale-shell">
           <div class="ro-login-stage">
+            <div id="authLoading" class="ro-login-loading hidden" role="status" aria-live="polite" aria-busy="false">
+              <strong id="authLoadingMessage">登入中，請稍候……</strong>
+            </div>
             <label class="ro-login-field ro-login-id">
               <span class="sr-only">帳號</span>
               <input
@@ -238,6 +241,29 @@
           <b id="selectCharacterName" class="ro-select-character-name">讀取中</b>
           <small id="selectCharacterMeta" class="ro-select-character-meta">初心者</small>
           <small id="selectCharacterLevel" class="ro-select-character-level">Base 1 / Job 1</small>
+          <div id="selectCharacterSummary" class="ro-select-character-summary" aria-label="角色完整資料">
+            <b id="selectCharacterExp" class="ro-select-character-value ro-select-character-exp">讀取中</b>
+            <b id="selectCharacterHp" class="ro-select-character-value ro-select-character-hp">讀取中</b>
+            <b id="selectCharacterSp" class="ro-select-character-value ro-select-character-sp">讀取中</b>
+            <b id="selectCharacterMap" class="ro-select-character-value ro-select-character-map">讀取中</b>
+            <div class="ro-select-character-stat-values" aria-label="能力值">
+              <b id="selectCharacterStr">讀取中</b>
+              <b id="selectCharacterAgi">讀取中</b>
+              <b id="selectCharacterVit">讀取中</b>
+              <b id="selectCharacterInt">讀取中</b>
+              <b id="selectCharacterDex">讀取中</b>
+              <b id="selectCharacterLuk">讀取中</b>
+            </div>
+            <div class="ro-select-character-supplement" aria-label="其他角色資料">
+              <span>Job EXP <b id="selectCharacterJobExpDisplay">讀取中</b></span>
+              <span>負重 <b id="selectCharacterWeightDisplay">未提供</b></span>
+              <span>Zeny <b id="selectCharacterZenyDisplay">讀取中</b></span>
+            </div>
+            <b id="selectCharacterJobExp" class="ro-select-character-data-mirror" aria-hidden="true">讀取中</b>
+            <b id="selectCharacterStats" class="ro-select-character-data-mirror" aria-hidden="true">讀取中</b>
+            <b id="selectCharacterWeight" class="ro-select-character-data-mirror" aria-hidden="true">未提供</b>
+            <b id="selectCharacterZeny" class="ro-select-character-data-mirror" aria-hidden="true">讀取中</b>
+          </div>
           <div class="login-actions character-select-actions">
             <button
               id="selectLogout"
@@ -496,20 +522,6 @@
             <div><span>職業 EXP</span><b id="jobExpGained">0</b></div>
             <div><span>撿取種類</span><b id="itemKinds">0</b></div>
             <div><span>死亡次數</span><b id="deaths">0</b></div>
-          </div>
-        </div>
-        <div class="window persistent-life-window" id="persistentLifeWindow" hidden>
-          <div class="titlebar">
-            <span>你不在的這段時間……</span><span id="persistentLifeStatus"></span>
-          </div>
-          <div class="persistent-life-body">
-            <p id="persistentLifeSummary" class="notice"></p>
-            <ul id="persistentLifeHighlights" class="persistent-life-highlights"></ul>
-            <div class="persistent-life-actions">
-              <button id="persistentLifeTimelineToggle" type="button">查看完整足跡</button
-              ><button id="persistentLifeDismiss" type="button">知道了</button>
-            </div>
-            <ol id="persistentLifeTimeline" class="persistent-life-timeline" hidden></ol>
           </div>
         </div>
         <div class="window map-window" data-pet-anchor="map">
@@ -1334,7 +1346,7 @@
     <script src="/minimap-presence.js?v=ui5-1" defer></script>
     <script type="module" src="/config-editor.js?v=config-v1"></script>
     <script
-      src="/app.js?v=r088-inventory-item-actions"
+      src="/app.js?v=r102-lost-ui-restoration"
       defer
       fetchpriority="high"
     ></script>
