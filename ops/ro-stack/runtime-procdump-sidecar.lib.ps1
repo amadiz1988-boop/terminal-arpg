@@ -34,6 +34,9 @@ function Get-MapProcDumpDecision($state, $servers, $guard, $sidecars, [string]$c
     return [pscustomobject]@{ status = 'MAP_PROCDUMP_REATTACH_BLOCKED'; reason = 'RUNTIME_GUARD'; map = $null; sidecar = $null }
   }
   $captureRoot = Join-Path $runtimeRoot 'crash-capture'
+  if (@($sidecars | Where-Object { -not $_.CommandLine -or -not $_.ExecutablePath }).Count) {
+    return [pscustomobject]@{ status = 'MAP_PROCDUMP_REATTACH_BLOCKED'; reason = 'SIDECAR_INVENTORY_INCOMPLETE'; map = $candidate; sidecar = $null }
+  }
   $targetSidecars = @($sidecars | Where-Object { [string]$_.CommandLine -match ('(?<!\d){0}(?!\d)' -f [int]$candidate.pid) })
   if ($targetSidecars.Count -gt 1) { return [pscustomobject]@{ status = 'MAP_PROCDUMP_REATTACH_BLOCKED'; reason = 'DUPLICATE_SIDECARS'; map = $candidate; sidecar = $null } }
   if ($targetSidecars.Count -eq 1) {
@@ -50,7 +53,7 @@ function Invoke-MapProcDumpTick([string]$runtimeRoot, [string]$canonicalRoot, $s
   $runtimeState = Read-IncidentJson (Join-Path $runtimeRoot 'state.json')
   if (-not $runtimeState) { return }
   $prior = Read-IncidentJson $statePath
-  $sidecars = @(Get-CimInstance Win32_Process -Filter "Name='procdump64.exe'" -ErrorAction SilentlyContinue)
+  $sidecars = @(Get-CimInstance Win32_Process -Filter "Name='procdump64.exe'" -ErrorAction Stop)
   $decision = Get-MapProcDumpDecision $runtimeState $servers $guard $sidecars $canonicalRoot $runtimeRoot
   if ($decision.map) {
     $portOwners = @(Get-NetTCPConnection -State Listen -LocalPort 5122 -ErrorAction SilentlyContinue | ForEach-Object { [int]$_.OwningProcess } | Select-Object -Unique)

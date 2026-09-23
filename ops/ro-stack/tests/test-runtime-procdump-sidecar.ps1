@@ -60,6 +60,8 @@ try {
   Check ($script:attachCount -eq 2) 'replacement PID no duplicate'
   $invalid = Get-MapProcDumpDecision (State 105 1002) @((Server 105 'C:\unauthorized\map-server.exe')) $guard @() $canonicalRoot $runtimeRoot
   Check ($invalid.status -eq 'MAP_PROCDUMP_REATTACH_BLOCKED') 'noncanonical PID denied'
+  $blind = Get-MapProcDumpDecision (State 105 1002) @((Server 105 $mapPath)) $guard @([pscustomobject]@{ ProcessId = 999; ExecutablePath = $script:approvedProcDumpPath; CommandLine = $null }) $canonicalRoot $runtimeRoot
+  Check ($blind.status -eq 'MAP_PROCDUMP_REATTACH_BLOCKED' -and $blind.reason -eq 'SIDECAR_INVENTORY_INCOMPLETE') 'incomplete sidecar inventory denied'
   $duplicate = Get-MapProcDumpDecision (State 105 1002) @((Server 105 $mapPath), (Server 106 $mapPath)) $guard @() $canonicalRoot $runtimeRoot
   Check ($duplicate.status -eq 'MAP_PROCDUMP_REATTACH_BLOCKED') 'second map denied'
   Write-IncidentJson (Join-Path $runtimeRoot 'state.json') (State 105 1002)
