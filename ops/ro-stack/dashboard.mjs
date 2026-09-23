@@ -2605,7 +2605,7 @@ async function reconcilePersistedRelocations() {
       const currentMap = live?.fresh && live.map ? String(live.map) : null;
       if (!currentMap) continue;
       if (currentMap === intent.targetMap) {
-        await queueOwnershipCommand(
+        const command = await queueOwnershipCommand(
           account,
           charId,
           { action: 'start_farm', expectedRevision: Number(controller.revision) },
@@ -2616,7 +2616,12 @@ async function reconcilePersistedRelocations() {
             deathRecoveryEnabled: true,
           },
         );
-        await clearPersistedRelocation(account);
+        pendingRelocations.set(charId, {
+          accountId, charId, targetMap: intent.targetMap,
+          stage: 'WAIT_FARM', commandId: command.commandId,
+          attempts: 0, busy: false,
+          deadline: Date.now() + coordinatorDeadlineMsForRouteSteps(1),
+        });
       } else {
         await queueServerAgentRelocation(account, controller, intent.targetMap);
       }
@@ -2774,7 +2779,24 @@ async function reconcileRelocations() {
       const currentMap = live?.fresh && live.map ? String(live.map) : null;
       const revision = Number(stateRow.revision);
 
-      if (pending.stage === 'WAIT_IDLE') {
+      if (pending.stage === 'WAIT_START_FARM') {
+        if (mode !== 'PERSISTENT_IDLE' || currentMap !== pending.targetMap)
+          continue;
+        const command = await queueOwnershipCommand(
+          account,
+          charId,
+          { action: 'start_farm', expectedRevision: revision },
+          {
+            targetMap: pending.targetMap,
+            lootEnabled: true,
+            survivalEnabled: true,
+            deathRecoveryEnabled: true,
+          },
+        );
+        pending.commandId = command.commandId;
+        pending.stage = 'WAIT_FARM';
+        pending.attempts = 0;
+      } else if (pending.stage === 'WAIT_IDLE') {
         if (mode !== 'PERSISTENT_IDLE') continue;
         await queueOwnershipCommand(
           account,
@@ -2787,7 +2809,7 @@ async function reconcileRelocations() {
       } else if (pending.stage === 'WAIT_ARRIVAL') {
         if (currentMap !== pending.targetMap || mode !== 'PERSISTENT_IDLE')
           continue;
-        await queueOwnershipCommand(
+        const command = await queueOwnershipCommand(
           account,
           charId,
           { action: 'start_farm', expectedRevision: revision },
@@ -2798,12 +2820,21 @@ async function reconcileRelocations() {
             deathRecoveryEnabled: true,
           },
         );
-        await clearPersistedRelocation(account);
+        pending.commandId = command.commandId;
         pending.stage = 'WAIT_FARM';
         pending.attempts = 0;
       } else if (pending.stage === 'WAIT_FARM') {
-        if (mode === 'AUTO_FARM' && currentMap === pending.targetMap)
+        if (mode === 'AUTO_FARM' && currentMap === pending.targetMap) {
+          await clearPersistedRelocation(account);
           pendingRelocations.delete(charId);
+        } else if (pending.commandId) {
+          const acknowledged = await getOwnershipCommand(account, charId, pending.commandId);
+          if (['REJECTED', 'FAILED'].includes(acknowledged?.status)) {
+            console.warn(`WEB_RELOCATION_BLOCKED char=${charId} reason=${acknowledged.reasonCode ?? acknowledged.status}`);
+            await clearPersistedRelocation(account);
+            pendingRelocations.delete(charId);
+          }
+        }
       } else if (pending.stage === 'RELOCATION' && pending.relocationPlan) {
         // Cross-region relocation: wait for authoritative progress (revision
         // bump) between commands; one existing contract action at a time.
@@ -2893,7 +2924,21 @@ async function reconcileRelocations() {
 // then hands the orchestration to reconcileRelocations() above. The player never
 // selects a monster; no mobId is resolved, generated or persisted. No route
 // waypoint, portal sequence or raw command ever comes from the browser.
+const relocationRequests = new Set();
 async function queueServerAgentRelocation(account, controller, requestedMapId) {
+  const charId = Number(account.characterId);
+  // Serialize admission before the first async read or intent write.
+  if (pendingRelocations.has(charId) || relocationRequests.has(charId))
+    throw new HttpError(409, 'farm_relocation_in_progress');
+  relocationRequests.add(charId);
+  try {
+    return await queueServerAgentRelocationPrepared(account, controller, requestedMapId);
+  } finally {
+    relocationRequests.delete(charId);
+  }
+}
+
+async function queueServerAgentRelocationPrepared(account, controller, requestedMapId) {
   const charId = Number(account.characterId);
   const mapId = String(requestedMapId ?? '').trim();
   if (!/^[a-z0-9_]{1,31}$/.test(mapId))
@@ -2943,13 +2988,44 @@ async function queueServerAgentRelocation(account, controller, requestedMapId) {
     !persistedGrindTarget
     || String(persistedGrindTarget.mapId ?? '') !== mapId
     || persistedGrindTarget.source !== FARM_MAP_SOURCE.PLAYER_OVERRIDE;
+  const grindTargetPath = join(instancesRoot, instanceId(account.accountId), 'grind-target.json');
+  const priorTargetBytes = targetChanged
+    ? await readFile(grindTargetPath, 'utf8').catch((error) => {
+        if (error?.code === 'ENOENT') return null;
+        throw error;
+      })
+    : null;
   const persistGrindTarget = async () => {
     if (!targetChanged) return;
-    await writeJsonAtomic(
-      join(instancesRoot, instanceId(account.accountId), 'grind-target.json'),
-      grindTarget,
-    );
+    await writeJsonAtomic(grindTargetPath, grindTarget);
     observationConfigCache.delete(`grind:${Number(account.accountId)}`);
+  };
+  const dispatchWithIntent = async (action, persistRelocation) => {
+    try {
+      await persistGrindTarget();
+      if (persistRelocation) await writePersistedRelocation(account, mapId);
+      return action ? await action() : null;
+    } catch (error) {
+      if (persistRelocation) await clearPersistedRelocation(account);
+      if (targetChanged) {
+        if (priorTargetBytes === null) {
+          await unlink(grindTargetPath).catch((unlinkError) => {
+            if (unlinkError?.code !== 'ENOENT') throw unlinkError;
+          });
+        } else {
+          const rollbackPath = `${grindTargetPath}.rollback-${randomUUID()}`;
+          try {
+            await writeFile(rollbackPath, priorTargetBytes, 'utf8');
+            await rename(rollbackPath, grindTargetPath);
+          } catch (rollbackError) {
+            await unlink(rollbackPath).catch(() => {});
+            throw rollbackError;
+          }
+        }
+        observationConfigCache.delete(`grind:${Number(account.accountId)}`);
+      }
+      throw error;
+    }
   };
 
   if (plan.mode === 'UNREACHABLE') {
@@ -2959,17 +3035,43 @@ async function queueServerAgentRelocation(account, controller, requestedMapId) {
   if (plan.mode === 'ALREADY_AT_DESTINATION') {
     pendingRelocations.delete(charId);
     await clearPersistedRelocation(account);
-    await persistGrindTarget();
-    const command = await queueOwnershipCommand(
-      account,
-      charId,
-      { action: 'start_farm', expectedRevision: Number(controller.revision) },
-      {
+    // The current map can equal the newly selected target while an old farm
+    // session is still active. Native start_farm accepts only PERSISTENT_IDLE;
+    // reuse the existing stop/idle/start coordinator without a navigation leg.
+    if (controller.agentMode !== 'PERSISTENT_IDLE') {
+      const command = await dispatchWithIntent(
+        () => queueOwnershipCommand(account, charId, {
+          action: 'stop_farm', expectedRevision: Number(controller.revision),
+        }),
+        true,
+      );
+      pendingRelocations.set(charId, {
+        accountId: Number(account.accountId), charId, targetMap: mapId,
+        stage: 'WAIT_START_FARM', attempts: 0, busy: false,
+        deadline: Date.now() + coordinatorDeadlineMsForRouteSteps(1),
+      });
+      return {
+        policy: plan.policy,
+        route: null,
+        reason: plan.reason,
         targetMap: mapId,
-        lootEnabled: true,
-        survivalEnabled: true,
-        deathRecoveryEnabled: true,
-      },
+        command,
+        grindTarget,
+      };
+    }
+    const command = await dispatchWithIntent(
+      () => queueOwnershipCommand(
+        account,
+        charId,
+        { action: 'start_farm', expectedRevision: Number(controller.revision) },
+        {
+          targetMap: mapId,
+          lootEnabled: true,
+          survivalEnabled: true,
+          deathRecoveryEnabled: true,
+        },
+      ),
+      false,
     );
     return {
       policy: plan.policy,
@@ -2985,15 +3087,12 @@ async function queueServerAgentRelocation(account, controller, requestedMapId) {
   const isSimpleDirect = plan.mode === 'DIRECT' && directStep &&
     plan.steps.length === 2;
   if (isSimpleDirect) {
-    await persistGrindTarget();
-    await writePersistedRelocation(account, mapId);
     const farmActive = Boolean(controller.agentMode) && controller.agentMode !== 'PERSISTENT_IDLE';
-    let command = null;
-    if (farmActive) {
-      command = await queueOwnershipCommand(account, charId, {
-        action: 'stop_farm', expectedRevision: Number(controller.revision),
-      });
-    }
+    const command = await dispatchWithIntent(farmActive
+      ? () => queueOwnershipCommand(account, charId, {
+          action: 'stop_farm', expectedRevision: Number(controller.revision),
+        })
+      : null, true);
     pendingRelocations.set(charId, {
       accountId: Number(account.accountId), charId, targetMap: mapId,
       route: directStep.route, stage: 'WAIT_IDLE', attempts: 0,
@@ -3003,17 +3102,13 @@ async function queueServerAgentRelocation(account, controller, requestedMapId) {
     return { policy: plan.policy, route: directStep.route, targetMap: mapId, command, grindTarget };
   }
 
-  await persistGrindTarget();
-  await writePersistedRelocation(account, mapId);
   const farmActive =
     Boolean(controller.agentMode) && controller.agentMode !== 'PERSISTENT_IDLE';
-  let command = null;
-  if (farmActive) {
-    command = await queueOwnershipCommand(account, charId, {
-      action: 'stop_farm',
-      expectedRevision: Number(controller.revision),
-    });
-  }
+  const command = await dispatchWithIntent(farmActive
+    ? () => queueOwnershipCommand(account, charId, {
+        action: 'stop_farm', expectedRevision: Number(controller.revision),
+      })
+    : null, true);
   pendingRelocations.set(charId, {
     accountId: Number(account.accountId),
     charId,

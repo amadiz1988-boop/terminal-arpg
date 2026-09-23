@@ -1,11 +1,20 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { createRelocationProgress, nextRelocationAction, relocationStageNeedsCommand } from './relocation-executor.mjs';
 import { existingCommandsForStep } from './relocation-command-surface.mjs';
 
 // Execute the actual Dashboard coordinator with bounded in-memory dependencies.
 // No server, database, browser or alternate runtime is started.
 const source = readFileSync(new URL('../dashboard.mjs', import.meta.url), 'utf8');
+const sameMapSelection = source.slice(
+  source.indexOf("if (plan.mode === 'ALREADY_AT_DESTINATION')"),
+  source.indexOf('const directStep = plan.steps.find', source.indexOf("if (plan.mode === 'ALREADY_AT_DESTINATION')")),
+);
+assert.match(sameMapSelection, /controller\.agentMode !== 'PERSISTENT_IDLE'/);
+assert.match(sameMapSelection, /action: 'stop_farm'/);
+assert.match(sameMapSelection, /stage: 'WAIT_START_FARM'/);
+assert.match(source, /if \(pendingRelocations\.has\(charId\) \|\| relocationRequests\.has\(charId\)\)\s+throw new HttpError\(409, 'farm_relocation_in_progress'\)/);
 const body = source.slice(source.indexOf('async function reconcileRelocations()'),
   source.indexOf('// W4 server-side adapter:', source.indexOf('async function reconcileRelocations()')));
 function fixture() {
@@ -91,3 +100,100 @@ assert.equal(retry.pending.attempts, 7);
 assert.equal(retry.pendingRelocations.size, 0);
 assert.equal(retry.cleared(), 1);
 console.log('PASS rejection_and_bounded_retry');
+
+const sameMap = fixture();
+sameMap.pending.stage = 'WAIT_START_FARM';
+sameMap.pending.targetMap = 'prontera';
+sameMap.state.agentMode = 'AUTO_FARM';
+await sameMap.poll();
+assert.equal(sameMap.emitted.length, 0, 'old farm must stop before replacement start');
+sameMap.state.agentMode = 'PERSISTENT_IDLE';
+sameMap.live.map = 'payon';
+await sameMap.poll();
+assert.equal(sameMap.emitted.length, 0, 'same-map replacement requires authoritative location');
+sameMap.live.map = 'prontera';
+await sameMap.poll();
+assert.equal(sameMap.emitted.at(-1).action, 'start_farm');
+assert.equal(sameMap.emitted.at(-1).payload.targetMap, 'prontera');
+assert.equal(sameMap.pending.stage, 'WAIT_FARM');
+assert.equal(sameMap.cleared(), 0, 'durable intent remains until authoritative AUTO_FARM');
+await sameMap.poll();
+assert.equal(sameMap.pendingRelocations.size, 1, 'queueing alone is not farm confirmation');
+sameMap.state.agentMode = 'AUTO_FARM';
+await sameMap.poll();
+assert.equal(sameMap.pendingRelocations.size, 0);
+assert.equal(sameMap.cleared(), 1);
+console.log('PASS same_map_replacement_waits_for_idle_location_and_farm');
+
+const rejectedStart = fixture();
+rejectedStart.pending.stage = 'WAIT_START_FARM';
+rejectedStart.pending.targetMap = 'prontera';
+await rejectedStart.poll();
+rejectedStart.emitted.at(-1).status = 'REJECTED';
+rejectedStart.emitted.at(-1).reasonCode = 'ROLLOUT_NOT_ALLOWED';
+await rejectedStart.poll();
+assert.equal(rejectedStart.pendingRelocations.size, 0);
+assert.equal(rejectedStart.cleared(), 1);
+console.log('PASS rejected_start_farm_exits_wait_farm');
+
+// Exercise the actual map-selection body with bounded filesystem and command
+// seams. An enqueue rejection must restore the previous map choice and clear
+// the new recovery marker; successful enqueue must retain the new intent.
+const selectionBody = source.slice(
+  source.indexOf('async function queueServerAgentRelocationPrepared('),
+  source.indexOf('// ---------------------------------------------------------------------------', source.indexOf('async function queueServerAgentRelocationPrepared(')),
+);
+function selectionFixture(rejectCommand) {
+  const path = join('fixture-root', '1', 'grind-target.json');
+  const oldTarget = { mapId: 'moc_pryd01', source: 'PLAYER_OVERRIDE' };
+  const files = new Map([[path, JSON.stringify(oldTarget)]]);
+  const pendingRelocations = new Map();
+  const observationConfigCache = new Map();
+  let marker = false;
+  const dependencies = {
+    FARM_MAP_SOURCE: { PLAYER_OVERRIDE: 'PLAYER_OVERRIDE' },
+    HttpError: class HttpError extends Error {},
+    instancesRoot: 'fixture-root', instanceId: () => '1', join,
+    pendingRelocations, observationConfigCache,
+    farmMapEligibility: () => ({ map: { name: 'Prontera' }, farmable: true, farmSelectionAvailable: true }),
+    readServerAgentReadModel: async () => ({ inventory: [] }),
+    readCharacterSavePoint: async () => ({ map: 'prontera' }),
+    serverAgentWarpGraph: async () => ({}),
+    planFarmMapChange: () => ({ mode: 'ALREADY_AT_DESTINATION', policy: 'DIRECT', reason: 'already_here' }),
+    readGrindTarget: async () => oldTarget,
+    readFile: async (target) => files.get(target),
+    writeJsonAtomic: async (target, value) => { files.set(target, JSON.stringify(value)); },
+    writeFile: async (target, value) => { files.set(target, value); },
+    rename: async (from, to) => { files.set(to, files.get(from)); files.delete(from); },
+    unlink: async (target) => { files.delete(target); },
+    randomUUID: () => 'fixture-rollback',
+    writePersistedRelocation: async () => { marker = true; },
+    clearPersistedRelocation: async () => { marker = false; },
+    queueOwnershipCommand: async () => {
+      if (rejectCommand) throw new Error('bounded dispatch failure');
+      return { commandId: 'fixture-stop', action: 'stop_farm' };
+    },
+    coordinatorDeadlineMsForRouteSteps: () => 60_000,
+    console: { warn() {} },
+  };
+  const select = new Function(...Object.keys(dependencies),
+    `${selectionBody}; return queueServerAgentRelocationPrepared;`)(...Object.values(dependencies));
+  return {
+    select: () => select({ accountId: 1, characterId: 1 }, {
+      liveStatus: { fresh: true, map: 'prontera' }, agentMode: 'AUTO_FARM', revision: 7,
+    }, 'prontera'),
+    files, path, pendingRelocations, marker: () => marker,
+  };
+}
+const acceptedSelection = selectionFixture(false);
+const acceptedResult = await acceptedSelection.select();
+assert.equal(acceptedResult.command.action, 'stop_farm');
+assert.equal(acceptedSelection.pendingRelocations.get(1)?.stage, 'WAIT_START_FARM');
+assert.equal(JSON.parse(acceptedSelection.files.get(acceptedSelection.path)).mapId, 'prontera');
+assert.equal(acceptedSelection.marker(), true);
+const rejectedSelection = selectionFixture(true);
+await assert.rejects(rejectedSelection.select(), /bounded dispatch failure/);
+assert.equal(JSON.parse(rejectedSelection.files.get(rejectedSelection.path)).mapId, 'moc_pryd01');
+assert.equal(rejectedSelection.marker(), false);
+assert.equal(rejectedSelection.pendingRelocations.size, 0);
+console.log('PASS map_selection_dispatch_rollback_and_intent_preservation');

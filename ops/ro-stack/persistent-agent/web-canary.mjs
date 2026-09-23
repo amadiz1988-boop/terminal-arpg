@@ -202,6 +202,11 @@ export function createControllerStatus({
       : farmRunning === null
       ? Boolean(agentMode) && agentMode !== 'PERSISTENT_IDLE'
       : farmRunning === true;
+  // Native persistent_agent_state_start_farm accepts only PERSISTENT_IDLE.
+  // Farm statistics describe the farm session, not command eligibility: a
+  // navigation, service or quest mode cannot start a second farm even when
+  // farmRunning is false.
+  const farmStartIdle = agentMode === 'PERSISTENT_IDLE';
 
   const blockers = {};
   let claim = false;
@@ -218,12 +223,12 @@ export function createControllerStatus({
       blockers.claim = 'agent_already_enabled';
 
     startFarm =
-      isServerAgent && !nonResidentSnapshot && agentEnabled && !farmActive && Boolean(farmTarget);
+      isServerAgent && !nonResidentSnapshot && agentEnabled && farmStartIdle && !farmActive && Boolean(farmTarget);
     if (isServerAgent && nonResidentSnapshot)
       blockers.startFarm = ownershipState === 'QUARANTINED'
         ? 'agent_quarantined'
         : 'not_resident';
-    else if (isServerAgent && agentEnabled && farmActive)
+    else if (isServerAgent && agentEnabled && (!farmStartIdle || farmActive))
       blockers.startFarm = 'task_already_active';
     else if (isServerAgent && !farmTarget)
       blockers.startFarm = 'farm_target_unresolved';
