@@ -20,6 +20,7 @@ Last-good evidence: `docs/openkore-exit-source-of-truth.md` Gate 1B records HP 1
 ## Source candidate, 2026-09-23
 
 - Native `handle_survival` now stops the melee lease and active attack at recovery entry. Item and skill attempts continue through rAthena.
+- Character HP potion rows now propagate an authoritative `pc_useitem` rejection as a failed recovery attempt, allowing the existing skill/Supply/blocked decision to run. The old unconditional handled result could mask this exact transition.
 - No-method arbitration uses the pinned sit predicate. Eligible Supply uses the existing `handle_supply` path; unavailable Supply plus ineligible sit enters recoverable `RECOVERY_BLOCKED`, with a 1000 ms policy recheck and no attack/target processing. Safe authoritative HP/SP, an available local recovery action, or successful Supply can clear the block. `AUTO_FARM` parent intent stays unchanged.
 - `live_runtime_phase` projects `RECOVERY_BLOCKED`. The phase is read-only and not a new persisted mode.
 - Evidence: `tools/pa-recovery-policy/build-and-test-recovery-policy.ps1` passes its C++ predicates and source wiring checks; `tools/pa-supply-recovery/test-supply-recovery.mjs` passes 38/38; Release x64 solution build passed. No live runtime, Production or Browser acceptance was performed.
