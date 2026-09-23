@@ -104,6 +104,11 @@ import {
   decideFarmStart,
 } from './admin-agent-control.mjs';
 import {
+  assertSpecialTransportHoldSet,
+  evaluateFarmMapSelection,
+  indexFarmMapAvailability,
+} from './persistent-agent/standard-farm-map-availability.mjs';
+import {
   buildPhysicalMapGraph,
   nearestSupplyHubForMap,
   supplyHubs,
@@ -115,6 +120,13 @@ import {
   planWebRelocation,
 } from './persistent-agent/map-route.mjs';
 import { kafraContextForPlan } from './persistent-agent/kafra-content.mjs';
+import { worldMapTeleportDecision } from './persistent-agent/world-map-teleport-policy.mjs';
+import { SUPPLY_TOWN_SERVICES } from './persistent-agent/supply-town-services.mjs';
+import {
+  buildWorldMapTeleportCatalog,
+  parseBlockedWorldMapFlags,
+  parseTownMapFlags,
+} from './persistent-agent/world-map-teleport-catalog.mjs';
 import {
   decideNormalizationAction,
   resolveSpawnEntry as resolveNoviceSpawnEntry,
@@ -221,6 +233,11 @@ const webRoot = join(dirname(fileURLToPath(import.meta.url)), 'dashboard');
 const publicRoot = join(root, 'public');
 const skillTreePath = join(publicRoot, 'ro', 'data', 'skill-trees.json');
 const mapInfoIndexPath = join(publicRoot, 'ro', 'data', 'map-info.json');
+const standardFarmMapRegistryPath = join(
+  dirname(fileURLToPath(import.meta.url)),
+  'persistent-agent',
+  'standard-farm-map-release-registry.json',
+);
 const webExperienceRegistryPath = join(
   dirname(fileURLToPath(import.meta.url)),
   'web-experience',
@@ -407,6 +424,15 @@ const physicalMapGraph = buildPhysicalMapGraph(
   await readFile(openKorePortalsPath, 'utf8'),
 );
 const mapRoutingIndex = JSON.parse(await readFile(mapInfoIndexPath, 'utf8'));
+const standardFarmMapRegistry = JSON.parse(
+  await readFile(standardFarmMapRegistryPath, 'utf8'),
+);
+const standardFarmMapAvailability = indexFarmMapAvailability(
+  standardFarmMapRegistry,
+);
+assertSpecialTransportHoldSet(standardFarmMapRegistry);
+let worldMapTeleportCatalog = null;
+let worldMapTownFlagMaps = null;
 
 // W4: physical warp topology of the LIVE rAthena map server, used only to
 // resolve a Web-selected SERVER_AGENT destination into an explicit route. The
@@ -423,37 +449,91 @@ function serverAgentWarpGraph() {
   return serverAgentWarpGraphPromise;
 }
 
-// GLOBAL_SUPPLY: the ONE canonical configured supply service map (mirrors the
-// native supply service identity Tool Dealer#Extended_Prt @ prt_fild05 290,221).
-// It is a single service destination, never a per-farm route table: the farm
-// map is only the route origin and every origin reuses the same resolver.
-const SUPPLY_SERVICE_MAP = 'prt_fild05';
-// The canonical service NPC cell (Tool Dealer#Extended_Prt @ prt_fild05 290,221).
-// The generic resolver terminates at a warp-landing cell, but native supply
-// arrival requires the character within 4 cells of the NPC. The OUT leg must
-// therefore terminate at ONE service point shared by every farm origin; this is
-// not a per-farm waypoint table.
-const SUPPLY_SERVICE_X = 289;
-const SUPPLY_SERVICE_Y = 219;
+worldMapTownFlagMaps = new Set([
+  ...parseTownMapFlags(await readFile(join(rAthenaRuntimeRoot,
+    'npc/mapflag/town.txt'), 'utf8').catch(() => '')),
+  ...parseTownMapFlags(await readFile(join(rAthenaRuntimeRoot,
+    'npc/re/mapflag/town.txt'), 'utf8').catch(() => '')),
+]);
+worldMapTeleportCatalog = await buildWorldMapTeleportCatalog({
+  mapInfo: mapRoutingIndex,
+  sourceIndex: JSON.parse(await readFile(join(root,
+    'ops/ro-stack/persistent-agent/world-map-teleport-source.json'), 'utf8')),
+  mapCache: await loadRathenaMapCache(),
+  graph: await serverAgentWarpGraph(),
+  publicRoot,
+  townFlagMaps: worldMapTownFlagMaps,
+  blockedFlagMaps: new Set((await Promise.all([
+    'npc/mapflag/nowarpto.txt', 'npc/re/mapflag/nowarpto.txt',
+    'npc/mapflag/restricted.txt', 'npc/re/mapflag/restricted.txt',
+    'npc/mapflag/gvg.txt', 'npc/re/mapflag/gvg.txt',
+    'npc/mapflag/battleground.txt',
+  ].map(async (path) => [...parseBlockedWorldMapFlags(
+    await readFile(join(rAthenaRuntimeRoot, path), 'utf8').catch(() => ''),
+  )]))).flat()),
+  mapNames: JSON.parse(await readFile(join(publicRoot,
+    'ro/data/map-names.json'), 'utf8')).entries,
+});
 
-// Farm map eligibility: a canonical map is farm-selectable only when it has at
-// least one monster spawn. Visibility is never gated. Eligibility comes from the
-// canonical map-info metadata the world map already renders, not from a
-// town-name rule, a region unlock, a rollout allowlist or a static map/mob
-// allowlist. The player selects the MAP only; AUTO_FARM chooses the monster.
+// Supply uses the rAthena save point for world movement and keeps the existing
+// route planner only for the saved town's local shop service leg.
+
+// Farm map eligibility requires authoritative spawn detail plus the canonical
+// standard-route release decision. Player Web only projects this registry.
 function farmMapEligibility(mapId) {
   const map = mapRoutingIndex.maps?.[String(mapId ?? '')];
   if (!map) return { map: null, farmable: false, reason: 'farm_target_unresolved' };
-  const hasMonster =
-    Number(map.normalMonsterCount ?? 0) > 0 ||
-    Number(map.combatMonsterCount ?? 0) > 0 ||
-    Number(map.bossCount ?? 0) > 0 ||
-    (map.primaryMonsters?.length ?? 0) > 0;
+  const teleport = worldMapTeleportCatalog?.get(String(mapId ?? ''));
+  if (teleport) return { map, ...teleport,
+    reason: teleport.farmSelectionAvailable ? null : teleport.availabilityReason };
   return {
     map,
-    farmable: hasMonster,
-    reason: hasMonster ? null : 'farm_map_not_farmable',
+    ...evaluateFarmMapSelection({
+      mapSummary: map,
+      availability: standardFarmMapAvailability.get(String(mapId ?? '')),
+    }),
   };
+}
+
+async function playerWorldMapAvailability(account) {
+  const charId = Number(account.characterId);
+  if (!Number.isSafeInteger(charId) || charId <= 0)
+    return { maps: [], towns: [], player: null, cooldownSeconds: 60 };
+  const [character, live] = await Promise.all([
+    sql(`SELECT c.base_level,c.zeny,COALESCE(r.value,0),c.save_map,c.save_x,c.save_y FROM \`char\` c LEFT JOIN char_reg_num r ON r.char_id=c.char_id AND r.\`key\`='world_teleport_available_at' AND r.\`index\`=0 WHERE c.char_id=${charId} AND c.account_id=${Number(account.accountId)} LIMIT 1;`),
+    readPersistentAgentLiveStatusView(charId),
+  ]);
+  const [levelText, zenyText, availableText, savedMap, savedX, savedY] = String(character ?? '').split('\t');
+  const baseLevel = Number(levelText);
+  const zeny = live?.fresh ? Number(live.zeny) : Number(zenyText);
+  const currentMap = live?.fresh ? String(live.map ?? '') : null;
+  const availableAt = Number(availableText) || 0;
+  const nowSeconds = Math.floor(Date.now() / 1000);
+  const currentIsTown = worldMapTownFlagMaps.has(currentMap);
+  const savedTown = worldMapTeleportCatalog.get(savedMap)?.kind === 'town'
+    ? { map: savedMap, name: worldMapTeleportCatalog.get(savedMap).name,
+      x: Number(savedX), y: Number(savedY) } : null;
+  const rows = [...worldMapTeleportCatalog.values()].map((row) => {
+    if (row.kind === 'farm' && !row.farmSelectionAvailable)
+      return { ...row, buttonState: 'UNAVAILABLE_MAP', cost: null };
+    if (!currentMap || !Number.isSafeInteger(baseLevel) || !Number.isSafeInteger(zeny))
+      return { ...row, buttonState: 'PLAYER_STATE_UNAVAILABLE', cost: null };
+    const decision = worldMapTeleportDecision({ kind: row.kind,
+      currentMap, targetMap: row.map, baseLevel, minLevel: row.minLevel,
+      zeny, currentIsTown, availableAt, nowSeconds });
+    const sameMapIdleFarmStart = row.kind === 'farm' &&
+      decision.reason === 'ALREADY_ON_TARGET_MAP' &&
+      live?.agentMode === 'PERSISTENT_IDLE';
+    return { ...row, buttonState: sameMapIdleFarmStart ? 'AVAILABLE' : decision.reason,
+      cost: decision.cost ?? (row.kind === 'town' ? 0 : baseLevel <= 66 ? 0 : row.minLevel * 10),
+      cooldownRemaining: decision.cooldownRemaining ?? 0,
+      cooldownSeconds: decision.cooldownSeconds ?? 0,
+      currentZeny: zeny };
+  });
+  return { maps: rows.filter((row) => row.kind === 'farm'),
+    towns: rows.filter((row) => row.kind === 'town'),
+    player: { baseLevel, zeny, currentMap, phase: live?.fresh ? live.phase : null,
+      availableAt, savedTown, savedTownSetupRequired: !savedTown }, cooldownSeconds: 60 };
 }
 const webExperienceRegistry = JSON.parse(
   await readFile(webExperienceRegistryPath, 'utf8'),
@@ -1191,6 +1271,8 @@ const ownershipActions = new Set([
   'release_agent',
   'start_farm',
   'start_navigation',
+  'world_map_teleport',
+  'set_saved_town',
   'equip_item',
   'unequip_item',
   'allocate_stat_point',
@@ -1221,6 +1303,8 @@ const rolloutGatedActions = new Set([
   'claim_agent',
   'start_farm',
   'start_navigation',
+  'world_map_teleport',
+  'set_saved_town',
   'talk_to_npc',
   'service_shop_buy',
   'service_shop_sell',
@@ -2422,7 +2506,6 @@ async function queueCanaryAutomation(account, controller, body) {
         ? controller.actionBlockers.startFarm
         : controller.actionBlockers.stopFarm) ?? 'invalid_transition',
     );
-  let skipSupplyRouteResolution = false;
   // A farm target that is not the character's authoritative current map is a
   // relocation, not a direct start: rAthena only accepts start_farm on the
   // target map, so reuse the W4 coordinator (STOP_FARM -> START_NAVIGATION ->
@@ -2434,18 +2517,19 @@ async function queueCanaryAutomation(account, controller, body) {
     const eligibility = farmMapEligibility(targetMap);
     if (!eligibility.map) throw new HttpError(409, 'farm_target_unresolved');
     if (!eligibility.farmable) throw new HttpError(409, 'farm_map_not_farmable');
+    if (!eligibility.farmSelectionAvailable)
+      throw new HttpError(409, 'farm_map_not_released');
     const live = controller.liveStatus ?? null;
     const currentMap = live?.fresh && live.map ? String(live.map) : null;
     if (!currentMap) throw new HttpError(409, 'agent_position_unavailable');
-    skipSupplyRouteResolution = currentMap === targetMap;
     if (currentMap !== targetMap)
-      return await queueServerAgentRelocation(account, controller, targetMap);
+      return await queuePlayerWorldMapTeleport(account, controller, targetMap, 'farm');
   }
   const command = await queueOwnershipCommand(account, charId, {
     action,
     expectedRevision: controller.revision,
     ...buildW1CommandPayload(action, { farmTarget: controller.farmTarget }),
-  }, null, { skipSupplyRouteResolution });
+  });
   if (action === W1_ACTION.START_FARM || action === W1_ACTION.STOP_FARM)
     await clearPersistedRelocation(account);
   return {
@@ -2506,9 +2590,10 @@ function persistedRelocationPath(accountId) {
   );
 }
 
-async function writePersistedRelocation(account, targetMap) {
+async function writePersistedRelocation(account, targetMap, kind = 'route-farm') {
   await writeJsonAtomic(persistedRelocationPath(account.accountId), {
     targetMap,
+    kind,
     createdAt: Date.now(),
   });
 }
@@ -2519,7 +2604,7 @@ async function readPersistedRelocation(accountId) {
       await readFile(persistedRelocationPath(accountId), 'utf8'),
     );
     return /^[a-z0-9_]{1,31}$/.test(String(value?.targetMap ?? ''))
-      ? { targetMap: String(value.targetMap) }
+      ? { targetMap: String(value.targetMap), kind: String(value.kind ?? 'route-farm') }
       : null;
   } catch {
     return null;
@@ -2571,25 +2656,39 @@ async function reconcilePersistedRelocations() {
       const currentMap = live?.fresh && live.map ? String(live.map) : null;
       if (!currentMap) continue;
       if (currentMap === intent.targetMap) {
-        const command = await queueOwnershipCommand(
-          account,
-          charId,
-          { action: 'start_farm', expectedRevision: Number(controller.revision) },
-          {
-            targetMap: intent.targetMap,
-            lootEnabled: true,
-            survivalEnabled: true,
-            deathRecoveryEnabled: true,
-          },
-        );
+        if (intent.kind === 'world-map-town') {
+          await clearPersistedRelocation(account);
+          continue;
+        }
+        if (intent.kind === 'world-map-farm') {
+          const row = worldMapTeleportCatalog.get(intent.targetMap);
+          if (!row?.farmSelectionAvailable) {
+            await clearPersistedRelocation(account);
+            continue;
+          }
+          await writeJsonAtomic(join(instancesRoot, instanceId(accountId), 'grind-target.json'), {
+            mapId: intent.targetMap, name: row.name ?? intent.targetMap,
+            levelRange: mapRoutingIndex.maps?.[intent.targetMap]?.levelRange ?? null,
+            source: FARM_MAP_SOURCE.PLAYER_OVERRIDE, updatedAt: Date.now(),
+          });
+          observationConfigCache.delete(`grind:${accountId}`);
+        }
+        const farmPayload = { targetMap: intent.targetMap, lootEnabled: true,
+          survivalEnabled: true, deathRecoveryEnabled: true };
+        const command = await queueOwnershipCommand(account, charId,
+          { action: 'start_farm', expectedRevision: Number(controller.revision) }, farmPayload);
         pendingRelocations.set(charId, {
           accountId, charId, targetMap: intent.targetMap,
           stage: 'WAIT_FARM', commandId: command.commandId,
           attempts: 0, busy: false,
           deadline: Date.now() + coordinatorDeadlineMsForRouteSteps(1),
         });
+      } else if (intent.kind === 'world-map-farm' || intent.kind === 'world-map-town') {
+        await queuePlayerWorldMapTeleport(account, controller, intent.targetMap,
+          intent.kind === 'world-map-town' ? 'town' : 'farm', { recovering: true });
       } else {
-        await queueServerAgentRelocation(account, controller, intent.targetMap);
+        await queuePlayerWorldMapTeleport(account, controller, intent.targetMap,
+          'farm', { recovering: true });
       }
     } finally {
       persistedRelocationRecoveryRunning.delete(charId);
@@ -2685,8 +2784,7 @@ async function reconcileDeferredFarmRestores() {
           },
         );
       } else {
-        // Canonical relocation: same resolver + coordinator as a player map pick.
-        await queueServerAgentRelocation(account, controller, targetMap);
+        await queuePlayerWorldMapTeleport(account, controller, targetMap, 'farm');
       }
       deferredFarmResume.set(charId, {
         revision,
@@ -2745,7 +2843,57 @@ async function reconcileRelocations() {
       const currentMap = live?.fresh && live.map ? String(live.map) : null;
       const revision = Number(stateRow.revision);
 
-      if (pending.stage === 'WAIT_START_FARM') {
+      if (pending.stage === 'WAIT_WORLD_MAP_IDLE') {
+        const stopped = await getOwnershipCommand(account, charId, pending.commandId);
+        if (['REJECTED', 'FAILED'].includes(stopped.status)) {
+          console.warn(`WORLD_MAP_TELEPORT_BLOCKED char=${charId} reason=${stopped.reasonCode}`);
+          pendingRelocations.delete(charId);
+          await clearPersistedRelocation(account);
+          continue;
+        }
+        if (stopped.status !== 'CONFIRMED' || mode !== 'PERSISTENT_IDLE') continue;
+        const queued = await queueOwnershipCommand(account, charId,
+          { action: 'world_map_teleport', expectedRevision: revision },
+          { targetMap: pending.targetMap, kind: pending.kind,
+            anchorX: pending.landing.x, anchorY: pending.landing.y });
+        pending.commandId = queued.commandId;
+        pending.stage = 'WAIT_WORLD_MAP_ARRIVAL';
+        pending.attempts = 0;
+      } else if (pending.stage === 'WAIT_WORLD_MAP_ARRIVAL') {
+        const teleport = await getOwnershipCommand(account, charId, pending.commandId);
+        if (['REJECTED', 'FAILED'].includes(teleport.status)) {
+          console.warn(`WORLD_MAP_TELEPORT_BLOCKED char=${charId} reason=${teleport.reasonCode}`);
+          pendingRelocations.delete(charId);
+          await clearPersistedRelocation(account);
+          continue;
+        }
+        if (teleport.status !== 'CONFIRMED' || currentMap !== pending.targetMap ||
+            mode !== 'PERSISTENT_IDLE') continue;
+        if (pending.kind === 'town') {
+          pendingRelocations.delete(charId);
+          await clearPersistedRelocation(account);
+          continue;
+        }
+        const grindTargetPath = join(instancesRoot, instanceId(account.accountId), 'grind-target.json');
+        await writeJsonAtomic(grindTargetPath, pending.grindTarget);
+        observationConfigCache.delete(`grind:${Number(account.accountId)}`);
+        let farmCommand;
+        try {
+          farmCommand = await queueOwnershipCommand(account, charId,
+            { action: 'start_farm', expectedRevision: revision },
+            { targetMap: pending.targetMap, lootEnabled: true,
+              survivalEnabled: true, deathRecoveryEnabled: true });
+        } catch (error) {
+          if (error?.message !== 'supply_route_unavailable') throw error;
+          farmCommand = await queueOwnershipCommand(account, charId,
+            { action: 'start_farm', expectedRevision: revision },
+            { targetMap: pending.targetMap, lootEnabled: true,
+              survivalEnabled: true, deathRecoveryEnabled: true });
+        }
+        pending.commandId = farmCommand.commandId;
+        pending.stage = 'WAIT_FARM';
+        pending.attempts = 0;
+      } else if (pending.stage === 'WAIT_START_FARM') {
         if (mode !== 'PERSISTENT_IDLE' || currentMap !== pending.targetMap)
           continue;
         const command = await queueOwnershipCommand(
@@ -2891,6 +3039,100 @@ async function reconcileRelocations() {
 // selects a monster; no mobId is resolved, generated or persisted. No route
 // waypoint, portal sequence or raw command ever comes from the browser.
 const relocationRequests = new Set();
+
+async function queuePlayerWorldMapTeleport(account, controller, requestedMapId,
+  kind = 'farm', { recovering = false } = {}) {
+  const charId = Number(account.characterId);
+  const mapId = String(requestedMapId ?? '').trim();
+  if (!/^[a-z0-9_]{1,31}$/.test(mapId) || !['farm', 'town'].includes(kind))
+    throw new HttpError(400, 'WORLD_MAP_DESTINATION_UNAVAILABLE');
+  if (pendingRelocations.has(charId) || relocationRequests.has(charId))
+    throw new HttpError(409, 'farm_relocation_in_progress');
+  relocationRequests.add(charId);
+  try {
+    const row = worldMapTeleportCatalog.get(mapId);
+    if (!row || row.kind !== kind ||
+        (kind === 'farm' && !row.farmSelectionAvailable) ||
+        (kind === 'town' && !row.townTeleportAvailable))
+      throw new HttpError(409, row?.availabilityReason ?? 'WORLD_MAP_DESTINATION_UNAVAILABLE');
+    const currentMap = controller.liveStatus?.fresh ? controller.liveStatus.map : null;
+    if (!currentMap) throw new HttpError(503, 'agent_position_unavailable');
+    const mode = String(controller.agentMode ?? '');
+    if (mode !== 'PERSISTENT_IDLE' && mode !== 'AUTO_FARM')
+      throw new HttpError(409, 'WORLD_MAP_BUSY');
+    if (currentMap === mapId && (kind === 'town' || mode === 'AUTO_FARM'))
+      return { reason: 'ALREADY_ON_TARGET_MAP', message: '已經在該地圖',
+        targetMap: mapId, grindTarget: await readGrindTarget(account) };
+    if (currentMap === mapId) {
+      const grindTarget = {
+        mapId, name: row.name ?? mapId,
+        levelRange: mapRoutingIndex.maps?.[mapId]?.levelRange ?? null,
+        source: FARM_MAP_SOURCE.PLAYER_OVERRIDE, updatedAt: Date.now(),
+      };
+      if (!recovering) await writePersistedRelocation(account, mapId, 'world-map-farm');
+      let command;
+      try {
+        await writeJsonAtomic(join(instancesRoot, instanceId(account.accountId),
+          'grind-target.json'), grindTarget);
+        observationConfigCache.delete(`grind:${Number(account.accountId)}`);
+        command = await queueOwnershipCommand(account, charId,
+          { action: 'start_farm', expectedRevision: Number(controller.revision) },
+          { targetMap: mapId, lootEnabled: true, survivalEnabled: true,
+            deathRecoveryEnabled: true });
+      } catch (error) {
+        if (!recovering) await clearPersistedRelocation(account);
+        throw error;
+      }
+      pendingRelocations.set(charId, {
+        accountId: Number(account.accountId), charId, targetMap: mapId,
+        stage: 'WAIT_FARM', commandId: command.commandId,
+        attempts: 0, busy: false,
+        deadline: Date.now() + coordinatorDeadlineMsForRouteSteps(1),
+      });
+      return { reason: 'WORLD_MAP_FARM_START_QUEUED', targetMap: mapId,
+        cost: 0, cooldownSeconds: 0, command };
+    }
+    const availability = await playerWorldMapAvailability(account);
+    const selection = (kind === 'town' ? availability.towns : availability.maps)
+      .find((candidate) => candidate.map === mapId);
+    if (!selection || selection.buttonState !== 'AVAILABLE') {
+      const reason = selection?.buttonState ?? 'PLAYER_STATE_UNAVAILABLE';
+      throw new HttpError(409, reason === 'INSUFFICIENT_ZENY'
+        ? `INSUFFICIENT_ZENY required=${selection.cost} current=${selection.currentZeny}` : reason);
+    }
+    const grindTarget = kind === 'farm' ? {
+      mapId, name: row.name ?? mapId,
+      levelRange: mapRoutingIndex.maps?.[mapId]?.levelRange ?? null,
+      source: FARM_MAP_SOURCE.PLAYER_OVERRIDE,
+      updatedAt: Date.now(),
+    } : null;
+    const intentKind = `world-map-${kind}`;
+    if (!recovering) await writePersistedRelocation(account, mapId, intentKind);
+    let command;
+    try {
+      command = mode === 'AUTO_FARM'
+        ? await queueOwnershipCommand(account, charId,
+          { action: 'stop_farm', expectedRevision: Number(controller.revision) })
+        : await queueOwnershipCommand(account, charId,
+          { action: 'world_map_teleport', expectedRevision: Number(controller.revision) },
+          { targetMap: mapId, kind, anchorX: row.landing.x, anchorY: row.landing.y });
+    } catch (error) {
+      if (!recovering) await clearPersistedRelocation(account);
+      throw error;
+    }
+    pendingRelocations.set(charId, {
+      accountId: Number(account.accountId), charId, targetMap: mapId,
+      kind, landing: row.landing, grindTarget, commandId: command.commandId,
+      stage: mode === 'AUTO_FARM' ? 'WAIT_WORLD_MAP_IDLE' : 'WAIT_WORLD_MAP_ARRIVAL',
+      attempts: 0, busy: false, deadline: Date.now() + 60_000,
+    });
+    return { reason: 'WORLD_MAP_TELEPORT_QUEUED', targetMap: mapId,
+      cost: selection.cost, cooldownSeconds: selection.cooldownSeconds, command };
+  } finally {
+    relocationRequests.delete(charId);
+  }
+}
+
 async function queueServerAgentRelocation(account, controller, requestedMapId) {
   const charId = Number(account.characterId);
   // Serialize admission before the first async read or intent write.
@@ -2911,10 +3153,11 @@ async function queueServerAgentRelocationPrepared(account, controller, requested
     throw new HttpError(400, 'farm_target_unresolved');
   const eligibility = farmMapEligibility(mapId);
   if (!eligibility.map) throw new HttpError(409, 'farm_target_unresolved');
-  // All maps stay visible; only maps with at least one monster spawn are
-  // farm-selectable. No town-name rule, no rollout allowlist, no fallback.
+  // All maps stay visible; the release registry independently gates commands.
   if (!eligibility.farmable)
     throw new HttpError(409, 'farm_map_not_farmable');
+  if (!eligibility.farmSelectionAvailable)
+    throw new HttpError(409, 'farm_map_not_released');
   const map = eligibility.map;
 
   // The authoritative current position comes from the PA live-status read model.
@@ -3138,7 +3381,6 @@ async function queueOwnershipCommand(
   charId,
   body,
   serverResolvedPayload = null,
-  options = {},
 ) {
   if (Number(account.characterId) !== charId)
     throw new HttpError(403, 'ownership_conflict');
@@ -3401,44 +3643,31 @@ async function queueOwnershipCommand(
     if (payloadObject.skillEnabled && (!Number.isSafeInteger(payloadObject.skillId) || payloadObject.skillId <= 0))
       throw new HttpError(422, 'invalid_transition');
   }
-  // GLOBAL_SUPPLY generic relocation delivery: resolve the canonical supply legs
-  // with the SAME server-side resolver used by the Player Web start_navigation
-  // path and deliver them on the start_farm command. The farm map is only the
-  // origin; there is no per-farm route table and no second planner. Farming on
-  // the service map itself needs no farm-origin leg. A missing service leg is an
-  // explicit blocker because Native requires it after authoritative Save Point.
+  // Supply world movement uses the character's rAthena save point and the
+  // native return teleport. Only the city-local shop leg uses the existing
+  // server-side route planner; no farm-origin/world return route is generated.
   if (
-    options.skipSupplyRouteResolution !== true &&
     action === 'start_farm' &&
     payloadObject.targetMap
   ) {
     const farmMap = String(payloadObject.targetMap);
     const graph = await serverAgentWarpGraph();
     const savePoint = await readCharacterSavePoint(account.accountId);
-    const supplyServiceRoute = savePoint
+    const service = SUPPLY_TOWN_SERVICES[savePoint?.map];
+    const supplyServiceRoute = service
       ? buildTerminalRoute(
           graph,
           savePoint.map,
-          SUPPLY_SERVICE_MAP,
-          SUPPLY_SERVICE_X,
-          SUPPLY_SERVICE_Y,
+          service.map,
+          service.x,
+          service.y,
         )
       : null;
-    if (!supplyServiceRoute)
-      throw new HttpError(409, 'supply_route_unavailable');
-    payloadObject.supplyServiceRoute = supplyServiceRoute;
-    if (farmMap !== SUPPLY_SERVICE_MAP) {
-      const outbound = planWebRelocation(graph, farmMap, SUPPLY_SERVICE_MAP);
-      const inbound = planWebRelocation(graph, SUPPLY_SERVICE_MAP, farmMap);
-      if (!outbound?.route || !inbound?.route)
-        throw new HttpError(409, 'supply_route_unavailable');
-      const supplyRouteOut = outbound.route.map((step, index) =>
-        index === outbound.route.length - 1 && !step.portalTo && step.map === SUPPLY_SERVICE_MAP
-          ? { ...step, x: SUPPLY_SERVICE_X, y: SUPPLY_SERVICE_Y }
-          : step,
-      );
-      payloadObject.supplyRouteOut = supplyRouteOut;
-      payloadObject.supplyRouteBack = inbound.route;
+    if (service && !supplyServiceRoute)
+      throw new HttpError(409, 'SAVED_TOWN_SERVICE_UNAVAILABLE');
+    if (supplyServiceRoute) {
+      payloadObject.supplyServiceRoute = supplyServiceRoute;
+      payloadObject.supplyNpcName = service.npc;
     }
   }
   const payload = JSON.stringify(payloadObject);
@@ -7623,6 +7852,8 @@ async function saveGrindTarget(account, requestedMapId) {
   const eligibility = farmMapEligibility(mapId);
   if (!eligibility.map) throw new HttpError(400, 'farm_target_unresolved');
   if (!eligibility.farmable) throw new HttpError(409, 'farm_map_not_farmable');
+  if (!eligibility.farmSelectionAvailable)
+    throw new HttpError(409, 'farm_map_not_released');
   const map = eligibility.map;
 
   const id = await ensureWorker(account);
@@ -9297,6 +9528,11 @@ async function handleDashboardRequest(request, response) {
         'cache-control': 'private, max-age=60, must-revalidate',
       });
     }
+    if (url.pathname === '/api/farm-map-availability' && request.method === 'GET') {
+      return json(response, 200, await playerWorldMapAvailability(account), {
+        'cache-control': 'private, no-store',
+      });
+    }
     if (url.pathname === '/api/internal/probe') {
       if (!loopbackRequest(request))
         return json(response, 404, { error: 'not_found' });
@@ -10829,7 +11065,7 @@ async function handleDashboardRequest(request, response) {
         return json(
           response,
           202,
-          await queueServerAgentRelocation(account, controllerStatus, body.mapId),
+          await queuePlayerWorldMapTeleport(account, controllerStatus, body.mapId, 'farm'),
         );
       if (
         !controllerStatus.available &&
@@ -10850,6 +11086,37 @@ async function handleDashboardRequest(request, response) {
       return json(response, 202, {
         grindTarget: await saveGrindTarget(account, body.mapId),
       });
+    }
+    if (url.pathname === '/api/world-map-teleport' && request.method === 'POST') {
+      if (!account.characterId)
+        return json(response, 409, { error: '請先建立角色' });
+      const body = await requestBody(request);
+      const controller = await readCharacterControllerStatus(account,
+        Number(account.characterId), { includeFarmTarget: false });
+      if (!controller.available || controller.controller !== SERVER_AGENT_OWNER)
+        return json(response, 409, { error: 'SERVER_AGENT_REQUIRED' });
+      return json(response, 202,
+        await queuePlayerWorldMapTeleport(account, controller, body.mapId, 'town'));
+    }
+    if (url.pathname === '/api/saved-town' && request.method === 'POST') {
+      if (!account.characterId)
+        return json(response, 409, { error: '請先建立角色' });
+      const body = await requestBody(request);
+      const mapId = String(body.mapId ?? '');
+      const town = worldMapTeleportCatalog.get(mapId);
+      if (!town || town.kind !== 'town' || !town.townTeleportAvailable)
+        throw new HttpError(409, 'TOWN_DESTINATION_REQUIRED');
+      const controller = await readCharacterControllerStatus(account,
+        Number(account.characterId), { includeFarmTarget: false });
+      if (!controller.available || controller.controller !== SERVER_AGENT_OWNER ||
+          controller.agentMode !== 'PERSISTENT_IDLE' || !controller.liveStatus?.fresh)
+        throw new HttpError(409, 'SERVER_AGENT_IDLE_REQUIRED');
+      if (controller.liveStatus.map !== mapId)
+        throw new HttpError(409, 'SAVED_TOWN_REQUIRES_PRESENCE');
+      const command = await queueOwnershipCommand(account, Number(account.characterId),
+        { action: 'set_saved_town', expectedRevision: Number(controller.revision) },
+        { targetMap: mapId });
+      return json(response, 202, { command, targetMap: mapId });
     }
     if (url.pathname === '/api/job-change' && request.method === 'POST') {
       if (!account.characterId)

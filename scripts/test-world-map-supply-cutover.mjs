@@ -58,7 +58,7 @@ const dashboard = await readFile(join(root, 'ops/ro-stack/dashboard.mjs'), 'utf8
 for (const id of ['worldMapTownLabels', 'worldMapSavedTown', 'worldMapSavedTownHint', 'worldMapConfirm',
   'worldMapConfirmCancel', 'worldMapConfirmSubmit', 'worldMapArrivalToast'])
   assert.ok(html.includes(`id="${id}"`), id);
-assert.match(app, /button\.onclick = \(\) => selectTownWorldMap\(town\.map\)/);
+assert.match(app, /button\.onclick = \(event\) => \{[\s\S]*?selectTownWorldMap\(town\.map\)/);
 assert.match(app, /await waitForWorldMapAuthority\(\(state\) =>\s*state\.player\?\.currentMap === mapId\)/);
 assert.match(app, /playCombatSound\('warp'/);
 assert.match(app, /detail\.replaceChildren\(\s*title,\s*controls,\s*teleportInfo/);

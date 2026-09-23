@@ -1256,7 +1256,9 @@
           <header class="world-map-header">
             <div>
               <h2 id="worldMapHeading">RO 世界地圖掛機選擇</h2>
-              <p id="worldMapStatus">正在讀取 Renewal 地圖資料</p>
+              <p id="worldMapStatus">正在讀取世界地圖資料</p>
+              <p id="worldMapSavedTown">儲存主城：讀取中</p>
+              <p id="worldMapSavedTownHint" class="hidden">請先前往任一可用主城，再設定儲存主城。</p>
             </div>
             <button id="closeWorldMap" type="button" aria-label="關閉世界地圖">關閉</button>
           </header>
@@ -1273,7 +1275,14 @@
                   draggable="false"
                 />
                 <div id="worldMapNodes" class="world-map-regions"></div>
+                <div id="worldMapTownLabels" class="world-map-town-labels"></div>
               </div>
+              <section id="worldMapTowns" class="world-map-towns" aria-label="主城傳送"></section>
+              <details class="world-map-region-index">
+                <summary>所有地圖區域（含重疊標籤）</summary>
+                <input id="worldMapRegionSearch" type="search" placeholder="搜尋地圖名稱或 Map ID" aria-label="搜尋世界地圖區域" />
+                <div id="worldMapRegionIndex" class="world-map-region-index-list"></div>
+              </details>
             </div>
             <aside id="worldMapDetail" class="world-map-detail">
               <h3>選擇掛機區域</h3>
@@ -1282,6 +1291,17 @@
           </div>
         </div>
       </section>
+      <div id="worldMapConfirm" class="world-map-confirm hidden" role="dialog" aria-modal="true" aria-labelledby="worldMapConfirmTitle">
+        <div class="world-map-confirm-card">
+          <h3 id="worldMapConfirmTitle">傳送確認</h3>
+          <p id="worldMapConfirmCost">傳送費用：免費</p>
+          <div class="controls">
+            <button id="worldMapConfirmCancel" type="button">取消</button>
+            <button id="worldMapConfirmSubmit" type="button" class="primary">確定傳送</button>
+          </div>
+        </div>
+      </div>
+      <div id="worldMapArrivalToast" class="world-map-arrival-toast hidden" role="status"></div>
       <div
         id="cardArtPreview"
         class="card-art-preview hidden"
