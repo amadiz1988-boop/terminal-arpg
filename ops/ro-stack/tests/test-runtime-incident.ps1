@@ -7,7 +7,8 @@ $ErrorActionPreference = 'Stop'
 # Synthetic identities only. No rAthena process is started or stopped.
 $script:mockListeners = @()
 function Get-NetTCPConnection { @($script:mockListeners) }
-function Get-WinEvent { @() }
+$script:mockWinEvents = @()
+function Get-WinEvent { @($script:mockWinEvents) }
 
 $testRoot = Join-Path ([IO.Path]::GetTempPath()) ('ro-incident-test-' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $testRoot | Out-Null
@@ -50,6 +51,11 @@ try {
   Check ($incident.firstExitCode -eq 3221225477) 'event exit code'
   Check ($incident.exitClassification -eq 'UNKNOWN') 'nonzero code does not prove crash'
   Check ($incident.exitOrder.Count -eq 1) 'first timeline entry'
+  $properties = @('map-server.exe', '', '', 'fault.dll', '', '', '0xc0000005') | ForEach-Object { [pscustomobject]@{ Value = $_ } }
+  $script:mockWinEvents = @([pscustomobject]@{ Id = 1000; Message = 'Faulting application name: map-server.exe'; TimeCreated = [DateTime]::UtcNow; ProviderName = 'Application Error'; Properties = $properties })
+  Invoke-RuntimeIncidentTick $one.root @($one.live | Where-Object pid -ne 103) @()
+  Check ((Latest $one).exitClassification -eq 'PROCESS_CRASH') 'late Windows event upgrades crash classification'
+  Check ((Latest $one).windowsEvidence.exceptionCode -eq '0xc0000005') 'fault exception captured'
   $summary = & (Join-Path $PSScriptRoot '..\show-runtime-incident.ps1') -RuntimeRoot $one.root | Out-String
   Check ($summary -match [regex]::Escape($incident.incidentId) -and $summary -match 'FIRST_EXIT_SERVICE') 'operator latest summary'
   $charEvent = [pscustomobject]@{ name = 'char-server.exe'; pid = 102; at = $when.AddMilliseconds(307).ToString('o'); exitCode = 0 }
@@ -64,6 +70,7 @@ try {
   $tailFile = @(Get-ChildItem -LiteralPath (Join-Path $one.root 'runtime-incidents') -Directory | Select-Object -First 1)[0]
   $tail = Get-Content -LiteralPath (Join-Path $tailFile.FullName 'map-stdout-tail.log') -Raw
   Check ($tail -match '\[REDACTED\]' -and $tail -notmatch 'secret-value') 'log redaction'
+  $script:mockWinEvents = @()
   $sensitive = Protect-IncidentText '"token":"json-secret" --password cli-secret Bearer bearer-secret'
   Check ($sensitive -notmatch 'json-secret|cli-secret|bearer-secret') 'structured and cli redaction'
 

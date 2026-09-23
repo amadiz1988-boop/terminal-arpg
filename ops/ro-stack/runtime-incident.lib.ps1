@@ -154,14 +154,14 @@ function Get-SafeSentinelTail([string]$path) {
 }
 
 function Get-IncidentWindowsEvidence([DateTimeOffset]$when, [string[]]$names) {
-  $matches = @()
+  $matchedEvents = @()
   $application = $null; $module = $null; $exception = $null
   try {
     $events = @(Get-WinEvent -FilterHashtable @{ LogName = 'Application'; StartTime = $when.AddMinutes(-2).LocalDateTime; EndTime = $when.AddMinutes(2).LocalDateTime; Id = @(1000, 1001) } -MaxEvents 50 -ErrorAction SilentlyContinue)
     foreach ($item in $events) {
       if (@($names | Where-Object { $item.Message -match [regex]::Escape($_) }).Count -eq 0) { continue }
       $safeMessage = Protect-IncidentText ([string]$item.Message)
-      $matches += [pscustomobject]@{ at = $item.TimeCreated.ToUniversalTime().ToString('o'); id = $item.Id; provider = $item.ProviderName; message = $safeMessage.Substring(0, [Math]::Min(2048, $safeMessage.Length)) }
+      $matchedEvents += [pscustomobject]@{ at = $item.TimeCreated.ToUniversalTime().ToString('o'); id = $item.Id; provider = $item.ProviderName; message = $safeMessage.Substring(0, [Math]::Min(2048, $safeMessage.Length)) }
       if ($item.Id -eq 1000 -and $item.Properties.Count -ge 7) {
         $application = [string]$item.Properties[0].Value
         $module = [string]$item.Properties[3].Value
@@ -169,7 +169,7 @@ function Get-IncidentWindowsEvidence([DateTimeOffset]$when, [string[]]$names) {
       }
     }
   } catch {}
-  return [pscustomobject]@{ matchCount = $matches.Count; werMatch = [bool](@($matches | Where-Object { $_.id -eq 1001 }).Count); faultingApplication = $application; faultingModule = $module; exceptionCode = $exception; events = @($matches) }
+  return [pscustomobject]@{ matchCount = $matchedEvents.Count; werMatch = [bool](@($matchedEvents | Where-Object { $_.id -eq 1001 }).Count); faultingApplication = $application; faultingModule = $module; exceptionCode = $exception; events = @($matchedEvents) }
 }
 
 function Get-IncidentDumpReferences([string]$captureRoot, [DateTimeOffset]$when) {
@@ -263,14 +263,23 @@ function Update-IncidentLateEvidence([string]$runtimeRoot, [string]$incidentId) 
   if (-not $folder) { return }
   $path = Join-Path $folder 'incident.json'
   $incident = Read-IncidentJson $path
-  if (-not $incident -or -not $incident.firstExitAt) { return }
-  $at = [DateTimeOffset]::Parse([string]$incident.firstExitAt)
+  if (-not $incident) { return }
+  $timeValue = if ($incident.firstExitAt) { [string]$incident.firstExitAt } else { [string]$incident.detectedAt }
+  if (-not $timeValue) { return }
+  $at = [DateTimeOffset]::Parse($timeValue)
   if ([DateTimeOffset]::UtcNow -gt $at.AddMinutes(3)) { return }
   if ($incident.windowsEvidence.matchCount -eq 0) {
     $windows = Get-IncidentWindowsEvidence $at @('login-server.exe', 'char-server.exe', 'map-server.exe')
     if ($windows.matchCount -gt 0) {
       $incident.windowsEvidence = $windows
       Write-IncidentJson (Join-Path $folder 'windows-events.json') $windows
+      foreach ($exit in @($incident.exitOrder)) {
+        if ($exit.classification -eq 'UNKNOWN' -and @($windows.events | Where-Object { $_.id -eq 1000 -and $_.message -match "$($exit.service)-server.exe" }).Count) {
+          $exit.classification = 'PROCESS_CRASH'
+          if ($incident.firstExitService -eq $exit.service -and [int]$incident.firstExitPid -eq [int]$exit.pid) { $incident.exitClassification = 'PROCESS_CRASH' }
+        }
+      }
+      Write-IncidentJson (Join-Path $folder 'timeline.json') @($incident.exitOrder)
     }
   }
   if ($incident.crashDump.created -eq 'NO') {
