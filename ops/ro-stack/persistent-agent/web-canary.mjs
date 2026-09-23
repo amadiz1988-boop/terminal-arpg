@@ -37,6 +37,13 @@ const serverAgentOwnershipStates = new Set([
   'QUARANTINED',
 ]);
 
+// Mirrors the authoritative persistent_agent_state_stop_farm CAS modes. This
+// read-only action gate is distinct from the Farm Statistics running flag.
+const stoppableAgentModes = new Set([
+  'AUTO_FARM', 'NAVIGATING', 'ROUTE_FAILED', 'NPC_INTERACTION', 'NPC_FAILED',
+  'SERVICE_INTERACTION', 'SERVICE_FAILED', 'AUTO_QUEST', 'QUEST_FAILED',
+]);
+
 const mapIdPattern = /^[a-z0-9_]{1,31}$/;
 
 // Live-status READ MODEL source. The Dashboard reads `persistent_agent_live_status`
@@ -189,6 +196,7 @@ export function createControllerStatus({
   const isServerAgent =
     owner === SERVER_AGENT_OWNER &&
     serverAgentOwnershipStates.has(ownershipState ?? '');
+  const commandOwner = isServerAgent && ownershipState === SERVER_AGENT_OWNER;
   const isLegacyOwner = owner === OPENKORE_OWNER;
   // A persisted AUTO_FARM mode is historical intent while the live read model
   // is non-resident. It must not make a quarantined character look actionable.
@@ -223,22 +231,22 @@ export function createControllerStatus({
       blockers.claim = 'agent_already_enabled';
 
     startFarm =
-      isServerAgent && !nonResidentSnapshot && agentEnabled && farmStartIdle && !farmActive && Boolean(farmTarget);
-    if (isServerAgent && nonResidentSnapshot)
-      blockers.startFarm = ownershipState === 'QUARANTINED'
-        ? 'agent_quarantined'
-        : 'not_resident';
+      commandOwner && !nonResidentSnapshot && agentEnabled && farmStartIdle && !farmActive && Boolean(farmTarget);
+    if (isServerAgent && ownershipState === 'QUARANTINED')
+      blockers.startFarm = 'agent_quarantined';
+    else if (isServerAgent && nonResidentSnapshot)
+      blockers.startFarm = 'not_resident';
     else if (isServerAgent && agentEnabled && (!farmStartIdle || farmActive))
       blockers.startFarm = 'task_already_active';
     else if (isServerAgent && !farmTarget)
       blockers.startFarm = 'farm_target_unresolved';
 
-    stopFarm = isServerAgent && !nonResidentSnapshot && farmActive;
-    if (isServerAgent && nonResidentSnapshot)
-      blockers.stopFarm = ownershipState === 'QUARANTINED'
-        ? 'agent_quarantined'
-        : 'not_resident';
-    else if (isServerAgent && !farmActive) blockers.stopFarm = 'nothing_to_stop';
+    stopFarm = commandOwner && !nonResidentSnapshot && agentEnabled && stoppableAgentModes.has(agentMode);
+    if (isServerAgent && ownershipState === 'QUARANTINED')
+      blockers.stopFarm = 'agent_quarantined';
+    else if (isServerAgent && nonResidentSnapshot)
+      blockers.stopFarm = 'not_resident';
+    else if (isServerAgent && !stoppableAgentModes.has(agentMode)) blockers.stopFarm = 'nothing_to_stop';
 
     release = isServerAgent;
     if (owner && !isServerAgent) blockers.release = 'agent_not_owner';
