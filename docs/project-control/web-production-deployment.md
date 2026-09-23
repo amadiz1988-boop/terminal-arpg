@@ -1,8 +1,44 @@
 # Canonical Production Web Deployment
 
 Status: `CANONICAL_DEPLOYMENT_POLICY=ACTIVE`; `SOURCE_VALIDATED=YES`;
-`OFFLINE_VALIDATED=YES (20/20)`; `PRODUCTION_VALIDATED=NO`;
-`PRODUCTION_VALIDATION_STATUS=FAILED_V4_STARTUP_OPERATIONAL_CLOSURE`.
+`PRODUCTION_VALIDATED=YES`; `PRODUCTION_VALIDATION_STATUS=FINAL_WEB_SUPERSET_PROMOTED`.
+
+## Current promoted Web baseline (2026-09-23)
+
+- Final source: `b975021e449f50c9b53ae06d294ba0daf6a72068` on
+  `codex/production-web-final-superset-v1`, composed from the accepted current
+  Production fixture baseline `d22361ed9e618f8bd9fd6290c44d989f823a75ef`,
+  accepted V5 feature reference `9290df46b0b81d6ccbd67e8b20867d68c48cc992`,
+  and request-scoped observability reference `1ef66ac326b77ce8a0ae8de2e2ba49b53673c6f0`.
+  Public Admin security lineage `fbe974579f198e451dcc3bc041333ef2baa1aca5`
+  and headless fixture transport remain included.
+- Dashboard SHA256:
+  `A1D48404C6ECE823DEBB29E3105AE75590A13184127CEA3FC1ABCE0804E828A5`.
+  The prior accepted Production Dashboard SHA256 was
+  `B13AA400B7CB8B1AD764C25589E355C38BF0EDDD9D4DB52A8D952279C65889E4`.
+- Final manifest: 194 exact Web paths, SHA256
+  `E05EE5F45044D855E83B7365C9AA4E322CF0E620BA44BC43134D172CA143CF2B`;
+  read-only precheck passed. Deploy receipt:
+  `C:\Users\Administrator\ghost-island-production\ro-stack\.local\ro-stack\dashboard\deploy-receipts\manifest-0af69529fa284e0da15ab520d73fe737\deploy-receipt.json`.
+- Request-scoped ordinary Player proof: session, lean state, and live-position
+  each had zero support-session SQL lookups, zero Admin-data SQL queries, and
+  zero synchronous monitoring writes; positive DB query counts confirmed
+  attribution. Public Admin data and ordinary Player fixture access were denied.
+  Authorized Admin/Test read transport returned `command_not_found` for a
+  nonexistent request ID; no fixture command was submitted.
+- Player Browser smoke passed at desktop and 390x844 for status, map info,
+  available-map preview, no page overflow, and no Admin controls. The
+  pre-existing ordinary Player Browser character was nonresident; a separate
+  resident TEST_PLAYER provided 20/20 available live-position samples with
+  maximum freshness age 509 ms. No gameplay command was sent.
+- Final 6901/6122/5122/8788 listeners were each exactly one. Native PIDs
+  were unchanged. Dashboard health and Admin Web Experience were healthy.
+  Request diagnostics were returned to their default-off mode after proof.
+  Production remains on the final Web Superset; no rollback was performed.
+
+The following V3/V4/V5 paragraphs record the earlier preparation and failures.
+The historical V5 candidate was later canary-tested and rolled back; it is not
+the current Production source.
 
 Policy authority: `AGENTS.md`. Initial tool source checkpoint:
 `8f3073079e075771cd63c2a830da100e722068a7`; canonical integration
@@ -18,8 +54,8 @@ applied its 195-file manifest, then Node exited before binding 8788 because
 `standard-farm-map-release-registry.json` was absent. Automatic rollback
 restored 195/195 preimages and Production health. Startup `readFile` closure
 now rejects V4 before mutation, including two changed Quest JSON assets.
-The additive 198-file V5 manifest passes read-only precheck with 312 resolved
-dependencies. V5 has not been deployed.
+The additive 198-file V5 manifest passed read-only precheck with 312 resolved
+dependencies. At that stage, V5 had not yet been deployed.
 
 ## Entrypoints
 
@@ -94,7 +130,7 @@ failure phase/reason, mutated files, topology and health before/after, rollback
 attempt/result, and final preimage validation. Verified automatic rollback
 uses the failure receipt as its completion evidence; explicit `-Rollback`
 requires a successful deploy receipt. This source contract has offline test
-coverage; Production validation remains open.
+coverage; current Production validation is recorded above.
 The current tool writes its runtime deploy receipt after health validation;
 Player/API and Browser acceptance must be recorded separately before a release
 can pass the full policy sequence.

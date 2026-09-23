@@ -40,8 +40,10 @@ V4 applied all 195 files but failed on a top-level `readFile` of the missing
 preimage. The immutable V4 manifest is superseded for the next canary by an
 additive 198-file manifest at
 `C:\Users\Administrator\.codex\canary-backups\production-web-superset-v5-9290df4\canary-manifest.json`.
-It adds that new registry plus two changed startup Quest JSON assets. V5 has
-passed read-only precheck and has not been deployed.
+It adds that new registry plus two changed startup Quest JSON assets. V5
+passed read-only precheck at that stage. Its later canary was rolled back;
+the current promoted Web baseline and receipt are recorded in
+`web-production-deployment.md`.
 V3 failed when its deployed Dashboard imported a runtime module absent from
 Production and omitted from the manifest. The V4 manifest retains the
 exact candidate commit and records 123 new targets with `production_preimage:
