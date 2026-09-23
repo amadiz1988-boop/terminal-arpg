@@ -128,6 +128,26 @@ remains disabled. Authoritative multi-skill casts, failure transitions,
 configured item/ammo prerequisites and Browser acceptance are still unproven,
 so `AUTO_SKILL` and `MULTI_SKILL` remain `PARTIAL`.
 
+### Basic recovery no-method source seam
+
+`m1-basic-recovery-source-gate.md` records pinned `processSitAuto` gates and
+the explicit GI safety policy. The Native recovery interrupt now stops the
+existing melee lease and attack. Ordered potion attempts propagate rAthena
+rejection as a failure. When local item/skill recovery fails, a ready legal
+Supply contract uses the existing journey; otherwise an ineligible sit leads
+to read-only phase `RECOVERY_BLOCKED`, with target/attack stopped and a bounded
+1000 ms recheck. The persisted `AUTO_FARM` parent is unchanged. This source
+candidate has C++ policy/source tests, 38 Supply regression checks and a
+Release x64 Native build. No current-runtime or Browser proof was performed,
+so `R03/R04/R05/R10/R14/R18/R20` remain `PARTIAL` for product acceptance.
+The scoped M1 profile, HP-potion, settings-capability, permanent-wing,
+Supply-service-route and player-scenario source tests passed. The historical
+OpenKore `test-supply-interruption-recovery.mjs` still expects a removed
+`supplyWeight` form in the current Dashboard HTML and fails at that assertion;
+it is not a current PA Supply acceptance test. The canonical Native map cache
+passes `test-supply-return-safe-endpoint.mjs`; the Production stack path has no
+`db/map_cache.dat`, so that test does not establish Production topology.
+
 The requested sequence is source implementation and bounded tests, then a
 coherent candidate. No Production file, runtime restart or live-player mutation
 is authorized here. A source `PASS` does not turn any row into a released UI
