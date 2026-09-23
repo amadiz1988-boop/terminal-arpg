@@ -11,7 +11,7 @@
       "legacyProject": {"status": "CHECKED", "evidence": "docs/openkore-reference/mature-capability-census-v1.md C04/C05/C13 and docs/openkore-harvest-registry.md preserve legacy selection evidence."},
       "reuseRegistry": {"status": "REGISTRY_HIT", "reference": "ops/research/external-reuse-registry.json ok-combat-loot-recovery; docs/openkore-reference/profile-contract-reuse-gate.json"},
       "rAthena": {"status": "CHECKED", "evidence": "Native pc_checkskill, skill_get_requirement, skill_check_condition_castbegin, battle_check_range and unit_skilluse_id already execute and validate skills."},
-      "openKore": {"status": "CHECKED", "evidence": "Pinned 51de1ddfc4449ae5217f6886de702f87ca934030 control/config.txt:605-632 attackSkillSlot defaults and src/AI/Attack.pm:725-775,1057-1083 first-match selection and attempt transition, recorded in m1-attack-skill-source-gate.md."},
+      "openKore": {"status": "CHECKED", "evidence": "Pinned 51de1ddfc4449ae5217f6886de702f87ca934030 control/config.txt:605-632 attackSkillSlot defaults; src/AI/Attack.pm:725-775,1057-1083 first-match/attempt transition; src/Misc.pm:5660-5675 learned-skill and SP-cost row gate, recorded in m1-attack-skill-source-gate.md."},
       "externalEcosystem": {"status": "NOT_APPLICABLE", "reason": "No new external skill runtime is authorized."},
       "genericOSS": {"status": "NOT_APPLICABLE", "reason": "Generic schedulers cannot substitute rAthena skill authority."}
     },
@@ -25,7 +25,7 @@
     "capabilityDelta": {"addsCapability": true, "replacesCapability": false, "changesBehavior": true, "changesConfigurationSemantics": true, "changesCapabilityUi": false, "changesExceptionRecovery": true, "changesMatureCapabilityDataModel": false},
     "matureReferenceMatrix": {
       "currentGiCapability": "Persisted attackSlots stop before command; one Native skill path already checks rAthena legality and explicit weapon fallback.",
-      "openKoreCapability": "AI::Attack::main scans numbered attackSkillSlot rows in order and selects first matching self/target predicates; chosen skill attempts stamp row/target time.",
+      "openKoreCapability": "AI::Attack::main scans numbered attackSkillSlot rows in order and selects first matching self/target predicates; checkSelfCondition skips unlearned or SP-unaffordable rows; chosen skill attempts stamp row/target time.",
       "rAthenaCapability": "Native rAthena checks learning, SP, cooldown, range, items, ammo, cast legality and target effect.",
       "otherMatureReference": "NOT_APPLICABLE: existing PA local combat is the target architecture.",
       "matureExceptionBehavior": "Unsupported configured predicates fail typed; unavailable cast remains visible and never silently attacks normally in SKILL_CAST.",

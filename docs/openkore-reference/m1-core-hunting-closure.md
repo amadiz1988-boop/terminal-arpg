@@ -119,6 +119,9 @@ order and per-attempt timeout. Character rows with numeric skill ID, level and
 the M1 HP/SP percent subset now enter the existing `start_farm` command.
 Native selects the first matching row and then reuses its rAthena skill
 legality, range, SP, cooldown, cast and weapon/no-weapon fallback checks.
+Pinned `checkSelfCondition` also requires the skill to be learned and its SP
+cost payable before a row wins priority; Native now skips such unavailable rows
+and can select a later configured skill.
 Pending HIT/KILL observations retain the actual cast skill ID across later
 slot switches. Unsupported row fields fail typed; the Player skills editor
 remains disabled. Authoritative multi-skill casts, failure transitions,
