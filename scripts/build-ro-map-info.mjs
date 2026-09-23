@@ -8,7 +8,8 @@ const root = process.cwd();
 const rathena = join(root, '.local', 'ro-stack', 'rathena');
 const openkore = join(root, '.local', 'ro-stack', 'openkore');
 const mapRoot = join(root, 'public', 'ro', 'maps');
-const outputRoot = join(root, 'public', 'ro', 'data');
+const outputPublicRoot = process.env.RO_MAP_INFO_PUBLIC_ROOT ?? join(root, 'public');
+const outputRoot = join(outputPublicRoot, 'ro', 'data');
 const detailRoot = join(outputRoot, 'map-info');
 const standardFarmMapRegistryPath = join(
   root,
@@ -25,7 +26,7 @@ const worldPositionPath = join(
   'world-map',
   'positions.json',
 );
-const monsterNamePath = join(outputRoot, 'monster-names-tw.json');
+const monsterNamePath = join(root, 'public', 'ro', 'data', 'monster-names-tw.json');
 const preferredMapNames = {
   prt_fild08: '普隆德拉原野 08',
   moc_fild11: '蘇克拉特沙漠 11',

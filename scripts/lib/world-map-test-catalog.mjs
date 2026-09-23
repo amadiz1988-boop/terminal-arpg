@@ -22,9 +22,11 @@ function readMapCache(bytes) {
   return result;
 }
 
-export async function loadWorldMapTestCatalog(root, native) {
-  const mapInfo = JSON.parse(await readFile(join(root,
-    'public/ro/data/map-info.json'), 'utf8'));
+export async function loadWorldMapTestCatalog(root, native, {
+  mapInfoPath = join(root, 'public/ro/data/map-info.json'),
+  publicRoot = join(root, 'public'),
+} = {}) {
+  const mapInfo = JSON.parse(await readFile(mapInfoPath, 'utf8'));
   const mapCache = new Map();
   for (const relative of ['db/import/map_cache.dat', 'db/re/map_cache.dat', 'db/map_cache.dat'])
     for (const [name, map] of readMapCache(await readFile(join(native, relative))))
@@ -46,6 +48,6 @@ export async function loadWorldMapTestCatalog(root, native) {
   const sourceIndex = JSON.parse(await readFile(join(root,
     'ops/ro-stack/persistent-agent/world-map-teleport-source.json'), 'utf8'));
   const catalog = await buildWorldMapTeleportCatalog({ mapInfo, mapCache, graph,
-    publicRoot: join(root, 'public'), townFlagMaps, blockedFlagMaps, mapNames, sourceIndex });
+    publicRoot, townFlagMaps, blockedFlagMaps, mapNames, sourceIndex });
   return { mapInfo, catalog, sourceIndex, graph, townFlagMaps, blockedFlagMaps };
 }

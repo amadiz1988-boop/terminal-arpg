@@ -223,3 +223,9 @@ calls the same planner as the endpoint. Matrix output marks that inventory and
 SavePoint were not evaluated; it is a route-plan check, not proof of player
 resources, command acceptance, arrival or resumed combat. `H04/H16` remain
 `PARTIAL` until those transitions pass.
+
+The 2026-09-24 per-capability source recalculation and 42-field settings
+mapping are in [m1-source-closure-recalculation-2026-09-24.md](m1-source-closure-recalculation-2026-09-24.md).
+It retains `SOURCE_CLOSED=1/38` and `PRODUCT_CLOSED=0/38` from current
+implementation, tests and checkpoint evidence. Obsolete player cross-map
+Navigation is not counted as a blocker.

@@ -5,9 +5,11 @@ import { loadWorldMapTestCatalog } from './lib/world-map-test-catalog.mjs';
 const root = resolve(import.meta.dirname, '..');
 const native = process.env.RO_RATHENA_ROOT ??
   'C:/Users/Administrator/source/ghost-island-rathena';
-const indexPath = join(root, 'public/ro/data/map-info.json');
+const publicRoot = process.env.RO_MAP_INFO_PUBLIC_ROOT ?? join(root, 'public');
+const indexPath = join(publicRoot, 'ro/data/map-info.json');
 const index = JSON.parse(await readFile(indexPath, 'utf8'));
-const { catalog } = await loadWorldMapTestCatalog(root, native);
+const { catalog } = await loadWorldMapTestCatalog(root, native,
+  { mapInfoPath: indexPath, publicRoot });
 const visibleMapIds = new Set(index.worldMap.regions.flatMap((region) => region.mapIds));
 const nonPersistent = new Set(['INSTANCE', 'EVENT', 'TEST', 'UNUSED']);
 
