@@ -25,6 +25,12 @@ produced by `ops/ro-stack/openkore-instance.ps1` and historical player config.
 
 ## Projection rule
 
+Pinned default `sitAuto_sp_lower=0` and `sitAuto_sp_upper=0` disable
+SP-triggered sit. A skill's SP shortage is checked for that skill action and
+does not globally block navigation or configured normal attack. The current
+source-level parity boundary and unclosed profile contract are recorded in
+`runtime-state-policy-parity.md`.
+
 Configuration is policy input. It does not prove a runtime action occurred.
 Runtime overrides must record the previous value, owner, reason and restoration
 condition. A PA implementation may normalize config into typed durable state when

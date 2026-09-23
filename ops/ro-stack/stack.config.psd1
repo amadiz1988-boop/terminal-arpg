@@ -26,8 +26,8 @@
   PersistentAgentSurvivalEnabled = $true
   PersistentAgentHpThresholdPercent = 70
   PersistentAgentHpSafePercent = 80
-  PersistentAgentSpThresholdPercent = 20
-  PersistentAgentSpSafePercent = 40
+  PersistentAgentSpThresholdPercent = 0
+  PersistentAgentSpSafePercent = 0
   PersistentAgentHpItemAllowlist = @(501)
   PersistentAgentSpItemAllowlist = @()
   PersistentAgentRecoverySkillAllowlist = @()
