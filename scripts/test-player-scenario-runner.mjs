@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
+import { buildWarpGraph, planWebRelocation } from '../ops/ro-stack/persistent-agent/map-route.mjs';
 import {
   RESULT,
   parseCli,
@@ -7,7 +8,7 @@ import {
   extractEventNames,
   eventCheckpoints,
 } from './lib/player-scenario/scenario-core.mjs';
-import { normalizeState, positionChanged } from './player-scenario-runner.mjs';
+import { normalizeState, positionChanged, summarizeFarmMapPlan } from './player-scenario-runner.mjs';
 
 function runCli(args) {
   return new Promise((resolve) => {
@@ -70,6 +71,19 @@ assert.equal(state.charId, 150094);
 assert.equal(state.mode, 'AUTO_FARM');
 assert.equal(state.farmTarget, 'moc_pryd01');
 assert.equal(positionChanged(state, { ...state, x: 193 }), true);
+
+const multimodalGraph = buildWarpGraph([
+  ['prt_fild08', 'prontera'], ['morocc', 'moc_ruins'], ['moc_ruins', 'moc_pryd01'],
+].map(([map, to], index) => ({
+  map, to, x: index + 1, y: index + 2, toX: index + 3, toY: index + 4,
+  name: `scenario_${index}`, xs: 1, ys: 1,
+})));
+assert.equal(planWebRelocation(multimodalGraph, 'prt_fild08', 'moc_pryd01').route, null);
+const multimodal = summarizeFarmMapPlan(multimodalGraph, 'prt_fild08', 'moc_pryd01');
+assert.equal(multimodal.relocationSupported, true);
+assert.equal(multimodal.policy, 'KAFRA_DIALOG_TRANSFER');
+assert.equal(multimodal.terminal, 'START_FARM');
+assert.equal(multimodal.feasibilityScope, 'GRAPH_AND_KAFRA_WITHOUT_CHARACTER_INVENTORY_OR_SAVEPOINT');
 assert.equal(positionChanged(state, state), false);
 
 const dryRun = await runCli(['--scenario', 'start-farm', '--json']);

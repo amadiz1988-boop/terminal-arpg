@@ -4,7 +4,7 @@ import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   loadWarpGraph,
-  planWebRelocation,
+  planFarmMapChange,
 } from '../ops/ro-stack/persistent-agent/map-route.mjs';
 import {
   RESULT,
@@ -200,17 +200,25 @@ async function mapFeasibility(options, sourceMap, targetMap) {
   if (!runtimeRoot)
     return { map: targetMap, farmEligible: true, relocationSupported: false, routeFound: false, reason: 'RUNTIME_WARP_GRAPH_UNAVAILABLE' };
   const graph = await loadWarpGraph(runtimeRoot);
-  const plan = planWebRelocation(graph, sourceMap, targetMap);
-  const routeFound = plan.reason === 'already_at_destination' || Boolean(plan.route);
+  return { map: targetMap, farmEligible: true, ...summarizeFarmMapPlan(graph, sourceMap, targetMap) };
+}
+
+export function summarizeFarmMapPlan(graph, sourceMap, targetMap) {
+  // Match the player endpoint's full weighted farm-map planner. The direct
+  // physical-only plan can report NO_DIRECT_ROUTE while a legal Kafra/service
+  // plan exists; dry-run must not misclassify that destination as unsupported.
+  const plan = planFarmMapChange(graph, sourceMap, targetMap);
+  const routeFound = plan.mode !== 'UNREACHABLE';
   return {
-    map: targetMap,
-    farmEligible: true,
     relocationSupported: routeFound,
     routeFound,
     reason: routeFound ? null : String(plan.reason ?? 'ROUTE_UNAVAILABLE').toUpperCase(),
-    routeSteps: plan.route ?? [],
-    hops: plan.hops ?? 0,
-    terminal: routeFound ? plan.policy : null,
+    routeSteps: plan.steps ?? [],
+    hops: plan.routeCost ?? 0,
+    terminal: routeFound ? plan.steps?.at(-1)?.kind ?? null : null,
+    policy: routeFound ? plan.policy : null,
+    routeQuality: routeFound ? plan.routeQuality ?? null : null,
+    feasibilityScope: 'GRAPH_AND_KAFRA_WITHOUT_CHARACTER_INVENTORY_OR_SAVEPOINT',
   };
 }
 

@@ -9,6 +9,7 @@ assert.equal(execFileSync('git', ['rev-parse', 'HEAD'], { cwd: openKore, encodin
 
 const census = await readFile('docs/openkore-reference/mature-capability-census-v1.md', 'utf8');
 const predicates = await readFile('docs/openkore-reference/condition-key-census-v1.md', 'utf8');
+const m1 = await readFile('docs/openkore-reference/m1-core-hunting-closure.md', 'utf8');
 const rows = census.split(/\r?\n/).filter((line) => /^\| [HCR]\d{2} /.test(line));
 const statuses = ['ALIGNED', 'PARTIAL', 'MISSING', 'NOT_IMPLEMENTED', 'NOT_APPLICABLE', 'GI_EXPLICIT_OVERRIDE'];
 const ids = new Set();
@@ -39,7 +40,39 @@ for (const row of predicateRows) {
   assert.equal(cells.length, 7);
   assert.ok(statuses.includes(cells[5]), `unclassified predicate: ${cells[0]}`);
 }
+const scopeRows = m1.split(/\r?\n/).filter((line) => /^\| (M1_REQUIRED|M1_OPTIONAL|FUTURE|NOT_APPLICABLE) \|/.test(line));
+assert.equal(scopeRows.length, 4);
+const scopedIds = new Set();
+let requiredIds;
+for (const row of scopeRows) {
+  const cells = row.split('|').slice(1, -1).map((cell) => cell.trim());
+  assert.equal(cells.length, 3);
+  const rowIds = cells[1].split(/\s+/);
+  assert.equal(rowIds.length, Number(cells[2]), `${cells[0]} count`);
+  for (const id of rowIds) {
+    assert.ok(ids.has(id), `unknown M1 scope ID: ${id}`);
+    assert.ok(!scopedIds.has(id), `duplicate M1 scope ID: ${id}`);
+    scopedIds.add(id);
+  }
+  if (cells[0] === 'M1_REQUIRED') requiredIds = new Set(rowIds);
+}
+assert.equal(scopedIds.size, ids.size, 'every discovered capability has an M1 scope');
+const requiredRows = m1.split(/\r?\n/).filter((line) => /^\| [HCR]\d{2} /.test(line));
+assert.equal(requiredRows.length, requiredIds.size);
+const detailedIds = new Set();
+for (const row of requiredRows) {
+  const cells = row.split('|').slice(1, -1).map((cell) => cell.trim());
+  assert.equal(cells.length, 8, `M1 required field count: ${row}`);
+  assert.ok(cells.every(Boolean), `M1 required blank field: ${row}`);
+  const id = cells[0].split(' ')[0];
+  assert.ok(requiredIds.has(id), `not M1 required: ${id}`);
+  assert.ok(!detailedIds.has(id), `duplicate M1 required detail: ${id}`);
+  detailedIds.add(id);
+  assert.match(cells[2], new RegExp(`^${id} `), `missing pinned census reference: ${id}`);
+  assert.ok(['YES', 'NO'].includes(cells[7]), `invalid M1 UI gate: ${id}`);
+}
 console.log(`OPENKORE_CENSUS_SOURCE_PASS capabilities=${rows.length} predicates=${predicateRows.length}`);
+console.log(`M1_SCOPE_SOURCE_PASS required=${requiredIds.size} classified=${scopedIds.size}`);
 if (process.argv.includes('--closure')) {
   const counts = Object.fromEntries(statuses.map((status) => [status, 0]));
   for (const row of rows)

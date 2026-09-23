@@ -1,5 +1,11 @@
 # 目前狀態
 
+## 2026-09-23 M1 Local Hunting 來源閉合進度
+
+- 已將 pinned OpenKore 59 項成熟能力完整分派至 M1 必要 38、M1 選用 14、後續 6、不適用 1；每個 M1 必要項的現況、PA seam、首個斷點、修正與 UI 啟用條件記於 `docs/openkore-reference/m1-core-hunting-closure.md`。這是來源盤點，尚非玩家流程驗收。
+- Synthetic 換圖矩陣改用與 Player endpoint 相同的 `planFarmMapChange`。先前只查 direct physical route，將 `moc_pryd01` 到 `mjolnir_07`／`pay_fild04` 均誤列 `NO_DIRECT_ROUTE`；完整 weighted planner 對兩者皆產生 Kafra multimodal candidate。矩陣未驗角色物資、SavePoint、執行、到達或戰鬥恢復。
+- `test-openkore-mature-capability-census.mjs`、`test-player-scenario-runner.mjs` 及既有 multimodal planner 測試通過。M1 source candidate 尚未完成；Production 未部署、runtime 未重啟。
+
 ## 2026-09-22 Discord OAuth Account Linking V1
 
 - 已加入 provider-neutral `account_external_identity` 與一次性 `web_oauth_state` migration，沿用既有 rAthena `login.account_id`、Web password credential 與 `web_sessions`，沒有建立第二套 account 或 character authority。

@@ -160,15 +160,15 @@ topics:
     upstream_paths: [src/AI/Attack.pm, src/AI/CoreLogic.pm, src/Actor/Monster.pm]
     symbols: [ai_getAggressives, targetGone, process]
     config_keys: [teleportAuto_search, teleportAuto_minAggressives, attackAuto]
-    mature_behavior: "Scan visible actors, filter eligibility, and search again after target loss."
-    state_transitions: "idle -> scan -> target or search escape"
+    mature_behavior: "Scan visible actors and filter eligibility; pinned teleportAuto_search gates auto-attack by tagged search-monster count, not no-target teleport."
+    state_transitions: "idle -> tagged-monster count gate -> eligible target or continued scan"
     retry_policy: "Bounded scan and search intervals."
-    recovery_policy: "Reset target, repath or use configured teleport search."
+    recovery_policy: "Reset target and rescan; GI no-target Fly is a separate explicit project policy."
     edge_cases: "No mobs, hidden mobs, map boundaries, stale actor IDs."
     project_last_good: "Gate 1A mob scan; future Fly Wing roaming is research only."
     project_acceptance_evidence: "Gate 1A PLAYER_FLOW_PASS."
     current_pa: "AUTO_FARM scan and target state."
-    current_pa_gap: "Fly Wing roaming policy is not implemented by this task."
+    current_pa_gap: "GI no-target Fly source path exists; authoritative post-warp combat acceptance is open."
     reuse_classification: ADAPT
     pa_design_implication: "Separate scan policy from movement and teleport authority."
     pa_flexibility_allowed: "Yes, autonomous search may use server-side indexes."
@@ -513,7 +513,7 @@ topics:
     upstream_paths: [src/Task/Teleport.pm, src/AI/CoreLogic.pm, src/Task/CalcMapRoute.pm]
     symbols: [Task::Teleport::run, ai_useTeleport, getTeleportItemCooldownTimeoutSec]
     config_keys: [teleportAuto, teleportAuto_hp, teleportAuto_search, teleportAuto_deadly]
-    mature_behavior: "Use teleport for configured safety, search or respawn reasons and wait for map result."
+    mature_behavior: "Use teleport for configured safety, route, target-loss or respawn reasons and wait for map result; teleportAuto_search is not a no-target teleport call."
     state_transitions: "reason -> request -> cooldown/map wait -> reacquire"
     retry_policy: "Cooldown-aware retry with bounded give-up."
     recovery_policy: "Re-read map, target and inventory after teleport."
@@ -521,7 +521,7 @@ topics:
     project_last_good: "Gate 1B escape/recovery and Fly Wing diagnostic."
     project_acceptance_evidence: "Gate 1B and RO_FLY_WING_SOURCE_AUDIT."
     current_pa: "rAthena item use and native PA relocation."
-    current_pa_gap: "Generic teleport search policy is future work."
+    current_pa_gap: "Danger/escape and other reason-specific policies remain distinct from GI no-target Fly."
     reuse_classification: ADAPT
     pa_design_implication: "Record teleport reason and authoritative result."
     pa_flexibility_allowed: "Yes, PA can use non-consumable item semantics."
@@ -531,17 +531,17 @@ topics:
     topic: FLY_WING
     keywords: [Fly Wing, item 601, random warp, teleport search]
     upstream_paths: [src/Task/Teleport.pm, src/Task/CalcMapRoute.pm, control/config.txt]
-    symbols: [ai_useTeleport, route_warpByItem, teleportAuto_search]
+    symbols: [ai_useTeleport, route_warpByItem, processAutoAttack]
     config_keys: [route_warpByItem, route_warpItem_minGain, teleportAuto_search]
-    mature_behavior: "Use random-warp item to escape or search when policy and cooldown allow."
-    state_transitions: "search need -> item use -> random map position -> scan"
+    mature_behavior: "Use random-warp item for exact configured teleport reasons; teleportAuto_search is only a tagged-monster count gate in processAutoAttack. GI no-target Fly is an explicit project override."
+    state_transitions: "configured reason -> item use -> authoritative random position -> rescan"
     retry_policy: "Respect cooldown and bounded attempts."
     recovery_policy: "Reacquire target or remain in lockMap policy."
     edge_cases: "Project item 601 is non-consumable; random map result is authoritative."
     project_last_good: "Gate 1A/1B Fly Wing diagnostic item 601 count 30 -> 30."
     project_acceptance_evidence: "docs/RO_FLY_WING_SOURCE_AUDIT.md diagnostic PASS only."
-    current_pa: "Native rAthena Fly Wing item effect; roaming not implemented here."
-    current_pa_gap: "Future roaming acceptance and post-warp agent reattach remain gaps."
+    current_pa: "Native rAthena Fly Wing item effect and GI no-target relocation path."
+    current_pa_gap: "GI no-target Fly post-warp rescan and combat live acceptance remain open."
     reuse_classification: ADAPT
     pa_design_implication: "Reuse reason, cooldown, result and reacquire semantics; preserve non-consumption."
     pa_flexibility_allowed: "Yes, roaming planner remains open."
