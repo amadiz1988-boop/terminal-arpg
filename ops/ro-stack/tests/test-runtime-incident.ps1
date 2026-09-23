@@ -127,6 +127,17 @@ try {
   Check ((Read-IncidentJson (Join-Path $replacement.root 'incident-observer-state.json')).generationId -eq ('ro-{0}' -f $replacementState.startedAt)) 'new generation tracked'
   Check ($oldIncident.onlineCharacterCount -eq 'UNAVAILABLE' -and $oldIncident.persistentAgentResidentCount -eq 'UNAVAILABLE') 'missing DB source not recorded as zero'
 
+  $gracefulReplacement = New-Fixture 'graceful-replacement-before-poll'
+  Invoke-RuntimeIncidentTick $gracefulReplacement.root $gracefulReplacement.live @()
+  ('{0} run=fixture STOP pid=103' -f ([DateTimeOffset]::UtcNow.ToString('o'))) | Set-Content -LiteralPath (Join-Path $gracefulReplacement.root 'logs\map-launch-telemetry.log')
+  $gracefulState = Read-IncidentJson (Join-Path $gracefulReplacement.root 'state.json')
+  $gracefulState.startedAt = [long]$gracefulState.startedAt + 1
+  $gracefulState.processes[2].id = 104
+  Write-IncidentJson (Join-Path $gracefulReplacement.root 'state.json') $gracefulState
+  $gracefulLive = @($gracefulReplacement.live | Where-Object pid -ne 103) + @([pscustomobject]@{ name = 'map-server.exe'; pid = 104; path = $gracefulState.processes[2].path; start = [DateTimeOffset]::UtcNow.ToString('o') })
+  Invoke-RuntimeIncidentTick $gracefulReplacement.root $gracefulLive @([pscustomobject]@{ name = 'map-server.exe'; pid = 103; at = [DateTimeOffset]::UtcNow.ToString('o'); exitCode = 0 })
+  Check ($null -eq (Latest $gracefulReplacement)) 'graceful generation replacement no false incident'
+
   $sentinel = New-Fixture 'sentinel'
   Invoke-RuntimeIncidentTick $sentinel.root $sentinel.live @()
   ('{"timestamp":"' + ([DateTimeOffset]::UtcNow.ToString('o')) + '","action":"TERMINATE","pid":103}') | Set-Content -LiteralPath (Join-Path $sentinel.root 'sentinel-audit.log')
