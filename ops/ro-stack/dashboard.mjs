@@ -3116,7 +3116,10 @@ async function queueOwnershipCommand(
       throw new HttpError(422, 'invalid_transition');
     const skillEnabled = body.skillEnabled === true;
     const skillId = Number(body.skillId ?? 0);
-    if (skillEnabled && (!Number.isSafeInteger(skillId) || skillId <= 0 || skillId > 65535))
+    // A character's ordered attackSkillSlots may provide the skill ID after
+    // authenticated config resolution below. Legacy one-skill requests still
+    // require a valid ID before dispatch.
+    if (skillEnabled && (!Number.isSafeInteger(skillId) || skillId < 0 || skillId > 65535))
       throw new HttpError(422, 'invalid_transition');
     payloadObject = {
       targetMap,
@@ -3326,6 +3329,8 @@ async function queueOwnershipCommand(
     if (!executionProfile.ok)
       throw new HttpError(409, executionProfile.reason);
     payloadObject = { ...payloadObject, ...executionProfile.payload };
+    if (payloadObject.skillEnabled && (!Number.isSafeInteger(payloadObject.skillId) || payloadObject.skillId <= 0))
+      throw new HttpError(422, 'invalid_transition');
   }
   // GLOBAL_SUPPLY generic relocation delivery: resolve the canonical supply legs
   // with the SAME server-side resolver used by the Player Web start_navigation

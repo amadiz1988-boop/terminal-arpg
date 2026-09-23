@@ -112,6 +112,19 @@ UI remains disabled; Native build and command-shape tests are source-only.
 The exact `R04` runtime HP/inventory delta, overlap with global HP recovery,
 resume and Browser proof remain open, so `AUTO_POTION=PARTIAL`.
 
+### Ordered attack-skill source seam
+
+`m1-attack-skill-source-gate.md` records pinned `attackSkillSlot` first-match
+order and per-attempt timeout. Character rows with numeric skill ID, level and
+the M1 HP/SP percent subset now enter the existing `start_farm` command.
+Native selects the first matching row and then reuses its rAthena skill
+legality, range, SP, cooldown, cast and weapon/no-weapon fallback checks.
+Pending HIT/KILL observations retain the actual cast skill ID across later
+slot switches. Unsupported row fields fail typed; the Player skills editor
+remains disabled. Authoritative multi-skill casts, failure transitions,
+configured item/ammo prerequisites and Browser acceptance are still unproven,
+so `AUTO_SKILL` and `MULTI_SKILL` remain `PARTIAL`.
+
 The requested sequence is source implementation and bounded tests, then a
 coherent candidate. No Production file, runtime restart or live-player mutation
 is authorized here. A source `PASS` does not turn any row into a released UI
