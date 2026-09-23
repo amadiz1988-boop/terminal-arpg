@@ -1,0 +1,46 @@
+:root {
+  --ro-floor-image: url('/ro/client/floors/prontera-stone.png');
+  --ro-floor-shade: rgb(0 0 0 / 42%);
+  background-color: #414445;
+}
+
+:root[data-ro-floor-theme='field-grass'] {
+  --ro-floor-image: url('/ro/client/floors/field-grass.png');
+  --ro-floor-shade: rgb(0 0 0 / 34%);
+}
+
+:root[data-ro-floor-theme='morocc-sand'] {
+  --ro-floor-image: url('/ro/client/floors/morocc-sand.png');
+  --ro-floor-shade: rgb(0 0 0 / 45%);
+}
+
+body,
+.auth {
+  background-color: #414445;
+  background-image:
+    linear-gradient(var(--ro-floor-shade), var(--ro-floor-shade)),
+    var(--ro-floor-image);
+  background-repeat: repeat;
+  background-size: auto, 256px 256px;
+}
+
+:root[data-ro-floor-theme='legacy-green'] body,
+:root[data-ro-floor-theme='legacy-green'] .auth {
+  background-color: #2d4926;
+  background-image:
+    linear-gradient(#294820cc, #294820cc),
+    repeating-linear-gradient(0deg, #416438 0 1px, #36592e 1px 24px);
+  background-size: auto;
+}
+
+:root[data-ro-floor-theme='legacy-green'] {
+  background-color: #2d4926;
+}
+
+.floor-theme-settings {
+  grid-template-columns: 1fr;
+}
+
+.floor-theme-settings label {
+  grid-template-columns: 90px minmax(0, 1fr);
+}

@@ -9,8 +9,10 @@
     <meta name="theme-color" content="#566d8b" />
     <title>鬼島傳說｜冒險掛機</title>
     <link rel="icon" href="/ro/client/paperdoll/novice-male.png" />
+    <script src="/ro-floor-theme.js?v=1"></script>
     <link rel="stylesheet" href="/styles.css?v=r071-lost-ui-restoration" />
     <link rel="stylesheet" href="/ro-ui-kit.css?v=r014-lost-ui-restoration" />
+    <link rel="stylesheet" href="/ro-floor-theme.css?v=1" />
   </head>
   <body>
     <section id="auth" class="auth">
@@ -983,6 +985,19 @@
         </div>
       </section>
       <section id="system" class="panel" data-pet-anchor="system">
+        <div class="window">
+          <div class="titlebar"><span>背景設定</span><span>此裝置</span></div>
+          <div class="audio-settings floor-theme-settings">
+            <label>背景樣式
+              <select id="roFloorTheme">
+                <option value="prontera-stone">普隆德拉石磚</option>
+                <option value="field-grass">野外草地</option>
+                <option value="morocc-sand">夢羅克沙地</option>
+                <option value="legacy-green">綠色經典</option>
+              </select>
+            </label>
+          </div>
+        </div>
         <div class="window" id="accountSettings">
           <div class="titlebar"><span>帳號設定</span><span>登入方式</span></div>
           <div class="discord-account-settings" aria-live="polite">
