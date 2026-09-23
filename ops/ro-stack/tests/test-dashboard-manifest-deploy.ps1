@@ -210,6 +210,43 @@ try {
     Assert ($r.ExitCode -ne 0 -and $r.Json.error -match 'UNAUTHORIZED_WEB_PATH') $r.Output
     Assert-Preimage $f
   }
+  Run-Test 'exact RO floor PNGs deploy and roll back; nearby path is denied' {
+    $f = New-Fixture 'ro-floor-cycle'
+    $manifest = Get-Content -LiteralPath $f.Manifest -Raw | ConvertFrom-Json
+    $floorPaths = @('prontera-stone.png', 'field-grass.png', 'morocc-sand.png') |
+      ForEach-Object { "public/ro/client/floors/$_" }
+    foreach ($path in $floorPaths) {
+      $source = Join-Path $f.Candidate ($path.Replace('/', '\'))
+      New-Item -ItemType Directory -Force -Path (Split-Path -Parent $source) | Out-Null
+      [IO.File]::WriteAllBytes($source, [byte[]](137, 80, 78, 71, 1, 2, 3))
+      $manifest.files += [pscustomobject]@{
+        path = $path
+        candidate_sha256 = (Get-FileHash -LiteralPath $source -Algorithm SHA256).Hash
+        production_preimage = 'ABSENT'
+      }
+    }
+    $manifest | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $f.Manifest -Encoding utf8
+    $precheck = Invoke-Tool $f @('-Precheck')
+    Assert ($precheck.ExitCode -eq 0 -and $precheck.Json.file_count -eq 6) $precheck.Output
+    $deploy = Invoke-Tool $f @('-Deploy')
+    Assert ($deploy.ExitCode -eq 0 -and $deploy.Json.result -eq 'DEPLOY_PASS') $deploy.Output
+    foreach ($path in $floorPaths) {
+      Assert (Test-Path -LiteralPath (Join-Path $f.Production ($path.Replace('/', '\')))) "floor PNG missing: $path"
+    }
+    $rollback = Invoke-Tool $f @('-Rollback', '-ReceiptPath', $deploy.Json.receipt)
+    Assert ($rollback.ExitCode -eq 0 -and $rollback.Json.result -eq 'ROLLBACK_PASS') $rollback.Output
+    foreach ($path in $floorPaths) {
+      Assert (-not (Test-Path -LiteralPath (Join-Path $f.Production ($path.Replace('/', '\'))))) "floor PNG remained: $path"
+    }
+    Assert-Preimage $f
+
+    $denied = New-Fixture 'ro-floor-nearby-denied'
+    $plan = Get-Content -LiteralPath $denied.Manifest -Raw | ConvertFrom-Json
+    $plan.files[0].path = 'public/ro/client/floors/unverified.png'
+    $plan | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $denied.Manifest -Encoding utf8
+    $result = Invoke-Tool $denied @('-Precheck')
+    Assert ($result.ExitCode -ne 0 -and $result.Json.error -match 'UNAUTHORIZED_WEB_PATH') $result.Output
+  }
   Run-Test 'mid-deploy failure restores every preimage' {
     $f = New-Fixture 'mid-failure'
     $r = Invoke-Tool $f @('-Deploy', '-SimulateFailureAfter', '1')

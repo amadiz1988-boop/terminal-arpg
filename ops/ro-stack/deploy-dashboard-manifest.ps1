@@ -42,6 +42,8 @@ function Assert-WithinRoot([string]$Root, [string]$RelativePath) {
     $RelativePath -match '^public/ro/data/map-info/[A-Za-z0-9_-]+\.json$' -or
     $RelativePath -eq 'public/ro/client/minimaps/manifest.json' -or
     $RelativePath -match '^public/ro/client/minimaps/[A-Za-z0-9_-]+\.png$' -or
+    $RelativePath -in @('public/ro/client/floors/prontera-stone.png',
+      'public/ro/client/floors/field-grass.png', 'public/ro/client/floors/morocc-sand.png') -or
     $RelativePath -in @('ops/ro-stack/support-session.mjs', 'ops/ro-stack/ops-control-plane.mjs',
       'ops/ro-stack/web-observation.mjs', 'ops/ro-stack/web-latency-trace.mjs',
       'ops/ro-stack/test-fixture-command.mjs',
