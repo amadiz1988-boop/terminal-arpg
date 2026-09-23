@@ -213,10 +213,7 @@ try {
   Run-Test 'exact RO floor PNGs deploy and roll back; nearby path is denied' {
     $f = New-Fixture 'ro-floor-cycle'
     $manifest = Get-Content -LiteralPath $f.Manifest -Raw | ConvertFrom-Json
-    $floorPaths = @('prontera-stone.png', 'field-grass.png', 'morocc-sand.png',
-      'prt-bot01.png', 'prt-bot03.png', 'prt-bot04.png', 'prt-bot06.png',
-      'prt-city-bot02.png', 'prt-city-bot03.png', 'prt-city-bot04.png',
-      'prt-city-bot05.png', 'prt-pr-bottom01.png') |
+    $floorPaths = @('prontera-stone.png', 'field-grass.png', 'morocc-sand.png') |
       ForEach-Object { "public/ro/client/floors/$_" }
     foreach ($path in $floorPaths) {
       $source = Join-Path $f.Candidate ($path.Replace('/', '\'))
@@ -230,7 +227,7 @@ try {
     }
     $manifest | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $f.Manifest -Encoding utf8
     $precheck = Invoke-Tool $f @('-Precheck')
-    Assert ($precheck.ExitCode -eq 0 -and $precheck.Json.file_count -eq 15) $precheck.Output
+    Assert ($precheck.ExitCode -eq 0 -and $precheck.Json.file_count -eq 6) $precheck.Output
     $deploy = Invoke-Tool $f @('-Deploy')
     Assert ($deploy.ExitCode -eq 0 -and $deploy.Json.result -eq 'DEPLOY_PASS') $deploy.Output
     foreach ($path in $floorPaths) {

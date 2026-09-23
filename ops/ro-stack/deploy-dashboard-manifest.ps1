@@ -46,12 +46,7 @@ function Assert-WithinRoot([string]$Root, [string]$RelativePath) {
     $RelativePath -match '^public/ro/client/skills/[A-Z0-9_]+\.png$' -or
     $RelativePath -eq 'docs/ro-asset-index/skills.json' -or
     $RelativePath -in @('public/ro/client/floors/prontera-stone.png',
-      'public/ro/client/floors/field-grass.png', 'public/ro/client/floors/morocc-sand.png',
-      'public/ro/client/floors/prt-bot01.png', 'public/ro/client/floors/prt-bot03.png',
-      'public/ro/client/floors/prt-bot04.png', 'public/ro/client/floors/prt-bot06.png',
-      'public/ro/client/floors/prt-city-bot02.png', 'public/ro/client/floors/prt-city-bot03.png',
-      'public/ro/client/floors/prt-city-bot04.png', 'public/ro/client/floors/prt-city-bot05.png',
-      'public/ro/client/floors/prt-pr-bottom01.png') -or
+      'public/ro/client/floors/field-grass.png', 'public/ro/client/floors/morocc-sand.png') -or
     $RelativePath -in @('ops/ro-stack/support-session.mjs', 'ops/ro-stack/ops-control-plane.mjs',
       'ops/ro-stack/web-observation.mjs', 'ops/ro-stack/web-latency-trace.mjs',
       'ops/ro-stack/test-fixture-command.mjs',
