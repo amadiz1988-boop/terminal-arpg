@@ -105,6 +105,7 @@ export const registry = JSON.parse(await readFile(registryPath, 'utf8'));
 function Add-ExactFixtureRuntime($Fixture) {
   $newFiles = @(
     @{ Path = 'ops/ro-stack/test-fixture-command.mjs'; Content = 'export const fixtureCommand = true;' },
+    @{ Path = 'ops/ro-stack/web-latency-trace.mjs'; Content = 'export const trace = true;' },
     @{ Path = 'docs/project-control/canonical-test-fixtures.json'; Content = '{"identities":[]}' }
   )
   $manifest = Get-Content -LiteralPath $Fixture.Manifest -Raw | ConvertFrom-Json
@@ -225,15 +226,15 @@ try {
     Add-ExactFixtureRuntime $f
     Assert (-not (Test-Path -LiteralPath (Join-Path $f.Production 'docs\project-control'))) 'new registry parent pre-exists'
     $precheck = Invoke-Tool $f @('-Precheck')
-    Assert ($precheck.ExitCode -eq 0 -and $precheck.Json.file_count -eq 5) $precheck.Output
+    Assert ($precheck.ExitCode -eq 0 -and $precheck.Json.file_count -eq 6) $precheck.Output
     $deploy = Invoke-Tool $f @('-Deploy')
     Assert ($deploy.ExitCode -eq 0 -and $deploy.Json.result -eq 'DEPLOY_PASS') $deploy.Output
-    foreach ($path in @('ops/ro-stack/test-fixture-command.mjs', 'docs/project-control/canonical-test-fixtures.json')) {
+    foreach ($path in @('ops/ro-stack/test-fixture-command.mjs', 'ops/ro-stack/web-latency-trace.mjs', 'docs/project-control/canonical-test-fixtures.json')) {
       Assert (Test-Path -LiteralPath (Join-Path $f.Production ($path.Replace('/', '\')))) "new fixture file missing: $path"
     }
     $rollback = Invoke-Tool $f @('-Rollback', '-ReceiptPath', $deploy.Json.receipt)
     Assert ($rollback.ExitCode -eq 0 -and $rollback.Json.result -eq 'ROLLBACK_PASS') $rollback.Output
-    foreach ($path in @('ops/ro-stack/test-fixture-command.mjs', 'docs/project-control/canonical-test-fixtures.json')) {
+    foreach ($path in @('ops/ro-stack/test-fixture-command.mjs', 'ops/ro-stack/web-latency-trace.mjs', 'docs/project-control/canonical-test-fixtures.json')) {
       Assert (-not (Test-Path -LiteralPath (Join-Path $f.Production ($path.Replace('/', '\'))))) "new fixture file survived rollback: $path"
     }
     Assert-Preimage $f
@@ -241,6 +242,7 @@ try {
   Run-Test 'nearby fixture paths, traversal and absolute paths fail closed' {
     $pathsToReject = @(
       @{ Path = 'ops/ro-stack/test-fixture-command-extra.mjs'; Error = 'UNAUTHORIZED_WEB_PATH' },
+      @{ Path = 'ops/ro-stack/web-latency-trace-extra.mjs'; Error = 'UNAUTHORIZED_WEB_PATH' },
       @{ Path = 'docs/project-control/canonical-test-fixtures-extra.json'; Error = 'UNAUTHORIZED_WEB_PATH' },
       @{ Path = 'docs/project-control/../canonical-test-fixtures.json'; Error = 'INVALID_MANIFEST_PATH' },
       @{ Path = 'C:/ops/ro-stack/test-fixture-command.mjs'; Error = 'INVALID_MANIFEST_PATH' }

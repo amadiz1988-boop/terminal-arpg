@@ -41,7 +41,8 @@ function Assert-WithinRoot([string]$Root, [string]$RelativePath) {
     ) -or
     $RelativePath -match '^public/ro/data/map-info/[A-Za-z0-9_-]+\.json$' -or
     $RelativePath -in @('ops/ro-stack/support-session.mjs', 'ops/ro-stack/ops-control-plane.mjs',
-      'ops/ro-stack/web-observation.mjs', 'ops/ro-stack/test-fixture-command.mjs',
+      'ops/ro-stack/web-observation.mjs', 'ops/ro-stack/web-latency-trace.mjs',
+      'ops/ro-stack/test-fixture-command.mjs',
       'docs/project-control/canonical-test-fixtures.json', 'public/ro/data/map-info.json')
   if (-not $webPath) { throw "UNAUTHORIZED_WEB_PATH:$RelativePath" }
   $full = [IO.Path]::GetFullPath((Join-Path $Root ($RelativePath.Replace('/', '\'))))
