@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "1.0.0",
+  "note": "WEB_REAL_USER_EXPERIENCE_V1 · configurable health thresholds for player-perceived latency. Edit here, never hardcode in UI/backend.",
+  "windows": {
+    "1m": 60000,
+    "5m": 300000,
+    "15m": 900000,
+    "1h": 3600000
+  },
+  "defaultWindow": "5m",
+  "profiles": {
+    "default": { "healthyMs": 500, "degradedMs": 1000, "slowMs": 2000 },
+    "realtime": { "healthyMs": 300, "degradedMs": 600, "slowMs": 1200 },
+    "minimap": { "healthyMs": 400, "degradedMs": 800, "slowMs": 1500 }
+  },
+  "profileByAction": {
+    "stat_allocate": "default",
+    "equip_item": "default",
+    "unequip_item": "default",
+    "use_item": "default",
+    "npc_dialog_action": "default",
+    "minimap_freshness": "minimap",
+    "minimap_marker_update": "minimap"
+  },
+  "actions": [
+    "stat_allocate", "equip_item", "unequip_item", "use_item", "npc_dialog_action", "minimap_freshness",
+    "skill_allocate", "equipment_change", "item_use", "automation_start", "automation_stop", "mode_switch",
+    "target_switch", "farm_map_switch", "minimap_marker_update", "minimap_open", "minimap_close",
+    "map_transition_visible", "quest_open", "dialog_visible", "choice_submit", "journal_update",
+    "inventory_open", "storage_open", "shop_open", "login", "character_select", "enter_game",
+    "combat_state_visible", "target_change_visible"
+  ]
+}
