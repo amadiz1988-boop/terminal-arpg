@@ -4,6 +4,8 @@
 TASK_ID = OPENKORE_MATURE_CAPABILITY_GAP_CENSUS_AND_CLOSURE_V1
 PINNED_OPENKORE = 51de1ddfc4449ae5217f6886de702f87ca934030
 STATUS = IN_PROGRESS / SOURCE_ONLY
+DISCOVERY_COMPLETE = NO
+BEHAVIOR_PARITY_COMPLETE = NO
 OPENKORE_RUNTIME = 0
 RATHENA_WORLD_AUTHORITY = YES
 ```
@@ -99,6 +101,9 @@ names the existing GI seam, or `HOLD` when the executor is not authorized.
 ## Closure accounting
 
 This is a discovered-capability classification, not a full parity certificate.
+`node scripts/test-openkore-mature-capability-census.mjs --closure` is the
+machine-readable exit check. It exits 2 while any discovered row is `PARTIAL`
+or `MISSING`, or while complete discovery and behavior parity are unproven.
 The table has 59 rows: 17 H, 19 C, 23 R. Classification counts are
 `PARTIAL=37`, `MISSING=1`, `NOT_IMPLEMENTED=11`, `NOT_APPLICABLE=1`,
 `GI_EXPLICIT_OVERRIDE=9`, and `ALIGNED=0`. Every displayed row has exactly one

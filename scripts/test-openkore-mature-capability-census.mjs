@@ -40,3 +40,17 @@ for (const row of predicateRows) {
   assert.ok(statuses.includes(cells[5]), `unclassified predicate: ${cells[0]}`);
 }
 console.log(`OPENKORE_CENSUS_SOURCE_PASS capabilities=${rows.length} predicates=${predicateRows.length}`);
+if (process.argv.includes('--closure')) {
+  const counts = Object.fromEntries(statuses.map((status) => [status, 0]));
+  for (const row of rows)
+    counts[row.split('|').slice(1, -1)[5].trim()]++;
+  const outstanding = counts.PARTIAL + counts.MISSING;
+  const discoveryComplete = /^DISCOVERY_COMPLETE = YES$/m.test(census);
+  const behaviorParityComplete = /^BEHAVIOR_PARITY_COMPLETE = YES$/m.test(census);
+  if (outstanding || !discoveryComplete || !behaviorParityComplete) {
+    console.error(`OPENKORE_CENSUS_CLOSURE_BLOCKED partial=${counts.PARTIAL} missing=${counts.MISSING} discoveryComplete=${discoveryComplete} behaviorParityComplete=${behaviorParityComplete}`);
+    process.exitCode = 2;
+  } else {
+    console.log(`OPENKORE_CENSUS_CLOSURE_PASS capabilities=${rows.length} predicates=${predicateRows.length}`);
+  }
+}
