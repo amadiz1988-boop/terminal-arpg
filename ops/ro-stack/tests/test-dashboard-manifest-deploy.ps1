@@ -122,6 +122,32 @@ function Add-ExactFixtureRuntime($Fixture) {
   $manifest | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $Fixture.Manifest -Encoding utf8
 }
 
+function Add-MinimapFixture($Fixture, [switch]$UnlistedPng) {
+  $pngPath = if ($UnlistedPng) { 'public/ro/client/minimaps/unlisted.png' } else { 'public/ro/client/minimaps/pay_fild07.png' }
+  $pngSource = Join-Path $Fixture.Candidate ($pngPath.Replace('/', '\'))
+  New-Item -ItemType Directory -Force -Path (Split-Path -Parent $pngSource) | Out-Null
+  [IO.File]::WriteAllBytes($pngSource, [Convert]::FromBase64String('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9WlLtPAAAAAASUVORK5CYII='))
+  $pngHash = (Get-FileHash -LiteralPath $pngSource -Algorithm SHA256).Hash
+  $manifestPath = 'public/ro/client/minimaps/manifest.json'
+  $manifestSource = Join-Path $Fixture.Candidate ($manifestPath.Replace('/', '\'))
+  [ordered]@{ entries = @([ordered]@{
+    availability = 'AVAILABLE'
+    webAsset = "/ro/client/minimaps/pay_fild07.png?v=$($pngHash.Substring(0,16).ToLowerInvariant())"
+    outputHash = $pngHash.ToLowerInvariant()
+  }) } | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $manifestSource -Encoding utf8
+  $plan = Get-Content -LiteralPath $Fixture.Manifest -Raw | ConvertFrom-Json
+  foreach ($path in @($manifestPath, $pngPath)) {
+    $source = Join-Path $Fixture.Candidate ($path.Replace('/', '\'))
+    $plan.files += [pscustomobject]@{
+      path = $path
+      candidate_sha256 = (Get-FileHash -LiteralPath $source -Algorithm SHA256).Hash
+      production_preimage = 'ABSENT'
+    }
+  }
+  $plan | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $Fixture.Manifest -Encoding utf8
+  return $pngPath
+}
+
 function Set-ManifestFileCount($Fixture, [int]$Count) {
   $manifest = Get-Content -LiteralPath $Fixture.Manifest -Raw | ConvertFrom-Json
   for ($index = $manifest.files.Count; $index -lt $Count; $index++) {
@@ -219,6 +245,36 @@ try {
     $rollbackReceipt = Get-Content -LiteralPath $rollback.Json.receipt -Raw | ConvertFrom-Json
     Assert ($rollbackReceipt.rollback_performed -and $rollbackReceipt.final_state -eq 'ORIGINAL_PREIMAGE') 'rollback receipt incomplete'
     Assert ($rollbackReceipt.candidate_root -ceq $f.Candidate) 'rollback receipt candidate root differs from manifest source'
+    Assert-Preimage $f
+  }
+  Run-Test 'canonical minimap PNG and manifest precheck, deploy and rollback' {
+    $f = New-Fixture 'minimap-cycle'
+    $pngPath = Add-MinimapFixture $f
+    $precheck = Invoke-Tool $f @('-Precheck')
+    Assert ($precheck.ExitCode -eq 0 -and $precheck.Json.file_count -eq 5) $precheck.Output
+    $deploy = Invoke-Tool $f @('-Deploy')
+    Assert ($deploy.ExitCode -eq 0 -and $deploy.Json.result -eq 'DEPLOY_PASS') $deploy.Output
+    Assert (Test-Path -LiteralPath (Join-Path $f.Production ($pngPath.Replace('/', '\')))) 'minimap PNG missing after deploy'
+    $rollback = Invoke-Tool $f @('-Rollback', '-ReceiptPath', $deploy.Json.receipt)
+    Assert ($rollback.ExitCode -eq 0 -and $rollback.Json.result -eq 'ROLLBACK_PASS') $rollback.Output
+    Assert (-not (Test-Path -LiteralPath (Join-Path $f.Production ($pngPath.Replace('/', '\'))))) 'minimap PNG remained after rollback'
+    Assert-Preimage $f
+  }
+  Run-Test 'unlisted minimap PNG is denied' {
+    $f = New-Fixture 'minimap-unlisted'
+    $pngPath = Add-MinimapFixture $f -UnlistedPng
+    $r = Invoke-Tool $f @('-Precheck')
+    Assert ($r.ExitCode -ne 0 -and $r.Json.error -eq "MINIMAP_ASSET_NOT_IN_CANONICAL_MANIFEST:$pngPath") $r.Output
+    Assert-Preimage $f
+  }
+  Run-Test 'minimap PNG without manifest is denied' {
+    $f = New-Fixture 'minimap-no-manifest'
+    $pngPath = Add-MinimapFixture $f
+    $plan = Get-Content -LiteralPath $f.Manifest -Raw | ConvertFrom-Json
+    $plan.files = @($plan.files | Where-Object path -ne 'public/ro/client/minimaps/manifest.json')
+    $plan | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $f.Manifest -Encoding utf8
+    $r = Invoke-Tool $f @('-Precheck')
+    Assert ($r.ExitCode -ne 0 -and $r.Json.error -eq 'MINIMAP_MANIFEST_REQUIRED') $r.Output
     Assert-Preimage $f
   }
   Run-Test 'exact fixture paths precheck, deploy and rollback as absent' {

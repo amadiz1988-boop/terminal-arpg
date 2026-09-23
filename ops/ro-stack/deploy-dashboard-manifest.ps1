@@ -40,6 +40,8 @@ function Assert-WithinRoot([string]$Root, [string]$RelativePath) {
       'ops/ro-stack/persistent-agent/quest-sequences/novice-onboarding.json'
     ) -or
     $RelativePath -match '^public/ro/data/map-info/[A-Za-z0-9_-]+\.json$' -or
+    $RelativePath -eq 'public/ro/client/minimaps/manifest.json' -or
+    $RelativePath -match '^public/ro/client/minimaps/[A-Za-z0-9_-]+\.png$' -or
     $RelativePath -in @('ops/ro-stack/support-session.mjs', 'ops/ro-stack/ops-control-plane.mjs',
       'ops/ro-stack/web-observation.mjs', 'ops/ro-stack/web-latency-trace.mjs',
       'ops/ro-stack/test-fixture-command.mjs',
@@ -108,11 +110,40 @@ function Read-Plan {
   }
   $files = @($data.files)
   if ($files.Count -lt 1 -or $files.Count -gt 256) { throw 'MANIFEST_FILE_COUNT_OUT_OF_BOUNDS' }
+  $minimapPngs = @($files | Where-Object { [string]$_.path -match '^public/ro/client/minimaps/[A-Za-z0-9_-]+\.png$' })
+  $minimapHashes = @{}
+  if ($minimapPngs.Count -gt 0) {
+    $minimapManifestPath = 'public/ro/client/minimaps/manifest.json'
+    if (-not @($files | Where-Object { [string]$_.path -ceq $minimapManifestPath }).Count) {
+      throw 'MINIMAP_MANIFEST_REQUIRED'
+    }
+    $minimapRoot = if ($Rollback) { $production } else { $candidate }
+    $minimapSource = Join-Path $minimapRoot ($minimapManifestPath.Replace('/', '\'))
+    if (-not (Test-Path -LiteralPath $minimapSource -PathType Leaf)) { throw 'MINIMAP_MANIFEST_MISSING' }
+    $minimapData = Get-Content -LiteralPath $minimapSource -Raw | ConvertFrom-Json
+    foreach ($entry in @($minimapData.entries)) {
+      if ([string]$entry.availability -ne 'AVAILABLE') { continue }
+      $asset = [string]$entry.webAsset
+      $hash = [string]$entry.outputHash
+      if ($asset -notmatch '^/ro/client/minimaps/([A-Za-z0-9_-]+\.png)\?v=[0-9a-fA-F]{16}$') {
+        throw 'MINIMAP_MANIFEST_ENTRY_INVALID'
+      }
+      $assetPath = 'public/ro/client/minimaps/' + $Matches[1]
+      if ($hash -notmatch '^[0-9a-fA-F]{64}$') { throw 'MINIMAP_MANIFEST_ENTRY_INVALID' }
+      if ($minimapHashes.ContainsKey($assetPath)) { throw "MINIMAP_MANIFEST_DUPLICATE:$assetPath" }
+      $minimapHashes[$assetPath] = $hash.ToUpperInvariant()
+    }
+  }
   $seen = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
   $entries = @()
   foreach ($file in $files) {
     $relative = [string]$file.path
     if (-not $seen.Add($relative)) { throw "DUPLICATE_MANIFEST_PATH:$relative" }
+    if ($relative -match '^public/ro/client/minimaps/[A-Za-z0-9_-]+\.png$' -and
+        (-not $minimapHashes.ContainsKey($relative) -or
+         $minimapHashes[$relative] -ne ([string]$file.candidate_sha256).ToUpperInvariant())) {
+      throw "MINIMAP_ASSET_NOT_IN_CANONICAL_MANIFEST:$relative"
+    }
     $preimageAbsent = [string]$file.production_preimage -ceq 'ABSENT'
     if ([string]$file.candidate_sha256 -notmatch '^[0-9a-fA-F]{64}$' -or
         (-not $preimageAbsent -and [string]$file.production_preimage_sha256 -notmatch '^[0-9a-fA-F]{64}$') -or
