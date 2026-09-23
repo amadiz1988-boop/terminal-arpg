@@ -52,7 +52,7 @@ that row's real runtime capability and Player Web wiring are accepted.
 | C01 Attack mode | PARTIAL | C01 `getAttackAutoMode` | Farm profile payload | Only active mode 2 supported | Validate UI exposes only accepted mode | 戰鬥模式 | YES |
 | C02 Normal attack | PARTIAL | C02 `Attack::main` | `issue_melee_attack` | Class and authoritative HIT evidence incomplete | Melee/ranged legal attack matrix | 普攻 | YES |
 | C03 Ranged attack | PARTIAL | C03 `Attack::main` | Native `rhw.range` | Ranged profile intentionally rejected | Bow/gun ammo/range/LOS proof | 普攻 | YES |
-| C04 Attack skills | PARTIAL | C04 `attackSkillSlot` | One Native `skillId` | Stored multiple slots stop at command payload | Ordered slots adapter and cast effect proof | 自動技能 | YES |
+| C04 Attack skills | PARTIAL | C04 `attackSkillSlot` | Ordered numeric slots through existing attack loop | Target/ground predicates and authoritative multi-skill effects unproven | Complete supported predicates and cast effect proof | 自動技能 | YES |
 | C05 Skill fallback | PARTIAL | C05 `Attack::main` | Profile weapon guard | Source-only, no legal live hit/no-hit proof | Wait/retarget/explicit fallback fixture | 技能失敗處理 | YES |
 | C06 Attack retry | PARTIAL | C06 `shouldGiveUp` | Blocked target and walk retry | Failure reasons/limits unclassified | Separate approach/cast/target retry tests | NONE | NO |
 | C07 Lost target | PARTIAL | C07 `targetGone` | Target invalidation | Lost vs unreachable vs killed unproven | Typed reason and rescan proof | NONE | NO |
@@ -64,7 +64,7 @@ that row's real runtime capability and Player Web wiring are accepted.
 | R01 HP threshold | PARTIAL | R01 `processSitAuto` | Native `handle_survival` | Native 30/60 and stack 70/80 differ from pinned 40/100 | Action-specific HP gate and accepted threshold | HP 回復門檻 | YES |
 | R02 SP threshold | PARTIAL | R02 `processSitAuto` | Native default 0/0 | Production still has positive opt-in | Preserve opt-in; source/live parity proof | SP 回復門檻 | YES |
 | R03 Sit/stand | PARTIAL | R03 `processSitAuto` | Native recovery sit | Safety, weight and queue gates incomplete | Port gates and safe stand/resume tests | 自動坐下 | YES |
-| R04 Potion/item | PARTIAL | R04 `processAutoItemUse` | Native item allowlist | Stored per-row conditions stop before action | Condition-to-item adapter and HP/count proof | 自動喝水 | YES |
+| R04 Potion/item | PARTIAL | R04 `processAutoItemUse` | HP-percent rows plus Native item allowlist | Authoritative HP/count effect and global threshold overlap unproven | Legal potion HP/count and resume proof | 自動喝水 | YES |
 | R05 Recovery skill | PARTIAL | R05 `processAutoSkillUse` | Native skill allowlist | Stored self-skill row conditions stop before action | Enabled-row predicate/cast effect proof | 自我回復技能 | YES |
 | R07 Loot | PARTIAL | R07 `processItemsTake` | Native loot and event | Authoritative inventory-add proof incomplete | Global AutoLoot to inventory and ledger test | 自動拾取 | YES |
 | R08 Inventory | PARTIAL | R08 `processAutoItemUse` | rAthena inventory | Presence/capacity results not fully typed | Inventory delta and rejection matrix | NONE | NO |
