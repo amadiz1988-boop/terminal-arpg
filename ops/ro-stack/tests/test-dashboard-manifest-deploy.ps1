@@ -102,6 +102,25 @@ export const registry = JSON.parse(await readFile(registryPath, 'utf8'));
   return $relative
 }
 
+function Add-ExactFixtureRuntime($Fixture) {
+  $newFiles = @(
+    @{ Path = 'ops/ro-stack/test-fixture-command.mjs'; Content = 'export const fixtureCommand = true;' },
+    @{ Path = 'docs/project-control/canonical-test-fixtures.json'; Content = '{"identities":[]}' }
+  )
+  $manifest = Get-Content -LiteralPath $Fixture.Manifest -Raw | ConvertFrom-Json
+  foreach ($file in $newFiles) {
+    $source = Join-Path $Fixture.Candidate ($file.Path.Replace('/', '\'))
+    New-Item -ItemType Directory -Force -Path (Split-Path -Parent $source) | Out-Null
+    [IO.File]::WriteAllText($source, $file.Content)
+    $manifest.files += [pscustomobject]@{
+      path = $file.Path
+      candidate_sha256 = (Get-FileHash -LiteralPath $source -Algorithm SHA256).Hash
+      production_preimage = 'ABSENT'
+    }
+  }
+  $manifest | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $Fixture.Manifest -Encoding utf8
+}
+
 function Set-ManifestFileCount($Fixture, [int]$Count) {
   $manifest = Get-Content -LiteralPath $Fixture.Manifest -Raw | ConvertFrom-Json
   for ($index = $manifest.files.Count; $index -lt $Count; $index++) {
@@ -200,6 +219,43 @@ try {
     Assert ($rollbackReceipt.rollback_performed -and $rollbackReceipt.final_state -eq 'ORIGINAL_PREIMAGE') 'rollback receipt incomplete'
     Assert ($rollbackReceipt.candidate_root -ceq $f.Candidate) 'rollback receipt candidate root differs from manifest source'
     Assert-Preimage $f
+  }
+  Run-Test 'exact fixture paths precheck, deploy and rollback as absent' {
+    $f = New-Fixture 'exact-fixture-runtime'
+    Add-ExactFixtureRuntime $f
+    Assert (-not (Test-Path -LiteralPath (Join-Path $f.Production 'docs\project-control'))) 'new registry parent pre-exists'
+    $precheck = Invoke-Tool $f @('-Precheck')
+    Assert ($precheck.ExitCode -eq 0 -and $precheck.Json.file_count -eq 5) $precheck.Output
+    $deploy = Invoke-Tool $f @('-Deploy')
+    Assert ($deploy.ExitCode -eq 0 -and $deploy.Json.result -eq 'DEPLOY_PASS') $deploy.Output
+    foreach ($path in @('ops/ro-stack/test-fixture-command.mjs', 'docs/project-control/canonical-test-fixtures.json')) {
+      Assert (Test-Path -LiteralPath (Join-Path $f.Production ($path.Replace('/', '\')))) "new fixture file missing: $path"
+    }
+    $rollback = Invoke-Tool $f @('-Rollback', '-ReceiptPath', $deploy.Json.receipt)
+    Assert ($rollback.ExitCode -eq 0 -and $rollback.Json.result -eq 'ROLLBACK_PASS') $rollback.Output
+    foreach ($path in @('ops/ro-stack/test-fixture-command.mjs', 'docs/project-control/canonical-test-fixtures.json')) {
+      Assert (-not (Test-Path -LiteralPath (Join-Path $f.Production ($path.Replace('/', '\'))))) "new fixture file survived rollback: $path"
+    }
+    Assert-Preimage $f
+  }
+  Run-Test 'nearby fixture paths, traversal and absolute paths fail closed' {
+    $pathsToReject = @(
+      @{ Path = 'ops/ro-stack/test-fixture-command-extra.mjs'; Error = 'UNAUTHORIZED_WEB_PATH' },
+      @{ Path = 'docs/project-control/canonical-test-fixtures-extra.json'; Error = 'UNAUTHORIZED_WEB_PATH' },
+      @{ Path = 'docs/project-control/../canonical-test-fixtures.json'; Error = 'INVALID_MANIFEST_PATH' },
+      @{ Path = 'C:/ops/ro-stack/test-fixture-command.mjs'; Error = 'INVALID_MANIFEST_PATH' }
+    )
+    $index = 0
+    foreach ($case in $pathsToReject) {
+      $f = New-Fixture "fixture-reject-$index"
+      $manifest = Get-Content -LiteralPath $f.Manifest -Raw | ConvertFrom-Json
+      $manifest.files[0].path = $case.Path
+      $manifest | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $f.Manifest -Encoding utf8
+      $result = Invoke-Tool $f @('-Precheck')
+      Assert ($result.ExitCode -ne 0 -and $result.Json.error -match $case.Error) $result.Output
+      Assert-Preimage $f
+      $index++
+    }
   }
   Run-Test '256 explicit files pass precheck without mutation' {
     $f = New-Fixture 'capacity-256'

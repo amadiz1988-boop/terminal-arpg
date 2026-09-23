@@ -41,7 +41,8 @@ function Assert-WithinRoot([string]$Root, [string]$RelativePath) {
     ) -or
     $RelativePath -match '^public/ro/data/map-info/[A-Za-z0-9_-]+\.json$' -or
     $RelativePath -in @('ops/ro-stack/support-session.mjs', 'ops/ro-stack/ops-control-plane.mjs',
-      'ops/ro-stack/web-observation.mjs', 'public/ro/data/map-info.json')
+      'ops/ro-stack/web-observation.mjs', 'ops/ro-stack/test-fixture-command.mjs',
+      'docs/project-control/canonical-test-fixtures.json', 'public/ro/data/map-info.json')
   if (-not $webPath) { throw "UNAUTHORIZED_WEB_PATH:$RelativePath" }
   $full = [IO.Path]::GetFullPath((Join-Path $Root ($RelativePath.Replace('/', '\'))))
   $prefix = $Root.TrimEnd('\') + '\'
@@ -120,7 +121,7 @@ function Read-Plan {
     $source = if ($Rollback) { $null } else { Assert-WithinRoot -Root $candidate -RelativePath $relative }
     $target = Assert-WithinRoot -Root $production -RelativePath $relative
     if ((-not $Rollback -and -not (Test-Path -LiteralPath $source -PathType Leaf)) -or
-        -not (Test-Path -LiteralPath (Split-Path -Parent $target) -PathType Container) -or
+        (-not $preimageAbsent -and -not (Test-Path -LiteralPath (Split-Path -Parent $target) -PathType Container)) -or
         ($Rollback -and -not (Test-Path -LiteralPath $target -PathType Leaf)) -or
         (-not $Rollback -and -not $preimageAbsent -and -not (Test-Path -LiteralPath $target -PathType Leaf))) {
       throw "MANIFEST_FILE_MISSING:$relative"
@@ -241,6 +242,7 @@ function Replace-FileAtomic([string]$Source, [string]$Target) {
 function Place-NewFileAtomic([string]$Source, [string]$Target) {
   $temporary = "$Target.deploy-$([guid]::NewGuid().ToString('N')).tmp"
   try {
+    New-Item -ItemType Directory -Force -Path (Split-Path -Parent $Target) | Out-Null
     [IO.File]::WriteAllBytes($temporary, [IO.File]::ReadAllBytes($Source))
     [IO.File]::Move($temporary, $Target)
   } finally {
@@ -422,6 +424,7 @@ try {
     $index = 0
     $failurePhase = 'FILE_REPLACEMENT'
     foreach ($entry in $plan.Entries) {
+      Assert-WithinRoot -Root $plan.Production -RelativePath $entry.Path | Out-Null
       $staged = Join-Path $runRoot ('staged\' + $entry.Path.Replace('/', '\'))
       if ($entry.PreimageAbsent) { Place-NewFileAtomic -Source $staged -Target $entry.Target }
       else { Replace-FileAtomic -Source $staged -Target $entry.Target }
