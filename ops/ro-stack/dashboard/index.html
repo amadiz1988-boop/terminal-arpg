@@ -726,13 +726,15 @@
                 <button
                   id="resetStats"
                   type="button"
-                  aria-label="全部重置能力值"
+                  aria-label="重置能力值"
                   data-ro-primitive="RoButton"
                   data-ro-source-state="SOURCE_VERIFIED"
-                >全部重置</button>
-                <p id="statNotice" class="notice">
-                  點擊增加 1 點，長按可連續配點。
-                </p>
+                  disabled
+                >重置能力值</button>
+                <div class="reset-copy"><small>重置能力值 · 免費 · 冷卻：8 小時</small>
+                  <output id="statResetState">狀態讀取中</output>
+                  <p id="statNotice" class="notice">點擊增加 1 點，長按可連續配點。</p>
+                </div>
               </div>
             </div>
           </div>
@@ -744,6 +746,12 @@
             <span>技能欄</span><span id="skillPoints">Skill Point 0</span>
           </div>
           <div id="skillList" class="skill-list"></div>
+          <div class="skill-reset-action">
+            <button id="resetSkills" type="button" data-ro-primitive="RoButton"
+              data-ro-source-state="SOURCE_VERIFIED" disabled>重置技能點</button>
+            <span>重置技能點 · 免費 · 冷卻：8 小時</span>
+            <output id="skillResetState">狀態讀取中</output>
+          </div>
           <p id="skillNotice" class="notice">
             技能樹、前置條件、說明、等級與可加點狀態均由遊戲伺服器同步。
           </p>

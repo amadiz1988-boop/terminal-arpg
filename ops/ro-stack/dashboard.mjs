@@ -1195,6 +1195,8 @@ const ownershipActions = new Set([
   'unequip_item',
   'allocate_stat_point',
   'allocate_skill_point',
+  'reset_character_stat',
+  'reset_character_skill',
   'use_item',
   'card_insert',
   'talk_to_npc',
@@ -1208,7 +1210,6 @@ const ownershipActions = new Set([
   'service_storage_withdraw',
   'service_save_point',
   'service_transport',
-  'service_status_reset',
   'start_quest',
   'start_quest_sequence',
   'run_server_command',
@@ -2038,41 +2039,6 @@ async function readServerAgentDialog(charId) {
     return parseLiveDialogRow(output);
   } catch (error) {
     if (persistentAgentDialogSchemaUnavailable(error)) return null;
-    throw error;
-  }
-}
-
-// Canonical server-side reset-service descriptor. The Web reads this for the
-// Zeny precheck so the browser never hardcodes the reset cost. Fail-soft: an
-// absent table disables only the UX precheck, never the native path.
-function serviceConfigSchemaUnavailable(error) {
-  return /persistent_agent_service_config.*(?:doesn't exist|does not exist)|Unknown table/i.test(
-    String(error?.message ?? error),
-  );
-}
-
-function parseServiceConfigRow(output) {
-  const line = String(output ?? '').split(/\r?\n/)[0];
-  if (!line) return null;
-  const row = line.split('\t');
-  if (row.length < 5) return null;
-  return {
-    resetNpc: decodeHexText(row[0]),
-    resetNpcMap: decodeHexText(row[1]),
-    resetStatCost: Number(row[2]),
-    resetCostCurrency: decodeHexText(row[3]) || 'zeny',
-    revision: Number(row[4]),
-  };
-}
-
-async function readServerAgentServiceConfig() {
-  try {
-    const output = await sql(
-      `SELECT HEX(COALESCE(reset_npc,'')),HEX(COALESCE(reset_npc_map,'')),reset_stat_cost,HEX(COALESCE(reset_cost_currency,'zeny')),revision FROM persistent_agent_service_config WHERE config_id=1 LIMIT 1;`,
-    );
-    return parseServiceConfigRow(output);
-  } catch (error) {
-    if (serviceConfigSchemaUnavailable(error)) return null;
     throw error;
   }
 }
@@ -8163,70 +8129,103 @@ async function queueServerAgentNpcDialog(account, input = {}) {
   throw new HttpError(422, 'invalid_transition');
 }
 
-// SERVER_AGENT status reset. This does NOT reset anything itself: it opens the
-// configured native Reset Girl NPC script over the same dialog bridge. The
-// native script owns the stat cost, the Zeny check and the actual ResetStatus,
-// and the player then chooses the menu option explicitly (no autonomous
-// irreversible selection).
-//
-// Before starting navigation we precheck the authoritative read-model Zeny
-// against the canonical server-side reset cost. This is UX only: it must never
-// become a replacement authority, so the native script still revalidates and
-// deducts. If the read model or descriptor is unavailable we fail closed rather
-// than start a travel/service flow we cannot precheck.
-async function queueServerAgentStatusReset(account, input = {}) {
+const characterResetCooldownSeconds = 8 * 60 * 60;
+async function readCharacterResetCooldowns(charId) {
+  const id = Number(charId);
+  if (!Number.isSafeInteger(id) || id <= 0)
+    throw new HttpError(409, 'character_required');
+  const output = await sql(
+    `SELECT FLOOR(UNIX_TIMESTAMP()),` +
+    `COALESCE(MAX(CASE WHEN \`key\`='last_stat_reset_at' THEN value END),0),` +
+    `COALESCE(MAX(CASE WHEN \`key\`='last_skill_reset_at' THEN value END),0) ` +
+    `FROM char_reg_num WHERE char_id=${id} AND \`index\`=0 ` +
+    `AND \`key\` IN ('last_stat_reset_at','last_skill_reset_at');`,
+  );
+  const [nowText, statText, skillText] = String(output ?? '').split('\t');
+  const serverNow = Number(nowText);
+  if (!Number.isSafeInteger(serverNow) || serverNow <= 0)
+    throw new HttpError(503, 'reset_cooldown_unavailable');
+  const state = (valueText) => {
+    const lastResetAt = Number(valueText ?? 0);
+    const availableAt = lastResetAt > 0
+      ? lastResetAt + characterResetCooldownSeconds : 0;
+    return {
+      lastResetAt,
+      availableAt,
+      remainingSeconds: Math.max(0, availableAt - serverNow),
+      available: availableAt <= serverNow,
+    };
+  };
+  return {
+    cost: 0,
+    cooldownSeconds: characterResetCooldownSeconds,
+    scope: 'CHARACTER',
+    serverNow,
+    stat: state(statText),
+    skill: state(skillText),
+  };
+}
+
+async function waitForResetCommand(account, charId, commandId) {
+  const deadline = Date.now() + 12000;
+  let command;
+  do {
+    command = await getOwnershipCommand(account, charId, commandId);
+    if (command.status === 'CONFIRMED' || command.status === 'REJECTED' ||
+        command.status === 'CANCELLED') return command;
+    await sleep(200);
+  } while (Date.now() < deadline);
+  return command;
+}
+
+async function queueCharacterReset(account, type, commandId) {
   const charId = Number(account.characterId);
   if (!Number.isSafeInteger(charId) || charId <= 0)
     throw new HttpError(409, 'character_required');
-  const stateRow = await readAgentStateRow(charId);
-  if (!stateRow) throw new HttpError(409, 'agent_state_unavailable');
-  const [live, serviceConfig] = await Promise.all([
-    readPersistentAgentLiveStatusView(charId),
-    readServerAgentServiceConfig(),
-  ]);
-  if (!live?.available || !live.fresh)
-    throw new HttpError(503, 'agent_status_unavailable');
-  if (!serviceConfig || !Number.isFinite(serviceConfig.resetStatCost))
-    throw new HttpError(503, 'reset_service_config_unavailable');
-  const currentZeny = Number(live.zeny);
-  const resetCost = Number(serviceConfig.resetStatCost);
-  if (currentZeny < resetCost) {
-    // Explicit player-facing insufficient-funds result. No command is enqueued,
-    // so no navigation and no NPC service start.
-    return {
-      status: 'INSUFFICIENT_ZENY',
-      accepted: false,
-      rejected: true,
-      resetPrecheckResult: 'INSUFFICIENT_ZENY',
-      navigationStarted: false,
-      npcServiceStarted: false,
-      currentZeny,
-      resetCost,
-      currency: serviceConfig.resetCostCurrency || 'zeny',
-      resetNpc: serviceConfig.resetNpc,
-      resetNpcMap: serviceConfig.resetNpcMap,
-    };
-  }
-  const command = await queueOwnershipCommand(account, charId, {
-    action: 'service_status_reset',
-    expectedRevision: Number(stateRow.revision),
-    commandId: input.commandId,
+  if (type !== 'stat' && type !== 'skill')
+    throw new HttpError(422, 'invalid_reset_type');
+  if (!commandIdPattern.test(commandId))
+    throw new HttpError(422, 'invalid_command_id');
+  return withStatCommandLock(charId, async () => {
+    let prior = null;
+    try {
+      prior = await getOwnershipCommand(account, charId, commandId);
+    } catch (error) {
+      if (!(error instanceof HttpError) || error.statusCode !== 404) throw error;
+    }
+    const action = type === 'stat' ? 'reset_character_stat' : 'reset_character_skill';
+    if (prior) {
+      if (prior.action !== action) throw new HttpError(409, 'idempotency_conflict');
+      return { command: await waitForResetCommand(account, charId, commandId),
+        cooldowns: await readCharacterResetCooldowns(charId) };
+    }
+    const controller = await readCharacterControllerStatus(account, charId, {
+      includeFarmTarget: false,
+    });
+    if (!controller.available || controller.controller !== SERVER_AGENT_OWNER)
+      throw new HttpError(409, 'server_agent_required');
+    const cooldowns = await readCharacterResetCooldowns(charId);
+    if (!cooldowns[type].available)
+      throw new HttpError(409, 'reset_cooldown_active');
+    let state = await readAgentStateRow(charId);
+    if (!state) throw new HttpError(503, 'agent_state_unavailable');
+    if (state.agentMode !== 'PERSISTENT_IDLE') {
+      const stop = await queueOwnershipCommand(account, charId, {
+        action: 'stop_farm', expectedRevision: Number(state.revision),
+      });
+      const stopped = await waitForResetCommand(account, charId, stop.commandId);
+      if (stopped.status !== 'CONFIRMED')
+        throw new HttpError(409, 'reset_safe_stop_failed');
+      state = await readAgentStateRow(charId);
+      if (!state || state.agentMode !== 'PERSISTENT_IDLE')
+        throw new HttpError(409, 'reset_safe_stop_failed');
+    }
+    const command = await queueOwnershipCommand(account, charId, {
+      action, expectedRevision: Number(state.revision), commandId,
+    });
+    return { command: await waitForResetCommand(account, charId, command.commandId),
+      cooldowns: await readCharacterResetCooldowns(charId) };
   });
-  return {
-    commandId: command.commandId,
-    accepted: true,
-    rejected: false,
-    reason: null,
-    source: 'persistent_agent',
-    statusReset: 'NATIVE_RESET_GIRL_DIALOG_OPEN',
-    resetPrecheckResult: 'OK',
-    navigationStarted: true,
-    npcServiceStarted: true,
-    currentZeny,
-    resetCost,
-    currency: serviceConfig.resetCostCurrency || 'zeny',
-    command,
-  };
 }
 
 async function allocateStatusPoint(account, statName, input = {}) {
@@ -8323,12 +8322,6 @@ async function allocateStatusPoint(account, statName, input = {}) {
     });
   });
 }
-async function resetStatusPoints(account) {
-  const snapshot = await currentStatusSnapshot(instanceId(account.accountId));
-  if (!snapshot) throw new Error('角色目前不在線上');
-  return await queueCharacterCommand(account, 'reset_stats', '1');
-}
-
 async function queueSkillAutomation(account, input) {
   const mode = String(input.mode ?? ''),
     enabled = input.enabled === true;
@@ -10987,86 +10980,27 @@ async function handleDashboardRequest(request, response) {
       const infoCharId = Number(account.characterId);
       if (!Number.isSafeInteger(infoCharId) || infoCharId <= 0)
         return json(response, 409, { error: 'character_required' });
-      const controllerStatus = await readCharacterControllerStatus(
-        account,
-        infoCharId,
-        { includeFarmTarget: false },
-      );
-      if (!controllerStatus.available)
-        return json(response, 503, { error: 'agent_status_unavailable' });
-      if (controllerStatus.controller !== SERVER_AGENT_OWNER)
-        return json(response, 200, { available: false, source: 'openkore' });
-      const [live, serviceConfig] = await Promise.all([
-        readPersistentAgentLiveStatusView(infoCharId),
-        readServerAgentServiceConfig(),
-      ]);
-      if (!live?.available || !live.fresh)
-        return json(response, 503, { error: 'agent_status_unavailable' });
-      if (!serviceConfig)
-        return json(response, 503, { error: 'reset_service_config_unavailable' });
-      const currentZeny = Number(live.zeny);
-      const resetCost = Number(serviceConfig.resetStatCost);
-      return json(response, 200, {
-        available: true,
-        source: 'persistent_agent',
-        resetNpc: serviceConfig.resetNpc,
-        resetNpcMap: serviceConfig.resetNpcMap,
-        resetCost,
-        currentZeny,
-        currency: serviceConfig.resetCostCurrency || 'zeny',
-        insufficient: currentZeny < resetCost,
-      });
+      return json(response, 200, await readCharacterResetCooldowns(infoCharId));
     }
-    if (url.pathname === '/api/status-reset' && request.method === 'POST') {
-      const resetCharId = Number(account.characterId);
-      if (Number.isSafeInteger(resetCharId) && resetCharId > 0) {
-        const controllerStatus = await readCharacterControllerStatus(
-          account,
-          resetCharId,
-          { includeFarmTarget: false },
-        );
-        if (
-          controllerStatus.available &&
-          controllerStatus.controller === SERVER_AGENT_OWNER
-        ) {
-          // Product policy: status reset is the native Reset Girl service. The
-          // precheck reads the authoritative read model Zeny and the canonical
-          // server-side reset cost; if Zeny is insufficient we return an explicit
-          // player-facing result WITHOUT enqueuing, so neither navigation nor the
-          // NPC service starts. The native script still owns the final
-          // revalidation and deduction.
-          const result = await queueServerAgentStatusReset(account, {});
-          if (result.status === 'INSUFFICIENT_ZENY')
-            return json(response, 409, {
-              error: `Zeny 不足：目前 ${result.currentZeny} ${result.currency}，需要 ${result.resetCost} ${result.currency}`,
-              code: 'INSUFFICIENT_ZENY',
-              resetPrecheckResult: 'INSUFFICIENT_ZENY',
-              navigationStarted: false,
-              npcServiceStarted: false,
-              currentZeny: result.currentZeny,
-              resetCost: result.resetCost,
-              currency: result.currency,
-              resetNpc: result.resetNpc,
-              resetNpcMap: result.resetNpcMap,
-            });
-          return json(response, 202, result);
-        }
-        if (
-          !controllerStatus.available &&
-          controllerStatus.unavailableReason === 'agent_status_unavailable'
-        )
-          return json(response, 503, {
-            error: '系統狀態暫時無法讀取，已停止操作以保護角色',
-          });
-      }
-      // P2-OPENKORE-EXIT-MAINLINE: normal production no longer writes OpenKore
-      // .cmd for status reset. Legacy OPENKORE gets a migration-required refusal.
-      if (runtimeMode !== 'isolated-test')
-        return json(response, 409, {
-          error: 'LEGACY_OPENKORE_MIGRATION_REQUIRED',
-          code: 'LEGACY_OPENKORE_MIGRATION_REQUIRED',
-        });
-      return json(response, 202, await resetStatusPoints(account));
+    if (url.pathname === '/api/character-reset' && request.method === 'POST') {
+      const body = await requestBody(request);
+      const type = String(body.type ?? '');
+      const commandId = String(body.commandId ?? '').toLowerCase();
+      const result = await queueCharacterReset(account, type, commandId);
+      return json(response, result.command.status === 'CONFIRMED' ? 200 : 202, result);
+    }
+    if (url.pathname === '/api/character-reset-command' && request.method === 'GET') {
+      const charId = Number(account.characterId);
+      if (!Number.isSafeInteger(charId) || charId <= 0)
+        return json(response, 409, { error: 'character_required' });
+      const commandId = String(url.searchParams.get('commandId') ?? '').toLowerCase();
+      if (!commandIdPattern.test(commandId))
+        return json(response, 422, { error: 'invalid_command_id' });
+      const command = await getOwnershipCommand(account, charId, commandId);
+      if (command.action !== 'reset_character_stat' && command.action !== 'reset_character_skill')
+        return json(response, 403, { error: 'ownership_conflict' });
+      return json(response, 200, { command,
+        cooldowns: await readCharacterResetCooldowns(charId) });
     }
     if (url.pathname === '/api/item-action' && request.method === 'POST') {
       if (!account.characterId)

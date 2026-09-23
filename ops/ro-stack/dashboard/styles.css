@@ -4332,6 +4332,31 @@ html {
 .stat-actions .notice {
   padding: 0;
 }
+.skill-reset-action {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  padding: 7px;
+  font: 12px/1.4 'Microsoft JhengHei', sans-serif;
+}
+.skill-reset-action button {
+  width: 119px;
+  height: 60px;
+  border: 0;
+  background: transparent url('/ro/client/ui/original/status/reset-a.png') 0 0 / 119px 60px no-repeat;
+  color: transparent;
+  image-rendering: pixelated;
+  cursor: pointer;
+}
+.skill-reset-action button:active {
+  background-image: url('/ro/client/ui/original/status/reset-b.png');
+}
+.skill-reset-action button:disabled {
+  background-image: url('/ro/client/ui/original/status/reset-c.png');
+  cursor: default;
+}
+.skill-reset-action output { font-weight: bold; }
 .base-stats button {
   touch-action: none;
   user-select: none;

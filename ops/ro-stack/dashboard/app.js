@@ -9325,8 +9325,7 @@ let statHoldDelay = null,
   statHoldPointerId = null,
   statHoldButton = null,
   statQueueActive = false,
-  statAuthoritativeState = null,
-  resetArmedUntil = 0;
+  statAuthoritativeState = null;
 const statCommandQueue = [];
 const statCommandQueueLimit = 20;
 const statHoldTiming = Object.freeze({
@@ -9661,39 +9660,120 @@ window.addEventListener('blur', stopStatHold);
 $('#stats').addEventListener('contextmenu', (event) => {
   if (event.target.closest('[data-stat]')) event.preventDefault();
 });
-$('#resetStats').onclick = async () => {
-  if (Date.now() > resetArmedUntil) {
-    resetArmedUntil = Date.now() + 5000;
-    $('#statNotice').textContent =
-      '再次點擊「全部重置」確認，角色會保持在線與掛機。';
-    return;
+let characterResetInfo = null;
+let characterResetFetchedAt = 0;
+let characterResetCharId = 0;
+let characterResetPending = null;
+let characterResetPendingCommandId = null;
+let characterResetBusy = false;
+function resetRemainingSeconds(type) {
+  if (!characterResetInfo) return null;
+  const initial = Number(characterResetInfo[type]?.remainingSeconds);
+  if (!Number.isFinite(initial)) return null;
+  return Math.max(0, initial - Math.floor((performance.now() - characterResetFetchedAt) / 1000));
+}
+function formatResetRemaining(seconds) {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const rest = seconds % 60;
+  return [hours, minutes, rest].map((value) => String(value).padStart(2, '0')).join(':');
+}
+function renderCharacterResetState() {
+  for (const [type, buttonId, stateId] of [
+    ['stat', 'resetStats', 'statResetState'],
+    ['skill', 'resetSkills', 'skillResetState'],
+  ]) {
+    const remaining = resetRemainingSeconds(type);
+    const pending = characterResetPending === type;
+    $(`#${stateId}`).textContent = pending
+      ? '伺服器確認中'
+      : remaining === null ? '狀態讀取中'
+        : remaining > 0 ? `冷卻中：${formatResetRemaining(remaining)}`
+          : '可立即重置';
+    $(`#${buttonId}`).disabled = characterResetBusy || pending || remaining === null || remaining > 0;
   }
-  resetArmedUntil = 0;
-  const beforeUpdate = Number(lastState?.derived?.updatedAt ?? 0);
-  $('#resetStats').disabled = true;
-  $('#statNotice').textContent = '正在重置能力值';
+}
+async function refreshCharacterResetInfo() {
+  if (!authenticated || $('#game').classList.contains('hidden')) return;
+  const charId = Number(lastState?.character?.charId ?? 0);
+  if (!Number.isSafeInteger(charId) || charId <= 0) return;
+  const info = await api('/api/status-reset-info');
+  if (charId !== Number(lastState?.character?.charId ?? 0)) return;
+  characterResetInfo = info;
+  characterResetFetchedAt = performance.now();
+  characterResetCharId = charId;
+  if (characterResetPending && Number(info[characterResetPending]?.remainingSeconds) > 0)
+    characterResetPending = characterResetPendingCommandId = null;
+  renderCharacterResetState();
+}
+async function refreshPendingResetCommand() {
+  if (!characterResetPendingCommandId) return;
+  const result = await api(`/api/character-reset-command?commandId=${encodeURIComponent(characterResetPendingCommandId)}`);
+  if (result.command?.status === 'REJECTED' || result.command?.status === 'CANCELLED') {
+    const notice = characterResetPending === 'stat' ? $('#statNotice') : $('#skillNotice');
+    notice.textContent = `重置未完成：${result.command.reasonCode ?? '伺服器拒絕'}`;
+    characterResetPending = characterResetPendingCommandId = null;
+  } else if (result.command?.status === 'CONFIRMED') {
+    characterResetPendingCommandId = null;
+    void refresh();
+  }
+  renderCharacterResetState();
+}
+async function submitCharacterReset(type) {
+  if (characterResetBusy || characterResetPending || resetRemainingSeconds(type) !== 0) return;
+  const stat = type === 'stat';
+  const question = stat ? '確定要重置能力值嗎？' : '確定要重置技能點嗎？';
+  const cooldown = stat
+    ? '成功後，能力值重置將進入 8 小時冷卻。'
+    : '成功後，技能點重置將進入 8 小時冷卻。';
+  if (!window.confirm([question, '本次費用：免費', cooldown].join('\n'))) return;
+  characterResetBusy = true;
+  renderCharacterResetState();
+  const notice = stat ? $('#statNotice') : $('#skillNotice');
+  notice.textContent = stat ? '正在重置能力值' : '正在重置技能點';
   try {
-    await api('/api/status-reset', { method: 'POST' });
-    const confirmed = await waitForLive(
-      (live) =>
-        Number(live.updatedAt ?? 0) > beforeUpdate &&
-        ['str', 'agi', 'vit', 'int', 'dex', 'luk'].every(
-          (stat) => Number(live[stat]) === 1,
-        ),
-    );
-    if (confirmed) {
-      lastState = { ...lastState, derived: confirmed };
-      setCharacter(lastState.character, confirmed);
-      $('#statNotice').textContent = '能力值已重置，掛機持續進行。';
+    const result = await api('/api/character-reset', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ type, commandId: crypto.randomUUID() }),
+    });
+    if (result.command?.status === 'REJECTED' || result.command?.status === 'CANCELLED') {
+      notice.textContent = `重置未完成：${result.command.reasonCode ?? '伺服器拒絕'}`;
     } else {
-      $('#statNotice').textContent = '伺服器尚未確認能力重置';
+      characterResetPending = type;
+      characterResetPendingCommandId = result.command?.status === 'CONFIRMED'
+        ? null : result.command?.commandId ?? null;
+      notice.textContent = result.command?.status === 'CONFIRMED'
+        ? '伺服器已確認重置，正在同步冷卻。' : '伺服器仍在處理重置。';
     }
+    await refreshCharacterResetInfo();
+    if (result.command?.status === 'CONFIRMED') void refresh();
   } catch (error) {
-    $('#statNotice').textContent = error.message;
+    notice.textContent = error.message;
   } finally {
-    $('#resetStats').disabled = false;
+    characterResetBusy = false;
+    renderCharacterResetState();
   }
-};
+}
+$('#resetStats').onclick = () => void submitCharacterReset('stat');
+$('#resetSkills').onclick = () => void submitCharacterReset('skill');
+setInterval(() => {
+  const charId = Number(lastState?.character?.charId ?? 0);
+  if (charId !== characterResetCharId) {
+    characterResetInfo = null;
+    characterResetCharId = charId;
+    characterResetPending = null;
+    characterResetPendingCommandId = null;
+    renderCharacterResetState();
+    void refreshCharacterResetInfo().catch(() => {});
+  } else if (authenticated && !$('#game').classList.contains('hidden') &&
+             (characterResetPending || performance.now() - characterResetFetchedAt > 15000)) {
+    void refreshCharacterResetInfo().catch(() => {});
+    if (characterResetPendingCommandId)
+      void refreshPendingResetCommand().catch(() => {});
+  }
+  renderCharacterResetState();
+}, 1000);
 $('#skillList').onclick = async (event) => {
   const button = event.target.closest('[data-skill-id]');
   if (!button || button.disabled) return;
