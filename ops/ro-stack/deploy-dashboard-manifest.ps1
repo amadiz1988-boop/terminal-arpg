@@ -34,6 +34,11 @@ function Assert-WithinRoot([string]$Root, [string]$RelativePath) {
     $RelativePath -match '^ops/ro-stack/dashboard/[A-Za-z0-9_./-]+\.(js|mjs|css|html|json)$' -or
     $RelativePath -match '^ops/ro-stack/web-experience/[A-Za-z0-9_./-]+\.(mjs|json)$' -or
     $RelativePath -match '^ops/ro-stack/persistent-agent/[A-Za-z0-9_-]+\.mjs$' -or
+    $RelativePath -in @(
+      'ops/ro-stack/persistent-agent/standard-farm-map-release-registry.json',
+      'ops/ro-stack/persistent-agent/quest-content/novice-onboarding.allowlists.json',
+      'ops/ro-stack/persistent-agent/quest-sequences/novice-onboarding.json'
+    ) -or
     $RelativePath -match '^public/ro/data/map-info/[A-Za-z0-9_-]+\.json$' -or
     $RelativePath -in @('ops/ro-stack/support-session.mjs', 'ops/ro-stack/ops-control-plane.mjs',
       'ops/ro-stack/web-observation.mjs', 'public/ro/data/map-info.json')

@@ -75,6 +75,33 @@ function Add-NewDependency($Fixture, [bool]$IncludeInManifest) {
   return $relative
 }
 
+function Add-StartupRegistry($Fixture, [bool]$IncludeInManifest) {
+  $relative = 'ops/ro-stack/persistent-agent/standard-farm-map-release-registry.json'
+  $source = Join-Path $Fixture.Candidate ($relative.Replace('/', '\'))
+  $target = Join-Path $Fixture.Production ($relative.Replace('/', '\'))
+  New-Item -ItemType Directory -Force -Path (Split-Path -Parent $source), (Split-Path -Parent $target) | Out-Null
+  [IO.File]::WriteAllText($source, '{"maps":[]}')
+  $entry = Join-Path $Fixture.Candidate 'ops\ro-stack\dashboard.mjs'
+  [IO.File]::WriteAllText($entry, @'
+import { readFile } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+const registryPath = join(dirname(fileURLToPath(import.meta.url)), 'persistent-agent', 'standard-farm-map-release-registry.json');
+export const registry = JSON.parse(await readFile(registryPath, 'utf8'));
+'@)
+  $manifest = Get-Content -LiteralPath $Fixture.Manifest -Raw | ConvertFrom-Json
+  $manifest.files[0].candidate_sha256 = (Get-FileHash -LiteralPath $entry -Algorithm SHA256).Hash
+  if ($IncludeInManifest) {
+    $manifest.files += [pscustomobject]@{
+      path = $relative
+      candidate_sha256 = (Get-FileHash -LiteralPath $source -Algorithm SHA256).Hash
+      production_preimage = 'ABSENT'
+    }
+  }
+  $manifest | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $Fixture.Manifest -Encoding utf8
+  return $relative
+}
+
 function Set-ManifestFileCount($Fixture, [int]$Count) {
   $manifest = Get-Content -LiteralPath $Fixture.Manifest -Raw | ConvertFrom-Json
   for ($index = $manifest.files.Count; $index -lt $Count; $index++) {
@@ -223,6 +250,66 @@ try {
     Assert ($r.ExitCode -ne 0 -and $r.Json.error -match 'DEPLOYMENT_RUNTIME_CLOSURE_FAILED') $r.Output
     Assert (-not $r.Json.production_touched) 'precheck mutated Production fixture'
     Assert (-not (Test-Path -LiteralPath (Join-Path $f.Production $dependency))) 'missing dependency appeared in Production fixture'
+    Assert-Preimage $f
+  }
+  Run-Test 'unlisted top-level readFile asset rejects precheck before mutation' {
+    $f = New-Fixture 'missing-startup-registry'
+    $relative = Add-StartupRegistry $f $false
+    $r = Invoke-Tool $f @('-Precheck')
+    Assert ($r.ExitCode -ne 0 -and $r.Json.error -match [regex]::Escape($relative)) $r.Output
+    Assert (-not $r.Json.production_touched) 'startup asset precheck mutated Production fixture'
+    Assert (-not (Test-Path -LiteralPath (Join-Path $f.Production $relative))) 'unlisted startup asset appeared in Production fixture'
+    Assert-Preimage $f
+  }
+  Run-Test 'changed top-level readFile asset rejects precheck before mutation' {
+    $f = New-Fixture 'changed-startup-registry'
+    $relative = Add-StartupRegistry $f $false
+    $target = Join-Path $f.Production $relative
+    [IO.File]::WriteAllText($target, '{"maps":["old"]}')
+    $r = Invoke-Tool $f @('-Precheck')
+    Assert ($r.ExitCode -ne 0 -and $r.Json.error -match [regex]::Escape($relative)) $r.Output
+    Assert (-not $r.Json.production_touched) 'changed startup asset precheck mutated Production fixture'
+    Assert ([IO.File]::ReadAllText($target) -eq '{"maps":["old"]}') 'changed startup asset preimage changed'
+    Assert-Preimage $f
+  }
+  Run-Test 'pre-existing top-level readFile asset remains available without candidate copy' {
+    $f = New-Fixture 'inherited-startup-registry'
+    $relative = Add-StartupRegistry $f $false
+    $source = Join-Path $f.Candidate $relative
+    $target = Join-Path $f.Production $relative
+    [IO.File]::WriteAllText($target, '{"maps":[]}')
+    Remove-Item -LiteralPath $source -Force
+    $r = Invoke-Tool $f @('-Precheck')
+    Assert ($r.ExitCode -eq 0 -and $r.Json.result -eq 'PRECHECK_PASS') $r.Output
+    Assert ([IO.File]::ReadAllText($target) -eq '{"maps":[]}') 'inherited startup asset changed'
+    Assert-Preimage $f
+  }
+  Run-Test 'listed top-level readFile asset deploys and rolls back exactly' {
+    $f = New-Fixture 'listed-startup-registry'
+    $relative = Add-StartupRegistry $f $true
+    $precheck = Invoke-Tool $f @('-Precheck')
+    Assert ($precheck.ExitCode -eq 0 -and $precheck.Json.file_count -eq 4) $precheck.Output
+    $deploy = Invoke-Tool $f @('-Deploy')
+    Assert ($deploy.ExitCode -eq 0 -and $deploy.Json.result -eq 'DEPLOY_PASS') $deploy.Output
+    $target = Join-Path $f.Production $relative
+    Assert ((Get-FileHash -LiteralPath $target -Algorithm SHA256).Hash -eq (Get-FileHash -LiteralPath (Join-Path $f.Candidate $relative) -Algorithm SHA256).Hash) 'startup asset deployed hash mismatch'
+    $rollback = Invoke-Tool $f @('-Rollback', '-ReceiptPath', $deploy.Json.receipt)
+    Assert ($rollback.ExitCode -eq 0 -and $rollback.Json.result -eq 'ROLLBACK_PASS') $rollback.Output
+    Assert (-not (Test-Path -LiteralPath $target)) 'startup asset remained after rollback'
+    Assert-Preimage $f
+  }
+  Run-Test 'invalid listed startup JSON rejects precheck before mutation' {
+    $f = New-Fixture 'invalid-startup-registry'
+    $relative = Add-StartupRegistry $f $true
+    $source = Join-Path $f.Candidate $relative
+    [IO.File]::WriteAllText($source, '{invalid')
+    $manifest = Get-Content -LiteralPath $f.Manifest -Raw | ConvertFrom-Json
+    ($manifest.files | Where-Object path -eq $relative).candidate_sha256 = (Get-FileHash -LiteralPath $source -Algorithm SHA256).Hash
+    $manifest | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $f.Manifest -Encoding utf8
+    $r = Invoke-Tool $f @('-Precheck')
+    Assert ($r.ExitCode -ne 0 -and $r.Json.error -match 'PARSE_FAILED') $r.Output
+    Assert (-not $r.Json.production_touched) 'invalid startup JSON precheck mutated Production fixture'
+    Assert (-not (Test-Path -LiteralPath (Join-Path $f.Production $relative))) 'invalid startup JSON appeared in Production fixture'
     Assert-Preimage $f
   }
   Run-Test 'new dependency deploys and explicit rollback removes only listed new file' {

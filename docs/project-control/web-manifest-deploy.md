@@ -35,8 +35,15 @@ The failed V3 16-file manifest remains immutable at
 `C:\Users\Administrator\.codex\canary-backups\production-web-superset-v2-9290df4\canary-manifest.json`.
 The corrected 195-file V4 candidate manifest and per-dependency closure report
 are at `C:\Users\Administrator\.codex\canary-backups\production-web-superset-v4-9290df4\`.
+V4 applied all 195 files but failed on a top-level `readFile` of the missing
+`standard-farm-map-release-registry.json`; automatic rollback restored every
+preimage. The immutable V4 manifest is superseded for the next canary by an
+additive 198-file manifest at
+`C:\Users\Administrator\.codex\canary-backups\production-web-superset-v5-9290df4\canary-manifest.json`.
+It adds that new registry plus two changed startup Quest JSON assets. V5 has
+passed read-only precheck and has not been deployed.
 V3 failed when its deployed Dashboard imported a runtime module absent from
-Production and omitted from the manifest. The corrected manifest retains the
+Production and omitted from the manifest. The V4 manifest retains the
 exact candidate commit and records 123 new targets with `production_preimage:
 "ABSENT"` and 56 changed existing map-detail files. The old manifest is not
 edited. Deployment makes fresh tool-owned backups of existing targets before
@@ -57,7 +64,9 @@ manifest-owned file, and only while its deployed hash still matches.
 `manifest-runtime-closure.mjs` before any Production mutation. It follows
 bounded local static imports, re-exports, statically resolvable dynamic
 imports, direct Browser HTML/CSS/JS asset references, and map-info detail
-references. It resolves them against the simulated post-deploy tree:
+references. It also follows top-level `readFile` calls using statically
+resolved module-relative paths. It resolves them against the simulated
+post-deploy tree:
 Production plus only the explicit manifest overlay. Existing Production
 modules retain their current bytes and must satisfy the imported export names;
 existing assets must resolve. Changed map-info detail data and absent

@@ -72,6 +72,43 @@ function staticString(node) {
 
 function scanJavaScript(path, content) {
   const ast = parse(content, { ecmaVersion: 'latest', sourceType: 'module', allowHashBang: true });
+  const startupPaths = new Map();
+  const isModuleDirectory = (node) => {
+    const filePath = node?.arguments?.[0];
+    const metaUrl = filePath?.arguments?.[0];
+    return node?.callee?.name === 'dirname' && filePath?.callee?.name === 'fileURLToPath' &&
+      metaUrl?.type === 'MemberExpression' && metaUrl.property?.name === 'url' &&
+      metaUrl.object?.type === 'MetaProperty' && metaUrl.object.meta?.name === 'import' &&
+      metaUrl.object.property?.name === 'meta';
+  };
+  for (const statement of ast.body) {
+    if (statement.type !== 'VariableDeclaration') continue;
+    for (const declaration of statement.declarations) {
+      const call = declaration.init;
+      if (declaration.id.type !== 'Identifier' || call?.callee?.name !== 'join' ||
+          !isModuleDirectory(call.arguments[0])) continue;
+      const segments = call.arguments.slice(1).map(staticString);
+      if (segments.length && segments.every((segment) => segment !== null)) {
+        startupPaths.set(declaration.id.name, `./${segments.join('/')}`);
+      }
+    }
+  }
+  function scanStartupReads(node) {
+    if (!node || typeof node !== 'object' ||
+        ['FunctionDeclaration', 'FunctionExpression', 'ArrowFunctionExpression',
+          'ClassDeclaration', 'ClassExpression'].includes(node.type)) return;
+    if (node.type === 'CallExpression' && node.callee?.name === 'readFile' &&
+        node.arguments[0]?.type === 'Identifier') {
+      const specifier = startupPaths.get(node.arguments[0].name);
+      if (specifier) add(path, specifier, 'startup-asset');
+    }
+    for (const value of Object.values(node)) {
+      if (Array.isArray(value)) {
+        for (const child of value) if (child?.type) scanStartupReads(child);
+      } else if (value?.type) scanStartupReads(value);
+    }
+  }
+  for (const statement of ast.body) scanStartupReads(statement);
   function walk(node) {
     if (!node || typeof node !== 'object') return;
     if (node.type === 'ImportDeclaration') {
@@ -190,6 +227,7 @@ function scanGraph(mode) {
       else if (extension === '.html') scanHtml(path, content);
       else if (extension === '.css') scanCss(path, content);
       else if (path === 'public/ro/data/map-info.json') scanMapInfo(path, content);
+      else if (extension === '.json' && kind === 'startup-asset') JSON.parse(readFileSync(source, 'utf8'));
     } catch (error) { errors.push(`${mode.toUpperCase()}_PARSE_FAILED:${path}:${error.message}`); }
   }
   if (mode === 'post-deploy') {
@@ -225,7 +263,7 @@ const dependencies = postDeployGraph.paths.sort().map((path) => {
   const manifestAction = listed.has(path) ? (productionExists ? 'DELIVER_CHANGED' : 'DELIVER_NEW') :
     !candidateExists ? (productionExists && kind !== 'module' ? 'EXISTING_PRODUCTION_ASSET' : 'SOURCE_MISSING') :
     !productionExists ? 'ADD_NEW' : same ? 'EXISTING_IDENTICAL' :
-    kind === 'map-data' || kind === 'entrypoint' ? 'ADD_CHANGED' :
+    kind === 'map-data' || kind === 'entrypoint' || kind === 'startup-asset' ? 'ADD_CHANGED' :
     kind === 'asset' ? 'EXISTING_PRODUCTION_ASSET' : 'EXISTING_EXPORT_COMPATIBLE';
   return {
     source_path: references.get(path)?.source_path ?? 'ENTRYPOINT',

@@ -1,8 +1,8 @@
 # Canonical Production Web Deployment
 
 Status: `CANONICAL_DEPLOYMENT_POLICY=ACTIVE`; `SOURCE_VALIDATED=YES`;
-`OFFLINE_VALIDATED=YES (15/15)`; `PRODUCTION_VALIDATED=NO`;
-`PRODUCTION_VALIDATION_STATUS=FAILED_CANARY_DEPENDENCY_CLOSURE`.
+`OFFLINE_VALIDATED=YES (20/20)`; `PRODUCTION_VALIDATED=NO`;
+`PRODUCTION_VALIDATION_STATUS=FAILED_V4_STARTUP_OPERATIONAL_CLOSURE`.
 
 Policy authority: `AGENTS.md`. Initial tool source checkpoint:
 `8f3073079e075771cd63c2a830da100e722068a7`; canonical integration
@@ -13,9 +13,13 @@ separate gates. V3 executed a real deploy attempt; the candidate Dashboard
 failed startup because an imported local module was omitted from the manifest.
 Automatic recovery restored 16/16 preimages and health, but a durable failure
 receipt and bounded transaction finalization were missing. V3 did not pass.
-The original V3 manifest now fails read-only precheck on the omitted module;
-the corrected 195-file manifest passes read-only Production precheck with
-307 resolved runtime dependencies. No corrected-candidate deploy occurred.
+The original V3 manifest fails read-only precheck on the omitted module. V4
+applied its 195-file manifest, then Node exited before binding 8788 because
+`standard-farm-map-release-registry.json` was absent. Automatic rollback
+restored 195/195 preimages and Production health. Startup `readFile` closure
+now rejects V4 before mutation, including two changed Quest JSON assets.
+The additive 198-file V5 manifest passes read-only precheck with 312 resolved
+dependencies. V5 has not been deployed.
 
 ## Entrypoints
 
