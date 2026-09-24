@@ -133,5 +133,18 @@ try {
   assert.deepEqual(await readdir(folder).then((names) => names.includes('config')), false,
     'start_farm migration does not write Player settings');
   cases++;
+  const firstRead = await loadCanonicalConfig({ instancesRoot: root, accountId: 2000139,
+    characterId: 150095, persistMigration: true });
+  assert.equal(firstRead.source, 'migrated');
+  const persisted = await readFile(firstRead.path, 'utf8');
+  assert.equal(firstRead.config.supply.itemRules.length, 4);
+  assert.deepEqual(firstRead.config.migration.retained.itemsControl, itemsControlText.split('\n'));
+  cases++;
+  const secondRead = await loadCanonicalConfig({ instancesRoot: root, accountId: 2000139,
+    characterId: 150095, persistMigration: true });
+  assert.equal(secondRead.source, 'canonical');
+  assert.equal(await readFile(firstRead.path, 'utf8'), persisted);
+  assert.deepEqual(secondRead.config, firstRead.config);
+  cases++;
 } finally { await rm(root, { recursive: true, force: true }); }
 console.log('LEGACY_ITEM_RULE_MIGRATION_PASS', JSON.stringify({ cases, legacyRows: 1666, projected: 4 }));

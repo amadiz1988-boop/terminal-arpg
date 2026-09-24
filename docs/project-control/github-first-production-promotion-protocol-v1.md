@@ -350,6 +350,28 @@ sha256: "..."}`. Validation rechecks receipt schema, lease/SHA/manifest identiti
 all three deployed binary hashes and the original final live-acceptance gates.
 Missing Native receipt cannot consume bootstrap or transition the baseline.
 
+### Active first-promotion Web candidate amendment
+
+When a Web candidate is already `CANDIDATE_ACTIVE` and F still owns the same
+first-promotion lease, GOV may advance only the Web SHA with
+`ops/ro-stack/amend-active-web-candidate.mjs`. The new candidate needs a clean
+remote checkout, a complete new manifest based on the deployed Web preimages,
+the private asset package, current source regression, unchanged Native candidate,
+capability preservation, and a valid first-promotion evidence file. Run with
+`--execute false` to inspect the preflight, then `--execute true` after this
+governance code is on GitHub `main`. Supply `--production-root`, `--owner`,
+`--lease`, `--old-web-sha`, `--new-web-sha`, `--manifest`, `--old-web-receipt`,
+`--source-fix-checkpoint`, and `--reason`.
+
+The action keeps the lease ID and Native stage, advances the lease and pending
+Web SHA together, and writes an immutable amendment audit receipt. The old Web
+deployment receipt remains in place. A repeated invocation with the exact same
+completed identity reports `idempotent: true`; a partial or conflicting state
+fails closed. The final first-promotion receipt must copy the lease's
+`web_candidate_amendments` array exactly. Finalization verifies the audit and
+previous Web receipt hashes before accepting the new Web baseline. F owns the
+subsequent Web deployment and live acceptance.
+
 `node ops/ro-stack/tests/test-native-promotion.mjs` runs isolated full contract
 fixtures, combined admission, staged replacement through an injected fixture
 lifecycle, Web continuation, receipt finalization and failure retention. The CLI

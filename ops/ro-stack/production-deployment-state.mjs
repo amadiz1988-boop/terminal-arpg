@@ -91,6 +91,28 @@ export function canCloseDrift(state, receipt, root) {
     receipt.hotfix_normalization?.behavior_equivalent === true;
 }
 
+export function webAmendmentHistoryValid(root, lease, pending, receipt) {
+  const expected = lease.web_candidate_amendments || [];
+  if (!expected.length) return !pending.web_candidate_amendments?.length && !receipt.web_candidate_amendments?.length;
+  if (JSON.stringify(expected) !== JSON.stringify(pending.web_candidate_amendments) ||
+      JSON.stringify(expected) !== JSON.stringify(receipt.web_candidate_amendments)) return false;
+  let previous = expected[0].old_web_git_sha;
+  for (const item of expected) {
+    try {
+      if (item.old_web_git_sha !== previous || !sha(item.new_web_git_sha) ||
+          !/^[a-f0-9]{64}$/i.test(item.audit_sha256 || '') ||
+          !/^[a-f0-9]{64}$/i.test(item.previous_web_candidate_receipt_sha256 || '') ||
+          !equalHash(hash(safePath(root,item.audit_receipt)),item.audit_sha256) ||
+          !equalHash(hash(safePath(root,item.previous_web_candidate_receipt)),item.previous_web_candidate_receipt_sha256)) return false;
+      const audit=read(safePath(root,item.audit_receipt));
+      if (audit.lease_id !== lease.lease_id || audit.old_web_git_sha !== item.old_web_git_sha ||
+          audit.new_web_git_sha !== item.new_web_git_sha) return false;
+      previous=item.new_web_git_sha;
+    } catch { return false; }
+  }
+  return previous === lease.web_deploy_git_sha && receipt.web_git_sha === previous;
+}
+
 export function commitAcceptedBaseline(root, state, lease, receipt) {
   const first = lease.promotion_mode === FIRST_PROMOTION;
   if (!lease.emergency && verifyWebReceipt(receipt,root,lease).deployed.predeploy_baseline!==state.current_deploy_id) fail('WEB_PREDEPLOY_BASELINE_MISMATCH');
@@ -106,6 +128,7 @@ export function commitAcceptedBaseline(root, state, lease, receipt) {
     if(pending.lease_id!==lease.lease_id || pending.owner_task_id!==lease.owner_task_id ||
       pending.native_git_sha!==lease.native_deploy_git_sha || pending.web_git_sha!==lease.web_deploy_git_sha ||
       !equalHash(pending.native_receipt_sha256,receipt.native_deployment_receipt.sha256)) fail('NATIVE_PENDING_RECEIPT_MISMATCH');
+    if (!webAmendmentHistoryValid(root,lease,pending,receipt)) fail('WEB_CANDIDATE_AMENDMENT_HISTORY_MISMATCH');
   }
   if (first && (receipt.result !== 'PROMOTED' ||
       !['source_regression', 'native_build', 'asset_hash', 'rollback', 'single_owner', 'procdump', 'runtime_health', 'live_acceptance']

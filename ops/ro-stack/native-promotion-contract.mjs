@@ -3,6 +3,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { boundedPath, digest, readJson, FIRST_PROMOTION, legacyIdentity, verifyLegacyBaseline, pendingPath } from './legacy-production-baseline.mjs';
+import { verifyWebReceipt, readManifest, receiptIdentity } from './web-complete-manifest.mjs';
 
 export const NATIVE_REPOSITORY = 'https://github.com/amadiz1988-boop/ghost-island-rathena.git';
 export const nativeReceiptPath = '.local/ro-stack/native-promotion-receipt.json';
@@ -179,8 +180,8 @@ export function nativeReceiptValid(r, { nativeSha, binaryHash, leaseId, manifest
     r.artifacts.every(x=>/^[a-f0-9]{64}$/i.test(x.sha256 || ''));
 }
 
-// The only permitted OPEN state for Web continuation is a receipt-proven Native
-// stage owned by this exact lease. Every untouched legacy Web byte is rechecked.
+// An amended Web candidate can follow an already deployed intermediate Web
+// candidate. Its receipt proves current Web bytes and the original rollback.
 export function verifyNativeStage(root, state, lease, webManifestHash) {
   try {
     check(legacyIdentity(state) && state.production_drift === 'OPEN' && state.drift_reason === 'FIRST_PROMOTION_PENDING_FINAL_RECEIPT', 'NOT_NATIVE_STAGE');
@@ -192,10 +193,31 @@ export function verifyNativeStage(root, state, lease, webManifestHash) {
       nativeReceiptValid(r,{nativeSha:lease.native_deploy_git_sha,leaseId:lease.lease_id,manifestHash:lease.native_candidate_manifest_sha256}), 'NATIVE_RECEIPT_INVALID');
     const snapshot = structuredClone(state);
     snapshot.native_binaries = r.artifacts;
-    // Verify unchanged Web and the new native bytes, with legacy rollback
-    // independently checked against its original hashes.
-    const current = verifyLegacyBaseline(root,snapshot);
-    check(current.pass, 'STAGED_BYTES_CHANGED');
+    const history=lease.web_candidate_amendments || [];
+    let current;
+    if (history.length) {
+      check(JSON.stringify(history)===JSON.stringify(pending.web_candidate_amendments) &&
+        history.at(-1).new_web_git_sha===lease.web_deploy_git_sha,'WEB_AMENDMENT_HISTORY_MISMATCH');
+      const prior=history.at(-1);
+      check(equalHash(digest(boundedPath(root,prior.audit_receipt)),prior.audit_sha256) &&
+        equalHash(digest(boundedPath(root,prior.previous_web_candidate_receipt)),prior.previous_web_candidate_receipt_sha256),'WEB_AMENDMENT_EVIDENCE_CHANGED');
+      const audit=readJson(boundedPath(root,prior.audit_receipt));
+      check(audit.lease_id===lease.lease_id && audit.old_web_git_sha===prior.old_web_git_sha &&
+        audit.new_web_git_sha===prior.new_web_git_sha,'WEB_AMENDMENT_AUDIT_INVALID');
+      const previousReceipt=readJson(boundedPath(root,prior.previous_web_candidate_receipt));
+      const previousManifest=readManifest(path.join(path.dirname(boundedPath(root,prior.previous_web_candidate_receipt)),'manifest.json'));
+      verifyWebReceipt({web_deployment_receipt:{path:prior.previous_web_candidate_receipt,sha256:prior.previous_web_candidate_receipt_sha256},
+        owner_task_id:lease.owner_task_id,lease_id:lease.lease_id,...receiptIdentity(previousManifest),
+        files:previousManifest.files.map(item=>({path:item.path,sha256:item.sha256}))},root);
+      check(previousReceipt.web_git_sha===prior.old_web_git_sha,'PREVIOUS_WEB_SHA_MISMATCH');
+      check(r.artifacts.every(item=>equalHash(digest(boundedPath(root,item.path)),item.sha256)),'NATIVE_STAGE_BYTES_CHANGED');
+      const legacyManifest=readJson(boundedPath(root,state.current_web_artifact_manifest));
+      check(equalHash(digest(boundedPath(root,state.current_web_artifact_manifest)),state.current_web_manifest_sha256),'LEGACY_MANIFEST_CHANGED');
+      current={pass:true,files:legacyManifest.files,capabilityCount:(state.accepted_capabilities || []).length};
+    } else {
+      current=verifyLegacyBaseline(root,snapshot);
+      check(current.pass,'STAGED_BYTES_CHANGED');
+    }
     const rollback = state.legacy_rollback;
     check(equalHash(digest(boundedPath(root,rollback.web_manifest)),state.current_web_manifest_sha256) &&
       [...current.files,...state.native_binaries].every(x=>equalHash(digest(boundedPath(root,`${rollback.root}/${x.path}`)),x.sha256)), 'ROLLBACK_CHANGED');
