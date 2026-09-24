@@ -1,3 +1,4 @@
+import {attachWebFixture} from './web-full-manifest-fixture.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -35,7 +36,7 @@ function fixture(){
   write('build/build-receipt.json',build);
   write('build/native-regression.json',{native_git_sha:sha,result:'PASS',groups:Object.entries(groups).map(([group,test_suite])=>({group,test_suite,result:'PASS',receipt:suites.find(x=>x.test_suite===test_suite).receipt})),shutdown_source_contract:{result:'PASS',files:['map.cpp','persistent_agent.cpp','persistent_agent_state.cpp'].map(n=>({path:'src/map/'+n,sha256:digest(path.join(source,'src/map/'+n))}))}});
   const old=nativeArtifacts.map(p=>({path:p,sha256:digest(write(p,'legacy-'+path.basename(p)))}));
-  const webFiles=[{path:'app.js',sha256:digest(write('app.js','legacy-web'))}];
+  const webFiles=[{path:'ops/ro-stack/dashboard/app.js',sha256:digest(write('ops/ro-stack/dashboard/app.js','legacy-web'))}];
   const state={schema_version:2,baseline_mode:LEGACY_MODE,historical_provenance:'UNRESOLVED',current_deploy_id:'LEGACY_BOOTSTRAP_0123456789abcdef',current_web_git_sha:UNKNOWN_SHA,current_native_git_sha:UNKNOWN_SHA,legacy_bootstrap_available:true,production_drift:'CLOSED',accepted_capabilities:ids,current_web_artifact_manifest:'baseline/web.json',current_web_manifest_sha256:digest(write('baseline/web.json',{files:webFiles})),accepted_capability_manifest:'baseline/caps.json',accepted_capability_manifest_sha256:digest(write('baseline/caps.json',{capabilities:ids.map(id=>({id}))})),native_binaries:old,current_native_binary_path:nativeArtifacts[2],current_native_binary_sha256:old[2].sha256,legacy_rollback:{root:'rollback',web_manifest:'rollback-web.json'}};
   write('rollback-web.json',{files:webFiles});for(const e of [...webFiles,...old])write('rollback/'+e.path,fs.readFileSync(path.join(root,e.path),'utf8'));
   write('.local/ro-stack/production-deployment-state.json',state);
@@ -73,7 +74,7 @@ try {
  await test('9 absent lease blocked',()=>rejected(f,{lease:null},/LEASE/));
  await test('10 wrong owner blocked',()=>rejected(f,{owner:'OTHER'},/LEASE/));
  const asset={repository:'amadiz1988-boop/ghost-island-assets',immutable_required:true,release_id:1,release_tag:'test',package_id:'test',package_version:'1',asset_count:1,package_sha256:'1'.repeat(64),manifest_sha256:'2'.repeat(64),archive:{sha256:'3'.repeat(64)}};
- const webCandidate={sha:f.web,head:f.web,commitExists:true,pushed:true,nativePushed:true,dirty:false,requiredFilesTracked:true,firstPromotionEvidencePass:true,nativeCandidatePass:f.inspect({mode:'precheck'}).eligible,repository:'https://github.com/example/web.git',ref:'refs/heads/main',capabilities:ids,owner:'F',nativeSha:f.sha,assetPackage:{...asset,available:true,private:true,immutable:true,valid:true,archive_sha256:asset.archive.sha256}};
+ const webCandidate={sha:f.web,head:f.web,commitExists:true,pushed:true,nativePushed:true,dirty:false,fullManifestPass:true,requiredFilesTracked:true,firstPromotionEvidencePass:true,nativeCandidatePass:f.inspect({mode:'precheck'}).eligible,repository:'https://github.com/example/web.git',ref:'refs/heads/main',capabilities:ids,owner:'F',nativeSha:f.sha,assetPackage:{...asset,available:true,private:true,immutable:true,valid:true,archive_sha256:asset.archive.sha256}};
  const combined=patch=>evaluatePromotion({authority:{web:{repository:webCandidate.repository,release_ref:webCandidate.ref},assets:asset},candidate:webCandidate,state:f.state,currentHashes:{pass:true,rollbackReady:true},lease:null,mode:'acquire',promotionMode:FIRST_PROMOTION,...patch});
  await test('11 valid combined preflight eligible for lease',()=>assert.equal(combined().eligible,true));
  await test('12 manifest tampering blocked',()=>{f.write('build/candidate.json',{...f.m,required_openkore_count:1});rejected(f,{},/MANIFEST_TAMPERED/);f.write('build/candidate.json',f.m);});
@@ -99,8 +100,9 @@ try {
    assert.equal(combined({state,currentHashes:stage,lease:x.lease,mode:'deploy',candidate:{...webCandidate,nativeSha:x.sha}}).eligible,true);
    assert.equal(verifyNativeStage(x.root,state,{...x.lease,owner_task_id:'OTHER'},x.lease.admission_manifest_sha256).pass,false);
    assert.equal(verifyNativeStage(x.root,{...state,drift_reason:'OUT_OF_BAND'},x.lease,x.lease.admission_manifest_sha256).pass,false);
-   x.write('app.js','unapproved');assert.equal(verifyNativeStage(x.root,state,x.lease,x.lease.admission_manifest_sha256).pass,false);x.write('app.js','legacy-web');
+   x.write('ops/ro-stack/dashboard/app.js','unapproved');assert.equal(verifyNativeStage(x.root,state,x.lease,x.lease.admission_manifest_sha256).pass,false);x.write('ops/ro-stack/dashboard/app.js','legacy-web');
    const receipt={result:'PROMOTED',deploy_id:'fixture-final',deployed_at:'fixture',owner_task_id:'F',lease_id:x.lease.lease_id,web_git_sha:x.web,native_git_sha:x.sha,canonical_product_checkpoint:x.web,github_remote:'https://github.com/example/web.git',github_ref:'refs/heads/main',web_build_manifest:x.state.current_web_artifact_manifest,web_build_manifest_sha256:x.state.current_web_manifest_sha256,native_build_sha256:x.m.binary_sha256,native_artifact_path:nativeArtifacts[2],runtime_pids:[21,22,23,14],openkore_runtime_count:0,live_acceptance_results:{pass:true},rollback_artifact:'rollback',files:x.webFiles,accepted_capabilities:ids,first_github_first_gates:Object.fromEntries(['source_regression','native_build','asset_hash','rollback','single_owner','procdump','runtime_health','live_acceptance'].map(k=>[k,{pass:true,evidence:'fixture-only'}])),native_deployment_receipt:{path:nativeReceiptPath,sha256:digest(path.join(x.root,nativeReceiptPath))}};
+   attachWebFixture(x.root,receipt,x.lease);
    assert.equal(receiptComplete({...receipt,native_deployment_receipt:null},x.root),false);
    assert.equal(commitAcceptedBaseline(x.root,state,x.lease,receipt).baseline_mode,'GITHUB_FIRST');
  });

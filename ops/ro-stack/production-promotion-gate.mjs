@@ -6,9 +6,10 @@ import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { FIRST_PROMOTION, legacyIdentity, verifyLegacyBaseline, firstPromotionEvidence, consumedPath, pendingPath } from './legacy-production-baseline.mjs';
-import { inspectNativeCandidate, verifyNativeStage, equalHash } from './native-promotion-contract.mjs';
+import { inspectNativeCandidate, verifyNativeStage } from './native-promotion-contract.mjs';
+import { admission, assertLeaseManifest, safeRelative, readManifest } from './web-complete-manifest.mjs';
 import { receiptComplete } from './production-deployment-state.mjs';
-import { assetReleaseErrors, inspectPrivatePackage } from './private-asset-release-gate.mjs';
+import { assetReleaseErrors } from './private-asset-release-gate.mjs';
 
 const sourceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const authorityFile = path.join(sourceRoot, 'docs/project-control/production-release-authority.json');
@@ -42,8 +43,7 @@ export function capabilityRegistry(root, commit, governanceRoot, promotionMode) 
   return JSON.parse(run(registryRoot,'show',`${registryCommit}:docs/project-control/production-capabilities.json`));
 }
 const within = (root, relative) => {
-  if (typeof relative !== 'string' || !/^[A-Za-z0-9_./-]+$/.test(relative) ||
-      relative.split('/').some(part => part === '.' || part === '..' || !part)) fail('INVALID_PATH');
+  safeRelative(relative);
   const full = path.resolve(root, relative);
   if (!full.startsWith(path.resolve(root) + path.sep)) fail('PATH_ESCAPES_ROOT');
   let cursor = path.resolve(root);
@@ -65,6 +65,7 @@ export function evaluatePromotion({ authority, state, candidate, currentHashes, 
   if (!candidate.pushed) reject('DEPLOY_SHA_NOT_ON_CANONICAL_GITHUB_REF');
   if (!candidate.nativePushed) reject('NATIVE_BASELINE_NOT_ON_CANONICAL_GITHUB_REF');
   errors.push(...assetReleaseErrors(authority.assets, candidate.assetPackage));
+  if (!candidate.fullManifestPass) reject('COMPLETE_MANIFEST_ADMISSION_REQUIRED');
   if (!candidate.requiredFilesTracked) reject('UNTRACKED_REQUIRED_ASSET');
   if (!['NORMAL', FIRST_PROMOTION].includes(promotionMode)) reject('PROMOTION_MODE_INVALID');
   if (promotionMode === FIRST_PROMOTION) {
@@ -99,35 +100,16 @@ export function evaluatePromotion({ authority, state, candidate, currentHashes, 
     candidate_missing: accepted.filter(id => !preserved.has(id) && !(removed.has(id) && decisions.has(id))).length };
 }
 
-function facts(manifest, authority, state, owner, productionRoot, promotionMode, currentHashes) {
+function facts(manifest, authority, state, owner, productionRoot, promotionMode, currentHashes, admitted) {
   const root = path.resolve(manifest.candidate_root);
   const commit = String(manifest.candidate_commit || '').toLowerCase();
   const remote = run(root, 'remote', 'get-url', 'origin');
   const head = run(root, 'rev-parse', 'HEAD');
   const status = run(root, 'status', '--porcelain=v1', '--untracked-files=all');
   const commitExists = sha(commit) && spawnSync('git', ['cat-file', '-e', `${commit}^{commit}`], { cwd: root, windowsHide: true }).status === 0;
-  const required = [...(manifest.files || []).map(item => item.path), ...(manifest.required_assets || [])];
-  const assetPackage = inspectPrivatePackage(root, manifest.private_asset_package_root, authority.assets);
-  const assetManifest = assetReleaseErrors(authority.assets, assetPackage).length === 0
-    ? readJson(path.join(root, 'docs/project-control/web-runtime-assets-manifest-v1.json')) : { assets: [] };
-  const privateFiles = new Map(assetManifest.assets.map(item => [item.relative_path, item.sha256.toUpperCase()]));
-  let baselineFiles = new Map();
-  if (state?.last_deploy_receipt) {
-    const baselinePath = within(productionRoot, state.last_deploy_receipt);
-    if (fs.existsSync(baselinePath)) baselineFiles = new Map((readJson(baselinePath).files || []).map(x => [x.path, String(x.sha256 || '').toUpperCase()]));
-  }
-  if (promotionMode === FIRST_PROMOTION) baselineFiles = new Map((verifyLegacyBaseline(productionRoot, state).files || []).map(x => [x.path, x.sha256.toUpperCase()]));
+  const assetPackage = admitted.assetPackage;
   const manifestFiles = new Map((manifest.files || []).map(x => [x.path, String(x.candidate_sha256 || '').toUpperCase()]));
-  let requiredFilesTracked = required.length > 0;
-  for (const relative of required) {
-    const local = within(root, relative);
-    const tracked = spawnSync('git', ['ls-tree', '-r', '--name-only', commit, '--', relative], { cwd: root, encoding: 'utf8', windowsHide: true });
-    const privateVerified = fs.existsSync(local) && privateFiles.get(relative) === fileHash(local);
-    if (!fs.existsSync(local) || (!privateVerified && (tracked.status !== 0 || tracked.stdout.trim() !== relative))) requiredFilesTracked = false;
-    if (fs.existsSync(local) && fileHash(local) !== String((manifest.files || []).find(x => x.path === relative)?.candidate_sha256 || '').toUpperCase() &&
-        (manifest.files || []).some(x => x.path === relative)) requiredFilesTracked = false;
-    if (fs.existsSync(local) && !manifestFiles.has(relative) && baselineFiles.get(relative) !== fileHash(local)) requiredFilesTracked = false;
-  }
+  let requiredFilesTracked = admitted.PRESTAGE_COMPLETE === true;
   const pushed = remote === authority.web?.repository && commitExists &&
     reachable(root, remote, authority.web.release_ref, commit);
   const nativeSha = promotionMode === FIRST_PROMOTION ? manifest.candidate_native_commit : state?.current_native_git_sha;
@@ -147,7 +129,7 @@ function facts(manifest, authority, state, owner, productionRoot, promotionMode,
         const local = within(root, relative);
         const tracked = spawnSync('git', ['ls-tree', '-r', '--name-only', commit, '--', relative], { cwd: root, encoding: 'utf8', windowsHide: true });
         return tracked.status === 0 && tracked.stdout.trim() === relative && fs.existsSync(local) &&
-          (manifestFiles.get(relative) === fileHash(local) || baselineFiles.get(relative) === fileHash(local));
+          manifestFiles.get(relative) === fileHash(local);
       })).map(item => item.id);
   }
   let committedDecisions = [];
@@ -172,7 +154,7 @@ function facts(manifest, authority, state, owner, productionRoot, promotionMode,
     nativeCandidatePass = inspected.eligible && inspected.manifest.native_git_sha === nativeSha;
     if(nativeCandidatePass) for(const row of inspected.capability_rows) if(row.classification==='INTENTIONALLY_SUPERSEDED' && !capabilities.includes(row.id)) capabilities.push(row.id);
   }
-  return { nativeCandidatePass, repository: remote, ref: authority.web?.release_ref, sha: commit, head,
+  return { fullManifestPass: admitted.PRESTAGE_COMPLETE === true, nativeCandidatePass, repository: remote, ref: authority.web?.release_ref, sha: commit, head,
     commitExists, dirty: !!status, pushed, nativePushed, nativeSha, firstPromotionEvidencePass, assetPackage, requiredFilesTracked, owner,
     capabilities, intentionalRemovals: manifest.intentional_removals || [], committedDecisions };
 }
@@ -195,8 +177,9 @@ function main() {
   const mode = args.mode || 'precheck';
   if (!['precheck', 'acquire', 'deploy'].includes(mode) || !args.manifest || !args['production-root'] || !args.owner) fail('GATE_ARGUMENTS_REQUIRED');
   const authority = readJson(authorityFile);
-  const manifest = readJson(args.manifest);
-  manifest._manifestPath = path.resolve(args.manifest);
+  const manifest = readManifest(args.manifest);
+  const inputHash=fileHash(args.manifest);
+  Object.defineProperty(manifest,'_manifestPath',{value:path.resolve(args.manifest)});
   const promotionMode = args['promotion-mode'] || manifest.promotion_mode || 'NORMAL';
   if(promotionMode===FIRST_PROMOTION){
     const governanceSha=run(sourceRoot,'rev-parse','HEAD');
@@ -208,10 +191,14 @@ function main() {
   const leasePath = path.join(productionRoot, '.local/ro-stack/production-deployment-lease/lease.json');
   const state = fs.existsSync(statePath) ? readJson(statePath) : null;
   const lease = fs.existsSync(leasePath) ? readJson(leasePath) : fs.existsSync(path.dirname(leasePath)) ? { status: 'INVALID' } : null;
-  if (lease?.status === 'ACTIVE' && !equalHash(lease.admission_manifest_sha256,fileHash(args.manifest))) fail('LEASE_MANIFEST_CHANGED');
+  if (lease?.status === 'ACTIVE') assertLeaseManifest(lease,fileHash(args.manifest),manifest);
+  const admitted = admission(args.manifest,productionRoot);
   const currentHashes = productionHashes(productionRoot,state,promotionMode,lease,fileHash(args.manifest));
-  const result = evaluatePromotion({ authority,state,candidate:facts(manifest,authority,state,args.owner,productionRoot,promotionMode,currentHashes),
+  const result = evaluatePromotion({ authority,state,candidate:facts(manifest,authority,state,args.owner,productionRoot,promotionMode,currentHashes,admitted),
     currentHashes,lease,mode,promotionMode });
+  if(fileHash(args.manifest)!==inputHash)fail('ADMISSION_MANIFEST_CHANGED');
+  result.admission_manifest_sha256=inputHash;
+  result.manifest_digest=manifest.manifest_digest;
   process.stdout.write(JSON.stringify(result) + '\n');
   if (!result.eligible) process.exitCode = 1;
 }

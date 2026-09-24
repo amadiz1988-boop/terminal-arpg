@@ -1,3 +1,18 @@
+## Complete Web promotion payload
+
+WEB_DEPLOYMENT_MANIFEST = COMPLETE_PROMOTION_PAYLOAD
+MULTI_MANIFEST_SINGLE_PROMOTION = FORBIDDEN
+PRECOPY_OUTSIDE_LEASE = FORBIDDEN
+LEGACY_256_FILE_LIMIT = SUPERSEDED
+
+Normal and first GitHub promotions require the `web-complete-v1` contract in
+`docs/project-control/web-atomic-full-manifest-delivery-v1.md` and the independent
+limits in `web-manifest-safety-policy.json`. One candidate, one complete manifest,
+one lease and one Web deployment receipt. Prestage, exact provenance/hashes,
+complete rollback and postdeploy fileset checks gate final baseline advancement.
+Production cannot fill missing candidate files. Historical subset manifests are
+retained only for historical rollback and isolated compatibility fixtures.
+
 # Manifest-driven Dashboard deploy
 
 Tool: `ops/ro-stack/deploy-dashboard-manifest.ps1`.
@@ -7,7 +22,7 @@ uses `dashboard-service.ps1` for the sole 8788 process, the checkpoint deploy
 tool's exact-hash/staging/atomic-replacement pattern, and a durable backup and
 receipt for explicit rollback. It never starts or stops login, char, or map.
 
-## Manifest V2
+## Historical Manifest V2 (rollback compatibility only)
 
 JSON fields:
 
@@ -51,11 +66,11 @@ exact candidate commit and records 123 new targets with `production_preimage:
 edited. Deployment makes fresh tool-owned backups of existing targets before
 stopping Dashboard. Optional `backup_sha256` must match the preimage hash.
 
-One to 256 explicit files are allowed within the Web paths enforced by the tool.
+The complete payload is subject to the reviewed independent safety policy.
 Paths must be relative, unique, and free of traversal or reparse points. No
 glob, directory mirror, Native file, database file, runtime config, or dirty
 candidate worktree is accepted. Every future run must recheck live preimages.
-An `ABSENT` target requires an existing parent directory and an absent target
+An `ABSENT` target permits a missing parent directory and requires an absent target
 at precheck and immediately before replacement. Rollback removes only that
 manifest-owned file, and only while its deployed hash still matches.
 
@@ -68,8 +83,8 @@ bounded local static imports, re-exports, statically resolvable dynamic
 imports, direct Browser HTML/CSS/JS asset references, and map-info detail
 references. It also follows top-level `readFile` calls using statically
 resolved module-relative paths. It resolves them against the simulated
-post-deploy tree:
-Production plus only the explicit manifest overlay. Existing Production
+post-deploy tree. Complete manifests resolve exclusively from the candidate.
+The historical subset compatibility mode alone resolves Production plus overlay. Existing Production
 modules retain their current bytes and must satisfy the imported export names;
 existing assets must resolve. Changed map-info detail data and absent
 dependencies must be delivered explicitly. A missing dependency fails precheck

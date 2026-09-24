@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "max_manifest_bytes": 67108864,
+  "max_files": 100000,
+  "max_payload_bytes": 4294967296,
+  "max_single_file_bytes": 268435456,
+  "scope": "Complete Web payload; ceilings are governance-controlled resource guards, independent of current product count.",
+  "generated_file_policy": "No generated output admitted without a future reviewed reproducibility contract. Current payload uses Git sources and pinned private release only."
+}

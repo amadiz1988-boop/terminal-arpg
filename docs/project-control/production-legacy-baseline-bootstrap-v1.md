@@ -1,3 +1,18 @@
+## Complete Web promotion payload
+
+WEB_DEPLOYMENT_MANIFEST = COMPLETE_PROMOTION_PAYLOAD
+MULTI_MANIFEST_SINGLE_PROMOTION = FORBIDDEN
+PRECOPY_OUTSIDE_LEASE = FORBIDDEN
+LEGACY_256_FILE_LIMIT = SUPERSEDED
+
+Normal and first GitHub promotions require the `web-complete-v1` contract in
+`docs/project-control/web-atomic-full-manifest-delivery-v1.md` and the independent
+limits in `web-manifest-safety-policy.json`. One candidate, one complete manifest,
+one lease and one Web deployment receipt. Prestage, exact provenance/hashes,
+complete rollback and postdeploy fileset checks gate final baseline advancement.
+Production cannot fill missing candidate files. Historical subset manifests are
+retained only for historical rollback and isolated compatibility fixtures.
+
 # Legacy Production baseline bootstrap V1
 
 Task: PRODUCTION_LEGACY_BASELINE_BOOTSTRAP_V1.

@@ -1,16 +1,12 @@
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, statSync } from 'node:fs';
 import { dirname, extname, isAbsolute, join, relative, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 const { parse } = require('acorn');
-const [manifestPath, candidateRoot, productionRoot] = process.argv.slice(2);
-if (!manifestPath || !candidateRoot || !productionRoot) {
-  throw new Error('MANIFEST_CLOSURE_ARGUMENTS_REQUIRED');
-}
-
-const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+export function runtimeClosure(manifest, candidateRoot, productionRoot, complete = false) {
 const listed = new Set(manifest.files.map((file) => file.path.replaceAll('\\', '/')));
 const visited = new Set();
 const references = new Map();
@@ -39,7 +35,7 @@ function directoryExists(path) {
 }
 
 function effectivePath(path) {
-  return inside(listed.has(path) ? candidateRoot : productionRoot, path).full;
+  return inside(complete || listed.has(path) ? candidateRoot : productionRoot, path).full;
 }
 
 function localTarget(from, specifier) {
@@ -213,7 +209,7 @@ function scanGraph(mode) {
       continue;
     }
     if (!fileExists(source)) {
-      if (mode === 'post-deploy' || listed.has(path) || kind === 'module' ||
+      if (complete || mode === 'post-deploy' || listed.has(path) || kind === 'module' ||
           kind === 'map-data' || !fileExists(production)) {
         errors.push(`${mode.toUpperCase()}_FILE_MISSING:${path}`);
       }
@@ -276,7 +272,7 @@ const dependencies = postDeployGraph.paths.sort().map((path) => {
     production_preimage_sha256: productionExists ? sha256(target) : null,
   };
 });
-const missing = dependencies.filter((item) => ['SOURCE_MISSING', 'ADD_NEW', 'ADD_CHANGED'].includes(item.manifest_action));
+const missing = dependencies.filter((item) => complete ? item.kind !== 'directory' && (!listed.has(item.target_path) || !item.exists_in_candidate) : ['SOURCE_MISSING', 'ADD_NEW', 'ADD_CHANGED'].includes(item.manifest_action));
 const result = {
   candidate_source_closure: candidateGraph.errors.length === 0,
   post_deploy_import_closure: postDeployGraph.errors.length === 0 && missing.length === 0,
@@ -285,5 +281,13 @@ const result = {
   missing,
   errors: [...candidateGraph.errors, ...postDeployGraph.errors],
 };
-process.stdout.write(`${JSON.stringify(result)}\n`);
-if (!result.post_deploy_import_closure) process.exitCode = 1;
+return result;
+}
+if(process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  const [manifestPath,candidateRoot,productionRoot]=process.argv.slice(2);
+  if(!manifestPath || !candidateRoot || !productionRoot) throw Error('MANIFEST_CLOSURE_ARGUMENTS_REQUIRED');
+  const manifest=JSON.parse(readFileSync(manifestPath,'utf8'));
+  const result=runtimeClosure(manifest,candidateRoot,productionRoot,manifest.schema_version==='web-complete-v1');
+  process.stdout.write(JSON.stringify(result)+'\n');
+  if(!result.post_deploy_import_closure)process.exitCode=1;
+}

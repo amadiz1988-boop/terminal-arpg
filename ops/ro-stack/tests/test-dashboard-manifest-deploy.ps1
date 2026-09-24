@@ -360,11 +360,11 @@ try {
     Assert ($r.Json.file_count -eq 256 -and -not $r.Json.production_touched) 'capacity precheck receipt invalid'
     Assert-Preimage $f
   }
-  Run-Test '257 explicit files fail bounded manifest gate' {
+  Run-Test '257 explicit files pass the replacement policy' {
     $f = New-Fixture 'capacity-257'
     Set-ManifestFileCount $f 257
     $r = Invoke-Tool $f @('-Precheck')
-    Assert ($r.ExitCode -ne 0 -and $r.Json.error -eq 'MANIFEST_FILE_COUNT_OUT_OF_BOUNDS') $r.Output
+    Assert ($r.ExitCode -eq 0 -and $r.Json.file_count -eq 257) $r.Output
     Assert (-not $r.Json.production_touched) 'out-of-bounds precheck mutated Production fixture'
     Assert-Preimage $f
   }

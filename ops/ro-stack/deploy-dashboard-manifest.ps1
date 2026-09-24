@@ -21,14 +21,21 @@ $script:fixtureDashboardPid = 9000
 $script:watchdogWasEnabled = $false
 $script:watchdogChanged = $false
 $script:simulatedStartFailureConsumed = $false
+$script:completePaths = $null
+$manifestPolicy = Get-Content -LiteralPath (Join-Path $PSScriptRoot '../../docs/project-control/web-manifest-safety-policy.json') -Raw | ConvertFrom-Json
+function Invoke-CompleteCheck([string]$Mode, [string]$File, [string]$Root) {
+  $output = & node (Join-Path $PSScriptRoot 'web-complete-manifest.mjs') $Mode $File $Root 2>&1 | Out-String
+  if ($LASTEXITCODE -ne 0) { throw "COMPLETE_MANIFEST_FAILED:$($output.Trim())" }
+  return ($output | ConvertFrom-Json)
+}
 
 function Get-Sha256([string]$Path) {
   return (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToUpperInvariant()
 }
 
 function Assert-WithinRoot([string]$Root, [string]$RelativePath) {
-  if ($RelativePath -notmatch '^[A-Za-z0-9_./-]+$' -or
-      $RelativePath -match '(^|/)\.{1,2}(/|$)' -or $RelativePath.Contains('//')) {
+  if (-not $script:completePaths -and ($RelativePath -notmatch '^[A-Za-z0-9_./-]+$' -or
+      $RelativePath -match '(^|/)\.{1,2}(/|$)' -or $RelativePath.Contains('//'))) {
     throw "INVALID_MANIFEST_PATH:$RelativePath"
   }
   $webPath = $RelativePath -eq 'ops/ro-stack/dashboard.mjs' -or
@@ -52,6 +59,7 @@ function Assert-WithinRoot([string]$Root, [string]$RelativePath) {
       'ops/ro-stack/web-observation.mjs', 'ops/ro-stack/web-latency-trace.mjs',
       'ops/ro-stack/test-fixture-command.mjs',
       'docs/project-control/canonical-test-fixtures.json', 'public/ro/data/map-info.json')
+  if ($script:completePaths) { $webPath = $script:completePaths.Contains($RelativePath) }
   if (-not $webPath) { throw "UNAUTHORIZED_WEB_PATH:$RelativePath" }
   $full = [IO.Path]::GetFullPath((Join-Path $Root ($RelativePath.Replace('/', '\'))))
   $prefix = $Root.TrimEnd('\') + '\'
@@ -90,7 +98,14 @@ function Read-Plan {
   if (-not $manifestInput -or -not [IO.Path]::IsPathFullyQualified($manifestInput) -or
       -not (Test-Path -LiteralPath $manifestInput -PathType Leaf)) { throw 'MANIFEST_ABSOLUTE_PATH_REQUIRED' }
   $manifestPath = (Resolve-Path -LiteralPath $manifestInput).Path
+  if ((Get-Item -LiteralPath $manifestPath).Length -gt $manifestPolicy.max_manifest_bytes) { throw 'MANIFEST_BYTES_EXCEED_POLICY' }
   $data = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
+  $complete = $data.schema_version -eq 'web-complete-v1'
+  if ($complete) {
+    Invoke-CompleteCheck 'schema' $manifestPath $ProductionRoot | Out-Null
+    $script:completePaths = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    foreach ($f in $data.files) { $script:completePaths.Add([string]$f.path) | Out-Null }
+  } elseif (-not $TestMode -and -not $Rollback) { throw 'COMPLETE_MANIFEST_REQUIRED' }
   if ($data.candidate_commit -notmatch '^[0-9a-fA-F]{40}$' -or
       -not [IO.Path]::IsPathFullyQualified([string]$data.candidate_root) -or
       -not [IO.Path]::IsPathFullyQualified([string]$data.production_root)) {
@@ -115,7 +130,7 @@ function Read-Plan {
     throw 'PRODUCTION_ROOT_NOT_CANONICAL'
   }
   $files = @($data.files)
-  if ($files.Count -lt 1 -or $files.Count -gt 256) { throw 'MANIFEST_FILE_COUNT_OUT_OF_BOUNDS' }
+  if ($files.Count -lt 1 -or $files.Count -gt $manifestPolicy.max_files) { throw 'MANIFEST_FILE_COUNT_OUT_OF_BOUNDS' }
   $minimapPngs = @($files | Where-Object { [string]$_.path -match '^public/ro/client/minimaps/[A-Za-z0-9_-]+\.png$' })
   $minimapHashes = @{}
   if ($minimapPngs.Count -gt 0) {
@@ -141,7 +156,8 @@ function Read-Plan {
     }
   }
   $seen = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
-  $entries = @()
+  $entries = [Collections.Generic.List[object]]::new()
+  [long]$payloadBytes = 0
   foreach ($file in $files) {
     $relative = [string]$file.path
     if (-not $seen.Add($relative)) { throw "DUPLICATE_MANIFEST_PATH:$relative" }
@@ -178,10 +194,17 @@ function Read-Plan {
       $expectedCurrent = if ($Rollback) { $candidateHash } else { $preimageHash }
       if ((Get-Sha256 $target) -ne $expectedCurrent) { throw "CURRENT_HASH_MISMATCH:$relative" }
     }
-    $entries += [pscustomobject]@{
+    if (-not $Rollback) {
+      $size = (Get-Item -LiteralPath $source).Length
+      if ($size -gt $manifestPolicy.max_single_file_bytes) { throw 'SINGLE_FILE_BYTES_EXCEED_POLICY' }
+      if ($complete -and $size -ne $file.size) { throw 'MANIFEST_FILE_SIZE_MISMATCH' }
+      $payloadBytes += $size
+      if ($payloadBytes -gt $manifestPolicy.max_payload_bytes) { throw 'PAYLOAD_BYTES_EXCEED_POLICY' }
+    }
+    $entries.Add([pscustomobject]@{
       Path = $relative; Source = $source; Target = $target
       CandidateHash = $candidateHash; PreimageHash = $preimageHash; PreimageAbsent = $preimageAbsent
-    }
+    })
   }
   if (-not $TestMode -and -not $Rollback) {
     $head = (& git -C $candidate rev-parse HEAD 2>&1 | Out-String).Trim()
@@ -208,7 +231,7 @@ function Read-Plan {
   return [pscustomobject]@{
     ManifestPath = $manifestPath; ManifestHash = Get-Sha256 $manifestPath
     Commit = ([string]$data.candidate_commit).ToLowerInvariant(); Closure = $closure
-    Candidate = $candidate; Production = $production; Entries = $entries
+    Candidate = $candidate; Production = $production; Entries = $entries.ToArray(); Complete = $complete; Data = $data
   }
 }
 
@@ -417,6 +440,10 @@ try {
   }
   if ($SimulateDashboardDown) { $script:fixtureDashboardPid = 0 }
   $plan = Read-Plan
+  if (-not $TestMode -and -not $Rollback -and ($gateOutput | ConvertFrom-Json).admission_manifest_sha256 -ne $plan.ManifestHash) { throw 'ADMISSION_MANIFEST_CHANGED' }
+  $predeployBaseline = if ($Rollback) { $null } elseif ($TestMode) { 'ISOLATED_FIXTURE' } else {
+    (Get-Content -LiteralPath (Join-Path $plan.Production '.local/ro-stack/production-deployment-state.json') -Raw | ConvertFrom-Json).current_deploy_id
+  }
   $failurePhase = 'TOPOLOGY_PRECHECK'
   $before = Get-Topology
   Assert-Topology $before -AllowDashboardDown:$Rollback
@@ -457,6 +484,7 @@ try {
     if (-not $TestMode) {
       $leaseFile = Join-Path $plan.Production '.local\ro-stack\production-deployment-lease\lease.json'
       $lease = Get-Content -LiteralPath $leaseFile -Raw | ConvertFrom-Json
+      if ($lease.admission_manifest_sha256 -ne $plan.ManifestHash -or $lease.manifest_digest -ne $plan.Data.manifest_digest) { throw 'LEASE_MANIFEST_CHANGED' }
       if ($lease.promotion_mode -eq 'FIRST_GITHUB_FIRST_PROMOTION') {
         $stateTool = Join-Path $PSScriptRoot 'production-deployment-state.mjs'
         $begin = & node $stateTool --action begin-first-promotion --production-root $plan.Production --owner $OwnerTaskId 2>&1 | Out-String
@@ -494,6 +522,9 @@ try {
     $after = Get-Topology
     Assert-Topology $after $before.NativePids
     if ($after.DashboardPid -eq $before.DashboardPid) { throw 'DASHBOARD_PID_UNCHANGED' }
+    $sealedManifest = Join-Path $runRoot 'manifest.json'
+    if ((Get-Sha256 $sealedManifest) -ne $plan.ManifestHash) { throw 'SEALED_MANIFEST_CHANGED' }
+    $completeProof = if ($plan.Complete) { Invoke-CompleteCheck 'postdeploy' $sealedManifest $plan.Production } else { $null }
     $receipt = [ordered]@{ timestamp = [DateTimeOffset]::UtcNow.ToString('o'); mode = 'DEPLOY';
       result = 'CANDIDATE_ACTIVE'; manifest_sha256 = $plan.ManifestHash; candidate_commit = $plan.Commit;
       owner_task_id = $OwnerTaskId; web_git_sha = $plan.Commit;
@@ -510,6 +541,16 @@ try {
       native_pids_before = $before.NativePids; native_pids_after = $after.NativePids;
       listener_counts_before = $before.Counts; listener_counts_after = $after.Counts;
       rollback_performed = $false; final_state = 'CANDIDATE_ACTIVE' }
+    if ($plan.Complete) {
+      foreach ($key in @('candidate_id','manifest_digest','manifest_file_count','manifest_total_payload_bytes','asset_release','asset_package_sha256','asset_manifest_sha256')) {
+        $receipt[$key] = $completeProof.$key
+      }
+      $receipt['predeploy_baseline'] = $predeployBaseline
+      $receipt['rollback_reference'] = ($runRoot.Substring($plan.Production.Length + 1).Replace('\','/'))
+      $receipt['deployment_result'] = 'COMPLETE_CANDIDATE_ACTIVE'
+      $receipt['PRODUCTION_FILESET_MATCHES_MANIFEST'] = $true
+      $receipt['lease_id'] = if ($TestMode) { 'ISOLATED_FIXTURE' } else { $lease.lease_id }
+    }
     $failurePhase = 'FINALIZATION'
     Resume-WebWatchdog
     $receiptFile = Join-Path $runRoot 'deploy-receipt.json'
@@ -536,8 +577,13 @@ try {
       $receipt.production_root -ine $plan.Production -or
       [bool]$receipt.test_mode -ne [bool]$TestMode -or
       @($receipt.files).Count -ne $plan.Entries.Count) { throw 'ROLLBACK_RECEIPT_MISMATCH' }
+  $receiptRows = @{}
+  foreach ($r in $receipt.files) {
+    if ($receiptRows.ContainsKey($r.path)) { throw 'ROLLBACK_DUPLICATE_RECEIPT_PATH' }
+    $receiptRows[$r.path] = $r
+  }
   foreach ($entry in $plan.Entries) {
-    $row = @($receipt.files | Where-Object { $_.path -eq $entry.Path })
+    $row = @($receiptRows[$entry.Path])
     if ($row.Count -ne 1 -or $row[0].candidate_sha256 -ne $entry.CandidateHash -or
         $row[0].production_preimage_sha256 -ne $entry.PreimageHash) { throw 'ROLLBACK_FILE_RECEIPT_MISMATCH' }
     if ((Get-Sha256 $entry.Target) -ne $entry.CandidateHash) { throw "ROLLBACK_CURRENT_HASH_MISMATCH:$($entry.Path)" }

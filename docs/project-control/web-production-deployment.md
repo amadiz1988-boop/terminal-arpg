@@ -1,3 +1,18 @@
+## Complete Web promotion payload
+
+WEB_DEPLOYMENT_MANIFEST = COMPLETE_PROMOTION_PAYLOAD
+MULTI_MANIFEST_SINGLE_PROMOTION = FORBIDDEN
+PRECOPY_OUTSIDE_LEASE = FORBIDDEN
+LEGACY_256_FILE_LIMIT = SUPERSEDED
+
+Normal and first GitHub promotions require the `web-complete-v1` contract in
+`docs/project-control/web-atomic-full-manifest-delivery-v1.md` and the independent
+limits in `web-manifest-safety-policy.json`. One candidate, one complete manifest,
+one lease and one Web deployment receipt. Prestage, exact provenance/hashes,
+complete rollback and postdeploy fileset checks gate final baseline advancement.
+Production cannot fill missing candidate files. Historical subset manifests are
+retained only for historical rollback and isolated compatibility fixtures.
+
 # Canonical Production Web Deployment
 
 Status: `CANONICAL_DEPLOYMENT_POLICY=ACTIVE`; `SOURCE_VALIDATED=YES`;
@@ -74,7 +89,7 @@ dependencies. At that stage, V5 had not yet been deployed.
 `WEB_DEPLOY_RECEIPT_REQUIRED=YES`; `WEB_DEPLOY_FAIL_CLOSED=YES`;
 `WEB_DEPLOY_WEB_ONLY=YES`.
 
-The manifest names 1-256 unique, authorized Web-relative paths, a clean
+The complete manifest names unique, authorized Web-relative paths, a clean
 candidate commit/root, Production root, and exact candidate SHA256 values.
 Existing targets require their preimage SHA256; new targets require the explicit
 `production_preimage: "ABSENT"` marker. No wildcard or implicit file discovery

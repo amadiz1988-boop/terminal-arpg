@@ -1,3 +1,18 @@
+## Complete Web promotion payload
+
+WEB_DEPLOYMENT_MANIFEST = COMPLETE_PROMOTION_PAYLOAD
+MULTI_MANIFEST_SINGLE_PROMOTION = FORBIDDEN
+PRECOPY_OUTSIDE_LEASE = FORBIDDEN
+LEGACY_256_FILE_LIMIT = SUPERSEDED
+
+Normal and first GitHub promotions require the `web-complete-v1` contract in
+`docs/project-control/web-atomic-full-manifest-delivery-v1.md` and the independent
+limits in `web-manifest-safety-policy.json`. One candidate, one complete manifest,
+one lease and one Web deployment receipt. Prestage, exact provenance/hashes,
+complete rollback and postdeploy fileset checks gate final baseline advancement.
+Production cannot fill missing candidate files. Historical subset manifests are
+retained only for historical rollback and isolated compatibility fixtures.
+
 # GitHub First Production Promotion Protocol V1
 
 Status: `GITHUB_FIRST_SOURCE_POLICY_V6`; GOVERNANCE_PRODUCTION_ACTIVE=YES, verified in canonical-remote-verification-v6.json. Production baseline migration requires separate runtime evidence.
@@ -77,7 +92,7 @@ explicit owner reconciliation.
 Capability IDs and source paths are committed in
 `production-capabilities.json`. The gate reads that file from the exact candidate
 commit. Every capability source path must have the candidate hash in the new
-manifest or the same hash in the verified Production baseline. Accepted IDs are
+complete manifest. Production baseline bytes cannot satisfy missing candidate source. Accepted IDs are
 read from the last completed Production baseline.
 Removal needs an exact ID and a committed `INTENTIONALLY_REMOVED` or
 `SUPERSEDED` decision in `production-capability-decisions.json`. The registry

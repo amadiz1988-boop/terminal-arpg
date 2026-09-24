@@ -17,7 +17,7 @@ const authority = { assets, web: { repository: repo, release_ref: 'refs/heads/ma
 const state = { current_deploy_id: 'old', current_web_git_sha: web, current_native_git_sha: native,
   last_deploy_receipt: 'receipt.json', production_drift: 'CLOSED', accepted_capabilities: ['skill-tree'] };
 const candidate = { repository: repo, ref: 'refs/heads/main', sha: web, head: web, commitExists: true,
-  assetPackage, dirty: false, pushed: true, nativePushed: true, requiredFilesTracked: true, owner: 'GOV',
+  assetPackage, dirty: false, pushed: true, nativePushed: true, fullManifestPass: true, requiredFilesTracked: true, owner: 'GOV',
   capabilities: ['skill-tree'], intentionalRemovals: [], committedDecisions: [] };
 const lease = { owner_task_id: 'GOV', status: 'ACTIVE', web_deploy_git_sha: web };
 const check = (changes = {}, mode = 'precheck') => evaluatePromotion({ authority, state, candidate,
