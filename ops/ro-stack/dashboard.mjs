@@ -8497,9 +8497,7 @@ async function saveSupplyCycle(account, input) {
 }
 
 const nativeSupplyConfigPaths = [
-  'supply.enabled', 'supply.weightTriggerPercent', 'supply.inventorySlotTrigger',
-  'supply.services.storage.enabled', 'supply.services.sell.enabled',
-  'supply.services.buy.enabled', 'supply.services.buy.rules', 'supply.itemRules',
+  'supply.enabled', 'supply.services.buy.enabled', 'supply.services.buy.rules',
 ];
 const configOnlyExecution = () => ({ applied: false, controller: 'CONFIG_ONLY',
   reason: 'CONFIG_ONLY_NO_EXECUTOR_COMMAND' });

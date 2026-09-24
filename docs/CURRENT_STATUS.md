@@ -750,3 +750,8 @@
 - 使用者定案的原始 Client WAV 為 A `ef_readyportal.wav`、B `ef_portal.wav`、C `warp.wav`、D `ef_teleportation.wav`；來源與 hash 記於 `docs/ro-original-ui/ro-warp-portal-teleport-audio-provenance.md`。
 - World Map 過場來源接入既有 Dashboard preflight、權威到達與 Web 音訊系統；取消或拒絕不播放 C/D，到達與 D 完成都成立後才揭露目的地並恢復 BGM。蒼蠅翅膀音效僅在權威成功位移時觸發，物品不消耗規則未更動。
 - 此為 source candidate。Production 未部署、runtime 未重啟；桌面與 390×844 Player Browser 聲音及視覺驗收仍待受控部署後執行。
+
+## 2026-09-24 M1 部署前閘門 V3
+
+- 五個 Native 忽略的舊 Supply 設定已從 Web 的 `SUPPORTED` 能力宣告移除；它們依 `c0450b1c` 歸為 M1 排除或明確產品覆寫，並保持停用。AUTO_FARM 未追蹤測試的隔離角色可啟動預期已更正，來源測試通過。
+- 目前 Production map binary 缺少可連到 canonical Native checkpoint 的部署收據；ProcDump 雖有對應 sidecar，map 的 debugger 查核為未附掛，正式 attachment 收據仍是 `FAILED`。因此受控部署、Fly／Supply 實機閉環與 Browser 驗收均延期，Production 和 runtime 未更動。詳見 `docs/openkore-reference/m1-predeploy-gate-v3-2026-09-24.md`。

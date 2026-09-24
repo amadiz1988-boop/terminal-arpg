@@ -7,6 +7,14 @@ export const CONFIG_SECTIONS = Object.freeze([
   '蝴蝶翅膀 / 回城補給', '恢復', '進階功能 / 尚未支援',
 ]);
 
+// c0450b1c excludes storage/sell, weight/slot-triggered Supply, and the
+// associated item-disposal rows from the M1 executor contract.
+const outsideM1SupplyPaths = new Set([
+  'supply.weightTriggerPercent', 'supply.inventorySlotTrigger',
+  'supply.services.storage.enabled', 'supply.services.sell.enabled',
+  'supply.itemRules',
+]);
+
 export function configControlVisible(path) {
   // Cross-map travel is controlled by the World Map action, not Player
   // Navigation settings. Retain the stored schema field for migration only.
@@ -29,7 +37,8 @@ export function configSection(path) {
 export function configCapability(execution, path) {
   // These are outside the authorized first M1 core loop. The existing stored
   // values are preserved but the controls cannot send a new policy.
-  if (path.startsWith('combat.follow.') || path === 'combat.skills.partySkills') return 'UNAVAILABLE';
+  if (path.startsWith('combat.follow.') || path === 'combat.skills.partySkills' ||
+      outsideM1SupplyPaths.has(path)) return 'UNAVAILABLE';
   const attested = execution?.capabilities?.[path];
   if (attested === 'UNAVAILABLE') return 'UNAVAILABLE';
   if (attested === 'SUPPORTED' && (execution?.applied === true || execution?.editable === true)) return 'SUPPORTED';

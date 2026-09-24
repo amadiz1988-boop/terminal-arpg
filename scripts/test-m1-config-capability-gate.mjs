@@ -23,6 +23,10 @@ assert.equal(configCapability({ applied: true, capabilities: { 'combat.profile':
 assert.equal(configCapability({ applied: true, capabilities: { 'combat.profile': 'PARTIAL' } }, 'combat.profile'), 'PARTIAL');
 assert.equal(configCapability({ applied: true, capabilities: { 'combat.profile': 'UNAVAILABLE' } }, 'combat.profile'), 'UNAVAILABLE');
 assert.equal(configCapability({ applied: true, capabilities: { 'combat.skills.partySkills': 'SUPPORTED' } }, 'combat.skills.partySkills'), 'UNAVAILABLE');
+for (const path of [
+  'supply.weightTriggerPercent', 'supply.inventorySlotTrigger',
+  'supply.services.storage.enabled', 'supply.services.sell.enabled', 'supply.itemRules',
+]) assert.equal(configCapability({ editable: true, capabilities: { [path]: 'SUPPORTED' } }, path), 'UNAVAILABLE');
 assert.equal(configSection('combat.travel.flyWing.enabled'), '蒼蠅翅膀');
 assert.equal(configSection('supply.tools.butterflyWing.required'), '蝴蝶翅膀 / 回城補給');
 assert.equal(configSection('combat.itemUse'), 'HP / SP');

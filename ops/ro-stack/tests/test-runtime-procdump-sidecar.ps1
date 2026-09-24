@@ -9,6 +9,7 @@ $canonicalRoot = 'C:\canonical\rathena'
 $script:sidecars = @()
 $script:attachCount = 0
 $script:failAttach = $false
+$script:emitAttachOutput = $true
 $count = 0
 function Check([bool]$condition, [string]$label) { if (-not $condition) { throw "FAIL $label" }; $script:count++ }
 function Get-CimInstance {
@@ -26,15 +27,18 @@ function Get-NetTCPConnection {
 function Invoke-RestMethod { return [pscustomobject]@{ ok = $true } }
 function Test-Path {
   param($LiteralPath, $PathType)
+  if ($PathType -eq 'Container' -and ($LiteralPath -eq $script:approvedProcDumpPath -or
+      $LiteralPath -eq (Join-Path $canonicalRoot 'map-server.exe'))) { return $false }
   if ($LiteralPath -eq $script:approvedProcDumpPath -or $LiteralPath -eq (Join-Path $canonicalRoot 'map-server.exe')) { return $true }
   return Microsoft.PowerShell.Management\Test-Path -LiteralPath $LiteralPath
 }
-function Get-FileHash {
+function Get-MockedFileHash {
   param($LiteralPath, $Algorithm)
   if ($LiteralPath -eq $script:approvedProcDumpPath) { return [pscustomobject]@{ Hash = $script:approvedProcDumpHash } }
   if ($LiteralPath -eq (Join-Path $canonicalRoot 'map-server.exe')) { return [pscustomobject]@{ Hash = ('A' * 64) } }
   return Microsoft.PowerShell.Utility\Get-FileHash -LiteralPath $LiteralPath -Algorithm $Algorithm
 }
+Set-Alias -Name Get-FileHash -Value Get-MockedFileHash -Scope Script
 function Start-Process {
   param($FilePath, $ArgumentList, $WindowStyle, $RedirectStandardOutput, $RedirectStandardError, [switch]$PassThru)
   $script:attachCount++
@@ -43,7 +47,9 @@ function Start-Process {
   $mapPid = [int]$ArgumentList[-2]
   $folder = [string]$ArgumentList[-1]
   $filterLines = @($script:approvedProcDumpFilter.Split(',') | ForEach-Object { "                       $_" }) -join "`n"
-  "Process: map-server.exe ($mapPid)`nProcess image: $(Join-Path $canonicalRoot 'map-server.exe')`nException monitor: First Chance+Unhandled`n$filterLines`nNumber of dumps: 2`nDump folder: $folder" | Set-Content -LiteralPath $RedirectStandardOutput -Encoding Unicode
+  if ($script:emitAttachOutput) {
+    "Process: map-server.exe ($mapPid)`nProcess image: $(Join-Path $canonicalRoot 'map-server.exe')`nException monitor: First Chance+Unhandled`n$filterLines`nNumber of dumps: 2`nDump folder: $folder" | Set-Content -LiteralPath $RedirectStandardOutput -Encoding Unicode
+  }
   $script:sidecars += [pscustomobject]@{
     ProcessId = $id; ExecutablePath = $script:approvedProcDumpPath
     CommandLine = ('"{0}" {1}' -f $script:approvedProcDumpPath, ($ArgumentList -join ' '))
@@ -60,7 +66,7 @@ function State([int]$mapPid, [long]$generation) {
 function Server([int]$mapPid, [string]$path) {
   return [pscustomobject]@{ name = 'map-server.exe'; pid = $mapPid; path = $path; start = '2026-09-23T00:00:00Z'; ports = @(5122) }
 }
-$guard = [pscustomobject]@{ unauthorized = @(); survivors = @(103, 104, 105) }
+$guard = [pscustomobject]@{ unauthorized = @(); survivors = @(103, 104, 105, 107) }
 try {
   New-Item -ItemType Directory -Force -Path $runtimeRoot | Out-Null
   $mapPath = Join-Path $canonicalRoot 'map-server.exe'
@@ -89,6 +95,13 @@ try {
   $failed = Invoke-MapProcDumpTick $runtimeRoot $canonicalRoot @((Server 105 $mapPath)) $guard $true
   Check ($failed.procdumpAttachStatus -eq 'FAILED' -and $failed.mapRuntimeUnaffected -eq 'YES') 'attach failure does not affect map'
   Check ((Get-MapProcDumpDecision (State 105 1002) @((Server 105 $mapPath)) $guard @() $canonicalRoot $runtimeRoot).status -eq 'ATTACH') 'failure permits bounded retry'
+  Write-IncidentJson (Join-Path $runtimeRoot 'state.json') (State 107 1003)
+  $script:failAttach = $false
+  $script:emitAttachOutput = $false
+  $silent = Invoke-MapProcDumpTick $runtimeRoot $canonicalRoot @((Server 107 $mapPath)) $guard $true
+  Check ($silent.procdumpAttachStatus -eq 'FAILED' -and $silent.procdumpAttachError -eq 'PROCDUMP_OUTPUT_UNVERIFIED') 'live sidecar without attach output is not confirmed'
+  $unchanged = Invoke-MapProcDumpTick $runtimeRoot $canonicalRoot @((Server 107 $mapPath)) $guard $true
+  Check ($unchanged.procdumpAttachStatus -eq 'FAILED' -and $unchanged.procdumpAttachedPid -eq $null) 'unverified sidecar cannot self-confirm'
   Write-Output "RUNTIME_PROCDUMP_TEST_PASS count=$count"
 } finally {
   $resolved = [IO.Path]::GetFullPath($root)
