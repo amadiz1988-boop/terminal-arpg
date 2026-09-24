@@ -13,6 +13,13 @@ export const digest = file => createHash('sha256').update(fs.readFileSync(file))
 const strictUtf8 = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true });
 export const decodeGovernanceJson = bytes => JSON.parse(strictUtf8.decode(bytes));
 export const readJson = file => decodeGovernanceJson(fs.readFileSync(file));
+// Windows PowerShell 5.1 children must not inherit a PowerShell 7 module path;
+// without PSModulePath, 5.1 rebuilds its default Windows module path.
+export function windowsPowerShellEnv(base = process.env) {
+  const env = { ...base };
+  for (const key of Object.keys(env)) if (key.toUpperCase() === 'PSMODULEPATH') delete env[key];
+  return env;
+}
 export function boundedPath(root, relative) {
   if (typeof relative !== 'string' || /[\\:\x00-\x1f]/.test(relative) || path.isAbsolute(relative) ||
       relative.split('/').some(x => !x || x === '.' || x === '..')) throw Error('INVALID_BASELINE_PATH');

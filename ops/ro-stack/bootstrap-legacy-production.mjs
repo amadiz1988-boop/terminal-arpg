@@ -3,7 +3,7 @@ import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { digest, boundedPath, verifyLegacyBaseline, consumedPath, LEGACY_MODE, UNKNOWN_SHA, readJson } from './legacy-production-baseline.mjs';
+import { digest, boundedPath, verifyLegacyBaseline, consumedPath, LEGACY_MODE, UNKNOWN_SHA, readJson, windowsPowerShellEnv } from './legacy-production-baseline.mjs';
 import { gitRefReachable } from './production-promotion-gate.mjs';
 
 const source = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -17,7 +17,7 @@ const hash = value => createHash('sha256').update(value).digest('hex').toUpperCa
 const ensure = (condition, message) => { if (!condition) throw Error(message); };
 function runtime() {
   return JSON.parse(execFileSync('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File',
-    path.join(source, 'ops/ro-stack/capture-legacy-runtime.ps1')], { encoding: 'utf8', windowsHide: true, timeout: 60000 }));
+    path.join(source, 'ops/ro-stack/capture-legacy-runtime.ps1')], { encoding: 'utf8', windowsHide: true, timeout: 60000, env: windowsPowerShellEnv() }));
 }
 function main() {
   const head = git('rev-parse', 'HEAD');

@@ -3,12 +3,12 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { evaluateNative,inspectNativeCandidate,nativeReceiptValid,nativeReceiptPath,nativeArtifacts,NATIVE_REPOSITORY,groups,verifyNativeStage } from '../native-promotion-contract.mjs';
 import { evaluatePromotion,capabilityRegistry } from '../production-promotion-gate.mjs';
 import { receiptComplete,commitAcceptedBaseline } from '../production-deployment-state.mjs';
-import { executeNative } from '../deploy-native-candidate.mjs';
+import { executeNative, finalizeRunningNativeStage, NATIVE_STAGE_PHASE, reconciledPrefix } from '../deploy-native-candidate.mjs';
 import { digest,readJson,FIRST_PROMOTION,LEGACY_MODE,UNKNOWN_SHA,pendingPath } from '../legacy-production-baseline.mjs';
 
 let count=0;
@@ -115,6 +115,87 @@ try {
    const operation=readJson(path.join(x.root,'.local/ro-stack/native-deploy.lock/operation.json'));
    assert.equal(operation.owner_task_id,'F');assert.equal(operation.lease_id,x.lease.lease_id);assert.equal(operation.candidate_manifest_sha256,digest(x.file));
  });
+ const OWNER_U='F｜M1 最終整合';
+ const readState=root=>readJson(path.join(root,'.local/ro-stack/production-deployment-state.json'));
+ async function failedStage(owner=OWNER_U){
+   const x=fixture();
+   x.lease.owner_task_id=owner;x.lease.acquired_at=new Date(Date.now()-60000).toISOString();
+   const ev=x.write('first-evidence.json',{native_git_sha:x.sha,web_git_sha:x.web,runtime_health_gate:{pass:true,evidence:'Same snapshot: login 11, char 12, map 13 each one listener; OpenKore 0'}});
+   x.write('web.json',{...readJson(x.lease.admission_manifest),candidate_commit:x.web,candidate_native_commit:x.sha,first_promotion_evidence:{path:'first-evidence.json',sha256:digest(ev)}});
+   x.lease.admission_manifest_sha256=digest(x.lease.admission_manifest);
+   x.write('.local/ro-stack/production-deployment-lease/lease.json',x.lease);
+   const inspect=o=>inspectNativeCandidate({...o,remoteVerifier:()=>true});
+   await assert.rejects(executeNative({root:x.root,file:x.file,sha256:digest(x.file),owner,leaseId:x.lease.lease_id,authority:{accepted_source_sha:x.sha},
+     adapter:async a=>{if(a==='start')throw Error('NATIVE_RUNTIME_START_FAILED');return a==='snapshot'?x.runtime:null;},inspect,
+     webAdmission:async()=>({eligible:true,candidate_capabilities:ids})}),/NATIVE_RUNTIME_START_FAILED/);
+   const failedOutput=x.write('native-deploy.out.json',{result:'BLOCKED',error:'NATIVE_RUNTIME_START_FAILED'});
+   const later=new Date(Date.now()+5000).toISOString(),exe=n=>path.join(x.root,'.local/ro-stack/rathena',n+'-server.exe');
+   const snapshot={pass:true,counts:{login:1,char:1,map:1},pids:{login:21,char:22,map:23},
+     processes:Object.fromEntries([['login',21],['char',22],['map',23]].map(([n,pid])=>[n,{pid,executable_path:exe(n),started_at:later}])),
+     dashboard_pid:14,database_pid:15,openkore_runtime_count:0,
+     procdump_receipt:{mapPid:23,procdumpAttachedPid:23,procdumpAttachStatus:'ATTACHED',mapBinarySha256:x.m.binary_sha256},
+     procdump_process_identity:{PROCESS_IDENTITY_MATCH:'YES',target_pid:23,procdump_target_pid:23}};
+   const args=patch=>({root:x.root,file:x.file,sha256:digest(x.file),owner,leaseId:x.lease.lease_id,authority:{accepted_source_sha:x.sha},
+     failedOutput,oldPids:{login:11,char:12,map:13},snapshot,apiHealth:{status:200,ok:true},governanceSha:'d'.repeat(40),inspect,...patch});
+   return {...x,owner,failedOutput,snapshot,args,lock:path.join(x.root,'.local/ro-stack/native-deploy.lock')};
+ }
+ const noStageWritten=s=>{assert.equal(fs.existsSync(path.join(s.root,nativeReceiptPath)),false);assert.equal(fs.existsSync(s.lock),true);
+   assert.equal(readJson(path.join(s.root,pendingPath)).native_receipt_sha256,undefined);assert.equal(readState(s.root).first_promotion_phase,undefined);};
+ const s=await failedStage();
+ const blocked=(patch,code)=>{assert.throws(()=>finalizeRunningNativeStage(s.args(patch)),code);noStageWritten(s);};
+ await test('reconcile 1 tool failed but exact candidate runtime healthy is eligible',()=>{
+   const r=finalizeRunningNativeStage(s.args({dryRun:true}));assert.equal(r.eligible,true);assert.equal(r.receipt.tool_initial_result,'NATIVE_RUNTIME_START_FAILED');noStageWritten(s);});
+ await test('reconcile 2 binary mismatch blocked',()=>{const p=path.join(s.root,'.local/ro-stack/rathena/char-server.exe');const old=fs.readFileSync(p);
+   fs.writeFileSync(p,'other');blocked({},/NATIVE_BINARY_MISMATCH/);fs.writeFileSync(p,old);});
+ await test('reconcile 3 wrong Native Git SHA blocked',()=>blocked({authority:{accepted_source_sha:'e'.repeat(40)}},/NATIVE_SHA_NOT_CANONICAL/));
+ await test('reconcile 4 wrong lease id blocked',()=>blocked({leaseId:'other-lease'},/LEASE_ID_MISMATCH/));
+ await test('reconcile 5 wrong Unicode owner blocked',()=>blocked({owner:'F｜M1 最終整理'},/LEASE_OWNER_MISMATCH/));
+ await test('reconcile 6 released lease blocked',()=>{const d=path.join(s.root,'.local/ro-stack/production-deployment-lease');fs.renameSync(d,d+'.held');
+   assert.throws(()=>finalizeRunningNativeStage(s.args()),/DEPLOYMENT_LEASE_REQUIRED/);fs.renameSync(d+'.held',d);noStageWritten(s);});
+ await test('reconcile 7 Web already partially deployed blocked',()=>{s.write('ops/ro-stack/dashboard/app.js','partial-web');blocked({},/WEB_OR_NATIVE_BYTES_CHANGED/);
+   s.write('ops/ro-stack/dashboard/app.js','legacy-web');const d=path.join(s.root,'.local/ro-stack/dashboard/deploy-receipts/manifest-fixture');fs.mkdirSync(d,{recursive:true});
+   blocked({},/WEB_STAGE_ALREADY_STARTED/);fs.rmSync(path.dirname(d),{recursive:true});});
+ await test('reconcile 8 ProcDump invalid blocked',()=>{blocked({snapshot:{...s.snapshot,procdump_process_identity:{...s.snapshot.procdump_process_identity,PROCESS_IDENTITY_MATCH:'NO'}}},/PROCDUMP_GATE_FAILED/);
+   blocked({snapshot:{...s.snapshot,procdump_process_identity:{...s.snapshot.procdump_process_identity,procdump_target_pid:99}}},/PROCDUMP_GATE_FAILED/);});
+ await test('reconcile 9 OpenKore above zero blocked',()=>blocked({snapshot:{...s.snapshot,openkore_runtime_count:1}},/SINGLE_RUNTIME|OPENKORE/));
+ await test('reconcile 10 duplicate map runtime blocked',()=>blocked({snapshot:{...s.snapshot,pass:false,counts:{login:1,char:1,map:2}}},/SINGLE_RUNTIME/));
+ await test('reconcile 11 healthy runtime with executable path mismatch blocked',()=>{
+   const moved={...s.snapshot,processes:{...s.snapshot.processes,map:{...s.snapshot.processes.map,executable_path:'C:\\other\\map-server.exe'}}};
+   blocked({snapshot:moved},/RUNTIME_BINARY_PATH_OR_START_MISMATCH/);
+   const early={...s.snapshot,processes:{...s.snapshot.processes,map:{...s.snapshot.processes.map,started_at:'2020-01-01T00:00:00.000Z'}}};
+   blocked({snapshot:early},/RUNTIME_BINARY_PATH_OR_START_MISMATCH/);});
+ await test('reconcile old PID, API and tool result bindings blocked',()=>{blocked({oldPids:{login:11,char:12,map:14}},/OLD_RUNTIME_PIDS_MISMATCH/);
+   blocked({apiHealth:{status:500,ok:false}},/API_UNHEALTHY/);
+   const other=s.write('other.out.json',{result:'BLOCKED',error:'NATIVE_RUNTIME_STOP_FAILED'});blocked({failedOutput:other},/FAILED_TOOL_OUTPUT_NOT_START_FAILURE/);});
+ await test('reconcile 16 failed reconciliation leaves no receipt',()=>noStageWritten(s));
+ const operationSha=digest(path.join(s.lock,'operation.json')),outputSha=digest(s.failedOutput),leaseSha=digest(path.join(s.root,'.local/ro-stack/production-deployment-lease/lease.json'));
+ await test('reconcile 12 exact valid reconciliation generates Native stage receipt',()=>{
+   finalizeRunningNativeStage(s.args());const r=readJson(path.join(s.root,nativeReceiptPath));
+   assert.equal(nativeReceiptValid(r,{nativeSha:s.sha,leaseId:s.lease.lease_id,manifestHash:digest(s.file)}),true);
+   assert.equal(r.tool_initial_result,'NATIVE_RUNTIME_START_FAILED');assert.equal(r.reconciliation_result,'RUNTIME_ACTUALLY_STARTED_AND_VERIFIED');
+   assert.equal(r.owner_task_id,OWNER_U);assert.deepEqual(r.old_pids,{login:11,char:12,map:13});assert.deepEqual(r.new_pids,{login:21,char:22,map:23});
+   assert.match(r.reconciliation_evidence_digest,/^[A-F0-9]{64}$/);assert.equal(r.first_promotion_complete,false);
+   assert.equal(readJson(path.join(s.root,pendingPath)).native_receipt_sha256,digest(path.join(s.root,nativeReceiptPath)));});
+ await test('reconcile 13 Native stage receipt keeps legacy baseline and lease',()=>{const st=readState(s.root);
+   assert.equal(st.baseline_mode,LEGACY_MODE);assert.equal(st.production_drift,'OPEN');assert.equal(st.drift_reason,'FIRST_PROMOTION_PENDING_FINAL_RECEIPT');
+   assert.equal(st.first_promotion_phase,NATIVE_STAGE_PHASE);assert.equal(digest(path.join(s.root,'.local/ro-stack/production-deployment-lease/lease.json')),leaseSha);});
+ await test('reconcile 14 same active lease can resume Web stage',()=>{const st=readState(s.root);
+   const stage=verifyNativeStage(s.root,st,s.lease,s.lease.admission_manifest_sha256);assert.equal(stage.nativeStage,true);
+   assert.equal(combined({state:st,currentHashes:stage,lease:s.lease,mode:'deploy',candidate:{...webCandidate,owner:OWNER_U,nativeSha:s.sha}}).eligible,true);
+   const begin=spawnSync(process.execPath,[fileURLToPath(new URL('../production-deployment-state.mjs',import.meta.url)),'--production-root',s.root,'--test-mode','true','--owner',OWNER_U,'--action','begin-first-promotion'],{encoding:'utf8',windowsHide:true});
+   assert.equal(begin.status,0,begin.stdout);assert.equal(fs.existsSync(path.join(s.root,'.local/ro-stack/production-deployment-lease/lease.json')),true);});
+ await test('reconcile 15 second Native replacement after reconciled stage blocked',async()=>{
+   await assert.rejects(executeNative({root:s.root,file:s.file,sha256:digest(s.file),owner:OWNER_U,leaseId:s.lease.lease_id,authority:{accepted_source_sha:s.sha},
+     adapter:async()=>{throw Error('adapter must not run');},webAdmission:async()=>({eligible:true,candidate_capabilities:ids})}),/NATIVE_STAGE_ALREADY_RECORDED/);
+   assert.throws(()=>finalizeRunningNativeStage(s.args()),/NATIVE_STAGE_ALREADY_RECORDED/);});
+ await test('reconcile 17 original failed operation record remains immutable',()=>{
+   const archived=path.join(s.root,'.local/ro-stack',reconciledPrefix+s.lease.lease_id),r=readJson(path.join(s.root,nativeReceiptPath));
+   assert.equal(fs.existsSync(s.lock),false);assert.equal(digest(path.join(archived,'operation.json')),operationSha);assert.equal(r.failed_operation.operation_sha256,operationSha);
+   assert.deepEqual(fs.readdirSync(archived).sort(),['operation.json','stage']);assert.equal(digest(s.failedOutput),outputSha);assert.equal(r.failed_operation.tool_output.sha256,outputSha);
+   for(const x of r.failed_operation.stage)assert.equal(digest(path.join(archived,x.path)),x.sha256);});
+ await test('reconcile 18 long-lived child adapter real test',()=>{
+   const run=spawnSync(process.execPath,[fileURLToPath(new URL('./test-native-start-adapter.mjs',import.meta.url))],{encoding:'utf8',windowsHide:true,timeout:240000});
+   assert.equal(run.status,0,run.stdout+run.stderr);assert.match(run.stdout,/REAL_LONG_LIVED_START_TEST_COUNT=11/);});
  console.log(`NATIVE_PROMOTION_TOOL_TEST_COUNT=${count}`);
 }finally{
  if(!fs.realpathSync(tmp).toLowerCase().startsWith(fs.realpathSync(os.tmpdir()).toLowerCase()+path.sep))throw Error('UNSAFE_FIXTURE_CLEANUP');

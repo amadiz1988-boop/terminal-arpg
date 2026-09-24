@@ -12,12 +12,37 @@ $native = Join-Path $runtime 'rathena'
 $launcher = Join-Path $ProductionRoot 'ops\ro-stack\ro-stack.ps1'
 . (Join-Path $PSScriptRoot 'procdump-process-identity.ps1')
 . (Join-Path $PSScriptRoot 'governance-json.ps1')
+# Windows PowerShell 5.1 started below pwsh 7 can inherit a PowerShell 7
+# PSModulePath and load the wrong Utility module. Callers pass a normalized
+# environment; a mismatch fails here instead of silently voiding hash gates.
+if (-not (Get-Command Get-FileHash -ErrorAction SilentlyContinue)) { throw 'POWERSHELL_MODULE_PATH_INVALID' }
+
+# The existing launcher starts long-lived services with Start-Process, which
+# inherits every inheritable handle of its parent. A captured launcher pipe is
+# therefore held open by the services and a synchronous reader never sees EOF.
+# The launcher runs with file-backed stdio and the adapter waits only for the
+# launcher process itself, bounded by TimeoutSeconds.
+function Invoke-BoundedLauncher([string]$Launcher, [string]$LauncherAction, [string]$LogRoot, [int]$TimeoutSeconds = 150) {
+  New-Item -ItemType Directory -Force -Path $LogRoot | Out-Null
+  $stamp = [DateTime]::UtcNow.ToString('yyyyMMddTHHmmssfffZ')
+  $out = Join-Path $LogRoot ('native-adapter-{0}-{1}.out.log' -f $LauncherAction, $stamp)
+  $err = Join-Path $LogRoot ('native-adapter-{0}-{1}.err.log' -f $LauncherAction, $stamp)
+  $shell = Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe'
+  $process = Start-Process -FilePath $shell -ArgumentList @('-NoProfile','-ExecutionPolicy','Bypass','-File',('"' + $Launcher + '"'),'-Action',$LauncherAction) -WindowStyle Hidden -RedirectStandardOutput $out -RedirectStandardError $err -PassThru
+  $null = $process.Handle
+  if (-not $process.WaitForExit($TimeoutSeconds * 1000)) { throw 'LAUNCHER_TIMEOUT' }
+  foreach ($log in @($out, $err)) {
+    if (Test-Path -LiteralPath $log) { Get-Content -LiteralPath $log -Tail 40 -Encoding UTF8 | ForEach-Object { Write-Host $_ } }
+  }
+  return [pscustomobject]@{ exit_code = $process.ExitCode; stdout = $out; stderr = $err }
+}
 
 function Get-Snapshot {
   $all = @(Get-CimInstance Win32_Process)
   $listeners = @(Get-NetTCPConnection -State Listen)
   $counts = [ordered]@{}
   $pids = [ordered]@{}
+  $processes = [ordered]@{}
   $pass = $true
   foreach ($entry in @(@('login',6901),@('char',6122),@('map',5122))) {
     $name = [string]$entry[0]; $port = [int]$entry[1]
@@ -26,6 +51,8 @@ function Get-Snapshot {
     $holders = @($listeners | Where-Object LocalPort -eq $port | Select-Object -ExpandProperty OwningProcess -Unique)
     if ($matches.Count -ne 1 -or $holders.Count -ne 1) { $pass = $false; continue }
     $pids[$name] = [int]$matches[0].ProcessId
+    $processes[$name] = [ordered]@{ pid = [int]$matches[0].ProcessId; executable_path = [string]$matches[0].ExecutablePath;
+      started_at = $(if ($matches[0].CreationDate) { ([DateTime]$matches[0].CreationDate).ToUniversalTime().ToString('o') } else { $null }) }
     if ([string]$matches[0].ExecutablePath -ine (Join-Path $native ($name + '-server.exe')) -or
         $holders[0] -ne $matches[0].ProcessId) { $pass = $false }
   }
@@ -55,7 +82,7 @@ function Get-Snapshot {
     }
     if ($identity.PROCESS_IDENTITY_MATCH -ne 'YES') { $capture = $null }
   }
-  return [pscustomobject]@{pass=$pass; counts=$counts; pids=$pids; openkore_runtime_count=$openkore;
+  return [pscustomobject]@{pass=$pass; counts=$counts; pids=$pids; processes=$processes; openkore_runtime_count=$openkore;
     dashboard_pid= $(if($dashboard.Count -eq 1){$dashboard[0]}else{0}); database_pid=$(if($db.Count -eq 1){$db[0]}else{0});
     procdump_receipt=$capture; procdump_process_identity=$identity; measured_at=[DateTime]::UtcNow.ToString('o')}
 }
@@ -102,8 +129,8 @@ if ($Action -eq 'stop') {
 }
 # Existing Production procedure owns graceful stop, lifecycle lock, configured
 # environment, guard and exactly one replacement. No replacement runtime engine.
-& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $launcher -Action $Action | Out-Host
-if ($LASTEXITCODE -ne 0) { throw 'EXISTING_LIFECYCLE_FAILED' }
+$launch = Invoke-BoundedLauncher $launcher $Action (Join-Path $runtime 'logs')
+if ($launch.exit_code -ne 0) { throw 'EXISTING_LIFECYCLE_FAILED' }
 if ($Action -eq 'stop') {
   $left = @(Get-CimInstance Win32_Process | Where-Object Name -in @('login-server.exe','char-server.exe','map-server.exe'))
   $ports = @(Get-NetTCPConnection -State Listen | Where-Object LocalPort -in @(6901,6122,5122))

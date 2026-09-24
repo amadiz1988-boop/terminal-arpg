@@ -210,7 +210,8 @@ function main() {
       writeAtomic(stateFile, { ...state, production_drift: 'OPEN', drift_reason: 'FAILED_FIRST_PROMOTION_REQUIRES_RECONCILIATION' });
       fail('LEGACY_ARTIFACTS_NOT_RESTORED');
     }
-    writeAtomic(stateFile, { ...state, production_drift: 'CLOSED', drift_reason: null });
+    const { first_promotion_phase: _releasedPhase, ...released } = state;
+    writeAtomic(stateFile, { ...released, production_drift: 'CLOSED', drift_reason: null });
     if (fs.existsSync(pendingFile)) fs.unlinkSync(pendingFile);
     fs.unlinkSync(leaseFile); fs.rmdirSync(leaseDir);
     process.stdout.write(JSON.stringify({ released: true, baseline_mode: state.baseline_mode, legacy_bootstrap_available: true }) + '\n');

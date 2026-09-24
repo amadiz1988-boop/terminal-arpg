@@ -229,6 +229,18 @@ identities compared ordinally. A failed Native operation journal is closed only
 through `deploy-native-candidate.mjs --action archive-failed-operation`.
 Evidence: `docs/project-control/powershell51-utf8-governance-json-v1.md`.
 
+## Native lifecycle start and stage reconciliation
+
+Native lifecycle actions run with file-backed stdio and a normalized Windows
+PowerShell 5.1 module path; the adapter waits boundedly for the launcher only.
+A first-promotion Native stage whose tool reported
+`NATIVE_RUNTIME_START_FAILED` can be completed only through
+`deploy-native-candidate.mjs --action finalize-running-native-stage`, which
+verifies lease, candidate, bytes, runtime, ProcDump and untouched Web before
+writing a reconciliation Native stage receipt. It never completes the first
+promotion or changes the baseline. Evidence:
+`docs/project-control/running-native-stage-reconciliation-v1.md`.
+
 ## Native GitHub-first promotion entry V1
 
 `NATIVE_PROMOTION_PATH = AVAILABLE`. This entry implements the one-time first

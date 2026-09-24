@@ -80,8 +80,12 @@ export function evaluateNative({ manifest: m, build: b, authority, reachable, so
   need(rollbackValid, 'NATIVE_ROLLBACK_REQUIRED');
   need(m?.required_database === 'ragnarok' && JSON.stringify(m?.required_runtime_ports) === JSON.stringify([6901,6122,5122,8788]), 'NATIVE_TOPOLOGY_INVALID');
   need(m?.required_openkore_count === 0, 'OPENKORE_FORBIDDEN');
-  need(legacyIdentity(state) && state?.production_drift === 'CLOSED', 'PRODUCTION_DRIFT_OPEN');
-  if (mode === 'deploy') {
+  // reconcile: the candidate was already staged under this lease; the only
+  // admitted state is the lease-owned first-promotion Native stage.
+  if (mode === 'reconcile') need(legacyIdentity(state) && state?.production_drift === 'OPEN' &&
+    state.drift_reason === 'FIRST_PROMOTION_PENDING_FINAL_RECEIPT', 'NATIVE_STAGE_STATE_INVALID');
+  else need(legacyIdentity(state) && state?.production_drift === 'CLOSED', 'PRODUCTION_DRIFT_OPEN');
+  if (mode === 'deploy' || mode === 'reconcile') {
     need(lease?.status === 'ACTIVE' && lease.promotion_mode === FIRST_PROMOTION && lease.owner_task_id === owner &&
       lease.lease_id === leaseId && !!leaseId && lease.native_deploy_git_sha === m.native_git_sha &&
       equalHash(lease.native_candidate_manifest_sha256, manifestHash), 'NATIVE_LEASE_NOT_OWNED');
