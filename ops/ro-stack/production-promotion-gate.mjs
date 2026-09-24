@@ -18,14 +18,18 @@ const run = (cwd, ...args) => {
   if (result.status !== 0) fail(`GIT_FAILED:${args[0]}:${(result.stderr || '').trim()}`);
   return result.stdout.trim();
 };
-function reachable(root, remote, ref, commit) {
-  if (!root || !remote || !ref || !sha(commit) || !/^https:\/\/github\.com\//.test(remote)) return false;
+export function gitRefReachable(root, remote, ref, commit) {
+  if (!root || !remote || !ref || !sha(commit)) return false;
   if (run(root, 'remote', 'get-url', 'origin') !== remote) return false;
   const advertised = spawnSync('git', ['ls-remote', '--exit-code', 'origin', ref], { cwd: root, encoding: 'utf8', windowsHide: true, timeout: 15000 });
   const tip = advertised.status === 0 ? advertised.stdout.trim().split(/\s/)[0] : '';
   if (!sha(tip)) return false;
   const fetch = spawnSync('git', ['fetch', '--no-tags', '--no-write-fetch-head', 'origin', ref], { cwd: root, windowsHide: true, timeout: 30000 });
   return fetch.status === 0 && spawnSync('git', ['merge-base', '--is-ancestor', commit, tip], { cwd: root, windowsHide: true }).status === 0;
+}
+function reachable(root, remote, ref, commit) {
+  if (!/^https:\/\/github\.com\//.test(remote || '')) return false;
+  return gitRefReachable(root, remote, ref, commit);
 }
 const within = (root, relative) => {
   if (typeof relative !== 'string' || !/^[A-Za-z0-9_./-]+$/.test(relative) ||

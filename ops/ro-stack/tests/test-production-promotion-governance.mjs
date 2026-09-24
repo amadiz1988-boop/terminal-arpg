@@ -4,7 +4,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
-import { evaluatePromotion } from '../production-promotion-gate.mjs';
+import { execFileSync } from 'node:child_process';
+import { evaluatePromotion, gitRefReachable } from '../production-promotion-gate.mjs';
 import { receiptComplete, canCloseDrift } from '../production-deployment-state.mjs';
 
 const web = 'a'.repeat(40);
@@ -37,6 +38,29 @@ test('intentional removal requires committed decision', () => {
   blocked(check({ candidate: proposed }), 'CANDIDATE_MISSING_CAPABILITY');
   assert.equal(check({ candidate: { ...proposed, committedDecisions: ['skill-tree'] } }).eligible, true);
 });
+const gitRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'promotion-git-ref-'));
+try {
+  const bare = path.join(gitRoot, 'remote.git');
+  const work = path.join(gitRoot, 'work');
+  fs.mkdirSync(work);
+  const git = (...args) => execFileSync('git', args, { cwd: work, encoding: 'utf8', windowsHide: true }).trim();
+  execFileSync('git', ['init', '--bare', '-q', bare], { windowsHide: true });
+  git('init', '-q');
+  git('config', 'user.name', 'Fixture');
+  git('config', 'user.email', 'fixture@example.invalid');
+  git('remote', 'add', 'origin', bare);
+  git('commit', '-q', '--allow-empty', '-m', 'accepted');
+  const accepted = git('rev-parse', 'HEAD');
+  git('push', '-q', 'origin', 'HEAD:refs/heads/release');
+  test('actual Git SHA reachable from authorized fixture ref', () => assert.equal(gitRefReachable(work, bare, 'refs/heads/release', accepted), true));
+  git('commit', '-q', '--allow-empty', '-m', 'local-only');
+  const local = git('rev-parse', 'HEAD');
+  test('actual local-only Git SHA blocked', () => assert.equal(gitRefReachable(work, bare, 'refs/heads/release', local), false));
+  git('push', '-q', 'origin', 'HEAD:refs/heads/feature');
+  test('actual pushed SHA on wrong ref blocked', () => assert.equal(gitRefReachable(work, bare, 'refs/heads/release', local), false));
+  git('push', '-q', 'origin', 'HEAD:refs/heads/release');
+  test('actual promoted SHA becomes release reachable', () => assert.equal(gitRefReachable(work, bare, 'refs/heads/release', local), true));
+} finally { fs.rmSync(gitRoot, { recursive: true, force: true }); }
 test('receipt records exact Git SHAs', () => {
   assert.equal(receiptComplete({ web_git_sha: web }, os.tmpdir()), false);
 });
