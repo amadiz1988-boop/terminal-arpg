@@ -3846,7 +3846,7 @@ async function queueOwnershipCommand(
     const targetMap = String(body.targetMap ?? '');
     if (!/^[a-z0-9_]{1,31}$/.test(targetMap))
       throw new HttpError(422, 'invalid_transition');
-    const skillEnabled = body.skillEnabled === true;
+    const skillEnabled = body.skillEnabled === undefined ? undefined : body.skillEnabled === true;
     const skillId = Number(body.skillId ?? 0);
     // A character's ordered attackSkillSlots may provide the skill ID after
     // authenticated config resolution below. Legacy one-skill requests still

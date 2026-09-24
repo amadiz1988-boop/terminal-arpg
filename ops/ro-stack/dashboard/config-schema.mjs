@@ -216,7 +216,7 @@ const gameplayKey = key => /^(?:attack|useSelf_|partySkill|buyAuto|sellAuto|stor
 // identities owned by the canonical contract are projected. Every source line
 // stays verbatim in migration.retained for a later authorized capability.
 export const LEGACY_ITEM_RULE_BASELINE = Object.freeze(['all','501','601','602']);
-export function migrateLegacyConfig({supplyCycle={},configText='',skillAutomation={},itemsControlText='',pickupText='',monControlText='',source='legacy'}={}) {
+export function migrateLegacyConfig({supplyCycle={},configText='',skillAutomation={},itemsControlText='',pickupText='',monControlText='',skillIdsByHandle=new Map(),source='legacy'}={}) {
   const config=defaultCanonicalConfig(0); const mappings=[]; const unmapped=[];
   const parsed=parseConfig(configText); const retained={supplyCycle:clone(supplyCycle),scalars:{},blocks:[],itemsControl:[],pickup:[],monControl:[]};
   const add=(legacy,canonical,disposition='MIGRATE',reason='沿用成熟欄位語意')=>mappings.push({legacy,canonical,disposition,reason});
@@ -249,6 +249,10 @@ export function migrateLegacyConfig({supplyCycle={},configText='',skillAutomatio
     retained.blocks.push(block);
     const descriptor=arrayByMature.get(block.kind); const row=defaultConfigRow(descriptor.kind); const consumed=new Set();
     row[descriptor.kind.endsWith('Skill')?'skill':'item']=block.name;
+    if(descriptor.kind==='attackSkill' && !/^\d+$/.test(row.skill)) {
+      const skillId=skillIdsByHandle.get(row.skill);
+      if(skillId) { row.skill=String(skillId); add(`attackSkillSlot ${block.name}`,'combat.skills.attackSlots[].skill','ADAPT','skill-trees.json handle 對應數字 ID'); }
+    }
     if(descriptor.kind==='buy' && block.name.trim().toLowerCase()==='red potion') {
       row.item='501'; add('buyAuto Red Potion','supply.services.buy.rules[item=501]','ADAPT','rAthena 道具 501');
     }

@@ -9,6 +9,31 @@ import {
 
 const accountIdPattern = /^[0-9]+$/;
 const characterIdPattern = /^[0-9]+$/;
+let legacySkillIdsPromise;
+
+function legacyAttackSkillIds() {
+  legacySkillIdsPromise ??= readFile(new URL('../../../public/ro/data/skill-trees.json', import.meta.url), 'utf8')
+    .then((text) => {
+      const jobs = JSON.parse(text).jobs ?? {};
+      const ids = new Map();
+      const ambiguous = new Set();
+      for (const job of Object.values(jobs)) for (const skill of job.skills ?? []) {
+        const handle = String(skill.handle ?? '');
+        const id = Number(skill.id);
+        if (!handle || !Number.isSafeInteger(id) || id < 1 || id > 65535 || ambiguous.has(handle)) continue;
+        if (ids.has(handle) && ids.get(handle) !== id) {
+          ids.delete(handle);
+          ambiguous.add(handle);
+        } else ids.set(handle, id);
+      }
+      return ids;
+    })
+    .catch((error) => {
+      if (error?.code === 'ENOENT') return new Map();
+      throw error;
+    });
+  return legacySkillIdsPromise;
+}
 
 function identityPart(value, pattern, name) {
   const text = String(value ?? '');
@@ -75,8 +100,10 @@ export async function loadCanonicalConfig({ instancesRoot, accountId, characterI
   }
   const legacy = await readLegacy(instancesRoot, accountId);
   const hasLegacy = Boolean(legacy.configText.trim()) || Object.keys(legacy.supplyCycle).length > 0;
+  const skillIdsByHandle = hasLegacy && /\battackSkillSlot(?:_\d+)?\b/.test(legacy.configText)
+    ? await legacyAttackSkillIds() : new Map();
   const migrated = hasLegacy
-    ? migrateLegacyConfig({ ...legacy, source: 'legacy-openkore-web-v1' })
+    ? migrateLegacyConfig({ ...legacy, skillIdsByHandle, source: 'legacy-openkore-web-v1' })
     : { config: defaultCanonicalConfig(0), migration: { source: 'default', sourceVersion: null, mappings: [], unmapped: [], policy: { fixedOverlays: ['loot.autoLoot=true', 'loot.autoStore=false', 'Butterfly/Fly presence based'] } } };
   const config = { ...migrated.config, migration: migrated.migration };
   assertCanonicalConfig(config);
