@@ -1,9 +1,15 @@
 # ProcDump identity comparison shared by the receipt writer and Native reader.
 # One Windows tick is 100 ns. Missing or ambiguous timestamps fail closed.
+# Receipts record CIM Win32_Process.CreationDate, which has microsecond
+# resolution: its last tick digit is always 0. Get-Process StartTime carries
+# the full 100 ns value, so the same process can read 0-9 ticks later. That
+# case matches only when the receipt is microsecond aligned and the current
+# start lies inside that same microsecond.
 $script:procdumpMaxStartTimeDeltaTicks = 1
+$script:procdumpCimResolutionTicks = 10
 function Get-ProcDumpStartDelta($ReceiptStart, $CurrentStart) {
   $result = [ordered]@{ valid = $false; receipt_start_time_utc = $null;
-    current_start_time_utc = $null; start_time_delta_ticks = $null }
+    current_start_time_utc = $null; start_time_delta_ticks = $null; same_cim_microsecond = $false }
   if ($null -eq $ReceiptStart -or [string]::IsNullOrWhiteSpace([string]$ReceiptStart) -or $null -eq $CurrentStart) {
     return [pscustomobject]$result
   }
@@ -34,9 +40,17 @@ function Get-ProcDumpStartDelta($ReceiptStart, $CurrentStart) {
     $result.receipt_start_time_utc = $receiptUtc.ToString('o', [Globalization.CultureInfo]::InvariantCulture)
     $result.current_start_time_utc = $current.ToString('o', [Globalization.CultureInfo]::InvariantCulture)
     $result.start_time_delta_ticks = [Math]::Abs($receiptUtc.Ticks - $current.Ticks)
+    $offset = $current.Ticks - $receiptUtc.Ticks
+    $result.same_cim_microsecond = ($receiptUtc.Ticks % $script:procdumpCimResolutionTicks) -eq 0 -and
+      $offset -ge 0 -and $offset -lt $script:procdumpCimResolutionTicks
     $result.valid = $true
   } catch {}
   return [pscustomobject]$result
+}
+
+function Test-ProcDumpStartMatch($Times) {
+  return [bool]($Times -and $Times.valid -and
+    ($Times.start_time_delta_ticks -le $script:procdumpMaxStartTimeDeltaTicks -or $Times.same_cim_microsecond))
 }
 
 function Compare-ProcDumpProcessIdentity($Capture, [int]$TargetPid, $CurrentMap, $CurrentProcess,
@@ -85,7 +99,7 @@ function Compare-ProcDumpProcessIdentity($Capture, [int]$TargetPid, $CurrentMap,
     elseif ([string]$sidecar.ExecutablePath -ine $ExpectedProcDumpPath) { 'PROCDUMP_EXECUTABLE_MISMATCH' }
     elseif ($null -eq $commandTarget -or $commandTarget -ne $TargetPid) { 'PROCDUMP_TARGET_MISMATCH' }
     elseif (-not $times.valid) { 'START_TIME_INVALID' }
-    elseif ($times.start_time_delta_ticks -gt $script:procdumpMaxStartTimeDeltaTicks) { 'START_TIME_DELTA_EXCEEDED' }
+    elseif (-not (Test-ProcDumpStartMatch $times)) { 'START_TIME_DELTA_EXCEEDED' }
     else { $null }
   $evidence.reason = $reason
   if (-not $reason) { $evidence.PROCESS_IDENTITY_MATCH = 'YES' }

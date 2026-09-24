@@ -95,7 +95,7 @@ function Invoke-MapProcDumpTick([string]$runtimeRoot, [string]$canonicalRoot, $s
     return $record
   }
   $startDelta = Get-ProcDumpStartDelta $prior.mapProcessStartTime $map.start
-  $sameStart = $startDelta.valid -and $startDelta.start_time_delta_ticks -le $script:procdumpMaxStartTimeDeltaTicks
+  $sameStart = Test-ProcDumpStartMatch $startDelta
   $sameMap = $prior -and [int]$prior.mapPid -eq [int]$map.pid -and $sameStart -and [string]$prior.runtimeGenerationId -eq $generation
   if ($decision.status -eq 'ALREADY_ATTACHED') {
     if ($sameMap -and [int]$prior.procdumpProcessId -eq [int]$decision.sidecar.ProcessId -and $prior.procdumpAttachStatus -eq 'ATTACHED') { return $prior }

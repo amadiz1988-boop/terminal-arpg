@@ -47,10 +47,16 @@ $twoTicks=Get-Snapshot
 if($twoTicks.procdump_receipt -or $twoTicks.procdump_process_identity.reason -ne 'START_TIME_DELTA_EXCEEDED'){throw 'TWO_TICK_RECEIPT_ACCEPTED'}
 Write-Output 'PASS two-tick receipt fails closed in Native snapshot'
 $script:receiptStarted=$script:started
+$script:started=$script:receiptStarted.AddTicks(3)
+$cimMicrosecond=Get-Snapshot
+if(-not $cimMicrosecond.procdump_receipt -or $cimMicrosecond.procdump_process_identity.start_time_delta_ticks -ne 3){throw 'CIM_MICROSECOND_RECEIPT_REJECTED'}
+Write-Output 'PASS CIM microsecond receipt survives JSON reader and Native snapshot'
+$script:started=$script:receiptStarted
+$script:receiptStarted=$script:started
 $script:fixtureCount=2
 if((Get-Snapshot).pass){throw 'SECOND_STACK_ACCEPTED'}
 Write-Output 'PASS fixture duplicate map is rejected'
 $script:fixtureCount=1;$script:wrongMap=$true
 if((Get-Snapshot).procdump_receipt){throw 'WRONG_MAP_CAPTURE_ACCEPTED'}
 Write-Output 'PASS fixture stale ProcDump map is rejected'
-Write-Output 'NATIVE_RUNTIME_ADAPTER_TEST_COUNT=5'
+Write-Output 'NATIVE_RUNTIME_ADAPTER_TEST_COUNT=6'

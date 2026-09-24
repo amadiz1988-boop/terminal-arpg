@@ -26,7 +26,11 @@ function Invoke-IdentityFixture($r=$receipt,$target=13,$m=$map,$p=$current,$s=$s
 Check 'exact start' (Invoke-IdentityFixture) YES $null 0
 Check 'current +1 tick' (Invoke-IdentityFixture -p ([pscustomobject]@{Id=13;StartTime=$start.AddTicks(1);HasExited=$false})) YES $null 1
 Check 'current -1 tick' (Invoke-IdentityFixture -p ([pscustomobject]@{Id=13;StartTime=$start.AddTicks(-1);HasExited=$false})) YES $null 1
-Check 'current +2 ticks' (Invoke-IdentityFixture -p ([pscustomobject]@{Id=13;StartTime=$start.AddTicks(2);HasExited=$false})) NO START_TIME_DELTA_EXCEEDED 2
+Check 'current +2 ticks inside CIM microsecond' (Invoke-IdentityFixture -p ([pscustomobject]@{Id=13;StartTime=$start.AddTicks(2);HasExited=$false})) YES $null 2
+Check 'current +3 ticks inside CIM microsecond (map 47184 sample)' (Invoke-IdentityFixture -p ([pscustomobject]@{Id=13;StartTime=$start.AddTicks(3);HasExited=$false})) YES $null 3
+Check 'current +9 ticks inside CIM microsecond' (Invoke-IdentityFixture -p ([pscustomobject]@{Id=13;StartTime=$start.AddTicks(9);HasExited=$false})) YES $null 9
+Check 'current +10 ticks next microsecond' (Invoke-IdentityFixture -p ([pscustomobject]@{Id=13;StartTime=$start.AddTicks(10);HasExited=$false})) NO START_TIME_DELTA_EXCEEDED 10
+Check 'unaligned receipt +2 ticks' (Invoke-IdentityFixture -r ([pscustomobject]@{mapPid=13;procdumpAttachedPid=13;procdumpProcessId=20;procdumpAttachStatus='ATTACHED';mapProcessStartTime=$start.AddTicks(3).ToString('o');mapBinaryPath=$mapPath}) -p ([pscustomobject]@{Id=13;StartTime=$start.AddTicks(5);HasExited=$false})) NO START_TIME_DELTA_EXCEEDED 2
 Check 'current -2 ticks' (Invoke-IdentityFixture -p ([pscustomobject]@{Id=13;StartTime=$start.AddTicks(-2);HasExited=$false})) NO START_TIME_DELTA_EXCEEDED 2
 Check 'same start different PID' (Invoke-IdentityFixture -m ([pscustomobject]@{Name='map-server.exe';ProcessId=14;ExecutablePath=$mapPath})) NO PID_MISMATCH 0
 Check 'executable mismatch' (Invoke-IdentityFixture -m ([pscustomobject]@{Name='map-server.exe';ProcessId=13;ExecutablePath='C:\other\map-server.exe'})) NO EXECUTABLE_MISMATCH 0
