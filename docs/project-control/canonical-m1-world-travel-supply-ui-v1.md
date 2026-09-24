@@ -87,6 +87,20 @@ PLAYER_FARM_MAP_CHANGE_PREFLIGHT = BEFORE_FARM_STOP_FEE_COOLDOWN_TELEPORT
 
 服務不可用、倉庫滿、處置後仍超重或滿格、Zeny 不足及交易拒絕時，保留父意圖與所選地圖，進入可恢復的安全阻擋狀態。重試必須有進度條件與總次數／時間上限；禁止隔離、空轉及用販售取代無法完成的存倉。此狀態為 `SAFE / RECOVERABLE / NO_QUARANTINE`，待權威狀態變化或明確玩家處理後續行。
 
+### NON-CONSUMABLE TRAVEL / AMMO OVERRIDES
+
+```text
+CLASSIFICATION = GI_EXPLICIT_OVERRIDE
+FLY_WING_CONSUMPTION = NO
+BUTTERFLY_WING_CONSUMPTION = NO
+BULLET_CONSUMPTION = NO
+ARROW_CONSUMPTION = NO
+```
+
+蒼蠅翅膀仍須完成權威同圖隨機移動，蝴蝶翅膀仍須完成權威 Saved Town 回城；成功與否以地圖、座標及權威到達結果判定，數量保持不變。遠程攻擊保留 rAthena 的彈藥類型、裝備、武器、射程、傷害及技能合法性判定；具備相容彈藥後，命中不扣箭矢或子彈數量。缺少必要相容彈藥時，保留安全的戰鬥資源阻擋狀態與掛機父意圖，不隔離角色。
+
+四類非消耗資源均不適用數量耗盡補給門檻，不以其數量下降觸發 Supply，也不顯示補貨或耗盡閾值設定。此條款只凍結四類資源的非消耗性及其補給排除；其他補給、重量、格數與服務政策依本文件各自的現行決策處理。
+
 ## M1 設定與 Fly Wing 拒絕
 
 玩家設定區順序為：1 掛機、2 戰鬥、3 技能、4 HP / SP、5 補給、6 蒼蠅翅膀、7 蝴蝶翅膀 / 回城、8 恢復、9 進階 / 尚未支援；不加入玩家 Navigation 區。每個設定須可追溯 `OPENKORE_FILE`、`OPENKORE_SYMBOL`、`OPENKORE_CONFIG`、`OPENKORE_DEFAULT`、`OPENKORE_BEHAVIOR`、`GI_RUNTIME_MAPPING`、`UI_CONTROL`、`UI_STATE`。`UI_ENABLEMENT <= RUNTIME_CAPABILITY`，`ENABLED_UI_NO_OP_COUNT=0`；執行尚未接通的控制須停用或唯讀。
