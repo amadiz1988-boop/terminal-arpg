@@ -1,0 +1,276 @@
+{
+  "schemaVersion": 1,
+  "kind": "paper-doll",
+  "updatedAt": "2026-09-14",
+  "entries": [
+    {
+      "key": "dashboard-character-showcase",
+      "zhHantName": "Dashboard 角色紙娃娃基線",
+      "canonicalZhHant": "Dashboard 角色紙娃娃基線",
+      "enName": "Dashboard character paper doll baseline",
+      "aliases": [
+        "character-showcase",
+        "paper-doll"
+      ],
+      "translationStatus": "verified-zh-hant",
+      "sex": [
+        "male",
+        "female"
+      ],
+      "jobs": [
+        "novice",
+        "swordsman",
+        "mage",
+        "archer",
+        "acolyte",
+        "merchant",
+        "thief",
+        "taekwon",
+        "supernovice",
+        "gunslinger",
+        "ninja"
+      ],
+      "body": {
+        "manifestPath": "/ro/client/showcase/manifest.json",
+        "webPath": "/ro/client/showcase/manifest.json",
+        "variants": 22
+      },
+      "hair": {
+        "stylesPerSex": 42,
+        "variants": 84
+      },
+      "headgear": {
+        "headTop": [
+          {
+            "itemId": 2213,
+            "viewId": 2
+          },
+          {
+            "itemId": 2207,
+            "viewId": 4
+          },
+          {
+            "itemId": 2221,
+            "viewId": 16
+          },
+          {
+            "itemId": 2209,
+            "viewId": 17
+          },
+          {
+            "itemId": 2233,
+            "viewId": 18
+          },
+          {
+            "itemId": 2253,
+            "viewId": 37
+          },
+          {
+            "itemId": 2254,
+            "viewId": 38
+          },
+          {
+            "itemId": 2255,
+            "viewId": 39
+          },
+          {
+            "itemId": 2257,
+            "viewId": 42
+          },
+          {
+            "itemId": 2264,
+            "viewId": 51
+          },
+          {
+            "itemId": 2272,
+            "viewId": 59
+          },
+          {
+            "itemId": 2274,
+            "viewId": 61
+          },
+          {
+            "itemId": 2277,
+            "viewId": 64
+          },
+          {
+            "itemId": 2279,
+            "viewId": 66
+          },
+          {
+            "itemId": 2282,
+            "viewId": 69
+          },
+          {
+            "itemId": 2285,
+            "viewId": 72
+          },
+          {
+            "itemId": 5008,
+            "viewId": 94
+          },
+          {
+            "itemId": 5011,
+            "viewId": 97
+          },
+          {
+            "itemId": 5015,
+            "viewId": 101
+          },
+          {
+            "itemId": 5055,
+            "viewId": 101
+          },
+          {
+            "itemId": 5035,
+            "viewId": 120
+          },
+          {
+            "itemId": 5046,
+            "viewId": 139
+          },
+          {
+            "itemId": 5583,
+            "viewId": 465
+          },
+          {
+            "itemId": 18730,
+            "viewId": 872
+          }
+        ],
+        "headMid": [
+          {
+            "itemId": 2276,
+            "viewId": 63
+          },
+          {
+            "itemId": 5014,
+            "viewId": 100
+          }
+        ],
+        "headLow": [
+          {
+            "itemId": 2262,
+            "viewId": 49
+          },
+          {
+            "itemId": 2269,
+            "viewId": 56
+          },
+          {
+            "itemId": 2270,
+            "viewId": 57
+          }
+        ]
+      },
+      "weapon": {
+        "types": [
+          "dagger",
+          "sword",
+          "twoHandSword",
+          "spear",
+          "twoHandSpear",
+          "axe",
+          "twoHandAxe",
+          "club",
+          "rod",
+          "bow",
+          "revolver"
+        ],
+        "combinations": 84,
+        "itemOverrides": [
+          1117,
+          1361,
+          1460,
+          1461,
+          1613
+        ]
+      },
+      "shield": {
+        "types": [
+          "guard",
+          "buckler",
+          "shield",
+          "mirrorShield"
+        ],
+        "combinations": 38,
+        "mappedViewIds": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "garment": [],
+      "robe": [],
+      "mount": [],
+      "costume": [],
+      "directions": 8,
+      "animations": [
+        "stand",
+        "walk",
+        "sit",
+        "attack"
+      ],
+      "palette": {
+        "indexedSource": true,
+        "webOutput": "RGBA PNG sprite sheets"
+      },
+      "layerOrder": [
+        "headTopBack",
+        "headMidBack",
+        "headLowBack",
+        "weaponBack",
+        "hairBack",
+        "shieldBack",
+        "body",
+        "garment",
+        "shieldFront",
+        "weaponFront",
+        "hairFront",
+        "headLowFront",
+        "headMidFront",
+        "headTopFront",
+        "costume"
+      ],
+      "assetStatus": "ready",
+      "verificationGrade": "A",
+      "missingCoverage": [
+        "book",
+        "katar",
+        "whip",
+        "shield-view-5",
+        "garments",
+        "robes",
+        "mounts",
+        "costumes"
+      ],
+      "provenance": [
+        {
+          "tier": 1,
+          "sourceType": "client-derived-manifest",
+          "sourcePath": "public/ro/client/showcase/manifest.json",
+          "verifiedAt": "2026-09-14"
+        },
+        {
+          "tier": 1,
+          "sourceType": "dashboard-renderer",
+          "sourcePath": "ops/ro-stack/dashboard/app.js:1111",
+          "verifiedAt": "2026-09-14"
+        }
+      ]
+    }
+  ],
+  "researchStatus": "WEB READY",
+  "coverage": {
+    "bodies": 22,
+    "hair": 84,
+    "headTop": 46,
+    "weaponPairs": 84,
+    "shieldPairs": 38,
+    "headLow": 6,
+    "headMid": 4,
+    "headgearItemIds": 29,
+    "headgearViewIds": 28
+  }
+}

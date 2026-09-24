@@ -12,4 +12,69 @@
   LoginPort = 6901
   CharacterPort = 6122
   MapPort = 5122
+  PersistentAgentEnabled = $true
+  PersistentAgentServerCommandAllowlist = @('terminal_onboarding_resume','terminal_onboarding_advance','terminal_academy_graduate')
+  PersistentAgentAccountAllowlist = @(2000099,2000035,2000021,2000022,2000031,2000038,2000040,2000088,2000102,2000103,2000111,2000141,2000142,2000145)
+  PersistentAgentCharacterAllowlist = @(150067,150035,150021,150022,150031,150040,150039,150056,150069,150070,150075,150097,150098,150099)
+  PersistentAgentEdenCourseAEnabled = $true
+  PersistentAgentPollMilliseconds = 500
+  PersistentAgentFarmMapAllowlist = @('pay_dun00','prt_fild05','prt_fild07')
+  PersistentAgentFarmMobAllowlist = @(1076,1052)
+  PersistentAgentLootEnabled = $true
+  PersistentAgentSkillEnabled = $true
+  PersistentAgentSkillAllowlist = @(5)
+  PersistentAgentSurvivalEnabled = $true
+  PersistentAgentHpThresholdPercent = 70
+  PersistentAgentHpSafePercent = 80
+  PersistentAgentSpThresholdPercent = 0
+  PersistentAgentSpSafePercent = 0
+  PersistentAgentHpItemAllowlist = @(501)
+  PersistentAgentSpItemAllowlist = @()
+  PersistentAgentRecoverySkillAllowlist = @()
+  PersistentAgentDeathRecoveryEnabled = $true
+  PersistentAgentRespawnDelayMilliseconds = 1500
+  PersistentAgentRespawnMaxAttempts = 5
+  PersistentAgentNavigationEnabled = $true
+  PersistentAgentNavigationMapAllowlist = @('pay_arche','prt_fild05','prt_fild07','pay_dun00','payon','pay_gld','moc_fild02','moc_fild01','prt_fild09')
+  PersistentAgentNavigationMaxRetries = 6
+  PersistentAgentNavigationStuckMilliseconds = 5000
+  PersistentAgentNpcEnabled = $false
+  PersistentAgentNpcMapAllowlist = @()
+  PersistentAgentNpcAllowlist = @()
+  PersistentAgentNpcTimeoutMilliseconds = 15000
+  PersistentAgentNpcMaxRetries = 3
+  PersistentAgentServiceEnabled = $true
+  PersistentAgentServiceMapAllowlist = @('prt_fild05','prt_in','geffen_in','izlude_in','payon','alberta_in','cmd_in01','aldeba_in','prontera','geffen','izlude','alberta','comodo','aldebaran')
+  PersistentAgentServiceNpcAllowlist = @('Tool Dealer#Extended_Prt','Tool Dealer#Extended_Prt1','Tool Dealer#Extended_Gef','Tool Dealer#iz','Tool Dealer#pay3','Tool Dealer#Extended_Alb2','Tool Dealer#Extended_Cmd','Tool Dealer#Extended_Alde','kaf_prontera2','kaf_geffen','Kafra Employee#iz','kaf_payon','kaf_alberta2','kaf_comodo','kaf_aldebaran')
+  PersistentAgentServiceItemAllowlist = @(501)
+  PersistentAgentServiceDestinationAllowlist = @()
+  PersistentAgentServiceTimeoutMilliseconds = 15000
+  PersistentAgentServiceMaxRetries = 3
+  PersistentAgentQuestEnabled = $false
+  PersistentAgentQuestIdAllowlist = @()
+  PersistentAgentQuestTaskAllowlist = @()
+  PersistentAgentQuestSequenceAllowlist = @()
+  PersistentAgentQuestRewardItemAllowlist = @()
+  PersistentAgentQuestTimeoutMilliseconds = 60000
+  PersistentAgentQuestMaxRetries = 3
+  # Gate2 supply (1:1 projection of PERSISTENT_AGENT_SUPPLY_*). Canary profile values.
+  PersistentAgentSupplyEnabled = $true
+  PersistentAgentSupplyItem = 501
+  PersistentAgentSupplyMin = 5
+  PersistentAgentSupplyTarget = 15
+  PersistentAgentSupplyNpc = 'Tool Dealer#Extended_Prt'
+  PersistentAgentSupplyGraceMilliseconds = 3000
+  PersistentAgentSupplyMaxRetries = 3
+  # M1 storage/sell/buy source remains disabled until Web, Native, and SQL deploy together.
+  PersistentAgentM1SupplyEnabled = $false
+  WebNativeSupplyPolicyEnabled = $false
+  # Gate3 routes (1:1 projection of PERSISTENT_AGENT_ROUTE_*). Accepted g3 / g3b2 route JSON.
+  PersistentAgentRouteDeath = '[{"map":"pay_arche","x":36,"y":131,"portalTo":"pay_dun00"},{"map":"pay_dun00","x":73,"y":78}]'
+  PersistentAgentRouteSupplyOut = '{"pay_dun00":[{"map":"pay_dun00","x":21,"y":186,"portalTo":"pay_arche"},{"map":"pay_arche","x":81,"y":18,"portalTo":"payon"},{"map":"payon","x":16,"y":143,"portalTo":"pay_gld"},{"map":"pay_gld","x":16,"y":276,"portalTo":"moc_fild02"},{"map":"moc_fild02","x":67,"y":342,"portalTo":"moc_fild01"},{"map":"moc_fild01","x":22,"y":242,"portalTo":"prt_fild09"},{"map":"prt_fild09","x":224,"y":380,"portalTo":"prt_fild07"},{"map":"prt_fild07","x":132,"y":381,"portalTo":"prt_fild05"},{"map":"prt_fild05","x":289,"y":219}],"prt_fild08":[{"map":"prt_fild08","x":16,"y":187,"portalTo":"prt_fild07"},{"map":"prt_fild07","x":132,"y":381,"portalTo":"prt_fild05"},{"map":"prt_fild05","x":289,"y":219}],"mjolnir_06":[{"map":"mjolnir_06","x":265,"y":29,"portalTo":"gef_fild00"},{"map":"gef_fild00","x":381,"y":137,"portalTo":"prt_fild00"},{"map":"prt_fild00","x":165,"y":18,"portalTo":"prt_fild04"},{"map":"prt_fild04","x":378,"y":72,"portalTo":"prt_fild05"},{"map":"prt_fild05","x":289,"y":219}]}'
+  PersistentAgentRouteSupplyBack = '{"pay_dun00":[{"map":"prt_fild05","x":134,"y":14,"portalTo":"prt_fild07"},{"map":"prt_fild07","x":206,"y":12,"portalTo":"prt_fild09"},{"map":"prt_fild09","x":383,"y":223,"portalTo":"moc_fild01"},{"map":"moc_fild01","x":301,"y":16,"portalTo":"moc_fild02"},{"map":"moc_fild02","x":378,"y":272,"portalTo":"pay_gld"},{"map":"pay_gld","x":374,"y":149,"portalTo":"payon"},{"map":"payon","x":228,"y":330,"portalTo":"pay_arche"},{"map":"pay_arche","x":36,"y":131,"portalTo":"pay_dun00"},{"map":"pay_dun00","x":73,"y":78}],"prt_fild08":[{"map":"prt_fild05","x":134,"y":14,"portalTo":"prt_fild07"},{"map":"prt_fild07","x":383,"y":239,"portalTo":"prt_fild08"},{"map":"prt_fild08","x":20,"y":239}],"mjolnir_06":[{"map":"prt_fild05","x":105,"y":381,"portalTo":"mjolnir_09"},{"map":"mjolnir_09","x":194,"y":367,"portalTo":"mjolnir_08"},{"map":"mjolnir_08","x":29,"y":346,"portalTo":"mjolnir_07"},{"map":"mjolnir_07","x":16,"y":377,"portalTo":"mjolnir_06"},{"map":"mjolnir_06","x":379,"y":377}]}'
+  # Gate3 live status (1:1 projection of PERSISTENT_AGENT_LIVE_STATUS_*).
+  PersistentAgentLiveStatusEnabled = $true
+  PersistentAgentLiveStatusExportMilliseconds = 500
+  # Gate3 hunt relocation items (1:1 projection of PERSISTENT_AGENT_HUNT_RELOCATION_ITEMS).
+  PersistentAgentHuntRelocationItems = @(601)
 }

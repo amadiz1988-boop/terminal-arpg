@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>RO Original Minimap Acceptance</title>
+    <style>
+      :root { color-scheme: dark; font-family: system-ui, sans-serif; }
+      body { margin: 0; background: #111; color: #eee; }
+      main { width: min(960px, calc(100% - 24px)); margin: 12px auto; }
+      body.mobile main { width: 390px; max-width: calc(100% - 16px); }
+      nav { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+      button { padding: 7px 10px; border: 1px solid #777; border-radius: 5px; background: #252525; color: inherit; }
+      canvas { display: block; width: 100%; height: auto; background: #050505; border: 1px solid #555; }
+      #status { margin: 8px 0; font: 13px/1.4 ui-monospace, monospace; }
+      .legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 13px; }
+      .legend span::before { content: ''; display: inline-block; width: 9px; height: 9px; margin-right: 4px; border-radius: 50%; background: var(--c); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <nav id="maps"></nav>
+      <nav>
+        <button id="original">原廠彩圖</button>
+        <button id="collision">Collision</button>
+        <button id="zoomIn">放大</button>
+        <button id="zoomOut">縮小</button>
+      </nav>
+      <div id="status">載入中</div>
+      <canvas width="720" height="420" aria-label="RO minimap acceptance canvas"></canvas>
+      <p class="legend">
+        <span style="--c:#45a3ff">玩家</span><span style="--c:#ff5a52">怪物</span>
+        <span style="--c:#ffd34d">NPC</span><span style="--c:#d777ff">傳送點</span>
+        <span style="--c:#79e66d">路線</span>
+      </p>
+    </main>
+    <script src="../../original-minimap.js?v=3"></script>
+    <script src="./app.js?v=3"></script>
+  </body>
+</html>

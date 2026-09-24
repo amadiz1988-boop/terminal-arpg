@@ -1,0 +1,530 @@
+{
+  "id": "dic_dun02",
+  "name": "斯卡勒伯熔岩",
+  "category": "SERVICE_ONLY",
+  "dungeon": null,
+  "totalMonsters": 127,
+  "normalMonsterCount": 127,
+  "levelRange": {
+    "min": 127,
+    "max": 139
+  },
+  "fullLevelRange": {
+    "min": 127,
+    "max": 139
+  },
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [
+    {
+      "id": 2085,
+      "name": "鹿角甲蟲",
+      "level": 136,
+      "count": 50
+    },
+    {
+      "id": 2086,
+      "name": "尖角甲蟲",
+      "level": 139,
+      "count": 45
+    },
+    {
+      "id": 2090,
+      "name": "鹿角甲蟲卵",
+      "level": 127,
+      "count": 15
+    },
+    {
+      "id": 2091,
+      "name": "尖角甲蟲卵",
+      "level": 128,
+      "count": 15
+    }
+  ],
+  "resourceMonsters": [],
+  "bossMonsters": [],
+  "monsters": [
+    {
+      "id": 2090,
+      "aegisName": "ANTLER_SCARABA_EGG",
+      "name": "鹿角甲蟲卵",
+      "count": 15,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 127,
+      "hp": 69000,
+      "baseExp": 2600,
+      "jobExp": 1980,
+      "attackMin": 1,
+      "attackMax": 1,
+      "defense": 235,
+      "magicDefense": 180,
+      "size": "小型",
+      "race": "昆蟲",
+      "element": "無 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/dic_dun.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 7032,
+          "aegisName": "Piece_Of_Egg_Shell",
+          "name": "蛋殼碎片",
+          "ratePerTenThousand": 2500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "破掉的蛋殼碎片,賣給收集品商人。\n\n重量: 1"
+        },
+        {
+          "itemId": 518,
+          "aegisName": "Honey",
+          "name": "蜂蜜",
+          "ratePerTenThousand": 50,
+          "type": "恢復道具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "味道香甜的液體,營養價值相當高,常被拿來治療用 可恢復少量HP 與 SP。\n\n重量: 10"
+        },
+        {
+          "itemId": 985,
+          "aegisName": "Elunium",
+          "name": "鋁",
+          "ratePerTenThousand": 5,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "很輕且沒有毒性的金屬。常被拿來作成盔甲,以此製成的所有防具將變成更強。\n\n重量: 20"
+        }
+      ]
+    },
+    {
+      "id": 2091,
+      "aegisName": "RAKE_SCARABA_EGG",
+      "name": "尖角甲蟲卵",
+      "count": 15,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 128,
+      "hp": 72000,
+      "baseExp": 2600,
+      "jobExp": 1980,
+      "attackMin": 1,
+      "attackMax": 1,
+      "defense": 290,
+      "magicDefense": 44,
+      "size": "小型",
+      "race": "昆蟲",
+      "element": "無 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/dic_dun.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 7032,
+          "aegisName": "Piece_Of_Egg_Shell",
+          "name": "蛋殼碎片",
+          "ratePerTenThousand": 2500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "破掉的蛋殼碎片,賣給收集品商人。\n\n重量: 1"
+        },
+        {
+          "itemId": 518,
+          "aegisName": "Honey",
+          "name": "蜂蜜",
+          "ratePerTenThousand": 50,
+          "type": "恢復道具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "味道香甜的液體,營養價值相當高,常被拿來治療用 可恢復少量HP 與 SP。\n\n重量: 10"
+        },
+        {
+          "itemId": 985,
+          "aegisName": "Elunium",
+          "name": "鋁",
+          "ratePerTenThousand": 5,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "很輕且沒有毒性的金屬。常被拿來作成盔甲,以此製成的所有防具將變成更強。\n\n重量: 20"
+        },
+        {
+          "itemId": 2153,
+          "aegisName": "Imperial_Guard",
+          "name": "帝國黃金盾",
+          "ratePerTenThousand": 250,
+          "type": "防具",
+          "weight": 250,
+          "attack": 0,
+          "defense": 120,
+          "slots": 1,
+          "description": "刻有盧恩王國紋樣的美麗盾牌。\nMDEF+5,\n重壓盾擊傷害+20%,從精煉6開始每精煉1，重壓盾擊傷害再+2%。\n系列：盾牌 防禦：120\n重量：250\n要求等級：102\n裝備：皇家禁衛隊"
+        }
+      ]
+    },
+    {
+      "id": 2085,
+      "aegisName": "ANTLER_SCARABA",
+      "name": "鹿角甲蟲",
+      "count": 50,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 136,
+      "hp": 62600,
+      "baseExp": 3165,
+      "jobExp": 3467,
+      "attackMin": 1418,
+      "attackMax": 410,
+      "defense": 155,
+      "magicDefense": 102,
+      "size": "中型",
+      "race": "昆蟲",
+      "element": "地 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/dic_dun.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 6322,
+          "aegisName": "Antler_Helm",
+          "name": "鹿角頭盔",
+          "ratePerTenThousand": 3250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "纖長鹿角形狀的頭盔, 可以賣給收集品商人。\n重量：1"
+        },
+        {
+          "itemId": 1930,
+          "aegisName": "Green_Whistle",
+          "name": "綠花草梗笛",
+          "ratePerTenThousand": 5,
+          "type": "武器",
+          "weight": 80,
+          "attack": 170,
+          "defense": 0,
+          "slots": 1,
+          "description": "用堅硬植物梗製成的草笛。\n使用沉睡搖籃曲, 朝風車突擊時變動詠唱時間縮短2秒, 自6精煉起每次精煉時該技能的 SP 消耗量 -4。\nMATK+50\n系列: 樂器 攻擊: 170\n重量: 80\n武器等級: 3\n要求等級: 102\n裝備: 宮廷樂師"
+        },
+        {
+          "itemId": 12735,
+          "aegisName": "Runstone_Ancient",
+          "name": "古代盧恩原石",
+          "ratePerTenThousand": 5,
+          "type": "恢復道具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "古代所製成的盧恩原石\n\n重量: 10"
+        },
+        {
+          "itemId": 7939,
+          "aegisName": "Elder_Branch",
+          "name": "古老樹枝",
+          "ratePerTenThousand": 50,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "生長在聖地的古老樹上採的小樹枝。\n\n重量: 1"
+        },
+        {
+          "itemId": 993,
+          "aegisName": "Yellow_Live",
+          "name": "地靈礦石",
+          "ratePerTenThousand": 50,
+          "type": "其他",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "綠色的小礦石塊。擁有地屬性,提煉後可以製作出地靈原石。\n\n重量: 5"
+        },
+        {
+          "itemId": 1692,
+          "aegisName": "Magical_Foxtail",
+          "name": "魔力狐尾草手杖",
+          "ratePerTenThousand": 1,
+          "type": "武器",
+          "weight": 60,
+          "attack": 120,
+          "defense": 0,
+          "slots": 2,
+          "description": "感受到蜻蜓和狐尾草奇妙魔力的草。\nMATK+260. MSP+100\n精煉值每+2時, MATK+2%, MSP+1%。\n- 喵族武器專屬能力值 -\n精煉+7時, 武器的基本屬性ATK&MATK+40%。\n自精煉+7起精煉每+1時, 武器的基本屬性ATK&MATK再+20%。\n(最多精煉+10)\n系列: 單手杖 攻擊: 120\n重量: 60\n武器等級: 3\n要求等級: 140\n裝備: 喵族"
+        },
+        {
+          "itemId": 1696,
+          "aegisName": "Ex_Model_Foxtail",
+          "name": "精工狐尾草模型",
+          "ratePerTenThousand": 1,
+          "type": "武器",
+          "weight": 30,
+          "attack": 240,
+          "defense": 0,
+          "slots": 2,
+          "description": "製作非常精工的狐尾草模型。\n遠程物理 攻擊力+8%, MHP+5%。\n精煉值每+2時, DEX+3, MSP+15。\n- 喵族武器專屬能力值 -\n精煉+7時, 武器的基本屬性ATK&MATK+40%。\n自精煉+7起精煉每+1時, 武器的基本屬性ATK&MATK再+20%。\n(最多精煉+10)\n系列: 單手杖 攻擊: 240\n重量: 30\n武器等級: 3\n要求等級: 140\n裝備: 喵族"
+        },
+        {
+          "itemId": 4505,
+          "aegisName": "Scaraba_Card",
+          "name": "甲蟲卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "MATK+20,MSP -1%。\n系列: 卡片\n裝備: 飾品\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2896,
+      "aegisName": "C5_ANTLER_SCARABA",
+      "name": "狡猾鹿角甲蟲",
+      "count": 2,
+      "respawnMinMs": 180000,
+      "respawnMaxMs": 180000,
+      "level": 136,
+      "hp": 313000,
+      "baseExp": 15825,
+      "jobExp": 52008,
+      "attackMin": 1701,
+      "attackMax": 410,
+      "defense": 155,
+      "magicDefense": 102,
+      "size": "中型",
+      "race": "昆蟲",
+      "element": "地 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/championmobs.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 6322,
+          "aegisName": "Antler_Helm",
+          "name": "鹿角頭盔",
+          "ratePerTenThousand": 10000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "纖長鹿角形狀的頭盔, 可以賣給收集品商人。\n重量：1"
+        },
+        {
+          "itemId": 1930,
+          "aegisName": "Green_Whistle",
+          "name": "綠花草梗笛",
+          "ratePerTenThousand": 25,
+          "type": "武器",
+          "weight": 80,
+          "attack": 170,
+          "defense": 0,
+          "slots": 1,
+          "description": "用堅硬植物梗製成的草笛。\n使用沉睡搖籃曲, 朝風車突擊時變動詠唱時間縮短2秒, 自6精煉起每次精煉時該技能的 SP 消耗量 -4。\nMATK+50\n系列: 樂器 攻擊: 170\n重量: 80\n武器等級: 3\n要求等級: 102\n裝備: 宮廷樂師"
+        },
+        {
+          "itemId": 12735,
+          "aegisName": "Runstone_Ancient",
+          "name": "古代盧恩原石",
+          "ratePerTenThousand": 25,
+          "type": "恢復道具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "古代所製成的盧恩原石\n\n重量: 10"
+        },
+        {
+          "itemId": 7939,
+          "aegisName": "Elder_Branch",
+          "name": "古老樹枝",
+          "ratePerTenThousand": 250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "生長在聖地的古老樹上採的小樹枝。\n\n重量: 1"
+        },
+        {
+          "itemId": 993,
+          "aegisName": "Yellow_Live",
+          "name": "地靈礦石",
+          "ratePerTenThousand": 250,
+          "type": "其他",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "綠色的小礦石塊。擁有地屬性,提煉後可以製作出地靈原石。\n\n重量: 5"
+        },
+        {
+          "itemId": 4505,
+          "aegisName": "Scaraba_Card",
+          "name": "甲蟲卡片",
+          "ratePerTenThousand": 5,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "MATK+20,MSP -1%。\n系列: 卡片\n裝備: 飾品\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2086,
+      "aegisName": "RAKE_SCARABA",
+      "name": "尖角甲蟲",
+      "count": 45,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 139,
+      "hp": 67700,
+      "baseExp": 3495,
+      "jobExp": 3955,
+      "attackMin": 1645,
+      "attackMax": 112,
+      "defense": 250,
+      "magicDefense": 70,
+      "size": "中型",
+      "race": "昆蟲",
+      "element": "地 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/dic_dun.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 6321,
+          "aegisName": "Rakehorn_Helm",
+          "name": "耙子角頭盔",
+          "ratePerTenThousand": 3250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "看起來異常堅固的尖角頭盔, 可以賣給收集品商人。\n重量：1"
+        },
+        {
+          "itemId": 16010,
+          "aegisName": "Red_Ether_Bag",
+          "name": "紅色乙太包",
+          "ratePerTenThousand": 5,
+          "type": "武器",
+          "weight": 100,
+          "attack": 15,
+          "defense": 0,
+          "slots": 1,
+          "description": "以提供'女性喜愛的武器!'為口號由鍊金術師所推出的新包。\n瘋狂野草, 惡魔火焰的攻擊力+20%；該技能的攻擊力是自6精煉起每次精煉時+2%。\nMATK+100\n系列: 鈍器 攻擊: 15\n重量: 100\n武器等級: 3\n要求等級: 102\n裝備: 基因學者"
+        },
+        {
+          "itemId": 12735,
+          "aegisName": "Runstone_Ancient",
+          "name": "古代盧恩原石",
+          "ratePerTenThousand": 5,
+          "type": "恢復道具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "古代所製成的盧恩原石\n\n重量: 10"
+        },
+        {
+          "itemId": 15000,
+          "aegisName": "Bone_Plate",
+          "name": "骷髏鎧甲[1]",
+          "ratePerTenThousand": 50,
+          "type": "防具",
+          "weight": 100,
+          "attack": 0,
+          "defense": 60,
+          "slots": 1,
+          "description": "周圍纏繞著尖骨的鋼鐵鎧甲, \n被攻擊時以1%的機率在自己周圍5*5空格上觸發出血, \n攻擊時無視玩家人類型、人類型、喵族、動物型的防禦力10%。\nSTR+1、MDEF+3。\n系列: 鎧甲 防禦: 60\n重量: 100\n要求等級 :1\n裝備: 進階劍士/商人/盜賊"
+        },
+        {
+          "itemId": 993,
+          "aegisName": "Yellow_Live",
+          "name": "地靈礦石",
+          "ratePerTenThousand": 50,
+          "type": "其他",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "綠色的小礦石塊。擁有地屬性,提煉後可以製作出地靈原石。\n\n重量: 5"
+        },
+        {
+          "itemId": 20789,
+          "aegisName": "Doram_High_Cape",
+          "name": "喵族高級斗篷",
+          "ratePerTenThousand": 20,
+          "type": "防具",
+          "weight": 40,
+          "attack": 0,
+          "defense": 25,
+          "slots": 1,
+          "description": "喵族所喜愛高級紋路的斗篷。\nFLEE+7、無屬性抗性3%。\n精煉值每+3時, 完全迴避+1, LUK+1。\n系列 : 披肩 防禦 : 25\n重量 : 40\n要求等級 : 140\n裝備 : 喵族"
+        },
+        {
+          "itemId": 512,
+          "aegisName": "Apple",
+          "name": "蘋果",
+          "ratePerTenThousand": 20,
+          "type": "恢復道具",
+          "weight": 2,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "清爽香甜的水果,可恢復少量的HP。\n\n重量: 2"
+        },
+        {
+          "itemId": 4505,
+          "aegisName": "Scaraba_Card",
+          "name": "甲蟲卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "MATK+20,MSP -1%。\n系列: 卡片\n裝備: 飾品\n重量: 1"
+        }
+      ]
+    }
+  ]
+}

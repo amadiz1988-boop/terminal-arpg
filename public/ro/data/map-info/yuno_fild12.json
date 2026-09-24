@@ -1,0 +1,368 @@
+{
+  "id": "yuno_fild12",
+  "name": "秀發茲發德 國界檢查站",
+  "category": "SERVICE_ONLY",
+  "dungeon": null,
+  "totalMonsters": 103,
+  "normalMonsterCount": 103,
+  "levelRange": {
+    "min": 65,
+    "max": 73
+  },
+  "fullLevelRange": {
+    "min": 65,
+    "max": 73
+  },
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [
+    {
+      "id": 1368,
+      "name": "邪惡向日葵",
+      "level": 73,
+      "count": 68
+    },
+    {
+      "id": 1139,
+      "name": "螳螂",
+      "level": 65,
+      "count": 34
+    }
+  ],
+  "resourceMonsters": [],
+  "bossMonsters": [],
+  "monsters": [
+    {
+      "id": 1139,
+      "aegisName": "MANTIS",
+      "name": "螳螂",
+      "count": 34,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 65,
+      "hp": 2363,
+      "baseExp": 642,
+      "jobExp": 556,
+      "attackMin": 199,
+      "attackMax": 31,
+      "defense": 90,
+      "magicDefense": 0,
+      "size": "中型",
+      "race": "昆蟲",
+      "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/yuno.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 993,
+          "aegisName": "Yellow_Live",
+          "name": "地靈礦石",
+          "ratePerTenThousand": 55,
+          "type": "其他",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "綠色的小礦石塊。擁有地屬性,提煉後可以製作出地靈原石。\n\n重量: 5"
+        },
+        {
+          "itemId": 1031,
+          "aegisName": "Limb_Of_Mantis",
+          "name": "螳螂臂",
+          "ratePerTenThousand": 4500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "如鐮刀般銳利的螳螂手臂,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 911,
+          "aegisName": "Scell",
+          "name": "雪勒結晶",
+          "ratePerTenThousand": 700,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從一部份怪物身上得來的結晶,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 757,
+          "aegisName": "Elunium_Stone",
+          "name": "鋁原石",
+          "ratePerTenThousand": 35,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以拿來煉鋁的礦石,拿來提煉作成盔甲。\n\n重量: 20"
+        },
+        {
+          "itemId": 943,
+          "aegisName": "Solid_Shell",
+          "name": "堅硬外皮",
+          "ratePerTenThousand": 125,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "怪物身上堅硬的外皮,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 721,
+          "aegisName": "Azure_Jewel",
+          "name": "綠寶石",
+          "ratePerTenThousand": 5,
+          "type": "其他",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "呈現出綠色光芒的寶石。\n\n重量: 10"
+        },
+        {
+          "itemId": 507,
+          "aegisName": "Red_Herb",
+          "name": "紅色藥草",
+          "ratePerTenThousand": 325,
+          "type": "恢復道具",
+          "weight": 3,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在治療傷處上有一定功效的珍貴藥草,可恢復少量的HP。\n\n重量: 3"
+        },
+        {
+          "itemId": 4079,
+          "aegisName": "Mantis_Card",
+          "name": "螳螂卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "STR+3。\n系列: 卡片\n裝置: 飾品\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1368,
+      "aegisName": "GEOGRAPHER",
+      "name": "邪惡向日葵",
+      "count": 68,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 73,
+      "hp": 3408,
+      "baseExp": 804,
+      "jobExp": 706,
+      "attackMin": 278,
+      "attackMax": 82,
+      "defense": 158,
+      "magicDefense": 42,
+      "size": "中型",
+      "race": "植物",
+      "element": "地 3",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/yuno.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 1032,
+          "aegisName": "Blossom_Of_Maneater",
+          "name": "噬人樹花",
+          "ratePerTenThousand": 3100,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "像人一般擁有各種器官的花。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 1033,
+          "aegisName": "Root_Of_Maneater",
+          "name": "噬人樹根",
+          "ratePerTenThousand": 2750,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "如筋肉或血管般結實的植物的根。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 2253,
+          "aegisName": "Sunflower",
+          "name": "向日葵頭飾",
+          "ratePerTenThousand": 15,
+          "type": "防具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 1,
+          "slots": 0,
+          "description": "戴在頭上裝飾用的向日葵頭飾。\n受到昆蟲係怪物的攻擊時, 傷害-10%\n系列: 頭具  防禦: 1\n位置: 上  重量: 10\n裝備: 全職業"
+        },
+        {
+          "itemId": 2207,
+          "aegisName": "Fancy_Flower",
+          "name": "花朵頭飾",
+          "ratePerTenThousand": 25,
+          "type": "防具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "用來插在頭上當裝飾的花。\n受到植物型怪的攻擊時, 可-10% 的傷害度。\n系列: 頭具  防禦: 0\n位置: 上  重量: 10\n裝備: 全職業"
+        },
+        {
+          "itemId": 12002,
+          "aegisName": "Holy_Scroll_1_5",
+          "name": "治癒術等級5",
+          "ratePerTenThousand": 50,
+          "type": "延遲消耗品",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "經過崇古的祭司洗禮過的紙張,並有著聖屬性的魔法,可使用等級5的治癒術。\n\n重量: 1"
+        },
+        {
+          "itemId": 12359,
+          "aegisName": "Very_Soft_Plant",
+          "name": "光滑柔軟草",
+          "ratePerTenThousand": 5,
+          "type": "消耗品",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "淡綠色的柔軟光滑的草, 是群葉貓的最愛。\n活動怪、小兵怪則無法認養。 \n\n種類 : 認養寵物物品\n重量 : 5"
+        },
+        {
+          "itemId": 4280,
+          "aegisName": "Geographer_Card",
+          "name": "邪惡向日葵卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "受到物理傷害時,當習得自動念咒、天使之賜福2技能、天使之賜福10技能時,可使用10技能天使之賜福。\n飛行魔書、猴桃木、甜餅人、海豹寶寶卡片一起裝備時,詠唱時間-10%。\n技能使用時SP消耗量,-10%。\nVIT+10。\n當套裝裝備者是服事系列角色時,從惡魔型和不死型怪受到的傷害-30%,打死惡魔型和不死型怪時,所得到的經驗值+5%。\n系列: 卡片\n裝備: 鎧甲\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2824,
+      "aegisName": "C1_GEOGRAPHER",
+      "name": "迅捷邪惡向日葵",
+      "count": 1,
+      "respawnMinMs": 180000,
+      "respawnMaxMs": 180000,
+      "level": 73,
+      "hp": 17040,
+      "baseExp": 4020,
+      "jobExp": 10590,
+      "attackMin": 333,
+      "attackMax": 82,
+      "defense": 158,
+      "magicDefense": 42,
+      "size": "中型",
+      "race": "植物",
+      "element": "地 3",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/championmobs.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 1032,
+          "aegisName": "Blossom_Of_Maneater",
+          "name": "噬人樹花",
+          "ratePerTenThousand": 10000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "像人一般擁有各種器官的花。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 1033,
+          "aegisName": "Root_Of_Maneater",
+          "name": "噬人樹根",
+          "ratePerTenThousand": 10000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "如筋肉或血管般結實的植物的根。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 2253,
+          "aegisName": "Sunflower",
+          "name": "向日葵頭飾",
+          "ratePerTenThousand": 75,
+          "type": "防具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 1,
+          "slots": 0,
+          "description": "戴在頭上裝飾用的向日葵頭飾。\n受到昆蟲係怪物的攻擊時, 傷害-10%\n系列: 頭具  防禦: 1\n位置: 上  重量: 10\n裝備: 全職業"
+        },
+        {
+          "itemId": 2207,
+          "aegisName": "Fancy_Flower",
+          "name": "花朵頭飾",
+          "ratePerTenThousand": 125,
+          "type": "防具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "用來插在頭上當裝飾的花。\n受到植物型怪的攻擊時, 可-10% 的傷害度。\n系列: 頭具  防禦: 0\n位置: 上  重量: 10\n裝備: 全職業"
+        },
+        {
+          "itemId": 12002,
+          "aegisName": "Holy_Scroll_1_5",
+          "name": "治癒術等級5",
+          "ratePerTenThousand": 250,
+          "type": "延遲消耗品",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "經過崇古的祭司洗禮過的紙張,並有著聖屬性的魔法,可使用等級5的治癒術。\n\n重量: 1"
+        },
+        {
+          "itemId": 4280,
+          "aegisName": "Geographer_Card",
+          "name": "邪惡向日葵卡片",
+          "ratePerTenThousand": 5,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "受到物理傷害時,當習得自動念咒、天使之賜福2技能、天使之賜福10技能時,可使用10技能天使之賜福。\n飛行魔書、猴桃木、甜餅人、海豹寶寶卡片一起裝備時,詠唱時間-10%。\n技能使用時SP消耗量,-10%。\nVIT+10。\n當套裝裝備者是服事系列角色時,從惡魔型和不死型怪受到的傷害-30%,打死惡魔型和不死型怪時,所得到的經驗值+5%。\n系列: 卡片\n裝備: 鎧甲\n重量: 1"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,231 @@
+{
+  "schema": "ro-quest-sequence/v1",
+  "sequenceId": "novice_onboarding",
+  "taskId": 7100001,
+  "enabled": true,
+  "engineStatus": "READY",
+  "sourceSpec": "../quest-content/novice-onboarding.spec.md",
+  "integration": {
+    "navigation": "canonical_persistent_agent_navigation",
+    "farm": "existing_auto_farm",
+    "checkpoint": "persistent_agent_quest_checkpoint",
+    "allowlist": "novice-onboarding.allowlists.json"
+  },
+  "steps": [
+    {
+      "type": "GO_NPC",
+      "npcName": "terminal_ship_wounded",
+      "map": "iz_int",
+      "x": 56,
+      "y": 32,
+      "destinationType": "NPC",
+      "route": [{ "map": "iz_int", "x": 56, "y": 32 }],
+      "retryPolicy": { "maxRetries": 3, "timeoutMs": 120000 },
+      "expectedArrivalCondition": "NPC_INTERACTION_RANGE"
+    },
+    { "type": "TALK_NPC", "npcName": "terminal_ship_wounded", "map": "iz_int" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "WAIT_QUEST_STATE", "questId": 21001, "expectedState": "COMPLETE" },
+    {
+      "type": "GO_NPC",
+      "npcName": "#ship_out",
+      "map": "iz_int",
+      "x": 56,
+      "y": 15,
+      "destinationType": "NPC",
+      "expectedDestinationMap": "int_land",
+      "route": [{ "map": "iz_int", "x": 56, "y": 15 }],
+      "retryPolicy": { "maxRetries": 3, "timeoutMs": 120000 },
+      "expectedArrivalCondition": "NPC_INTERACTION_RANGE"
+    },
+    {
+      "type": "GO_NPC",
+      "npcName": "Captain Carocc#intro_npc03",
+      "map": "int_land",
+      "x": 78,
+      "y": 103,
+      "destinationType": "NPC",
+      "route": [{ "map": "int_land", "x": 78, "y": 103 }],
+      "retryPolicy": { "maxRetries": 3, "timeoutMs": 120000 },
+      "expectedArrivalCondition": "NPC_INTERACTION_RANGE"
+    },
+    { "type": "TALK_NPC", "npcName": "Captain Carocc#intro_npc03", "map": "int_land" },
+    { "type": "WAIT_QUEST_STATE", "questId": 21008, "expectedState": "ACTIVE" },
+    {
+      "type": "GO_NPC",
+      "npcName": "Lumin#new_ship",
+      "map": "int_land",
+      "x": 73,
+      "y": 100,
+      "destinationType": "NPC",
+      "route": [{ "map": "int_land", "x": 73, "y": 100 }],
+      "retryPolicy": { "maxRetries": 3, "timeoutMs": 120000 },
+      "expectedArrivalCondition": "NPC_INTERACTION_RANGE"
+    },
+    { "type": "TALK_NPC", "npcName": "Lumin#new_ship", "map": "int_land" },
+    { "type": "WAIT_QUEST_STATE", "questId": 7471, "expectedState": "COMPLETE" },
+    { "type": "COLLECT_ITEM", "itemId": 6008, "count": 2 },
+    {
+      "type": "GO_NPC",
+      "npcName": "Sailor#intro_npc04",
+      "map": "int_land",
+      "x": 58,
+      "y": 69,
+      "destinationType": "NPC",
+      "route": [{ "map": "int_land", "x": 58, "y": 69 }],
+      "retryPolicy": { "maxRetries": 3, "timeoutMs": 120000 },
+      "expectedArrivalCondition": "NPC_INTERACTION_RANGE"
+    },
+    { "type": "TALK_NPC", "npcName": "Sailor#intro_npc04", "map": "int_land" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    {
+      "type": "GO_NPC",
+      "npcName": "#intro_to_izlude",
+      "map": "int_land",
+      "x": 49,
+      "y": 57,
+      "destinationType": "NPC",
+      "route": [{ "map": "int_land", "x": 49, "y": 57 }],
+      "retryPolicy": { "maxRetries": 3, "timeoutMs": 120000 },
+      "expectedArrivalCondition": "NPC_INTERACTION_RANGE"
+    },
+    { "type": "TALK_NPC", "npcName": "#intro_to_izlude", "map": "int_land" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    {
+      "type": "DIALOG_MENU_SELECT",
+      "expectedDialogState": "WAIT_MENU",
+      "index": 2,
+      "expectedDestinationMap": "izlude"
+    },
+    { "type": "WAIT_QUEST_STATE", "questId": 21008, "expectedState": "COMPLETE" },
+    {
+      "type": "GO_NPC",
+      "npcName": "Captain Carocc#iz",
+      "map": "izlude",
+      "x": 198,
+      "y": 213,
+      "destinationType": "NPC",
+      "route": [{ "map": "izlude", "x": 198, "y": 213 }],
+      "retryPolicy": { "maxRetries": 3, "timeoutMs": 120000 },
+      "expectedArrivalCondition": "NPC_INTERACTION_RANGE"
+    },
+    { "type": "TALK_NPC", "npcName": "Captain Carocc#iz", "map": "izlude" },
+    { "type": "WAIT_QUEST_STATE", "questId": 7472, "expectedState": "COMPLETE" },
+    {
+      "type": "GO_NPC",
+      "npcName": "Criatura Academy Staff#0",
+      "map": "izlude",
+      "x": 122,
+      "y": 207,
+      "destinationType": "NPC",
+      "route": [{ "map": "izlude", "x": 122, "y": 207 }],
+      "retryPolicy": { "maxRetries": 3, "timeoutMs": 120000 },
+      "expectedArrivalCondition": "NPC_INTERACTION_RANGE"
+    },
+    { "type": "TALK_NPC", "npcName": "Criatura Academy Staff#0", "map": "izlude" },
+    { "type": "WAIT_QUEST_STATE", "questId": 7473, "expectedState": "ACTIVE" },
+    { "type": "USE_ITEM", "itemId": 531 },
+    {
+      "type": "GO_NPC",
+      "npcName": "Criatura Academy Staff#0",
+      "map": "izlude",
+      "x": 122,
+      "y": 207,
+      "destinationType": "NPC",
+      "route": [{ "map": "izlude", "x": 122, "y": 207 }],
+      "retryPolicy": { "maxRetries": 3, "timeoutMs": 120000 },
+      "expectedArrivalCondition": "NPC_INTERACTION_RANGE"
+    },
+    { "type": "TALK_NPC", "npcName": "Criatura Academy Staff#0", "map": "izlude" },
+    { "type": "WAIT_QUEST_STATE", "questId": 7473, "expectedState": "COMPLETE" },
+    {
+      "type": "GO_MAP",
+      "map": "iz_ac01",
+      "x": 100,
+      "y": 39,
+      "destinationType": "MAP_POSITION",
+      "route": [
+        { "map": "izlude", "x": 125, "y": 257, "portalTo": "iz_ac01" },
+        { "map": "iz_ac01", "x": 99, "y": 29 },
+        { "map": "iz_ac01", "x": 100, "y": 39 }
+      ],
+      "retryPolicy": { "maxRetries": 3, "timeoutMs": 120000 },
+      "expectedArrivalCondition": "MAP_POSITION"
+    },
+    {
+      "type": "GO_NPC",
+      "npcName": "Academy Receptionist#1",
+      "map": "iz_ac01",
+      "x": 100,
+      "y": 39,
+      "destinationType": "NPC",
+      "route": [{ "map": "iz_ac01", "x": 100, "y": 39 }],
+      "retryPolicy": { "maxRetries": 3, "timeoutMs": 120000 },
+      "expectedArrivalCondition": "NPC_INTERACTION_RANGE"
+    },
+    { "type": "TALK_NPC", "npcName": "Academy Receptionist#1", "map": "iz_ac01" },
+    { "type": "WAIT_QUEST_STATE", "questId": 4269, "expectedState": "COMPLETE" },
+    {
+      "type": "GO_NPC",
+      "npcName": "Adept Adventurer#ac",
+      "map": "iz_ac01",
+      "x": 45,
+      "y": 80,
+      "destinationType": "NPC",
+      "route": [{ "map": "iz_ac01", "x": 45, "y": 80 }],
+      "retryPolicy": { "maxRetries": 3, "timeoutMs": 120000 },
+      "expectedArrivalCondition": "NPC_INTERACTION_RANGE"
+    },
+    { "type": "TALK_NPC", "npcName": "Adept Adventurer#ac", "map": "iz_ac01" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    {
+      "type": "DIALOG_MENU_SELECT",
+      "expectedDialogState": "WAIT_MENU",
+      "index": 1,
+      "expectedDestinationMap": "new_1-3"
+    },
+    { "type": "WAIT_QUEST_STATE", "questId": 2293, "expectedState": "ACTIVE" },
+    { "type": "USE_ITEM", "itemId": 569 },
+    { "type": "ALLOCATE_SKILL", "skillId": 1, "targetLevel": 9 },
+    {
+      "type": "FARM_UNTIL",
+      "map": "new_1-3",
+      "condition": { "read": "job_level", "op": "gte", "value": 10 }
+    },
+    {
+      "type": "GO_MAP",
+      "map": "iz_ac01",
+      "x": 49,
+      "y": 73,
+      "destinationType": "MAP_POSITION",
+      "route": [
+        { "map": "new_1-3", "x": 96, "y": 176, "portalTo": "iz_ac01" },
+        { "map": "iz_ac01", "x": 49, "y": 73 }
+      ],
+      "retryPolicy": { "maxRetries": 3, "timeoutMs": 120000 },
+      "expectedArrivalCondition": "MAP_POSITION"
+    },
+    {
+      "type": "GO_NPC",
+      "npcName": "學院結業導師#terminal",
+      "map": "iz_ac01",
+      "x": 60,
+      "y": 67,
+      "destinationType": "NPC",
+      "route": [{ "map": "iz_ac01", "x": 60, "y": 67 }],
+      "retryPolicy": { "maxRetries": 3, "timeoutMs": 120000 },
+      "expectedArrivalCondition": "NPC_INTERACTION_RANGE"
+    },
+    { "type": "TALK_NPC", "npcName": "學院結業導師#terminal", "map": "iz_ac01" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    {
+      "type": "DIALOG_MENU_SELECT",
+      "expectedDialogState": "WAIT_MENU",
+      "index": 1,
+      "expectedDestinationMap": "prt_fild08"
+    },
+    { "type": "WAIT_QUEST_STATE", "questId": 4269, "expectedState": "COMPLETE" }
+  ]
+}

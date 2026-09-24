@@ -1,0 +1,360 @@
+{
+    "schema":  "ro-quest-routes/v1",
+    "sequenceId":  "novice_onboarding",
+    "generatedBy":  "ops/ro-stack/persistent-agent/map-route.mjs (loadWarpGraph/findWarpPath/buildRouteSteps)",
+    "runtimeTopologySource":  "rAthena-owned warp scripts (npc/scripts_warps.conf, npc/re/scripts_warps.conf)",
+    "note":  "Every required leg now carries a bounded route[] contract. Physical legs end at the authoritative destination cell; NPC-mediated legs end at the canonical trigger cell and declare expectedDestinationMap in the transfer manifest. Ambiguous multi-trigger hops are resolved deterministically to the first warp by (x,y,name).",
+    "totals":  {
+                   "required":  13,
+                   "compiled":  13,
+                   "ambiguous":  0,
+                   "noRoute":  0
+               },
+    "legs":  [
+                 {
+                     "id":  "ship_wounded",
+                     "kind":  "GO_NPC",
+                     "from":  {
+                                  "map":  "iz_int",
+                                  "x":  56,
+                                  "y":  32
+                              },
+                     "to":  {
+                                "map":  "iz_int",
+                                "x":  56,
+                                "y":  32
+                            },
+                     "classification":  "ROUTE_COMPILED",
+                     "hops":  0,
+                     "ambiguous":  false,
+                     "reason":  null,
+                     "route":  [
+                                   {
+                                       "map":  "iz_int",
+                                       "x":  56,
+                                       "y":  32
+                                   }
+                               ]
+                 },
+                 {
+                      "id":  "ship_exit",
+                     "kind":  "GO_NPC",
+                     "from":  {
+                                  "map":  "iz_int",
+                                  "x":  56,
+                                  "y":  32
+                              },
+                     "to":  {
+                                "map":  "int_land",
+                                "x":  85,
+                                "y":  107
+                            },
+                     "classification":  "ROUTE_COMPILED",
+                     "hops":  0,
+                     "ambiguous":  false,
+                     "reason":  null,
+                     "route":  [
+                                   {
+                                       "map":  "iz_int",
+                                       "x":  56,
+                                       "y":  15
+                                   }
+                               ],
+                     "expectedDestinationMap":  "int_land"
+                 },
+                 {
+                      "id":  "island_captain",
+                     "kind":  "GO_NPC",
+                     "from":  {
+                                  "map":  "iz_int",
+                                  "x":  56,
+                                  "y":  15
+                              },
+                     "to":  {
+                                "map":  "int_land",
+                                "x":  78,
+                                "y":  103
+                            },
+                     "classification":  "ROUTE_COMPILED",
+                     "hops":  0,
+                     "ambiguous":  false,
+                     "reason":  "no_direct_route (NPC/service warp not a physical walk edge)",
+                     "route":  [
+                                   {
+                                       "map":  "int_land",
+                                       "x":  78,
+                                       "y":  103
+                                   }
+                               ]
+                 },
+                 {
+                     "id":  "island_lumin",
+                     "kind":  "GO_NPC",
+                     "from":  {
+                                  "map":  "int_land",
+                                  "x":  78,
+                                  "y":  103
+                              },
+                     "to":  {
+                                "map":  "int_land",
+                                "x":  73,
+                                "y":  100
+                            },
+                     "classification":  "ROUTE_COMPILED",
+                     "hops":  0,
+                     "ambiguous":  false,
+                     "reason":  null,
+                     "route":  [
+                                   {
+                                       "map":  "int_land",
+                                       "x":  73,
+                                       "y":  100
+                                   }
+                               ]
+                 },
+                 {
+                     "id":  "island_sailor",
+                     "kind":  "GO_NPC",
+                     "from":  {
+                                  "map":  "int_land",
+                                  "x":  73,
+                                  "y":  100
+                              },
+                     "to":  {
+                                "map":  "int_land",
+                                "x":  58,
+                                "y":  69
+                            },
+                     "classification":  "ROUTE_COMPILED",
+                     "hops":  0,
+                     "ambiguous":  false,
+                     "reason":  null,
+                     "route":  [
+                                   {
+                                       "map":  "int_land",
+                                       "x":  58,
+                                       "y":  69
+                                   }
+                               ]
+                 },
+                 {
+                      "id":  "sail_izlude",
+                     "kind":  "GO_NPC",
+                     "from":  {
+                                  "map":  "int_land",
+                                  "x":  58,
+                                  "y":  69
+                              },
+                     "to":  {
+                                "map":  "izlude",
+                                "x":  196,
+                                "y":  209
+                            },
+                     "classification":  "ROUTE_COMPILED",
+                     "hops":  0,
+                     "ambiguous":  false,
+                     "reason":  null,
+                     "route":  [
+                                   {
+                                       "map":  "int_land",
+                                       "x":  49,
+                                       "y":  57
+                                   }
+                               ],
+                     "expectedDestinationMap":  "izlude"
+                 },
+                 {
+                     "id":  "izlude_captain",
+                     "kind":  "GO_NPC",
+                     "from":  {
+                                  "map":  "izlude",
+                                  "x":  49,
+                                  "y":  57
+                              },
+                     "to":  {
+                                "map":  "izlude",
+                                "x":  198,
+                                "y":  213
+                            },
+                     "classification":  "ROUTE_COMPILED",
+                     "hops":  0,
+                     "ambiguous":  false,
+                     "reason":  null,
+                     "route":  [
+                                   {
+                                       "map":  "izlude",
+                                       "x":  198,
+                                       "y":  213
+                                   }
+                               ]
+                 },
+                 {
+                     "id":  "izlude_hun",
+                     "kind":  "GO_NPC",
+                     "from":  {
+                                  "map":  "izlude",
+                                  "x":  198,
+                                  "y":  213
+                              },
+                     "to":  {
+                                "map":  "izlude",
+                                "x":  122,
+                                "y":  207
+                            },
+                     "classification":  "ROUTE_COMPILED",
+                     "hops":  0,
+                     "ambiguous":  false,
+                     "reason":  null,
+                     "route":  [
+                                   {
+                                       "map":  "izlude",
+                                       "x":  122,
+                                       "y":  207
+                                   }
+                               ]
+                 },
+                 {
+                     "id":  "academy_route",
+                     "kind":  "GO_MAP",
+                     "from":  {
+                                  "map":  "izlude",
+                                  "x":  122,
+                                  "y":  207
+                              },
+                     "to":  {
+                                "map":  "iz_ac01",
+                                "x":  100,
+                                "y":  39
+                            },
+                     "classification":  "ROUTE_COMPILED",
+                     "hops":  1,
+                     "ambiguous":  false,
+                     "reason":  "first warp by (x,y,name): izlude,125,257 #to_ac01",
+                     "route":  [
+                                   {
+                                       "map":  "izlude",
+                                       "x":  125,
+                                       "y":  257,
+                                       "portalTo":  "iz_ac01"
+                                   },
+                                   {
+                                       "map":  "iz_ac01",
+                                       "x":  99,
+                                       "y":  29
+                                   },
+                                   {
+                                       "map":  "iz_ac01",
+                                       "x":  100,
+                                       "y":  39
+                                   }
+                               ]
+                 },
+                 {
+                     "id":  "academy_pet_intro",
+                     "kind":  "GO_NPC",
+                     "from":  {
+                                  "map":  "iz_ac01",
+                                  "x":  100,
+                                  "y":  39
+                              },
+                     "to":  {
+                                "map":  "iz_ac01",
+                                "x":  45,
+                                "y":  80
+                            },
+                     "classification":  "ROUTE_COMPILED",
+                     "hops":  0,
+                     "ambiguous":  false,
+                     "reason":  null,
+                     "route":  [
+                                   {
+                                       "map":  "iz_ac01",
+                                       "x":  45,
+                                       "y":  80
+                                   }
+                               ]
+                 },
+                 {
+                      "id":  "academy_training_route",
+                     "kind":  "GO_NPC",
+                     "from":  {
+                                  "map":  "iz_ac01",
+                                  "x":  45,
+                                  "y":  80
+                              },
+                     "to":  {
+                                "map":  "new_1-3",
+                                "x":  95,
+                                "y":  171
+                            },
+                     "classification":  "ROUTE_COMPILED",
+                     "hops":  0,
+                     "ambiguous":  false,
+                     "reason":  null,
+                     "route":  [
+                                   {
+                                       "map":  "iz_ac01",
+                                       "x":  45,
+                                       "y":  80
+                                   }
+                               ],
+                     "expectedDestinationMap":  "new_1-3"
+                 },
+                 {
+                     "id":  "academy_return",
+                     "kind":  "GO_MAP",
+                     "from":  {
+                                  "map":  "new_1-3",
+                                  "x":  95,
+                                  "y":  171
+                              },
+                     "to":  {
+                                "map":  "iz_ac01",
+                                "x":  49,
+                                "y":  73
+                            },
+                     "classification":  "ROUTE_COMPILED",
+                     "hops":  1,
+                     "ambiguous":  false,
+                     "reason":  null,
+                     "route":  [
+                                   {
+                                       "map":  "new_1-3",
+                                       "x":  96,
+                                       "y":  176,
+                                       "portalTo":  "iz_ac01"
+                                   },
+                                   {
+                                       "map":  "iz_ac01",
+                                       "x":  49,
+                                       "y":  73
+                                   }
+                               ]
+                 },
+                 {
+                     "id":  "academy_graduation",
+                     "kind":  "GO_NPC",
+                     "from":  {
+                                  "map":  "iz_ac01",
+                                  "x":  49,
+                                  "y":  73
+                              },
+                     "to":  {
+                                "map":  "iz_ac01",
+                                "x":  60,
+                                "y":  67
+                            },
+                     "classification":  "ROUTE_COMPILED",
+                     "hops":  0,
+                     "ambiguous":  false,
+                     "reason":  null,
+                     "route":  [
+                                   {
+                                       "map":  "iz_ac01",
+                                       "x":  60,
+                                       "y":  67
+                                   }
+                               ]
+                 }
+             ]
+}

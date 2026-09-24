@@ -169,8 +169,26 @@ try {
     (value) => value.settings?.enabled && value.live?.enabled,
     60_000,
   );
+  const instanceConfigs = await import('node:fs/promises').then(({ readdir }) =>
+    readdir('.local/ro-stack/instances', { withFileTypes: true }),
+  );
+  let buyGuard = null;
+  for (const entry of instanceConfigs) {
+    if (!entry.isDirectory()) continue;
+    const config = await readFile(
+      join('.local/ro-stack/instances', entry.name, 'control', 'config.txt'),
+      'utf8',
+    ).catch(() => '');
+    if (!/^username jobtest_merchant$/m.test(config)) continue;
+    const block = config.match(/^buyAuto\s+501\s*\{[\s\S]*?^\}/m)?.[0] ?? '';
+    buyGuard = {
+      price: /^\s*price 10$/m.test(block),
+      zeny: /^\s*zeny >= 10$/m.test(block),
+    };
+    break;
+  }
 
-  const observedStages = new Set();
+  const observedStages = [];
   const completed = await waitFor(
     async () => {
       const value =
@@ -180,7 +198,8 @@ try {
         redPotions:(v.live?.inventory||[]).filter(i=>Number(i.itemId)===501)
           .reduce((total,i)=>total+Number(i.amount||0),0)
       }))`);
-      if (value.stage) observedStages.add(value.stage);
+      if (value.stage && observedStages.at(-1) !== value.stage)
+        observedStages.push(value.stage);
       return value;
     },
     (value) => {
@@ -209,6 +228,11 @@ try {
     'tmp/supply-cycle-mobile.png',
     Buffer.from(screenshot.result.data, 'base64'),
   );
+  const sellStage = observedStages.indexOf('sellAuto'),
+    buyStage = observedStages.indexOf('buyAuto'),
+    storageStage = observedStages.indexOf('storageAuto'),
+    orderedSupplyStages =
+      sellStage >= 0 && buyStage > sellStage && storageStage > buyStage;
   const pass =
     before.map === 'prt_fild08' &&
     Number(before.weight) / Number(before.maxWeight) >= 0.4 &&
@@ -217,6 +241,9 @@ try {
       (rule) => Number(rule.itemId) === 909 && rule.action === 'sell',
     ) &&
     applied.width <= applied.viewport &&
+    buyGuard?.price === true &&
+    buyGuard?.zeny === true &&
+    orderedSupplyStages &&
     completed.map === 'prt_fild08' &&
     errors.length === 0;
   console.log(
@@ -226,7 +253,9 @@ try {
         viewport: '390x844',
         before,
         applied,
-        observedStages: [...observedStages],
+        buyGuard,
+        observedStages,
+        orderedSupplyStages,
         after: {
           map: completed.map,
           weight: completed.weight,
@@ -250,7 +279,7 @@ try {
       method:'POST',headers:{'content-type':'application/json'},
       body:JSON.stringify({...${JSON.stringify({
         enabled: false,
-        returnWeight: 68,
+        returnWeight: 75,
         store: true,
         sell: true,
         buy: true,

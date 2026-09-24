@@ -1,0 +1,311 @@
+{
+  "id": "bulbasaur",
+  "displayName": "妙蛙種子",
+  "version": 1,
+  "revision": 2,
+  "generatedAt": "2026-09-12T17:52:26.259Z",
+  "sourcePolicy": "User-supplied authorized JPEG files; originals read-only and never modified.",
+  "sources": [
+    {
+      "file": "01.jpg",
+      "role": "front-left and back-left authored silhouettes",
+      "usedInFinalPixels": true,
+      "path": "C:\\Users\\Administrator\\Desktop\\御三家\\妙蛙種子\\01.jpg",
+      "format": "jpeg",
+      "width": 735,
+      "height": 521,
+      "sha256": "ff20063668f5da79d17f1831954f6f52b879375faceae2bdf371b563c837e2d5",
+      "originalModified": false
+    },
+    {
+      "file": "05.jpg",
+      "role": "turnaround cross-check; omitted because 07 has the same useful angles without page labels",
+      "usedInFinalPixels": false,
+      "path": "C:\\Users\\Administrator\\Desktop\\御三家\\妙蛙種子\\05.jpg",
+      "format": "jpeg",
+      "width": 735,
+      "height": 386,
+      "sha256": "906b0afa4a84b83334dc6b80bf5004c4c180e5dda4e7860a8b578805ed509b8d",
+      "originalModified": false
+    },
+    {
+      "file": "07.jpg",
+      "role": "front, left and back authored silhouettes",
+      "usedInFinalPixels": true,
+      "path": "C:\\Users\\Administrator\\Desktop\\御三家\\妙蛙種子\\07.jpg",
+      "format": "jpeg",
+      "width": 735,
+      "height": 454,
+      "sha256": "1eb748d6307513b7c8bba649b316582effc39dd87b273a0c58350c62d645c278",
+      "originalModified": false
+    },
+    {
+      "file": "08.jpg",
+      "role": "pose and proportion reference",
+      "usedInFinalPixels": false,
+      "path": "C:\\Users\\Administrator\\Desktop\\御三家\\妙蛙種子\\08.jpg",
+      "format": "jpeg",
+      "width": 735,
+      "height": 490,
+      "sha256": "d2c3088949c1c9e31687939fea6d047c5cee7fea858086aad9068d1baa8e4f48",
+      "originalModified": false
+    },
+    {
+      "file": "12.jpg",
+      "role": "expression reference for happy timing",
+      "usedInFinalPixels": false,
+      "path": "C:\\Users\\Administrator\\Desktop\\御三家\\妙蛙種子\\12.jpg",
+      "format": "jpeg",
+      "width": 736,
+      "height": 1104,
+      "sha256": "aa5eb7829750b54b834e2cf9c25e286a9296ca47dd9d656440af2a00a8d33b6d",
+      "originalModified": false
+    },
+    {
+      "file": "14.jpg",
+      "role": "weight-shift reference for walk and happy motion",
+      "usedInFinalPixels": false,
+      "path": "C:\\Users\\Administrator\\Desktop\\御三家\\妙蛙種子\\14.jpg",
+      "format": "jpeg",
+      "width": 735,
+      "height": 750,
+      "sha256": "3e8768eec9756a16767db4e3fb92c2ca4e6948f66c68f4d114e7f13d5f186038",
+      "originalModified": false
+    }
+  ],
+  "generation": {
+    "builtInImagegen": {
+      "mode": "edit with local authorized references",
+      "attempts": 2,
+      "result": "blocked_by_output_safety",
+      "finalAttemptPrompt": "Transform the user-provided authorized character references into a new game sprite asset.\n\nOutput one transparent PNG sheet containing exactly five consistent pixel-art views of the same small teal quadruped plant creature. Place them in one evenly spaced horizontal row, ordered: front, front-left three-quarter, left profile, back-left three-quarter, back.\n\nKeep the same large rounded head, compact body, four short legs, back plant bulb, eyes, skin markings, proportions, colors, light direction, and center of gravity across all views. Every view uses a neutral natural standing pose. Back views must show coherent rear anatomy and the bulb. No vines, effects, text, labels, guides, borders, environment, or ground shadow.\n\nStyle it as original chibi 3/4 top-down indexed-color pixel art for a classic 2D online RPG interface. Use hard pixel edges, a crisp one-pixel-equivalent dark teal outline, selective internal outlines, low-color 2–3 tone cel shading, and upper-left lighting. Avoid blur, painterly gradients, photographic detail, and excessive anti-aliasing. Give each sprite equal transparent padding and a compact readable silhouette. The intended production cells are 96 by 96 logical pixels."
+    },
+    "finalMethod": "deterministic local crop, border-sampled background rejection, largest-component extraction, enclosed-detail restoration, light-edge fringe stripping, nearest-neighbor reconstruction, shared-palette quantization, one-pixel outline, and frame-by-frame pixel transforms",
+    "builder": "scripts/build-bulbasaur-pet-assets.mjs",
+    "fallbackBuild": {
+      "sourceType": "local-v1",
+      "builder": "scripts/build-bulbasaur-pet-assets.mjs",
+      "finalMethod": "deterministic local crop, border-sampled background rejection, largest-component extraction, enclosed-detail restoration, light-edge fringe stripping, nearest-neighbor reconstruction, shared-palette quantization, one-pixel outline, and frame-by-frame pixel transforms",
+      "formalFiles": [
+        "idle.webp",
+        "walk.webp",
+        "happy.webp"
+      ]
+    },
+    "grokBuild": {
+      "sourceType": "grok-assisted",
+      "status": "preview-only-incomplete",
+      "builder": "scripts/build-grok-bulbasaur-preview.mjs",
+      "sourceFiles": [
+        {
+          "source": "C:\\Users\\Administrator\\Desktop\\御三家\\妙蛙種子\\grok-91b7ef52-f5bf-438e-a69b-440f6d171b50.jpg",
+          "sha256": "856a525c5ce104a19667626171110c40df30ce1a5322a62ea0ea2eb4b18f1cae"
+        },
+        {
+          "source": "C:\\Users\\Administrator\\Desktop\\御三家\\妙蛙種子\\grok-cf7f56a9-8879-4107-98ab-22b08f1a6a55.png",
+          "sha256": "712e86180b2a7d3e6b95c683f34c2d7475b4416cbe90cd3335e1a6dcb23e4f01"
+        },
+        {
+          "source": "C:\\Users\\Administrator\\Desktop\\御三家\\妙蛙種子\\grok-d6b31429-ea90-4830-97e3-f1236b17777a.jpg",
+          "sha256": "1a0b8dd9ca732c69fc568983bfc9565fd7619a2f8c5cefa6180c9e90012f69c5"
+        },
+        {
+          "source": "C:\\Users\\Administrator\\Desktop\\御三家\\妙蛙種子\\grok-e85178d0-1236-40e2-8d3f-0a86da1b21e6.jpg",
+          "sha256": "825167954abad90312ca7c9decede50ab732d6030a5a87d1fe3ec6540fceae95"
+        },
+        {
+          "source": "C:\\Users\\Administrator\\Desktop\\御三家\\妙蛙種子\\grok-eceb2cd7-cb5b-4f54-848d-429082bff475.jpg",
+          "sha256": "d63d01c49dd3fa2b725aed28a3e30e3685bc97baf54ec80b8f2e5e06a682573a"
+        }
+      ],
+      "selectedSource": "C:\\Users\\Administrator\\Desktop\\御三家\\妙蛙種子\\grok-cf7f56a9-8879-4107-98ab-22b08f1a6a55.png",
+      "auditFile": "tmp/grok-bulbasaur/audit.json",
+      "preprocessingSteps": [
+        "metadata and alpha audit",
+        "edge-connected checkerboard or white-background flood removal",
+        "content-connected-component direction detection",
+        "ground-shadow exclusion",
+        "aspect-ratio-preserving nearest-neighbor resize",
+        "shared 32-color palette quantization",
+        "pivot alignment at x=48 y=78",
+        "safe horizontal mirroring for three right-facing directions",
+        "lossless WebP preview composition"
+      ],
+      "previewFiles": [
+        {
+          "file": "authored-directions.grok-preview.webp",
+          "sha256": "971d6d61bd1a45b63c1c7664722b966314561fd38c024f83c71dfb5328238545",
+          "width": 480,
+          "height": 96
+        },
+        {
+          "file": "idle.grok-preview.webp",
+          "sha256": "ea5881f4e87f13f7bd1dac5be8d878a1359cc0675eb3684976ede17da47173e7",
+          "width": 768,
+          "height": 768,
+          "animationComplete": false,
+          "syntheticHoldColumns": 8
+        }
+      ]
+    }
+  },
+  "logicalFrame": {
+    "width": 96,
+    "height": 96
+  },
+  "visibleBodyTarget": {
+    "width": [
+      56,
+      78
+    ],
+    "height": [
+      44,
+      68
+    ]
+  },
+  "palette": {
+    "colors": 32,
+    "sharedAcrossCharacter": true
+  },
+  "outline": {
+    "logicalPixels": 1,
+    "color": "#143331"
+  },
+  "alphaCleanup": {
+    "backgroundModel": "median RGB from a six-pixel crop border",
+    "rejectionDistanceSquared": 1764,
+    "lightFringeRadius": 2,
+    "alphaMode": "binary hard edge"
+  },
+  "perspective": "RO-like 3/4 top-down",
+  "directions": [
+    "front",
+    "front-left",
+    "left",
+    "back-left",
+    "back",
+    "back-right",
+    "right",
+    "front-right"
+  ],
+  "authoredDirections": [
+    "front",
+    "front-left",
+    "left",
+    "back-left",
+    "back"
+  ],
+  "mirroredDirections": {
+    "back-right": "back-left",
+    "right": "left",
+    "front-right": "front-left"
+  },
+  "directionRows": {
+    "front": 0,
+    "front-left": 1,
+    "left": 2,
+    "back-left": 3,
+    "back": 4,
+    "back-right": 5,
+    "right": 6,
+    "front-right": 7
+  },
+  "atlases": {
+    "idle": {
+      "file": "idle.webp",
+      "frameWidth": 96,
+      "frameHeight": 96,
+      "frames": 8,
+      "frameDurationMs": 75,
+      "loop": true
+    },
+    "walk": {
+      "file": "walk.webp",
+      "frameWidth": 96,
+      "frameHeight": 96,
+      "frames": 8,
+      "frameDurationMs": 50,
+      "loop": true
+    },
+    "happy": {
+      "file": "happy.webp",
+      "frameWidth": 96,
+      "frameHeight": 96,
+      "frames": 8,
+      "frameDurationMs": 63,
+      "loop": false
+    }
+  },
+  "master": {
+    "file": "authored-directions.webp",
+    "width": 480,
+    "height": 96,
+    "cellWidth": 96,
+    "cellHeight": 96
+  },
+  "shadow": {
+    "file": "shadow.png",
+    "width": 44,
+    "height": 12,
+    "opacity": 0.26,
+    "separateLayer": true
+  },
+  "outputs": [
+    {
+      "file": "authored-directions.webp",
+      "sha256": "017a388eed7e5551913ba384b28d9737b79fd3857790b0556ed3e230be19bcd1",
+      "bytes": 5276
+    },
+    {
+      "file": "idle.webp",
+      "sha256": "e44fda8101566532b1d3547a0280f301218a1339ecfd93a8b8a1bdb3eba9c662",
+      "bytes": 13508
+    },
+    {
+      "file": "walk.webp",
+      "sha256": "506f36c15612e0a3c1b58c3e36799200f79cfecceee3704fcdd6d1c97aa4206f",
+      "bytes": 12844
+    },
+    {
+      "file": "happy.webp",
+      "sha256": "a84aa3750882ca8b30bbc167e78a989c142b9b6ade7a7dd6d2e7506d20a1d088",
+      "bytes": 14866
+    },
+    {
+      "file": "shadow.png",
+      "sha256": "fd636bd78721dacc62755034610cc3897f049db5b1e212ceb6a141508b8f54ef",
+      "bytes": 592
+    }
+  ],
+  "runtime": {
+    "formalAnimations": [
+      "idle",
+      "walk",
+      "happy"
+    ],
+    "fallbackAnimations": [
+      "run",
+      "pant",
+      "sleep"
+    ],
+    "cssDisplayPx": {
+      "desktop": 72,
+      "mobile": 64
+    },
+    "spriteDirectionRow": "right",
+    "leftFacing": "safe horizontal flip of the authored left row"
+  },
+  "previewAtlases": {
+    "idle": {
+      "file": "idle.grok-preview.webp",
+      "frameWidth": 96,
+      "frameHeight": 96,
+      "rows": 8,
+      "columns": 8,
+      "frameCountPerDirection": 1,
+      "displayedColumns": 8,
+      "timing": "static hold; source has no animation frames",
+      "formalReplacementEligible": false
+    }
+  }
+}

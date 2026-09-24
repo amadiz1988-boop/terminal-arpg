@@ -1,0 +1,118 @@
+schema: NAVIGATION_CAPABILITY_MATRIX_V1
+topic: navigation_warp_portal_pathfinding
+last_reviewed: '2026-09-21'
+authority: PA / SERVER_AGENT -> rAthena
+openkore_runtime_count: 0
+route_diagnosis:
+  - source: moc_pryd01
+    target: mjolnir_07
+    planner_reason: no_direct_route
+    classification: [C_UNSUPPORTED_EDGE_TYPE, D_NPC_SCRIPTED_TRANSFER_REQUIRED, B_PROJECT_GRAPH_INCOMPLETE]
+    root_cause: static_warp_parser_excludes_warper_service_and_source_static_component_has_no_path
+  - source: moc_pryd01
+    target: pay_fild04
+    planner_reason: no_direct_route
+    classification: [C_UNSUPPORTED_EDGE_TYPE, D_NPC_SCRIPTED_TRANSFER_REQUIRED, B_PROJECT_GRAPH_INCOMPLETE]
+    root_cause: static_warp_parser_excludes_warper_service_and_source_static_component_has_no_path
+capabilities:
+  - id: static_warp_graph
+    mature_reference: static portal metadata and map chaining
+    project_status: parses scripts_warps.conf and re/scripts_warps.conf
+    classification: REUSE
+    reusable_now: true
+  - id: same_map_collision_path
+    mature_reference: collision-aware field route
+    project_status: rAthena and PA execute movement
+    classification: IMPROVE
+    reusable_now: true
+  - id: authoritative_map_checkpoint
+    mature_reference: wait for map change then replan
+    project_status: native map and live position are authoritative
+    classification: REUSE
+    reusable_now: true
+  - id: ontouch_family
+    mature_reference: OnTouch, OnTouch_, OnTouchNPC script triggers
+    project_status: absent from static graph
+    classification: ADAPT
+    reusable_now: false
+  - id: scripted_warp_family
+    mature_reference: warp, areawarp and mapwarp
+    project_status: absent from static graph
+    classification: ADAPT
+    reusable_now: false
+  - id: warper_npc_dialogue
+    mature_reference: menu and service transition
+    project_status: excluded from resolver
+    classification: ADAPT
+    reusable_now: false
+  - id: kafra_service
+    mature_reference: TalkNPC and transaction checkpoints
+    project_status: fixed supply service route
+    classification: ADAPT
+    reusable_now: false
+  - id: navigateto_guidance
+    mature_reference: client guidance packet
+    project_status: no server authority
+    classification: REJECT_LEGACY
+    reusable_now: false
+  - id: instance_entry
+    mature_reference: instance-aware entry
+    project_status: no instance edge model
+    classification: ADAPT
+    reusable_now: false
+  - id: mapflag_constraints
+    mature_reference: runtime teleport and warp restrictions
+    project_status: no graph annotation
+    classification: ADAPT
+    reusable_now: false
+  - id: unknown_portal_recording
+    mature_reference: record source/destination after map change
+    project_status: no durable learner
+    classification: IMPROVE
+    reusable_now: false
+  - id: missing_portal_recovery
+    mature_reference: suspend, try alternative, re-add later
+    project_status: partial bounded recovery only
+    classification: IMPROVE
+    reusable_now: false
+  - id: route_chaining
+    mature_reference: replan after every map change
+    project_status: static BFS route steps
+    classification: ADAPT
+    reusable_now: true
+  - id: unreachable_diagnosis
+    mature_reference: reasoned route-source failure
+    project_status: no_direct_route only
+    classification: IMPROVE
+    reusable_now: false
+  - id: lock_map
+    mature_reference: one farm map with bounded return
+    project_status: target map and relocation policy
+    classification: REUSE
+    reusable_now: true
+  - id: timeout_retry
+    mature_reference: operation-specific ceilings
+    project_status: PA recovery ceilings
+    classification: ADAPT
+    reusable_now: true
+  - id: teleport_candidate
+    mature_reference: route teleport and item candidate
+    project_status: project wing semantics
+    classification: ADAPT
+    reusable_now: false
+  - id: savepoint_recovery
+    mature_reference: respawn then route resume
+    project_status: PA recovery and farm resume
+    classification: ADAPT
+    reusable_now: false
+  - id: infinite_random_walk
+    mature_reference: legacy fallback risk
+    project_status: safe idle/backoff policy
+    classification: REJECT_LEGACY
+    reusable_now: false
+counts:
+  REUSE: 3
+  ADAPT: 10
+  IMPROVE: 4
+  REJECT_LEGACY: 2
+  NOT_APPLICABLE: 0

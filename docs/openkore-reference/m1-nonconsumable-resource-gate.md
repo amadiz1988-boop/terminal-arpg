@@ -1,0 +1,20 @@
+# M1 nonconsumable travel and ammo evidence
+
+```text
+PINNED_OPENKORE = 51de1ddfc4449ae5217f6886de702f87ca934030
+PRODUCT_AUTHORITY = docs/project-control/canonical-m1-world-travel-supply-ui-v1.md#non-consumable-travel--ammo-overrides
+CLASSIFICATION = GI_EXPLICIT_OVERRIDE
+RATHENA_AUTHORITY = WORLD / ITEM / EQUIPMENT / COMBAT
+OPENKORE_RUNTIME_REQUIRED = NO
+```
+
+| Resource | OPENKORE_FILE / SYMBOL / CONFIG / DEFAULT | OPENKORE_BEHAVIOR / TRANSITION | CURRENT_GI_BEHAVIOR / PORT_MAPPING |
+| --- | --- | --- | --- |
+| Fly Wing 601 | `src/Task/Teleport.pm:89-163`, `Task::Teleport::iterate`; `control/config.txt:236-238`, `route_warpByItem=0`, `route_warpByItem_minDistance=150`; `control/config.txt:317`, `teleportAuto_search=0` | Configured teleport task retries within timeout, sends item use, then waits for map-change observation. `teleportAuto_search` is a monster-search gate in `src/AI/CoreLogic.pm:3291`, not a universal no-target teleport instruction. OpenKore does not determine server-side item decrement. | `terminal_item_db.yml` sets `NoConsume`; Native PA item use requests rAthena relocation. Group-0 test 150095 previously showed item 601 count 59→59 and same-map position change. Source observer `FLY_WING_RELOCATED` and rescan are committed; post-Fly authoritative HIT is unproven. GI quantity rule is independent of OpenKore defaults. |
+| Butterfly Wing 602 | `src/Task/Teleport.pm:89-163`, `Task::Teleport::iterate`; `control/config.txt:275`, `saveMap_warpToBuyOrSell=1`; `src/AI/CoreLogic.pm:4122-4140`, `shouldUseWarpToSaveMapForBuyOrSell` | Service warp is conditional on configured save map, current map, distance and one-attempt state; item use requires observed map-change result. OpenKore does not determine server-side item decrement. | `terminal_item_db.yml` sets `NoConsume`; PA keeps Supply intent and rAthena save point is destination authority. Count unchanged and Saved Town arrival are both required; full live return remains unproven. |
+| Arrow ammo | `control/config.txt:89,123`, `attackUseWeapon=1`, `attackEquip_arrow` empty; `src/AI/Attack.pm:727`, `attackUseWeapon` | OpenKore may select weapon attack and configured arrow equipment. The server decides equipped ammo legality, damage and decrement; no OpenKore quantity policy is ported. | rAthena `pc.cpp:1907-1914` keeps bow/ammo compatibility, `skill.cpp:9506-9543` keeps skill quantity/type checks. `battle.cpp::battle_consume_ammo` and Fear Breeze suppress decrement only for `AMMO_ARROW`; authoritative ranged HIT with stable count remains a live gate. |
+| Bullet ammo | `control/config.txt:89`, `attackUseWeapon=1`; `src/AI/Attack.pm:727`, `attackUseWeapon` | OpenKore may select weapon attack; server-owned ammo outcome follows. No pinned OpenKore setting authorizes a nonconsumable bullet rule. | rAthena `pc.cpp:1919-1930` keeps gun/ammo compatibility, `skill.cpp:9506-9543` keeps skill quantity/type checks. `battle.cpp::battle_consume_ammo` suppresses decrement only for `AMMO_BULLET`; authoritative ranged HIT with stable count remains a live gate. |
+
+The upstream rAthena default is `conf/battle/battle.conf:169` `arrow_decrement: 1`; the GI override is implemented at the two deletion sites while retaining that default and `ammo_check_weapon: yes`. `AMMO_SHELL`, grenades, kunai and other subtypes remain on rAthena's existing behavior because the current product decision names arrows and bullets only. Supply quantity thresholds for 601, 602, arrow and bullet are inapplicable; any configured Supply item must still be verified as a genuinely depleting M1 combat resource. The current global configured Supply item is 501, but the general configuration rejection guard has not been source-closed.
+
+Source checkpoints: Web `0a120ae8` and `1d28a1fe`; Native `633aacb`. Source tests: `test-permanent-travel-wings.mjs`, `test-m1-nonconsumable-canonical.mjs`, `Test-NonConsumableAmmo.ps1`; clean Native Release x64 build from `633aacb` passed. These tests do not establish Fly-to-HIT, Supply-to-HIT or ranged ammo live acceptance.

@@ -1,0 +1,380 @@
+{
+  "id": "gl_sew02",
+  "name": "克雷斯特漢姆古城 地下水道 2樓",
+  "category": "SERVICE_ONLY",
+  "dungeon": null,
+  "totalMonsters": 114,
+  "normalMonsterCount": 114,
+  "levelRange": {
+    "min": 82,
+    "max": 100
+  },
+  "fullLevelRange": {
+    "min": 82,
+    "max": 100
+  },
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [
+    {
+      "id": 1253,
+      "name": "蝙蝠弓箭手",
+      "level": 100,
+      "count": 89
+    },
+    {
+      "id": 1209,
+      "name": "藍鼠",
+      "level": 82,
+      "count": 24
+    }
+  ],
+  "resourceMonsters": [],
+  "bossMonsters": [],
+  "monsters": [
+    {
+      "id": 1209,
+      "aegisName": "CRAMP",
+      "name": "藍鼠",
+      "count": 24,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 82,
+      "hp": 3935,
+      "baseExp": 970,
+      "jobExp": 905,
+      "attackMin": 268,
+      "attackMax": 48,
+      "defense": 88,
+      "magicDefense": 42,
+      "size": "小型",
+      "race": "動物",
+      "element": "毒 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/glastheim.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 7007,
+          "aegisName": "Claw_Of_Rat",
+          "name": "巨鼠指甲",
+          "ratePerTenThousand": 2328,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "巨大的老鼠指甲。有數萬隻病菌藏在裡頭。可向收集商人購買。\n\n重量 :1"
+        },
+        {
+          "itemId": 528,
+          "aegisName": "Monster's_Feed",
+          "name": "魔物飼料",
+          "ratePerTenThousand": 500,
+          "type": "恢復道具",
+          "weight": 15,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "魔物們最喜愛的加工食品,可恢復少量的HP。\n\n重量: 15"
+        },
+        {
+          "itemId": 726,
+          "aegisName": "Blue_Jewel",
+          "name": "藍寶石",
+          "ratePerTenThousand": 40,
+          "type": "其他",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "呈現出藍色光芒的寶石。\n\n重量: 10"
+        },
+        {
+          "itemId": 746,
+          "aegisName": "Glass_Bead",
+          "name": "玻璃珠",
+          "ratePerTenThousand": 55,
+          "type": "其他",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "用玻璃做成的小珠子,小朋友們常拿來當玩具。\n\n重量: 5"
+        },
+        {
+          "itemId": 568,
+          "aegisName": "Lemon",
+          "name": "檸檬",
+          "ratePerTenThousand": 125,
+          "type": "恢復道具",
+          "weight": 4,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "屬橢圓形,成熟時變成黃色有香味的水果,光用想像的,嘴裡就有一股酸溜溜的感覺而產生口水!恢復少量的SP\n\n重量: 4"
+        },
+        {
+          "itemId": 510,
+          "aegisName": "Blue_Herb",
+          "name": "藍色藥草",
+          "ratePerTenThousand": 35,
+          "type": "恢復道具",
+          "weight": 7,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "擁有特殊香味且能使精神飽滿的珍貴藥草,可恢復少量的SP。\n\n重量: 7"
+        },
+        {
+          "itemId": 984,
+          "aegisName": "Oridecon",
+          "name": "神之金屬",
+          "ratePerTenThousand": 48,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "被稱為神之金屬的神秘金屬,比什麼東西都堅硬,用它來製造武器可以得到相當強大的破壞力,可以強化等級三和等級四的武器。\n\n重量: 20"
+        },
+        {
+          "itemId": 4296,
+          "aegisName": "Cramp_Card",
+          "name": "藍鼠卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "每次擊殺怪物時,有機率得到一定量的金幣,裝備白鼠卡片時,STR+3。\n系列: 卡片\n裝備: 頭具\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1253,
+      "aegisName": "GARGOYLE",
+      "name": "蝙蝠弓箭手",
+      "count": 89,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 100,
+      "hp": 9233,
+      "baseExp": 1387,
+      "jobExp": 1316,
+      "attackMin": 451,
+      "attackMax": 89,
+      "defense": 98,
+      "magicDefense": 43,
+      "size": "中型",
+      "race": "惡魔",
+      "element": "風 3",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/glastheim.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 912,
+          "aegisName": "Zargon",
+          "name": "剎勒空結晶",
+          "ratePerTenThousand": 1940,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從一部份怪物身上得來的結晶,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 1039,
+          "aegisName": "Petite_DiablOfs_Wing",
+          "name": "小惡魔翅膀",
+          "ratePerTenThousand": 250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "小惡魔身上的小翅膀,和蝙蝠的翅膀相似。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 1746,
+          "aegisName": "Elven_Bow",
+          "name": "小精靈弓",
+          "ratePerTenThousand": 3,
+          "type": "武器",
+          "weight": 150,
+          "attack": 160,
+          "defense": 0,
+          "slots": 1,
+          "description": "摹仿古代守護森林的種族而製成的弓。\nDEX+2.\n系列: 弓 攻擊: 160\n重量: 150\n武器等級: 3\n要求等級: 100\n裝備: 3轉弓箭手系列"
+        },
+        {
+          "itemId": 2619,
+          "aegisName": "Thimble_Of_Archer",
+          "name": "神射手套",
+          "ratePerTenThousand": 1,
+          "type": "防具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "為了使攜帶箭矢方便纏在手上的布塊,可提高箭矢攻擊時的傷害度。\n系列: 飾品\n防禦: 0  重量: 10\n要求等級: 65\n裝備: 弓箭手系列"
+        },
+        {
+          "itemId": 1769,
+          "aegisName": "Silence_Arrow",
+          "name": "寧靜箭矢",
+          "ratePerTenThousand": 1000,
+          "type": "彈藥",
+          "weight": 0.1,
+          "attack": 1,
+          "defense": 0,
+          "slots": 0,
+          "description": "有塗抹可讓嘴巴僵硬的毒箭矢，有機率讓目標陷入沉默。\n系列 : 箭矢    攻擊 : 1\n重量 : 0.1      屬性 : 無"
+        },
+        {
+          "itemId": 757,
+          "aegisName": "Elunium_Stone",
+          "name": "鋁原石",
+          "ratePerTenThousand": 119,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以拿來煉鋁的礦石,拿來提煉作成盔甲。\n\n重量: 20"
+        },
+        {
+          "itemId": 4149,
+          "aegisName": "Gargoyle_Card",
+          "name": "蝙蝠弓箭手卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "打死昆蟲型怪時,有機率會得到'打雷的箱子'。\n系列: 卡片\n裝備: 飾品\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2827,
+      "aegisName": "C4_GARGOYLE",
+      "name": "憤怒蝙蝠弓箭手",
+      "count": 1,
+      "respawnMinMs": 180000,
+      "respawnMaxMs": 180000,
+      "level": 100,
+      "hp": 46165,
+      "baseExp": 6935,
+      "jobExp": 19740,
+      "attackMin": 541,
+      "attackMax": 89,
+      "defense": 98,
+      "magicDefense": 43,
+      "size": "中型",
+      "race": "惡魔",
+      "element": "風 3",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/championmobs.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 912,
+          "aegisName": "Zargon",
+          "name": "剎勒空結晶",
+          "ratePerTenThousand": 9700,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從一部份怪物身上得來的結晶,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 1039,
+          "aegisName": "Petite_DiablOfs_Wing",
+          "name": "小惡魔翅膀",
+          "ratePerTenThousand": 1250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "小惡魔身上的小翅膀,和蝙蝠的翅膀相似。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 1746,
+          "aegisName": "Elven_Bow",
+          "name": "小精靈弓",
+          "ratePerTenThousand": 15,
+          "type": "武器",
+          "weight": 150,
+          "attack": 160,
+          "defense": 0,
+          "slots": 1,
+          "description": "摹仿古代守護森林的種族而製成的弓。\nDEX+2.\n系列: 弓 攻擊: 160\n重量: 150\n武器等級: 3\n要求等級: 100\n裝備: 3轉弓箭手系列"
+        },
+        {
+          "itemId": 2619,
+          "aegisName": "Thimble_Of_Archer",
+          "name": "神射手套",
+          "ratePerTenThousand": 5,
+          "type": "防具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "為了使攜帶箭矢方便纏在手上的布塊,可提高箭矢攻擊時的傷害度。\n系列: 飾品\n防禦: 0  重量: 10\n要求等級: 65\n裝備: 弓箭手系列"
+        },
+        {
+          "itemId": 1769,
+          "aegisName": "Silence_Arrow",
+          "name": "寧靜箭矢",
+          "ratePerTenThousand": 5000,
+          "type": "彈藥",
+          "weight": 0.1,
+          "attack": 1,
+          "defense": 0,
+          "slots": 0,
+          "description": "有塗抹可讓嘴巴僵硬的毒箭矢，有機率讓目標陷入沉默。\n系列 : 箭矢    攻擊 : 1\n重量 : 0.1      屬性 : 無"
+        },
+        {
+          "itemId": 757,
+          "aegisName": "Elunium_Stone",
+          "name": "鋁原石",
+          "ratePerTenThousand": 595,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以拿來煉鋁的礦石,拿來提煉作成盔甲。\n\n重量: 20"
+        },
+        {
+          "itemId": 4149,
+          "aegisName": "Gargoyle_Card",
+          "name": "蝙蝠弓箭手卡片",
+          "ratePerTenThousand": 5,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "打死昆蟲型怪時,有機率會得到'打雷的箱子'。\n系列: 卡片\n裝備: 飾品\n重量: 1"
+        }
+      ]
+    }
+  ]
+}

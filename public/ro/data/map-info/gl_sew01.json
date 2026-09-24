@@ -1,0 +1,473 @@
+{
+  "id": "gl_sew01",
+  "name": "克雷斯特漢姆古城 地下水道 1樓",
+  "category": "SERVICE_ONLY",
+  "dungeon": null,
+  "totalMonsters": 132,
+  "normalMonsterCount": 132,
+  "levelRange": {
+    "min": 46,
+    "max": 107
+  },
+  "fullLevelRange": {
+    "min": 46,
+    "max": 107
+  },
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [
+    {
+      "id": 1179,
+      "name": "白幽靈",
+      "level": 46,
+      "count": 66
+    },
+    {
+      "id": 1253,
+      "name": "蝙蝠弓箭手",
+      "level": 100,
+      "count": 49
+    },
+    {
+      "id": 1194,
+      "name": "捲甲蟲",
+      "level": 107,
+      "count": 16
+    }
+  ],
+  "resourceMonsters": [],
+  "bossMonsters": [],
+  "monsters": [
+    {
+      "id": 1179,
+      "aegisName": "WHISPER",
+      "name": "白幽靈",
+      "count": 66,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 46,
+      "hp": 796,
+      "baseExp": 325,
+      "jobExp": 328,
+      "attackMin": 77,
+      "attackMax": 55,
+      "defense": 20,
+      "magicDefense": 40,
+      "size": "小型",
+      "race": "惡魔",
+      "element": "念 3",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/glastheim.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 1001,
+          "aegisName": "Sparkling_Dust",
+          "name": "星星的粉末",
+          "ratePerTenThousand": 75,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "星星的一角,提煉之後可以製造星星的碎片。\n\n重量: 1"
+        },
+        {
+          "itemId": 1059,
+          "aegisName": "Transparent_Cloth",
+          "name": "透明之布",
+          "ratePerTenThousand": 2668,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "透明而且裡面會發光神奇的布塊。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 2282,
+          "aegisName": "Spirit_Chain",
+          "name": "光環",
+          "ratePerTenThousand": 1,
+          "type": "防具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "亡者前往天國時頭上出現的光環,配帶時並不會有隱匿的效果。\n對聖屬性的攻擊,可-15% 的傷害度。\n系列: 頭具  防禦: 0\n位置: 上  重量: 10\n裝備: 全職業"
+        },
+        {
+          "itemId": 2333,
+          "aegisName": "Silver_Robe_",
+          "name": "秘銀之衣",
+          "ratePerTenThousand": 5,
+          "type": "防具",
+          "weight": 70,
+          "attack": 0,
+          "defense": 23,
+          "slots": 1,
+          "description": "以價值不斐的銀絲所編製成的衣服。\n系列: 鎧甲  防禦: 23\n重量: 70\n裝備: 魔法師系列/悟靈士"
+        },
+        {
+          "itemId": 601,
+          "aegisName": "Wing_Of_Fly",
+          "name": "蒼蠅翅膀",
+          "ratePerTenThousand": 500,
+          "type": "延遲消耗品",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "將蒼蠅的翅膀剪下可以用來製作具有魔法力量的物品,可在地圖上移動至任意的位置上。\n\n重量: 0"
+        },
+        {
+          "itemId": 4102,
+          "aegisName": "Whisper_Card",
+          "name": "白幽靈卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "受念屬性怪物攻擊時,會+50%的傷害。\n迴避+20\n系列: 卡片\n裝置: 披挂用\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2618,
+      "aegisName": "C2_WHISPER",
+      "name": "雄壯白幽靈",
+      "count": 1,
+      "respawnMinMs": 180000,
+      "respawnMaxMs": 180000,
+      "level": 46,
+      "hp": 7960,
+      "baseExp": 1625,
+      "jobExp": 4920,
+      "attackMin": 92,
+      "attackMax": 55,
+      "defense": 20,
+      "magicDefense": 40,
+      "size": "小型",
+      "race": "惡魔",
+      "element": "念 3",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/championmobs.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 1001,
+          "aegisName": "Sparkling_Dust",
+          "name": "星星的粉末",
+          "ratePerTenThousand": 375,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "星星的一角,提煉之後可以製造星星的碎片。\n\n重量: 1"
+        },
+        {
+          "itemId": 1059,
+          "aegisName": "Transparent_Cloth",
+          "name": "透明之布",
+          "ratePerTenThousand": 10000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "透明而且裡面會發光神奇的布塊。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 2282,
+          "aegisName": "Spirit_Chain",
+          "name": "光環",
+          "ratePerTenThousand": 5,
+          "type": "防具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "亡者前往天國時頭上出現的光環,配帶時並不會有隱匿的效果。\n對聖屬性的攻擊,可-15% 的傷害度。\n系列: 頭具  防禦: 0\n位置: 上  重量: 10\n裝備: 全職業"
+        },
+        {
+          "itemId": 2333,
+          "aegisName": "Silver_Robe_",
+          "name": "秘銀之衣",
+          "ratePerTenThousand": 25,
+          "type": "防具",
+          "weight": 70,
+          "attack": 0,
+          "defense": 23,
+          "slots": 1,
+          "description": "以價值不斐的銀絲所編製成的衣服。\n系列: 鎧甲  防禦: 23\n重量: 70\n裝備: 魔法師系列/悟靈士"
+        },
+        {
+          "itemId": 601,
+          "aegisName": "Wing_Of_Fly",
+          "name": "蒼蠅翅膀",
+          "ratePerTenThousand": 2500,
+          "type": "延遲消耗品",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "將蒼蠅的翅膀剪下可以用來製作具有魔法力量的物品,可在地圖上移動至任意的位置上。\n\n重量: 0"
+        },
+        {
+          "itemId": 4102,
+          "aegisName": "Whisper_Card",
+          "name": "白幽靈卡片",
+          "ratePerTenThousand": 5,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "受念屬性怪物攻擊時,會+50%的傷害。\n迴避+20\n系列: 卡片\n裝置: 披挂用\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1253,
+      "aegisName": "GARGOYLE",
+      "name": "蝙蝠弓箭手",
+      "count": 49,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 100,
+      "hp": 9233,
+      "baseExp": 1387,
+      "jobExp": 1316,
+      "attackMin": 451,
+      "attackMax": 89,
+      "defense": 98,
+      "magicDefense": 43,
+      "size": "中型",
+      "race": "惡魔",
+      "element": "風 3",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/glastheim.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 912,
+          "aegisName": "Zargon",
+          "name": "剎勒空結晶",
+          "ratePerTenThousand": 1940,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從一部份怪物身上得來的結晶,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 1039,
+          "aegisName": "Petite_DiablOfs_Wing",
+          "name": "小惡魔翅膀",
+          "ratePerTenThousand": 250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "小惡魔身上的小翅膀,和蝙蝠的翅膀相似。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 1746,
+          "aegisName": "Elven_Bow",
+          "name": "小精靈弓",
+          "ratePerTenThousand": 3,
+          "type": "武器",
+          "weight": 150,
+          "attack": 160,
+          "defense": 0,
+          "slots": 1,
+          "description": "摹仿古代守護森林的種族而製成的弓。\nDEX+2.\n系列: 弓 攻擊: 160\n重量: 150\n武器等級: 3\n要求等級: 100\n裝備: 3轉弓箭手系列"
+        },
+        {
+          "itemId": 2619,
+          "aegisName": "Thimble_Of_Archer",
+          "name": "神射手套",
+          "ratePerTenThousand": 1,
+          "type": "防具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "為了使攜帶箭矢方便纏在手上的布塊,可提高箭矢攻擊時的傷害度。\n系列: 飾品\n防禦: 0  重量: 10\n要求等級: 65\n裝備: 弓箭手系列"
+        },
+        {
+          "itemId": 1769,
+          "aegisName": "Silence_Arrow",
+          "name": "寧靜箭矢",
+          "ratePerTenThousand": 1000,
+          "type": "彈藥",
+          "weight": 0.1,
+          "attack": 1,
+          "defense": 0,
+          "slots": 0,
+          "description": "有塗抹可讓嘴巴僵硬的毒箭矢，有機率讓目標陷入沉默。\n系列 : 箭矢    攻擊 : 1\n重量 : 0.1      屬性 : 無"
+        },
+        {
+          "itemId": 757,
+          "aegisName": "Elunium_Stone",
+          "name": "鋁原石",
+          "ratePerTenThousand": 119,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以拿來煉鋁的礦石,拿來提煉作成盔甲。\n\n重量: 20"
+        },
+        {
+          "itemId": 4149,
+          "aegisName": "Gargoyle_Card",
+          "name": "蝙蝠弓箭手卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "打死昆蟲型怪時,有機率會得到'打雷的箱子'。\n系列: 卡片\n裝備: 飾品\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1194,
+      "aegisName": "ARCLOUSE",
+      "name": "捲甲蟲",
+      "count": 16,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 107,
+      "hp": 14944,
+      "baseExp": 1937,
+      "jobExp": 1759,
+      "attackMin": 681,
+      "attackMax": 40,
+      "defense": 101,
+      "magicDefense": 36,
+      "size": "中型",
+      "race": "昆蟲",
+      "element": "地 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/glastheim.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 1096,
+          "aegisName": "Round_Shell",
+          "name": "圓形外皮",
+          "ratePerTenThousand": 1750,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "捲成圓形經過乾燥後而成的外皮。可向收集商人購買。\n\n重量 :1"
+        },
+        {
+          "itemId": 938,
+          "aegisName": "Sticky_Mucus",
+          "name": "粘稠液體",
+          "ratePerTenThousand": 1500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "不知名的黏稠液體,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 943,
+          "aegisName": "Solid_Shell",
+          "name": "堅硬外皮",
+          "ratePerTenThousand": 400,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "怪物身上堅硬的外皮,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 912,
+          "aegisName": "Zargon",
+          "name": "剎勒空結晶",
+          "ratePerTenThousand": 225,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從一部份怪物身上得來的結晶,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 716,
+          "aegisName": "Red_Gemstone",
+          "name": "紅色魔力礦石",
+          "ratePerTenThousand": 150,
+          "type": "其他",
+          "weight": 0.1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "具有魔法力量的礦石，使用魔法時可以代替施法者抵消魔法的反作用力。\n\n重量 : 0.1"
+        },
+        {
+          "itemId": 997,
+          "aegisName": "Great_Nature",
+          "name": "土靈原石",
+          "ratePerTenThousand": 10,
+          "type": "其他",
+          "weight": 30,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "擁有地屬性的礦石。\n\n重量: 30"
+        },
+        {
+          "itemId": 912,
+          "aegisName": "Zargon",
+          "name": "剎勒空結晶",
+          "ratePerTenThousand": 1250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從一部份怪物身上得來的結晶,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 4240,
+          "aegisName": "Arclouse_Card",
+          "name": "捲甲蟲卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "當精練+5以下時,DEF+2,MDEF+3。\n系列: 卡片\n裝備: 盾牌\n重量: 1"
+        }
+      ]
+    }
+  ]
+}

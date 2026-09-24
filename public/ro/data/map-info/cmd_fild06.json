@@ -1,0 +1,534 @@
+{
+  "id": "cmd_fild06",
+  "name": "要塞都市 山特樂曼西區",
+  "category": "SERVICE_ONLY",
+  "dungeon": null,
+  "totalMonsters": 227,
+  "normalMonsterCount": 227,
+  "levelRange": {
+    "min": 55,
+    "max": 61
+  },
+  "fullLevelRange": {
+    "min": 55,
+    "max": 61
+  },
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [
+    {
+      "id": 1040,
+      "name": "巨石怪",
+      "level": 61,
+      "count": 165
+    },
+    {
+      "id": 1058,
+      "name": "重金屬蝗蟲",
+      "level": 55,
+      "count": 55
+    }
+  ],
+  "resourceMonsters": [
+    {
+      "id": 1081,
+      "name": "黃草",
+      "level": 1,
+      "count": 5
+    }
+  ],
+  "bossMonsters": [],
+  "monsters": [
+    {
+      "id": 1081,
+      "aegisName": "YELLOW_PLANT",
+      "name": "黃草",
+      "count": 5,
+      "respawnMinMs": 900000,
+      "respawnMaxMs": 1800000,
+      "level": 1,
+      "hp": 6,
+      "baseExp": 0,
+      "jobExp": 0,
+      "attackMin": 1,
+      "attackMax": 1,
+      "defense": 100,
+      "magicDefense": 99,
+      "size": "小型",
+      "race": "植物",
+      "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": true,
+      "sourceFiles": [
+        "npc/re/mobs/fields/comodo.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 508,
+          "aegisName": "Yellow_Herb",
+          "name": "黃色藥草",
+          "ratePerTenThousand": 2750,
+          "type": "恢復道具",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在治療傷處上有相當功效的珍貴藥草,可恢復少量的HP。\n\n重量: 5"
+        },
+        {
+          "itemId": 712,
+          "aegisName": "Flower",
+          "name": "花",
+          "ratePerTenThousand": 500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "沒有名稱的花。沒有香味也沒有荊棘。\n\n重量: 1"
+        },
+        {
+          "itemId": 711,
+          "aegisName": "Shoot",
+          "name": "芽苗",
+          "ratePerTenThousand": 500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "剛剛才從這個世上出生的幼小植物,單純無瑕的樣子非常可愛。\n\n重量: 1"
+        },
+        {
+          "itemId": 905,
+          "aegisName": "Stem",
+          "name": "植物梗",
+          "ratePerTenThousand": 250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "植物細長的梗,可以當做藥材,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 7935,
+          "aegisName": "Poison_Herb_Seratum",
+          "name": "蛇足毒草",
+          "ratePerTenThousand": 150,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "危險: 不像美麗的外表, 卻沒有香味。\n\n重量: 1"
+        },
+        {
+          "itemId": 707,
+          "aegisName": "Singing_Plant",
+          "name": "哀唱草",
+          "ratePerTenThousand": 3,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "一到有滿月的夜晚就會獨自唱著哀傷的歌曲的神秘植物,傳說以前有位少女,她唱著歌思念離開很久的戀人,但是心愛的他終究沒有歸來,等著等著她就這樣化成了一株草。\n\n重量: 1"
+        },
+        {
+          "itemId": 914,
+          "aegisName": "Fluff",
+          "name": "毛",
+          "ratePerTenThousand": 250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "小型怪身上的毛,可以用來做衣服的原料,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 2269,
+          "aegisName": "Centimental_Flower",
+          "name": "花葉",
+          "ratePerTenThousand": 1,
+          "type": "防具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "小小的花葉,含在嘴裡會讓人有幸福浪漫的感覺。\n受到植物型敵人的攻擊時, 可-3%的傷害度。\n系列: 頭具  防禦: 0\n位置: 下  重量: 10\n裝備: 初學者以外的全職業"
+        }
+      ]
+    },
+    {
+      "id": 1058,
+      "aegisName": "METALLER",
+      "name": "重金屬蝗蟲",
+      "count": 55,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 55,
+      "hp": 1487,
+      "baseExp": 466,
+      "jobExp": 413,
+      "attackMin": 126,
+      "attackMax": 41,
+      "defense": 72,
+      "magicDefense": 12,
+      "size": "中型",
+      "race": "昆蟲",
+      "element": "火 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/comodo.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 990,
+          "aegisName": "Boody_Red",
+          "name": "火靈礦石",
+          "ratePerTenThousand": 30,
+          "type": "其他",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "紅色的小礦石塊。擁有火屬性,提煉後可以製作出火靈原石。\n\n重量: 5"
+        },
+        {
+          "itemId": 940,
+          "aegisName": "Grasshopper's_Leg",
+          "name": "蝗蟲後腿",
+          "ratePerTenThousand": 3250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "怪物搖滾蝗蟲的後腿。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 1690,
+          "aegisName": "Amazing_Foxtail",
+          "name": "神秘狐尾草手杖",
+          "ratePerTenThousand": 15,
+          "type": "武器",
+          "weight": 40,
+          "attack": 80,
+          "defense": 0,
+          "slots": 3,
+          "description": "上面坐著蜻蜓且蘊含魔法的堅固狐尾草。\nMATK+180. MSP+50\n精煉值每+3時, MATK+10, MSP+10。\n系列: 單手杖 攻擊: 80\n重量: 40\n武器等級: 2\n要求等級: 60\n裝備: 喵族"
+        },
+        {
+          "itemId": 1694,
+          "aegisName": "Model_Foxtail",
+          "name": "狐尾草模型",
+          "ratePerTenThousand": 15,
+          "type": "武器",
+          "weight": 30,
+          "attack": 150,
+          "defense": 0,
+          "slots": 3,
+          "description": "用塑膠製成的狐尾草模型。\n遠程物理 攻擊力+8%, MHP+100。\n精煉值每+3時, DEX+2, MSP+10。\n系列: 單手杖 攻擊: 150\n重量: 30\n武器等級: 2\n要求等級: 60\n裝備: 喵族"
+        },
+        {
+          "itemId": 707,
+          "aegisName": "Singing_Plant",
+          "name": "哀唱草",
+          "ratePerTenThousand": 10,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "一到有滿月的夜晚就會獨自唱著哀傷的歌曲的神秘植物,傳說以前有位少女,她唱著歌思念離開很久的戀人,但是心愛的他終究沒有歸來,等著等著她就這樣化成了一株草。\n\n重量: 1"
+        },
+        {
+          "itemId": 935,
+          "aegisName": "Shell",
+          "name": "堅硬外殼",
+          "ratePerTenThousand": 1500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "怪物身上堅硬的外殼,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 1914,
+          "aegisName": "Guitar_Of_Passion",
+          "name": "熱情的吉他",
+          "ratePerTenThousand": 5,
+          "type": "武器",
+          "weight": 90,
+          "attack": 110,
+          "defense": 0,
+          "slots": 0,
+          "description": "只要拿在手上就會想要彈些熱情的歌曲,擁有魔力般的吉他.\n系列: 樂器  攻擊: 110\n重量: 90 屬性 :火\n武器等級: 3\n要求等級: 27\n裝備: 吟遊詩人"
+        },
+        {
+          "itemId": 4057,
+          "aegisName": "Metaller_Card",
+          "name": "重金屬蝗蟲卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "攻擊敵人時,有5%的機率使敵人陷入沉默狀態。\nATK+5。\n系列: 卡片\n裝置: 武器\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1040,
+      "aegisName": "GOLEM",
+      "name": "巨石怪",
+      "count": 165,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 61,
+      "hp": 2324,
+      "baseExp": 564,
+      "jobExp": 508,
+      "attackMin": 172,
+      "attackMax": 25,
+      "defense": 190,
+      "magicDefense": 12,
+      "size": "大型",
+      "race": "無形",
+      "element": "無 3",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/comodo.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 999,
+          "aegisName": "Steel",
+          "name": "鋼鐵",
+          "ratePerTenThousand": 75,
+          "type": "其他",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "將鐵浸泡幾次特殊藥水後,可以使其強度更高,製造出來的武器或防具硬度更高。\n\n重量: 10"
+        },
+        {
+          "itemId": 953,
+          "aegisName": "Stone_Heart",
+          "name": "石心",
+          "ratePerTenThousand": 4500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "擁有魔力,是讓石頭發揮力量的原動力之石心臟,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 912,
+          "aegisName": "Zargon",
+          "name": "剎勒空結晶",
+          "ratePerTenThousand": 110,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從一部份怪物身上得來的結晶,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 757,
+          "aegisName": "Elunium_Stone",
+          "name": "鋁原石",
+          "ratePerTenThousand": 35,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以拿來煉鋁的礦石,拿來提煉作成盔甲。\n\n重量: 20"
+        },
+        {
+          "itemId": 2146,
+          "aegisName": "Siver_Guard",
+          "name": "銀盾",
+          "ratePerTenThousand": 3,
+          "type": "防具",
+          "weight": 30,
+          "attack": 0,
+          "defense": 60,
+          "slots": 1,
+          "description": "把銀和鐵混合而成的一般薄盾, 據說反射光線時很炫。\n系列: 盾牌 防禦: 60\n重量: 30\n要求等級: 22\n裝備: 全職業"
+        },
+        {
+          "itemId": 715,
+          "aegisName": "Yellow_Gemstone",
+          "name": "黃色魔力礦石",
+          "ratePerTenThousand": 100,
+          "type": "其他",
+          "weight": 0.1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "具有魔法力量的礦石，使用魔法時可以代替施法者抵消魔法的反作用力。\n\n重量: 0.1"
+        },
+        {
+          "itemId": 998,
+          "aegisName": "Iron",
+          "name": "鐵",
+          "ratePerTenThousand": 175,
+          "type": "其他",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "除了硬度夠,它也較為輕薄,與其他金屬比較起來,加工較容易。\n\n重量: 5"
+        },
+        {
+          "itemId": 4072,
+          "aegisName": "Golem_Card",
+          "name": "巨石怪卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可使武器完全不受損。\nATK+5。\n系列: 卡片\n裝置: 武器\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2812,
+      "aegisName": "C4_GOLEM",
+      "name": "憤怒巨石怪",
+      "count": 2,
+      "respawnMinMs": 180000,
+      "respawnMaxMs": 180000,
+      "level": 61,
+      "hp": 11620,
+      "baseExp": 2820,
+      "jobExp": 7620,
+      "attackMin": 206,
+      "attackMax": 25,
+      "defense": 190,
+      "magicDefense": 12,
+      "size": "大型",
+      "race": "無形",
+      "element": "無 3",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/championmobs.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 999,
+          "aegisName": "Steel",
+          "name": "鋼鐵",
+          "ratePerTenThousand": 375,
+          "type": "其他",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "將鐵浸泡幾次特殊藥水後,可以使其強度更高,製造出來的武器或防具硬度更高。\n\n重量: 10"
+        },
+        {
+          "itemId": 953,
+          "aegisName": "Stone_Heart",
+          "name": "石心",
+          "ratePerTenThousand": 10000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "擁有魔力,是讓石頭發揮力量的原動力之石心臟,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 912,
+          "aegisName": "Zargon",
+          "name": "剎勒空結晶",
+          "ratePerTenThousand": 550,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從一部份怪物身上得來的結晶,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 757,
+          "aegisName": "Elunium_Stone",
+          "name": "鋁原石",
+          "ratePerTenThousand": 175,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以拿來煉鋁的礦石,拿來提煉作成盔甲。\n\n重量: 20"
+        },
+        {
+          "itemId": 2146,
+          "aegisName": "Siver_Guard",
+          "name": "銀盾",
+          "ratePerTenThousand": 15,
+          "type": "防具",
+          "weight": 30,
+          "attack": 0,
+          "defense": 60,
+          "slots": 1,
+          "description": "把銀和鐵混合而成的一般薄盾, 據說反射光線時很炫。\n系列: 盾牌 防禦: 60\n重量: 30\n要求等級: 22\n裝備: 全職業"
+        },
+        {
+          "itemId": 715,
+          "aegisName": "Yellow_Gemstone",
+          "name": "黃色魔力礦石",
+          "ratePerTenThousand": 500,
+          "type": "其他",
+          "weight": 0.1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "具有魔法力量的礦石，使用魔法時可以代替施法者抵消魔法的反作用力。\n\n重量: 0.1"
+        },
+        {
+          "itemId": 998,
+          "aegisName": "Iron",
+          "name": "鐵",
+          "ratePerTenThousand": 875,
+          "type": "其他",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "除了硬度夠,它也較為輕薄,與其他金屬比較起來,加工較容易。\n\n重量: 5"
+        },
+        {
+          "itemId": 4072,
+          "aegisName": "Golem_Card",
+          "name": "巨石怪卡片",
+          "ratePerTenThousand": 5,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可使武器完全不受損。\nATK+5。\n系列: 卡片\n裝置: 武器\n重量: 1"
+        }
+      ]
+    }
+  ]
+}

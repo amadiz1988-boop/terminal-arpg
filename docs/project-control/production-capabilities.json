@@ -1,0 +1,123 @@
+{
+  "schema": 1,
+  "governance_task": "SAFE_CANONICAL_GITHUB_RECONSTRUCTION_V6",
+  "capabilities": [
+    {
+      "id": "m1-world-map",
+      "source_paths": [
+        "ops/ro-stack/dashboard.mjs",
+        "ops/ro-stack/dashboard/app.js"
+      ],
+      "offline_test": "scripts/test-world-map-supply-cutover.mjs",
+      "acceptance_scope": "SOURCE_ONLY_NO_PRODUCTION"
+    },
+    {
+      "id": "direct-teleport",
+      "source_paths": [
+        "ops/ro-stack/dashboard.mjs",
+        "ops/ro-stack/dashboard/app.js"
+      ],
+      "offline_test": "scripts/test-world-map-teleport.mjs",
+      "acceptance_scope": "SOURCE_ONLY_NO_PRODUCTION"
+    },
+    {
+      "id": "saved-town",
+      "source_paths": [
+        "ops/ro-stack/dashboard.mjs",
+        "ops/ro-stack/dashboard/app.js"
+      ],
+      "offline_test": "scripts/test-world-map-supply-cutover.mjs",
+      "acceptance_scope": "SOURCE_ONLY_NO_PRODUCTION"
+    },
+    {
+      "id": "supply-canonical",
+      "source_paths": [
+        "ops/ro-stack/dashboard.mjs",
+        "ops/ro-stack/dashboard/app.js"
+      ],
+      "offline_test": "scripts/test-supply-service-route-controller.mjs",
+      "acceptance_scope": "SOURCE_ONLY_NO_PRODUCTION"
+    },
+    {
+      "id": "auto-farm-same-map",
+      "source_paths": [
+        "ops/ro-stack/dashboard.mjs",
+        "ops/ro-stack/dashboard/app.js"
+      ],
+      "offline_test": "scripts/test-auto-farm-same-map-start.mjs",
+      "acceptance_scope": "SOURCE_ONLY_NO_PRODUCTION"
+    },
+    {
+      "id": "teleport-presentation-abcd",
+      "source_paths": [
+        "ops/ro-stack/dashboard.mjs",
+        "ops/ro-stack/dashboard/app.js"
+      ],
+      "offline_test": "scripts/test-world-map-teleport-presentation.mjs",
+      "acceptance_scope": "SOURCE_ONLY_NO_PRODUCTION"
+    },
+    {
+      "id": "skill-tree",
+      "source_paths": [
+        "ops/ro-stack/dashboard.mjs",
+        "ops/ro-stack/dashboard/app.js"
+      ],
+      "offline_test": "scripts/test-ro-skill-tree-layouts.mjs",
+      "acceptance_scope": "SOURCE_ONLY_NO_PRODUCTION"
+    },
+    {
+      "id": "skill-loader",
+      "source_paths": [
+        "ops/ro-stack/dashboard.mjs",
+        "ops/ro-stack/dashboard/app.js"
+      ],
+      "offline_test": "scripts/test-ro-skill-icons.mjs",
+      "acceptance_scope": "SOURCE_ONLY_NO_PRODUCTION"
+    },
+    {
+      "id": "original-ro-button-audio",
+      "source_paths": [
+        "ops/ro-stack/dashboard.mjs",
+        "ops/ro-stack/dashboard/app.js"
+      ],
+      "offline_test": "scripts/test-web-full-production-superset.mjs",
+      "acceptance_scope": "SOURCE_ONLY_NO_PRODUCTION"
+    },
+    {
+      "id": "admin-quarantine-recovery",
+      "source_paths": [
+        "ops/ro-stack/dashboard.mjs",
+        "ops/ro-stack/dashboard/app.js"
+      ],
+      "offline_test": "ops/ro-stack/tests/test-admin-quarantine-recovery.mjs",
+      "acceptance_scope": "SOURCE_ONLY_NO_PRODUCTION"
+    },
+    {
+      "id": "admin-security",
+      "source_paths": [
+        "ops/ro-stack/dashboard.mjs",
+        "ops/ro-stack/dashboard/app.js"
+      ],
+      "offline_test": "scripts/test-server-ops-admin-control.mjs",
+      "acceptance_scope": "SOURCE_ONLY_NO_PRODUCTION"
+    },
+    {
+      "id": "web-canary",
+      "source_paths": [
+        "ops/ro-stack/dashboard.mjs",
+        "ops/ro-stack/dashboard/app.js"
+      ],
+      "offline_test": "scripts/test-active-web-entrypoint.mjs",
+      "acceptance_scope": "SOURCE_ONLY_NO_PRODUCTION"
+    },
+    {
+      "id": "private-runtime-assets",
+      "source_paths": [
+        "scripts/materialize-web-runtime-assets.mjs",
+        "scripts/fetch-web-runtime-private-release.py"
+      ],
+      "offline_test": "scripts/test-web-runtime-asset-materialization.mjs",
+      "acceptance_scope": "SOURCE_ONLY_NO_PRODUCTION"
+    }
+  ]
+}

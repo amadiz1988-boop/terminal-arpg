@@ -1,0 +1,339 @@
+{
+  "id": "terasoid",
+  "displayName": "帖拉所伊朵",
+  "releaseStatus": "test",
+  "version": 2,
+  "generatedAt": "2026-09-12T19:35:02.329475+00:00",
+  "sourcePolicy": "User-confirmed legally authorized Stone Age client; source files read-only.",
+  "sourceClient": "C:\\SODASA0627\\SODASA528\\stoneage",
+  "sourceLookup": {
+    "nameTable": "lua/file.cf:19",
+    "portraitGraphicId": 63694,
+    "animationId": 100374,
+    "resourceDirectory": "C:\\SODASA0627\\SODASA528\\stoneage\\path\\pet",
+    "palette": "data/pal/Palet_4.sap",
+    "paletteStorage": "BGR converted to RGB"
+  },
+  "sourceFiles": {
+    "C:\\SODASA0627\\SODASA528\\stoneage\\path\\pet\\adrn.bin": {
+      "bytes": 7904412,
+      "sha256": "98f827982bac9f671eeb67daab2d7674edff09b758b4d44a7bd6b66ca7220784"
+    },
+    "C:\\SODASA0627\\SODASA528\\stoneage\\path\\pet\\real.bin": {
+      "bytes": 381170444,
+      "sha256": "38142bb2c0c32f7a008af47601c3bc99b26732116b295ec13e1f650fa44ed062"
+    },
+    "C:\\SODASA0627\\SODASA528\\stoneage\\path\\pet\\spradrn.bin": {
+      "bytes": 4020,
+      "sha256": "ad2b8061d80130ae06f9cb2f452eae3c75445a6df86a54c34ae538b9a0558206"
+    },
+    "C:\\SODASA0627\\SODASA528\\stoneage\\path\\pet\\spr.bin": {
+      "bytes": 1975648,
+      "sha256": "b7393c53bdb5122da40c687345fcec459680562807f5eea5999d211615a72a4c"
+    },
+    "C:\\SODASA0627\\SODASA528\\stoneage\\data\\pal\\Palet_4.sap": {
+      "bytes": 708,
+      "sha256": "9a995ac1d9641eda9d1305d3f6a5ffc2783ee87a3c4f557d9808b89ed5ed0251"
+    }
+  },
+  "logicalFrame": {
+    "width": 96,
+    "height": 96
+  },
+  "atlas": {
+    "columns": 8,
+    "rows": 8,
+    "directionRows": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      7,
+      6
+    ],
+    "runtimeRow": 6,
+    "runtimeDirection": 7
+  },
+  "animations": {
+    "idle": {
+      "file": "idle.webp",
+      "width": 768,
+      "height": 768,
+      "frames": 8,
+      "directions": 8,
+      "frameWidth": 96,
+      "frameHeight": 96,
+      "frameDurationMs": 75,
+      "loop": true,
+      "sourceActionCode": 0,
+      "sampledFrameIndicesByDirection": {
+        "0": [
+          0,
+          3,
+          6,
+          9,
+          12,
+          15,
+          18,
+          21
+        ],
+        "1": [
+          0,
+          3,
+          6,
+          9,
+          12,
+          15,
+          18,
+          21
+        ],
+        "2": [
+          0,
+          3,
+          6,
+          9,
+          12,
+          15,
+          18,
+          21
+        ],
+        "3": [
+          0,
+          3,
+          6,
+          9,
+          12,
+          15,
+          18,
+          21
+        ],
+        "4": [
+          0,
+          3,
+          6,
+          9,
+          12,
+          15,
+          18,
+          21
+        ],
+        "5": [
+          0,
+          3,
+          6,
+          9,
+          12,
+          15,
+          18,
+          21
+        ],
+        "7": [
+          0,
+          3,
+          6,
+          9,
+          12,
+          15,
+          18,
+          21
+        ],
+        "6": [
+          0,
+          3,
+          6,
+          9,
+          12,
+          15,
+          18,
+          21
+        ]
+      },
+      "sha256": "f5247e26d72b359d1f9ea87dce05a245be82f47864a2ce07d0a961f1f6aec82a"
+    },
+    "walk": {
+      "file": "walk.webp",
+      "width": 576,
+      "height": 768,
+      "frames": 6,
+      "directions": 8,
+      "frameWidth": 96,
+      "frameHeight": 96,
+      "frameDurationMs": 167,
+      "loop": true,
+      "sourceActionCode": 4,
+      "sampledFrameIndicesByDirection": {
+        "0": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "1": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "2": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "3": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "4": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "5": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "7": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "6": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      "sha256": "a72af666c7d9f6a63e6e904d641fccef545292d62dbe965a7a937624d78a25a1"
+    },
+    "happy": {
+      "file": "happy.webp",
+      "width": 768,
+      "height": 768,
+      "frames": 8,
+      "directions": 8,
+      "frameWidth": 96,
+      "frameHeight": 96,
+      "frameDurationMs": 63,
+      "loop": false,
+      "sourceActionCode": 0,
+      "sampledFrameIndicesByDirection": {
+        "0": [
+          0,
+          3,
+          4,
+          5,
+          6,
+          8,
+          10,
+          21
+        ],
+        "1": [
+          0,
+          3,
+          4,
+          5,
+          6,
+          8,
+          10,
+          21
+        ],
+        "2": [
+          0,
+          3,
+          4,
+          5,
+          6,
+          8,
+          10,
+          21
+        ],
+        "3": [
+          0,
+          3,
+          4,
+          5,
+          6,
+          8,
+          10,
+          21
+        ],
+        "4": [
+          0,
+          3,
+          4,
+          5,
+          6,
+          8,
+          10,
+          21
+        ],
+        "5": [
+          0,
+          3,
+          4,
+          5,
+          6,
+          8,
+          10,
+          21
+        ],
+        "7": [
+          0,
+          3,
+          4,
+          5,
+          6,
+          8,
+          10,
+          21
+        ],
+        "6": [
+          0,
+          3,
+          4,
+          5,
+          6,
+          8,
+          10,
+          21
+        ]
+      },
+      "sha256": "a7edc8734685e68edef838ea8ed16a54cb17f41750dba2ebba30882502ccd090"
+    }
+  },
+  "semanticMapping": {
+    "status": "visual-assignment",
+    "officialActionNames": "【資料不足，無法確認】",
+    "idle": "source action 0 sampled to eight companion frames",
+    "walk": "source action 4, user-confirmed locomotion cycle, all six source frames",
+    "happy": "source action 0 expressive frames sampled to eight companion frames"
+  },
+  "transparency": "RLE background runs converted to alpha 0",
+  "sourceModified": false
+}

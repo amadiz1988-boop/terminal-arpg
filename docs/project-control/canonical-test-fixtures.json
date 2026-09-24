@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "runtime": "canonical-ragnarok",
+  "identities": [
+    {
+      "logicalRole": "TEST_SUPERUSER",
+      "accountId": 2000164,
+      "characterId": 150106,
+      "permissionClass": "rathena-admin-group-99",
+      "testFlag": true,
+      "purpose": "test fixture preparation and diagnosis",
+      "allowedUse": ["test-only setup", "diagnostic", "environment recovery"],
+      "forbiddenUse": ["player-flow acceptance", "real-player mutation", "real-player economy", "public ranking", "life-social simulation"],
+      "credentialKey": "canonical-test-superuser-credentials",
+      "status": "PROVISIONED_PENDING_SERVER_COMMAND_ACCEPTANCE"
+    },
+    {
+      "logicalRole": "TEST_PLAYER",
+      "accountId": 2000163,
+      "characterId": 150105,
+      "permissionClass": "rathena-player-group-0",
+      "testFlag": true,
+      "purpose": "normal player-flow and browser acceptance",
+      "allowedUse": ["normal player login", "player web action", "authoritative gameplay acceptance"],
+      "forbiddenUse": ["GM fixture setup", "admin bypass", "real-player economy", "public ranking", "life-social simulation"],
+      "credentialKey": "fresh-e2e-credentials",
+      "status": "PROVISIONED_PENDING_SERVER_COMMAND_DENIAL_AND_GAMEPLAY_ACCEPTANCE"
+    }
+  ],
+  "acceptance": {
+    "serverCommandSuperuser": "PENDING",
+    "serverCommandPlayerRejection": "PENDING",
+    "clientRequiredForTesting": false,
+    "superuserPrepPlayerExecution": "PENDING",
+    "rankingExclusion": "PASS",
+    "lifeSourceGate": "BUILD_PASS_PENDING_DEPLOY",
+    "lifeRuntimeGate": "FAIL_ACTIVE_SESSIONS",
+    "socialRuntime": "NOT_ACTIVE",
+    "futureSocialGate": "REQUIRED_IS_TEST_EXCLUSION",
+    "economyIsolation": "PARTIAL_SOURCE_ONLY",
+    "ready": false
+  }
+}

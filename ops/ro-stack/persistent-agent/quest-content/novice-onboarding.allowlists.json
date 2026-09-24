@@ -1,0 +1,47 @@
+{
+  "schema": "ro-quest-allowlist-delta/v1",
+  "sequenceId": "novice_onboarding",
+  "generatedFrom": "ops/ro-stack/persistent-agent/quest-content/novice-onboarding.spec.md + academy.txt identity resolution",
+  "note": "Minimal exact allowlist additions for the frozen novice flow. No wildcard/all-map/all-NPC entries. Not deployed.",
+  "env": {
+    "PERSISTENT_AGENT_NPCS": [
+      "terminal_ship_wounded",
+      "#ship_out",
+      "#intro_to_izlude",
+      "Captain Carocc#intro_npc03",
+      "Lumin#new_ship",
+      "Sailor#intro_npc04",
+      "Captain Carocc#iz",
+      "Criatura Academy Staff#0",
+      "Academy Receptionist#1",
+      "Adept Adventurer#ac",
+      "學院結業導師#terminal"
+    ],
+    "PERSISTENT_AGENT_NPC_MAPS": ["iz_int", "int_land", "izlude", "iz_ac01"],
+    "PERSISTENT_AGENT_NAVIGATION_MAPS": ["iz_int", "int_land", "izlude", "iz_ac01", "new_1-3", "prt_fild08"],
+    "PERSISTENT_AGENT_FARM_MAPS": ["new_1-3"],
+    "PERSISTENT_AGENT_FARM_MOBS": [],
+    "PERSISTENT_AGENT_QUEST_IDS": [21001, 7471, 21008, 7472, 7473, 4269, 2293],
+    "PERSISTENT_AGENT_QUEST_TASKS": [7100001],
+    "PERSISTENT_AGENT_SERVICE_ITEMS": [531, 569],
+    "PERSISTENT_AGENT_QUEST_SEQUENCES": ["novice_onboarding"],
+    "PERSISTENT_AGENT_QUEST_REWARD_ITEMS": []
+  },
+  "counts": {
+    "npcs": 11,
+    "npcMaps": 4,
+    "navigationMaps": 6,
+    "farmMaps": 1,
+    "farmMobs": 0,
+    "questIds": 7,
+    "questTasks": 1,
+    "serviceItems": 2,
+    "questSequences": 1,
+    "rewardItems": 0
+  },
+  "pending": {
+    "FARM_UNTIL_INTEGRATION": "FARM_UNTIL uses the existing AUTO_FARM handoff with mobId=0 and authoritative condition evaluation.",
+    "ROUTES_COMPILED": "route[] waypoints and expected destination maps are compiled in novice-onboarding.json from the canonical route and transfer definitions.",
+    "MIGRATION_011": "persistent_agent_live_quest_sequence + persistent_agent_quest_checkpoint tables come from B migration 011."
+  }
+}

@@ -1,0 +1,965 @@
+/*
+ * RO Original UI Kit
+ * Visual rules in this file may only reference provenance-verified client assets.
+ * Primitives marked PROVENANCE_PENDING in ro-ui-kit.js intentionally have no skin here.
+ */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Login restoration pilot. All interactive coordinates are percentages of the
+ * verified 280x120 win_login.bmp client coordinate system. */
+.ro-login-card {
+  width: min(560px, calc(100vw - 18px));
+  max-width: 560px;
+  margin: auto;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.ro-login-scale-shell {
+  width: 100%;
+  overflow: hidden;
+}
+
+.ro-login-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 280 / 120;
+  background: transparent url('/ro/client/ui/original/login/win_login.png') 0 0 / 100% 100% no-repeat;
+  image-rendering: pixelated;
+}
+
+.ro-login-loading {
+  position: absolute;
+  inset: 12.5% 0 0;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  padding: 8%;
+  background: rgb(255 255 255 / 92%) url('/ro/client/skin/default/sysbox_bg.png') repeat;
+  color: #263954;
+  text-align: center;
+  font: clamp(10px, 1.8vw, 15px)/1.25 Tahoma, 'Microsoft JhengHei', sans-serif;
+}
+
+.ro-login-loading strong {
+  font-weight: 400;
+}
+
+.ro-login-field {
+  position: absolute;
+  display: block;
+  width: 45.357%;
+  height: 15.833%;
+  margin: 0;
+}
+
+.ro-login-id {
+  left: 32.5%;
+  top: 25.833%;
+}
+
+.ro-login-password {
+  left: 32.5%;
+  top: 50%;
+}
+
+.ro-login-field input {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: 0 3.5%;
+  border: 0;
+  border-radius: 0;
+  outline: 0;
+  background: transparent;
+  color: #263954;
+  font: clamp(10px, 1.75vw, 18px)/1 Tahoma, sans-serif;
+}
+
+.ro-login-field input:focus {
+  box-shadow: inset 0 0 0 1px #5a7898;
+}
+
+#loginForm #loginSubmit.ro-login-connect {
+  position: absolute;
+  left: 82.143%;
+  top: 80%;
+  width: 15% !important;
+  min-width: 0 !important;
+  height: 16.667% !important;
+  min-height: 0 !important;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent url('/ro/client/ui/original/login/btn_connect_a.png') 0 0 / 100% 100% no-repeat !important;
+  color: transparent;
+  font-size: 0;
+  image-rendering: pixelated;
+  cursor: pointer;
+  transform: none;
+}
+
+#loginForm #loginSubmit.ro-login-connect:active {
+  background-image: url('/ro/client/ui/original/login/btn_connect_b.png') !important;
+  transform: none;
+}
+
+#loginForm #loginSubmit.ro-login-connect:focus-visible {
+  outline: 1px dotted #1c3b64;
+  outline-offset: 1px;
+}
+
+#loginForm #loginSubmit.ro-login-connect:disabled {
+  opacity: 0.48;
+  cursor: default;
+}
+
+.ro-login-save-account {
+  position: absolute;
+  left: 2.857%;
+  top: 80%;
+  width: 20%;
+  height: 16.667%;
+  margin: 0;
+  background: transparent url('/ro/client/ui/original/login/chk_saveoff.png') left center / 60.714% 50% no-repeat;
+  image-rendering: pixelated;
+  cursor: pointer;
+}
+
+.ro-login-save-account:has(input:checked) {
+  background-image: url('/ro/client/ui/original/login/chk_saveon.png');
+}
+
+.ro-login-save-account input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.ro-login-save-account:focus-within {
+  outline: 1px dotted #1c3b64;
+  outline-offset: 1px;
+}
+
+.ro-login-options {
+  display: grid;
+  gap: 5px;
+  width: 100%;
+  padding: 6px 8px 7px;
+  background: #fff url('/ro/client/skin/default/sysbox_bg.png') repeat;
+  color: #263954;
+  font: 11px/1.35 Tahoma, 'Microsoft JhengHei', sans-serif;
+}
+
+.ro-login-server {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-weight: 700;
+}
+
+.ro-login-server small {
+  color: #39704b;
+}
+
+.ro-login-audio {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 5px 10px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.ro-login-audio > label:first-child {
+  grid-template-columns: 32px minmax(80px, 1fr) 38px;
+}
+
+.ro-login-registration {
+  color: #59656e;
+}
+
+.ro-login-options #authError {
+  min-height: 15px;
+  color: #a02323;
+}
+
+@media (max-width: 650px) {
+  .ro-login-card {
+    width: min(100%, 560px);
+  }
+
+  .ro-login-options {
+    font-size: 12px;
+  }
+}
+
+/* Single-character account selection. The stage is the verified 576x358
+ * win_select2.bmp coordinate system; only slot 0 exists in the DOM. */
+.ro-character-select-card {
+  width: min(576px, calc(100vw - 18px));
+  max-width: 576px;
+  margin: auto;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.ro-character-select-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 576 / 358;
+  overflow: hidden;
+  background: transparent url('/ro/client/ui/original/character-select/win_select2.png') 0 0 / 100% 100% no-repeat;
+  image-rendering: pixelated;
+}
+
+.ro-character-select-stage::before {
+  content: '';
+  position: absolute;
+  left: 0.5%;
+  right: 0.5%;
+  top: 5.9%;
+  height: 47.2%;
+  background: #fff url('/ro/client/skin/default/sysbox_bg.png') repeat;
+}
+
+.ro-character-select-stage .character-slots {
+  position: absolute;
+  inset: 0;
+  display: block;
+  z-index: 1;
+}
+
+.ro-character-select-stage .ro-character-single-slot {
+  position: absolute;
+  left: 37.847%;
+  top: 10.894%;
+  width: 24.132%;
+  height: 40.224%;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent url('/ro/client/ui/original/character-select/box_select.png') 0 0 / 100% 100% no-repeat;
+  image-rendering: pixelated;
+  cursor: default;
+}
+
+.ro-character-single-slot > input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ro-character-single-slot .select-character-paperdoll {
+  position: absolute;
+  left: 50%;
+  bottom: -7%;
+  width: 96px;
+  height: 160px;
+  overflow: hidden;
+  transform: translateX(-50%) scale(0.98);
+  transform-origin: 50% 100%;
+}
+
+.ro-select-character-name,
+.ro-select-character-meta,
+.ro-select-character-level {
+  position: absolute;
+  left: 11.3%;
+  width: calc(17% - 4px);
+  min-width: 0;
+  box-sizing: border-box;
+  padding-right: 2px;
+  overflow: hidden;
+  color: #263954;
+  font: 700 clamp(8px, 1.35vw, 13px)/1 Tahoma, 'Microsoft JhengHei', sans-serif;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  z-index: 1;
+}
+
+.ro-select-character-name {
+  top: 57.6%;
+}
+
+.ro-select-character-meta {
+  top: 63.2%;
+  font-weight: 400;
+}
+
+.ro-select-character-level {
+  top: 68.6%;
+  font-weight: 400;
+}
+
+.ro-select-character-summary {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  color: #263954;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.ro-select-character-value,
+.ro-select-character-stat-values b {
+  position: absolute;
+  overflow: hidden;
+  min-width: 0;
+  box-sizing: border-box;
+  padding-right: 2px;
+  color: #263954;
+  font: 400 clamp(7px, 1.35vw, 11px)/1 Tahoma, 'Microsoft JhengHei', sans-serif;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ro-select-character-exp {
+  left: 11.3%;
+  top: 72.8%;
+  width: calc(16.5% - 4px);
+}
+
+.ro-select-character-hp {
+  left: 11.3%;
+  top: 77.3%;
+  width: calc(16.5% - 4px);
+}
+
+.ro-select-character-sp {
+  left: 11.3%;
+  top: 81.8%;
+  width: calc(16.5% - 4px);
+}
+
+.ro-select-character-map {
+  left: 11.3%;
+  top: 86.3%;
+  width: calc(16.5% - 4px);
+}
+
+.ro-select-character-stat-values {
+  position: absolute;
+  inset: 0;
+}
+
+.ro-select-character-stat-values b {
+  left: 36.5%;
+  width: calc(16.5% - 4px);
+}
+
+.ro-select-character-stat-values b:nth-child(1) { top: 57.6%; }
+.ro-select-character-stat-values b:nth-child(2) { top: 62.1%; }
+.ro-select-character-stat-values b:nth-child(3) { top: 66.6%; }
+.ro-select-character-stat-values b:nth-child(4) { top: 71.0%; }
+.ro-select-character-stat-values b:nth-child(5) { top: 75.5%; }
+.ro-select-character-stat-values b:nth-child(6) { top: 80.0%; }
+
+.ro-select-character-supplement {
+  position: absolute;
+  left: 3%;
+  right: 3%;
+  bottom: 1.6%;
+  display: flex;
+  gap: 10px;
+  overflow: hidden;
+  color: #536779;
+  font: 400 clamp(6px, 1.05vw, 8px)/1 Tahoma, 'Microsoft JhengHei', sans-serif;
+  white-space: nowrap;
+}
+
+.ro-select-character-supplement span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ro-select-character-supplement b {
+  color: #263954;
+  font-weight: 400;
+}
+
+.ro-select-character-data-mirror {
+  display: none;
+}
+
+.ro-character-select-stage .character-select-actions {
+  position: absolute;
+  right: 2.8%;
+  bottom: 3.4%;
+  display: flex;
+  gap: 8px;
+  z-index: 1;
+}
+
+.ro-character-select-stage .official-skin-button {
+  width: 42px !important;
+  min-width: 42px !important;
+  height: 20px !important;
+  min-height: 20px !important;
+  background-size: 100% 100% !important;
+}
+
+.ro-character-select-stage #characterSelectError {
+  position: absolute;
+  left: 3%;
+  right: 34%;
+  bottom: 3.8%;
+  min-height: 14px;
+  color: #a02323;
+  font: 11px/1.2 Tahoma, 'Microsoft JhengHei', sans-serif;
+}
+
+@media (max-width: 650px) {
+  .ro-character-select-card {
+    width: min(100%, 576px);
+  }
+
+  .ro-character-single-slot .select-character-paperdoll {
+    transform: translateX(-50%) scale(0.66);
+  }
+
+  .ro-select-character-value,
+  .ro-select-character-stat-values b {
+    font-size: clamp(7px, 2vw, 10px);
+  }
+
+  .ro-select-character-supplement {
+    gap: 5px;
+    font-size: 7px;
+  }
+
+  .ro-character-select-stage .official-skin-button {
+    width: 56px !important;
+    min-width: 56px !important;
+    height: 27px !important;
+    min-height: 27px !important;
+  }
+}
+
+.ro-status-window {
+  width: min(100%, 560px);
+  max-width: 100%;
+  margin-inline: auto;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.ro-status-window > .titlebar {
+  width: 100%;
+  max-width: 100%;
+}
+
+.ro-status-scale-content {
+  width: 280px;
+  height: 163px;
+}
+
+.ro-status-scale-shell {
+  width: 100%;
+  overflow: hidden;
+}
+
+.ro-status-scale-content {
+  transform-origin: left top;
+}
+
+.ro-status-window .status-layout {
+  position: relative;
+  display: block;
+  width: 280px;
+  height: 103px;
+  max-width: 100%;
+  overflow: hidden;
+  background: transparent url('/ro/client/ui/original/status/statwin_bg.png') 0 0 / 280px 103px no-repeat;
+  image-rendering: pixelated;
+}
+
+.ro-status-window .base-stats,
+.ro-status-window .derived-stats {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background: transparent;
+}
+
+.ro-status-window .derived-stats,
+.ro-status-window .ro-status-point-value {
+  pointer-events: none;
+}
+
+.ro-status-window .base-stats > [data-stat-row],
+.ro-status-window .derived-stats > [data-derived-row] {
+  position: absolute;
+  display: block;
+  min-height: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.ro-status-window .base-stats > [data-stat-row] {
+  left: 36px;
+  width: 67px;
+  height: 16px;
+}
+
+.ro-status-window [data-stat-row='str'] { top: 3px; }
+.ro-status-window [data-stat-row='agi'] { top: 19px; }
+.ro-status-window [data-stat-row='vit'] { top: 35px; }
+.ro-status-window [data-stat-row='int'] { top: 51px; }
+.ro-status-window [data-stat-row='dex'] { top: 67px; }
+.ro-status-window [data-stat-row='luk'] { top: 83px; }
+
+.ro-status-window .ro-status-label,
+.ro-status-window .ro-derived-label,
+.ro-status-window .ro-status-cost {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.ro-status-window .ro-status-value {
+  position: absolute;
+  left: 1px;
+  top: 1px;
+  width: 39px;
+  height: 13px;
+  overflow: hidden;
+  color: #142847;
+  font: 10px/13px Tahoma, sans-serif;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.ro-status-window .ro-status-bonus {
+  position: absolute;
+  left: 41px;
+  top: 1px;
+  width: 11px;
+  height: 13px;
+  overflow: hidden;
+  color: #24538a;
+  font: 8px/13px Tahoma, sans-serif;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.ro-status-window .ro-status-increase {
+  position: absolute;
+  left: 54px;
+  top: 1px;
+  width: 11px;
+  height: 11px;
+  min-width: 11px;
+  padding: 0;
+  border: 0;
+  background: transparent url('/ro/client/ui/original/status/arw_up.png') center / 11px 11px no-repeat;
+  color: transparent;
+  image-rendering: pixelated;
+  cursor: pointer;
+}
+
+.ro-status-window .ro-status-increase:disabled {
+  background-image: none;
+  cursor: default;
+}
+
+.ro-status-window .ro-status-increase:focus-visible {
+  outline: 1px dotted #243d5c;
+  outline-offset: 1px;
+}
+
+.ro-status-window .derived-stats > [data-derived-row] {
+  width: 44px;
+  height: 16px;
+}
+
+.ro-status-window [data-derived-row='attack'],
+.ro-status-window [data-derived-row='matk'],
+.ro-status-window [data-derived-row='hit'],
+.ro-status-window [data-derived-row='critical'] {
+  left: 150px;
+}
+
+.ro-status-window [data-derived-row='def'],
+.ro-status-window [data-derived-row='mdef'],
+.ro-status-window [data-derived-row='flee'],
+.ro-status-window [data-derived-row='aspd'] {
+  left: 232px;
+  width: 42px;
+}
+
+.ro-status-window [data-derived-row='attack'],
+.ro-status-window [data-derived-row='def'] { top: 3px; }
+.ro-status-window [data-derived-row='matk'],
+.ro-status-window [data-derived-row='mdef'] { top: 19px; }
+.ro-status-window [data-derived-row='hit'],
+.ro-status-window [data-derived-row='flee'] { top: 35px; }
+.ro-status-window [data-derived-row='critical'],
+.ro-status-window [data-derived-row='aspd'] { top: 51px; }
+
+.ro-status-window .ro-derived-value {
+  display: block;
+  width: 100%;
+  height: 13px;
+  overflow: hidden;
+  color: #142847;
+  font: 10px/13px Tahoma, sans-serif;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.ro-status-point-value {
+  position: absolute;
+  left: 198px;
+  top: 68px;
+  width: 76px;
+  height: 13px;
+  overflow: hidden;
+  color: #142847;
+  font: 10px/13px Tahoma, sans-serif;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.ro-status-window .stat-actions {
+  width: 280px;
+  min-height: 76px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 119px 1fr;
+  align-items: center;
+  gap: 6px;
+  background: #f4f5f2;
+}
+
+.ro-status-window #resetStats {
+  width: 119px;
+  height: 60px;
+  min-height: 60px;
+  padding: 0;
+  border: 0;
+  background: transparent url('/ro/client/ui/original/status/reset-a.png') 0 0 / 119px 60px no-repeat;
+  color: transparent;
+  image-rendering: pixelated;
+  cursor: pointer;
+}
+
+.ro-status-window #resetStats:active {
+  background-image: url('/ro/client/ui/original/status/reset-b.png');
+}
+
+.ro-status-window #resetStats:disabled {
+  background-image: url('/ro/client/ui/original/status/reset-c.png');
+  cursor: default;
+}
+
+.ro-status-window .reset-copy {
+  display: grid;
+  gap: 2px;
+  font: 10px/1.3 Tahoma, 'Microsoft JhengHei', sans-serif;
+}
+
+.ro-status-window .reset-copy output { font-weight: bold; }
+
+.ro-status-window .stat-actions .notice {
+  padding: 3px 5px 3px 0;
+  color: #465260;
+  font: 10px/1.35 Tahoma, 'Microsoft JhengHei', sans-serif;
+}
+
+/* Equipment restoration pilot. Geometry is keyed to the verified 280x157
+ * equipwin_bg2.bmp client asset. Behaviour-only Web adaptations remain scoped
+ * to this panel and do not alter equipment commands or character state. */
+.ro-equipment-window {
+  width: min(100%, 560px);
+  max-width: 100%;
+  margin-inline: auto;
+}
+
+.ro-equipment-scale-shell {
+  width: 100%;
+  overflow: hidden;
+}
+
+.ro-equipment-scale-content {
+  position: relative;
+  display: block;
+  width: 280px;
+  height: 157px;
+  padding: 0;
+  gap: 0;
+  overflow: hidden;
+  background: transparent url('/ro/client/ui/original/equipment/equipwin_bg2.png') 0 0 / 280px 157px no-repeat;
+  image-rendering: pixelated;
+  transform-origin: left top;
+}
+
+.ro-equipment-window .equip-column {
+  position: absolute;
+  top: 0;
+  width: 104px;
+  height: 130px;
+  display: block;
+  z-index: 3;
+}
+
+.ro-equipment-window .equip-column-left { left: 0; }
+.ro-equipment-window .equip-column-right { right: 0; }
+
+.ro-equipment-window .equip-slot {
+  position: absolute;
+  left: 0;
+  width: 104px;
+  height: 26px;
+  min-height: 26px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #26384f;
+  cursor: default;
+}
+
+.ro-equipment-window .equip-slot:nth-child(1) { top: 0; }
+.ro-equipment-window .equip-slot:nth-child(2) { top: 26px; }
+.ro-equipment-window .equip-slot:nth-child(3) { top: 52px; }
+.ro-equipment-window .equip-slot:nth-child(4) { top: 78px; }
+.ro-equipment-window .equip-slot:nth-child(5) { top: 104px; }
+
+.ro-equipment-window .equip-slot::before { content: none; }
+
+.ro-equipment-window .equip-slot span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.ro-equipment-window .equip-slot b {
+  position: absolute;
+  top: 7px;
+  width: 70px;
+  height: 13px;
+  overflow: hidden;
+  color: #2f4056;
+  font: 9px/13px Tahoma, 'Microsoft JhengHei', sans-serif;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ro-equipment-window .equip-slot[data-side='left'] b {
+  left: 32px;
+  text-align: left;
+}
+
+.ro-equipment-window .equip-slot[data-side='right'] b {
+  left: 2px;
+  text-align: right;
+}
+
+.ro-equipment-window .equip-slot img {
+  position: absolute;
+  top: 3px;
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  z-index: 2;
+}
+
+.ro-equipment-window .equip-slot[data-side='left'] img { left: 3px; }
+.ro-equipment-window .equip-slot[data-side='right'] img { right: 3px; left: auto; }
+
+.ro-equipment-window .equip-slot.equipped {
+  border: 0;
+  background: transparent;
+}
+
+.ro-equipment-window .equip-slot[data-action='unequip'] { cursor: pointer; }
+
+.ro-equipment-window .equip-slot:focus-visible {
+  outline: 1px dotted #243d5c;
+  outline-offset: -2px;
+}
+
+.ro-equipment-window .paperdoll-stage {
+  position: absolute;
+  left: 112px;
+  top: 0;
+  width: 58px;
+  height: 130px;
+  min-height: 130px;
+  display: block;
+  border: 0;
+  background: transparent;
+  overflow: visible;
+  cursor: grab;
+  z-index: 2;
+}
+
+.ro-equipment-window .paperdoll-stage.dragging { cursor: grabbing; }
+
+.ro-equipment-window .paperdoll-viewport {
+  position: absolute;
+  inset: 0;
+  width: 58px;
+  height: 130px;
+  overflow: hidden;
+}
+
+.ro-equipment-window .paperdoll-sprite {
+  position: absolute;
+  left: -19px;
+  top: 5px;
+  width: 96px;
+  height: 160px;
+  transform: scale(.72);
+  transform-origin: 50% 50%;
+}
+
+.ro-equipment-window .paperdoll-rotation-controls {
+  position: absolute;
+  top: 49px;
+  left: -11px;
+  width: 80px;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.ro-equipment-window .paperdoll-rotation-controls button {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  pointer-events: auto;
+}
+
+.ro-equipment-window .paperdoll-rotation-controls img {
+  visibility: hidden;
+}
+
+.ro-equipment-window #paperdollRotateLeft {
+  background: transparent url('/ro/client/ui/original/equipment/chr_arrow_rotate_l_out.png') center / 10px 10px no-repeat;
+}
+.ro-equipment-window #paperdollRotateLeft:hover {
+  background-image: url('/ro/client/ui/original/equipment/chr_arrow_rotate_l_over.png');
+}
+.ro-equipment-window #paperdollRotateLeft:active {
+  background-image: url('/ro/client/ui/original/equipment/chr_arrow_rotate_l_press.png');
+}
+.ro-equipment-window #paperdollRotateRight {
+  background: transparent url('/ro/client/ui/original/equipment/chr_arrow_rotate_r_out.png') center / 10px 10px no-repeat;
+}
+.ro-equipment-window #paperdollRotateRight:hover {
+  background-image: url('/ro/client/ui/original/equipment/chr_arrow_rotate_r_over.png');
+}
+.ro-equipment-window #paperdollRotateRight:active {
+  background-image: url('/ro/client/ui/original/equipment/chr_arrow_rotate_r_press.png');
+}
+
+.ro-equipment-window .paperdoll-actions[hidden] { display: none; }
+
+.equipment-character-info {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 8px;
+  align-items: center;
+  padding: 5px 8px 2px;
+  color: #405064;
+  font: 11px/1.35 Tahoma, 'Microsoft JhengHei', sans-serif;
+}
+
+.equipment-character-info strong { grid-row: 1; }
+.equipment-character-info #paperdollDetails { grid-row: 1; }
+.equipment-character-info .paperdoll-hint { grid-column: 1 / -1; }
+.equipment-character-info .paperdoll-equipment-toggle {
+  grid-column: 1 / -1;
+  margin: 1px 0 0;
+}
+
+.equipment-bag .inventory-item .item-icon-missing {
+  visibility: hidden;
+}
+
+@media (min-width: 1200px) {
+  .ro-status-window {
+    width: min(100%, 840px);
+  }
+
+  .ro-equipment-window {
+    width: min(100%, 840px);
+  }
+}
+
+@media (max-width: 650px) {
+  .ro-status-window {
+    width: 100%;
+    max-width: 380px;
+  }
+
+  .ro-status-window > .titlebar,
+  .ro-status-scale-shell {
+    width: 100%;
+    max-width: none;
+  }
+
+  .ro-status-window .ro-status-increase {
+    left: -36px;
+    top: 0;
+    width: 103px;
+    height: 16px;
+    min-width: 103px;
+    touch-action: none;
+    background-position: right 2px center;
+  }
+
+  .ro-equipment-window {
+    width: 100%;
+    max-width: 380px;
+  }
+
+  .ro-equipment-window > .titlebar,
+  .ro-equipment-scale-shell {
+    width: 100%;
+    max-width: none;
+  }
+}

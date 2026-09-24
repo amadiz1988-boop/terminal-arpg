@@ -9,81 +9,88 @@
     <meta name="theme-color" content="#566d8b" />
     <title>鬼島傳說｜冒險掛機</title>
     <link rel="icon" href="/ro/client/paperdoll/novice-male.png" />
-    <link rel="stylesheet" href="/styles.css?v=r044-foldable-windows" />
+    <script src="/ro-floor-theme.js?v=r108-m1-full-superset"></script>
+    <link rel="stylesheet" href="/styles.css?v=r108-m1-full-superset" />
+    <link rel="stylesheet" href="/ro-ui-kit.css?v=r014-lost-ui-restoration" />
+    <link rel="stylesheet" href="/ro-floor-theme.css?v=r108-m1-full-superset" />
   </head>
   <body>
     <section id="auth" class="auth">
-      <form id="loginForm" class="window auth-card">
-        <div class="titlebar">
-          <span>Ragnarok Online</span><span>帳號登入</span>
-        </div>
-        <div class="auth-body">
-          <div class="server-picker" role="listbox" aria-label="伺服器選擇">
-            <div class="server-picker-title">選擇伺服器</div>
-            <label class="server-row">
-              <input type="radio" name="server" value="ghost-island" checked />
-              <span>鬼島傳說</span>
-              <small id="loginServerStatus">連線確認中</small>
-            </label>
-          </div>
-          <div class="login-fields">
-            <label
-              ><span>帳號</span
-              ><input
+      <form id="loginForm" class="auth-card ro-login-card">
+        <div class="ro-login-scale-shell">
+          <div class="ro-login-stage">
+            <div id="authLoading" class="ro-login-loading hidden" role="status" aria-live="polite" aria-busy="false">
+              <strong id="authLoadingMessage">登入中，請稍候……</strong>
+            </div>
+            <label class="ro-login-field ro-login-id">
+              <span class="sr-only">帳號</span>
+              <input
                 id="username"
                 required
                 minlength="4"
                 maxlength="23"
                 autocomplete="username"
-                pattern="[A-Za-z0-9_]+" /></label
-            ><label
-              ><span>密碼</span
-              ><input
+                pattern="[A-Za-z0-9_]+"
+              />
+            </label>
+            <label class="ro-login-field ro-login-password">
+              <span class="sr-only">密碼</span>
+              <input
                 id="password"
                 type="password"
                 required
                 minlength="8"
                 maxlength="32"
                 autocomplete="current-password"
-            /></label>
-          </div>
-          <fieldset class="registration-settings">
-            <legend>首次登入會建立帳號</legend>
-            <span>角色資料將於創角畫面設定</span>
-          </fieldset>
-          <div class="audio-settings compact">
-            <label
-              >音樂
-              <input
-                id="authMusicVolume"
-                type="range"
-                min="0"
-                max="100"
-                value="20"
-              /><output id="authMusicValue">20%</output></label
-            ><label class="audio-check"
-              ><input id="authMusicToggle" type="checkbox" checked />
-              <span>播放背景音樂</span></label
-            >
-          </div>
-          <div class="login-actions">
+              />
+            </label>
             <button
-              class="primary official-skin-button official-ok"
+              id="loginSubmit"
+              class="ro-login-connect"
               type="submit"
-            >
-              確定
-            </button>
+              aria-label="登入或建立帳號"
+              disabled
+            >登入／建立帳號</button>
+            <label class="ro-login-save-account">
+              <input id="rememberAccount" type="checkbox" />
+              <span class="sr-only">儲存帳號</span>
+            </label>
           </div>
-          <strong id="authError"></strong>
+        </div>
+        <div class="ro-login-options">
+          <button id="discordLoginButton" class="discord-login-button" type="button" disabled>使用 Discord 登入</button>
+          <label class="ro-login-server">
+            <input class="sr-only" type="radio" name="server" value="ghost-island" checked />
+            <span>鬼島傳說</span>
+            <small id="loginServerStatus">連線確認中</small>
+          </label>
+          <div class="audio-settings compact ro-login-audio">
+            <label>
+              音樂
+              <input id="authMusicVolume" type="range" min="0" max="100" value="20" />
+              <output id="authMusicValue">20%</output>
+            </label>
+            <label class="audio-check">
+              <input id="authMusicToggle" type="checkbox" checked />
+              <span>播放背景音樂</span>
+            </label>
+          </div>
+          <small class="ro-login-registration">首次登入會建立帳號，角色資料於創角畫面設定。</small>
+          <strong id="authError" aria-live="polite">正在載入登入功能</strong>
         </div>
       </form>
+      <section id="discordRequiredGate" class="window hidden" aria-live="polite">
+        <div class="titlebar"><span>需要綁定 Discord 才能繼續</span><span>帳號安全</span></div>
+        <p id="discordRequiredMessage">此帳號需要先完成 Discord 綁定。</p>
+        <button id="discordRequiredLink" class="official-skin-button official-ok" type="button">綁定 Discord</button>
+      </section>
       <form id="characterForm" class="window auth-card hidden">
         <div class="titlebar"><span>建立初心者</span><span>創角</span></div>
         <div class="auth-body character-create">
           <div class="create-preview">
             <img
               id="createPaperdoll"
-              src="/ro/client/paperdoll/novice-male.png"
+              data-entry-src="/ro/client/paperdoll/novice-male.png"
               alt="初心者紙娃娃"
             /><b>初心者</b>
           </div>
@@ -206,27 +213,58 @@
       </form>
       <form
         id="characterSelectForm"
-        class="window auth-card character-select hidden"
+        class="auth-card character-select ro-character-select-card hidden"
       >
-        <div class="titlebar">
-          <span>角色選擇</span><span>Character Select</span>
-        </div>
-        <div class="auth-body">
-          <div class="character-slots" role="listbox" aria-label="角色選擇">
-            <label class="character-slot selected">
+        <div class="ro-character-select-stage">
+          <div class="character-slots" role="listbox" aria-label="角色選擇，帳號限一個角色">
+            <label class="character-slot selected ro-character-single-slot">
               <input type="radio" name="characterSlot" value="0" checked />
-              <img
+              <div
                 id="selectPaperdoll"
-                src="/ro/client/paperdoll/novice-male-hair-1.png"
-                alt="角色紙娃娃"
-              />
-              <span
-                ><b id="selectCharacterName">讀取中</b
-                ><small id="selectCharacterMeta">初心者</small></span
+                class="select-character-paperdoll"
+                data-direction="0"
+                role="img"
+                aria-label="角色紙娃娃"
               >
+                <span class="ranking-character-layer ranking-head-back-layer"></span>
+                <span class="ranking-character-layer ranking-head-mid-back-layer"></span>
+                <span class="ranking-character-layer ranking-head-low-back-layer"></span>
+                <span class="ranking-character-layer ranking-weapon-back-layer"></span>
+                <span class="ranking-character-layer ranking-hair-back-layer"></span>
+                <span class="ranking-character-layer ranking-body-layer"></span>
+                <span class="ranking-character-layer ranking-weapon-front-layer"></span>
+                <span class="ranking-character-layer ranking-hair-front-layer"></span>
+                <span class="ranking-character-layer ranking-head-low-front-layer"></span>
+                <span class="ranking-character-layer ranking-head-mid-front-layer"></span>
+                <span class="ranking-character-layer ranking-head-front-layer"></span>
+              </div>
             </label>
-            <div class="character-slot empty"><span>空白角色欄位</span></div>
-            <div class="character-slot empty"><span>空白角色欄位</span></div>
+          </div>
+          <b id="selectCharacterName" class="ro-select-character-name">讀取中</b>
+          <small id="selectCharacterMeta" class="ro-select-character-meta">初心者</small>
+          <small id="selectCharacterLevel" class="ro-select-character-level">Base 1 / Job 1</small>
+          <div id="selectCharacterSummary" class="ro-select-character-summary" aria-label="角色完整資料">
+            <b id="selectCharacterExp" class="ro-select-character-value ro-select-character-exp">讀取中</b>
+            <b id="selectCharacterHp" class="ro-select-character-value ro-select-character-hp">讀取中</b>
+            <b id="selectCharacterSp" class="ro-select-character-value ro-select-character-sp">讀取中</b>
+            <b id="selectCharacterMap" class="ro-select-character-value ro-select-character-map">讀取中</b>
+            <div class="ro-select-character-stat-values" aria-label="能力值">
+              <b id="selectCharacterStr">讀取中</b>
+              <b id="selectCharacterAgi">讀取中</b>
+              <b id="selectCharacterVit">讀取中</b>
+              <b id="selectCharacterInt">讀取中</b>
+              <b id="selectCharacterDex">讀取中</b>
+              <b id="selectCharacterLuk">讀取中</b>
+            </div>
+            <div class="ro-select-character-supplement" aria-label="其他角色資料">
+              <span>Job EXP <b id="selectCharacterJobExpDisplay">讀取中</b></span>
+              <span>負重 <b id="selectCharacterWeightDisplay">未提供</b></span>
+              <span>Zeny <b id="selectCharacterZenyDisplay">讀取中</b></span>
+            </div>
+            <b id="selectCharacterJobExp" class="ro-select-character-data-mirror" aria-hidden="true">讀取中</b>
+            <b id="selectCharacterStats" class="ro-select-character-data-mirror" aria-hidden="true">讀取中</b>
+            <b id="selectCharacterWeight" class="ro-select-character-data-mirror" aria-hidden="true">未提供</b>
+            <b id="selectCharacterZeny" class="ro-select-character-data-mirror" aria-hidden="true">讀取中</b>
           </div>
           <div class="login-actions character-select-actions">
             <button
@@ -254,18 +292,41 @@
       <header class="brand">
         <div><b>鬼島傳說</b><small id="accountName">連線確認中</small></div>
         <div>
-          <span id="worldLamp" class="lamp">連線確認中</span
-          ><button
+          <button
             id="quickAudio"
             class="quick-audio"
             type="button"
-            aria-label="開啟音效設定"
+            aria-label="音效開啟，點擊靜音"
+            aria-pressed="false"
+            data-audio-state="on"
+            title="音效開關"
           >
-            音效</button
+            <svg
+              class="quick-audio-icon"
+              viewBox="0 0 16 16"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                class="quick-audio-speaker"
+                d="M2.5 6h2L7.5 3v10L4.5 10h-2z"
+              />
+              <path
+                class="quick-audio-wave"
+                d="M9.6 5.4a3.4 3.4 0 0 1 0 5.2M11.8 3.8a6 6 0 0 1 0 8.4"
+              />
+              <path class="quick-audio-mute" d="M9.8 6l4 4M13.8 6l-4 4" />
+            </svg></button
+          ><span id="worldLamp" class="lamp">連線確認中</span
           ><button id="logout" class="logout">登出</button>
         </div>
       </header>
-      <section class="window">
+      <div id="supportDebugBanner" class="support-debug-banner hidden" role="status" aria-live="polite">
+        <strong>支援偵錯模式</strong>
+        <span id="supportDebugDetails"></span>
+        <button id="supportDebugEnd" type="button">結束偵錯</button>
+      </div>
+      <section class="window" data-pet-anchor="character-summary">
         <div class="titlebar"><span>基本訊息視窗</span><span>●</span></div>
         <div class="basic">
           <div class="identity">
@@ -295,7 +356,7 @@
       </section>
       <section class="window social-window" aria-label="玩家對話欄">
         <div class="titlebar">
-          <span>對話欄</span><span id="chatChannel">全部訊息</span>
+          <span>對話欄</span><span id="chatChannel">檢視：全部訊息</span>
         </div>
         <div
           id="chatChannels"
@@ -346,6 +407,35 @@
             系統
           </button>
         </div>
+        <div class="chat-toolbar">
+          <label for="chatSendChannel">發言目標</label>
+          <select id="chatSendChannel" aria-label="選擇發言頻道">
+            <option value="public">一般（附近）</option>
+            <option value="private">密語</option>
+            <option value="party">隊伍</option>
+            <option value="guild">公會</option>
+            <option value="clan">家族</option>
+            <option value="battleground">戰場</option>
+            <option value="map">地圖</option>
+            <option value="global">全服</option>
+            <option value="trade">交易</option>
+            <option value="support">支援</option>
+            <option value="ally">同盟</option>
+          </select>
+          <button
+            id="chatFilterToggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="chatChannelSettings"
+          >
+            顯示設定
+          </button>
+        </div>
+        <div
+          id="chatChannelSettings"
+          class="chat-channel-settings hidden"
+          aria-label="顯示頻道設定"
+        ></div>
         <div id="chatFeed" class="chat-feed" aria-live="polite">
           <p class="chat-empty">正在連接對話頻道...</p>
         </div>
@@ -410,16 +500,27 @@
         ><button data-tab="equipment">裝備</button
         ><button data-tab="inventory">道具</button
         ><button data-tab="mapInfo">地圖情報</button
+        ><button data-tab="rankings">排行榜</button
         ><button data-tab="system">系統</button>
       </nav>
-      <section id="hunt" class="panel active">
+      <section id="hunt" class="panel active" data-pet-anchor="automation">
         <div class="window">
           <div class="titlebar">
             <span>自動戰鬥控制</span><span id="status">讀取中</span>
           </div>
           <div class="controls">
-            <button id="start" class="primary">開始掛機</button
-            ><button id="stop">停止掛機</button>
+            <button id="start" class="primary">開始指定掛機</button
+            ><button id="stop">停止掛機</button
+            ><button id="openWorldMap" type="button">更換掛機地圖</button>
+          </div>
+          <p id="grindTargetSummary" class="notice">掛機目標：尚未設定</p>
+          <p id="automationNotice" class="notice"></p>
+          <div id="canaryPanel" class="canary-panel" hidden>
+            <p id="controllerBadge" class="controller-badge" hidden></p>
+            <div class="controls canary-controls">
+              <button id="canaryClaim" type="button" hidden>由系統接管角色</button>
+            </div>
+            <p id="canaryNotice" class="notice"></p>
           </div>
           <div class="session-grid">
             <div><span>掛機時間</span><b id="duration">00:00:00</b></div>
@@ -430,9 +531,16 @@
             <div><span>死亡次數</span><b id="deaths">0</b></div>
           </div>
         </div>
-        <div class="window map-window">
+        <div class="window map-window" data-pet-anchor="map">
           <div class="titlebar">
-            <span>即時小地圖</span><span id="mapPosition">等待角色位置</span>
+            <span>即時小地圖</span><span id="mapPosition">等待角色位置</span
+            ><span
+              id="mapFreshness"
+              class="map-freshness"
+              data-state="unknown"
+              title="小地圖資料即時性"
+              >—</span
+            >
           </div>
           <div class="minimap-wrap">
             <canvas
@@ -442,9 +550,11 @@
               aria-label="即時小地圖"
             ></canvas>
             <div class="map-legend">
-              <span class="you">■ 你</span><span class="monster">● 怪物</span
+              <span class="you">■ 你</span><span class="monster">● 怪物 <b id="mapMonsterCount">0</b></span
               ><span class="engaged">● 交戰</span
-              ><span class="player">■ 玩家</span>
+              ><span class="player">■ 玩家 <b id="mapPlayerCount">0</b></span
+              ><span class="npc">● NPC</span
+              ><span class="portal">● 傳送點</span>
             </div>
           </div>
         </div>
@@ -458,75 +568,11 @@
           <div class="titlebar">
             <span>回城補給循環</span><span id="supplyStage">尚未啟用</span>
           </div>
-          <form id="supplyForm" class="supply-form">
-            <label class="check-row">
-              <input id="supplyEnabled" type="checkbox" />
-              <span>啟用自動回城補給</span>
-            </label>
-            <div class="supply-grid">
-              <label>
-                <span>負重達到</span>
-                <span
-                  ><input
-                    id="supplyWeight"
-                    type="number"
-                    min="40"
-                    max="88"
-                    value="68"
-                  />%</span
-                >
-              </label>
-              <label class="check-row">
-                <input id="supplyStore" type="checkbox" checked />
-                <span>卡普拉存倉</span>
-              </label>
-              <label class="check-row">
-                <input id="supplySell" type="checkbox" checked />
-                <span>販售戰利品</span>
-              </label>
-              <label class="check-row">
-                <input id="supplyBuy" type="checkbox" checked />
-                <span>補充紅色藥水</span>
-              </label>
-              <label>
-                <span>藥水低於</span>
-                <input
-                  id="redPotionMin"
-                  type="number"
-                  min="0"
-                  max="500"
-                  value="20"
-                />
-              </label>
-              <label>
-                <span>補到</span>
-                <input
-                  id="redPotionMax"
-                  type="number"
-                  min="0"
-                  max="1000"
-                  value="100"
-                />
-              </label>
-            </div>
-            <p class="supply-route">
-              南門卡普拉存倉 → 普隆德拉道具商販售與補給 → 自動返回原掛機地圖
-            </p>
-            <details class="supply-rules">
-              <summary>逐項拾取、丟棄、販售與存倉規則</summary>
-              <div id="supplyRuleList"><p>正在讀取背包道具</p></div>
-            </details>
-            <div class="controls">
-              <button id="saveSupply" type="submit" class="primary">
-                套用補給設定
-              </button>
-            </div>
-            <p id="supplyNotice" class="notice">
-              預設保留補品與傳送道具、販售一般戰利品、存放卡片及未穿裝備。
-            </p>
-          </form>
+          <div id="configEditor" class="config-editor" aria-live="polite">
+            <p class="notice">正在讀取角色設定契約…</p>
+          </div>
         </div>
-        <section class="window combat-window">
+        <section class="window combat-window" data-pet-anchor="combat-log">
           <div class="titlebar">
             <span>戰鬥終端</span><span id="logLatency">即時</span>
           </div>
@@ -538,12 +584,23 @@
           ></div>
         </section>
       </section>
-      <section id="quests" class="panel">
+      <section id="quests" class="panel" data-pet-anchor="quests">
         <div class="window quest-window">
           <div class="titlebar">
             <span>任務日誌</span><span id="questSummary">新生訓練</span>
           </div>
           <div class="task-categories" aria-label="任務分類">
+            <section class="task-section assassin-task-section" data-task-section="career">
+              <button class="task-section-title" type="button" aria-expanded="true">
+                <span>職業轉職</span>
+                <span id="assassinSummary">資格確認中</span>
+                <span class="task-section-fold" aria-hidden="true"></span>
+              </button>
+              <div class="task-section-body">
+                <div id="careerTargets" class="career-targets" aria-label="二轉志願"></div>
+                <p id="assassinNotice" class="notice">符合二轉資格後即可選擇職業志願。</p>
+              </div>
+            </section>
             <section class="task-section" data-task-section="beginner">
               <button
                 class="task-section-title"
@@ -588,7 +645,39 @@
                 </p>
               </div>
             </section>
+            <section
+              class="task-section completed-task-section is-collapsed"
+              data-task-section="completed"
+              hidden
+            >
+              <button
+                class="task-section-title"
+                type="button"
+                aria-expanded="false"
+                aria-controls="completedQuestList"
+              >
+                <span>已完成任務<span id="completedQuestCount">（0）</span></span>
+                <span class="task-section-fold" aria-hidden="true"></span>
+              </button>
+              <div class="task-section-body">
+                <div
+                  id="completedQuestList"
+                  class="completed-quest-list"
+                  role="list"
+                  aria-label="已完成任務"
+                ></div>
+              </div>
+            </section>
           </div>
+          <article
+            id="assassinMissionStage"
+            class="assassin-mission-stage mission-interaction-stage"
+            aria-live="polite"
+            aria-label="目前任務互動"
+            data-authority="server"
+          >
+            <p>正在讀取二轉任務狀態</p>
+          </article>
           <article
             id="questDetail"
             class="quest-detail console task-console task-log"
@@ -604,39 +693,78 @@
           </p>
         </div>
       </section>
-      <section id="character" class="panel">
-        <div class="window">
-          <div class="titlebar">
+      <section id="character" class="panel" data-pet-anchor="status">
+        <div
+          class="window ro-status-window"
+          data-ro-primitive="RoWindow"
+          data-ro-source-state="SOURCE_VERIFIED"
+        >
+          <div class="titlebar" data-ro-primitive="RoTitleBar">
             <span>人物能力屬性狀態欄</span
-            ><span id="points">Status Point 0</span>
+            ><span id="points" aria-hidden="true">Status Point 0</span>
           </div>
-          <div class="status-layout">
-            <div class="base-stats" id="stats"></div>
-            <div class="derived-stats" id="derivedStats">
-              <div><span>Atk</span><b>資料同步中</b></div>
-              <div><span>Def</span><b>資料同步中</b></div>
-              <div><span>Matk</span><b>資料同步中</b></div>
-              <div><span>Mdef</span><b>資料同步中</b></div>
-              <div><span>Hit</span><b>資料同步中</b></div>
-              <div><span>Flee</span><b>資料同步中</b></div>
-              <div><span>Critical</span><b>資料同步中</b></div>
-              <div><span>Aspd</span><b>資料同步中</b></div>
+          <div class="ro-status-scale-shell">
+            <div class="ro-status-scale-content">
+              <div
+                class="status-layout"
+                role="group"
+                aria-label="人物能力與衍生能力"
+              >
+                <div class="base-stats" id="stats"></div>
+                <div class="derived-stats" id="derivedStats">
+                  <div data-derived-row="attack"><span>Atk</span><b>同步中</b></div>
+                  <div data-derived-row="def"><span>Def</span><b>同步中</b></div>
+                  <div data-derived-row="matk"><span>Matk</span><b>同步中</b></div>
+                  <div data-derived-row="mdef"><span>Mdef</span><b>同步中</b></div>
+                  <div data-derived-row="hit"><span>Hit</span><b>同步中</b></div>
+                  <div data-derived-row="flee"><span>Flee</span><b>同步中</b></div>
+                  <div data-derived-row="critical"><span>Critical</span><b>同步中</b></div>
+                  <div data-derived-row="aspd"><span>Aspd</span><b>同步中</b></div>
+                </div>
+                <output
+                  id="statusPointValue"
+                  class="ro-status-point-value"
+                  aria-label="剩餘能力點數"
+                >0</output>
+              </div>
+              <div class="stat-actions">
+                <button
+                  id="resetStats"
+                  type="button"
+                  aria-label="重置能力值"
+                  data-ro-primitive="RoButton"
+                  data-ro-source-state="SOURCE_VERIFIED"
+                  disabled
+                >重置能力值</button>
+                <div class="reset-copy">
+                  <small>重置能力值 · 免費 · 冷卻：8 小時</small>
+                  <output id="statResetState">狀態讀取中</output>
+                  <p id="statNotice" class="notice">
+                    點擊增加 1 點，長按可連續配點。
+                  </p>
+                </div>
+              </div>
             </div>
-          </div>
-          <div class="stat-actions">
-            <button id="resetStats" type="button">全部重置</button>
-            <p id="statNotice" class="notice">
-              點擊增加 1 點，長按可連續配點。
-            </p>
           </div>
         </div>
       </section>
-      <section id="skills" class="panel">
+      <section id="skills" class="panel" data-pet-anchor="skills">
         <div class="window">
           <div class="titlebar">
             <span>技能欄</span><span id="skillPoints">Skill Point 0</span>
           </div>
           <div id="skillList" class="skill-list"></div>
+          <div class="skill-reset-action">
+            <button
+              id="resetSkills"
+              type="button"
+              data-ro-primitive="RoButton"
+              data-ro-source-state="SOURCE_VERIFIED"
+              disabled
+            >重置技能點</button>
+            <span>重置技能點 · 免費 · 冷卻：8 小時</span>
+            <output id="skillResetState">狀態讀取中</output>
+          </div>
           <p id="skillNotice" class="notice">
             技能樹、前置條件、說明、等級與可加點狀態均由遊戲伺服器同步。
           </p>
@@ -705,52 +833,96 @@
           </p>
         </div>
       </section>
-      <section id="equipment" class="panel">
-        <div class="window equipment-window">
+      <section id="equipment" class="panel" data-pet-anchor="equipment">
+        <div class="window equipment-window ro-equipment-window" data-ro-primitive="RoWindow">
           <div class="titlebar">
             <span>裝備欄</span><span id="appearanceMeta">初心者</span>
           </div>
-          <div class="paperdoll-layout">
-            <div class="equip-column">
-              <div class="equip-slot" data-slot="headTop">
+          <div class="ro-equipment-scale-shell">
+          <div class="paperdoll-layout ro-equipment-scale-content">
+            <div class="equip-column equip-column-left">
+              <div class="equip-slot" data-slot="headTop" data-side="left" data-ro-primitive="RoEquipmentSlot">
                 <span>頭上</span><b>未裝備</b>
               </div>
-              <div class="equip-slot" data-slot="headMid">
+              <div class="equip-slot" data-slot="headMid" data-side="left" data-ro-primitive="RoEquipmentSlot">
                 <span>頭中</span><b>未裝備</b>
               </div>
-              <div class="equip-slot" data-slot="headLow">
-                <span>頭下</span><b>未裝備</b>
-              </div>
-              <div class="equip-slot" data-slot="rightHand">
+              <div class="equip-slot" data-slot="rightHand" data-side="left" data-ro-primitive="RoEquipmentSlot">
                 <span>右手</span><b>未裝備</b>
               </div>
-              <div class="equip-slot" data-slot="garment">
+              <div class="equip-slot" data-slot="garment" data-side="left" data-ro-primitive="RoEquipmentSlot">
                 <span>披肩</span><b>未裝備</b>
               </div>
+              <div class="equip-slot" data-slot="accessoryLeft" data-side="left" data-ro-primitive="RoEquipmentSlot">
+                <span>左飾品</span><b>未裝備</b>
+              </div>
             </div>
-            <div class="paperdoll-stage">
-              <img id="paperdollBody" alt="角色紙娃娃" /><strong
-                id="paperdollName"
-                >讀取中</strong
-              ><small id="paperdollDetails">外觀讀取中</small>
+            <div
+              id="paperdollStage"
+              class="paperdoll-stage"
+              tabindex="0"
+              aria-label="角色展示台，可左右拖曳旋轉角色"
+            >
+              <div class="paperdoll-viewport" aria-hidden="true">
+                <div id="paperdollSprite" class="paperdoll-sprite">
+                  <span id="paperdollHeadBackLayer" class="paperdoll-layer paperdoll-equipment-layer"></span>
+                  <span id="paperdollHeadMidBackLayer" class="paperdoll-layer paperdoll-equipment-layer"></span>
+                  <span id="paperdollHeadLowBackLayer" class="paperdoll-layer paperdoll-equipment-layer"></span>
+                  <span id="paperdollWeaponBackLayer" class="paperdoll-layer paperdoll-equipment-layer"></span>
+                  <span id="paperdollHairBackLayer" class="paperdoll-layer"></span>
+                  <span id="paperdollShieldBackLayer" class="paperdoll-layer paperdoll-equipment-layer"></span>
+                  <span id="paperdollBodyLayer" class="paperdoll-layer"></span>
+                  <span id="paperdollShieldFrontLayer" class="paperdoll-layer paperdoll-equipment-layer"></span>
+                  <span id="paperdollWeaponFrontLayer" class="paperdoll-layer paperdoll-equipment-layer"></span>
+                  <span id="paperdollHairFrontLayer" class="paperdoll-layer"></span>
+                  <span id="paperdollHeadLowFrontLayer" class="paperdoll-layer paperdoll-equipment-layer"></span>
+                  <span id="paperdollHeadMidFrontLayer" class="paperdoll-layer paperdoll-equipment-layer"></span>
+                  <span id="paperdollHeadFrontLayer" class="paperdoll-layer paperdoll-equipment-layer"></span>
+                </div>
+                <img id="paperdollBody" class="paperdoll-fallback" alt="角色紙娃娃" />
+              </div>
+              <div class="paperdoll-rotation-controls" aria-label="八方向旋轉">
+                <button id="paperdollRotateLeft" type="button" aria-label="向左旋轉">
+                  <img data-game-src="/ro/client/ui/original/equipment/chr_arrow_rotate_l_out.png" alt="" />
+                </button>
+                <button id="paperdollRotateRight" type="button" aria-label="向右旋轉">
+                  <img data-game-src="/ro/client/ui/original/equipment/chr_arrow_rotate_r_out.png" alt="" />
+                </button>
+              </div>
+              <div class="paperdoll-actions" aria-label="展示動作" hidden>
+                <button type="button" data-showcase-action="stand" class="active">站立</button>
+                <button type="button" data-showcase-action="walk">走路</button>
+                <button type="button" data-showcase-action="sit">坐下</button>
+                <button type="button" data-showcase-action="attack">攻擊</button>
+              </div>
             </div>
-            <div class="equip-column">
-              <div class="equip-slot" data-slot="armor">
+            <div class="equip-column equip-column-right">
+              <div class="equip-slot" data-slot="headLow" data-side="right" data-ro-primitive="RoEquipmentSlot">
+                <span>頭下</span><b>未裝備</b>
+              </div>
+              <div class="equip-slot" data-slot="armor" data-side="right" data-ro-primitive="RoEquipmentSlot">
                 <span>鎧甲</span><b>未裝備</b>
               </div>
-              <div class="equip-slot" data-slot="leftHand">
+              <div class="equip-slot" data-slot="leftHand" data-side="right" data-ro-primitive="RoEquipmentSlot">
                 <span>左手</span><b>未裝備</b>
               </div>
-              <div class="equip-slot" data-slot="shoes">
+              <div class="equip-slot" data-slot="shoes" data-side="right" data-ro-primitive="RoEquipmentSlot">
                 <span>鞋子</span><b>未裝備</b>
               </div>
-              <div class="equip-slot" data-slot="accessoryLeft">
-                <span>飾品</span><b>未裝備</b>
-              </div>
-              <div class="equip-slot" data-slot="accessoryRight">
-                <span>飾品</span><b>未裝備</b>
+              <div class="equip-slot" data-slot="accessoryRight" data-side="right" data-ro-primitive="RoEquipmentSlot">
+                <span>右飾品</span><b>未裝備</b>
               </div>
             </div>
+          </div>
+          </div>
+          <div class="equipment-character-info">
+            <strong id="paperdollName">讀取中</strong>
+            <small id="paperdollDetails">外觀讀取中</small>
+            <small id="paperdollHint" class="paperdoll-hint">左右拖曳角色可查看八個方向</small>
+            <label class="paperdoll-equipment-toggle">
+              <input id="paperdollEquipmentVisible" type="checkbox" checked data-ro-primitive="RoCheckbox" />
+              顯示裝備外觀
+            </label>
           </div>
           <p class="notice">人物基底與裝備狀態由遊戲伺服器即時同步。</p>
         </div>
@@ -766,7 +938,7 @@
           </p>
         </div>
       </section>
-      <section id="inventory" class="panel">
+      <section id="inventory" class="panel" data-pet-anchor="inventory">
         <div class="window">
           <div class="titlebar">
             <span>道具欄</span><span id="inventoryTotal">0 種</span>
@@ -783,7 +955,7 @@
           </p>
         </div>
       </section>
-      <section id="mapInfo" class="panel">
+      <section id="mapInfo" class="panel" data-pet-anchor="map-info">
         <div class="window">
           <div class="titlebar">
             <span id="mapInfoTitle">地圖情報</span
@@ -793,7 +965,59 @@
           <div id="mapMonsterList" class="map-monster-list"></div>
         </div>
       </section>
-      <section id="system" class="panel">
+      <section id="rankings" class="panel" data-pet-anchor="rankings">
+        <div class="window ranking-window">
+          <div class="titlebar">
+            <span>職業等級排行榜</span><span id="rankingUpdated">尚未載入</span>
+          </div>
+          <div class="ranking-controls">
+            <label for="rankingJob">職業</label>
+            <select id="rankingJob" aria-label="選擇排行榜職業"></select>
+            <button id="rankingRefresh" type="button">重新整理</button>
+          </div>
+          <p id="rankingStatus" class="notice">
+            開啟排行榜後才會讀取資料，每個職業最多顯示100名。
+          </p>
+          <p class="ranking-rotation-hint">
+            左右拖曳角色可查看八個方向
+          </p>
+          <div
+            id="rankingPodium"
+            class="ranking-podium"
+            aria-label="前三名角色展示"
+          ></div>
+          <div class="ranking-table-scroll">
+            <table class="ranking-table">
+              <thead>
+                <tr>
+                  <th>名次</th>
+                  <th>角色名稱</th>
+                  <th>職業</th>
+                  <th>人物等級</th>
+                  <th>職業等級</th>
+                </tr>
+              </thead>
+              <tbody id="rankingRows"></tbody>
+            </table>
+          </div>
+          <p class="notice">
+            排名依人物等級、職業等級與隱藏經驗進度計算；不公開裝備、能力、技能與所在地圖。
+          </p>
+        </div>
+      </section>
+      <section id="system" class="panel" data-pet-anchor="system">
+        <div class="window" id="accountSettings">
+          <div class="titlebar"><span>帳號設定</span><span>登入方式</span></div>
+          <div class="discord-account-settings" aria-live="polite">
+            <strong>Discord</strong>
+            <div id="discordIdentitySummary">未綁定</div>
+            <div class="login-actions">
+              <button id="discordLinkButton" class="official-skin-button official-ok" type="button">綁定 Discord</button>
+              <button id="discordUnlinkButton" class="official-skin-button official-cancel hidden" type="button">解除綁定</button>
+            </div>
+            <small id="discordSettingsNotice">Discord 名稱與頭像只用於顯示。</small>
+          </div>
+        </div>
         <div class="window">
           <div class="titlebar"><span>聲音設定</span><span>帳號共用</span></div>
           <div class="audio-settings">
@@ -835,8 +1059,8 @@
                 min="10"
                 max="1000"
                 step="10"
-                value="50"
-              /><output id="damageFloatScaleValue">50%</output></label
+                value="500"
+              /><output id="damageFloatScaleValue">500%</output></label
             ><label
               >透明度
               <input
@@ -926,18 +1150,110 @@
                 data-preview-marker="end"
                 aria-hidden="true"
               ></span>
-              <span class="damage-preview-reference" aria-hidden="true"
+              <span
+                id="damagePreviewPositionHandle"
+                class="damage-preview-reference"
+                role="button"
+                tabindex="0"
+                aria-label="拖曳調整傷害位置"
                 >60</span
               >
+              <span
+                id="damagePreviewResizeHandle"
+                class="damage-preview-resize-handle"
+                role="slider"
+                tabindex="0"
+                aria-label="拖曳調整傷害大小"
+                aria-valuemin="10"
+                aria-valuemax="1000"
+                aria-valuenow="50"
+              ></span>
               <span class="damage-preview segment">60</span>
               <span class="damage-preview total">120</span>
               <span class="damage-preview critical">99</span>
             </div>
             <p>
-              小黑窗即為戰鬥終端可見範圍；圓點依序標示起點、最高點與終點。原廠素材啟用時，數字不是系統字型，而是直接使用
+              小黑窗即為戰鬥終端可見範圍；拖曳灰色數字可改變位置，拖曳右下角把手可改變大小，滑軌會同步更新。圓點依序標示起點、最高點與終點。原廠素材啟用時，數字不是系統字型，而是直接使用
               RO 的逐字元 Sprite；暴擊同步使用原廠底圖與白色 EF_HIT2
               放射動畫。<span id="damageAssetStatus">正在檢查原廠傷害素材</span>
             </p>
+          </div>
+        </div>
+        <div class="window">
+          <div class="titlebar"><span>桌面寵物</span><span>帳號共用</span></div>
+          <div class="audio-settings pet-settings">
+            <label class="audio-check pet-setting-toggle"
+              ><input id="petCompanionToggle" type="checkbox" checked />
+              <span>顯示桌面寵物</span></label
+            ><label class="visual-select"
+              >寵物選擇
+              <select id="petCompanionSpecies">
+                <optgroup label="現有寵物">
+                  <option value="bulbasaur" selected>妙蛙種子</option>
+                  <option value="terasoid">帖拉所伊朵</option>
+                  <option value="baphomet">巴風特</option>
+                  <option value="angeling">天使波利</option>
+                  <option value="moonlight">月夜貓</option>
+                </optgroup>
+                <optgroup label="JRO × Puzzle &amp; Dragons">
+                  <option value="tamadora">たまドラ</option>
+                </optgroup>
+              </select></label
+            ><label class="pet-size-setting"
+              >寵物大小
+              <input
+                id="petCompanionSize"
+                type="range"
+                min="48"
+                max="1200"
+                step="1"
+                value="72"
+                list="petCompanionSizePresets"
+              /><output id="petCompanionSizeValue">標準 72px</output></label
+            ><datalist id="petCompanionSizePresets">
+              <option value="56" label="小"></option>
+              <option value="72" label="標準"></option>
+              <option value="88" label="大"></option>
+              <option value="104" label="特大"></option>
+              <option value="1200" label="最大"></option>
+            </datalist>
+            <label class="visual-select"
+              >寵物活躍程度
+              <select id="petActivityLevel">
+                <option value="quiet">安靜</option>
+                <option value="normal" selected>一般</option>
+                <option value="lively">活潑</option>
+              </select></label
+            ><label class="audio-check"
+              ><input id="petIdleSleepToggle" type="checkbox" checked />
+              <span>閒置睡眠</span></label
+            ><label class="audio-check"
+              ><input
+                id="petReduceActivityInLog"
+                type="checkbox"
+                checked
+              />
+              <span>戰鬥 Log 時降低活動</span></label
+            >
+            <p class="pet-settings-note">
+              只調整這個帳號的 Dashboard 顯示。寵物資料、能力與排行榜公開展示設定維持獨立。
+            </p>
+            <p id="petShowcaseSizeNote" class="pet-settings-note pet-showcase-size-note" hidden>
+              超大尺寸將使用「展示模式」，寵物會降低移動頻率並優先停靠畫面邊緣。
+            </p>
+          </div>
+        </div>
+        <div class="window">
+          <div class="titlebar"><span>背景設定</span><span>此裝置</span></div>
+          <div class="audio-settings floor-theme-settings">
+            <label>背景樣式
+              <select id="roFloorTheme">
+                <option value="prontera-stone">普隆德拉石磚</option>
+                <option value="field-grass">野外草地</option>
+                <option value="morocc-sand">夢羅克沙地</option>
+                <option value="legacy-green">綠色經典</option>
+              </select>
+            </label>
           </div>
         </div>
         <div class="window">
@@ -947,13 +1263,173 @@
           <div class="service-grid" id="services"></div>
         </div>
       </section>
+      <section
+        id="worldMapOverlay"
+        class="world-map-overlay hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="worldMapHeading"
+      >
+        <div class="world-map-shell">
+          <header class="world-map-header">
+            <div>
+              <h2 id="worldMapHeading">RO 世界地圖掛機選擇</h2>
+              <p id="worldMapStatus">正在讀取世界地圖資料</p>
+              <p id="worldMapSavedTown">儲存主城：讀取中</p>
+              <p id="worldMapSavedTownHint" class="hidden">請先前往任一可用主城，再設定儲存主城。</p>
+            </div>
+            <button id="closeWorldMap" type="button" aria-label="關閉世界地圖">關閉</button>
+          </header>
+          <div class="world-map-layout">
+            <div class="world-map-stage">
+              <div id="worldMapCanvas" class="world-map-canvas">
+                <img
+                  id="worldMapImage"
+                  class="world-map-image"
+                  data-game-src="/ro/client/world-map/world-map.webp"
+                  alt="RO 原廠世界大地圖"
+                  width="1280"
+                  height="1024"
+                  draggable="false"
+                />
+                <div id="worldMapNodes" class="world-map-regions"></div>
+                <div id="worldMapTownLabels" class="world-map-town-labels"></div>
+              </div>
+              <section id="worldMapTowns" class="world-map-towns" aria-label="主城傳送"></section>
+              <details class="world-map-region-index">
+                <summary>所有地圖區域（含重疊標籤）</summary>
+                <input id="worldMapRegionSearch" type="search" placeholder="搜尋地圖名稱或 Map ID" aria-label="搜尋世界地圖區域" />
+                <div id="worldMapRegionIndex" class="world-map-region-index-list"></div>
+              </details>
+            </div>
+            <aside id="worldMapDetail" class="world-map-detail">
+              <h3>選擇掛機區域</h3>
+              <p>點選左側已查核地圖查看怪物與等級資訊。</p>
+            </aside>
+          </div>
+        </div>
+      </section>
+      <div id="worldMapConfirm" class="world-map-confirm hidden" role="dialog" aria-modal="true" aria-labelledby="worldMapConfirmTitle">
+        <div class="world-map-confirm-card">
+          <h3 id="worldMapConfirmTitle">傳送確認</h3>
+          <p id="worldMapConfirmCost">傳送費用：免費</p>
+          <div class="controls">
+            <button id="worldMapConfirmCancel" type="button">取消</button>
+            <button id="worldMapConfirmSubmit" type="button" class="primary">確定傳送</button>
+          </div>
+        </div>
+      </div>
+      <div id="worldMapArrivalToast" class="world-map-arrival-toast hidden" role="status"></div>
+      <div
+        id="cardArtPreview"
+        class="card-art-preview hidden"
+        aria-labelledby="cardArtPreviewTitle"
+      >
+        <section
+          id="cardArtPreviewPanel"
+          class="card-art-preview-panel ro-item-detail-panel"
+          data-ro-primitive="RoWindow"
+          data-ro-item-detail=""
+        >
+          <div class="titlebar card-art-preview-titlebar ro-item-detail-titlebar" data-ro-primitive="RoTitleBar">
+            <span id="cardArtPreviewTitle">道具說明</span>
+            <button
+              id="cardArtPreviewClose"
+              class="card-art-preview-close"
+              type="button"
+              data-card-preview-close
+              aria-label="關閉道具說明"
+            ></button>
+          </div>
+          <div class="ro-item-detail-body">
+            <div id="itemDetailArt" class="ro-item-detail-art" hidden>
+              <img id="cardArtPreviewImage" class="ro-item-detail-image" alt="" />
+              <span id="itemDetailArtBadge" class="ro-item-detail-art-badge" hidden></span>
+            </div>
+            <p id="itemDetailName" class="ro-item-detail-name"></p>
+            <ul id="itemDetailStats" class="ro-item-detail-stats"></ul>
+            <p id="cardArtPreviewDescription" class="item-detail-description ro-item-detail-description"></p>
+            <ul id="itemDetailRequirements" class="ro-item-detail-requirements"></ul>
+          </div>
+          <small id="cardArtPreviewMeta" class="ro-item-detail-meta"></small>
+          <button id="cardArtPreviewAction" class="official-skin-button official-use hidden" type="button"></button>
+        </section>
+      </div>
+      <section
+        id="cardMergeDialog"
+        class="card-merge-dialog hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="cardMergeTitle"
+      >
+        <div class="card-merge-panel">
+          <div class="titlebar card-merge-titlebar">
+            <span id="cardMergeTitle">插入卡片</span>
+            <button id="cardMergeClose" class="card-art-preview-close" type="button" aria-label="關閉插卡視窗"></button>
+          </div>
+          <p class="card-merge-help">選擇具有相容空插槽的裝備。插入後無法直接取回卡片。</p>
+          <div id="cardMergeList" class="card-merge-list"></div>
+          <footer><button id="cardMergeCancel" class="official-skin-button official-cancel" type="button" aria-label="取消插卡"></button></footer>
+        </div>
+      </section>
+      <section
+        id="characterResetConfirm"
+        class="character-reset-confirm hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-label="角色重置確認"
+      >
+        <div class="character-reset-confirm-window" data-ro-primitive="RoWindow" data-ro-source-state="SOURCE_VERIFIED">
+          <div class="character-reset-confirm-copy">
+            <strong id="resetConfirmQuestion"></strong>
+            <span>本次費用：免費</span>
+            <span id="resetConfirmCooldown"></span>
+          </div>
+          <div class="character-reset-confirm-actions">
+            <button id="resetConfirmOk" class="official-skin-button official-ok" type="button" aria-label="確定重置" data-ro-primitive="RoButton" data-ro-source-state="SOURCE_VERIFIED"></button>
+            <button id="resetConfirmCancel" class="official-skin-button official-cancel" type="button" aria-label="取消重置" data-ro-primitive="RoButton" data-ro-source-state="SOURCE_VERIFIED"></button>
+          </div>
+        </div>
+      </section>
+      <div id="petCompanion" class="pet-companion-layer" aria-live="polite">
+        <span class="pet-reaction-message" hidden></span>
+        <button
+          class="pet-companion"
+          type="button"
+          data-animation="idle"
+          data-pet-animation="idle"
+          data-pet-renderer="sprite"
+          data-pet-fallback="false"
+          data-facing="right"
+          data-resting="false"
+          aria-label="和妙蛙種子互動"
+          data-pet-species="bulbasaur"
+        >
+          <span class="pet-shadow" aria-hidden="true"></span>
+          <span class="pet-facing" aria-hidden="true">
+            <span class="pet-sprite"></span>
+            <span class="pet-symbol">🌱</span>
+          </span>
+          <span class="pet-state" aria-hidden="true"></span>
+          <span class="pet-hitbox" aria-hidden="true"></span>
+        </button>
+      </div>
     </main>
     <audio
       id="bgm"
-      src="/ro/client/bgm/01-title.mp3"
+      data-src="/ro/client/bgm/01-title.mp3"
       loop
       preload="metadata"
     ></audio>
-    <script src="/app.js?v=r046-official-ui-audio" defer></script>
+    <script src="/ro-ui-kit.js?v=r013-item-quantity-detail" defer></script>
+    <script src="/original-minimap.js?v=ro-original-minimap-v1" defer></script>
+    <script src="/minimap-presence.js?v=ui5-1" defer></script>
+    <script type="module" src="/config-editor.js?v=config-v1"></script>
+    <script
+      src="/app.js?v=r108-m1-full-superset"
+      defer
+      fetchpriority="high"
+    ></script>
+    <script src="/player-web-observability.js?v=v1" defer></script>
   </body>
 </html>

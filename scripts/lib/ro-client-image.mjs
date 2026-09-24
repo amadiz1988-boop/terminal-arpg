@@ -102,7 +102,102 @@ export function decodeSpr(input) {
     }
     frames.push({ width, height, rgba });
   }
-  return { version, frames };
+  return { version, indexedCount, frames };
+}
+
+export function decodeAct(input) {
+  const buffer = Buffer.from(input);
+  assertRange(buffer, 0, 16, 'ACT 標頭');
+  if (buffer.toString('ascii', 0, 2) !== 'AC') throw new Error('ACT 標頭不符');
+
+  const version = buffer[3] + buffer[2] / 10;
+  const actionCount = buffer.readUInt16LE(4);
+  let offset = 16;
+  const actions = [];
+
+  const int32 = (label) => {
+    assertRange(buffer, offset, 4, label);
+    const value = buffer.readInt32LE(offset);
+    offset += 4;
+    return value;
+  };
+  const float32 = (label) => {
+    assertRange(buffer, offset, 4, label);
+    const value = buffer.readFloatLE(offset);
+    offset += 4;
+    return value;
+  };
+
+  for (let actionIndex = 0; actionIndex < actionCount; actionIndex += 1) {
+    const frameCount = int32(`ACT 動作 ${actionIndex}`);
+    const frames = [];
+    for (let frameIndex = 0; frameIndex < frameCount; frameIndex += 1) {
+      assertRange(buffer, offset, 32, `ACT 動作 ${actionIndex} 畫格 ${frameIndex}`);
+      offset += 32;
+      const layerCount = int32(`ACT 動作 ${actionIndex} 圖層數`);
+      const layers = [];
+      for (let layerIndex = 0; layerIndex < layerCount; layerIndex += 1) {
+        const offsetX = version >= 2.6 ? Math.floor(float32('ACT X')) : int32('ACT X');
+        const offsetY = version >= 2.6 ? Math.floor(float32('ACT Y')) : int32('ACT Y');
+        const spriteIndex = int32('ACT 圖像索引');
+        const mirror = int32('ACT 鏡像') !== 0;
+        let color = [255, 255, 255, 255];
+        let scaleX = 1;
+        let scaleY = 1;
+        let rotation = 0;
+        let spriteType = 0;
+        if (version >= 2) {
+          assertRange(buffer, offset, 4, 'ACT 色彩');
+          color = [...buffer.subarray(offset, offset + 4)];
+          offset += 4;
+          scaleX = float32('ACT X 縮放');
+          scaleY = version >= 2.4 ? float32('ACT Y 縮放') : scaleX;
+          rotation = int32('ACT 旋轉');
+          spriteType = int32('ACT 圖像類型');
+          if (version >= 2.5) offset += 8;
+        }
+        layers.push({
+          offsetX,
+          offsetY,
+          spriteIndex,
+          mirror,
+          color,
+          scaleX,
+          scaleY,
+          rotation,
+          spriteType,
+        });
+      }
+      if (version >= 2) offset += 4;
+      const anchors = [];
+      if (version >= 2.3) {
+        const anchorCount = int32('ACT 錨點數');
+        for (let anchorIndex = 0; anchorIndex < anchorCount; anchorIndex += 1) {
+          assertRange(buffer, offset, 16, 'ACT 錨點');
+          offset += 4;
+          anchors.push({
+            offsetX: int32('ACT 錨點 X'),
+            offsetY: int32('ACT 錨點 Y'),
+            other: int32('ACT 錨點資料'),
+          });
+        }
+      }
+      frames.push({ layers, anchors });
+    }
+    actions.push({ frames, delay: 100 });
+  }
+
+  if (version >= 2.1) {
+    const soundCount = int32('ACT 音效數');
+    assertRange(buffer, offset, soundCount * 40, 'ACT 音效');
+    offset += soundCount * 40;
+    if (version >= 2.2) {
+      for (const action of actions) {
+        action.delay = Math.max(25, Math.round(float32('ACT 動畫速度') * 25));
+      }
+    }
+  }
+  return { version, actions };
 }
 
 function tgaColor(bytes, depth, grayscale = false) {

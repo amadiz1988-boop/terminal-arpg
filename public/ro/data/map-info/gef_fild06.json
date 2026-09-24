@@ -1,0 +1,663 @@
+{
+  "id": "gef_fild06",
+  "name": "吉芬原野",
+  "category": "SERVICE_ONLY",
+  "dungeon": null,
+  "totalMonsters": 236,
+  "normalMonsterCount": 236,
+  "levelRange": {
+    "min": 65,
+    "max": 86
+  },
+  "fullLevelRange": {
+    "min": 65,
+    "max": 86
+  },
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [
+    {
+      "id": 1155,
+      "name": "畢帝特地龍",
+      "level": 86,
+      "count": 158
+    },
+    {
+      "id": 1139,
+      "name": "螳螂",
+      "level": 65,
+      "count": 36
+    },
+    {
+      "id": 1037,
+      "name": "黑蛇",
+      "level": 70,
+      "count": 36
+    }
+  ],
+  "resourceMonsters": [
+    {
+      "id": 1083,
+      "name": "光芒草",
+      "level": 1,
+      "count": 4
+    }
+  ],
+  "bossMonsters": [],
+  "monsters": [
+    {
+      "id": 1083,
+      "aegisName": "SHINING_PLANT",
+      "name": "光芒草",
+      "count": 4,
+      "respawnMinMs": 900000,
+      "respawnMaxMs": 1800000,
+      "level": 1,
+      "hp": 20,
+      "baseExp": 0,
+      "jobExp": 0,
+      "attackMin": 1,
+      "attackMax": 1,
+      "defense": 100,
+      "magicDefense": 99,
+      "size": "小型",
+      "race": "植物",
+      "element": "聖 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": true,
+      "sourceFiles": [
+        "npc/re/mobs/fields/geffen.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 510,
+          "aegisName": "Blue_Herb",
+          "name": "藍色藥草",
+          "ratePerTenThousand": 5000,
+          "type": "恢復道具",
+          "weight": 7,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "擁有特殊香味且能使精神飽滿的珍貴藥草,可恢復少量的SP。\n\n重量: 7"
+        },
+        {
+          "itemId": 508,
+          "aegisName": "Yellow_Herb",
+          "name": "黃色藥草",
+          "ratePerTenThousand": 1000,
+          "type": "恢復道具",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在治療傷處上有相當功效的珍貴藥草,可恢復少量的HP。\n\n重量: 5"
+        },
+        {
+          "itemId": 509,
+          "aegisName": "White_Herb",
+          "name": "白色藥草",
+          "ratePerTenThousand": 1000,
+          "type": "恢復道具",
+          "weight": 7,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在治療傷處上功效相當顯著的珍貴藥草,可恢復少量的HP。\n\n重量: 7"
+        },
+        {
+          "itemId": 710,
+          "aegisName": "Illusion_Flower",
+          "name": "幻想花",
+          "ratePerTenThousand": 3,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在深夜裏發著光芒的植物,在人跡罕見的森林裏獨自發著光芒。\n聽說雖然可以在那光芒中看見天國,但若將花摘下來看的話,它的光芒就會消失。\n\n重量: 1"
+        },
+        {
+          "itemId": 608,
+          "aegisName": "Seed_Of_Yggdrasil",
+          "name": "天地樹芽",
+          "ratePerTenThousand": 5,
+          "type": "恢復道具",
+          "weight": 30,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "形成這個世界根源的天地樹果實之芽,透露著微微香氣且甘甜美味,可恢復一半的HP 與 SP。\n\n重量: 30"
+        },
+        {
+          "itemId": 518,
+          "aegisName": "Honey",
+          "name": "蜂蜜",
+          "ratePerTenThousand": 500,
+          "type": "恢復道具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "味道香甜的液體,營養價值相當高,常被拿來治療用 可恢復少量HP 與 SP。\n\n重量: 10"
+        },
+        {
+          "itemId": 607,
+          "aegisName": "Yggdrasilberry",
+          "name": "天地樹果實",
+          "ratePerTenThousand": 5,
+          "type": "恢復道具",
+          "weight": 30,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "天地樹的果實, 據說食用後精神會為之一振, 感覺活力滿滿。可將使用者的HP和SP全數恢復。\n再使用等候時間:  5秒\n重量: 30"
+        },
+        {
+          "itemId": 714,
+          "aegisName": "Emperium",
+          "name": "華麗金屬",
+          "ratePerTenThousand": 5,
+          "type": "其他",
+          "weight": 100,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "帶有耀眼光芒的華麗金屬,據古代文獻記載,它只出現在可以改變這世界的命運的人的面前。\n\n重量: 100"
+        }
+      ]
+    },
+    {
+      "id": 1139,
+      "aegisName": "MANTIS",
+      "name": "螳螂",
+      "count": 36,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 65,
+      "hp": 2363,
+      "baseExp": 642,
+      "jobExp": 556,
+      "attackMin": 199,
+      "attackMax": 31,
+      "defense": 90,
+      "magicDefense": 0,
+      "size": "中型",
+      "race": "昆蟲",
+      "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/geffen.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 993,
+          "aegisName": "Yellow_Live",
+          "name": "地靈礦石",
+          "ratePerTenThousand": 55,
+          "type": "其他",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "綠色的小礦石塊。擁有地屬性,提煉後可以製作出地靈原石。\n\n重量: 5"
+        },
+        {
+          "itemId": 1031,
+          "aegisName": "Limb_Of_Mantis",
+          "name": "螳螂臂",
+          "ratePerTenThousand": 4500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "如鐮刀般銳利的螳螂手臂,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 911,
+          "aegisName": "Scell",
+          "name": "雪勒結晶",
+          "ratePerTenThousand": 700,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從一部份怪物身上得來的結晶,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 757,
+          "aegisName": "Elunium_Stone",
+          "name": "鋁原石",
+          "ratePerTenThousand": 35,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以拿來煉鋁的礦石,拿來提煉作成盔甲。\n\n重量: 20"
+        },
+        {
+          "itemId": 943,
+          "aegisName": "Solid_Shell",
+          "name": "堅硬外皮",
+          "ratePerTenThousand": 125,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "怪物身上堅硬的外皮,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 721,
+          "aegisName": "Azure_Jewel",
+          "name": "綠寶石",
+          "ratePerTenThousand": 5,
+          "type": "其他",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "呈現出綠色光芒的寶石。\n\n重量: 10"
+        },
+        {
+          "itemId": 507,
+          "aegisName": "Red_Herb",
+          "name": "紅色藥草",
+          "ratePerTenThousand": 325,
+          "type": "恢復道具",
+          "weight": 3,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在治療傷處上有一定功效的珍貴藥草,可恢復少量的HP。\n\n重量: 3"
+        },
+        {
+          "itemId": 4079,
+          "aegisName": "Mantis_Card",
+          "name": "螳螂卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "STR+3。\n系列: 卡片\n裝置: 飾品\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1037,
+      "aegisName": "SIDE_WINDER",
+      "name": "黑蛇",
+      "count": 36,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 70,
+      "hp": 2698,
+      "baseExp": 677,
+      "jobExp": 621,
+      "attackMin": 211,
+      "attackMax": 30,
+      "defense": 101,
+      "magicDefense": 12,
+      "size": "中型",
+      "race": "動物",
+      "element": "毒 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/geffen.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 954,
+          "aegisName": "Shining_Scales",
+          "name": "發亮鱗片",
+          "ratePerTenThousand": 2668,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "閃閃發亮的神秘麟片,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 912,
+          "aegisName": "Zargon",
+          "name": "剎勒空結晶",
+          "ratePerTenThousand": 700,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從一部份怪物身上得來的結晶,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 756,
+          "aegisName": "Oridecon_Stone",
+          "name": "神之金屬原石",
+          "ratePerTenThousand": 67,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "是被稱為神之金屬的礦石。相當稀少,且得來不易,可以說是相當珍貴的物品。\n\n重量: 20"
+        },
+        {
+          "itemId": 1120,
+          "aegisName": "Tsurugi_",
+          "name": "日本刀",
+          "ratePerTenThousand": 1,
+          "type": "武器",
+          "weight": 120,
+          "attack": 130,
+          "defense": 0,
+          "slots": 2,
+          "description": "非常恐怖且尖銳的劍,是專門用來傷害敵方時使用。\n系列: 劍  攻擊: 130\n重量: 120\n武器等級: 3\n要求等級: 27\n裝備: 劍士系列/商人系列/盜賊系列"
+        },
+        {
+          "itemId": 937,
+          "aegisName": "Posionous_Canine",
+          "name": "毒牙",
+          "ratePerTenThousand": 1250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "含有毒液的犬齒,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 926,
+          "aegisName": "Scale_Of_Snakes",
+          "name": "蛇鱗",
+          "ratePerTenThousand": 2500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "蛇的鱗片,可以用來製做各種衣物。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 509,
+          "aegisName": "White_Herb",
+          "name": "白色藥草",
+          "ratePerTenThousand": 500,
+          "type": "恢復道具",
+          "weight": 7,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在治療傷處上功效相當顯著的珍貴藥草,可恢復少量的HP。\n\n重量: 7"
+        },
+        {
+          "itemId": 4117,
+          "aegisName": "Side_Winder_Card",
+          "name": "黑蛇卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可使用[二刀連擊]Lv.1技能。\n遠距離武器無法使用。\n當習得二刀連擊技能後,因技能等級的不同,啟動二刀連擊的機率也將有所不同。\n系列: 卡片\n裝置: 武器\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1155,
+      "aegisName": "PETIT",
+      "name": "畢帝特地龍",
+      "count": 158,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 86,
+      "hp": 5491,
+      "baseExp": 1086,
+      "jobExp": 970,
+      "attackMin": 361,
+      "attackMax": 66,
+      "defense": 99,
+      "magicDefense": 49,
+      "size": "中型",
+      "race": "龍族",
+      "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/geffen.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 1035,
+          "aegisName": "Dragon_Canine",
+          "name": "龍牙",
+          "ratePerTenThousand": 2668,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "龍的牙齒,非常的堅硬,聽說連龍身上鋼鐵般的皮膚都可以輕易地穿透。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 1037,
+          "aegisName": "Dragon_Train",
+          "name": "龍尾",
+          "ratePerTenThousand": 150,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "龍的尾巴。 可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 756,
+          "aegisName": "Oridecon_Stone",
+          "name": "神之金屬原石",
+          "ratePerTenThousand": 70,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "是被稱為神之金屬的礦石。相當稀少,且得來不易,可以說是相當珍貴的物品。\n\n重量: 20"
+        },
+        {
+          "itemId": 509,
+          "aegisName": "White_Herb",
+          "name": "白色藥草",
+          "ratePerTenThousand": 500,
+          "type": "恢復道具",
+          "weight": 7,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在治療傷處上功效相當顯著的珍貴藥草,可恢復少量的HP。\n\n重量: 7"
+        },
+        {
+          "itemId": 16040,
+          "aegisName": "Scarlet_Mace",
+          "name": "緋紅色鐵錘",
+          "ratePerTenThousand": 50,
+          "type": "武器",
+          "weight": 80,
+          "attack": 80,
+          "defense": 0,
+          "slots": 2,
+          "description": "散發著紅光的鈍器。\nATK增加至(精煉值*精煉值) (精煉上限為+15)\n角色等級70以上: BaseLv每上升10時ATK+5。\n不可破壞。\n系列: 鈍器 攻擊: 80\n重量: 80\n武器等級: 3\n要求等級: 70\n裝備: 初學者系列/劍士系列/服事系列/商人系列"
+        },
+        {
+          "itemId": 6260,
+          "aegisName": "Petti_Tail",
+          "name": "畢帝特龍尾",
+          "ratePerTenThousand": 50,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "畢帝特地龍的尾巴部分, 聽說切掉了還會再長出來。\n重量: 1"
+        },
+        {
+          "itemId": 606,
+          "aegisName": "Aloebera",
+          "name": "蘆薈汁液",
+          "ratePerTenThousand": 8,
+          "type": "延遲消耗品",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "將蘆薈的硬皮撕掉後,裏面露出的組織,味道很酸又冰涼,所以一開始會對它厭惡,但只要嘗過令人無法忘記它特殊的滋味。\n\n重量: 10"
+        },
+        {
+          "itemId": 4118,
+          "aegisName": "Petit_Card",
+          "name": "畢帝特地龍卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "對龍族系怪物增加20%的傷害度。\n系列: 卡片\n裝置: 武器\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2715,
+      "aegisName": "C2_PETIT",
+      "name": "雄壯畢帝特地龍",
+      "count": 2,
+      "respawnMinMs": 180000,
+      "respawnMaxMs": 180000,
+      "level": 86,
+      "hp": 54910,
+      "baseExp": 5430,
+      "jobExp": 14550,
+      "attackMin": 433,
+      "attackMax": 66,
+      "defense": 99,
+      "magicDefense": 49,
+      "size": "中型",
+      "race": "龍族",
+      "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/championmobs.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 1035,
+          "aegisName": "Dragon_Canine",
+          "name": "龍牙",
+          "ratePerTenThousand": 10000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "龍的牙齒,非常的堅硬,聽說連龍身上鋼鐵般的皮膚都可以輕易地穿透。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 1037,
+          "aegisName": "Dragon_Train",
+          "name": "龍尾",
+          "ratePerTenThousand": 750,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "龍的尾巴。 可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 756,
+          "aegisName": "Oridecon_Stone",
+          "name": "神之金屬原石",
+          "ratePerTenThousand": 350,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "是被稱為神之金屬的礦石。相當稀少,且得來不易,可以說是相當珍貴的物品。\n\n重量: 20"
+        },
+        {
+          "itemId": 509,
+          "aegisName": "White_Herb",
+          "name": "白色藥草",
+          "ratePerTenThousand": 2500,
+          "type": "恢復道具",
+          "weight": 7,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在治療傷處上功效相當顯著的珍貴藥草,可恢復少量的HP。\n\n重量: 7"
+        },
+        {
+          "itemId": 16040,
+          "aegisName": "Scarlet_Mace",
+          "name": "緋紅色鐵錘",
+          "ratePerTenThousand": 250,
+          "type": "武器",
+          "weight": 80,
+          "attack": 80,
+          "defense": 0,
+          "slots": 2,
+          "description": "散發著紅光的鈍器。\nATK增加至(精煉值*精煉值) (精煉上限為+15)\n角色等級70以上: BaseLv每上升10時ATK+5。\n不可破壞。\n系列: 鈍器 攻擊: 80\n重量: 80\n武器等級: 3\n要求等級: 70\n裝備: 初學者系列/劍士系列/服事系列/商人系列"
+        },
+        {
+          "itemId": 6260,
+          "aegisName": "Petti_Tail",
+          "name": "畢帝特龍尾",
+          "ratePerTenThousand": 250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "畢帝特地龍的尾巴部分, 聽說切掉了還會再長出來。\n重量: 1"
+        },
+        {
+          "itemId": 606,
+          "aegisName": "Aloebera",
+          "name": "蘆薈汁液",
+          "ratePerTenThousand": 40,
+          "type": "延遲消耗品",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "將蘆薈的硬皮撕掉後,裏面露出的組織,味道很酸又冰涼,所以一開始會對它厭惡,但只要嘗過令人無法忘記它特殊的滋味。\n\n重量: 10"
+        },
+        {
+          "itemId": 4118,
+          "aegisName": "Petit_Card",
+          "name": "畢帝特地龍卡片",
+          "ratePerTenThousand": 5,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "對龍族系怪物增加20%的傷害度。\n系列: 卡片\n裝置: 武器\n重量: 1"
+        }
+      ]
+    }
+  ]
+}

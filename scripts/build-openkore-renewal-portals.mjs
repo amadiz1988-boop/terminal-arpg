@@ -2,7 +2,9 @@ import { readFile, writeFile } from 'node:fs/promises';
 
 const [source, target] = process.argv.slice(2);
 if (!source || !target)
-  throw new Error('Usage: node build-openkore-renewal-portals.mjs <source> <target>');
+  throw new Error(
+    'Usage: node build-openkore-renewal-portals.mjs <source> <target>',
+  );
 
 const renewalIzlude = [
   'iz_int 27 30 iz_int 51 30',
@@ -120,23 +122,27 @@ const renewalThiefRoute = [
   'moc_prydb1 100 191 moc_pryd01 90 105',
 ];
 const replacementKeys = new Set(
-  [...renewalMageRoute, ...renewalArcherRoute, ...renewalThiefRoute].map((line) =>
-    line.split(/\s+/).slice(0, 4).join(' '),
+  [...renewalMageRoute, ...renewalArcherRoute, ...renewalThiefRoute].map(
+    (line) => line.split(/\s+/).slice(0, 4).join(' '),
   ),
 );
-const replacementKey = (line) =>
-  line.trim().split(/\s+/).slice(0, 4).join(' ');
+const replacementKey = (line) => line.trim().split(/\s+/).slice(0, 4).join(' ');
 const sourceLines = (await readFile(source, 'utf8')).split(/\r?\n/);
 if (sourceLines.length < 3000)
-  throw new Error(`OpenKore tRO portal table is incomplete: ${sourceLines.length}`);
+  throw new Error(
+    `OpenKore tRO portal table is incomplete: ${sourceLines.length}`,
+  );
 const output = sourceLines.filter(
   (line) =>
-    !/^(iz_int(?:0[1-4])?|int_land(?:0[1-4])?|izlude(?:_[a-d])?|izlude_in|iz_ac0[12](?:_[a-d])?|new_1-3)\s/.test(line) &&
+    !/^(iz_int(?:0[1-4])?|int_land(?:0[1-4])?|izlude(?:_[a-d])?|izlude_in|iz_ac0[12](?:_[a-d])?|new_1-3)\s/.test(
+      line,
+    ) &&
     !/^prt_fild08\s+\d+\s+\d+\s+izlude\s/.test(line) &&
     !/^prt_fild08\s+170\s+378\s+prontera\s/.test(line) &&
     !/^prontera\s+156\s+22\s+prt_fild08\s/.test(line) &&
     !/^prontera\s+237\s+317\s+prt_church\s/.test(line) &&
     !/^prt_church\s/.test(line) &&
+    !/^moc_fild11\s+189\s+360\s+moc_fild20\s/.test(line) &&
     !replacementKeys.has(replacementKey(line)),
 );
 output.push(

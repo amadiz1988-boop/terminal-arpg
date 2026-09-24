@@ -1,0 +1,653 @@
+{
+  "id": "mag_dun01",
+  "name": "朱諾 諾可羅德 1樓",
+  "category": "SERVICE_ONLY",
+  "dungeon": null,
+  "totalMonsters": 101,
+  "normalMonsterCount": 101,
+  "levelRange": {
+    "min": 98,
+    "max": 103
+  },
+  "fullLevelRange": {
+    "min": 66,
+    "max": 103
+  },
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [
+    {
+      "id": 1383,
+      "name": "爆炎蝙蝠",
+      "level": 100,
+      "count": 30
+    },
+    {
+      "id": 1072,
+      "name": "卡浩",
+      "level": 98,
+      "count": 20
+    },
+    {
+      "id": 1367,
+      "name": "火焰妖",
+      "level": 101,
+      "count": 20
+    },
+    {
+      "id": 1366,
+      "name": "熔岩巨石",
+      "level": 103,
+      "count": 20
+    }
+  ],
+  "resourceMonsters": [],
+  "bossMonsters": [],
+  "monsters": [
+    {
+      "id": 1381,
+      "aegisName": "GRIZZLY",
+      "name": "暴燄野熊",
+      "count": 10,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 66,
+      "hp": 2185,
+      "baseExp": 625,
+      "jobExp": 569,
+      "attackMin": 205,
+      "attackMax": 13,
+      "defense": 109,
+      "magicDefense": 2,
+      "size": "大型",
+      "race": "動物",
+      "element": "火 3",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/mag_dun.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 948,
+          "aegisName": "Bear's_Foot",
+          "name": "熊掌",
+          "ratePerTenThousand": 2500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "熊的腳掌,聽說有著相當特殊的風味。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 919,
+          "aegisName": "Animal's_Skin",
+          "name": "動物外皮",
+          "ratePerTenThousand": 2500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "剝下動物的外皮得來的,可以用來折衣服或棉被等物品。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 549,
+          "aegisName": "Nice_Sweet_Potato",
+          "name": "美味蕃薯",
+          "ratePerTenThousand": 1250,
+          "type": "恢復道具",
+          "weight": 8,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "擁有較高的恢復力,要慢慢的飲用水一起吃下去, 要不然會嗆到喉嚨\n\n重量: 8"
+        },
+        {
+          "itemId": 2353,
+          "aegisName": "Odin's_Blessing",
+          "name": "奧丁的祝福",
+          "ratePerTenThousand": 10,
+          "type": "防具",
+          "weight": 250,
+          "attack": 0,
+          "defense": 53,
+          "slots": 1,
+          "description": "是海羅默德套裝的基本鎧甲,和奧丁的祝福...一起裝備時...可以把隱藏的力量拉出來\n系列: 鎧甲 防禦: 53\n重量: 250\n要求等級: 65\n裝備: 除了初學者之外,全職業"
+        },
+        {
+          "itemId": 4162,
+          "aegisName": "Grizzly_Card",
+          "name": "暴燄野熊卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "當受到物理傷害時,有機率讓敵人陷入黑暗。\n當裝備大腳熊卡片時,有較高機率讓敵人得到黑暗。\n系列: 卡片\n裝備: 鎧甲\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1072,
+      "aegisName": "KAHO",
+      "name": "卡浩",
+      "count": 20,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 98,
+      "hp": 7229,
+      "baseExp": 1349,
+      "jobExp": 1278,
+      "attackMin": 433,
+      "attackMax": 224,
+      "defense": 106,
+      "magicDefense": 55,
+      "size": "中型",
+      "race": "惡魔",
+      "element": "火 4",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/mag_dun.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 994,
+          "aegisName": "Flame_Heart",
+          "name": "火靈原石",
+          "ratePerTenThousand": 15,
+          "type": "其他",
+          "weight": 30,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "擁有火屬性的礦石。\n\n重量: 30"
+        },
+        {
+          "itemId": 1003,
+          "aegisName": "Coal",
+          "name": "煤礦",
+          "ratePerTenThousand": 75,
+          "type": "其他",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "含有很多碳成分的礦石,和鐵一起提煉可以得到鋼鐵。\n\n重量: 5"
+        },
+        {
+          "itemId": 7097,
+          "aegisName": "Burning_Heart",
+          "name": "燃燒的心臟",
+          "ratePerTenThousand": 1500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "以石頭形成的心臟,擁有火燃燒型態的魔力心臟。\n\n重量: 1"
+        },
+        {
+          "itemId": 690,
+          "aegisName": "Fire_Scroll_1_3",
+          "name": "火箭術等級3",
+          "ratePerTenThousand": 50,
+          "type": "延遲消耗品",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "以古代魔道學精髓而製成,並有著魔法師咒文的紙張,有著火屬性的魔法,可使用等級3的火箭術。\n\n重量: 1"
+        },
+        {
+          "itemId": 757,
+          "aegisName": "Elunium_Stone",
+          "name": "鋁原石",
+          "ratePerTenThousand": 500,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以拿來煉鋁的礦石,拿來提煉作成盔甲。\n\n重量: 20"
+        },
+        {
+          "itemId": 716,
+          "aegisName": "Red_Gemstone",
+          "name": "紅色魔力礦石",
+          "ratePerTenThousand": 150,
+          "type": "其他",
+          "weight": 0.1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "具有魔法力量的礦石，使用魔法時可以代替施法者抵消魔法的反作用力。\n\n重量 : 0.1"
+        },
+        {
+          "itemId": 970,
+          "aegisName": "Alchol",
+          "name": "酒精",
+          "ratePerTenThousand": 3,
+          "type": "其他",
+          "weight": 3,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "帶有獨特香味的液體, 因為在常溫中容易蒸發的關係,所以必須保存於密閉的空間中。具有容易著火的特性,還可以融化水無法溶解的物質。\n\n重量: 3"
+        },
+        {
+          "itemId": 4065,
+          "aegisName": "Kaho_Card",
+          "name": "卡浩卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "對地屬性怪物增加20%的傷害度。\n系列: 卡片\n裝置: 武器\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1383,
+      "aegisName": "EXPLOSION",
+      "name": "爆炎蝙蝠",
+      "count": 30,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 100,
+      "hp": 6464,
+      "baseExp": 1387,
+      "jobExp": 1316,
+      "attackMin": 406,
+      "attackMax": 110,
+      "defense": 112,
+      "magicDefense": 50,
+      "size": "小型",
+      "race": "動物",
+      "element": "火 3",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/mag_dun.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 7006,
+          "aegisName": "Wing_Of_Red_Bat",
+          "name": "紅色蝙蝠翅膀",
+          "ratePerTenThousand": 2750,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "紅色蝙蝠的翅膀。可向收集商人購買。\n\n重量 :1"
+        },
+        {
+          "itemId": 7097,
+          "aegisName": "Burning_Heart",
+          "name": "燃燒的心臟",
+          "ratePerTenThousand": 1100,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "以石頭形成的心臟,擁有火燃燒型態的魔力心臟。\n\n重量: 1"
+        },
+        {
+          "itemId": 7122,
+          "aegisName": "Hot_Hair",
+          "name": "炙熱的毛",
+          "ratePerTenThousand": 1600,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "觸摸時可以感覺到很熱的顏色的毛,可是實際上一點都不會熱,只是顏色上的感覺而已\n\n重量: 1"
+        },
+        {
+          "itemId": 756,
+          "aegisName": "Oridecon_Stone",
+          "name": "神之金屬原石",
+          "ratePerTenThousand": 400,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "是被稱為神之金屬的礦石。相當稀少,且得來不易,可以說是相當珍貴的物品。\n\n重量: 20"
+        },
+        {
+          "itemId": 522,
+          "aegisName": "Fruit_Of_Mastela",
+          "name": "瑪絲黛拉果實",
+          "ratePerTenThousand": 200,
+          "type": "恢復道具",
+          "weight": 3,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "瑪絲黛拉樹上采下的紫色果實,可恢復大量的HP。\n\n重量: 3"
+        },
+        {
+          "itemId": 4267,
+          "aegisName": "Explosion_Card",
+          "name": "爆炎蝙蝠卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "每次擊殺龍族怪物時,所得到的經驗值+10%,從龍族怪物受到的傷害+20%。\n系列: 卡片\n裝備: 鞋類\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2837,
+      "aegisName": "C4_EXPLOSION",
+      "name": "憤怒爆炎蝙蝠",
+      "count": 1,
+      "respawnMinMs": 180000,
+      "respawnMaxMs": 180000,
+      "level": 100,
+      "hp": 32320,
+      "baseExp": 6935,
+      "jobExp": 19740,
+      "attackMin": 487,
+      "attackMax": 110,
+      "defense": 112,
+      "magicDefense": 50,
+      "size": "小型",
+      "race": "動物",
+      "element": "火 3",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/championmobs.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 7006,
+          "aegisName": "Wing_Of_Red_Bat",
+          "name": "紅色蝙蝠翅膀",
+          "ratePerTenThousand": 10000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "紅色蝙蝠的翅膀。可向收集商人購買。\n\n重量 :1"
+        },
+        {
+          "itemId": 7097,
+          "aegisName": "Burning_Heart",
+          "name": "燃燒的心臟",
+          "ratePerTenThousand": 5500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "以石頭形成的心臟,擁有火燃燒型態的魔力心臟。\n\n重量: 1"
+        },
+        {
+          "itemId": 7122,
+          "aegisName": "Hot_Hair",
+          "name": "炙熱的毛",
+          "ratePerTenThousand": 8000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "觸摸時可以感覺到很熱的顏色的毛,可是實際上一點都不會熱,只是顏色上的感覺而已\n\n重量: 1"
+        },
+        {
+          "itemId": 756,
+          "aegisName": "Oridecon_Stone",
+          "name": "神之金屬原石",
+          "ratePerTenThousand": 2000,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "是被稱為神之金屬的礦石。相當稀少,且得來不易,可以說是相當珍貴的物品。\n\n重量: 20"
+        },
+        {
+          "itemId": 522,
+          "aegisName": "Fruit_Of_Mastela",
+          "name": "瑪絲黛拉果實",
+          "ratePerTenThousand": 1000,
+          "type": "恢復道具",
+          "weight": 3,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "瑪絲黛拉樹上采下的紫色果實,可恢復大量的HP。\n\n重量: 3"
+        },
+        {
+          "itemId": 4267,
+          "aegisName": "Explosion_Card",
+          "name": "爆炎蝙蝠卡片",
+          "ratePerTenThousand": 5,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "每次擊殺龍族怪物時,所得到的經驗值+10%,從龍族怪物受到的傷害+20%。\n系列: 卡片\n裝備: 鞋類\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1367,
+      "aegisName": "BLAZZER",
+      "name": "火焰妖",
+      "count": 20,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 101,
+      "hp": 9503,
+      "baseExp": 1545,
+      "jobExp": 1467,
+      "attackMin": 471,
+      "attackMax": 94,
+      "defense": 116,
+      "magicDefense": 60,
+      "size": "中型",
+      "race": "惡魔",
+      "element": "火 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/mag_dun.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 7097,
+          "aegisName": "Burning_Heart",
+          "name": "燃燒的心臟",
+          "ratePerTenThousand": 1200,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "以石頭形成的心臟,擁有火燃燒型態的魔力心臟。\n\n重量: 1"
+        },
+        {
+          "itemId": 7098,
+          "aegisName": "Live_Coal",
+          "name": "火種",
+          "ratePerTenThousand": 850,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "火苗還沒有完全熄滅,看到紅色的部份,還剩下氧氣在燃燒的型態。\n\n重量: 1"
+        },
+        {
+          "itemId": 509,
+          "aegisName": "White_Herb",
+          "name": "白色藥草",
+          "ratePerTenThousand": 700,
+          "type": "恢復道具",
+          "weight": 7,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在治療傷處上功效相當顯著的珍貴藥草,可恢復少量的HP。\n\n重量: 7"
+        },
+        {
+          "itemId": 4215,
+          "aegisName": "Blazzer_Card",
+          "name": "火焰妖卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "每次擊殺怪物時,有機率會掉落食品類物品。\n系列: 卡片\n裝備: 飾品\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1366,
+      "aegisName": "LAVA_GOLEM",
+      "name": "熔岩巨石",
+      "count": 20,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 103,
+      "hp": 10244,
+      "baseExp": 1585,
+      "jobExp": 1507,
+      "attackMin": 562,
+      "attackMax": 53,
+      "defense": 299,
+      "magicDefense": 27,
+      "size": "大型",
+      "race": "無形",
+      "element": "火 4",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/mag_dun.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 7096,
+          "aegisName": "Cold_Magma",
+          "name": "凝固的岩漿",
+          "ratePerTenThousand": 2280,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "擁有豐富礦物質的岩漿之角,把它融化掉好好提煉的話,可以做出好東西的樣子。\n\n重量: 1"
+        },
+        {
+          "itemId": 7097,
+          "aegisName": "Burning_Heart",
+          "name": "燃燒的心臟",
+          "ratePerTenThousand": 1843,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "以石頭形成的心臟,擁有火燃燒型態的魔力心臟。\n\n重量: 1"
+        },
+        {
+          "itemId": 2317,
+          "aegisName": "Plate_Armor_",
+          "name": "鋼鐵鎧甲",
+          "ratePerTenThousand": 1,
+          "type": "防具",
+          "weight": 450,
+          "attack": 0,
+          "defense": 70,
+          "slots": 1,
+          "description": "用神秘金屬混和鋼鐵做成的鎧甲。\n系列: 鎧甲  防禦: 70\n重量: 450\n要求等級: 40\n裝備: 劍士系列"
+        },
+        {
+          "itemId": 15027,
+          "aegisName": "Crimson_Robe",
+          "name": "赤火焰外袍",
+          "ratePerTenThousand": 1,
+          "type": "防具",
+          "weight": 50,
+          "attack": 0,
+          "defense": 40,
+          "slots": 0,
+          "description": "具有火之氣息之精緻花紋的火紅外袍。\nINT+1, MDEF+10.\n隕石術的變動詠唱縮短3秒, 純INT 為120時INT+1。\n系列: 鎧甲 防禦: 40\n重量: 50 屬性: 火\n要求等級: 100\n裝備: 咒術士"
+        },
+        {
+          "itemId": 509,
+          "aegisName": "White_Herb",
+          "name": "白色藥草",
+          "ratePerTenThousand": 1250,
+          "type": "恢復道具",
+          "weight": 7,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在治療傷處上功效相當顯著的珍貴藥草,可恢復少量的HP。\n\n重量: 7"
+        },
+        {
+          "itemId": 1818,
+          "aegisName": "Magma_Fist",
+          "name": "岩漿拳套",
+          "ratePerTenThousand": 10,
+          "type": "武器",
+          "weight": 65,
+          "attack": 80,
+          "defense": 0,
+          "slots": 3,
+          "description": "用岩漿所做成的拳套。有時候顯現的熱氣能讓所有的東西融化。當熱氣發動時因內部做過特殊的處理感覺不到熱氣\n當攻擊時, 以較低的機率對自己使用 自動念咒、火焰屬性附加Lv.5。\n系列: 拳套  攻擊: 80\n重量: 65\n武器等級: 3\n要求等級: 75\n裝備: 祭司/武道家"
+        },
+        {
+          "itemId": 6245,
+          "aegisName": "Black_Powder",
+          "name": "黑色粉末",
+          "ratePerTenThousand": 250,
+          "type": "其他",
+          "weight": 0.1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "有著暗黑光的粉末很容易沾在手上, 需小心不要進到眼睛裏。\n重量: 01"
+        },
+        {
+          "itemId": 4184,
+          "aegisName": "Lava_Golem_Card",
+          "name": "熔岩巨石卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "攻擊熔岩巨石時,傷害+30%。\n系列: 卡片\n裝備: 武器\n重量: 1"
+        }
+      ]
+    }
+  ]
+}

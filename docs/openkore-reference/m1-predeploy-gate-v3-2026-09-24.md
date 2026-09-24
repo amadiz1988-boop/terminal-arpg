@@ -1,0 +1,35 @@
+# M1 predeploy gate V3, 2026-09-24
+
+Authority: `c0450b1c` in `docs/project-control/canonical-m1-world-travel-supply-ui-v1.md`. Native source `de168f5`; Web teleport presentation `5beb3a39`. This is source and read-only Production evidence, not deployment or Browser acceptance.
+
+## A. Production Native lineage and capability preservation
+
+The sole map listener on port 5122 was PID `43092`, running `C:\Users\Administrator\ghost-island-production\ro-stack\.local\ro-stack\rathena\map-server.exe`, SHA256 `294482A656BCE8DC3374514ADFCCC4D074ADD3D4CD90FD0C070D447D02D89B0B`. The runtime rAthena Git base is `e985006`, but the runtime source and build stamp are absent. A bounded search of `audits`, `deployment-backups`, and `deploy-backups` found no receipt containing this binary hash. The current binary cannot be bound to a canonical Native source checkpoint or accepted build hash. `CURRENT_PRODUCTION_NATIVE_LINEAGE=UNRESOLVED`; `LAST_ACCEPTED_NATIVE_DEPLOY_RECEIPT=NOT_FOUND`; `LAST_ACCEPTED_NATIVE_SOURCE_CHECKPOINT=UNRESOLVED`; `LAST_ACCEPTED_NATIVE_BUILD_HASH=UNRESOLVED`.
+
+The accepted capability inventory contains ten required groups: SERVER_AGENT, PERSISTENT_IDLE, quarantine recovery, RECOVER_QUARANTINED_TO_IDLE or equivalent, stale task/owner/target cleanup, command contract, action-column compatibility, graceful shutdown, farm/combat authority boundaries, and OpenKore runtime zero. The source comparison in `m1-native-release-integration-2026-09-24.md` is an indicator, not executable equivalence proof. `DISCOVERED=10`; `PRESERVED=UNVERIFIED`; `MISSING=UNDETERMINED`. The required `MISSING=0` gate is not met.
+
+## B. ProcDump attachment gate
+
+The current `procdump-attachment-state.json` names map PID `43092`, generation `ro-1790184652475`, status `FAILED`, reason `PROCDUMP_OUTPUT_UNVERIFIED`, attached PID null. A ProcDump process PID `57060` has the approved executable and exact target PID in its command line, but its redirected stdout contains only the UTF-16 BOM and stderr contains only the banner. `CheckRemoteDebuggerPresent` against the map with `PROCESS_QUERY_INFORMATION` succeeded and returned `false`. [Microsoft's ProcDump reference](https://learn.microsoft.com/en-us/sysinternals/downloads/procdump) defines `-e 1` as first-chance exception capture, and its [Windows API reference](https://learn.microsoft.com/en-us/windows/win32/api/debugapi/nf-debugapi-checkremotedebuggerpresent) defines a successful `false` result as no debugger on that process. A live sidecar process therefore does not establish an attached first-chance debugger. Classification: `PROCESS_NOT_ATTACHED`; the 3-second stdout-only validation in `runtime-procdump-sidecar.lib.ps1` also cannot provide the required evidence. Its focused test now covers a silent, still-running sidecar and refuses false confirmation (`13/13` checks). No crash was induced, no sidecar was restarted, and no attachment receipt was rewritten. `PROCDUMP_PRECHECK=FAIL`; `PROCDUMP_GATE=FAIL`. A new controlled attachment and verified PID-scoped receipt are required before deployment.
+
+## C. Five unsupported Native Supply fields
+
+Pinned OpenKore source is `.local/ro-stack/openkore` at `51de1ddfc4449ae5217f6886de702f87ca934030`. Native `src/map/persistent_agent.cpp::parse_m1_supply_policy` deliberately consumes only `enabled`, `buyEnabled`, and `buyRules` under the current M1 rule. The five legacy fields remain in saved schema/payload for compatibility, with no M1 runtime claim. Web `nativeSupplyConfigPaths` now attests only the three consumed paths; `configCapability` explicitly returns `UNAVAILABLE` for the five controls even if a stale API response claims support.
+
+| GI setting | OpenKore file, symbol and default | OpenKore transition | Current GI and required mapping |
+| --- | --- | --- | --- |
+| `supply.weightTriggerPercent` | `control/config.txt:211` `itemsMaxWeight_sellOrStore=48`; `src/AI.pm:679,779` | Threshold calls storage/sell checks. | Native ignores it. `M1_WEIGHT_TRIGGER_SUPPLY=NO`; `GI_EXPLICIT_OVERRIDE_NOT_APPLICABLE`. Remove supported attestation; no Native mapping. |
+| `supply.inventorySlotTrigger` | `control/config.txt:212` `itemsMaxNum_sellOrStore=99`; `src/AI.pm:682,782` | Slot threshold calls storage/sell checks. | Native ignores it. `M1_INVENTORY_TRIGGER_SUPPLY=NO`; `GI_EXPLICIT_OVERRIDE_NOT_APPLICABLE`. Remove supported attestation; no Native mapping. |
+| `supply.services.storage.enabled` | `control/config.txt:759` `storageAuto=0`; `src/AI/CoreLogic.pm:1402-1417` | Enabled service enters storage transaction when eligible. | Native ignores it. `OUTSIDE_M1`; remove supported attestation, no Native mapping. |
+| `supply.services.sell.enabled` | `control/config.txt:752` `sellAuto=0`; `src/AI/CoreLogic.pm:1417` and `src/AI.pm:505` | Enabled service checks eligible inventory and sells. | Native ignores it. `OUTSIDE_M1`; remove supported attestation, no Native mapping. |
+| `supply.itemRules` | `control/items_control.txt:38-43` `all 0 1 0`; `src/Misc.pm:3642` `items_control` | Per-item disposition selects store/sell behavior. | Native ignores it. `OUTSIDE_M1`; remove supported attestation, no Native mapping. |
+
+The parser still rejects malformed stored payloads through the existing Web adapter, but these fields do not acquire an M1 execution promise. Targeted source tests assert exactly three attested paths and five disabled legacy controls. `SUPPORTED_BUT_NATIVE_IGNORED=0` in source; `ENABLED_UI_NO_OP_COUNT=0` for this five-field group. Runtime and Browser availability remain unmeasured.
+
+## D. Untracked AUTO_FARM reconciliation test
+
+`scripts/test-auto-farm-browser-state-reconciliation.mjs` was created 2026-09-20 02:45 local, before the fail-closed non-resident gate introduced by `2c05c29b` on 2026-09-21 13:57 local. Its former line 54 expected `actions.startFarm=true` for `QUARANTINED` plus `resident=false`; the actual result is `false`, with blocker `agent_quarantined`. Tracked `scripts/test-persistent-agent-web-canary.mjs` already asserts that same canonical safety behavior. Classification: `INVALID_EXPECTATION_AFTER_CANONICAL_CHANGE`, first present at `2c05c29b`, not caused by teleport presentation. The untracked test now uses a resident `PERSISTENT_IDLE` startable fixture and separately asserts the quarantine block. Both reconciliation and tracked canary tests pass. File creator/workline is not encoded in the file; ownership is undetermined. `AUTO_FARM_RECONCILIATION_FAILURE_BLOCKS_DEPLOYMENT=NO` for this stale expectation, while A and B still block deployment.
+
+## Gate and next action
+
+No Production file, runtime, database, or player state was changed. Source-only C/D corrections are bounded; Native and Web deployment remain deferred because lineage/capability preservation and ProcDump attachment are unproven. Reconstruct the accepted Production binary receipt and establish a verified, current-PID ProcDump attachment before repeating the complete predeploy gate. Do not run Fly-to-HIT, Supply-to-HIT, Browser presentation acceptance, or post-deploy 42/38 recalculation against the old runtime as candidate proof.

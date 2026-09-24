@@ -1,0 +1,572 @@
+{
+  "id": "ra_fild01",
+  "name": "拉赫 阿巫敦拉草原",
+  "category": "SERVICE_ONLY",
+  "dungeon": null,
+  "totalMonsters": 213,
+  "normalMonsterCount": 213,
+  "levelRange": {
+    "min": 14,
+    "max": 103
+  },
+  "fullLevelRange": {
+    "min": 14,
+    "max": 103
+  },
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [
+    {
+      "id": 1106,
+      "name": "沙漠之狼",
+      "level": 103,
+      "count": 145
+    },
+    {
+      "id": 1782,
+      "name": "土狼",
+      "level": 95,
+      "count": 33
+    },
+    {
+      "id": 1107,
+      "name": "沙漠幼狼",
+      "level": 14,
+      "count": 22
+    }
+  ],
+  "resourceMonsters": [],
+  "bossMonsters": [],
+  "monsters": [
+    {
+      "id": 1107,
+      "aegisName": "DESERT_WOLF_B",
+      "name": "沙漠幼狼",
+      "count": 22,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 14,
+      "hp": 113,
+      "baseExp": 164,
+      "jobExp": 105,
+      "attackMin": 5,
+      "attackMax": 8,
+      "defense": 13,
+      "magicDefense": 0,
+      "size": "小型",
+      "race": "動物",
+      "element": "火 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/rachel.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 1010,
+          "aegisName": "Phracon",
+          "name": "強化武器金屬-級數一",
+          "ratePerTenThousand": 43,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "用來強化武器在製作武器所使用的金屬,可以強化等級一的武器。\n\n重量: 20"
+        },
+        {
+          "itemId": 919,
+          "aegisName": "Animal's_Skin",
+          "name": "動物外皮",
+          "ratePerTenThousand": 2750,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "剝下動物的外皮得來的,可以用來折衣服或棉被等物品。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 2306,
+          "aegisName": "Adventurere's_Suit_",
+          "name": "冒險衣",
+          "ratePerTenThousand": 40,
+          "type": "防具",
+          "weight": 30,
+          "attack": 0,
+          "defense": 20,
+          "slots": 1,
+          "description": "專為冒險者製作的衣服。\n系列: 鎧甲  防禦: 20\n重量: 30\n裝備: 全職業"
+        },
+        {
+          "itemId": 601,
+          "aegisName": "Wing_Of_Fly",
+          "name": "蒼蠅翅膀",
+          "ratePerTenThousand": 500,
+          "type": "延遲消耗品",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "將蒼蠅的翅膀剪下可以用來製作具有魔法力量的物品,可在地圖上移動至任意的位置上。\n\n重量: 0"
+        },
+        {
+          "itemId": 2301,
+          "aegisName": "Cotton_Shirt",
+          "name": "棉襯衫",
+          "ratePerTenThousand": 100,
+          "type": "防具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 10,
+          "slots": 0,
+          "description": "純棉製成的衣服,穿著時非常舒服的衣物。\n系列: 鎧甲  防禦: 10\n重量: 10\n裝備: 全職業"
+        },
+        {
+          "itemId": 13011,
+          "aegisName": "Asura_",
+          "name": "匕首",
+          "ratePerTenThousand": 3,
+          "type": "武器",
+          "weight": 60,
+          "attack": 50,
+          "defense": 0,
+          "slots": 3,
+          "description": "遠古以前神賜給人類的劍, 擁有這把劍的話感覺到一股破壞的衝動\nMATK+50。\n系列: 短劍 攻擊: 50\n重量: 60\n武器等級: 1\n要求等級: 12\n裝備: 忍者"
+        },
+        {
+          "itemId": 582,
+          "aegisName": "Orange",
+          "name": "柳橙",
+          "ratePerTenThousand": 500,
+          "type": "恢復道具",
+          "weight": 2,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "橘色圓形的果實,清爽的香味,可以直接吃或打成果汁、果醬等可以恢復少量的 HP和 SP\n\n重量: 2"
+        },
+        {
+          "itemId": 4023,
+          "aegisName": "Desert_Wolf_Babe_Card",
+          "name": "沙漠幼狼卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "INT+1。\n系列: 卡片\n裝置: 鎧甲\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2855,
+      "aegisName": "C3_DESERT_WOLF_B",
+      "name": "菁英沙漠之狼",
+      "count": 2,
+      "respawnMinMs": 180000,
+      "respawnMaxMs": 180000,
+      "level": 14,
+      "hp": 565,
+      "baseExp": 820,
+      "jobExp": 1575,
+      "attackMin": 6,
+      "attackMax": 8,
+      "defense": 13,
+      "magicDefense": 0,
+      "size": "小型",
+      "race": "動物",
+      "element": "火 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/championmobs.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 1010,
+          "aegisName": "Phracon",
+          "name": "強化武器金屬-級數一",
+          "ratePerTenThousand": 215,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "用來強化武器在製作武器所使用的金屬,可以強化等級一的武器。\n\n重量: 20"
+        },
+        {
+          "itemId": 919,
+          "aegisName": "Animal's_Skin",
+          "name": "動物外皮",
+          "ratePerTenThousand": 10000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "剝下動物的外皮得來的,可以用來折衣服或棉被等物品。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 2306,
+          "aegisName": "Adventurere's_Suit_",
+          "name": "冒險衣",
+          "ratePerTenThousand": 200,
+          "type": "防具",
+          "weight": 30,
+          "attack": 0,
+          "defense": 20,
+          "slots": 1,
+          "description": "專為冒險者製作的衣服。\n系列: 鎧甲  防禦: 20\n重量: 30\n裝備: 全職業"
+        },
+        {
+          "itemId": 601,
+          "aegisName": "Wing_Of_Fly",
+          "name": "蒼蠅翅膀",
+          "ratePerTenThousand": 2500,
+          "type": "延遲消耗品",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "將蒼蠅的翅膀剪下可以用來製作具有魔法力量的物品,可在地圖上移動至任意的位置上。\n\n重量: 0"
+        },
+        {
+          "itemId": 2301,
+          "aegisName": "Cotton_Shirt",
+          "name": "棉襯衫",
+          "ratePerTenThousand": 500,
+          "type": "防具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 10,
+          "slots": 0,
+          "description": "純棉製成的衣服,穿著時非常舒服的衣物。\n系列: 鎧甲  防禦: 10\n重量: 10\n裝備: 全職業"
+        },
+        {
+          "itemId": 13011,
+          "aegisName": "Asura_",
+          "name": "匕首",
+          "ratePerTenThousand": 15,
+          "type": "武器",
+          "weight": 60,
+          "attack": 50,
+          "defense": 0,
+          "slots": 3,
+          "description": "遠古以前神賜給人類的劍, 擁有這把劍的話感覺到一股破壞的衝動\nMATK+50。\n系列: 短劍 攻擊: 50\n重量: 60\n武器等級: 1\n要求等級: 12\n裝備: 忍者"
+        },
+        {
+          "itemId": 582,
+          "aegisName": "Orange",
+          "name": "柳橙",
+          "ratePerTenThousand": 2500,
+          "type": "恢復道具",
+          "weight": 2,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "橘色圓形的果實,清爽的香味,可以直接吃或打成果汁、果醬等可以恢復少量的 HP和 SP\n\n重量: 2"
+        },
+        {
+          "itemId": 4023,
+          "aegisName": "Desert_Wolf_Babe_Card",
+          "name": "沙漠幼狼卡片",
+          "ratePerTenThousand": 5,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "INT+1。\n系列: 卡片\n裝置: 鎧甲\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1627,
+      "aegisName": "ANOPHELES",
+      "name": "瘧蚊",
+      "count": 11,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 95,
+      "hp": 6617,
+      "baseExp": 1292,
+      "jobExp": 1221,
+      "attackMin": 366,
+      "attackMax": 18,
+      "defense": 7,
+      "magicDefense": 10,
+      "size": "小型",
+      "race": "昆蟲",
+      "element": "風 3",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/rachel.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 7119,
+          "aegisName": "Spawns",
+          "name": "菌絲",
+          "ratePerTenThousand": 250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在香菇或是黴菌類身上,所組成的組織\n\n重量: 1"
+        },
+        {
+          "itemId": 4344,
+          "aegisName": "Anopheles_Card",
+          "name": "瘧蚊卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "當抓到昆蟲型怪時,有機率會掉落觸鬚起士湯\n系列: 卡片\n裝備: 飾品\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1782,
+      "aegisName": "ROWEEN",
+      "name": "土狼",
+      "count": 33,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 95,
+      "hp": 6617,
+      "baseExp": 1292,
+      "jobExp": 1221,
+      "attackMin": 406,
+      "attackMax": 35,
+      "defense": 73,
+      "magicDefense": 33,
+      "size": "中型",
+      "race": "動物",
+      "element": "風 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/rachel.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 7564,
+          "aegisName": "Rotten_Meat",
+          "name": "腐臭之肉",
+          "ratePerTenThousand": 1500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "因放太久了而腐爛的肉, 若吃下的話一定會拉肚子的\n\n重量: 1"
+        },
+        {
+          "itemId": 919,
+          "aegisName": "Animal's_Skin",
+          "name": "動物外皮",
+          "ratePerTenThousand": 1500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "剝下動物的外皮得來的,可以用來折衣服或棉被等物品。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 992,
+          "aegisName": "Wind_Of_Verdure",
+          "name": "風靈礦石",
+          "ratePerTenThousand": 25,
+          "type": "其他",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "黃色的小礦石塊。擁有風屬性,提煉後可以製作出風靈原石。\n\n重量: 5"
+        },
+        {
+          "itemId": 1822,
+          "aegisName": "Combo_Battle_Glove",
+          "name": "連擊的套甲",
+          "ratePerTenThousand": 1,
+          "type": "武器",
+          "weight": 50,
+          "attack": 30,
+          "defense": 0,
+          "slots": 4,
+          "description": "刻印在套甲上祝福的咒文是武道家們強烈的意識反應出遵守神的意志可讓他做更強的攻擊。越是走苦行之路的武道家們對神的堅強意志會發出光芒的。\n六合拳傷害+15%、連環全身掌傷害+15%、猛龍誇強傷害+20%。\n系列: 拳套  攻擊: 30\n重量: 50\n武器等級: 3\n要求等級: 60\n裝備: 祭司/武道家"
+        },
+        {
+          "itemId": 1695,
+          "aegisName": "Detail_Model_Foxtail",
+          "name": "精美狐尾草模型",
+          "ratePerTenThousand": 20,
+          "type": "武器",
+          "weight": 30,
+          "attack": 195,
+          "defense": 0,
+          "slots": 2,
+          "description": "製作非常精美的狐尾草模型。\n遠程物理 攻擊力+8%, MHP+200。\n精煉值每+3時, DEX+3, MSP+15。\n- 喵族武器專屬能力值 -\n精煉+7時, 武器的基本屬性ATK&MATK+40%。\n自精煉+7起精煉每+1時, 武器的基本屬性ATK&MATK再+20%。\n(最多精煉+10)\n系列: 單手杖 攻擊: 195\n重量: 30\n武器等級: 3\n要求等級: 100\n裝備: 喵族"
+        },
+        {
+          "itemId": 28382,
+          "aegisName": "Charm_G_Necklace",
+          "name": "護符草項鍊",
+          "ratePerTenThousand": 20,
+          "type": "防具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 1,
+          "description": "用幸運草編製的粗曠項鍊。\nMDEF+5, 貓薄荷隕石的變動詠唱 -1秒。\n系列 : 飾品 防禦 : 0\n重量 : 10\n要求等級 : 100\n裝備 : 喵族"
+        },
+        {
+          "itemId": 4422,
+          "aegisName": "Roween_Card",
+          "name": "土狼卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "FLEE+5, 完全回避+3,\n對水屬性怪物造成物理傷害加10%,對魚貝怪物 CRI+15\n系列: 卡片\n裝置: 披肩\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1106,
+      "aegisName": "DESERT_WOLF",
+      "name": "沙漠之狼",
+      "count": 145,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 103,
+      "hp": 10244,
+      "baseExp": 1585,
+      "jobExp": 1507,
+      "attackMin": 511,
+      "attackMax": 59,
+      "defense": 114,
+      "magicDefense": 47,
+      "size": "中型",
+      "race": "動物",
+      "element": "火 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/rachel.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 1253,
+          "aegisName": "Katar_",
+          "name": "卡塔勒拳刃",
+          "ratePerTenThousand": 1,
+          "type": "武器",
+          "weight": 120,
+          "attack": 148,
+          "defense": 0,
+          "slots": 2,
+          "description": "用古代秘術所製作出來的拳刃,刀刃會不斷的晃動,造成敵人混亂的兵器。\nDex+1。\n系列: 拳刃  攻擊: 148\n重量: 120\n武器等級: 3\n要求等級: 33\n裝備: 暗殺者"
+        },
+        {
+          "itemId": 7030,
+          "aegisName": "Claw_Of_Desert_Wolf",
+          "name": "沙漠之狼之指甲",
+          "ratePerTenThousand": 2750,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "棲息在沙漠之中 狼的指甲。可向收集商人購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 2311,
+          "aegisName": "Mink_Coat",
+          "name": "毛皮大衣",
+          "ratePerTenThousand": 1,
+          "type": "防具",
+          "weight": 230,
+          "attack": 0,
+          "defense": 30,
+          "slots": 1,
+          "description": "用柔軟的動物皮毛作成的外套,不過是被保育團體批評最多的衣服。\n希望大家能愛護動物。\n系列: 鎧甲  防禦: 30\n重量: 230\n要求等級: 30\n裝備: 初學者以外的全職業"
+        },
+        {
+          "itemId": 6252,
+          "aegisName": "Wolf_Blood",
+          "name": "沙漠之狼血",
+          "ratePerTenThousand": 5,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "藥用的沙漠之狼血\n重量: 1"
+        },
+        {
+          "itemId": 1287,
+          "aegisName": "Durga",
+          "name": "杜爾迦拳刃",
+          "ratePerTenThousand": 1,
+          "type": "武器",
+          "weight": 120,
+          "attack": 190,
+          "defense": 0,
+          "slots": 1,
+          "description": "優於高速突刺攻擊之用的拳刃。\n系列: 拳刃 攻擊: 190\n重量: 120\n武器等級: 3\n要求等級: 100\n裝備: 十字斬首者"
+        },
+        {
+          "itemId": 756,
+          "aegisName": "Oridecon_Stone",
+          "name": "神之金屬原石",
+          "ratePerTenThousand": 27,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "是被稱為神之金屬的礦石。相當稀少,且得來不易,可以說是相當珍貴的物品。\n\n重量: 20"
+        },
+        {
+          "itemId": 28705,
+          "aegisName": "Scarlet_Dagger",
+          "name": "緋紅色大駒短劍",
+          "ratePerTenThousand": 50,
+          "type": "武器",
+          "weight": 55,
+          "attack": 55,
+          "defense": 0,
+          "slots": 2,
+          "description": "劍身上散發著紅光的短劍\nATK增加至(精煉值*精煉值) (精煉上限為+15)\nMATK增加至(精煉值*精煉值)/2 (精煉上限為+15)\n角色等級70以上: BaseLv每上升10時ATK+5。\n系列: 短劍 攻擊: 55\n重量: 55\n武器等級: 3\n要求等級: 70\n裝備: 初學者系列/劍士系列/魔法師系列/弓箭手系列/商人系列/盜賊系列/忍者系列/悟靈士"
+        },
+        {
+          "itemId": 4082,
+          "aegisName": "Desert_Wolf_Card",
+          "name": "沙漠之狼卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "對小型的傷害+15%。\nATK+5。\n系列: 卡片\n裝置: 武器\n重量: 1"
+        }
+      ]
+    }
+  ]
+}

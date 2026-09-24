@@ -1,0 +1,366 @@
+{
+  "schema": "ro-quest-sequence/v1",
+  "sequenceId": "novice_onboarding",
+  "taskId": 7100001,
+  "supersededBy": "novice-onboarding.json",
+  "enabled": false,
+  "engineStatus": "PENDING",
+  "compiledRoutesRef": "ops/ro-stack/persistent-agent/quest-content/novice-onboarding.routes.json",
+  "compiledRoutesSummary": {
+    "required": 13,
+    "routeCompiled": 10,
+    "ambiguous": 0,
+    "noRoute": 3
+  },
+  "engineBlockers": [
+    "ALLOCATE_SKILL_EXECUTOR",
+    "CONDITION_REPEAT_EXECUTOR",
+    "CHECKPOINT_PROGRESS_PROJECTION"
+  ],
+  "nativeSchemaBlockers": [
+    "ROUTES_REQUIRED: native parser (persistent_agent_quest_sequence_step_parser.inc:107-126) requires route[] (1..16 waypoints) + retryPolicy on every GO_NPC/GO_MAP/RETURN_NPC; novice map waypoints are not yet authored.",
+    "ALLOWLISTS_REQUIRED: NPC/quest/mob/item/map membership is native env config (PERSISTENT_AGENT_NPCS, NPCS_MAPS, QUEST_IDS, FARM_MAPS, FARM_MOBS, SERVICE_ITEMS, QUEST_SEQUENCES, QUEST_REWARD_ITEMS) and must include the novice content before dispatch can be accepted.",
+    "FARM_UNTIL_PENDING: free grind (academy_training JobLv<10, supernovice_training BaseLv<45) cannot use quest-bound KILL_MONSTER; awaiting B native FARM_UNTIL step (existing start_farm/stop_farm AUTO_FARM handoff).",
+    "RECOVERY_HANDOFF_REMOVED: recovery is automatic native PAUSED_FOR_RECOVERY (no step type). Placeholder dropped; semantics preserved via native projection.",
+    "ROUTES_NOT_STATIC: the last-good flow used dynamic OpenKore pathfinding (onboarding_move), so no stored waypoint arrays exist to recover verbatim; route[] must be produced from canonical map/warp data, not invented."
+  ],
+  "note": "Historical pending fixture retained fail-closed for audit and migration comparison. Source-ready payload is novice-onboarding.json. This file is not a runtime input.",
+  "visibleTasks": [
+    {
+      "questId": 21001,
+      "title": "逃離沉船"
+    },
+    {
+      "questId": 7471,
+      "title": "初次相遇"
+    },
+    {
+      "questId": 21008,
+      "title": "第一次戰鬥"
+    },
+    {
+      "questId": 7472,
+      "title": "新世界的第一步"
+    },
+    {
+      "questId": 7473,
+      "title": "清涼飲料"
+    },
+    {
+      "questId": 4269,
+      "title": "新生學院報到"
+    },
+    {
+      "id": "graduation",
+      "title": "一轉結業"
+    }
+  ],
+  "phases": [
+    {
+      "phaseId": "starting",
+      "next": [
+        "ship_wounded",
+        "island_captain",
+        "izlude_captain",
+        "academy_registration",
+        "academy_graduation"
+      ]
+    },
+    {
+      "phaseId": "respawning",
+      "next": [
+        "<resume-checkpoint>"
+      ]
+    },
+    {
+      "phaseId": "academy_exit",
+      "visibleTask": null,
+      "next": [
+        "finish"
+      ]
+    },
+    {
+      "phaseId": "ship_wounded",
+      "visibleTask": "逃離沉船",
+      "npc": "terminal_ship_wounded",
+      "map": "iz_int",
+      "x": 56,
+      "y": 32,
+      "questId": 21001,
+      "next": [
+        "ship_exit"
+      ]
+    },
+    {
+      "phaseId": "ship_exit",
+      "visibleTask": "逃離沉船",
+      "map": "iz_int",
+      "x": 56,
+      "y": 15,
+      "next": [
+        "island_captain"
+      ]
+    },
+    {
+      "phaseId": "island_captain",
+      "visibleTask": "初次相遇",
+      "npc": "Captain Carocc#intro_npc03",
+      "map": "int_land",
+      "x": 78,
+      "y": 103,
+      "questId": 21008,
+      "next": [
+        "island_lumin"
+      ]
+    },
+    {
+      "phaseId": "island_lumin",
+      "visibleTask": "初次相遇",
+      "npc": "Lumin#new_ship",
+      "map": "int_land",
+      "x": 73,
+      "y": 100,
+      "questId": 7471,
+      "next": [
+        "island_lumber"
+      ]
+    },
+    {
+      "phaseId": "island_lumber",
+      "visibleTask": "第一次戰鬥",
+      "map": "int_land",
+      "itemId": 6008,
+      "count": 2,
+      "next": [
+        "island_sailor"
+      ]
+    },
+    {
+      "phaseId": "island_sailor",
+      "visibleTask": "第一次戰鬥",
+      "npc": "Sailor#intro_npc04",
+      "map": "int_land",
+      "x": 58,
+      "y": 69,
+      "next": [
+        "sail_izlude"
+      ]
+    },
+    {
+      "phaseId": "sail_izlude",
+      "visibleTask": "新世界的第一步",
+      "map": "izlude",
+      "x": 49,
+      "y": 57,
+      "next": [
+        "izlude_captain"
+      ]
+    },
+    {
+      "phaseId": "izlude_captain",
+      "visibleTask": "新世界的第一步",
+      "npc": "Captain Carocc#iz",
+      "map": "izlude",
+      "x": 198,
+      "y": 213,
+      "questId": 7472,
+      "next": [
+        "izlude_hun_intro"
+      ]
+    },
+    {
+      "phaseId": "izlude_hun_intro",
+      "visibleTask": "清涼飲料",
+      "npc": "Criatura Academy Staff#0",
+      "map": "izlude",
+      "x": 122,
+      "y": 207,
+      "questId": 7473,
+      "next": [
+        "izlude_hun_drink"
+      ]
+    },
+    {
+      "phaseId": "izlude_hun_drink",
+      "visibleTask": "清涼飲料",
+      "itemId": 531,
+      "next": [
+        "izlude_hun_finish"
+      ]
+    },
+    {
+      "phaseId": "izlude_hun_finish",
+      "visibleTask": "清涼飲料",
+      "npc": "Criatura Academy Staff#0",
+      "map": "izlude",
+      "x": 122,
+      "y": 207,
+      "next": [
+        "academy_route"
+      ]
+    },
+    {
+      "phaseId": "academy_route",
+      "visibleTask": "新生學院報到",
+      "map": "iz_ac01",
+      "x": 100,
+      "y": 39,
+      "next": [
+        "academy_registration"
+      ]
+    },
+    {
+      "phaseId": "academy_registration",
+      "visibleTask": "新生學院報到",
+      "npc": "Academy Receptionist#1",
+      "map": "iz_ac01",
+      "x": 100,
+      "y": 39,
+      "questId": 4269,
+      "next": [
+        "academy_pet_intro"
+      ]
+    },
+    {
+      "phaseId": "academy_pet_intro",
+      "visibleTask": "一轉結業",
+      "npc": "Adept Adventurer#ac",
+      "map": "iz_ac01",
+      "x": 45,
+      "y": 80,
+      "questId": 2293,
+      "next": [
+        "academy_training_route"
+      ]
+    },
+    {
+      "phaseId": "academy_training_route",
+      "visibleTask": "一轉結業",
+      "map": "new_1-3",
+      "x": 95,
+      "y": 171,
+      "next": [
+        "academy_training_heal",
+        "academy_basic_skill",
+        "academy_training"
+      ]
+    },
+    {
+      "phaseId": "academy_training_heal",
+      "visibleTask": "一轉結業",
+      "itemId": 569,
+      "next": [
+        "academy_training"
+      ]
+    },
+    {
+      "phaseId": "academy_basic_skill",
+      "visibleTask": "一轉結業",
+      "skillId": 1,
+      "targetLevel": 9,
+      "next": [
+        "academy_graduation"
+      ]
+    },
+    {
+      "phaseId": "academy_training",
+      "visibleTask": "一轉結業",
+      "map": "new_1-3",
+      "next": [
+        "academy_return"
+      ]
+    },
+    {
+      "phaseId": "academy_return",
+      "visibleTask": "一轉結業",
+      "map": "iz_ac01",
+      "x": 49,
+      "y": 73,
+      "next": [
+        "academy_graduation"
+      ]
+    },
+    {
+      "phaseId": "academy_graduation",
+      "visibleTask": "一轉結業",
+      "npc": "terminal_academy_guide",
+      "map": "iz_ac01",
+      "x": 60,
+      "y": 67,
+      "next": [
+        "finish"
+      ]
+    },
+    {
+      "phaseId": "supernovice_relocating",
+      "visibleTask": "一轉結業",
+      "next": [
+        "supernovice_training"
+      ]
+    },
+    {
+      "phaseId": "supernovice_training",
+      "visibleTask": "一轉結業",
+      "next": [
+        "supernovice_ready"
+      ]
+    },
+    {
+      "phaseId": "supernovice_ready",
+      "visibleTask": "一轉結業",
+      "next": [
+        "academy_graduation"
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "type": "REPEAT_UNTIL",
+      "phaseId": "<driver>",
+      "condition": {
+        "read": "job_level",
+        "op": "gte",
+        "value": 10
+      },
+      "bodySteps": [],
+      "maxIterations": 1000,
+      "note": "shape reference only; RECOVERY_HANDOFF removed (native CP3 auto PAUSED_FOR_RECOVERY)"
+    },
+    {
+      "type": "ALLOCATE_SKILL",
+      "phaseId": "academy_basic_skill",
+      "skillId": 1,
+      "targetLevel": 9,
+      "note": "native ALLOCATE_SKILL executor ready"
+    },
+    {
+      "type": "CONDITION",
+      "phaseId": "academy_training_heal",
+      "read": "hp_percent",
+      "op": "lt",
+      "value": 60,
+      "note": "native CP1-1 CONDITION shape"
+    },
+    {
+      "type": "FARM_UNTIL",
+      "phaseId": "academy_training",
+      "condition": {
+        "read": "job_level",
+        "op": "gte",
+        "value": 10
+      },
+      "note": "FARM_UNTIL_PENDING: awaiting B native FARM_UNTIL schema (auto-farm handoff)"
+    },
+    {
+      "type": "FARM_UNTIL",
+      "phaseId": "supernovice_training",
+      "condition": {
+        "read": "base_level",
+        "op": "gte",
+        "value": 45
+      },
+      "note": "FARM_UNTIL_PENDING: awaiting B native FARM_UNTIL schema"
+    }
+  ],
+  "transfersRef": "ops/ro-stack/persistent-agent/quest-content/novice-onboarding.transfers.json"
+}

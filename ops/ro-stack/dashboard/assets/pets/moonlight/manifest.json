@@ -1,0 +1,191 @@
+{
+  "id": "moonlight",
+  "displayName": "月夜貓",
+  "status": "official-client-derived",
+  "source": {
+    "archive": "C:/Program Files (x86)/Gravity/RagnarokOnline/data0.grf",
+    "archiveSha256": "913402ace1d3c67818b4f070650a07eb157a6d62df9e394d596d59b4c7e6678a",
+    "act": "data/sprite/몬스터/moonlight.act",
+    "spr": "data/sprite/몬스터/moonlight.spr",
+    "actSha256": "8226dab3d7789baed4a04d8a59020a15efeacd5e2f4cd561e9562fb0c292fa6c",
+    "sprSha256": "ef11751683c949abeb1293d24f93440b7bd2a0e0b8e01a8f1744f4a682174138"
+  },
+  "logicalCell": {
+    "width": 96,
+    "height": 96
+  },
+  "directions": [
+    "front",
+    "front-left",
+    "left",
+    "back-left",
+    "back",
+    "back-right",
+    "right",
+    "front-right"
+  ],
+  "pivot": {
+    "x": 48,
+    "y": 90
+  },
+  "actVersion": 2.5,
+  "sprVersion": 2.1,
+  "animations": {
+    "idle": {
+      "file": "idle.webp",
+      "actGroup": 0,
+      "frames": 6,
+      "originalFrameCounts": [
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6
+      ],
+      "frameDelayMs": 75,
+      "durationMs": 450,
+      "playback": "loop"
+    },
+    "walk": {
+      "file": "walk.webp",
+      "actGroup": 1,
+      "frames": 11,
+      "originalFrameCounts": [
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11
+      ],
+      "frameDelayMs": 50,
+      "durationMs": 550,
+      "playback": "loop"
+    },
+    "happy": {
+      "file": "happy.webp",
+      "actGroup": 2,
+      "frames": 12,
+      "originalFrameCounts": [
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12
+      ],
+      "frameDelayMs": 25,
+      "durationMs": 300,
+      "playback": "once"
+    },
+    "run": {
+      "file": "run.webp",
+      "actGroup": 1,
+      "frames": 11,
+      "originalFrameCounts": [
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11
+      ],
+      "frameDelayMs": 50,
+      "durationMs": 341,
+      "playback": "loop"
+    },
+    "pant": {
+      "file": "pant.webp",
+      "actGroup": 3,
+      "frames": 4,
+      "originalFrameCounts": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "frameDelayMs": 50,
+      "durationMs": 200,
+      "playback": "once"
+    },
+    "sleep": {
+      "file": "sleep.webp",
+      "actGroup": 4,
+      "frames": 16,
+      "originalFrameCounts": [
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16
+      ],
+      "frameDelayMs": 63,
+      "durationMs": 1008,
+      "playback": "hold"
+    }
+  },
+  "outputs": {
+    "idle": {
+      "width": 576,
+      "height": 768,
+      "sha256": "f6e43fae521ad8f8853c2a02d33215d0677f163794664ea8d3da1f1d5c015de5"
+    },
+    "walk": {
+      "width": 1056,
+      "height": 768,
+      "sha256": "111d38b2bc1d58029e4c18d87189c1dd1c491f7962449a365a20da50f7a51dab"
+    },
+    "happy": {
+      "width": 1152,
+      "height": 768,
+      "sha256": "ae47270c8816b318a5ac9084174734e69a696ae10ab339cc3f8bc947652c9755"
+    },
+    "run": {
+      "width": 1056,
+      "height": 768,
+      "sha256": "111d38b2bc1d58029e4c18d87189c1dd1c491f7962449a365a20da50f7a51dab"
+    },
+    "pant": {
+      "width": 384,
+      "height": 768,
+      "sha256": "04d5c7f128921201672a26d497012acfe699ab0357573468372a94ac628d301a"
+    },
+    "sleep": {
+      "width": 1536,
+      "height": 768,
+      "sha256": "dc4e0eb025a29f72cc512b3d3710de57059c2376d31dfb93f77c73aa733901ab"
+    }
+  },
+  "mapping": {
+    "idle": "idle",
+    "walk": "walk",
+    "run": "walk at faster playback",
+    "happy": "attack",
+    "pant": "hit",
+    "sleep": "death held on final frame"
+  },
+  "preprocessing": [
+    "read-only GRF extraction",
+    "ACT layer composition",
+    "ACT mirror/scale/rotation/color",
+    "shared union bounds",
+    "nearest-neighbor scale",
+    "lossless WebP"
+  ]
+}

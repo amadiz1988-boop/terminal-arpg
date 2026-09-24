@@ -1,0 +1,26 @@
+{
+  "PRE_IMPLEMENTATION_REUSE_GATE": {
+    "featureId": "DISCORD_OAUTH_ACCOUNT_LINKING_V1",
+    "featureName": "Discord identity linking to existing accounts",
+    "scope": "NEW_FEATURE",
+    "taskCategory": "NEW_FEATURE",
+    "categories": ["authentication", "identity"],
+    "openKoreRelevant": false,
+    "checks": {
+      "currentProject": {"status": "CHECKED", "evidence": "dashboard.mjs loginOrRegister, web_accounts, web_sessions; dashboard-db.mjs pool. Reuse these account/session authorities; no existing external identity table in canonical auth or sql migrations."},
+      "legacyProject": {"status": "NOT_APPLICABLE", "reason": "Archived demo is not the canonical account authority."},
+      "reuseRegistry": {"status": "CHECKED", "evidence": "check-registry Discord OAuth identity auth account returns unrelated state-machine entries; no Discord OAuth implementation."},
+      "rAthena": {"status": "CHECKED", "evidence": "Canonical registration and character creation use login.account_id and char.account_id, character_slots=1. No changes to those authorities."},
+      "openKore": {"status": "NOT_APPLICABLE", "reason": "Web authentication only, no gameplay or bot behavior."},
+      "externalEcosystem": {"status": "CHECKED", "evidence": "https://discord.com/developers/docs/topics/oauth2 official authorization code flow and identify scope; reference only, no copied code."},
+      "genericOSS": {"status": "CHECKED", "evidence": "Use existing Node crypto/fetch and mysql2; no added dependencies or replacement auth framework."}
+    },
+    "decision": "BUILD_NEW",
+    "whyNotReuse": "Extend existing account/session architecture with the missing provider assertion adapter and identity mapping. No provider integration exists to reuse; existing account provisioning remains password-based, so V1 supports linked accounts only.",
+    "freshResearchPerformed": true,
+    "freshResearchJustification": "REGISTRY_MISS",
+    "registryUpdateRequired": true,
+    "registryUpdate": {"status": "NO_CHANGE", "evidence": "Official API contract check only, no OSS adoption candidate. Durable contract, sources and applicability are recorded here and in docs/discord-oauth-account-linking-v1.md."},
+    "inheritedFrom": ""
+  }
+}

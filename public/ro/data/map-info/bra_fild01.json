@@ -1,0 +1,128 @@
+{
+  "id": "bra_fild01",
+  "name": "巴西原野",
+  "category": "SERVICE_ONLY",
+  "dungeon": null,
+  "totalMonsters": 3,
+  "normalMonsterCount": 3,
+  "levelRange": {
+    "min": 70,
+    "max": 70
+  },
+  "fullLevelRange": {
+    "min": 70,
+    "max": 70
+  },
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [
+    {
+      "id": 2630,
+      "name": "憤怒巨嘴鳥",
+      "level": 70,
+      "count": 3
+    }
+  ],
+  "resourceMonsters": [],
+  "bossMonsters": [],
+  "monsters": [
+    {
+      "id": 2630,
+      "aegisName": "C4_TOUCAN",
+      "name": "憤怒巨嘴鳥",
+      "count": 3,
+      "respawnMinMs": 180000,
+      "respawnMaxMs": 180000,
+      "level": 70,
+      "hp": 12820,
+      "baseExp": 3385,
+      "jobExp": 9315,
+      "attackMin": 253,
+      "attackMax": 35,
+      "defense": 12,
+      "magicDefense": 12,
+      "size": "中型",
+      "race": "動物",
+      "element": "風 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/championmobs.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 917,
+          "aegisName": "Talon",
+          "name": "鳥指甲",
+          "ratePerTenThousand": 7500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從飛行怪物或動物身上得來的腳指甲,可以向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 7053,
+          "aegisName": "Cyfar",
+          "name": "賽依伐",
+          "ratePerTenThousand": 2500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "發出藍色光芒的稀有礦物,可賣給蒐集品商人\n重量: 1"
+        },
+        {
+          "itemId": 510,
+          "aegisName": "Blue_Herb",
+          "name": "藍色藥草",
+          "ratePerTenThousand": 125,
+          "type": "恢復道具",
+          "weight": 7,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "擁有特殊香味且能使精神飽滿的珍貴藥草,可恢復少量的SP。\n\n重量: 7"
+        },
+        {
+          "itemId": 508,
+          "aegisName": "Yellow_Herb",
+          "name": "黃色藥草",
+          "ratePerTenThousand": 250,
+          "type": "恢復道具",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在治療傷處上有相當功效的珍貴藥草,可恢復少量的HP。\n\n重量: 5"
+        },
+        {
+          "itemId": 2612,
+          "aegisName": "Flower_Ring",
+          "name": "花戒指",
+          "ratePerTenThousand": 500,
+          "type": "防具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "花邊戒指,淳樸的鄉下姑娘的收集品。\n系列: 飾品\n防禦: 0  重量: 10\n裝備: 全職業"
+        },
+        {
+          "itemId": 27123,
+          "aegisName": "Toucan_Card",
+          "name": "巨嘴鳥卡片",
+          "ratePerTenThousand": 5,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "給予昆蟲型怪的魔法攻擊力+10%。 \n頭盔精煉+9時, 給予昆蟲型怪的魔法攻擊力再+5%。\n系列 : 卡片 \n裝備 : 頭盔 \n重量 : 1"
+        }
+      ]
+    }
+  ]
+}

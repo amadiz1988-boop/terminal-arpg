@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "governance_task": "SAFE_CANONICAL_GITHUB_RECONSTRUCTION_V6",
+  "web": {
+    "repository": "https://github.com/amadiz1988-boop/terminal-arpg.git",
+    "release_ref": "refs/heads/main"
+  },
+  "native": {
+    "source_root": "C:\\Users\\Administrator\\.codex\\worktrees\\github-reconstruction-v6\\native-remote",
+    "repository": "https://github.com/amadiz1988-boop/ghost-island-rathena.git",
+    "github_repository": "https://github.com/amadiz1988-boop/ghost-island-rathena.git",
+    "release_ref": "refs/heads/main",
+    "accepted_source_sha": "a4c736d865eeedca398aad97aeff1c1036f2dc39",
+    "private_required": true
+  },
+  "assets": {
+    "schema_version": 1,
+    "remote_model": "GITHUB_PRIVATE_RELEASE",
+    "repository": "amadiz1988-boop/ghost-island-assets",
+    "release_id": 395506630,
+    "release_tag": "web-runtime-assets-v1.1.0",
+    "immutable_required": true,
+    "package_id": "ghost-island-web-runtime-assets-v1",
+    "package_version": "1.1.0",
+    "asset_count": 5107,
+    "manifest_sha256": "a3e554a6586cc7a57e78c3a76c33e6fa7deea677f26400caacd7b74084ecf2f8",
+    "created_from_web_head": "e794ef5be5417d1aba9158e4e088f99d618f6c64",
+    "package_sha256": "3f2e1ac73f24c9dd777dc89fa852da450f2c31298a91b98faf67f1909a82029a",
+    "archive": {
+      "id": 585562130,
+      "name": "ghost-island-web-runtime-assets-v1.1.0.zip",
+      "size": 95686109,
+      "sha256": "ef5b6034d9aaf75cba0a9deba97c2cc7d001302df8db3d45d9795dd3977a2b4f"
+    },
+    "manifest": {
+      "id": 585562398,
+      "name": "manifest.json",
+      "size": 3214881,
+      "sha256": "a3e554a6586cc7a57e78c3a76c33e6fa7deea677f26400caacd7b74084ecf2f8"
+    }
+  },
+  "legacy_public_history_exception": {
+    "through_commit": "6b61e318927ffe3e624cbc707b315ca3b051fd3e",
+    "ro_binary_count": 478,
+    "new_public_licensed_binary_allowed": false
+  }
+}

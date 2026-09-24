@@ -1,0 +1,503 @@
+{
+  "id": "xmas_fild01",
+  "name": "薑餅城原野",
+  "category": "NORMAL_FIELD",
+  "dungeon": null,
+  "totalMonsters": 76,
+  "normalMonsterCount": 76,
+  "levelRange": {
+    "min": 37,
+    "max": 72
+  },
+  "fullLevelRange": {
+    "min": 37,
+    "max": 94
+  },
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [
+    {
+      "id": 1242,
+      "name": "冰波利",
+      "level": 37,
+      "count": 65
+    },
+    {
+      "id": 1243,
+      "name": "雪熊",
+      "level": 72,
+      "count": 9
+    }
+  ],
+  "resourceMonsters": [],
+  "bossMonsters": [],
+  "monsters": [
+    {
+      "id": 1242,
+      "aegisName": "MARIN",
+      "name": "冰波利",
+      "count": 65,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 37,
+      "hp": 844,
+      "baseExp": 279,
+      "jobExp": 230,
+      "attackMin": 42,
+      "attackMax": 14,
+      "defense": 32,
+      "magicDefense": 8,
+      "size": "中型",
+      "race": "植物",
+      "element": "水 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/lutie.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 910,
+          "aegisName": "Garlet",
+          "name": "加勒結晶",
+          "ratePerTenThousand": 1600,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從一部份怪物身上得來的結晶,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 938,
+          "aegisName": "Sticky_Mucus",
+          "name": "粘稠液體",
+          "ratePerTenThousand": 750,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "不知名的黏稠液體,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 700,
+          "aegisName": "Cold_Scroll_2_1",
+          "name": "冰凍術等級1",
+          "ratePerTenThousand": 50,
+          "type": "延遲消耗品",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "以古代魔道學精髓而製成,並有著魔法師咒文的紙張,有著水屬性的魔法,可使用等級1的冰凍術。\n\n重量: 1"
+        },
+        {
+          "itemId": 601,
+          "aegisName": "Wing_Of_Fly",
+          "name": "蒼蠅翅膀",
+          "ratePerTenThousand": 500,
+          "type": "延遲消耗品",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "將蒼蠅的翅膀剪下可以用來製作具有魔法力量的物品,可在地圖上移動至任意的位置上。\n\n重量: 0"
+        },
+        {
+          "itemId": 510,
+          "aegisName": "Blue_Herb",
+          "name": "藍色藥草",
+          "ratePerTenThousand": 38,
+          "type": "恢復道具",
+          "weight": 7,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "擁有特殊香味且能使精神飽滿的珍貴藥草,可恢復少量的SP。\n\n重量: 7"
+        },
+        {
+          "itemId": 529,
+          "aegisName": "Candy",
+          "name": "糖果",
+          "ratePerTenThousand": 175,
+          "type": "恢復道具",
+          "weight": 3,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "味道甜美的糖果,可恢復45點HP。\n\n重量: 3"
+        },
+        {
+          "itemId": 5035,
+          "aegisName": "Poring_Hat",
+          "name": "波利帽",
+          "ratePerTenThousand": 1,
+          "type": "防具",
+          "weight": 70,
+          "attack": 0,
+          "defense": 3,
+          "slots": 0,
+          "description": "依照人氣絕頂波利怪物的樣子,所做成的帽子,但材質絕對不會是不透氣的橡膠!\n系列: 頭具 防禦: 3\n位置: 頭上 重量: 70\n要求等級: 38\n裝載: 除了初學者之外, 全職業"
+        },
+        {
+          "itemId": 4196,
+          "aegisName": "Marin_Card",
+          "name": "冰波利卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "每次擊殺怪物時,有機率會掉落傑勒比結晶或是巨大傑勒比結晶。\n系列: 卡片\n裝備: 飾品\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2762,
+      "aegisName": "C4_MARIN",
+      "name": "憤怒冰波利",
+      "count": 1,
+      "respawnMinMs": 180000,
+      "respawnMaxMs": 180000,
+      "level": 37,
+      "hp": 4220,
+      "baseExp": 1395,
+      "jobExp": 3450,
+      "attackMin": 50,
+      "attackMax": 14,
+      "defense": 32,
+      "magicDefense": 8,
+      "size": "中型",
+      "race": "植物",
+      "element": "水 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/championmobs.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 910,
+          "aegisName": "Garlet",
+          "name": "加勒結晶",
+          "ratePerTenThousand": 8000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從一部份怪物身上得來的結晶,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 938,
+          "aegisName": "Sticky_Mucus",
+          "name": "粘稠液體",
+          "ratePerTenThousand": 3750,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "不知名的黏稠液體,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 700,
+          "aegisName": "Cold_Scroll_2_1",
+          "name": "冰凍術等級1",
+          "ratePerTenThousand": 250,
+          "type": "延遲消耗品",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "以古代魔道學精髓而製成,並有著魔法師咒文的紙張,有著水屬性的魔法,可使用等級1的冰凍術。\n\n重量: 1"
+        },
+        {
+          "itemId": 601,
+          "aegisName": "Wing_Of_Fly",
+          "name": "蒼蠅翅膀",
+          "ratePerTenThousand": 2500,
+          "type": "延遲消耗品",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "將蒼蠅的翅膀剪下可以用來製作具有魔法力量的物品,可在地圖上移動至任意的位置上。\n\n重量: 0"
+        },
+        {
+          "itemId": 510,
+          "aegisName": "Blue_Herb",
+          "name": "藍色藥草",
+          "ratePerTenThousand": 190,
+          "type": "恢復道具",
+          "weight": 7,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "擁有特殊香味且能使精神飽滿的珍貴藥草,可恢復少量的SP。\n\n重量: 7"
+        },
+        {
+          "itemId": 529,
+          "aegisName": "Candy",
+          "name": "糖果",
+          "ratePerTenThousand": 875,
+          "type": "恢復道具",
+          "weight": 3,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "味道甜美的糖果,可恢復45點HP。\n\n重量: 3"
+        },
+        {
+          "itemId": 5035,
+          "aegisName": "Poring_Hat",
+          "name": "波利帽",
+          "ratePerTenThousand": 5,
+          "type": "防具",
+          "weight": 70,
+          "attack": 0,
+          "defense": 3,
+          "slots": 0,
+          "description": "依照人氣絕頂波利怪物的樣子,所做成的帽子,但材質絕對不會是不透氣的橡膠!\n系列: 頭具 防禦: 3\n位置: 頭上 重量: 70\n要求等級: 38\n裝載: 除了初學者之外, 全職業"
+        },
+        {
+          "itemId": 4196,
+          "aegisName": "Marin_Card",
+          "name": "冰波利卡片",
+          "ratePerTenThousand": 5,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "每次擊殺怪物時,有機率會掉落傑勒比結晶或是巨大傑勒比結晶。\n系列: 卡片\n裝備: 飾品\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1243,
+      "aegisName": "SASQUATCH",
+      "name": "雪熊",
+      "count": 9,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 72,
+      "hp": 3329,
+      "baseExp": 752,
+      "jobExp": 692,
+      "attackMin": 247,
+      "attackMax": 30,
+      "defense": 101,
+      "magicDefense": 28,
+      "size": "大型",
+      "race": "動物",
+      "element": "無 3",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/lutie.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 912,
+          "aegisName": "Zargon",
+          "name": "剎勒空結晶",
+          "ratePerTenThousand": 375,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從一部份怪物身上得來的結晶,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 509,
+          "aegisName": "White_Herb",
+          "name": "白色藥草",
+          "ratePerTenThousand": 400,
+          "type": "恢復道具",
+          "weight": 7,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在治療傷處上功效相當顯著的珍貴藥草,可恢復少量的HP。\n\n重量: 7"
+        },
+        {
+          "itemId": 949,
+          "aegisName": "Feather",
+          "name": "柔毛",
+          "ratePerTenThousand": 500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "相當柔軟的毛,可用來製作高級衣物。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 5030,
+          "aegisName": "Panda_Cap",
+          "name": "熊貓帽",
+          "ratePerTenThousand": 1,
+          "type": "防具",
+          "weight": 80,
+          "attack": 0,
+          "defense": 6,
+          "slots": 0,
+          "description": "長的很像熊貓的帽子,裝載的同時, 好像可以發現自己正在啃食竹葉,非常可愛很受女性們的歡迎\n系列: 頭具 防禦: 6\n位置: 頭上 重量: 80\n要求等級: 40\n裝載: 除了初學者之外, 全職業"
+        },
+        {
+          "itemId": 948,
+          "aegisName": "Bear's_Foot",
+          "name": "熊掌",
+          "ratePerTenThousand": 2500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "熊的腳掌,聽說有著相當特殊的風味。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 727,
+          "aegisName": "White_Jewel",
+          "name": "白寶石",
+          "ratePerTenThousand": 15,
+          "type": "其他",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "呈現出白色光芒的寶石。\n\n重量: 10"
+        },
+        {
+          "itemId": 757,
+          "aegisName": "Elunium_Stone",
+          "name": "鋁原石",
+          "ratePerTenThousand": 45,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以拿來煉鋁的礦石,拿來提煉作成盔甲。\n\n重量: 20"
+        },
+        {
+          "itemId": 4216,
+          "aegisName": "Sasquatch_Card",
+          "name": "雪熊卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "受到物理傷害時,有機率讓敵人陷入冰凍。\n系列: 卡片\n裝備: 鎧甲\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1515,
+      "aegisName": "GARM_BABY",
+      "name": "卡崙寶寶",
+      "count": 1,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 94,
+      "hp": 10016,
+      "baseExp": 933,
+      "jobExp": 874,
+      "attackMin": 498,
+      "attackMax": 61,
+      "defense": 62,
+      "magicDefense": 43,
+      "size": "中型",
+      "race": "動物",
+      "element": "水 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/lutie.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 7270,
+          "aegisName": "Milk_Bottle",
+          "name": "嬰兒的奶瓶",
+          "ratePerTenThousand": 750,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "為了方便餵食嬰兒的瓶子,裡面有牛奶。\n\n重量: 1"
+        },
+        {
+          "itemId": 7269,
+          "aegisName": "Bib",
+          "name": "圍兜兜",
+          "ratePerTenThousand": 1250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "為了防止嬰兒的口水和牛奶不要沾在衣服上,用來放在下巴下面的小塊柔軟的布。\n\n重量: 1"
+        },
+        {
+          "itemId": 7066,
+          "aegisName": "Ice_Piece",
+          "name": "冰塊一角",
+          "ratePerTenThousand": 2183,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "冰塊的一角,很奇怪的是它不會融掉,可以拿出去賣,真是神奇的冰塊一角。\n重量: 1"
+        },
+        {
+          "itemId": 749,
+          "aegisName": "Frozen_Rose",
+          "name": "冰雕玫瑰",
+          "ratePerTenThousand": 50,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "用冰塊雕刻而成的,是一位住在寒冷地方相當知名的雕刻家的作品,是具有異國風味的禮物。\n\n重量: 1"
+        },
+        {
+          "itemId": 12000,
+          "aegisName": "Cold_Scroll_2_5",
+          "name": "冰凍術等級5",
+          "ratePerTenThousand": 50,
+          "type": "延遲消耗品",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "以古代魔道學精髓而製成,並有著魔法師咒文的紙張,有著水屬性的魔法,可使用等級5的冰凍術。\n\n重量: 1"
+        },
+        {
+          "itemId": 4323,
+          "aegisName": "Garm_Baby_Card",
+          "name": "卡崙寶寶卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "物理攻擊時有機率,施展自動念咒、冰凍術3技能。\n卡崙卡片一起裝備時,自動念咒、冰凍術啟動機率大幅度的增加。\n系列: 卡片\n裝備: 武器\n重量: 1"
+        }
+      ]
+    }
+  ]
+}

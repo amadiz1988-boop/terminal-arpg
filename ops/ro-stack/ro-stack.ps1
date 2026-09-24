@@ -145,9 +145,57 @@ function Get-TrackedProcess {
 function Stop-TrackedProcesses {
   if (-not (Test-Path $statePath)) { return }
   $state = Get-Content $statePath -Raw | ConvertFrom-Json
-  foreach ($entry in @($state.processes)) {
+  # Safe stop order: map (5122) -> char (6122) -> login (6901), so downstream
+  # servers disconnect before their upstream. Any other tracked entry is
+  # stopped afterwards. Each stop waits for clean exit and port release.
+  $shutdownOrder = @('map', 'char', 'login')
+  $entries = @($state.processes)
+  $ordered = @()
+  foreach ($name in $shutdownOrder) {
+    $ordered += @($entries | Where-Object { $_.name -eq $name })
+  }
+  $ordered += @($entries | Where-Object { $_.name -notin $shutdownOrder })
+  foreach ($entry in $ordered) {
     $process = Get-TrackedProcess $entry ([long]$state.startedAt)
-    if ($process) { Stop-Process -Id $process.Id -Force }
+    if ($process) {
+      $helper = Join-Path $scriptRoot 'graceful-console-signal.ps1'
+      if (-not (Test-Path -LiteralPath $helper)) { throw 'GRACEFUL_SHUTDOWN_HELPER_MISSING' }
+      $signalOut = Join-Path $logsRoot ('graceful-signal-{0}-{1}.out.log' -f $entry.name, $process.Id)
+      $signalErr = Join-Path $logsRoot ('graceful-signal-{0}-{1}.err.log' -f $entry.name, $process.Id)
+      $signalArgs = @{
+        FilePath = (Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe')
+        ArgumentList = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File',
+          ('"{0}"' -f $helper), '-TargetPid', [string]$process.Id,
+          '-ExpectedPath', ('"{0}"' -f [string]$entry.path))
+        WindowStyle = 'Hidden'
+        RedirectStandardOutput = $signalOut
+        RedirectStandardError = $signalErr
+        Wait = $true
+        PassThru = $true
+      }
+      $signal = Start-Process @signalArgs
+      if ($signal.ExitCode -ne 0) {
+        throw ('GRACEFUL_SHUTDOWN_SIGNAL_FAILED name={0} pid={1}' -f $entry.name, $process.Id)
+      }
+      $timeout = if ($entry.name -eq 'map') { 40 } else { 20 }
+      $deadline = [DateTime]::UtcNow.AddSeconds($timeout)
+      while ([DateTime]::UtcNow -lt $deadline) {
+        if (-not (Get-Process -Id $process.Id -ErrorAction SilentlyContinue)) { break }
+        Start-Sleep -Milliseconds 200
+      }
+      if (Get-Process -Id $process.Id -ErrorAction SilentlyContinue) {
+        throw ('GRACEFUL_SHUTDOWN_TIMEOUT name={0} pid={1}' -f $entry.name, $process.Id)
+      }
+      $port = switch ($entry.name) {
+        'map' { $config.MapPort }
+        'char' { $config.CharacterPort }
+        'login' { $config.LoginPort }
+      }
+      if ($port -and @(Get-NetTCPConnection -State Listen -LocalPort $port -ErrorAction SilentlyContinue).Count -ne 0) {
+        throw ('GRACEFUL_SHUTDOWN_PORT_OCCUPIED name={0} port={1}' -f $entry.name, $port)
+      }
+      Write-Host ('GRACEFUL_SHUTDOWN_CONFIRMED name={0} pid={1} port={2}' -f $entry.name, $process.Id, $port)
+    }
   }
   Remove-Item -LiteralPath $statePath -Force
 }
@@ -164,13 +212,55 @@ function Setup-Stack {
   Checkout-PinnedRepository $config.RAthenaRepository $config.RAthenaCommit $rathenaRoot
   Checkout-PinnedRepository $config.OpenKoreRepository $config.OpenKoreCommit $openkoreRoot
 
+  $persistentAgentPatch = Join-Path $scriptRoot 'patches\persistent-agent.patch'
+  if (-not (Test-Path $persistentAgentPatch)) { throw 'The Persistent Agent source patch was not found.' }
+  if (Select-String -LiteralPath (Join-Path $rathenaRoot 'src\map\pc.hpp') -SimpleMatch 'server_ai' -Quiet) {
+    throw 'Legacy server-ai-mvp patch detected. Restore the managed rAthena checkout to the pinned commit, then rerun setup.'
+  }
+  $patchCheck = & git -C $rathenaRoot apply --check --whitespace=nowarn $persistentAgentPatch 2>&1
+  $patchCheckExit = $LASTEXITCODE
+  if ($patchCheckExit -eq 0) {
+    & git -C $rathenaRoot apply --whitespace=nowarn $persistentAgentPatch
+    if ($LASTEXITCODE -ne 0) { throw 'The Persistent Agent source patch could not be applied.' }
+  } else {
+    $reverseCheck = & git -C $rathenaRoot apply --reverse --check --whitespace=nowarn $persistentAgentPatch 2>&1
+    if ($LASTEXITCODE -ne 0) { throw "The Persistent Agent source patch is neither applicable nor already applied: $reverseCheck" }
+  }
+
+  $firstJobQuestSkillNpcPatch = Join-Path $scriptRoot 'patches\first-job-quest-skill-npc-guards.patch'
+  if (-not (Test-Path $firstJobQuestSkillNpcPatch)) { throw 'The first-job Quest Skill NPC guard patch was not found.' }
+  $firstJobQuestSkillNpcPatchCheck = & git -C $rathenaRoot apply --check --whitespace=nowarn $firstJobQuestSkillNpcPatch 2>&1
+  if ($LASTEXITCODE -eq 0) {
+    & git -C $rathenaRoot apply --whitespace=nowarn $firstJobQuestSkillNpcPatch
+    if ($LASTEXITCODE -ne 0) { throw 'The first-job Quest Skill NPC guard patch could not be applied.' }
+  } else {
+    $firstJobQuestSkillNpcPatchReverseCheck = & git -C $rathenaRoot apply --reverse --check --whitespace=nowarn $firstJobQuestSkillNpcPatch 2>&1
+    if ($LASTEXITCODE -ne 0) { throw "The first-job Quest Skill NPC guard patch is neither applicable nor already applied: $firstJobQuestSkillNpcPatchReverseCheck" }
+  }
+
+  $allJobQuestSkillPatch = Join-Path $scriptRoot 'patches\all-job-quest-skill-autogrant.patch'
+  if (-not (Test-Path $allJobQuestSkillPatch)) { throw 'The all-job Quest Skill auto-grant patch was not found.' }
+  $allJobQuestSkillPatchCheck = & git -C $rathenaRoot apply --check --whitespace=nowarn $allJobQuestSkillPatch 2>&1
+  if ($LASTEXITCODE -eq 0) {
+    & git -C $rathenaRoot apply --whitespace=nowarn $allJobQuestSkillPatch
+    if ($LASTEXITCODE -ne 0) { throw 'The all-job Quest Skill auto-grant patch could not be applied.' }
+  } else {
+    $allJobQuestSkillPatchReverseCheck = & git -C $rathenaRoot apply --reverse --check --whitespace=nowarn $allJobQuestSkillPatch 2>&1
+    if ($LASTEXITCODE -ne 0) { throw "The all-job Quest Skill auto-grant patch is neither applicable nor already applied: $allJobQuestSkillPatchReverseCheck" }
+  }
+
   $requiredBinaries = @('login-server.exe', 'char-server.exe', 'map-server.exe') |
     ForEach-Object { Join-Path $rathenaRoot $_ }
   $missingBinaries = @($requiredBinaries | Where-Object { -not (Test-Path -LiteralPath $_) })
-  if ($missingBinaries.Count -gt 0) {
+  $buildStampPath = Join-Path $rathenaRoot '.persistent-agent-build-stamp'
+  $patchHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $persistentAgentPatch).Hash.ToLowerInvariant()
+  $expectedBuildStamp = "$($config.RAthenaCommit):$patchHash"
+  $actualBuildStamp = if (Test-Path $buildStampPath) { (Get-Content -LiteralPath $buildStampPath -Raw).Trim() } else { '' }
+  if ($missingBinaries.Count -gt 0 -or $actualBuildStamp -ne $expectedBuildStamp) {
     $msbuild = Find-MSBuild
     & $msbuild (Join-Path $rathenaRoot 'rAthena.sln') /m /t:Build /p:Configuration=Release /p:Platform=x64 /v:minimal /nologo
     if ($LASTEXITCODE -ne 0) { throw 'rAthena build failed.' }
+    [IO.File]::WriteAllText($buildStampPath, $expectedBuildStamp, [Text.UTF8Encoding]::new($false))
   }
 
   $secrets = if (Test-Path $secretsPath) {
@@ -193,6 +283,7 @@ function Setup-Stack {
   Expand-Template 'char_conf.txt' (Join-Path $importRoot 'char_conf.txt') $secrets
   Expand-Template 'map_conf.txt' (Join-Path $importRoot 'map_conf.txt') $secrets
   Expand-Template 'packet_conf.txt' (Join-Path $importRoot 'packet_conf.txt') $secrets
+  Expand-Template 'battle_conf.txt' (Join-Path $importRoot 'battle_conf.txt') $secrets
   Copy-Item (Join-Path $scriptRoot 'templates\player-groups.yml') (Join-Path $importRoot 'groups.yml') -Force
   Expand-Template 'openkore-servers.txt' (Join-Path $openkoreRoot 'tables\ghost-island-servers.txt') $secrets
   Copy-Item (Join-Path $scriptRoot 'templates\Headless.pm') (Join-Path $openkoreRoot 'src\Interface\Headless.pm') -Force
@@ -203,7 +294,6 @@ function Setup-Stack {
   if (-not (Select-String -LiteralPath $customScripts -SimpleMatch $academyNpcEntry -Quiet)) {
     Add-Content -LiteralPath $customScripts -Value "`r`n$academyNpcEntry" -Encoding utf8
   }
-
   $dbPassword = [string]$secrets.databasePassword
   $createSql = "CREATE DATABASE IF NOT EXISTS $($config.MainDatabase) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; " +
     "CREATE DATABASE IF NOT EXISTS $($config.LogDatabase) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; " +
@@ -221,6 +311,10 @@ function Setup-Stack {
     Invoke-MariaDb $DatabaseRootPassword "source $sqlRoot/roulette_default_data.sql" $config.MainDatabase
     Invoke-MariaDb $DatabaseRootPassword "source $sqlRoot/logs.sql" $config.LogDatabase
   }
+  $persistentAgentMigration = (Join-Path $scriptRoot 'sql\001-persistent-agent.sql').Replace('\', '/')
+  Invoke-MariaDb $DatabaseRootPassword "source $persistentAgentMigration" $config.MainDatabase
+  $discordAccountLinkingMigration = (Join-Path $scriptRoot 'sql\011-discord-account-linking.sql').Replace('\', '/')
+  Invoke-MariaDb $DatabaseRootPassword "source $discordAccountLinkingMigration" $config.MainDatabase
   $interUser = [string]$secrets.interServerUser
   $interPassword = [string]$secrets.interServerPassword
   $internalSql = "INSERT INTO login (account_id,userid,user_pass,sex,email) VALUES (1,'$interUser','$interPassword','S','server@local.invalid') " +
@@ -246,7 +340,74 @@ function Start-Stack {
       $path = Join-Path $rathenaRoot $server.file
       $out = Join-Path $logsRoot "$stamp-$($server.name).out.log"
       $err = Join-Path $logsRoot "$stamp-$($server.name).err.log"
-      $process = Start-Process -FilePath $path -WorkingDirectory $rathenaRoot -WindowStyle Hidden -RedirectStandardOutput $out -RedirectStandardError $err -PassThru
+      $previousAgentEnabled = $env:PERSISTENT_AGENT_ENABLED
+      $previousAgentAllowlist = $env:PERSISTENT_AGENT_ALLOWLIST
+      $previousAgentPoll = $env:PERSISTENT_AGENT_POLL_MS
+      $previousAgentFarmMaps = $env:PERSISTENT_AGENT_FARM_MAPS
+      $previousAgentFarmMobs = $env:PERSISTENT_AGENT_FARM_MOBS
+      $previousAgentLootEnabled = $env:PERSISTENT_AGENT_LOOT_ENABLED
+      $previousAgentSkillEnabled = $env:PERSISTENT_AGENT_SKILL_ENABLED
+      $previousAgentSkills = $env:PERSISTENT_AGENT_SKILLS
+      $previousAgentSurvivalEnabled = $env:PERSISTENT_AGENT_SURVIVAL_ENABLED
+      $previousAgentHpThreshold = $env:PERSISTENT_AGENT_HP_THRESHOLD_PCT
+      $previousAgentHpSafe = $env:PERSISTENT_AGENT_HP_SAFE_PCT
+      $previousAgentSpThreshold = $env:PERSISTENT_AGENT_SP_THRESHOLD_PCT
+      $previousAgentSpSafe = $env:PERSISTENT_AGENT_SP_SAFE_PCT
+      $previousAgentHpItems = $env:PERSISTENT_AGENT_HP_ITEMS
+      $previousAgentSpItems = $env:PERSISTENT_AGENT_SP_ITEMS
+      $previousAgentRecoverySkills = $env:PERSISTENT_AGENT_RECOVERY_SKILLS
+      $previousAgentDeathRecoveryEnabled = $env:PERSISTENT_AGENT_DEATH_RECOVERY_ENABLED
+      $previousAgentRespawnDelay = $env:PERSISTENT_AGENT_RESPAWN_DELAY_MS
+      $previousAgentRespawnAttempts = $env:PERSISTENT_AGENT_RESPAWN_MAX_ATTEMPTS
+      $previousAgentM1SupplyEnabled = $env:PERSISTENT_AGENT_M1_SUPPLY_ENABLED
+      if ($server.name -eq 'map') {
+        $env:PERSISTENT_AGENT_ENABLED = if ($config.PersistentAgentEnabled) { '1' } else { '0' }
+        $env:PERSISTENT_AGENT_ALLOWLIST = (@($config.PersistentAgentAccountAllowlist) -join ',')
+        $env:PERSISTENT_AGENT_POLL_MS = [string]$config.PersistentAgentPollMilliseconds
+        $env:PERSISTENT_AGENT_FARM_MAPS = (@($config.PersistentAgentFarmMapAllowlist) -join ',')
+        $env:PERSISTENT_AGENT_FARM_MOBS = (@($config.PersistentAgentFarmMobAllowlist) -join ',')
+        $env:PERSISTENT_AGENT_LOOT_ENABLED = if ($config.PersistentAgentLootEnabled) { '1' } else { '0' }
+        $env:PERSISTENT_AGENT_SKILL_ENABLED = if ($config.PersistentAgentSkillEnabled) { '1' } else { '0' }
+        $env:PERSISTENT_AGENT_SKILLS = (@($config.PersistentAgentSkillAllowlist) -join ',')
+        $env:PERSISTENT_AGENT_SURVIVAL_ENABLED = if ($config.PersistentAgentSurvivalEnabled) { '1' } else { '0' }
+        $env:PERSISTENT_AGENT_HP_THRESHOLD_PCT = [string]$config.PersistentAgentHpThresholdPercent
+        $env:PERSISTENT_AGENT_HP_SAFE_PCT = [string]$config.PersistentAgentHpSafePercent
+        $env:PERSISTENT_AGENT_SP_THRESHOLD_PCT = [string]$config.PersistentAgentSpThresholdPercent
+        $env:PERSISTENT_AGENT_SP_SAFE_PCT = [string]$config.PersistentAgentSpSafePercent
+        $env:PERSISTENT_AGENT_HP_ITEMS = (@($config.PersistentAgentHpItemAllowlist) -join ',')
+        $env:PERSISTENT_AGENT_SP_ITEMS = (@($config.PersistentAgentSpItemAllowlist) -join ',')
+        $env:PERSISTENT_AGENT_RECOVERY_SKILLS = (@($config.PersistentAgentRecoverySkillAllowlist) -join ',')
+        $env:PERSISTENT_AGENT_DEATH_RECOVERY_ENABLED = if ($config.PersistentAgentDeathRecoveryEnabled) { '1' } else { '0' }
+        $env:PERSISTENT_AGENT_RESPAWN_DELAY_MS = [string]$config.PersistentAgentRespawnDelayMilliseconds
+        $env:PERSISTENT_AGENT_RESPAWN_MAX_ATTEMPTS = [string]$config.PersistentAgentRespawnMaxAttempts
+        $env:PERSISTENT_AGENT_M1_SUPPLY_ENABLED = if ($config.PersistentAgentM1SupplyEnabled) { '1' } else { '0' }
+      }
+      try {
+        $process = Start-Process -FilePath $path -WorkingDirectory $rathenaRoot -WindowStyle Hidden -RedirectStandardOutput $out -RedirectStandardError $err -PassThru
+      } finally {
+        if ($server.name -eq 'map') {
+          if ($null -eq $previousAgentEnabled) { Remove-Item Env:PERSISTENT_AGENT_ENABLED -ErrorAction SilentlyContinue } else { $env:PERSISTENT_AGENT_ENABLED = $previousAgentEnabled }
+          if ($null -eq $previousAgentAllowlist) { Remove-Item Env:PERSISTENT_AGENT_ALLOWLIST -ErrorAction SilentlyContinue } else { $env:PERSISTENT_AGENT_ALLOWLIST = $previousAgentAllowlist }
+          if ($null -eq $previousAgentPoll) { Remove-Item Env:PERSISTENT_AGENT_POLL_MS -ErrorAction SilentlyContinue } else { $env:PERSISTENT_AGENT_POLL_MS = $previousAgentPoll }
+          if ($null -eq $previousAgentFarmMaps) { Remove-Item Env:PERSISTENT_AGENT_FARM_MAPS -ErrorAction SilentlyContinue } else { $env:PERSISTENT_AGENT_FARM_MAPS = $previousAgentFarmMaps }
+          if ($null -eq $previousAgentFarmMobs) { Remove-Item Env:PERSISTENT_AGENT_FARM_MOBS -ErrorAction SilentlyContinue } else { $env:PERSISTENT_AGENT_FARM_MOBS = $previousAgentFarmMobs }
+          if ($null -eq $previousAgentLootEnabled) { Remove-Item Env:PERSISTENT_AGENT_LOOT_ENABLED -ErrorAction SilentlyContinue } else { $env:PERSISTENT_AGENT_LOOT_ENABLED = $previousAgentLootEnabled }
+          if ($null -eq $previousAgentSkillEnabled) { Remove-Item Env:PERSISTENT_AGENT_SKILL_ENABLED -ErrorAction SilentlyContinue } else { $env:PERSISTENT_AGENT_SKILL_ENABLED = $previousAgentSkillEnabled }
+          if ($null -eq $previousAgentSkills) { Remove-Item Env:PERSISTENT_AGENT_SKILLS -ErrorAction SilentlyContinue } else { $env:PERSISTENT_AGENT_SKILLS = $previousAgentSkills }
+          if ($null -eq $previousAgentSurvivalEnabled) { Remove-Item Env:PERSISTENT_AGENT_SURVIVAL_ENABLED -ErrorAction SilentlyContinue } else { $env:PERSISTENT_AGENT_SURVIVAL_ENABLED = $previousAgentSurvivalEnabled }
+          if ($null -eq $previousAgentHpThreshold) { Remove-Item Env:PERSISTENT_AGENT_HP_THRESHOLD_PCT -ErrorAction SilentlyContinue } else { $env:PERSISTENT_AGENT_HP_THRESHOLD_PCT = $previousAgentHpThreshold }
+          if ($null -eq $previousAgentHpSafe) { Remove-Item Env:PERSISTENT_AGENT_HP_SAFE_PCT -ErrorAction SilentlyContinue } else { $env:PERSISTENT_AGENT_HP_SAFE_PCT = $previousAgentHpSafe }
+          if ($null -eq $previousAgentSpThreshold) { Remove-Item Env:PERSISTENT_AGENT_SP_THRESHOLD_PCT -ErrorAction SilentlyContinue } else { $env:PERSISTENT_AGENT_SP_THRESHOLD_PCT = $previousAgentSpThreshold }
+          if ($null -eq $previousAgentSpSafe) { Remove-Item Env:PERSISTENT_AGENT_SP_SAFE_PCT -ErrorAction SilentlyContinue } else { $env:PERSISTENT_AGENT_SP_SAFE_PCT = $previousAgentSpSafe }
+          if ($null -eq $previousAgentHpItems) { Remove-Item Env:PERSISTENT_AGENT_HP_ITEMS -ErrorAction SilentlyContinue } else { $env:PERSISTENT_AGENT_HP_ITEMS = $previousAgentHpItems }
+          if ($null -eq $previousAgentSpItems) { Remove-Item Env:PERSISTENT_AGENT_SP_ITEMS -ErrorAction SilentlyContinue } else { $env:PERSISTENT_AGENT_SP_ITEMS = $previousAgentSpItems }
+          if ($null -eq $previousAgentRecoverySkills) { Remove-Item Env:PERSISTENT_AGENT_RECOVERY_SKILLS -ErrorAction SilentlyContinue } else { $env:PERSISTENT_AGENT_RECOVERY_SKILLS = $previousAgentRecoverySkills }
+          if ($null -eq $previousAgentDeathRecoveryEnabled) { Remove-Item Env:PERSISTENT_AGENT_DEATH_RECOVERY_ENABLED -ErrorAction SilentlyContinue } else { $env:PERSISTENT_AGENT_DEATH_RECOVERY_ENABLED = $previousAgentDeathRecoveryEnabled }
+          if ($null -eq $previousAgentRespawnDelay) { Remove-Item Env:PERSISTENT_AGENT_RESPAWN_DELAY_MS -ErrorAction SilentlyContinue } else { $env:PERSISTENT_AGENT_RESPAWN_DELAY_MS = $previousAgentRespawnDelay }
+          if ($null -eq $previousAgentRespawnAttempts) { Remove-Item Env:PERSISTENT_AGENT_RESPAWN_MAX_ATTEMPTS -ErrorAction SilentlyContinue } else { $env:PERSISTENT_AGENT_RESPAWN_MAX_ATTEMPTS = $previousAgentRespawnAttempts }
+          if ($null -eq $previousAgentM1SupplyEnabled) { Remove-Item Env:PERSISTENT_AGENT_M1_SUPPLY_ENABLED -ErrorAction SilentlyContinue } else { $env:PERSISTENT_AGENT_M1_SUPPLY_ENABLED = $previousAgentM1SupplyEnabled }
+        }
+      }
       $processes += [pscustomobject]@{ name=$server.name; id=$process.Id; path=$path; stdout=$out; stderr=$err }
       [pscustomobject]@{ startedAt=[DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds(); processes=$processes } |
         ConvertTo-Json -Depth 4 | ForEach-Object { [IO.File]::WriteAllText($statePath, $_, [Text.UTF8Encoding]::new($false)) }

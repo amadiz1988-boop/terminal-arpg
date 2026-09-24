@@ -1,0 +1,51 @@
+{
+  "PRE_IMPLEMENTATION_REUSE_GATE": {
+    "featureId": "openkore-supply-combat-config-ui-replacement-v1",
+    "featureName": "OpenKore Supply and Combat Configuration UI Replacement",
+    "scope": "REPLACEMENT_OF_EXISTING_SUBSYSTEM",
+    "taskCategory": "REPLACEMENT_OF_EXISTING_SUBSYSTEM",
+    "categories": ["supply", "buy_sell_storage", "combat", "skills", "loot", "inventory", "policy"],
+    "openKoreRelevant": true,
+    "checks": {
+      "currentProject": {
+        "status": "CHECKED",
+        "evidence": "Existing Player Web supply form and skill-automation controls are in ops/ro-stack/dashboard/index.html and app.js; /api/supply-cycle and /api/skill-automation have separate legacy handlers in ops/ro-stack/dashboard.mjs. The replacement keeps the existing read projection and moves policy editing to one /api/config contract."
+      },
+      "legacyProject": {
+        "status": "CHECKED",
+        "evidence": "docs/openkore-harvest-registry.md and docs/openkore-reference/reference-index.yml identify the historical supply, loot, target, skill and storage behavior used here."
+      },
+      "reuseRegistry": {
+        "status": "REGISTRY_HIT",
+        "reference": "ops/research/external-reuse-registry.json; docs/openkore-reference/reference-index.yml topics ATTACK_AUTO, INVENTORY_LOOT, SHOP_BUY, SHOP_SELL, STORAGE, SUPPLY_AUTOMATION"
+      },
+      "rAthena": {
+        "status": "CHECKED",
+        "evidence": "Current rAthena source remains the authority for inventory amount, weight, item capacity, storage and shop transactions. This task adds no native executor and the adapter explicitly reports CONFIG_ONLY_NO_EXECUTOR_COMMAND."
+      },
+      "openKore": {
+        "status": "CHECKED",
+        "evidence": "Authorized local reference .local/ro-stack/openkore at commit 51de1ddfc4449ae5217f6886de702f87ca934030: src/AI/Attack.pm, src/Misc.pm, control/config.txt, items_control.txt, pickupitems.txt, mon_control.txt, src/Interface/Wx/ConfigEditor.pm and plugins/xConf/xConf.pl."
+      },
+      "externalEcosystem": {
+        "status": "NOT_APPLICABLE",
+        "reason": "The replacement uses the authorized local OpenKore and rAthena references; no external runtime dependency or engine is introduced."
+      },
+      "genericOSS": {
+        "status": "NOT_APPLICABLE",
+        "reason": "The browser form needs the existing Dashboard security and styles; a generic editor library would add an unnecessary runtime dependency."
+      }
+    },
+    "decision": "PORTABLE_LOGIC",
+    "whyNotReuse": "OpenKore runtime and Wx/Perl UI are historical references only. Their mature field names, grouping and repeated-block behavior are portable; their executor and GUI implementation are not the Dashboard authority.",
+    "freshResearchPerformed": true,
+    "freshResearchJustification": "INSUFFICIENT_EVIDENCE",
+    "registryUpdateRequired": true,
+    "registryUpdate": {
+      "status": "UPDATED",
+      "entryId": "openkore-supply-combat-config-ui-v1",
+      "evidence": "The accompanying audit records the current upstream commit, exact local source paths, field semantics, UI grouping reuse and the CONFIG_ONLY capability boundary."
+    },
+    "inheritedFrom": ""
+  }
+}

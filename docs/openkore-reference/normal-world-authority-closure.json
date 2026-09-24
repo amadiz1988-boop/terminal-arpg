@@ -1,0 +1,1736 @@
+{
+  "taskId": "NORMAL_WORLD_AUTHORITY_CLOSURE_AND_FARMABILITY_V1",
+  "baseCheckpoint": "12de254",
+  "stage1InventoryReused": true,
+  "mapIndexRescanned": false,
+  "weightedSolverModified": false,
+  "paAdapterEntered": false,
+  "productionTouched": false,
+  "openkoreRuntime": 0,
+  "ecosystemReferenceSweepCompleted": true,
+  "openkoreReferenceSemantics": [
+    "portals_commands",
+    "portals_airship",
+    "TalkNPC",
+    "MapRoute",
+    "CalcMapRoute"
+  ],
+  "canonicalRouteEngineCount": 1,
+  "perMapHardcodeCount": 0,
+  "unresolvedBeforeReconciliation": [
+    "um_dun01",
+    "um_dun02",
+    "treasure_n1",
+    "treasure_n2",
+    "prt_fild08a",
+    "prt_fild08b",
+    "prt_fild08c",
+    "prt_fild08d"
+  ],
+  "closures": [
+    {
+      "id": "um_dun01",
+      "staticGraphStatus": "UNREACHABLE",
+      "currentAuthoritativeTransport": "NO_CURRENT_ROOT_PATH_PROVEN",
+      "sweep": {
+        "STATIC_PORTAL": "CURRENT_EDGE_PRESENT_NO_ROOT_PATH",
+        "NPC_TRANSPORT": "NO_CURRENT_EVIDENCE",
+        "SHIP": "NO_CURRENT_EVIDENCE",
+        "AIRSHIP": "NO_CURRENT_EVIDENCE",
+        "SCRIPTED_TRANSFER": "NO_CURRENT_EVIDENCE",
+        "COMMAND_TRANSFER": "NO_CURRENT_RATHENA_AUTHORITY",
+        "SAVE_MAP_RESPAWN": "NO_CURRENT_TARGET_EVIDENCE",
+        "ITEM_WARP": "NO_CURRENT_TARGET_EVIDENCE",
+        "REQUIREMENT": "NO_CURRENT_QUEST_INSTANCE_EVENT_ENTRY",
+        "openkoreAdvisory": [
+          {
+            "kind": "PORTAL",
+            "source": "OpenKore:tables/portals.txt:1871",
+            "authority": "ADVISORY_ONLY"
+          },
+          {
+            "kind": "PORTAL",
+            "source": "OpenKore:tables/portals.txt:1882",
+            "authority": "ADVISORY_ONLY"
+          }
+        ],
+        "currentSources": [
+          "npc/warps/dungeons/um_dun.txt:19",
+          "npc/warps/dungeons/um_dun.txt:20"
+        ],
+        "historicalOrDisabledSources": []
+      },
+      "finalClassification": "OTHER_KNOWN",
+      "farmability": {
+        "mapExists": true,
+        "hasLegalMonsterSpawn": false,
+        "routeStatus": "NON_NORMAL_TARGET",
+        "requirementStatus": "NOT_APPLICABLE",
+        "farmability": "NON_FARMABLE"
+      },
+      "evidence": [
+        "npc/warps/dungeons/um_dun.txt:19",
+        "npc/warps/dungeons/um_dun.txt:20",
+        "npc/mapflag/nomemo.txt:376"
+      ]
+    },
+    {
+      "id": "um_dun02",
+      "staticGraphStatus": "UNREACHABLE",
+      "currentAuthoritativeTransport": "NO_CURRENT_ROOT_PATH_PROVEN",
+      "sweep": {
+        "STATIC_PORTAL": "CURRENT_EDGE_PRESENT_NO_ROOT_PATH",
+        "NPC_TRANSPORT": "NO_CURRENT_EVIDENCE",
+        "SHIP": "NO_CURRENT_EVIDENCE",
+        "AIRSHIP": "NO_CURRENT_EVIDENCE",
+        "SCRIPTED_TRANSFER": "PRE_RE_ONLY_OR_DISABLED",
+        "COMMAND_TRANSFER": "NO_CURRENT_RATHENA_AUTHORITY",
+        "SAVE_MAP_RESPAWN": "NO_CURRENT_TARGET_EVIDENCE",
+        "ITEM_WARP": "NO_CURRENT_TARGET_EVIDENCE",
+        "REQUIREMENT": "NO_CURRENT_QUEST_INSTANCE_EVENT_ENTRY",
+        "openkoreAdvisory": [
+          {
+            "kind": "PORTAL",
+            "source": "OpenKore:tables/portals.txt:1881",
+            "authority": "ADVISORY_ONLY"
+          }
+        ],
+        "currentSources": [
+          "npc/other/CashShop_Functions.txt:84",
+          "npc/warps/dungeons/um_dun.txt:21",
+          "npc/warps/dungeons/um_dun.txt:22",
+          "npc/warps/dungeons/um_dun.txt:23",
+          "npc/warps/dungeons/um_dun.txt:24",
+          "npc/warps/dungeons/um_dun.txt:25",
+          "npc/warps/dungeons/um_dun.txt:26",
+          "npc/warps/dungeons/um_dun.txt:27",
+          "npc/warps/dungeons/um_dun.txt:28",
+          "npc/warps/dungeons/um_dun.txt:29",
+          "npc/warps/dungeons/um_dun.txt:30",
+          "npc/warps/dungeons/um_dun.txt:31"
+        ],
+        "historicalOrDisabledSources": []
+      },
+      "finalClassification": "OTHER_KNOWN",
+      "farmability": {
+        "mapExists": true,
+        "hasLegalMonsterSpawn": false,
+        "routeStatus": "NON_NORMAL_TARGET",
+        "requirementStatus": "NOT_APPLICABLE",
+        "farmability": "NON_FARMABLE"
+      },
+      "evidence": [
+        "npc/other/CashShop_Functions.txt:84",
+        "npc/warps/dungeons/um_dun.txt:21",
+        "npc/warps/dungeons/um_dun.txt:22",
+        "npc/warps/dungeons/um_dun.txt:23",
+        "npc/warps/dungeons/um_dun.txt:24",
+        "npc/warps/dungeons/um_dun.txt:25",
+        "npc/warps/dungeons/um_dun.txt:26",
+        "npc/warps/dungeons/um_dun.txt:27",
+        "npc/warps/dungeons/um_dun.txt:28",
+        "npc/warps/dungeons/um_dun.txt:29",
+        "npc/warps/dungeons/um_dun.txt:30",
+        "npc/warps/dungeons/um_dun.txt:31",
+        "npc/warps/dungeons/um_dun.txt:32",
+        "npc/warps/dungeons/um_dun.txt:33",
+        "npc/other/CashShop_Functions.txt:84",
+        "npc/mapflag/nomemo.txt:377"
+      ]
+    },
+    {
+      "id": "treasure_n1",
+      "staticGraphStatus": "UNREACHABLE",
+      "currentAuthoritativeTransport": "NO_CURRENT_ROOT_PATH_PROVEN",
+      "sweep": {
+        "STATIC_PORTAL": "NO_CURRENT_ROOT_EDGE",
+        "NPC_TRANSPORT": "NO_CURRENT_EVIDENCE",
+        "SHIP": "NO_CURRENT_EVIDENCE",
+        "AIRSHIP": "NO_CURRENT_EVIDENCE",
+        "SCRIPTED_TRANSFER": "NO_CURRENT_EVIDENCE",
+        "COMMAND_TRANSFER": "NO_CURRENT_RATHENA_AUTHORITY",
+        "SAVE_MAP_RESPAWN": "NO_CURRENT_TARGET_EVIDENCE",
+        "ITEM_WARP": "NO_CURRENT_TARGET_EVIDENCE",
+        "REQUIREMENT": "NO_CURRENT_QUEST_INSTANCE_EVENT_ENTRY",
+        "openkoreAdvisory": [],
+        "currentSources": [
+          "npc/re/mobs/championmobs.txt:306",
+          "npc/re/mobs/dungeons/treasure.txt:121",
+          "npc/re/mobs/dungeons/treasure.txt:122",
+          "npc/re/mobs/dungeons/treasure.txt:123",
+          "npc/re/mobs/dungeons/treasure.txt:124",
+          "npc/re/mobs/dungeons/treasure.txt:125",
+          "npc/re/mobs/dungeons/treasure.txt:126",
+          "npc/re/mobs/dungeons/treasure.txt:127",
+          "npc/re/mobs/dungeons/treasure.txt:128",
+          "npc/re/mobs/dungeons/treasure.txt:129",
+          "npc/re/mobs/dungeons/treasure.txt:130",
+          "npc/re/mobs/dungeons/treasure.txt:131"
+        ],
+        "historicalOrDisabledSources": []
+      },
+      "finalClassification": "OTHER_KNOWN",
+      "farmability": {
+        "mapExists": true,
+        "hasLegalMonsterSpawn": true,
+        "routeStatus": "NON_NORMAL_TARGET",
+        "requirementStatus": "NOT_APPLICABLE",
+        "farmability": "NON_FARMABLE"
+      },
+      "evidence": [
+        "npc/re/mobs/championmobs.txt:306",
+        "npc/re/mobs/dungeons/treasure.txt:121",
+        "npc/re/mobs/dungeons/treasure.txt:122",
+        "npc/re/mobs/dungeons/treasure.txt:123",
+        "npc/re/mobs/dungeons/treasure.txt:124",
+        "npc/re/mobs/dungeons/treasure.txt:125",
+        "npc/re/mobs/dungeons/treasure.txt:126",
+        "npc/re/mobs/dungeons/treasure.txt:127",
+        "npc/re/mobs/dungeons/treasure.txt:128",
+        "npc/re/mobs/dungeons/treasure.txt:129",
+        "npc/re/mobs/dungeons/treasure.txt:130",
+        "npc/re/mobs/dungeons/treasure.txt:131",
+        "npc/re/mobs/dungeons/treasure.txt:132",
+        "npc/re/mobs/dungeons/treasure.txt:133",
+        "npc/re/mobs/dungeons/treasure.txt:134",
+        "npc/re/mobs/dungeons/treasure.txt:135",
+        "npc/re/mobs/dungeons/treasure.txt:136",
+        "npc/re/mobs/dungeons/treasure.txt:137",
+        "npc/re/mobs/dungeons/treasure.txt:138",
+        "npc/re/mobs/dungeons/treasure.txt:139"
+      ]
+    },
+    {
+      "id": "treasure_n2",
+      "staticGraphStatus": "UNREACHABLE",
+      "currentAuthoritativeTransport": "NO_CURRENT_ROOT_PATH_PROVEN",
+      "sweep": {
+        "STATIC_PORTAL": "NO_CURRENT_ROOT_EDGE",
+        "NPC_TRANSPORT": "NO_CURRENT_EVIDENCE",
+        "SHIP": "NO_CURRENT_EVIDENCE",
+        "AIRSHIP": "NO_CURRENT_EVIDENCE",
+        "SCRIPTED_TRANSFER": "NO_CURRENT_EVIDENCE",
+        "COMMAND_TRANSFER": "NO_CURRENT_RATHENA_AUTHORITY",
+        "SAVE_MAP_RESPAWN": "NO_CURRENT_TARGET_EVIDENCE",
+        "ITEM_WARP": "NO_CURRENT_TARGET_EVIDENCE",
+        "REQUIREMENT": "NO_CURRENT_QUEST_INSTANCE_EVENT_ENTRY",
+        "openkoreAdvisory": [],
+        "currentSources": [
+          "npc/re/mobs/championmobs.txt:307",
+          "npc/re/mobs/dungeons/treasure.txt:151",
+          "npc/re/mobs/dungeons/treasure.txt:152",
+          "npc/re/mobs/dungeons/treasure.txt:153",
+          "npc/re/mobs/dungeons/treasure.txt:154",
+          "npc/re/mobs/dungeons/treasure.txt:155",
+          "npc/re/mobs/dungeons/treasure.txt:156",
+          "npc/re/mobs/dungeons/treasure.txt:157",
+          "npc/re/mobs/dungeons/treasure.txt:158",
+          "npc/re/mobs/dungeons/treasure.txt:159",
+          "npc/re/mobs/dungeons/treasure.txt:160",
+          "npc/re/mobs/dungeons/treasure.txt:161"
+        ],
+        "historicalOrDisabledSources": []
+      },
+      "finalClassification": "OTHER_KNOWN",
+      "farmability": {
+        "mapExists": true,
+        "hasLegalMonsterSpawn": true,
+        "routeStatus": "NON_NORMAL_TARGET",
+        "requirementStatus": "NOT_APPLICABLE",
+        "farmability": "NON_FARMABLE"
+      },
+      "evidence": [
+        "npc/re/mobs/championmobs.txt:307",
+        "npc/re/mobs/dungeons/treasure.txt:151",
+        "npc/re/mobs/dungeons/treasure.txt:152",
+        "npc/re/mobs/dungeons/treasure.txt:153",
+        "npc/re/mobs/dungeons/treasure.txt:154",
+        "npc/re/mobs/dungeons/treasure.txt:155",
+        "npc/re/mobs/dungeons/treasure.txt:156",
+        "npc/re/mobs/dungeons/treasure.txt:157",
+        "npc/re/mobs/dungeons/treasure.txt:158",
+        "npc/re/mobs/dungeons/treasure.txt:159",
+        "npc/re/mobs/dungeons/treasure.txt:160",
+        "npc/re/mobs/dungeons/treasure.txt:161",
+        "npc/re/mobs/dungeons/treasure.txt:162",
+        "npc/re/mobs/dungeons/treasure.txt:163",
+        "npc/re/mobs/dungeons/treasure.txt:164",
+        "npc/re/mobs/dungeons/treasure.txt:165",
+        "npc/re/mobs/dungeons/treasure.txt:166",
+        "npc/re/mobs/dungeons/treasure.txt:167",
+        "npc/re/mobs/dungeons/treasure.txt:168",
+        "npc/re/mobs/dungeons/treasure.txt:169"
+      ]
+    },
+    {
+      "id": "prt_fild08a",
+      "staticGraphStatus": "UNREACHABLE",
+      "currentAuthoritativeTransport": "NO_CURRENT_ROOT_PATH_PROVEN",
+      "sweep": {
+        "STATIC_PORTAL": "CURRENT_EDGE_PRESENT_NO_ROOT_PATH",
+        "NPC_TRANSPORT": "NO_CURRENT_EVIDENCE",
+        "SHIP": "NO_CURRENT_EVIDENCE",
+        "AIRSHIP": "NO_CURRENT_EVIDENCE",
+        "SCRIPTED_TRANSFER": "NO_CURRENT_EVIDENCE",
+        "COMMAND_TRANSFER": "NO_CURRENT_RATHENA_AUTHORITY",
+        "SAVE_MAP_RESPAWN": "NO_CURRENT_TARGET_EVIDENCE",
+        "ITEM_WARP": "NO_CURRENT_TARGET_EVIDENCE",
+        "REQUIREMENT": "NO_CURRENT_QUEST_INSTANCE_EVENT_ENTRY",
+        "openkoreAdvisory": [],
+        "currentSources": [
+          "npc/re/cities/izlude.txt:80",
+          "npc/re/cities/izlude.txt:273",
+          "npc/re/warps/cities/izlude.txt:39",
+          "npc/re/warps/fields/prontera_fild.txt:94",
+          "npc/re/warps/fields/prontera_fild.txt:98",
+          "npc/re/warps/fields/prontera_fild.txt:102",
+          "npc/re/warps/fields/prontera_fild.txt:106",
+          "npc/re/warps/fields/prontera_fild.txt:110"
+        ],
+        "historicalOrDisabledSources": []
+      },
+      "finalClassification": "OTHER_KNOWN",
+      "farmability": {
+        "mapExists": true,
+        "hasLegalMonsterSpawn": false,
+        "routeStatus": "NON_NORMAL_TARGET",
+        "requirementStatus": "NOT_APPLICABLE",
+        "farmability": "NON_FARMABLE"
+      },
+      "evidence": [
+        "npc/re/cities/izlude.txt:80",
+        "npc/re/cities/izlude.txt:273",
+        "npc/re/warps/cities/izlude.txt:39",
+        "npc/re/warps/fields/prontera_fild.txt:94",
+        "npc/re/warps/fields/prontera_fild.txt:98",
+        "npc/re/warps/fields/prontera_fild.txt:102",
+        "npc/re/warps/fields/prontera_fild.txt:106",
+        "npc/re/warps/fields/prontera_fild.txt:110",
+        "npc/re/mapflag/night.txt:42"
+      ]
+    },
+    {
+      "id": "prt_fild08b",
+      "staticGraphStatus": "UNREACHABLE",
+      "currentAuthoritativeTransport": "NO_CURRENT_ROOT_PATH_PROVEN",
+      "sweep": {
+        "STATIC_PORTAL": "CURRENT_EDGE_PRESENT_NO_ROOT_PATH",
+        "NPC_TRANSPORT": "NO_CURRENT_EVIDENCE",
+        "SHIP": "NO_CURRENT_EVIDENCE",
+        "AIRSHIP": "NO_CURRENT_EVIDENCE",
+        "SCRIPTED_TRANSFER": "NO_CURRENT_EVIDENCE",
+        "COMMAND_TRANSFER": "NO_CURRENT_RATHENA_AUTHORITY",
+        "SAVE_MAP_RESPAWN": "NO_CURRENT_TARGET_EVIDENCE",
+        "ITEM_WARP": "NO_CURRENT_TARGET_EVIDENCE",
+        "REQUIREMENT": "NO_CURRENT_QUEST_INSTANCE_EVENT_ENTRY",
+        "openkoreAdvisory": [],
+        "currentSources": [
+          "npc/re/cities/izlude.txt:81",
+          "npc/re/cities/izlude.txt:274",
+          "npc/re/warps/cities/izlude.txt:40",
+          "npc/re/warps/fields/prontera_fild.txt:95",
+          "npc/re/warps/fields/prontera_fild.txt:99",
+          "npc/re/warps/fields/prontera_fild.txt:103",
+          "npc/re/warps/fields/prontera_fild.txt:107",
+          "npc/re/warps/fields/prontera_fild.txt:111"
+        ],
+        "historicalOrDisabledSources": []
+      },
+      "finalClassification": "OTHER_KNOWN",
+      "farmability": {
+        "mapExists": true,
+        "hasLegalMonsterSpawn": false,
+        "routeStatus": "NON_NORMAL_TARGET",
+        "requirementStatus": "NOT_APPLICABLE",
+        "farmability": "NON_FARMABLE"
+      },
+      "evidence": [
+        "npc/re/cities/izlude.txt:81",
+        "npc/re/cities/izlude.txt:274",
+        "npc/re/warps/cities/izlude.txt:40",
+        "npc/re/warps/fields/prontera_fild.txt:95",
+        "npc/re/warps/fields/prontera_fild.txt:99",
+        "npc/re/warps/fields/prontera_fild.txt:103",
+        "npc/re/warps/fields/prontera_fild.txt:107",
+        "npc/re/warps/fields/prontera_fild.txt:111",
+        "npc/re/mapflag/night.txt:43"
+      ]
+    },
+    {
+      "id": "prt_fild08c",
+      "staticGraphStatus": "UNREACHABLE",
+      "currentAuthoritativeTransport": "NO_CURRENT_ROOT_PATH_PROVEN",
+      "sweep": {
+        "STATIC_PORTAL": "CURRENT_EDGE_PRESENT_NO_ROOT_PATH",
+        "NPC_TRANSPORT": "NO_CURRENT_EVIDENCE",
+        "SHIP": "NO_CURRENT_EVIDENCE",
+        "AIRSHIP": "NO_CURRENT_EVIDENCE",
+        "SCRIPTED_TRANSFER": "NO_CURRENT_EVIDENCE",
+        "COMMAND_TRANSFER": "NO_CURRENT_RATHENA_AUTHORITY",
+        "SAVE_MAP_RESPAWN": "NO_CURRENT_TARGET_EVIDENCE",
+        "ITEM_WARP": "NO_CURRENT_TARGET_EVIDENCE",
+        "REQUIREMENT": "NO_CURRENT_QUEST_INSTANCE_EVENT_ENTRY",
+        "openkoreAdvisory": [],
+        "currentSources": [
+          "npc/re/cities/izlude.txt:82",
+          "npc/re/cities/izlude.txt:275",
+          "npc/re/warps/cities/izlude.txt:41",
+          "npc/re/warps/fields/prontera_fild.txt:96",
+          "npc/re/warps/fields/prontera_fild.txt:100",
+          "npc/re/warps/fields/prontera_fild.txt:104",
+          "npc/re/warps/fields/prontera_fild.txt:108",
+          "npc/re/warps/fields/prontera_fild.txt:112"
+        ],
+        "historicalOrDisabledSources": []
+      },
+      "finalClassification": "OTHER_KNOWN",
+      "farmability": {
+        "mapExists": true,
+        "hasLegalMonsterSpawn": false,
+        "routeStatus": "NON_NORMAL_TARGET",
+        "requirementStatus": "NOT_APPLICABLE",
+        "farmability": "NON_FARMABLE"
+      },
+      "evidence": [
+        "npc/re/cities/izlude.txt:82",
+        "npc/re/cities/izlude.txt:275",
+        "npc/re/warps/cities/izlude.txt:41",
+        "npc/re/warps/fields/prontera_fild.txt:96",
+        "npc/re/warps/fields/prontera_fild.txt:100",
+        "npc/re/warps/fields/prontera_fild.txt:104",
+        "npc/re/warps/fields/prontera_fild.txt:108",
+        "npc/re/warps/fields/prontera_fild.txt:112",
+        "npc/re/mapflag/night.txt:44"
+      ]
+    },
+    {
+      "id": "prt_fild08d",
+      "staticGraphStatus": "UNREACHABLE",
+      "currentAuthoritativeTransport": "NO_CURRENT_ROOT_PATH_PROVEN",
+      "sweep": {
+        "STATIC_PORTAL": "CURRENT_EDGE_PRESENT_NO_ROOT_PATH",
+        "NPC_TRANSPORT": "NO_CURRENT_EVIDENCE",
+        "SHIP": "NO_CURRENT_EVIDENCE",
+        "AIRSHIP": "NO_CURRENT_EVIDENCE",
+        "SCRIPTED_TRANSFER": "NO_CURRENT_EVIDENCE",
+        "COMMAND_TRANSFER": "NO_CURRENT_RATHENA_AUTHORITY",
+        "SAVE_MAP_RESPAWN": "NO_CURRENT_TARGET_EVIDENCE",
+        "ITEM_WARP": "NO_CURRENT_TARGET_EVIDENCE",
+        "REQUIREMENT": "NO_CURRENT_QUEST_INSTANCE_EVENT_ENTRY",
+        "openkoreAdvisory": [],
+        "currentSources": [
+          "npc/re/cities/izlude.txt:83",
+          "npc/re/cities/izlude.txt:276",
+          "npc/re/warps/cities/izlude.txt:42",
+          "npc/re/warps/fields/prontera_fild.txt:97",
+          "npc/re/warps/fields/prontera_fild.txt:101",
+          "npc/re/warps/fields/prontera_fild.txt:105",
+          "npc/re/warps/fields/prontera_fild.txt:109",
+          "npc/re/warps/fields/prontera_fild.txt:113"
+        ],
+        "historicalOrDisabledSources": []
+      },
+      "finalClassification": "OTHER_KNOWN",
+      "farmability": {
+        "mapExists": true,
+        "hasLegalMonsterSpawn": false,
+        "routeStatus": "NON_NORMAL_TARGET",
+        "requirementStatus": "NOT_APPLICABLE",
+        "farmability": "NON_FARMABLE"
+      },
+      "evidence": [
+        "npc/re/cities/izlude.txt:83",
+        "npc/re/cities/izlude.txt:276",
+        "npc/re/warps/cities/izlude.txt:42",
+        "npc/re/warps/fields/prontera_fild.txt:97",
+        "npc/re/warps/fields/prontera_fild.txt:101",
+        "npc/re/warps/fields/prontera_fild.txt:105",
+        "npc/re/warps/fields/prontera_fild.txt:109",
+        "npc/re/warps/fields/prontera_fild.txt:113",
+        "npc/re/mapflag/night.txt:45"
+      ]
+    }
+  ],
+  "reclassifiedMaps": [
+    "um_dun01",
+    "um_dun02",
+    "treasure_n1",
+    "treasure_n2",
+    "prt_fild08a",
+    "prt_fild08b",
+    "prt_fild08c",
+    "prt_fild08d"
+  ],
+  "genericTransportTransformerNeeded": false,
+  "genericTransformersAdded": [],
+  "normalWorldTotalBeforeReconciliation": 49,
+  "normalWorldTotalAfterReconciliation": 26,
+  "normalReachable": 26,
+  "normalUnreachable": 0,
+  "normalRouteStatusKnown": 26,
+  "normalUnexplained": 0,
+  "farmability": {
+    "autoFarmable": 24,
+    "lockedRequirement": 0,
+    "nonFarmable": 2,
+    "known": true
+  },
+  "globalUnsupportedUnknown": 334,
+  "globalDebtBlocksStage2": false,
+  "remainingTrueWorldUnreachable": 0,
+  "readyForStage2PaAdapter": true,
+  "rows": [
+    {
+      "id": "gef_dun03",
+      "originalCategory": "NORMAL_DUNGEON",
+      "category": "NORMAL_DUNGEON",
+      "capabilityClass": "REACHABLE",
+      "routeStatus": "FOUND",
+      "routeEdgeTypes": [
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "SCRIPTED_TRANSFER"
+      ],
+      "graphNode": true,
+      "evidence": [
+        "npc/quests/eye_of_hellion.txt:2421",
+        "npc/warps/dungeons/gef_dun.txt:46",
+        "npc/re/mobs/championmobs.txt:81",
+        "npc/re/mobs/dungeons/gef_dun.txt:68",
+        "npc/re/mobs/dungeons/gef_dun.txt:69"
+      ],
+      "advisoryEvidence": 0,
+      "mapExists": true,
+      "hasLegalMonsterSpawn": true,
+      "requirementStatus": "NONE_PROVEN",
+      "farmability": "AUTO_FARMABLE"
+    },
+    {
+      "id": "xmas_dun01",
+      "originalCategory": "NORMAL_DUNGEON",
+      "category": "NORMAL_DUNGEON",
+      "capabilityClass": "REACHABLE",
+      "routeStatus": "FOUND",
+      "routeEdgeTypes": [
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "NPC_TRANSPORT",
+        "PORTAL"
+      ],
+      "graphNode": true,
+      "evidence": [
+        "npc/other/CashShop_Functions.txt:87",
+        "npc/warps/dungeons/xmas_dun.txt:17",
+        "npc/warps/dungeons/xmas_dun.txt:18",
+        "npc/re/mobs/championmobs.txt:324",
+        "npc/re/mobs/dungeons/xmas_dun.txt:20"
+      ],
+      "advisoryEvidence": 4,
+      "mapExists": true,
+      "hasLegalMonsterSpawn": true,
+      "requirementStatus": "NONE_PROVEN",
+      "farmability": "AUTO_FARMABLE"
+    },
+    {
+      "id": "xmas_dun02",
+      "originalCategory": "NORMAL_DUNGEON",
+      "category": "NORMAL_DUNGEON",
+      "capabilityClass": "REACHABLE",
+      "routeStatus": "FOUND",
+      "routeEdgeTypes": [
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "NPC_TRANSPORT"
+      ],
+      "graphNode": true,
+      "evidence": [
+        "npc/kafras/dts_warper.txt:541",
+        "npc/kafras/dts_warper.txt:566",
+        "npc/kafras/dts_warper.txt:607",
+        "npc/warps/dungeons/xmas_dun.txt:19",
+        "npc/re/other/achievements.txt:124"
+      ],
+      "advisoryEvidence": 2,
+      "mapExists": true,
+      "hasLegalMonsterSpawn": true,
+      "requirementStatus": "NONE_PROVEN",
+      "farmability": "AUTO_FARMABLE"
+    },
+    {
+      "id": "xmas_fild01",
+      "originalCategory": "NORMAL_FIELD",
+      "category": "NORMAL_FIELD",
+      "capabilityClass": "REACHABLE",
+      "routeStatus": "FOUND",
+      "routeEdgeTypes": [
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "NPC_TRANSPORT",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL"
+      ],
+      "graphNode": true,
+      "evidence": [
+        "npc/cities/lutie.txt:52",
+        "npc/other/bulletin_boards.txt:347",
+        "npc/warps/fields/lutie_fild.txt:16",
+        "npc/warps/fields/lutie_fild.txt:17",
+        "npc/warps/fields/lutie_fild.txt:18"
+      ],
+      "advisoryEvidence": 5,
+      "mapExists": true,
+      "hasLegalMonsterSpawn": true,
+      "requirementStatus": "NONE_PROVEN",
+      "farmability": "AUTO_FARMABLE"
+    },
+    {
+      "id": "gld_dun01",
+      "originalCategory": "NORMAL_DUNGEON",
+      "category": "EVENT",
+      "capabilityClass": "MAP_MISCLASSIFIED",
+      "routeStatus": "UNREACHABLE",
+      "routeEdgeTypes": [],
+      "graphNode": true,
+      "evidence": [
+        "npc/quests/seals/god_weapon_creation.txt:19",
+        "npc/guild/agit_main.txt:947",
+        "npc/warps/guildcastles.txt:526",
+        "npc/re/other/Global_Functions.txt:35",
+        "npc/re/guild/invest_main.txt:1004"
+      ],
+      "advisoryEvidence": 0,
+      "farmability": "NON_FARMABLE",
+      "requirementStatus": "NOT_APPLICABLE"
+    },
+    {
+      "id": "gld_dun02",
+      "originalCategory": "NORMAL_DUNGEON",
+      "category": "EVENT",
+      "capabilityClass": "MAP_MISCLASSIFIED",
+      "routeStatus": "UNREACHABLE",
+      "routeEdgeTypes": [],
+      "graphNode": true,
+      "evidence": [
+        "npc/quests/seals/god_weapon_creation.txt:345",
+        "npc/guild/agit_main.txt:931",
+        "npc/warps/guildcastles.txt:527",
+        "npc/warps/guildcastles.txt:528",
+        "npc/re/guild/invest_main.txt:1000"
+      ],
+      "advisoryEvidence": 0,
+      "farmability": "NON_FARMABLE",
+      "requirementStatus": "NOT_APPLICABLE"
+    },
+    {
+      "id": "gld_dun03",
+      "originalCategory": "NORMAL_DUNGEON",
+      "category": "EVENT",
+      "capabilityClass": "MAP_MISCLASSIFIED",
+      "routeStatus": "UNREACHABLE",
+      "routeEdgeTypes": [],
+      "graphNode": true,
+      "evidence": [
+        "npc/quests/seals/god_weapon_creation.txt:346",
+        "npc/guild/agit_main.txt:955",
+        "npc/warps/guildcastles.txt:529",
+        "npc/warps/guildcastles.txt:530",
+        "npc/re/guild/invest_main.txt:1006"
+      ],
+      "advisoryEvidence": 0,
+      "farmability": "NON_FARMABLE",
+      "requirementStatus": "NOT_APPLICABLE"
+    },
+    {
+      "id": "gld_dun04",
+      "originalCategory": "NORMAL_DUNGEON",
+      "category": "EVENT",
+      "capabilityClass": "MAP_MISCLASSIFIED",
+      "routeStatus": "UNREACHABLE",
+      "routeEdgeTypes": [],
+      "graphNode": true,
+      "evidence": [
+        "npc/quests/seals/god_weapon_creation.txt:347",
+        "npc/guild/agit_main.txt:939",
+        "npc/warps/guildcastles.txt:531",
+        "npc/warps/guildcastles.txt:532",
+        "npc/re/guild/invest_main.txt:1002"
+      ],
+      "advisoryEvidence": 0,
+      "farmability": "NON_FARMABLE",
+      "requirementStatus": "NOT_APPLICABLE"
+    },
+    {
+      "id": "um_dun01",
+      "originalCategory": "NORMAL_DUNGEON",
+      "category": "OTHER_KNOWN",
+      "capabilityClass": "MAP_MISCLASSIFIED",
+      "routeStatus": "NON_NORMAL_TARGET",
+      "routeEdgeTypes": [],
+      "graphNode": true,
+      "evidence": [
+        "npc/warps/dungeons/um_dun.txt:19",
+        "npc/warps/dungeons/um_dun.txt:20"
+      ],
+      "advisoryEvidence": 4,
+      "farmability": "NON_FARMABLE"
+    },
+    {
+      "id": "um_dun02",
+      "originalCategory": "NORMAL_DUNGEON",
+      "category": "OTHER_KNOWN",
+      "capabilityClass": "MAP_MISCLASSIFIED",
+      "routeStatus": "NON_NORMAL_TARGET",
+      "routeEdgeTypes": [],
+      "graphNode": true,
+      "evidence": [
+        "npc/other/CashShop_Functions.txt:84",
+        "npc/warps/dungeons/um_dun.txt:21",
+        "npc/warps/dungeons/um_dun.txt:22",
+        "npc/warps/dungeons/um_dun.txt:23",
+        "npc/warps/dungeons/um_dun.txt:24"
+      ],
+      "advisoryEvidence": 3,
+      "farmability": "NON_FARMABLE"
+    },
+    {
+      "id": "yggdrasil01",
+      "originalCategory": "NORMAL_DUNGEON",
+      "category": "NORMAL_DUNGEON",
+      "capabilityClass": "REACHABLE",
+      "routeStatus": "FOUND",
+      "routeEdgeTypes": [
+        "PORTAL",
+        "PORTAL",
+        "SCRIPTED_TRANSFER",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL"
+      ],
+      "graphNode": true,
+      "evidence": [
+        "npc/re/jobs/3-1/archbishop.txt:426",
+        "npc/re/mobs/dungeons/yggdrasil.txt:17",
+        "npc/re/mobs/dungeons/yggdrasil.txt:18",
+        "npc/re/mobs/dungeons/yggdrasil.txt:19",
+        "npc/re/mobs/dungeons/yggdrasil.txt:20"
+      ],
+      "advisoryEvidence": 4,
+      "mapExists": true,
+      "hasLegalMonsterSpawn": true,
+      "requirementStatus": "NONE_PROVEN",
+      "farmability": "AUTO_FARMABLE"
+    },
+    {
+      "id": "jawaii_in",
+      "originalCategory": "NORMAL_FIELD",
+      "category": "NORMAL_FIELD",
+      "capabilityClass": "REACHABLE",
+      "routeStatus": "FOUND",
+      "routeEdgeTypes": [
+        "PORTAL",
+        "SCRIPTED_TRANSFER"
+      ],
+      "graphNode": true,
+      "evidence": [
+        "npc/cities/jawaii.txt:251",
+        "npc/cities/jawaii.txt:300",
+        "npc/cities/jawaii.txt:331",
+        "npc/cities/jawaii.txt:374",
+        "npc/cities/jawaii.txt:438"
+      ],
+      "advisoryEvidence": 0,
+      "mapExists": true,
+      "hasLegalMonsterSpawn": true,
+      "requirementStatus": "NONE_PROVEN",
+      "farmability": "AUTO_FARMABLE"
+    },
+    {
+      "id": "ayo_fild02",
+      "originalCategory": "NORMAL_FIELD",
+      "category": "QUEST_GATED",
+      "capabilityClass": "MISSING_REQUIREMENT_METADATA",
+      "routeStatus": "UNREACHABLE",
+      "routeEdgeTypes": [],
+      "graphNode": true,
+      "evidence": [
+        "npc/quests/quests_ayothaya.txt:1860",
+        "npc/quests/quests_ayothaya.txt:1887",
+        "npc/warps/dungeons/ayo_dun.txt:15",
+        "npc/re/other/adven_boards.txt:3060",
+        "npc/re/mobs/championmobs.txt:35"
+      ],
+      "advisoryEvidence": 5,
+      "farmability": "NON_FARMABLE",
+      "requirementStatus": "NOT_APPLICABLE"
+    },
+    {
+      "id": "ein_fild10",
+      "originalCategory": "NORMAL_FIELD",
+      "category": "NORMAL_FIELD",
+      "capabilityClass": "REACHABLE",
+      "routeStatus": "FOUND",
+      "routeEdgeTypes": [
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL"
+      ],
+      "graphNode": true,
+      "evidence": [
+        "npc/warps/fields/ein_fild.txt:32",
+        "npc/warps/fields/ein_fild.txt:33"
+      ],
+      "advisoryEvidence": 4,
+      "mapExists": true,
+      "hasLegalMonsterSpawn": false,
+      "requirementStatus": "NONE_PROVEN",
+      "farmability": "NON_FARMABLE"
+    },
+    {
+      "id": "kh_kiehl01",
+      "originalCategory": "NORMAL_DUNGEON",
+      "category": "NORMAL_DUNGEON",
+      "capabilityClass": "REACHABLE",
+      "routeStatus": "FOUND",
+      "routeEdgeTypes": [
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "SCRIPTED_TRANSFER"
+      ],
+      "graphNode": false,
+      "evidence": [
+        "npc/quests/kiel_hyre_quest.txt:5157",
+        "npc/quests/kiel_hyre_quest.txt:5887",
+        "npc/quests/kiel_hyre_quest.txt:5888",
+        "npc/quests/kiel_hyre_quest.txt:5902",
+        "npc/quests/kiel_hyre_quest.txt:5903"
+      ],
+      "advisoryEvidence": 0,
+      "mapExists": true,
+      "hasLegalMonsterSpawn": true,
+      "requirementStatus": "NONE_PROVEN",
+      "farmability": "AUTO_FARMABLE"
+    },
+    {
+      "id": "moc_fild20",
+      "originalCategory": "NORMAL_FIELD",
+      "category": "NORMAL_FIELD",
+      "capabilityClass": "REACHABLE",
+      "routeStatus": "FOUND",
+      "routeEdgeTypes": [
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "SCRIPTED_TRANSFER"
+      ],
+      "graphNode": true,
+      "evidence": [
+        "npc/quests/quests_13_1.txt:1185",
+        "npc/quests/quests_13_1.txt:1595",
+        "npc/quests/quests_13_1.txt:1643",
+        "npc/quests/quests_13_1.txt:1858",
+        "npc/quests/quests_morocc.txt:894"
+      ],
+      "advisoryEvidence": 32,
+      "mapExists": true,
+      "hasLegalMonsterSpawn": true,
+      "requirementStatus": "NONE_PROVEN",
+      "farmability": "AUTO_FARMABLE"
+    },
+    {
+      "id": "moc_fild21",
+      "originalCategory": "NORMAL_FIELD",
+      "category": "NORMAL_FIELD",
+      "capabilityClass": "REACHABLE",
+      "routeStatus": "FOUND",
+      "routeEdgeTypes": [
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "SCRIPTED_TRANSFER",
+        "SCRIPTED_TRANSFER"
+      ],
+      "graphNode": true,
+      "evidence": [
+        "npc/quests/quests_morocc.txt:967",
+        "npc/quests/quests_morocc.txt:1028",
+        "npc/quests/quests_morocc.txt:1854",
+        "npc/quests/quests_morocc.txt:1868",
+        "npc/quests/quests_morocc.txt:1879"
+      ],
+      "advisoryEvidence": 9,
+      "mapExists": true,
+      "hasLegalMonsterSpawn": true,
+      "requirementStatus": "NONE_PROVEN",
+      "farmability": "AUTO_FARMABLE"
+    },
+    {
+      "id": "moc_fild22",
+      "originalCategory": "NORMAL_FIELD",
+      "category": "NORMAL_FIELD",
+      "capabilityClass": "REACHABLE",
+      "routeStatus": "FOUND",
+      "routeEdgeTypes": [
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "SCRIPTED_TRANSFER",
+        "SCRIPTED_TRANSFER"
+      ],
+      "graphNode": true,
+      "evidence": [
+        "npc/quests/quests_morocc.txt:1061",
+        "npc/re/mobs/championmobs.txt:208",
+        "npc/re/mobs/fields/morocc.txt:216",
+        "npc/re/mobs/fields/morocc.txt:217",
+        "npc/re/mobs/fields/morocc.txt:218"
+      ],
+      "advisoryEvidence": 1,
+      "mapExists": true,
+      "hasLegalMonsterSpawn": true,
+      "requirementStatus": "NONE_PROVEN",
+      "farmability": "AUTO_FARMABLE"
+    },
+    {
+      "id": "gld2_ald",
+      "originalCategory": "NORMAL_DUNGEON",
+      "category": "EVENT",
+      "capabilityClass": "MAP_MISCLASSIFIED",
+      "routeStatus": "FOUND",
+      "routeEdgeTypes": [
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "SCRIPTED_TRANSFER"
+      ],
+      "graphNode": true,
+      "evidence": [
+        "npc/re/guild/invest_main.txt:1190",
+        "npc/re/guild/invest_main.txt:1191",
+        "npc/re/guild/invest_main.txt:1192",
+        "npc/re/guild/invest_main.txt:1193",
+        "npc/re/guild/invest_main.txt:1194"
+      ],
+      "advisoryEvidence": 0,
+      "farmability": "NON_FARMABLE",
+      "requirementStatus": "NOT_APPLICABLE"
+    },
+    {
+      "id": "gld2_gef",
+      "originalCategory": "NORMAL_DUNGEON",
+      "category": "EVENT",
+      "capabilityClass": "MAP_MISCLASSIFIED",
+      "routeStatus": "FOUND",
+      "routeEdgeTypes": [
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "SCRIPTED_TRANSFER"
+      ],
+      "graphNode": true,
+      "evidence": [
+        "npc/re/guild/invest_main.txt:1198",
+        "npc/re/guild/invest_main.txt:1199",
+        "npc/re/guild/invest_main.txt:1200",
+        "npc/re/guild/invest_main.txt:1201",
+        "npc/re/guild/invest_main.txt:1202"
+      ],
+      "advisoryEvidence": 0,
+      "farmability": "NON_FARMABLE",
+      "requirementStatus": "NOT_APPLICABLE"
+    },
+    {
+      "id": "gld2_pay",
+      "originalCategory": "NORMAL_DUNGEON",
+      "category": "EVENT",
+      "capabilityClass": "MAP_MISCLASSIFIED",
+      "routeStatus": "FOUND",
+      "routeEdgeTypes": [
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "SCRIPTED_TRANSFER"
+      ],
+      "graphNode": true,
+      "evidence": [
+        "npc/re/guild/invest_main.txt:1206",
+        "npc/re/guild/invest_main.txt:1207",
+        "npc/re/guild/invest_main.txt:1208",
+        "npc/re/guild/invest_main.txt:1209",
+        "npc/re/guild/invest_main.txt:1210"
+      ],
+      "advisoryEvidence": 0,
+      "farmability": "NON_FARMABLE",
+      "requirementStatus": "NOT_APPLICABLE"
+    },
+    {
+      "id": "gld2_prt",
+      "originalCategory": "NORMAL_DUNGEON",
+      "category": "EVENT",
+      "capabilityClass": "MAP_MISCLASSIFIED",
+      "routeStatus": "FOUND",
+      "routeEdgeTypes": [
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "SCRIPTED_TRANSFER"
+      ],
+      "graphNode": true,
+      "evidence": [
+        "npc/re/guild/invest_main.txt:1214",
+        "npc/re/guild/invest_main.txt:1215",
+        "npc/re/guild/invest_main.txt:1216",
+        "npc/re/guild/invest_main.txt:1217",
+        "npc/re/guild/invest_main.txt:1218"
+      ],
+      "advisoryEvidence": 0,
+      "farmability": "NON_FARMABLE",
+      "requirementStatus": "NOT_APPLICABLE"
+    },
+    {
+      "id": "gld_dun01_2",
+      "originalCategory": "NORMAL_DUNGEON",
+      "category": "EVENT",
+      "capabilityClass": "MAP_MISCLASSIFIED",
+      "routeStatus": "FOUND",
+      "routeEdgeTypes": [
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "SCRIPTED_TRANSFER"
+      ],
+      "graphNode": true,
+      "evidence": [
+        "npc/re/guild/invest_main.txt:1167",
+        "npc/re/guild/invest_main.txt:1168",
+        "npc/re/guild/invest_main.txt:1169",
+        "npc/re/guild/invest_main.txt:1170",
+        "npc/re/guild/invest_main.txt:1171"
+      ],
+      "advisoryEvidence": 0,
+      "farmability": "NON_FARMABLE",
+      "requirementStatus": "NOT_APPLICABLE"
+    },
+    {
+      "id": "gld_dun02_2",
+      "originalCategory": "NORMAL_DUNGEON",
+      "category": "EVENT",
+      "capabilityClass": "MAP_MISCLASSIFIED",
+      "routeStatus": "FOUND",
+      "routeEdgeTypes": [
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "SCRIPTED_TRANSFER"
+      ],
+      "graphNode": true,
+      "evidence": [
+        "npc/re/guild/invest_main.txt:1151",
+        "npc/re/guild/invest_main.txt:1152",
+        "npc/re/guild/invest_main.txt:1153",
+        "npc/re/guild/invest_main.txt:1154",
+        "npc/re/guild/invest_main.txt:1155"
+      ],
+      "advisoryEvidence": 0,
+      "farmability": "NON_FARMABLE",
+      "requirementStatus": "NOT_APPLICABLE"
+    },
+    {
+      "id": "gld_dun03_2",
+      "originalCategory": "NORMAL_DUNGEON",
+      "category": "EVENT",
+      "capabilityClass": "MAP_MISCLASSIFIED",
+      "routeStatus": "FOUND",
+      "routeEdgeTypes": [
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "SCRIPTED_TRANSFER"
+      ],
+      "graphNode": true,
+      "evidence": [
+        "npc/re/guild/invest_main.txt:1175",
+        "npc/re/guild/invest_main.txt:1176",
+        "npc/re/guild/invest_main.txt:1177",
+        "npc/re/guild/invest_main.txt:1178",
+        "npc/re/guild/invest_main.txt:1179"
+      ],
+      "advisoryEvidence": 0,
+      "farmability": "NON_FARMABLE",
+      "requirementStatus": "NOT_APPLICABLE"
+    },
+    {
+      "id": "gld_dun04_2",
+      "originalCategory": "NORMAL_DUNGEON",
+      "category": "EVENT",
+      "capabilityClass": "MAP_MISCLASSIFIED",
+      "routeStatus": "FOUND",
+      "routeEdgeTypes": [
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "SCRIPTED_TRANSFER"
+      ],
+      "graphNode": true,
+      "evidence": [
+        "npc/re/guild/invest_main.txt:1159",
+        "npc/re/guild/invest_main.txt:1160",
+        "npc/re/guild/invest_main.txt:1161",
+        "npc/re/guild/invest_main.txt:1162",
+        "npc/re/guild/invest_main.txt:1163"
+      ],
+      "advisoryEvidence": 0,
+      "farmability": "NON_FARMABLE",
+      "requirementStatus": "NOT_APPLICABLE"
+    },
+    {
+      "id": "treasure_n1",
+      "originalCategory": "NORMAL_DUNGEON",
+      "category": "OTHER_KNOWN",
+      "capabilityClass": "MAP_MISCLASSIFIED",
+      "routeStatus": "NON_NORMAL_TARGET",
+      "routeEdgeTypes": [],
+      "graphNode": false,
+      "evidence": [
+        "npc/re/mobs/championmobs.txt:306",
+        "npc/re/mobs/dungeons/treasure.txt:121",
+        "npc/re/mobs/dungeons/treasure.txt:122",
+        "npc/re/mobs/dungeons/treasure.txt:123",
+        "npc/re/mobs/dungeons/treasure.txt:124"
+      ],
+      "advisoryEvidence": 0,
+      "farmability": "NON_FARMABLE"
+    },
+    {
+      "id": "treasure_n2",
+      "originalCategory": "NORMAL_DUNGEON",
+      "category": "OTHER_KNOWN",
+      "capabilityClass": "MAP_MISCLASSIFIED",
+      "routeStatus": "NON_NORMAL_TARGET",
+      "routeEdgeTypes": [],
+      "graphNode": false,
+      "evidence": [
+        "npc/re/mobs/championmobs.txt:307",
+        "npc/re/mobs/dungeons/treasure.txt:151",
+        "npc/re/mobs/dungeons/treasure.txt:152",
+        "npc/re/mobs/dungeons/treasure.txt:153",
+        "npc/re/mobs/dungeons/treasure.txt:154"
+      ],
+      "advisoryEvidence": 0,
+      "farmability": "NON_FARMABLE"
+    },
+    {
+      "id": "prt_fild08a",
+      "originalCategory": "NORMAL_FIELD",
+      "category": "OTHER_KNOWN",
+      "capabilityClass": "MAP_MISCLASSIFIED",
+      "routeStatus": "NON_NORMAL_TARGET",
+      "routeEdgeTypes": [],
+      "graphNode": true,
+      "evidence": [
+        "npc/re/cities/izlude.txt:80",
+        "npc/re/cities/izlude.txt:273",
+        "npc/re/warps/cities/izlude.txt:39",
+        "npc/re/warps/fields/prontera_fild.txt:94",
+        "npc/re/warps/fields/prontera_fild.txt:98"
+      ],
+      "advisoryEvidence": 6,
+      "farmability": "NON_FARMABLE"
+    },
+    {
+      "id": "prt_fild08b",
+      "originalCategory": "NORMAL_FIELD",
+      "category": "OTHER_KNOWN",
+      "capabilityClass": "MAP_MISCLASSIFIED",
+      "routeStatus": "NON_NORMAL_TARGET",
+      "routeEdgeTypes": [],
+      "graphNode": true,
+      "evidence": [
+        "npc/re/cities/izlude.txt:81",
+        "npc/re/cities/izlude.txt:274",
+        "npc/re/warps/cities/izlude.txt:40",
+        "npc/re/warps/fields/prontera_fild.txt:95",
+        "npc/re/warps/fields/prontera_fild.txt:99"
+      ],
+      "advisoryEvidence": 6,
+      "farmability": "NON_FARMABLE"
+    },
+    {
+      "id": "prt_fild08c",
+      "originalCategory": "NORMAL_FIELD",
+      "category": "OTHER_KNOWN",
+      "capabilityClass": "MAP_MISCLASSIFIED",
+      "routeStatus": "NON_NORMAL_TARGET",
+      "routeEdgeTypes": [],
+      "graphNode": true,
+      "evidence": [
+        "npc/re/cities/izlude.txt:82",
+        "npc/re/cities/izlude.txt:275",
+        "npc/re/warps/cities/izlude.txt:41",
+        "npc/re/warps/fields/prontera_fild.txt:96",
+        "npc/re/warps/fields/prontera_fild.txt:100"
+      ],
+      "advisoryEvidence": 6,
+      "farmability": "NON_FARMABLE"
+    },
+    {
+      "id": "prt_fild08d",
+      "originalCategory": "NORMAL_FIELD",
+      "category": "OTHER_KNOWN",
+      "capabilityClass": "MAP_MISCLASSIFIED",
+      "routeStatus": "NON_NORMAL_TARGET",
+      "routeEdgeTypes": [],
+      "graphNode": true,
+      "evidence": [
+        "npc/re/cities/izlude.txt:83",
+        "npc/re/cities/izlude.txt:276",
+        "npc/re/warps/cities/izlude.txt:42",
+        "npc/re/warps/fields/prontera_fild.txt:97",
+        "npc/re/warps/fields/prontera_fild.txt:101"
+      ],
+      "advisoryEvidence": 6,
+      "farmability": "NON_FARMABLE"
+    },
+    {
+      "id": "c_tower2_",
+      "originalCategory": "NORMAL_DUNGEON",
+      "category": "QUEST_GATED",
+      "capabilityClass": "MISSING_REQUIREMENT_METADATA",
+      "routeStatus": "UNREACHABLE",
+      "routeEdgeTypes": [],
+      "graphNode": false,
+      "evidence": [
+        "npc/re/quests/quests_aldebaran.txt:33",
+        "npc/re/quests/quests_aldebaran.txt:75",
+        "npc/re/mobs/dungeons/c_tower.txt:56",
+        "npc/re/mobs/dungeons/c_tower.txt:57",
+        "npc/re/mobs/dungeons/c_tower.txt:58"
+      ],
+      "advisoryEvidence": 0,
+      "farmability": "NON_FARMABLE",
+      "requirementStatus": "NOT_APPLICABLE"
+    },
+    {
+      "id": "c_tower3_",
+      "originalCategory": "NORMAL_DUNGEON",
+      "category": "QUEST_GATED",
+      "capabilityClass": "MISSING_REQUIREMENT_METADATA",
+      "routeStatus": "UNREACHABLE",
+      "routeEdgeTypes": [],
+      "graphNode": false,
+      "evidence": [
+        "npc/re/quests/quests_aldebaran.txt:37",
+        "npc/re/quests/quests_aldebaran.txt:109",
+        "npc/re/mobs/dungeons/c_tower.txt:67",
+        "npc/re/mobs/dungeons/c_tower.txt:68",
+        "npc/re/mobs/dungeons/c_tower.txt:69"
+      ],
+      "advisoryEvidence": 0,
+      "farmability": "NON_FARMABLE",
+      "requirementStatus": "NOT_APPLICABLE"
+    },
+    {
+      "id": "harboro2",
+      "originalCategory": "NORMAL_DUNGEON",
+      "category": "NORMAL_DUNGEON",
+      "capabilityClass": "REACHABLE",
+      "routeStatus": "FOUND",
+      "routeEdgeTypes": [
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "SCRIPTED_TRANSFER",
+        "SCRIPTED_TRANSFER"
+      ],
+      "graphNode": false,
+      "evidence": [
+        "npc/re/quests/quests_rockridge.txt:4032",
+        "npc/re/quests/quests_rockridge.txt:4036",
+        "npc/re/quests/quests_rockridge.txt:4047",
+        "npc/re/quests/quests_rockridge.txt:4074",
+        "npc/re/quests/quests_rockridge.txt:4075"
+      ],
+      "advisoryEvidence": 0,
+      "mapExists": true,
+      "hasLegalMonsterSpawn": true,
+      "requirementStatus": "NONE_PROVEN",
+      "farmability": "AUTO_FARMABLE"
+    },
+    {
+      "id": "rockrdg1",
+      "originalCategory": "NORMAL_FIELD",
+      "category": "NORMAL_FIELD",
+      "capabilityClass": "REACHABLE",
+      "routeStatus": "FOUND",
+      "routeEdgeTypes": [
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "SCRIPTED_TRANSFER",
+        "PORTAL"
+      ],
+      "graphNode": false,
+      "evidence": [
+        "npc/re/quests/quests_rockridge.txt:1227",
+        "npc/re/quests/quests_rockridge.txt:1228",
+        "npc/re/quests/quests_rockridge.txt:1229",
+        "npc/re/quests/quests_rockridge.txt:1230",
+        "npc/re/quests/quests_rockridge.txt:1231"
+      ],
+      "advisoryEvidence": 4,
+      "mapExists": true,
+      "hasLegalMonsterSpawn": true,
+      "requirementStatus": "NONE_PROVEN",
+      "farmability": "AUTO_FARMABLE"
+    },
+    {
+      "id": "rockrdg2",
+      "originalCategory": "NORMAL_FIELD",
+      "category": "NORMAL_FIELD",
+      "capabilityClass": "REACHABLE",
+      "routeStatus": "FOUND",
+      "routeEdgeTypes": [
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "SCRIPTED_TRANSFER",
+        "PORTAL",
+        "PORTAL"
+      ],
+      "graphNode": false,
+      "evidence": [
+        "npc/re/quests/quests_rockridge.txt:1516",
+        "npc/re/quests/quests_rockridge.txt:1667",
+        "npc/re/quests/quests_rockridge.txt:1683",
+        "npc/re/quests/quests_rockridge.txt:1750",
+        "npc/re/quests/quests_rockridge.txt:1758"
+      ],
+      "advisoryEvidence": 4,
+      "mapExists": true,
+      "hasLegalMonsterSpawn": true,
+      "requirementStatus": "NONE_PROVEN",
+      "farmability": "AUTO_FARMABLE"
+    },
+    {
+      "id": "amicitia2",
+      "originalCategory": "NORMAL_DUNGEON",
+      "category": "NORMAL_DUNGEON",
+      "capabilityClass": "REACHABLE",
+      "routeStatus": "FOUND",
+      "routeEdgeTypes": [
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "SCRIPTED_TRANSFER",
+        "SCRIPTED_TRANSFER"
+      ],
+      "graphNode": false,
+      "evidence": [
+        "npc/re/warps/dungeons/amicitia.txt:16",
+        "npc/re/warps/dungeons/amicitia.txt:20",
+        "npc/re/warps/dungeons/amicitia.txt:16"
+      ],
+      "advisoryEvidence": 0,
+      "mapExists": true,
+      "hasLegalMonsterSpawn": false,
+      "requirementStatus": "NONE_PROVEN",
+      "farmability": "NON_FARMABLE"
+    },
+    {
+      "id": "ba_2whs01",
+      "originalCategory": "NORMAL_DUNGEON",
+      "category": "NORMAL_DUNGEON",
+      "capabilityClass": "REACHABLE",
+      "routeStatus": "FOUND",
+      "routeEdgeTypes": [
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "SCRIPTED_TRANSFER",
+        "SCRIPTED_TRANSFER",
+        "SCRIPTED_TRANSFER",
+        "SCRIPTED_TRANSFER",
+        "SCRIPTED_TRANSFER",
+        "PORTAL",
+        "PORTAL"
+      ],
+      "graphNode": true,
+      "evidence": [
+        "npc/re/quests/quests_17_2.txt:6643",
+        "npc/re/quests/quests_17_2.txt:7338",
+        "npc/re/quests/quests_17_2.txt:7340",
+        "npc/re/quests/quests_17_2.txt:7352",
+        "npc/re/quests/quests_17_2.txt:7353"
+      ],
+      "advisoryEvidence": 0,
+      "mapExists": true,
+      "hasLegalMonsterSpawn": true,
+      "requirementStatus": "NONE_PROVEN",
+      "farmability": "AUTO_FARMABLE"
+    },
+    {
+      "id": "ba_2whs02",
+      "originalCategory": "NORMAL_DUNGEON",
+      "category": "NORMAL_DUNGEON",
+      "capabilityClass": "REACHABLE",
+      "routeStatus": "FOUND",
+      "routeEdgeTypes": [
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "SCRIPTED_TRANSFER",
+        "SCRIPTED_TRANSFER",
+        "SCRIPTED_TRANSFER",
+        "SCRIPTED_TRANSFER",
+        "SCRIPTED_TRANSFER",
+        "PORTAL",
+        "PORTAL",
+        "SCRIPTED_TRANSFER"
+      ],
+      "graphNode": true,
+      "evidence": [
+        "npc/re/quests/quests_17_2.txt:7437",
+        "npc/re/quests/quests_17_2.txt:7445",
+        "npc/re/quests/quests_17_2.txt:7458",
+        "npc/re/quests/quests_17_2.txt:7474",
+        "npc/re/quests/quests_17_2.txt:7653"
+      ],
+      "advisoryEvidence": 0,
+      "mapExists": true,
+      "hasLegalMonsterSpawn": true,
+      "requirementStatus": "NONE_PROVEN",
+      "farmability": "AUTO_FARMABLE"
+    },
+    {
+      "id": "ba_bath",
+      "originalCategory": "NORMAL_DUNGEON",
+      "category": "NORMAL_DUNGEON",
+      "capabilityClass": "REACHABLE",
+      "routeStatus": "FOUND",
+      "routeEdgeTypes": [
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "SCRIPTED_TRANSFER",
+        "SCRIPTED_TRANSFER",
+        "SCRIPTED_TRANSFER",
+        "SCRIPTED_TRANSFER",
+        "SCRIPTED_TRANSFER",
+        "PORTAL"
+      ],
+      "graphNode": true,
+      "evidence": [
+        "npc/re/quests/quests_17_2.txt:4819",
+        "npc/re/quests/quests_17_2.txt:4861",
+        "npc/re/quests/quests_17_2.txt:5058",
+        "npc/re/quests/quests_17_2.txt:5059",
+        "npc/re/quests/quests_17_2.txt:5060"
+      ],
+      "advisoryEvidence": 0,
+      "mapExists": true,
+      "hasLegalMonsterSpawn": true,
+      "requirementStatus": "NONE_PROVEN",
+      "farmability": "AUTO_FARMABLE"
+    },
+    {
+      "id": "ba_lib",
+      "originalCategory": "NORMAL_DUNGEON",
+      "category": "NORMAL_DUNGEON",
+      "capabilityClass": "REACHABLE",
+      "routeStatus": "FOUND",
+      "routeEdgeTypes": [
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "SCRIPTED_TRANSFER",
+        "SCRIPTED_TRANSFER",
+        "SCRIPTED_TRANSFER",
+        "SCRIPTED_TRANSFER",
+        "SCRIPTED_TRANSFER",
+        "SCRIPTED_TRANSFER"
+      ],
+      "graphNode": true,
+      "evidence": [
+        "npc/re/quests/quests_17_2.txt:8334",
+        "npc/re/quests/quests_17_2.txt:8335",
+        "npc/re/quests/quests_17_2.txt:8354",
+        "npc/re/quests/quests_17_2.txt:8355",
+        "npc/re/quests/quests_17_2.txt:8358"
+      ],
+      "advisoryEvidence": 0,
+      "mapExists": true,
+      "hasLegalMonsterSpawn": true,
+      "requirementStatus": "NONE_PROVEN",
+      "farmability": "AUTO_FARMABLE"
+    },
+    {
+      "id": "ba_lost",
+      "originalCategory": "NORMAL_FIELD",
+      "category": "NORMAL_FIELD",
+      "capabilityClass": "REACHABLE",
+      "routeStatus": "FOUND",
+      "routeEdgeTypes": [
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "SCRIPTED_TRANSFER",
+        "SCRIPTED_TRANSFER",
+        "SCRIPTED_TRANSFER",
+        "SCRIPTED_TRANSFER",
+        "SCRIPTED_TRANSFER",
+        "PORTAL",
+        "SCRIPTED_TRANSFER"
+      ],
+      "graphNode": true,
+      "evidence": [
+        "npc/re/mobs/fields/ba_lost.txt:9",
+        "npc/re/mobs/fields/ba_lost.txt:10",
+        "npc/re/mobs/fields/ba_lost.txt:11",
+        "npc/re/mobs/fields/ba_lost.txt:12",
+        "npc/re/mobs/fields/ba_lost.txt:13"
+      ],
+      "advisoryEvidence": 0,
+      "mapExists": true,
+      "hasLegalMonsterSpawn": true,
+      "requirementStatus": "NONE_PROVEN",
+      "farmability": "AUTO_FARMABLE"
+    },
+    {
+      "id": "ba_pw01",
+      "originalCategory": "NORMAL_DUNGEON",
+      "category": "NORMAL_DUNGEON",
+      "capabilityClass": "REACHABLE",
+      "routeStatus": "FOUND",
+      "routeEdgeTypes": [
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "SCRIPTED_TRANSFER",
+        "SCRIPTED_TRANSFER",
+        "SCRIPTED_TRANSFER",
+        "SCRIPTED_TRANSFER"
+      ],
+      "graphNode": true,
+      "evidence": [
+        "npc/re/quests/quests_17_2.txt:124",
+        "npc/re/quests/quests_17_2.txt:140",
+        "npc/re/quests/quests_17_2.txt:270",
+        "npc/re/quests/quests_17_2.txt:280",
+        "npc/re/quests/quests_17_2.txt:291"
+      ],
+      "advisoryEvidence": 0,
+      "mapExists": true,
+      "hasLegalMonsterSpawn": true,
+      "requirementStatus": "NONE_PROVEN",
+      "farmability": "AUTO_FARMABLE"
+    },
+    {
+      "id": "ba_pw02",
+      "originalCategory": "NORMAL_DUNGEON",
+      "category": "NORMAL_DUNGEON",
+      "capabilityClass": "REACHABLE",
+      "routeStatus": "FOUND",
+      "routeEdgeTypes": [
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "SCRIPTED_TRANSFER",
+        "SCRIPTED_TRANSFER",
+        "SCRIPTED_TRANSFER"
+      ],
+      "graphNode": true,
+      "evidence": [
+        "npc/re/quests/quests_17_1.txt:7014",
+        "npc/re/quests/quests_17_2.txt:13",
+        "npc/re/quests/quests_17_2.txt:137",
+        "npc/re/quests/quests_17_2.txt:138",
+        "npc/re/quests/quests_17_2.txt:9514"
+      ],
+      "advisoryEvidence": 0,
+      "mapExists": true,
+      "hasLegalMonsterSpawn": true,
+      "requirementStatus": "NONE_PROVEN",
+      "farmability": "AUTO_FARMABLE"
+    },
+    {
+      "id": "ba_pw03",
+      "originalCategory": "NORMAL_DUNGEON",
+      "category": "NORMAL_DUNGEON",
+      "capabilityClass": "REACHABLE",
+      "routeStatus": "FOUND",
+      "routeEdgeTypes": [
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "SCRIPTED_TRANSFER",
+        "SCRIPTED_TRANSFER",
+        "SCRIPTED_TRANSFER",
+        "SCRIPTED_TRANSFER",
+        "SCRIPTED_TRANSFER",
+        "PORTAL",
+        "PORTAL"
+      ],
+      "graphNode": true,
+      "evidence": [
+        "npc/re/mobs/dungeons/ba_pw.txt:25",
+        "npc/re/mobs/dungeons/ba_pw.txt:26",
+        "npc/re/mobs/dungeons/ba_pw.txt:27",
+        "npc/re/mobs/dungeons/ba_pw.txt:28",
+        "npc/re/warps/other/ba_maison.txt:95"
+      ],
+      "advisoryEvidence": 0,
+      "mapExists": true,
+      "hasLegalMonsterSpawn": true,
+      "requirementStatus": "NONE_PROVEN",
+      "farmability": "AUTO_FARMABLE"
+    },
+    {
+      "id": "sp_rudus",
+      "originalCategory": "NORMAL_DUNGEON",
+      "category": "NORMAL_DUNGEON",
+      "capabilityClass": "REACHABLE",
+      "routeStatus": "FOUND",
+      "routeEdgeTypes": [
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "SCRIPTED_TRANSFER"
+      ],
+      "graphNode": true,
+      "evidence": [
+        "npc/re/quests/quests_17_1.txt:3902",
+        "npc/re/quests/quests_17_1.txt:3984",
+        "npc/re/quests/quests_17_1.txt:4104",
+        "npc/re/quests/quests_17_1.txt:4156",
+        "npc/re/quests/quests_17_1.txt:4198"
+      ],
+      "advisoryEvidence": 0,
+      "mapExists": true,
+      "hasLegalMonsterSpawn": true,
+      "requirementStatus": "NONE_PROVEN",
+      "farmability": "AUTO_FARMABLE"
+    },
+    {
+      "id": "sp_rudus2",
+      "originalCategory": "NORMAL_DUNGEON",
+      "category": "NORMAL_DUNGEON",
+      "capabilityClass": "REACHABLE",
+      "routeStatus": "FOUND",
+      "routeEdgeTypes": [
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "SCRIPTED_TRANSFER",
+        "PORTAL"
+      ],
+      "graphNode": true,
+      "evidence": [
+        "npc/re/mobs/dungeons/sp_rudus.txt:15",
+        "npc/re/mobs/dungeons/sp_rudus.txt:16",
+        "npc/re/mobs/dungeons/sp_rudus.txt:17",
+        "npc/re/mobs/dungeons/sp_rudus.txt:18",
+        "npc/re/mobs/dungeons/sp_rudus.txt:19"
+      ],
+      "advisoryEvidence": 0,
+      "mapExists": true,
+      "hasLegalMonsterSpawn": true,
+      "requirementStatus": "NONE_PROVEN",
+      "farmability": "AUTO_FARMABLE"
+    },
+    {
+      "id": "sp_rudus3",
+      "originalCategory": "NORMAL_DUNGEON",
+      "category": "NORMAL_DUNGEON",
+      "capabilityClass": "REACHABLE",
+      "routeStatus": "FOUND",
+      "routeEdgeTypes": [
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "PORTAL",
+        "SCRIPTED_TRANSFER",
+        "PORTAL",
+        "PORTAL"
+      ],
+      "graphNode": true,
+      "evidence": [
+        "npc/re/quests/quests_dungeons_200.txt:77",
+        "npc/re/quests/quests_dungeons_200.txt:363",
+        "npc/re/mobs/dungeons/sp_rudus.txt:21",
+        "npc/re/mobs/dungeons/sp_rudus.txt:22",
+        "npc/re/mobs/dungeons/sp_rudus.txt:23"
+      ],
+      "advisoryEvidence": 0,
+      "mapExists": true,
+      "hasLegalMonsterSpawn": true,
+      "requirementStatus": "NONE_PROVEN",
+      "farmability": "AUTO_FARMABLE"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Project Handoff"
+  short_description: "快速建立 terminal-arpg 的最小接手上下文"
+  default_prompt: "請用 project-handoff 接手這項 terminal-arpg 任務，先讀必要文件並列出範圍。"

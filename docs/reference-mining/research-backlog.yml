@@ -1,0 +1,138 @@
+schema: CONTINUOUS_REFERENCE_MINING_BACKLOG_V1
+last_reviewed: '2026-09-21'
+owner: F
+continuousMiningEnabled: true
+sourcePriority:
+  - CURRENT_CANONICAL_PROJECT_SOURCE
+  - CURRENT_UPSTREAM_SOURCE
+  - OFFICIAL_DOCUMENTATION_WIKI
+  - HIGH_VALUE_RATHENA_FORUM_TECHNICAL_SOLUTION
+  - OPENKORE_SOURCE_DOCUMENTATION
+  - OTHER_COMMUNITY_EVIDENCE
+forumAuthority: PATTERN_ONLY_UNTIL_SOURCE_VERIFIED
+versionPolicy: Every completed topic records upstream baseline commit and stale/version conflict.
+topics:
+  - domain: admin_support_impersonation_security
+    priority: P0
+    status: COMPLETE
+    whyHighValue: Real-character support sessions cross Admin, Player Web, Controller and Synthetic Runner identity boundaries.
+    currentAtlasCoverage: Actor/effective identity, TTL, revocation, nested impersonation, CSRF, permission scope, audit and secret handling are consolidated in the security dossier.
+    knownGaps: OBSERVE_ONLY mutation coverage and PLAYER_ACTIONS security-sensitive exclusions require the immediate H security patch spec.
+    relatedProjectFlows: [Admin support session, Player Web, Synthetic Runner, Action Trace, Controller authorization]
+    lastReviewed: '2026-09-21'
+    upstreamBaseline: { RFC8693: '2019-07', OWASP: 'reviewed-2026-09-21', GitLab: 'reviewed-2026-09-21', Keycloak: 'reviewed-2026-09-21', CloudflareAccess: 'reviewed-2026-09-21' }
+    dossier: docs/reference-mining/admin-support-impersonation.md
+  - domain: debugging_logging_packet_crash
+    priority: P0
+    status: COMPLETE_EXISTING_ATLAS
+    whyHighValue: Synthetic First and FIRST_BROKEN_TRANSITION require bounded diagnostics before runtime mutation.
+    currentAtlasCoverage: rAthena structured probes and packet/debugging dossier already exists.
+    knownGaps: Native build dependency and live trace integration remain separately gated.
+    relatedProjectFlows: [Synthetic First, Action Trace, Native PA probe, Event Ledger]
+    lastReviewed: '2026-09-20'
+    upstreamBaseline: { rAthena: e985006171d2eb320ee512a653f4c83aea3d81b6, OpenKore: 51de1ddfc4449ae5217f6886de702f87ca934030 }
+  - domain: navigation_warp_portal_pathfinding
+    priority: P0
+    status: COMPLETE
+    whyHighValue: Change Farm Map, Supply Return, Quest navigation and persistent roaming depend on arrival authority.
+    currentAtlasCoverage: rAthena navigation and OpenKore route/portal topics exist.
+    knownGaps: Scripted/service/instance edges, mapflag-aware planning, portal learning and full typed failure taxonomy remain partial.
+    relatedProjectFlows: [Change Farm Map, Supply Return, Quest navigation, Persistent roaming]
+    lastReviewed: '2026-09-21'
+    upstreamBaseline: { rAthena: e985006171d2eb320ee512a653f4c83aea3d81b6, OpenKore: 51de1ddfc4449ae5217f6886de702f87ca934030 }
+    dossier: docs/reference-mining/topics/navigation-warp-portal-pathfinding.md
+    machineReadableMatrix: docs/reference-mining/navigation-capability-matrix.yml
+  - domain: monster_ai_combat_target_retarget
+    priority: P0
+    status: COMPLETE
+    whyHighValue: AUTO_FARM correctness depends on target validity, hit confirmation, kill attribution and retarget safety.
+    currentAtlasCoverage: Combat, target, mob search and retarget topics exist.
+    knownGaps: MISS/NO_DAMAGE events, typed target/retarget trace, full mon_control and party/kill-steal policy parity, and Fly Wing roaming remain partial.
+    relatedProjectFlows: [AUTO_FARM, target, retarget, attack/hit, recovery]
+    lastReviewed: '2026-09-21'
+    upstreamBaseline: { rAthena: e985006171d2eb320ee512a653f4c83aea3d81b6, OpenKore: 51de1ddfc4449ae5217f6886de702f87ca934030 }
+    dossier: docs/reference-mining/topics/monster-ai-combat-target-retarget.md
+    machineReadableMatrix: docs/reference-mining/combat-capability-matrix.yml
+  - domain: item_loot_inventory_storage_weight
+    priority: P0
+    status: COMPLETE
+    whyHighValue: AutoLoot, Auto-Identify, Inventory, Storage and Supply use authoritative item, slot, weight and transaction state.
+    currentAtlasCoverage: rAthena items/inventory/storage/loot rows and OpenKore loot/item/inventory/storage/weight rows were consolidated by the mining dossier.
+    knownGaps: Storage player-flow closure, restart durability and generic item action parity remain partial.
+    relatedProjectFlows: [AutoLoot, Auto-Identify, Inventory, Storage, Supply, Fly Wing, Butterfly Wing]
+    lastReviewed: '2026-09-21'
+    upstreamBaseline: { rAthena: e985006171d2eb320ee512a653f4c83aea3d81b6, OpenKore: 51de1ddfc4449ae5217f6886de702f87ca934030 }
+  - domain: reconnect_session_character_lifecycle
+    priority: P1
+    status: COMPLETE
+    whyHighValue: Reconnect and character lifecycle can invalidate ownership, leases, inventory snapshots and resume intent.
+    currentAtlasCoverage: rAthena login/char/map authority, save/load, PA safe pause/reconcile, OpenKore bounded backoff, command dedupe, PA/AUTO_FARM/Supply/Quest resume and support-session lifecycle are consolidated in the lifecycle dossier.
+    knownGaps: Production reconnect persistence canary, explicit SUPERSEDED command status, service transaction ambiguity resolver, PLAYER_OVERRIDE resume contract and complete cross-layer Event Ledger trace remain open.
+    relatedProjectFlows: [Reconnect, character lifecycle, PA ownership, AUTO_FARM, Supply, Quest, support session, resume]
+    lastReviewed: '2026-09-21'
+    upstreamBaseline: { rAthena: e985006171d2eb320ee512a653f4c83aea3d81b6, OpenKore: 51de1ddfc4449ae5217f6886de702f87ca934030 }
+    dossier: docs/reference-mining/topics/reconnect-session-character-lifecycle.md
+    machineReadableMatrix: docs/reference-mining/reconnect-lifecycle-capability-matrix.yml
+  - domain: npc_quest_ontouch_hidden_triggers
+    priority: P1
+    status: BACKLOG
+    whyHighValue: Quest and NPC progress depends on server-triggered dialogue and hidden touch semantics.
+    currentAtlasCoverage: rAthena NPC/OnTouch/Quest and OpenKore task/dialogue topics exist.
+    knownGaps: Cross-flow trigger provenance and current PA quest parity remain partial.
+    relatedProjectFlows: [Quest, NPC dialogue, OnTouch, hidden triggers]
+    lastReviewed: NOT_REVIEWED_THIS_CYCLE
+    upstreamBaseline: { rAthena: e985006171d2eb320ee512a653f4c83aea3d81b6, OpenKore: 51de1ddfc4449ae5217f6886de702f87ca934030 }
+  - domain: performance_sql_timers_large_server
+    priority: P1
+    status: BACKLOG
+    whyHighValue: Timer and SQL behavior can change bounded scenario timing and create false first failures under load.
+    currentAtlasCoverage: rAthena event/timer and SQL source pointers exist.
+    knownGaps: Project-specific dashboard/PA load budgets are not consolidated.
+    relatedProjectFlows: [Event Ledger, timers, SQL, bounded observers, large-server behavior]
+    lastReviewed: NOT_REVIEWED_THIS_CYCLE
+    upstreamBaseline: { rAthena: e985006171d2eb320ee512a653f4c83aea3d81b6, OpenKore: 51de1ddfc4449ae5217f6886de702f87ca934030 }
+  - domain: client_compatibility_packetver_packet_differences
+    priority: P1
+    status: BACKLOG
+    whyHighValue: Packet version differences can stop a handler before authoritative state is reached.
+    currentAtlasCoverage: rAthena client packet and OpenKore packet observation topics exist.
+    knownGaps: Current client build and PA command paths require bounded compatibility matrix.
+    relatedProjectFlows: [Client compatibility, packet boundary, clif, map/session]
+    lastReviewed: NOT_REVIEWED_THIS_CYCLE
+    upstreamBaseline: { rAthena: e985006171d2eb320ee512a653f4c83aea3d81b6, OpenKore: 51de1ddfc4449ae5217f6886de702f87ca934030 }
+  - domain: extension_custom_subsystem_patterns
+    priority: P2
+    status: BACKLOG
+    whyHighValue: Custom extensions need clear authority and upgrade-safe boundaries.
+    currentAtlasCoverage: rAthena plugin/extension topic exists.
+    knownGaps: Project custom subsystem reuse rules need focused review.
+    relatedProjectFlows: [Native extension, NPC custom, command bridge]
+    lastReviewed: NOT_REVIEWED_THIS_CYCLE
+    upstreamBaseline: { rAthena: e985006171d2eb320ee512a653f4c83aea3d81b6, OpenKore: 51de1ddfc4449ae5217f6886de702f87ca934030 }
+  - domain: security_exploit_mitigation
+    priority: P2
+    status: BACKLOG
+    whyHighValue: Client input, command surfaces and packet handling require explicit fail-closed boundaries.
+    currentAtlasCoverage: Partial command and packet validation references.
+    knownGaps: No consolidated semantic security mining dossier.
+    relatedProjectFlows: [Auth, ownership, command validation, packet boundary]
+    lastReviewed: NOT_REVIEWED_THIS_CYCLE
+    upstreamBaseline: { rAthena: e985006171d2eb320ee512a653f4c83aea3d81b6, OpenKore: 51de1ddfc4449ae5217f6886de702f87ca934030 }
+  - domain: scheduler_timer_architecture
+    priority: P2
+    status: BACKLOG
+    whyHighValue: Scheduler semantics determine timeout, retry, recovery and event ordering.
+    currentAtlasCoverage: rAthena Event/Timer and OpenKore timeout topics exist.
+    knownGaps: Cross-runtime timing contract is not consolidated.
+    relatedProjectFlows: [Retry, backoff, Event Ledger, observer timeout]
+    lastReviewed: NOT_REVIEWED_THIS_CYCLE
+    upstreamBaseline: { rAthena: e985006171d2eb320ee512a653f4c83aea3d81b6, OpenKore: 51de1ddfc4449ae5217f6886de702f87ca934030 }
+  - domain: economy_shop_storage_edge_cases
+    priority: P2
+    status: BACKLOG
+    whyHighValue: Shop, storage, Zeny and capacity edge cases can break Supply and loot recovery.
+    currentAtlasCoverage: OpenKore buy/sell/storage and rAthena shop/storage topics exist.
+    knownGaps: Sell and storage player-flow acceptance remains partial.
+    relatedProjectFlows: [Supply, buy, sell, storage, weight]
+    lastReviewed: NOT_REVIEWED_THIS_CYCLE
+    upstreamBaseline: { rAthena: e985006171d2eb320ee512a653f4c83aea3d81b6, OpenKore: 51de1ddfc4449ae5217f6886de702f87ca934030 }

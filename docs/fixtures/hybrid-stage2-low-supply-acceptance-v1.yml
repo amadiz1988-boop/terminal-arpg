@@ -1,0 +1,39 @@
+fixture_id: HYBRID_STAGE2_LOW_SUPPLY_ACCEPTANCE_V1
+purpose: deterministic_authoritative_low_supply_acceptance_for_stage2_promotion
+status: ACCEPTANCE_FIXTURE
+character:
+  char_id: 150056
+  display_name: dedicated_acceptance_character
+  farm_target: pay_dun00
+  runtime_root: C:\Users\Administrator\ghost-island-production\ro-stack\.local\ro-stack\rathena
+  ownership: SERVER_AGENT
+  resident: 1
+  runtime: ACTIVE
+supply_policy:
+  source: canonical_native_stack_config.PersistentAgentSupplyMin
+  item_id: 501
+  min_count: 5
+  target_count: 15
+trigger:
+  type: authoritative_inventory_evaluation
+  expression: inventory_item_amount < supply_policy.min_count
+  prepared_count: 4
+  expected: SUPPLY_LOW
+  direct_gameplay_db_mutation: NO
+  gm_item_mutation: NO
+  teleport_or_position_mutation: NO
+acceptance_sequence:
+  - PRE_SUPPLY_STAGE2_COMBAT
+  - SUPPLY_LOW
+  - STOP_LOCAL_COMBAT
+  - SUPPLY_SERVICE_ROUTE
+  - AUTHORITATIVE_SUPPLY_TRANSACTION
+  - RETURN_TO_FARM
+  - NEW_STAGE2_MELEE_LEASE
+  - THREE_AUTHORITATIVE_HITS
+  - STOP_FARM
+restoration:
+  restore_supply_policy: YES
+  restore_feature_default: OFF
+  leave_character_persistent_idle: YES
+  production_binary_after_failed_gate: D_BASELINE

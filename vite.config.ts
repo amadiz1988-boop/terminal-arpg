@@ -2,7 +2,14 @@ import { sites } from '@openai/sites-vite-plugin';
 import tailwindcss from '@tailwindcss/postcss';
 import vinext from 'vinext';
 import { defineConfig } from 'vite';
-import hostingConfig from './.openai/hosting.json' with { type: 'json' };
+import hostingConfig from './archive/legacy-vinext-demo/hosting.json' with {
+  type: 'json',
+};
+
+if (process.env.ALLOW_ARCHIVED_VINEXT_WEB !== '1')
+  throw new Error(
+    'LEGACY_WEB_ARCHIVED: Vinext/D1 demo is disabled. Use http://127.0.0.1:8788/.',
+  );
 
 const SITE_CREATOR_PLACEHOLDER_DATABASE_ID =
   '00000000-0000-4000-8000-000000000000';

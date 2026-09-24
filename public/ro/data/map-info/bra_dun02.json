@@ -1,0 +1,152 @@
+{
+  "id": "bra_dun02",
+  "name": "瀑布內的洞窟",
+  "category": "SERVICE_ONLY",
+  "dungeon": null,
+  "totalMonsters": 3,
+  "normalMonsterCount": 3,
+  "levelRange": {
+    "min": 79,
+    "max": 79
+  },
+  "fullLevelRange": {
+    "min": 79,
+    "max": 79
+  },
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [
+    {
+      "id": 2795,
+      "name": "雄壯亞拉",
+      "level": 79,
+      "count": 3
+    }
+  ],
+  "resourceMonsters": [],
+  "bossMonsters": [],
+  "monsters": [
+    {
+      "id": 2795,
+      "aegisName": "C2_IARA",
+      "name": "雄壯亞拉",
+      "count": 3,
+      "respawnMinMs": 180000,
+      "respawnMaxMs": 180000,
+      "level": 79,
+      "hp": 42620,
+      "baseExp": 4270,
+      "jobExp": 11910,
+      "attackMin": 264,
+      "attackMax": 99,
+      "defense": 0,
+      "magicDefense": 76,
+      "size": "中型",
+      "race": "魚貝",
+      "element": "水 3",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/championmobs.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 995,
+          "aegisName": "Mistic_Frozen",
+          "name": "水靈原石",
+          "ratePerTenThousand": 15,
+          "type": "其他",
+          "weight": 30,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "擁有水屬性的礦石。\n\n重量: 30"
+        },
+        {
+          "itemId": 950,
+          "aegisName": "Heart_Of_Mermaid",
+          "name": "人魚之心",
+          "ratePerTenThousand": 10000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "人魚的紅色心臟,不論何時看起來都是噗通噗通跳動著的樣子。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 951,
+          "aegisName": "Fin",
+          "name": "背鰭",
+          "ratePerTenThousand": 1250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從魚類或是部份怪物身上得來的背鰭。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 748,
+          "aegisName": "Witherless_Rose",
+          "name": "永恆玫瑰",
+          "ratePerTenThousand": 125,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "永不枯萎的玫瑰, 因為數量不多,所以價值不菲。\n雖然如此,但因為帶有永不凋謝的愛情的意義,是年輕男子必備的珍貴物品。\n\n重量: 1"
+        },
+        {
+          "itemId": 747,
+          "aegisName": "Crystal_Mirror",
+          "name": "水晶鏡子",
+          "ratePerTenThousand": 250,
+          "type": "其他",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "用水晶製成的鏡子,是女性用來裝扮的必需用品,這比用玻璃做成的鏡子更為高級。\n\n重量: 5"
+        },
+        {
+          "itemId": 710,
+          "aegisName": "Illusion_Flower",
+          "name": "幻想花",
+          "ratePerTenThousand": 25,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在深夜裏發著光芒的植物,在人跡罕見的森林裏獨自發著光芒。\n聽說雖然可以在那光芒中看見天國,但若將花摘下來看的話,它的光芒就會消失。\n\n重量: 1"
+        },
+        {
+          "itemId": 2334,
+          "aegisName": "Mage_Coat",
+          "name": "魔法外套",
+          "ratePerTenThousand": 5,
+          "type": "防具",
+          "weight": 60,
+          "attack": 0,
+          "defense": 40,
+          "slots": 0,
+          "description": "古代魔道士所傳下來的衣服,穿著時會提高精神力。\nMDEF+5 , INT+1。\n系列: 鎧甲  防禦: 40\n重量: 60\n要求等級: 50\n裝備: 魔法師系列/悟靈士"
+        },
+        {
+          "itemId": 27120,
+          "aegisName": "Iara_Card",
+          "name": "亞拉卡片",
+          "ratePerTenThousand": 5,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可使用[痊癒術] 1級。\n搭配人魚卡片時, MSP+50。\n\n系列 : 卡片\n裝備 : 飾品\n重量 : 1"
+        }
+      ]
+    }
+  ]
+}

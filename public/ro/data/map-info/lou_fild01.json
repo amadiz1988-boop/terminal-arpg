@@ -1,0 +1,579 @@
+{
+  "id": "lou_fild01",
+  "name": "龍之城原野",
+  "category": "SERVICE_ONLY",
+  "dungeon": null,
+  "totalMonsters": 127,
+  "normalMonsterCount": 127,
+  "levelRange": {
+    "min": 65,
+    "max": 83
+  },
+  "fullLevelRange": {
+    "min": 65,
+    "max": 83
+  },
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [
+    {
+      "id": 1516,
+      "name": "米糕",
+      "level": 83,
+      "count": 60
+    },
+    {
+      "id": 1139,
+      "name": "螳螂",
+      "level": 65,
+      "count": 28
+    },
+    {
+      "id": 1368,
+      "name": "邪惡向日葵",
+      "level": 73,
+      "count": 28
+    }
+  ],
+  "resourceMonsters": [
+    {
+      "id": 1081,
+      "name": "黃草",
+      "level": 1,
+      "count": 10
+    }
+  ],
+  "bossMonsters": [],
+  "monsters": [
+    {
+      "id": 1081,
+      "aegisName": "YELLOW_PLANT",
+      "name": "黃草",
+      "count": 10,
+      "respawnMinMs": 10000,
+      "respawnMaxMs": 10000,
+      "level": 1,
+      "hp": 6,
+      "baseExp": 0,
+      "jobExp": 0,
+      "attackMin": 1,
+      "attackMax": 1,
+      "defense": 100,
+      "magicDefense": 99,
+      "size": "小型",
+      "race": "植物",
+      "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": true,
+      "sourceFiles": [
+        "npc/re/mobs/fields/louyang.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 508,
+          "aegisName": "Yellow_Herb",
+          "name": "黃色藥草",
+          "ratePerTenThousand": 2750,
+          "type": "恢復道具",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在治療傷處上有相當功效的珍貴藥草,可恢復少量的HP。\n\n重量: 5"
+        },
+        {
+          "itemId": 712,
+          "aegisName": "Flower",
+          "name": "花",
+          "ratePerTenThousand": 500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "沒有名稱的花。沒有香味也沒有荊棘。\n\n重量: 1"
+        },
+        {
+          "itemId": 711,
+          "aegisName": "Shoot",
+          "name": "芽苗",
+          "ratePerTenThousand": 500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "剛剛才從這個世上出生的幼小植物,單純無瑕的樣子非常可愛。\n\n重量: 1"
+        },
+        {
+          "itemId": 905,
+          "aegisName": "Stem",
+          "name": "植物梗",
+          "ratePerTenThousand": 250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "植物細長的梗,可以當做藥材,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 7935,
+          "aegisName": "Poison_Herb_Seratum",
+          "name": "蛇足毒草",
+          "ratePerTenThousand": 150,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "危險: 不像美麗的外表, 卻沒有香味。\n\n重量: 1"
+        },
+        {
+          "itemId": 707,
+          "aegisName": "Singing_Plant",
+          "name": "哀唱草",
+          "ratePerTenThousand": 3,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "一到有滿月的夜晚就會獨自唱著哀傷的歌曲的神秘植物,傳說以前有位少女,她唱著歌思念離開很久的戀人,但是心愛的他終究沒有歸來,等著等著她就這樣化成了一株草。\n\n重量: 1"
+        },
+        {
+          "itemId": 914,
+          "aegisName": "Fluff",
+          "name": "毛",
+          "ratePerTenThousand": 250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "小型怪身上的毛,可以用來做衣服的原料,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 2269,
+          "aegisName": "Centimental_Flower",
+          "name": "花葉",
+          "ratePerTenThousand": 1,
+          "type": "防具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "小小的花葉,含在嘴裡會讓人有幸福浪漫的感覺。\n受到植物型敵人的攻擊時, 可-3%的傷害度。\n系列: 頭具  防禦: 0\n位置: 下  重量: 10\n裝備: 初學者以外的全職業"
+        }
+      ]
+    },
+    {
+      "id": 1139,
+      "aegisName": "MANTIS",
+      "name": "螳螂",
+      "count": 28,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 65,
+      "hp": 2363,
+      "baseExp": 642,
+      "jobExp": 556,
+      "attackMin": 199,
+      "attackMax": 31,
+      "defense": 90,
+      "magicDefense": 0,
+      "size": "中型",
+      "race": "昆蟲",
+      "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/louyang.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 993,
+          "aegisName": "Yellow_Live",
+          "name": "地靈礦石",
+          "ratePerTenThousand": 55,
+          "type": "其他",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "綠色的小礦石塊。擁有地屬性,提煉後可以製作出地靈原石。\n\n重量: 5"
+        },
+        {
+          "itemId": 1031,
+          "aegisName": "Limb_Of_Mantis",
+          "name": "螳螂臂",
+          "ratePerTenThousand": 4500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "如鐮刀般銳利的螳螂手臂,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 911,
+          "aegisName": "Scell",
+          "name": "雪勒結晶",
+          "ratePerTenThousand": 700,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從一部份怪物身上得來的結晶,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 757,
+          "aegisName": "Elunium_Stone",
+          "name": "鋁原石",
+          "ratePerTenThousand": 35,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以拿來煉鋁的礦石,拿來提煉作成盔甲。\n\n重量: 20"
+        },
+        {
+          "itemId": 943,
+          "aegisName": "Solid_Shell",
+          "name": "堅硬外皮",
+          "ratePerTenThousand": 125,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "怪物身上堅硬的外皮,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 721,
+          "aegisName": "Azure_Jewel",
+          "name": "綠寶石",
+          "ratePerTenThousand": 5,
+          "type": "其他",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "呈現出綠色光芒的寶石。\n\n重量: 10"
+        },
+        {
+          "itemId": 507,
+          "aegisName": "Red_Herb",
+          "name": "紅色藥草",
+          "ratePerTenThousand": 325,
+          "type": "恢復道具",
+          "weight": 3,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在治療傷處上有一定功效的珍貴藥草,可恢復少量的HP。\n\n重量: 3"
+        },
+        {
+          "itemId": 4079,
+          "aegisName": "Mantis_Card",
+          "name": "螳螂卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "STR+3。\n系列: 卡片\n裝置: 飾品\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1368,
+      "aegisName": "GEOGRAPHER",
+      "name": "邪惡向日葵",
+      "count": 28,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 73,
+      "hp": 3408,
+      "baseExp": 804,
+      "jobExp": 706,
+      "attackMin": 278,
+      "attackMax": 82,
+      "defense": 158,
+      "magicDefense": 42,
+      "size": "中型",
+      "race": "植物",
+      "element": "地 3",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/louyang.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 1032,
+          "aegisName": "Blossom_Of_Maneater",
+          "name": "噬人樹花",
+          "ratePerTenThousand": 3100,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "像人一般擁有各種器官的花。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 1033,
+          "aegisName": "Root_Of_Maneater",
+          "name": "噬人樹根",
+          "ratePerTenThousand": 2750,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "如筋肉或血管般結實的植物的根。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 2253,
+          "aegisName": "Sunflower",
+          "name": "向日葵頭飾",
+          "ratePerTenThousand": 15,
+          "type": "防具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 1,
+          "slots": 0,
+          "description": "戴在頭上裝飾用的向日葵頭飾。\n受到昆蟲係怪物的攻擊時, 傷害-10%\n系列: 頭具  防禦: 1\n位置: 上  重量: 10\n裝備: 全職業"
+        },
+        {
+          "itemId": 2207,
+          "aegisName": "Fancy_Flower",
+          "name": "花朵頭飾",
+          "ratePerTenThousand": 25,
+          "type": "防具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "用來插在頭上當裝飾的花。\n受到植物型怪的攻擊時, 可-10% 的傷害度。\n系列: 頭具  防禦: 0\n位置: 上  重量: 10\n裝備: 全職業"
+        },
+        {
+          "itemId": 12002,
+          "aegisName": "Holy_Scroll_1_5",
+          "name": "治癒術等級5",
+          "ratePerTenThousand": 50,
+          "type": "延遲消耗品",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "經過崇古的祭司洗禮過的紙張,並有著聖屬性的魔法,可使用等級5的治癒術。\n\n重量: 1"
+        },
+        {
+          "itemId": 12359,
+          "aegisName": "Very_Soft_Plant",
+          "name": "光滑柔軟草",
+          "ratePerTenThousand": 5,
+          "type": "消耗品",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "淡綠色的柔軟光滑的草, 是群葉貓的最愛。\n活動怪、小兵怪則無法認養。 \n\n種類 : 認養寵物物品\n重量 : 5"
+        },
+        {
+          "itemId": 4280,
+          "aegisName": "Geographer_Card",
+          "name": "邪惡向日葵卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "受到物理傷害時,當習得自動念咒、天使之賜福2技能、天使之賜福10技能時,可使用10技能天使之賜福。\n飛行魔書、猴桃木、甜餅人、海豹寶寶卡片一起裝備時,詠唱時間-10%。\n技能使用時SP消耗量,-10%。\nVIT+10。\n當套裝裝備者是服事系列角色時,從惡魔型和不死型怪受到的傷害-30%,打死惡魔型和不死型怪時,所得到的經驗值+5%。\n系列: 卡片\n裝備: 鎧甲\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1516,
+      "aegisName": "INCREASE_SOIL",
+      "name": "米糕",
+      "count": 60,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 83,
+      "hp": 4899,
+      "baseExp": 1035,
+      "jobExp": 921,
+      "attackMin": 366,
+      "attackMax": 30,
+      "defense": 112,
+      "magicDefense": 39,
+      "size": "中型",
+      "race": "無形",
+      "element": "地 3",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/louyang.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 7264,
+          "aegisName": "Dried_Sand",
+          "name": "乾沙子",
+          "ratePerTenThousand": 2183,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在路上經常會看到的乾燥黃晶沙, 因為太乾燥了,握在手裡會破碎。\n\n重量: 1"
+        },
+        {
+          "itemId": 7004,
+          "aegisName": "Mud_Lump",
+          "name": "泥團",
+          "ratePerTenThousand": 1150,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "濕黏,讓人感覺很不舒服的一團泥巴。可向收集商人購買。\n\n重量 :1"
+        },
+        {
+          "itemId": 997,
+          "aegisName": "Great_Nature",
+          "name": "土靈原石",
+          "ratePerTenThousand": 5,
+          "type": "其他",
+          "weight": 30,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "擁有地屬性的礦石。\n\n重量: 30"
+        },
+        {
+          "itemId": 969,
+          "aegisName": "Gold",
+          "name": "黃金",
+          "ratePerTenThousand": 1,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "會發出如太陽般燦爛光芒的金屬,十分堅硬並且安定性高。雖然不易加工,但因為很稀少的關係,毫無疑問在金屬當中是非常有價值的東西,可以高價賣給收集商。\n\n重量: 20"
+        },
+        {
+          "itemId": 4231,
+          "aegisName": "Increase_Soil_Card",
+          "name": "米糕卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "攻城時,從監護人怪物受到的傷害,-50%。\n系列: 卡片\n裝備: 盾牌\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2793,
+      "aegisName": "C5_INCREASE_SOIL",
+      "name": "狡猾米糕",
+      "count": 1,
+      "respawnMinMs": 180000,
+      "respawnMaxMs": 180000,
+      "level": 83,
+      "hp": 24495,
+      "baseExp": 5175,
+      "jobExp": 13815,
+      "attackMin": 439,
+      "attackMax": 30,
+      "defense": 112,
+      "magicDefense": 39,
+      "size": "中型",
+      "race": "無形",
+      "element": "地 3",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/championmobs.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 7264,
+          "aegisName": "Dried_Sand",
+          "name": "乾沙子",
+          "ratePerTenThousand": 10000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在路上經常會看到的乾燥黃晶沙, 因為太乾燥了,握在手裡會破碎。\n\n重量: 1"
+        },
+        {
+          "itemId": 7004,
+          "aegisName": "Mud_Lump",
+          "name": "泥團",
+          "ratePerTenThousand": 5750,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "濕黏,讓人感覺很不舒服的一團泥巴。可向收集商人購買。\n\n重量 :1"
+        },
+        {
+          "itemId": 997,
+          "aegisName": "Great_Nature",
+          "name": "土靈原石",
+          "ratePerTenThousand": 25,
+          "type": "其他",
+          "weight": 30,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "擁有地屬性的礦石。\n\n重量: 30"
+        },
+        {
+          "itemId": 969,
+          "aegisName": "Gold",
+          "name": "黃金",
+          "ratePerTenThousand": 1,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "會發出如太陽般燦爛光芒的金屬,十分堅硬並且安定性高。雖然不易加工,但因為很稀少的關係,毫無疑問在金屬當中是非常有價值的東西,可以高價賣給收集商。\n\n重量: 20"
+        },
+        {
+          "itemId": 4231,
+          "aegisName": "Increase_Soil_Card",
+          "name": "米糕卡片",
+          "ratePerTenThousand": 5,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "攻城時,從監護人怪物受到的傷害,-50%。\n系列: 卡片\n裝備: 盾牌\n重量: 1"
+        }
+      ]
+    }
+  ]
+}

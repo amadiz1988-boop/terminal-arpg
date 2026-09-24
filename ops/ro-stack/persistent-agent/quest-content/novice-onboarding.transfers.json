@@ -1,0 +1,83 @@
+{
+  "schema": "ro-quest-transfers/v1",
+  "sequenceId": "novice_onboarding",
+  "source": "rAthena canonical scripts: npc/re/warps/cities/izlude.txt, npc/re/jobs/novice/academy.txt",
+  "note": "NPC-mediated map transitions recovered from last-good + canonical rAthena scripts. No GO_MAP used for NPC-mediated warps. Menu indexes derived from canonical select() order; nothing invented.",
+  "transfers": [
+    {
+      "id": "island_captain",
+      "leg": "iz_int -> int_land",
+      "npcName": "#ship_out",
+      "map": "iz_int",
+      "x": 56,
+      "y": 15,
+      "trigger": "WARPNPC OnTouch",
+      "dialogNextCount": 0,
+      "menuIndex": null,
+      "menuText": null,
+      "prerequisite": null,
+      "completionSignal": "authoritative map change -> int_land 85,107 (savepoint int_land 77,101)",
+      "nativeRepresentation": "GO_NPC(#ship_out, iz_int 56,15) + EXPECTED_MAP_CHANGE(int_land)",
+      "nativeCapability": "AVAILABLE:EXPECTED_MAP_CHANGE_COMPLETION",
+      "verification": "Existing navigation CAN reach the trigger cell (1) and rAthena OnTouch warps (2); but the quest navigation completion predicate requires arrival on the SOURCE map within 2 cells (persistent_agent.cpp:4151-4158). After the OnTouch warp the char is on int_land -> arrived=false -> fail_quest(QUEST_NAVIGATION_ARRIVAL_MISMATCH) (3). Sequence does NOT continue (4). Exact missing adapter = expected-map-change completion predicate; no new travel engine.",
+      "sourceRef": "npc/re/warps/cities/izlude.txt:69-77"
+    },
+    {
+      "id": "sail_izlude",
+      "leg": "int_land -> izlude",
+      "npcName": "#intro_to_izlude",
+      "map": "int_land",
+      "x": 49,
+      "y": 57,
+      "trigger": "WARPNPC OnTouch (dialog)",
+      "dialogNextCount": 2,
+      "menuIndex": 2,
+      "menuText": "Sail to Izlude!",
+      "prerequisite": "isbegin_quest(21008) == 1",
+      "completionSignal": "authoritative map change -> izlude 196,209; completequest 21008; completequest 21001 if begun",
+      "nativeRepresentation": "GO_NPC(#intro_to_izlude, int_land 49,57) + DIALOG_NEXT x2 + DIALOG_MENU_SELECT(2) + EXPECTED_MAP_CHANGE(izlude)",
+      "nativeCapability": "AVAILABLE:EXPECTED_MAP_CHANGE_COMPLETION",
+      "sourceRef": "npc/re/warps/cities/izlude.txt:83-109"
+    },
+    {
+      "id": "academy_training_route",
+      "leg": "iz_ac01 -> new_1-3",
+      "npcName": "Adept Adventurer#ac",
+      "map": "iz_ac01",
+      "x": 45,
+      "y": 80,
+      "trigger": "TALK_NPC (dialog)",
+      "dialogNextCount": 1,
+      "menuIndex": 1,
+      "menuText": "Send me now!",
+      "prerequisite": "quest 2293 ready (else script sets 2293 and closes)",
+      "completionSignal": "authoritative map change -> new_1-3 95,171",
+      "nativeRepresentation": "TALK_NPC + DIALOG_NEXT + DIALOG_MENU_SELECT(1)",
+      "nativeCapability": "AVAILABLE",
+      "sourceRef": "npc/re/jobs/novice/academy.txt:4731 (NPC), :4860-4870 (dialog/warp)"
+    }
+  ],
+  "physicalRecovered": {
+    "id": "academy_return",
+    "leg": "new_1-3 -> iz_ac01",
+    "note": "Not NPC-mediated: physical warp #to_ac01-2. Was NO_ROUTE only because the planner mapIdPattern rejected '-' in 'new_1-3'; fixed.",
+    "route": [{ "map": "new_1-3", "x": 96, "y": 176, "portalTo": "iz_ac01" }, { "map": "iz_ac01", "x": 49, "y": 73 }],
+    "sourceRef": "npc/re/warps/cities/izlude.txt:123"
+  },
+  "resolvedAdapter": {
+    "name": "EXPECTED_MAP_CHANGE_COMPLETION",
+    "owner": "native Persistent Agent quest navigation completion",
+    "description": "The existing native arrival predicate accepts the source trigger approach and completes idempotently after the authoritative destination map change.",
+    "affected": ["ship_exit", "sail_izlude", "academy_training_route"]
+  },
+  "summary": {
+    "npcMediatedRequired": 3,
+    "npcMediatedResolved": 3,
+    "npcMediatedPartial": 0,
+    "npcMediatedMissingCapability": 0,
+    "academyRouteAmbiguous": false,
+    "physicalRoutesCompiled": 10,
+    "physicalRoutesRequired": 13,
+    "expectedMapChangeAdapterMissing": 0
+  }
+}

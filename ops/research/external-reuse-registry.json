@@ -1,0 +1,1654 @@
+{
+  "schemaVersion": 1,
+  "auditMode": "FULL_SCAN",
+  "generatedAt": "2026-09-14T00:00:00+08:00",
+  "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+  "nextRecommendedRefresh": "2026-12-14",
+  "futureDefaultMode": "INCREMENTAL_RESEARCH_ONLY",
+  "reusedPriorResearchCount": 0,
+  "newlyDiscoveredCount": 58,
+  "researchFreshnessPolicy": {
+    "stableFoundationToolsMonths": "6-12",
+    "activeOssMonths": "3-6",
+    "beforeDependencyAdoption": "IMMEDIATE_FRESH_VERIFY",
+    "rejectedCandidates": "NO_REFRESH_WHILE_REJECTION_REASON_HOLDS",
+    "refreshTriggers": [
+      "REGISTRY_DOMAIN_MISSING",
+      "CANDIDATE_STALE",
+      "VERSION_LICENSE_OR_MAINTAINER_CHANGED",
+      "ARCHITECTURE_REQUIREMENTS_CHANGED",
+      "PRE_ADOPTION_FRESH_VERIFICATION",
+      "USER_EXPLICIT_REFRESH"
+    ]
+  },
+  "researchInvalidationRules": {
+    "UPSTREAM_VERSION_CHANGED": "Refresh only the affected entry.",
+    "PROJECT_REQUIREMENT_CHANGED": "Re-evaluate the reuse decision against the new requirement.",
+    "LICENSE_STATUS_UNRESOLVED": "Refresh license/provenance before any adoption.",
+    "INTEGRATION_IMMINENT": "Fresh verify immediately before dependency adoption.",
+    "EVIDENCE_TOO_SHALLOW": "Upgrade to primary-source evidence; do not adopt.",
+    "REGISTRY_TOO_OLD_FOR_FAST_MOVING_DEPENDENCY": "Refresh fast-moving OSS/dependency entries.",
+    "STABLE_ALGORITHM_NOTE": "Stable algorithms and rAthena primitives are evidence-based, not calendar-expired."
+  },
+  "preImplementationReuseGate": {
+    "authority": "docs/pre-implementation-reuse-gate.md",
+    "skill": ".agents/skills/external-ecosystem-reuse/SKILL.md",
+    "evaluator": ".agents/skills/external-ecosystem-reuse/scripts/reuse-gate.mjs",
+    "requiredFor": [
+      "NEW_FEATURE",
+      "NEW_SUBSYSTEM",
+      "NEW_CAPABILITY",
+      "NEW_EXTERNAL_DEPENDENCY",
+      "NEW_MAJOR_ALGORITHM",
+      "REPLACEMENT_OF_EXISTING_SUBSYSTEM"
+    ],
+    "registryWriteBackRequired": true,
+    "openKoreRemoved": "NO"
+  },
+  "entries": [
+    {
+      "id": "ra-player-iterators",
+      "name": "rAthena player iterators",
+      "url": "https://github.com/rathena/rathena/blob/e985006171d2eb320ee512a653f4c83aea3d81b6/src/map/map.hpp",
+      "sourceType": "rAthena",
+      "category": "map iteration",
+      "license": "GPL-3.0",
+      "repository": "rathena/rathena",
+      "version": "e985006171d2eb320ee512a653f4c83aea3d81b6",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-08-21",
+      "status": "REUSE",
+      "rating": "A",
+      "applicableWorklines": [
+        "A",
+        "B",
+        "C",
+        "Future-Life-Social"
+      ],
+      "solves": "線上玩家與 map_session_data 迭代",
+      "integrationCost": "LOW",
+      "maintenanceRisk": "LOW",
+      "licenseRisk": "LOW_WITHIN_EXISTING_GPL_CORE",
+      "notes": "WRAPPER_ONLY_NEEDED：直接呼叫原生 iterator，加入 ownership filter。",
+      "evidenceLinks": [
+        "https://github.com/rathena/rathena/blob/e985006171d2eb320ee512a653f4c83aea3d81b6/src/map/map.hpp"
+      ]
+    },
+    {
+      "id": "ra-map-iteration",
+      "name": "rAthena map iteration",
+      "url": "https://github.com/rathena/rathena/blob/e985006171d2eb320ee512a653f4c83aea3d81b6/src/map/map.cpp",
+      "sourceType": "rAthena",
+      "category": "Navigation",
+      "license": "GPL-3.0",
+      "repository": "rathena/rathena",
+      "version": "e985006171d2eb320ee512a653f4c83aea3d81b6",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-08-21",
+      "status": "REUSE",
+      "rating": "A",
+      "applicableWorklines": [
+        "A",
+        "B",
+        "C",
+        "Future-Life-Social"
+      ],
+      "solves": "地圖、範圍與區塊內實體迭代",
+      "integrationCost": "LOW",
+      "maintenanceRisk": "LOW",
+      "licenseRisk": "LOW_WITHIN_EXISTING_GPL_CORE",
+      "notes": "NATIVE_PRIMITIVE_EXISTS：沿用 map_foreach 系列。",
+      "evidenceLinks": [
+        "https://github.com/rathena/rathena/blob/e985006171d2eb320ee512a653f4c83aea3d81b6/src/map/map.cpp"
+      ]
+    },
+    {
+      "id": "ra-cell-pathfinding",
+      "name": "rAthena cell pathfinding",
+      "url": "https://github.com/rathena/rathena/blob/e985006171d2eb320ee512a653f4c83aea3d81b6/src/map/path.cpp",
+      "sourceType": "rAthena",
+      "category": "Navigation",
+      "license": "GPL-3.0",
+      "repository": "rathena/rathena",
+      "version": "e985006171d2eb320ee512a653f4c83aea3d81b6",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-08-21",
+      "status": "REUSE",
+      "rating": "A",
+      "applicableWorklines": [
+        "A",
+        "B",
+        "C",
+        "Future-Life-Social"
+      ],
+      "solves": "單張地圖 cell path search",
+      "integrationCost": "LOW",
+      "maintenanceRisk": "LOW",
+      "licenseRisk": "LOW_WITHIN_EXISTING_GPL_CORE",
+      "notes": "WRAPPER_ONLY_NEEDED：沿用 path_search_long；跨地圖規劃另做薄封裝。",
+      "evidenceLinks": [
+        "https://github.com/rathena/rathena/blob/e985006171d2eb320ee512a653f4c83aea3d81b6/src/map/path.cpp"
+      ]
+    },
+    {
+      "id": "ra-unit-movement",
+      "name": "rAthena unit movement and attack",
+      "url": "https://github.com/rathena/rathena/blob/e985006171d2eb320ee512a653f4c83aea3d81b6/src/map/unit.cpp",
+      "sourceType": "rAthena",
+      "category": "Navigation / Combat / Auto Attack",
+      "license": "GPL-3.0",
+      "repository": "rathena/rathena",
+      "version": "e985006171d2eb320ee512a653f4c83aea3d81b6",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-08-21",
+      "status": "REUSE",
+      "rating": "A",
+      "applicableWorklines": [
+        "A",
+        "B",
+        "C",
+        "Future-Life-Social"
+      ],
+      "solves": "走路、停止、攻擊與 unit timer",
+      "integrationCost": "LOW",
+      "maintenanceRisk": "LOW",
+      "licenseRisk": "LOW_WITHIN_EXISTING_GPL_CORE",
+      "notes": "WRAPPER_ONLY_NEEDED：Persistent Agent 只負責決策與 token 驗證。",
+      "evidenceLinks": [
+        "https://github.com/rathena/rathena/blob/e985006171d2eb320ee512a653f4c83aea3d81b6/src/map/unit.cpp"
+      ]
+    },
+    {
+      "id": "ra-timer",
+      "name": "rAthena timer subsystem",
+      "url": "https://github.com/rathena/rathena/blob/e985006171d2eb320ee512a653f4c83aea3d81b6/src/map/timer.cpp",
+      "sourceType": "rAthena",
+      "category": "Timer / Callback Lifecycle",
+      "license": "GPL-3.0",
+      "repository": "rathena/rathena",
+      "version": "e985006171d2eb320ee512a653f4c83aea3d81b6",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-08-21",
+      "status": "REUSE",
+      "rating": "A",
+      "applicableWorklines": [
+        "A",
+        "B",
+        "C",
+        "Future-Life-Social"
+      ],
+      "solves": "伺服器 tick、timer registration、cancel",
+      "integrationCost": "LOW",
+      "maintenanceRisk": "LOW",
+      "licenseRisk": "LOW_WITHIN_EXISTING_GPL_CORE",
+      "notes": "WRAPPER_ONLY_NEEDED：補 ownership 與 execution epoch。",
+      "evidenceLinks": [
+        "https://github.com/rathena/rathena/blob/e985006171d2eb320ee512a653f4c83aea3d81b6/src/map/timer.cpp"
+      ]
+    },
+    {
+      "id": "ra-npc-dialog",
+      "name": "rAthena NPC dialog and script runtime",
+      "url": "https://github.com/rathena/rathena/blob/e985006171d2eb320ee512a653f4c83aea3d81b6/src/map/npc.cpp",
+      "sourceType": "rAthena",
+      "category": "NPC / Dialog / Quest Automation",
+      "license": "GPL-3.0",
+      "repository": "rathena/rathena",
+      "version": "e985006171d2eb320ee512a653f4c83aea3d81b6",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-08-21",
+      "status": "REUSE",
+      "rating": "A",
+      "applicableWorklines": [
+        "A",
+        "B",
+        "C",
+        "Future-Life-Social"
+      ],
+      "solves": "NPC click、dialog、script event",
+      "integrationCost": "LOW",
+      "maintenanceRisk": "LOW",
+      "licenseRisk": "LOW_WITHIN_EXISTING_GPL_CORE",
+      "notes": "WRAPPER_ONLY_NEEDED：任務 adapter 應調用正式 NPC primitive。",
+      "evidenceLinks": [
+        "https://github.com/rathena/rathena/blob/e985006171d2eb320ee512a653f4c83aea3d81b6/src/map/npc.cpp"
+      ]
+    },
+    {
+      "id": "ra-party",
+      "name": "rAthena party subsystem",
+      "url": "https://github.com/rathena/rathena/blob/e985006171d2eb320ee512a653f4c83aea3d81b6/src/map/party.cpp",
+      "sourceType": "rAthena",
+      "category": "Party",
+      "license": "GPL-3.0",
+      "repository": "rathena/rathena",
+      "version": "e985006171d2eb320ee512a653f4c83aea3d81b6",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-08-21",
+      "status": "REUSE",
+      "rating": "A",
+      "applicableWorklines": [
+        "A",
+        "B",
+        "C",
+        "Future-Life-Social"
+      ],
+      "solves": "隊伍建立、邀請、分享與儲存",
+      "integrationCost": "LOW",
+      "maintenanceRisk": "LOW",
+      "licenseRisk": "LOW_WITHIN_EXISTING_GPL_CORE",
+      "notes": "NATIVE_PRIMITIVE_EXISTS：直接沿用。",
+      "evidenceLinks": [
+        "https://github.com/rathena/rathena/blob/e985006171d2eb320ee512a653f4c83aea3d81b6/src/map/party.cpp"
+      ]
+    },
+    {
+      "id": "ra-guild",
+      "name": "rAthena guild subsystem",
+      "url": "https://github.com/rathena/rathena/blob/e985006171d2eb320ee512a653f4c83aea3d81b6/src/map/guild.cpp",
+      "sourceType": "rAthena",
+      "category": "Guild",
+      "license": "GPL-3.0",
+      "repository": "rathena/rathena",
+      "version": "e985006171d2eb320ee512a653f4c83aea3d81b6",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-08-21",
+      "status": "REUSE",
+      "rating": "A",
+      "applicableWorklines": [
+        "A",
+        "B",
+        "C",
+        "Future-Life-Social"
+      ],
+      "solves": "公會建立、邀請、成員與儲存",
+      "integrationCost": "LOW",
+      "maintenanceRisk": "LOW",
+      "licenseRisk": "LOW_WITHIN_EXISTING_GPL_CORE",
+      "notes": "NATIVE_PRIMITIVE_EXISTS：直接沿用。",
+      "evidenceLinks": [
+        "https://github.com/rathena/rathena/blob/e985006171d2eb320ee512a653f4c83aea3d81b6/src/map/guild.cpp"
+      ]
+    },
+    {
+      "id": "ra-friend",
+      "name": "rAthena friend subsystem",
+      "url": "https://github.com/rathena/rathena/blob/e985006171d2eb320ee512a653f4c83aea3d81b6/src/map/pc.cpp",
+      "sourceType": "rAthena",
+      "category": "Friend / Social Graph",
+      "license": "GPL-3.0",
+      "repository": "rathena/rathena",
+      "version": "e985006171d2eb320ee512a653f4c83aea3d81b6",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-08-21",
+      "status": "REUSE",
+      "rating": "A",
+      "applicableWorklines": [
+        "A",
+        "B",
+        "C",
+        "Future-Life-Social"
+      ],
+      "solves": "好友清單、邀請與刪除",
+      "integrationCost": "LOW",
+      "maintenanceRisk": "LOW",
+      "licenseRisk": "LOW_WITHIN_EXISTING_GPL_CORE",
+      "notes": "WRAPPER_ONLY_NEEDED：MariaDB/rAthena 為權威，Graphology 僅做分析。",
+      "evidenceLinks": [
+        "https://github.com/rathena/rathena/blob/e985006171d2eb320ee512a653f4c83aea3d81b6/src/map/pc.cpp"
+      ]
+    },
+    {
+      "id": "ra-storage",
+      "name": "rAthena storage subsystem",
+      "url": "https://github.com/rathena/rathena/blob/e985006171d2eb320ee512a653f4c83aea3d81b6/src/map/storage.cpp",
+      "sourceType": "rAthena",
+      "category": "Shop / Storage",
+      "license": "GPL-3.0",
+      "repository": "rathena/rathena",
+      "version": "e985006171d2eb320ee512a653f4c83aea3d81b6",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-08-21",
+      "status": "REUSE",
+      "rating": "A",
+      "applicableWorklines": [
+        "A",
+        "B",
+        "C",
+        "Future-Life-Social"
+      ],
+      "solves": "倉庫開啟、存入、取出與保存",
+      "integrationCost": "LOW",
+      "maintenanceRisk": "LOW",
+      "licenseRisk": "LOW_WITHIN_EXISTING_GPL_CORE",
+      "notes": "WRAPPER_ONLY_NEEDED：補前置條件與交易型流程。",
+      "evidenceLinks": [
+        "https://github.com/rathena/rathena/blob/e985006171d2eb320ee512a653f4c83aea3d81b6/src/map/storage.cpp"
+      ]
+    },
+    {
+      "id": "ra-shop",
+      "name": "rAthena NPC shop subsystem",
+      "url": "https://github.com/rathena/rathena/blob/e985006171d2eb320ee512a653f4c83aea3d81b6/src/map/npc.cpp",
+      "sourceType": "rAthena",
+      "category": "Shop / Storage",
+      "license": "GPL-3.0",
+      "repository": "rathena/rathena",
+      "version": "e985006171d2eb320ee512a653f4c83aea3d81b6",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-08-21",
+      "status": "REUSE",
+      "rating": "A",
+      "applicableWorklines": [
+        "A",
+        "B",
+        "C",
+        "Future-Life-Social"
+      ],
+      "solves": "NPC 買賣與價格規則",
+      "integrationCost": "LOW",
+      "maintenanceRisk": "LOW",
+      "licenseRisk": "LOW_WITHIN_EXISTING_GPL_CORE",
+      "notes": "WRAPPER_ONLY_NEEDED：買賣流程直接進原生 handler。",
+      "evidenceLinks": [
+        "https://github.com/rathena/rathena/blob/e985006171d2eb320ee512a653f4c83aea3d81b6/src/map/npc.cpp"
+      ]
+    },
+    {
+      "id": "ra-autotrade",
+      "name": "rAthena autotrade vending primitive",
+      "url": "https://github.com/rathena/rathena/blob/e985006171d2eb320ee512a653f4c83aea3d81b6/src/map/pc.cpp",
+      "sourceType": "rAthena",
+      "category": "Autotrade / Offline Character",
+      "license": "GPL-3.0",
+      "repository": "rathena/rathena",
+      "version": "e985006171d2eb320ee512a653f4c83aea3d81b6",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-08-21",
+      "status": "REUSE",
+      "rating": "A",
+      "applicableWorklines": [
+        "A",
+        "B",
+        "C",
+        "Future-Life-Social"
+      ],
+      "solves": "離線露天商店與計時退出",
+      "integrationCost": "LOW",
+      "maintenanceRisk": "LOW",
+      "licenseRisk": "LOW_WITHIN_EXISTING_GPL_CORE",
+      "notes": "WRAPPER_ONLY_NEEDED：範圍限 vending/buying store，不等同離線戰鬥角色。",
+      "evidenceLinks": [
+        "https://github.com/rathena/rathena/blob/e985006171d2eb320ee512a653f4c83aea3d81b6/src/map/pc.cpp"
+      ]
+    },
+    {
+      "id": "ra-save",
+      "name": "rAthena character save pipeline",
+      "url": "https://github.com/rathena/rathena/blob/e985006171d2eb320ee512a653f4c83aea3d81b6/src/map/chrif.cpp",
+      "sourceType": "rAthena",
+      "category": "Restart / Reconnect",
+      "license": "GPL-3.0",
+      "repository": "rathena/rathena",
+      "version": "e985006171d2eb320ee512a653f4c83aea3d81b6",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-08-21",
+      "status": "REUSE",
+      "rating": "A",
+      "applicableWorklines": [
+        "A",
+        "B",
+        "C",
+        "Future-Life-Social"
+      ],
+      "solves": "角色狀態持久化與 char-server save",
+      "integrationCost": "LOW",
+      "maintenanceRisk": "LOW",
+      "licenseRisk": "LOW_WITHIN_EXISTING_GPL_CORE",
+      "notes": "NATIVE_PRIMITIVE_EXISTS：所有 Agent 狀態橋接需遵循既有 save 邊界。",
+      "evidenceLinks": [
+        "https://github.com/rathena/rathena/blob/e985006171d2eb320ee512a653f4c83aea3d81b6/src/map/chrif.cpp"
+      ]
+    },
+    {
+      "id": "ra-respawn",
+      "name": "rAthena respawn primitive",
+      "url": "https://github.com/rathena/rathena/blob/e985006171d2eb320ee512a653f4c83aea3d81b6/src/map/pc.cpp",
+      "sourceType": "rAthena",
+      "category": "Recovery",
+      "license": "GPL-3.0",
+      "repository": "rathena/rathena",
+      "version": "e985006171d2eb320ee512a653f4c83aea3d81b6",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-08-21",
+      "status": "REUSE",
+      "rating": "A",
+      "applicableWorklines": [
+        "A",
+        "B",
+        "C",
+        "Future-Life-Social"
+      ],
+      "solves": "死亡重生、存點與重新進圖",
+      "integrationCost": "LOW",
+      "maintenanceRisk": "LOW",
+      "licenseRisk": "LOW_WITHIN_EXISTING_GPL_CORE",
+      "notes": "WRAPPER_ONLY_NEEDED：恢復 policy 只選擇時機與目標。",
+      "evidenceLinks": [
+        "https://github.com/rathena/rathena/blob/e985006171d2eb320ee512a653f4c83aea3d81b6/src/map/pc.cpp"
+      ]
+    },
+    {
+      "id": "ra-item-use",
+      "name": "rAthena item-use primitive",
+      "url": "https://github.com/rathena/rathena/blob/e985006171d2eb320ee512a653f4c83aea3d81b6/src/map/pc.cpp",
+      "sourceType": "rAthena",
+      "category": "Loot / Recovery",
+      "license": "GPL-3.0",
+      "repository": "rathena/rathena",
+      "version": "e985006171d2eb320ee512a653f4c83aea3d81b6",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-08-21",
+      "status": "REUSE",
+      "rating": "A",
+      "applicableWorklines": [
+        "A",
+        "B",
+        "C",
+        "Future-Life-Social"
+      ],
+      "solves": "伺服器權威道具使用與扣除",
+      "integrationCost": "LOW",
+      "maintenanceRisk": "LOW",
+      "licenseRisk": "LOW_WITHIN_EXISTING_GPL_CORE",
+      "notes": "NATIVE_PRIMITIVE_EXISTS：禁止 Dashboard 模擬扣除。",
+      "evidenceLinks": [
+        "https://github.com/rathena/rathena/blob/e985006171d2eb320ee512a653f4c83aea3d81b6/src/map/pc.cpp"
+      ]
+    },
+    {
+      "id": "ra-skill-status",
+      "name": "rAthena skill cast and status",
+      "url": "https://github.com/rathena/rathena/blob/e985006171d2eb320ee512a653f4c83aea3d81b6/src/map/skill.cpp",
+      "sourceType": "rAthena",
+      "category": "Skill / Combat / Auto Attack",
+      "license": "GPL-3.0",
+      "repository": "rathena/rathena",
+      "version": "e985006171d2eb320ee512a653f4c83aea3d81b6",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-08-21",
+      "status": "REUSE",
+      "rating": "A",
+      "applicableWorklines": [
+        "A",
+        "B",
+        "C",
+        "Future-Life-Social"
+      ],
+      "solves": "施法、技能結算與狀態變更",
+      "integrationCost": "LOW",
+      "maintenanceRisk": "LOW",
+      "licenseRisk": "LOW_WITHIN_EXISTING_GPL_CORE",
+      "notes": "WRAPPER_ONLY_NEEDED：Agent 送 intent，由核心驗證與結算。",
+      "evidenceLinks": [
+        "https://github.com/rathena/rathena/blob/e985006171d2eb320ee512a653f4c83aea3d81b6/src/map/skill.cpp"
+      ]
+    },
+    {
+      "id": "ra-quest",
+      "name": "rAthena quest subsystem",
+      "url": "https://github.com/rathena/rathena/blob/e985006171d2eb320ee512a653f4c83aea3d81b6/src/map/quest.cpp",
+      "sourceType": "rAthena",
+      "category": "Quest Automation",
+      "license": "GPL-3.0",
+      "repository": "rathena/rathena",
+      "version": "e985006171d2eb320ee512a653f4c83aea3d81b6",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-08-21",
+      "status": "REUSE",
+      "rating": "A",
+      "applicableWorklines": [
+        "A",
+        "B",
+        "C",
+        "Future-Life-Social"
+      ],
+      "solves": "quest add/delete/status/update 與保存",
+      "integrationCost": "LOW",
+      "maintenanceRisk": "LOW",
+      "licenseRisk": "LOW_WITHIN_EXISTING_GPL_CORE",
+      "notes": "WRAPPER_ONLY_NEEDED：Quest Runtime adapter 保持 rAthena 權威。",
+      "evidenceLinks": [
+        "https://github.com/rathena/rathena/blob/e985006171d2eb320ee512a653f4c83aea3d81b6/src/map/quest.cpp"
+      ]
+    },
+    {
+      "id": "ok-plugin-hooks",
+      "name": "OpenKore plugin hook API",
+      "url": "https://github.com/OpenKore/openkore/blob/51de1ddfc4449ae5217f6886de702f87ca934030/src/Plugins.pm",
+      "sourceType": "OpenKore",
+      "category": "Timer / Callback Lifecycle",
+      "license": "GPL-2.0 (project LICENSE text)",
+      "repository": "OpenKore/openkore",
+      "version": "51de1ddfc4449ae5217f6886de702f87ca934030",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-08-09",
+      "status": "ADOPT_PATTERN",
+      "rating": "B",
+      "applicableWorklines": [
+        "A",
+        "B",
+        "Future-Life-Social"
+      ],
+      "solves": "事件 hook 註冊、解除與 callback 擴充",
+      "integrationCost": "MEDIUM",
+      "maintenanceRisk": "MEDIUM",
+      "licenseRisk": "COPYLEFT_PORTING_REVIEW_REQUIRED",
+      "notes": "插件 callback lifecycle 的需求規格；不移植 Perl code。",
+      "evidenceLinks": [
+        "https://github.com/OpenKore/openkore/blob/51de1ddfc4449ae5217f6886de702f87ca934030/src/Plugins.pm"
+      ]
+    },
+    {
+      "id": "ok-ai-queue",
+      "name": "OpenKore AI action queue",
+      "url": "https://github.com/OpenKore/openkore/blob/51de1ddfc4449ae5217f6886de702f87ca934030/src/AI.pm",
+      "sourceType": "OpenKore",
+      "category": "State Machine / Task executor",
+      "license": "GPL-2.0 (project LICENSE text)",
+      "repository": "OpenKore/openkore",
+      "version": "51de1ddfc4449ae5217f6886de702f87ca934030",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-08-09",
+      "status": "ADOPT_PATTERN",
+      "rating": "B",
+      "applicableWorklines": [
+        "A",
+        "B",
+        "Future-Life-Social"
+      ],
+      "solves": "互斥 action queue、流程切換與前置條件",
+      "integrationCost": "MEDIUM",
+      "maintenanceRisk": "MEDIUM",
+      "licenseRisk": "COPYLEFT_PORTING_REVIEW_REQUIRED",
+      "notes": "抽取行為與失敗狀態；server ownership 與 epoch 仍由本專案控制。",
+      "evidenceLinks": [
+        "https://github.com/OpenKore/openkore/blob/51de1ddfc4449ae5217f6886de702f87ca934030/src/AI.pm"
+      ]
+    },
+    {
+      "id": "ok-eventmacro",
+      "name": "OpenKore eventMacro",
+      "url": "https://github.com/OpenKore/openkore/blob/51de1ddfc4449ae5217f6886de702f87ca934030/plugins/eventMacro/README.md",
+      "sourceType": "OpenKore",
+      "category": "Quest Automation / AI / Utility Decision",
+      "license": "GPL-2.0 (project LICENSE text)",
+      "repository": "OpenKore/openkore",
+      "version": "51de1ddfc4449ae5217f6886de702f87ca934030",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-08-09",
+      "status": "ADOPT_PATTERN",
+      "rating": "B",
+      "applicableWorklines": [
+        "A",
+        "B",
+        "Future-Life-Social"
+      ],
+      "solves": "data-driven 條件、事件與 macro dispatch",
+      "integrationCost": "MEDIUM",
+      "maintenanceRisk": "MEDIUM",
+      "licenseRisk": "COPYLEFT_PORTING_REVIEW_REQUIRED",
+      "notes": "ADOPT_PATTERN；保留 Condition AST 與型別驗證。",
+      "evidenceLinks": [
+        "https://github.com/OpenKore/openkore/blob/51de1ddfc4449ae5217f6886de702f87ca934030/plugins/eventMacro/README.md"
+      ]
+    },
+    {
+      "id": "ok-reactonnpc",
+      "name": "OpenKore reactOnNPC",
+      "url": "https://github.com/OpenKore/openkore/blob/51de1ddfc4449ae5217f6886de702f87ca934030/plugins/needs-review/reactOnNPC/trunk/reactOnNPC.pl",
+      "sourceType": "OpenKore",
+      "category": "NPC / Dialog",
+      "license": "GPL-2.0 (project LICENSE text)",
+      "repository": "OpenKore/openkore",
+      "version": "51de1ddfc4449ae5217f6886de702f87ca934030",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-08-09",
+      "status": "REFERENCE_ONLY",
+      "rating": "C",
+      "applicableWorklines": [
+        "A",
+        "B",
+        "Future-Life-Social"
+      ],
+      "solves": "以 NPC 文字與選項觸發動作",
+      "integrationCost": "MEDIUM",
+      "maintenanceRisk": "HIGH",
+      "licenseRisk": "COPYLEFT_PORTING_REVIEW_REQUIRED",
+      "notes": "REFERENCE_ONLY；位於 needs-review，文字匹配脆弱。",
+      "evidenceLinks": [
+        "https://github.com/OpenKore/openkore/blob/51de1ddfc4449ae5217f6886de702f87ca934030/plugins/needs-review/reactOnNPC/trunk/reactOnNPC.pl"
+      ]
+    },
+    {
+      "id": "ok-routing",
+      "name": "OpenKore routing and map transition",
+      "url": "https://github.com/OpenKore/openkore/blob/51de1ddfc4449ae5217f6886de702f87ca934030/src/Task/Route.pm",
+      "sourceType": "OpenKore",
+      "category": "Navigation",
+      "license": "GPL-2.0 (project LICENSE text)",
+      "repository": "OpenKore/openkore",
+      "version": "51de1ddfc4449ae5217f6886de702f87ca934030",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-08-09",
+      "status": "ADOPT_PATTERN",
+      "rating": "B",
+      "applicableWorklines": [
+        "A",
+        "B",
+        "Future-Life-Social"
+      ],
+      "solves": "跨地圖 route、portal、teleport 與 stuck recovery",
+      "integrationCost": "MEDIUM",
+      "maintenanceRisk": "MEDIUM",
+      "licenseRisk": "COPYLEFT_PORTING_REVIEW_REQUIRED",
+      "notes": "轉成導航驗收案例；底層移動改用 rAthena unit/path primitive。",
+      "evidenceLinks": [
+        "https://github.com/OpenKore/openkore/blob/51de1ddfc4449ae5217f6886de702f87ca934030/src/Task/Route.pm"
+      ]
+    },
+    {
+      "id": "ok-storageauto",
+      "name": "OpenKore storageAuto",
+      "url": "https://github.com/OpenKore/openkore/blob/51de1ddfc4449ae5217f6886de702f87ca934030/src/AI.pm",
+      "sourceType": "OpenKore",
+      "category": "Shop / Storage / Loot",
+      "license": "GPL-2.0 (project LICENSE text)",
+      "repository": "OpenKore/openkore",
+      "version": "51de1ddfc4449ae5217f6886de702f87ca934030",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-08-09",
+      "status": "ADOPT_PATTERN",
+      "rating": "B",
+      "applicableWorklines": [
+        "A",
+        "B",
+        "Future-Life-Social"
+      ],
+      "solves": "負重與格數門檻觸發存倉流程",
+      "integrationCost": "MEDIUM",
+      "maintenanceRisk": "MEDIUM",
+      "licenseRisk": "COPYLEFT_PORTING_REVIEW_REQUIRED",
+      "notes": "轉成補給狀態機規格，保留 idempotency 與 timeout。",
+      "evidenceLinks": [
+        "https://github.com/OpenKore/openkore/blob/51de1ddfc4449ae5217f6886de702f87ca934030/src/AI.pm"
+      ]
+    },
+    {
+      "id": "ok-buy-sell",
+      "name": "OpenKore buyAuto and sellAuto",
+      "url": "https://github.com/OpenKore/openkore/blob/51de1ddfc4449ae5217f6886de702f87ca934030/control/config.txt",
+      "sourceType": "OpenKore",
+      "category": "Shop / Storage",
+      "license": "GPL-2.0 (project LICENSE text)",
+      "repository": "OpenKore/openkore",
+      "version": "51de1ddfc4449ae5217f6886de702f87ca934030",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-08-09",
+      "status": "ADOPT_PATTERN",
+      "rating": "B",
+      "applicableWorklines": [
+        "A",
+        "B",
+        "Future-Life-Social"
+      ],
+      "solves": "補貨、販售、批次與 NPC steps",
+      "integrationCost": "MEDIUM",
+      "maintenanceRisk": "MEDIUM",
+      "licenseRisk": "COPYLEFT_PORTING_REVIEW_REQUIRED",
+      "notes": "轉成 server-side shop precondition 與 retry 規格。",
+      "evidenceLinks": [
+        "https://github.com/OpenKore/openkore/blob/51de1ddfc4449ae5217f6886de702f87ca934030/control/config.txt"
+      ]
+    },
+    {
+      "id": "ok-social-auto",
+      "name": "OpenKore party/friend/guild automation",
+      "url": "https://github.com/OpenKore/openkore/blob/51de1ddfc4449ae5217f6886de702f87ca934030/control/config.txt",
+      "sourceType": "OpenKore",
+      "category": "Party / Friend / Guild",
+      "license": "GPL-2.0 (project LICENSE text)",
+      "repository": "OpenKore/openkore",
+      "version": "51de1ddfc4449ae5217f6886de702f87ca934030",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-08-09",
+      "status": "ADOPT_PATTERN",
+      "rating": "C",
+      "applicableWorklines": [
+        "A",
+        "B",
+        "Future-Life-Social"
+      ],
+      "solves": "隊伍接受、分享與社交邀請 policy",
+      "integrationCost": "MEDIUM",
+      "maintenanceRisk": "MEDIUM",
+      "licenseRisk": "COPYLEFT_PORTING_REVIEW_REQUIRED",
+      "notes": "僅借 policy；所有寫入走 rAthena native subsystem。",
+      "evidenceLinks": [
+        "https://github.com/OpenKore/openkore/blob/51de1ddfc4449ae5217f6886de702f87ca934030/control/config.txt"
+      ]
+    },
+    {
+      "id": "ok-reconnect",
+      "name": "OpenKore reconnect backoff",
+      "url": "https://github.com/OpenKore/openkore/blob/51de1ddfc4449ae5217f6886de702f87ca934030/plugins/reconnect/reconnect.pl",
+      "sourceType": "OpenKore",
+      "category": "Restart / Reconnect",
+      "license": "GPL-2.0 (project LICENSE text)",
+      "repository": "OpenKore/openkore",
+      "version": "51de1ddfc4449ae5217f6886de702f87ca934030",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-08-09",
+      "status": "ADOPT_PATTERN",
+      "rating": "B",
+      "applicableWorklines": [
+        "A",
+        "B",
+        "Future-Life-Social"
+      ],
+      "solves": "backoff、jitter、重連與反覆斷線降載",
+      "integrationCost": "MEDIUM",
+      "maintenanceRisk": "MEDIUM",
+      "licenseRisk": "COPYLEFT_PORTING_REVIEW_REQUIRED",
+      "notes": "採用 backoff pattern；角色 ownership 重取需由 CAS 保護。",
+      "evidenceLinks": [
+        "https://github.com/OpenKore/openkore/blob/51de1ddfc4449ae5217f6886de702f87ca934030/plugins/reconnect/reconnect.pl"
+      ]
+    },
+    {
+      "id": "ok-combat-loot-recovery",
+      "name": "OpenKore combat loot recovery configuration",
+      "url": "https://github.com/OpenKore/openkore/blob/51de1ddfc4449ae5217f6886de702f87ca934030/control/config.txt",
+      "sourceType": "OpenKore",
+      "category": "Combat / Loot / Recovery",
+      "license": "GPL-2.0 (project LICENSE text)",
+      "repository": "OpenKore/openkore",
+      "version": "51de1ddfc4449ae5217f6886de702f87ca934030",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-08-09",
+      "status": "ADOPT_PATTERN",
+      "rating": "B",
+      "applicableWorklines": [
+        "A",
+        "B",
+        "Future-Life-Social"
+      ],
+      "solves": "攻擊、撿取、回血、重量與排程互斥條件",
+      "integrationCost": "MEDIUM",
+      "maintenanceRisk": "MEDIUM",
+      "licenseRisk": "COPYLEFT_PORTING_REVIEW_REQUIRED",
+      "notes": "轉成 Persistent Agent 的 acceptance matrix，不沿用 packet bot 實作。",
+      "evidenceLinks": [
+        "https://github.com/OpenKore/openkore/blob/51de1ddfc4449ae5217f6886de702f87ca934030/control/config.txt"
+      ]
+    },
+    {
+      "id": "herc-hpm-api",
+      "name": "Hercules Plugin Manager hooks",
+      "url": "https://github.com/HerculesWS/Hercules",
+      "sourceType": "HPM",
+      "category": "Timer / Callback Lifecycle",
+      "license": "GPL-3.0",
+      "repository": "HerculesWS/Hercules",
+      "version": "410b9738f0eb91b20c0ecb5e1a3f78e844eb8f17",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-07-21",
+      "status": "ADOPT_PATTERN",
+      "rating": "B",
+      "applicableWorklines": [
+        "A",
+        "B",
+        "Future-Life-Social"
+      ],
+      "solves": "server hook ABI 與 plugin lifecycle",
+      "integrationCost": "MEDIUM",
+      "maintenanceRisk": "MEDIUM",
+      "licenseRisk": "COPYLEFT_PORTING_REVIEW_REQUIRED",
+      "notes": "借 hook 邊界設計；rAthena core 無 HPM ABI。",
+      "evidenceLinks": [
+        "https://github.com/HerculesWS/Hercules",
+        "https://github.com/HerculesWS/Hercules"
+      ]
+    },
+    {
+      "id": "hpm-autoattack",
+      "name": "HPM @autoattack plugin",
+      "url": "https://github.com/dastgirp/HPM-Plugins/blob/master/src/plugins/%40autoattack.c",
+      "sourceType": "HPM",
+      "category": "Combat / Auto Attack",
+      "license": "GPL-3.0",
+      "repository": "dastgirp/HPM-Plugins",
+      "version": "54d99a39f98074e4c152c662b8c20a089263d23a",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2023-02-24",
+      "status": "REFERENCE_ONLY",
+      "rating": "C",
+      "applicableWorklines": [
+        "A",
+        "B",
+        "Future-Life-Social"
+      ],
+      "solves": "伺服器端自動鎖敵、攻擊與漫遊 primitive 可行性",
+      "integrationCost": "HIGH",
+      "maintenanceRisk": "HIGH",
+      "licenseRisk": "COPYLEFT_PORTING_REVIEW_REQUIRED",
+      "notes": "實作簡單且年代久；僅作 primitive 可行性證據。",
+      "evidenceLinks": [
+        "https://github.com/dastgirp/HPM-Plugins/blob/master/src/plugins/%40autoattack.c",
+        "https://board.herc.ws/threads/error-hpmdatacheck-plugin-afk-and-autoattack.9393/"
+      ]
+    },
+    {
+      "id": "hpm-restock",
+      "name": "HPM restock and storeit plugins",
+      "url": "https://github.com/dastgirp/HPM-Plugins",
+      "sourceType": "HPM",
+      "category": "Shop / Storage",
+      "license": "GPL-3.0",
+      "repository": "dastgirp/HPM-Plugins",
+      "version": "54d99a39f98074e4c152c662b8c20a089263d23a",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2023-02-24",
+      "status": "REFERENCE_ONLY",
+      "rating": "C",
+      "applicableWorklines": [
+        "A",
+        "B",
+        "Future-Life-Social"
+      ],
+      "solves": "補貨與存倉命令行為",
+      "integrationCost": "HIGH",
+      "maintenanceRisk": "HIGH",
+      "licenseRisk": "COPYLEFT_PORTING_REVIEW_REQUIRED",
+      "notes": "需重編譯且 API 漂移風險高。",
+      "evidenceLinks": [
+        "https://github.com/dastgirp/HPM-Plugins",
+        "https://board.herc.ws/threads/error-hpmdatacheck-plugin-afk-and-autoattack.9393/"
+      ]
+    },
+    {
+      "id": "hpm-script-mapquit",
+      "name": "HPM script_mapquit plugin",
+      "url": "https://github.com/dastgirp/HPM-Plugins",
+      "sourceType": "HPM",
+      "category": "Restart / Reconnect",
+      "license": "GPL-3.0",
+      "repository": "dastgirp/HPM-Plugins",
+      "version": "54d99a39f98074e4c152c662b8c20a089263d23a",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2023-02-24",
+      "status": "REFERENCE_ONLY",
+      "rating": "C",
+      "applicableWorklines": [
+        "A",
+        "B",
+        "Future-Life-Social"
+      ],
+      "solves": "離圖/登出 script hook",
+      "integrationCost": "HIGH",
+      "maintenanceRisk": "HIGH",
+      "licenseRisk": "COPYLEFT_PORTING_REVIEW_REQUIRED",
+      "notes": "僅借 lifecycle hook 位置。",
+      "evidenceLinks": [
+        "https://github.com/dastgirp/HPM-Plugins",
+        "https://board.herc.ws/threads/error-hpmdatacheck-plugin-afk-and-autoattack.9393/"
+      ]
+    },
+    {
+      "id": "herc-autotrade",
+      "name": "Hercules autotrade primitive",
+      "url": "https://github.com/HerculesWS/Hercules",
+      "sourceType": "Hercules",
+      "category": "Autotrade / Offline Character",
+      "license": "GPL-3.0",
+      "repository": "HerculesWS/Hercules",
+      "version": "410b9738f0eb91b20c0ecb5e1a3f78e844eb8f17",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-07-21",
+      "status": "ADOPT_PATTERN",
+      "rating": "B",
+      "applicableWorklines": [
+        "A",
+        "B",
+        "Future-Life-Social"
+      ],
+      "solves": "offline vending lifecycle 與 map quit persistence",
+      "integrationCost": "MEDIUM",
+      "maintenanceRisk": "MEDIUM",
+      "licenseRisk": "COPYLEFT_PORTING_REVIEW_REQUIRED",
+      "notes": "只證明離線商店 primitive；不等同全角色離線 AI。",
+      "evidenceLinks": [
+        "https://github.com/HerculesWS/Hercules",
+        "https://github.com/HerculesWS/Hercules"
+      ]
+    },
+    {
+      "id": "forum-afk-dummy",
+      "name": "Hercules AFK dummy player forum plugin",
+      "url": "https://board.herc.ws/threads/plugin-for-id-not-active-be-afk-player.11312/",
+      "sourceType": "Forum",
+      "category": "Autotrade / Offline Character",
+      "license": "Unknown",
+      "repository": "Hercules forum",
+      "version": null,
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "historical",
+      "status": "REJECT",
+      "rating": "D",
+      "applicableWorklines": [
+        "A",
+        "B",
+        "Future-Life-Social"
+      ],
+      "solves": "以 dummy/autotrade 模擬離線玩家",
+      "integrationCost": "PROHIBITIVE",
+      "maintenanceRisk": "HIGH",
+      "licenseRisk": "BLOCKER",
+      "notes": "無清楚授權、unsafe shortcut、缺 restart/test 證據。",
+      "evidenceLinks": [
+        "https://board.herc.ws/threads/plugin-for-id-not-active-be-afk-player.11312/",
+        "https://board.herc.ws/threads/plugin-for-id-not-active-be-afk-player.11312/"
+      ]
+    },
+    {
+      "id": "hist-eathena",
+      "name": "eAthena historical source",
+      "url": "https://github.com/eathena/eathena",
+      "sourceType": "rAthena",
+      "category": "Historical architecture",
+      "license": "GPL-3.0",
+      "repository": "eathena/eathena",
+      "version": "0cb07145",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2014-12-20",
+      "status": "REJECT",
+      "rating": "D",
+      "applicableWorklines": [
+        "A",
+        "B",
+        "Future-Life-Social"
+      ],
+      "solves": "歷史 lineage 與舊 packet/server patterns",
+      "integrationCost": "PROHIBITIVE",
+      "maintenanceRisk": "HIGH",
+      "licenseRisk": "COPYLEFT_PORTING_REVIEW_REQUIRED",
+      "notes": "多年無維護，只供歷史背景。",
+      "evidenceLinks": [
+        "https://github.com/eathena/eathena"
+      ]
+    },
+    {
+      "id": "forum-rathena-autopilot",
+      "name": "rAthena server-side autopilot forum release",
+      "url": "https://rathena.org/board/topic/119137-server-side-ai-command-autopilot/",
+      "sourceType": "Forum",
+      "category": "Combat / Navigation",
+      "license": "Unknown",
+      "repository": "rAthena forum",
+      "version": null,
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "historical",
+      "status": "REJECT",
+      "rating": "D",
+      "applicableWorklines": [
+        "A",
+        "B",
+        "Future-Life-Social"
+      ],
+      "solves": "server-side autopilot prototype",
+      "integrationCost": "HIGH",
+      "maintenanceRisk": "HIGH",
+      "licenseRisk": "BLOCKER",
+      "notes": "作者公開承認 stuck 問題，授權不清。",
+      "evidenceLinks": [
+        "https://rathena.org/board/topic/119137-server-side-ai-command-autopilot/"
+      ]
+    },
+    {
+      "id": "forum-rathena-autocombat",
+      "name": "rAthena auto combat showcase",
+      "url": "https://rathena.org/board/topic/148752-showcase-auto-combat-feature-%E2%80%94-rathena-automation/",
+      "sourceType": "Forum",
+      "category": "Combat / Auto Attack",
+      "license": "Unknown",
+      "repository": "rAthena forum",
+      "version": null,
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026",
+      "status": "REFERENCE_ONLY",
+      "rating": "C",
+      "applicableWorklines": [
+        "A",
+        "B",
+        "Future-Life-Social"
+      ],
+      "solves": "近期 server-side automation UI 與行為展示",
+      "integrationCost": "MEDIUM",
+      "maintenanceRisk": "MEDIUM",
+      "licenseRisk": "BLOCKER",
+      "notes": "只有 showcase，未確認可重用授權與測試。",
+      "evidenceLinks": [
+        "https://rathena.org/board/topic/148752-showcase-auto-combat-feature-%E2%80%94-rathena-automation/"
+      ]
+    },
+    {
+      "id": "forum-rathena-autotrade2",
+      "name": "rAthena AutoTrade2 release",
+      "url": "https://rathena.org/board/topic/149428-release-offline-vending-system-autotrade2/",
+      "sourceType": "Forum",
+      "category": "Autotrade / Offline Character",
+      "license": "Unknown",
+      "repository": "rAthena forum",
+      "version": null,
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026",
+      "status": "REFERENCE_ONLY",
+      "rating": "C",
+      "applicableWorklines": [
+        "A",
+        "B",
+        "Future-Life-Social"
+      ],
+      "solves": "NPC clone 型離線露天商店",
+      "integrationCost": "MEDIUM",
+      "maintenanceRisk": "MEDIUM",
+      "licenseRisk": "BLOCKER",
+      "notes": "僅供 lifecycle 設計參考，導入前需 fresh license/source review。",
+      "evidenceLinks": [
+        "https://rathena.org/board/topic/149428-release-offline-vending-system-autotrade2/"
+      ]
+    },
+    {
+      "id": "oss-xstate",
+      "name": "XState",
+      "url": "https://github.com/statelyai/xstate",
+      "sourceType": "Generic OSS",
+      "category": "State Machine / Actor model",
+      "license": "MIT",
+      "repository": "statelyai/xstate",
+      "version": "a76139b6",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-09-12",
+      "status": "ADOPT_PATTERN",
+      "rating": "B",
+      "applicableWorklines": [
+        "A",
+        "C",
+        "Future-Life-Social"
+      ],
+      "solves": "statechart、actor、persisted snapshot 與 model-based test",
+      "integrationCost": "MEDIUM",
+      "maintenanceRisk": "LOW",
+      "licenseRisk": "LOW",
+      "notes": "Web control-plane FSM 可借型別化 transition；不替換 C++ authoritative agent。",
+      "evidenceLinks": [
+        "https://github.com/statelyai/xstate"
+      ]
+    },
+    {
+      "id": "oss-boost-sml",
+      "name": "Boost.SML",
+      "url": "https://github.com/boost-ext/sml",
+      "sourceType": "Generic OSS",
+      "category": "State Machine",
+      "license": "BSL-1.0",
+      "repository": "boost-ext/sml",
+      "version": "2074a7e8",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-08-09",
+      "status": "ADOPT_PATTERN",
+      "rating": "B",
+      "applicableWorklines": [
+        "A",
+        "B"
+      ],
+      "solves": "header-only C++ compile-time FSM",
+      "integrationCost": "MEDIUM",
+      "maintenanceRisk": "LOW",
+      "licenseRisk": "LOW",
+      "notes": "適合新孤立 FSM spike；現有已實作狀態機先 KEEP_OURS。",
+      "evidenceLinks": [
+        "https://github.com/boost-ext/sml"
+      ]
+    },
+    {
+      "id": "oss-behaviortree-cpp",
+      "name": "BehaviorTree.CPP",
+      "url": "https://github.com/BehaviorTree/BehaviorTree.CPP",
+      "sourceType": "Generic OSS",
+      "category": "AI / Utility Decision",
+      "license": "MIT",
+      "repository": "BehaviorTree/BehaviorTree.CPP",
+      "version": "9b63b505",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-08-31",
+      "status": "REUSE",
+      "rating": "A",
+      "applicableWorklines": [
+        "Future-Life-Social"
+      ],
+      "solves": "async behavior tree、XML data-driven tree、logging/replay",
+      "integrationCost": "MEDIUM",
+      "maintenanceRisk": "LOW",
+      "licenseRisk": "LOW",
+      "notes": "Life/Social 決策層首選評估；導入前做 deterministic server tick spike。",
+      "evidenceLinks": [
+        "https://github.com/BehaviorTree/BehaviorTree.CPP"
+      ]
+    },
+    {
+      "id": "oss-taskflow",
+      "name": "Taskflow",
+      "url": "https://github.com/taskflow/taskflow",
+      "sourceType": "Generic OSS",
+      "category": "Task / Step Executor",
+      "license": "MIT",
+      "repository": "taskflow/taskflow",
+      "version": "7cf5ddb9",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-09-14",
+      "status": "REFERENCE_ONLY",
+      "rating": "C",
+      "applicableWorklines": [
+        "A",
+        "B"
+      ],
+      "solves": "C++ task graph 與 work-stealing executor",
+      "integrationCost": "HIGH",
+      "maintenanceRisk": "LOW",
+      "licenseRisk": "LOW",
+      "notes": "適合 CPU DAG；遊戲 authoritative action queue 不需要 parallel executor。",
+      "evidenceLinks": [
+        "https://github.com/taskflow/taskflow"
+      ]
+    },
+    {
+      "id": "oss-caf",
+      "name": "C++ Actor Framework",
+      "url": "https://github.com/actor-framework/actor-framework",
+      "sourceType": "Generic OSS",
+      "category": "Actor Model / Agent Scheduler",
+      "license": "BSD-3-Clause",
+      "repository": "actor-framework/actor-framework",
+      "version": "ff5db5c8",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-08-29",
+      "status": "REFERENCE_ONLY",
+      "rating": "C",
+      "applicableWorklines": [
+        "A",
+        "Future-Life-Social"
+      ],
+      "solves": "C++ actors、message passing、metrics、networking",
+      "integrationCost": "HIGH",
+      "maintenanceRisk": "LOW",
+      "licenseRisk": "LOW",
+      "notes": "架構參考；全量導入會擴大 runtime 與 ownership 複雜度。",
+      "evidenceLinks": [
+        "https://github.com/actor-framework/actor-framework"
+      ]
+    },
+    {
+      "id": "oss-bullmq",
+      "name": "BullMQ",
+      "url": "https://github.com/taskforcesh/bullmq",
+      "sourceType": "Generic OSS",
+      "category": "Job Queue",
+      "license": "MIT",
+      "repository": "taskforcesh/bullmq",
+      "version": "017227e0",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-09-14",
+      "status": "REFERENCE_ONLY",
+      "rating": "C",
+      "applicableWorklines": [
+        "A",
+        "C"
+      ],
+      "solves": "durable queue、retry、dedupe、flows",
+      "integrationCost": "HIGH",
+      "maintenanceRisk": "LOW",
+      "licenseRisk": "LOW",
+      "notes": "只在跨程序非即時工作需要 durability 時評估；新增 Redis/PostgreSQL 成本高。",
+      "evidenceLinks": [
+        "https://github.com/taskforcesh/bullmq"
+      ]
+    },
+    {
+      "id": "oss-pino",
+      "name": "Pino",
+      "url": "https://github.com/pinojs/pino",
+      "sourceType": "Generic OSS",
+      "category": "Structured Event Log",
+      "license": "MIT",
+      "repository": "pinojs/pino",
+      "version": "1de1212b",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-09-05",
+      "status": "REUSE",
+      "rating": "A",
+      "applicableWorklines": [
+        "A",
+        "C",
+        "Future-Life-Social"
+      ],
+      "solves": "低負載結構化 JSON log、redaction、worker transport",
+      "integrationCost": "LOW",
+      "maintenanceRisk": "LOW",
+      "licenseRisk": "LOW",
+      "notes": "Node control plane 直接評估；事件 schema 仍由本專案定義。",
+      "evidenceLinks": [
+        "https://github.com/pinojs/pino"
+      ]
+    },
+    {
+      "id": "oss-otel-js",
+      "name": "OpenTelemetry JS",
+      "url": "https://github.com/open-telemetry/opentelemetry-js",
+      "sourceType": "Generic OSS",
+      "category": "Event Log / Rollout Telemetry",
+      "license": "Apache-2.0",
+      "repository": "open-telemetry/opentelemetry-js",
+      "version": "3d1d427a",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-09-10",
+      "status": "REUSE",
+      "rating": "A",
+      "applicableWorklines": [
+        "A",
+        "C"
+      ],
+      "solves": "trace、metric、log correlation 與 exporter 標準",
+      "integrationCost": "MEDIUM",
+      "maintenanceRisk": "LOW",
+      "licenseRisk": "LOW",
+      "notes": "採漸進 instrumentation；不讓 telemetry 成為控制權威。",
+      "evidenceLinks": [
+        "https://github.com/open-telemetry/opentelemetry-js"
+      ]
+    },
+    {
+      "id": "oss-lru-cache",
+      "name": "lru-cache",
+      "url": "https://github.com/isaacs/node-lru-cache",
+      "sourceType": "Generic OSS",
+      "category": "Projection Cache",
+      "license": "BlueOak-1.0.0",
+      "repository": "isaacs/node-lru-cache",
+      "version": "16b3a916",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-07-07",
+      "status": "REUSE",
+      "rating": "A",
+      "applicableWorklines": [
+        "C"
+      ],
+      "solves": "bounded LRU、TTL、size cap、AbortSignal fetch",
+      "integrationCost": "LOW",
+      "maintenanceRisk": "LOW",
+      "licenseRisk": "LOW",
+      "notes": "取代自寫 eviction/TTL wheel；projection source 仍可重建。",
+      "evidenceLinks": [
+        "https://github.com/isaacs/node-lru-cache"
+      ]
+    },
+    {
+      "id": "oss-fast-check",
+      "name": "fast-check",
+      "url": "https://github.com/dubzzz/fast-check",
+      "sourceType": "Generic OSS",
+      "category": "Deterministic Test Fixture",
+      "license": "MIT",
+      "repository": "dubzzz/fast-check",
+      "version": "014cc87e",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-09-13",
+      "status": "REUSE",
+      "rating": "A",
+      "applicableWorklines": [
+        "A",
+        "B",
+        "C",
+        "Future-Life-Social"
+      ],
+      "solves": "property/model-based testing、seed/path replay",
+      "integrationCost": "LOW",
+      "maintenanceRisk": "LOW",
+      "licenseRisk": "LOW",
+      "notes": "用於 lifecycle、FSM、quest adapter 與 projection invariants。",
+      "evidenceLinks": [
+        "https://github.com/dubzzz/fast-check"
+      ]
+    },
+    {
+      "id": "oss-k6",
+      "name": "Grafana k6",
+      "url": "https://github.com/grafana/k6",
+      "sourceType": "Generic OSS",
+      "category": "Load Test",
+      "license": "AGPL-3.0",
+      "repository": "grafana/k6",
+      "version": "8d061147",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-09-11",
+      "status": "REUSE",
+      "rating": "A",
+      "applicableWorklines": [
+        "C"
+      ],
+      "solves": "HTTP、SSE/WebSocket load 與 threshold",
+      "integrationCost": "LOW",
+      "maintenanceRisk": "LOW",
+      "licenseRisk": "EXTERNAL_TOOL_ONLY",
+      "notes": "僅作外部測試工具，不嵌入或衍生 production binary。",
+      "evidenceLinks": [
+        "https://github.com/grafana/k6"
+      ]
+    },
+    {
+      "id": "oss-artillery",
+      "name": "Artillery",
+      "url": "https://github.com/artilleryio/artillery",
+      "sourceType": "Generic OSS",
+      "category": "Load Test",
+      "license": "MPL-2.0",
+      "repository": "artilleryio/artillery",
+      "version": "5bcfa94c",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-08-14",
+      "status": "REUSE",
+      "rating": "B",
+      "applicableWorklines": [
+        "C"
+      ],
+      "solves": "HTTP、WebSocket、Playwright load test",
+      "integrationCost": "LOW",
+      "maintenanceRisk": "LOW",
+      "licenseRisk": "FILE_LEVEL_COPYLEFT_REVIEW",
+      "notes": "適合 Dashboard 玩家流程負載；與 k6 擇一作主要工具。",
+      "evidenceLinks": [
+        "https://github.com/artilleryio/artillery"
+      ]
+    },
+    {
+      "id": "oss-graphology",
+      "name": "Graphology",
+      "url": "https://github.com/graphology/graphology",
+      "sourceType": "Generic OSS",
+      "category": "Relationship Graph",
+      "license": "MIT",
+      "repository": "graphology/graphology",
+      "version": "65e278f0",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-09-02",
+      "status": "REUSE",
+      "rating": "A",
+      "applicableWorklines": [
+        "Future-Life-Social"
+      ],
+      "solves": "JS graph structure、traversal 與 graph algorithms",
+      "integrationCost": "LOW",
+      "maintenanceRisk": "LOW",
+      "licenseRisk": "LOW",
+      "notes": "可用於關係分析與推薦；rAthena/MariaDB 保持社交權威。",
+      "evidenceLinks": [
+        "https://github.com/graphology/graphology"
+      ]
+    },
+    {
+      "id": "oss-temporal",
+      "name": "Temporal",
+      "url": "https://github.com/temporalio/temporal",
+      "sourceType": "Generic OSS",
+      "category": "Durable Workflow / Event Sourcing",
+      "license": "MIT",
+      "repository": "temporalio/temporal",
+      "version": "9ab3a9f",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-09-11",
+      "status": "REJECT",
+      "rating": "D",
+      "applicableWorklines": [
+        "A",
+        "Future-Life-Social"
+      ],
+      "solves": "durable workflow、retry 與 replay",
+      "integrationCost": "PROHIBITIVE",
+      "maintenanceRisk": "LOW",
+      "licenseRisk": "LOW",
+      "notes": "目前規模會重複 ownership/lifecycle 基礎設施並新增獨立 cluster。",
+      "evidenceLinks": [
+        "https://github.com/temporalio/temporal"
+      ]
+    },
+    {
+      "id": "oss-ajv",
+      "name": "Ajv",
+      "url": "https://github.com/ajv-validator/ajv",
+      "sourceType": "Generic OSS",
+      "category": "Schema / Preconditions",
+      "license": "MIT",
+      "repository": "ajv-validator/ajv",
+      "version": "f177fe32",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-04-24",
+      "status": "REUSE",
+      "rating": "A",
+      "applicableWorklines": [
+        "A",
+        "B",
+        "C"
+      ],
+      "solves": "JSON Schema validation 與 compiled validator",
+      "integrationCost": "LOW",
+      "maintenanceRisk": "LOW",
+      "licenseRisk": "LOW",
+      "notes": "用於 API、registry、quest definition schema；schema 必須受信任並 compile once。",
+      "evidenceLinks": [
+        "https://github.com/ajv-validator/ajv"
+      ]
+    },
+    {
+      "id": "oss-cockatiel",
+      "name": "Cockatiel",
+      "url": "https://github.com/connor4312/cockatiel",
+      "sourceType": "Generic OSS",
+      "category": "Retry / Timeout Policy",
+      "license": "MIT",
+      "repository": "connor4312/cockatiel",
+      "version": "80b5ed67",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-09-06",
+      "status": "REUSE",
+      "rating": "A",
+      "applicableWorklines": [
+        "A",
+        "C"
+      ],
+      "solves": "retry、timeout、circuit breaker、bulkhead、AbortSignal",
+      "integrationCost": "LOW",
+      "maintenanceRisk": "LOW",
+      "licenseRisk": "LOW",
+      "notes": "限外部 I/O 與可冪等 control call；遊戲 action retry 仍需 action id。",
+      "evidenceLinks": [
+        "https://github.com/connor4312/cockatiel"
+      ]
+    },
+    {
+      "id": "oss-rxjs",
+      "name": "RxJS",
+      "url": "https://github.com/ReactiveX/rxjs",
+      "sourceType": "Generic OSS",
+      "category": "Event Bus / Callback Cancellation",
+      "license": "Apache-2.0",
+      "repository": "ReactiveX/rxjs",
+      "version": "54796b38",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-08-05",
+      "status": "REFERENCE_ONLY",
+      "rating": "C",
+      "applicableWorklines": [
+        "A",
+        "C"
+      ],
+      "solves": "observable stream、subscription cancellation、operators",
+      "integrationCost": "MEDIUM",
+      "maintenanceRisk": "LOW",
+      "licenseRisk": "LOW",
+      "notes": "模式值得參考；現有 bare Node callback 量不足以支持全量導入。",
+      "evidenceLinks": [
+        "https://github.com/ReactiveX/rxjs"
+      ]
+    },
+    {
+      "id": "oss-p-retry",
+      "name": "p-retry",
+      "url": "https://github.com/sindresorhus/p-retry",
+      "sourceType": "Generic OSS",
+      "category": "Retry / Timeout Policy",
+      "license": "MIT",
+      "repository": "sindresorhus/p-retry",
+      "version": "81cd2f0e",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-09-01",
+      "status": "REUSE",
+      "rating": "B",
+      "applicableWorklines": [
+        "A",
+        "C"
+      ],
+      "solves": "輕量 async retry、AbortSignal 與 backoff",
+      "integrationCost": "LOW",
+      "maintenanceRisk": "LOW",
+      "licenseRisk": "LOW",
+      "notes": "窄型工具與 research fetch 可直接用；狀態變更需 idempotency key。",
+      "evidenceLinks": [
+        "https://github.com/sindresorhus/p-retry"
+      ]
+    },
+    {
+      "id": "oss-eventsource",
+      "name": "EventSource",
+      "url": "https://github.com/EventSource/eventsource",
+      "sourceType": "Generic OSS",
+      "category": "Web Monitoring / SSE",
+      "license": "MIT",
+      "repository": "EventSource/eventsource",
+      "version": "1c09286d",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-09-08",
+      "status": "REUSE",
+      "rating": "B",
+      "applicableWorklines": [
+        "C"
+      ],
+      "solves": "Node SSE client 與 reconnect handling",
+      "integrationCost": "LOW",
+      "maintenanceRisk": "LOW",
+      "licenseRisk": "LOW",
+      "notes": "只供 Node 測試與工具；玩家瀏覽器優先 native EventSource。",
+      "evidenceLinks": [
+        "https://github.com/EventSource/eventsource"
+      ]
+    },
+    {
+      "id": "oss-gdx-ai",
+      "name": "gdxAI",
+      "url": "https://github.com/libgdx/gdx-ai",
+      "sourceType": "Generic OSS",
+      "category": "AI / Utility Decision",
+      "license": "Apache-2.0",
+      "repository": "libgdx/gdx-ai",
+      "version": "6726e345",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2024-10-01",
+      "status": "REFERENCE_ONLY",
+      "rating": "B",
+      "applicableWorklines": [
+        "Future-Life-Social"
+      ],
+      "solves": "FSM、BT、A*、steering、message 與 scheduler",
+      "integrationCost": "HIGH",
+      "maintenanceRisk": "MEDIUM",
+      "licenseRisk": "LOW",
+      "notes": "Java 技術棧不相容；用作 deterministic game AI pattern catalog。",
+      "evidenceLinks": [
+        "https://github.com/libgdx/gdx-ai"
+      ]
+    },
+    {
+      "id": "oss-goap",
+      "name": "crashkonijn GOAP",
+      "url": "https://github.com/crashkonijn/GOAP",
+      "sourceType": "Generic OSS",
+      "category": "AI / Utility Decision",
+      "license": "Apache-2.0",
+      "repository": "crashkonijn/GOAP",
+      "version": "b9409d75",
+      "lastCheckedAt": "2026-09-14T00:00:00+08:00",
+      "lastMeaningfulActivity": "2026-03-06",
+      "status": "REFERENCE_ONLY",
+      "rating": "B",
+      "applicableWorklines": [
+        "Future-Life-Social"
+      ],
+      "solves": "data-driven GOAP、multi-thread planning、visualizer",
+      "integrationCost": "HIGH",
+      "maintenanceRisk": "LOW",
+      "licenseRisk": "LOW",
+      "notes": "Unity/C# 技術棧不相容；借 goal/action/precondition/world-state 設計。",
+      "evidenceLinks": [
+        "https://github.com/crashkonijn/GOAP"
+      ]
+    },
+    {
+      "id": "openkore-supply-combat-config-ui-v1",
+      "capability": "OpenKore supply/combat configuration UI replacement",
+      "sources": [
+        "docs/openkore-reference/config-ui-replacement-v1.md",
+        "docs/openkore-reference/reference-index.yml",
+        "https://github.com/OpenKore/openkore/blob/master/src/AI/Attack.pm",
+        "https://github.com/OpenKore/openkore/blob/master/src/Interface/Wx/ConfigEditor.pm"
+      ],
+      "upstream_commit": "51de1ddfc4449ae5217f6886de702f87ca934030",
+      "last_reviewed": "2026-09-22",
+      "findings": "attackAuto and attackUseWeapon are independent; skill maxCastTime is cast duration; item controls use keep/storage/sell/cart flags; pickup flags are -1/0/1/2; repeated skill blocks are first-class.",
+      "reuse_decision": "PORTABLE_LOGIC",
+      "license_provenance": "Reference behavior and field names only; no OpenKore runtime or GUI code copied.",
+      "project_owner": "Web / configuration contract",
+      "freshness": "CURRENT",
+      "stale_reference": false,
+      "version_conflict": "OpenKore executor is legacy and unavailable to SERVER_AGENT; adapter remains config-only."
+    },
+    {
+      "id": "openkore-minimap-field-wx-map-v1",
+      "capability": "OpenKore Field and Wx minimap presentation model",
+      "sources": [
+        "docs/openkore-reference/minimap-field-wx-map-v1.md",
+        ".local/ro-stack/openkore/src/Field.pm",
+        ".local/ro-stack/openkore/src/Interface/Wx/MapViewer.pm",
+        ".local/ro-stack/openkore/src/Interface/Wx.pm",
+        ".local/ro-stack/openkore/control/config.txt"
+      ],
+      "upstream_commit": "51de1ddfc4449ae5217f6886de702f87ca934030",
+      "last_reviewed": "2026-09-23",
+      "findings": "Field/rawMap remains collision authority; image() selects JPG, PNG, BMP or XPM and generates collision XPM when absent; Wx overlays and coordinate transforms remain independent from the background.",
+      "reuse_decision": "PORTABLE_LOGIC",
+      "license_provenance": "GPL-2.0 behavior reference only; no Perl or Wx source copied into Dashboard runtime.",
+      "project_owner": "Web / minimap presentation",
+      "freshness": "CURRENT",
+      "stale_reference": false,
+      "version_conflict": "OpenKore runtime remains disabled; Ghost Island uses rAthena/PA coordinates and Canvas presentation."
+    }
+  ]
+}

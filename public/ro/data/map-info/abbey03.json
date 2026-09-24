@@ -1,0 +1,463 @@
+{
+  "id": "abbey03",
+  "name": "無名島修道院 地下2樓",
+  "category": "SERVICE_ONLY",
+  "dungeon": null,
+  "totalMonsters": 117,
+  "normalMonsterCount": 57,
+  "levelRange": {
+    "min": 121,
+    "max": 130
+  },
+  "fullLevelRange": {
+    "min": 121,
+    "max": 133
+  },
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [
+    {
+      "id": 1867,
+      "name": "惡耗女妖",
+      "level": 130,
+      "count": 30
+    },
+    {
+      "id": 1869,
+      "name": "火焰骷髏頭",
+      "level": 121,
+      "count": 25
+    }
+  ],
+  "resourceMonsters": [],
+  "bossMonsters": [
+    {
+      "id": 1870,
+      "name": "行妖術者",
+      "level": 133,
+      "count": 60,
+      "isMvp": false
+    }
+  ],
+  "monsters": [
+    {
+      "id": 1869,
+      "aegisName": "FLAME_SKULL",
+      "name": "火焰骷髏頭",
+      "count": 25,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 121,
+      "hp": 20150,
+      "baseExp": 2743,
+      "jobExp": 3076,
+      "attackMin": 815,
+      "attackMax": 135,
+      "defense": 93,
+      "magicDefense": 40,
+      "size": "小型",
+      "race": "惡魔",
+      "element": "念 3",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/abbey.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 7005,
+          "aegisName": "Skull",
+          "name": "骷髏頭",
+          "ratePerTenThousand": 2500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "死人的骷髏頭。可向收集商人購買。\n\n重量 :1"
+        },
+        {
+          "itemId": 2425,
+          "aegisName": "Black_Leather_Boots",
+          "name": "黑色皮革長靴",
+          "ratePerTenThousand": 10,
+          "type": "防具",
+          "weight": 50,
+          "attack": 0,
+          "defense": 16,
+          "slots": 0,
+          "description": "非常堅固用輕的皮革所做成的長靴,只要是穿上的話就會有想要跑的慾望\nAgi+1。\n當精煉+9以上時, 額外的增加 Agi+2。\n系列: 鞋類 防禦: 4\n重量: 50\n要求等級: 55\n裝備: 除了初學者之外所有進階職業群"
+        },
+        {
+          "itemId": 13170,
+          "aegisName": "Lever_Action_Rifle",
+          "name": "操作桿來福槍",
+          "ratePerTenThousand": 10,
+          "type": "武器",
+          "weight": 77,
+          "attack": 138,
+          "defense": 0,
+          "slots": 2,
+          "description": "把來福槍的性能發揮到極大的名作。漂亮的槍身瞬間獲取神槍手的心,那致命的性能瞬間穿透敵人的心臟。假如有缺點的話是操作桿方式裝填子彈,使得連射速度變慢\nHIT+20, Cri+50,攻速-5%。\n系列: 來福槍\n攻擊: 138\n重量: 77\n武器等級: 3\n要求等級: 70\n裝備: 神槍手"
+        },
+        {
+          "itemId": 958,
+          "aegisName": "Horrendous_Mouth",
+          "name": "亡者牙齒",
+          "ratePerTenThousand": 3000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "亡者身上的牙齒,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 4439,
+          "aegisName": "Flame_Skull_Card",
+          "name": "火焰骷髏頭卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "對暈眩、詛咒、暗黑、石化的抗性+30%；\n受到近距離物理攻擊時,有機率對敵人觸發暈眩、詛咒、暗黑、石化中一項。\n系列: 卡片\n裝置: 盾牌\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1867,
+      "aegisName": "BANSHEE",
+      "name": "惡耗女妖",
+      "count": 30,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 130,
+      "hp": 40950,
+      "baseExp": 3739,
+      "jobExp": 3598,
+      "attackMin": 1014,
+      "attackMax": 703,
+      "defense": 73,
+      "magicDefense": 96,
+      "size": "中型",
+      "race": "惡魔",
+      "element": "暗 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/abbey.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 7751,
+          "aegisName": "Old_White_Cloth",
+          "name": "破舊的白衣",
+          "ratePerTenThousand": 1500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "過於的破舊再不能試著穿戴的白衣,可賣給收集品商人\n\n重量: 1"
+        },
+        {
+          "itemId": 2365,
+          "aegisName": "Orleans_Gown",
+          "name": "歐羅萊昂的制服",
+          "ratePerTenThousand": 5,
+          "type": "防具",
+          "weight": 30,
+          "attack": 0,
+          "defense": 15,
+          "slots": 1,
+          "description": "有著強烈潔癖症的宮廷料理師所穿的制服,當他開始對料理說教的時候 任何人都不能對他所說的話叫停,\n詠唱時間+15%, 魔法不會被解除\n系列: 鎧甲 防禦: 15\n重量: 30\n要求等級: 55\n裝備: 除了初學者之外所有進階職業群"
+        },
+        {
+          "itemId": 13027,
+          "aegisName": "Scalpel",
+          "name": "解剖刀",
+          "ratePerTenThousand": 5,
+          "type": "武器",
+          "weight": 50,
+          "attack": 120,
+          "defense": 0,
+          "slots": 3,
+          "description": "短小輕巧又非常銳利的刀, 最適當用於切割人的皮膚。\n當攻擊時, 讓敵人有機率出血。\n系列: 短劍    攻擊: 120\n重量: 50\n武器等級: 4\n要求等級: 55\n裝備: 進階劍士/魔法師/弓箭手/商人/盜賊系列"
+        },
+        {
+          "itemId": 2528,
+          "aegisName": "Wool_Scarf",
+          "name": "羊毛領巾",
+          "ratePerTenThousand": 5,
+          "type": "防具",
+          "weight": 50,
+          "attack": 0,
+          "defense": 11,
+          "slots": 1,
+          "description": "用最上等的羊毛密密麻麻織成的領巾,溫暖的感覺讓全身變得很清爽\nMDEF+4。\n系列: 披肩  防禦: 11\n重量: 50\n要求等級: 55\n裝備: 除了初學者之外所有進階職業群"
+        },
+        {
+          "itemId": 934,
+          "aegisName": "Mementos",
+          "name": "亡者遺物",
+          "ratePerTenThousand": 750,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "亡者要赴黃泉時相伴一起埋葬的寶物,大部分的價值都相當高。\n\n重量: 1"
+        },
+        {
+          "itemId": 7054,
+          "aegisName": "Brigan",
+          "name": "布里刊",
+          "ratePerTenThousand": 2668,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "發出紅色光芒的稀有礦物,可賣給蒐集品商人\n重量: 1"
+        },
+        {
+          "itemId": 4438,
+          "aegisName": "Banshee_Card",
+          "name": "惡耗女妖卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "魔法師系列時SP+100, HP -100；\n技能聖靈召喚, 心靈爆破, 念力連擊的傷害+20%。\n系列: 卡片\n裝置: 頭具\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1870,
+      "aegisName": "NECROMANCER",
+      "name": "行妖術者",
+      "count": 60,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 133,
+      "hp": 91304,
+      "baseExp": 2990,
+      "jobExp": 3289,
+      "attackMin": 1359,
+      "attackMax": 1006,
+      "defense": 84,
+      "magicDefense": 73,
+      "size": "中型",
+      "race": "不死",
+      "element": "不死 4",
+      "isBoss": true,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/abbey.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 7752,
+          "aegisName": "Clattering_Skull",
+          "name": "搖晃的骷髏",
+          "ratePerTenThousand": 1500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "還在搖晃移動的骷髏,有時候還會唱歌的,可賣給收集品商人\n\n重量: 1"
+        },
+        {
+          "itemId": 1624,
+          "aegisName": "Lich_Bone_Wand",
+          "name": "里奇的骷髏魔杖",
+          "ratePerTenThousand": 10,
+          "type": "武器",
+          "weight": 80,
+          "attack": 60,
+          "defense": 0,
+          "slots": 2,
+          "description": "用強壯的里奇的骷髏所做成的杖,從杖裡不斷湧出的詛咒的氣息, 對威脅杖的主人下達詛咒\nMatk+170,Int+1, Dex+1。\n當受到物理攻擊時, 以較低的機率對畫面裡的所有敵人施展詛咒,\n依據精煉值的不同得到詛咒的機率更高,\n當精煉值9以上時, 額外增加 Matk+3%, MSP+300\n不死型屬性\n系列: 杖  攻擊: 60\n重量: 80\n武器等級: 3\n要求等級: 70\n裝備: 進階魔法師/服事 系列"
+        },
+        {
+          "itemId": 932,
+          "aegisName": "Skel_Bone",
+          "name": "死人遺骨",
+          "ratePerTenThousand": 2250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "不死的邪骸戰士的骨頭。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 2532,
+          "aegisName": "Mithril_Magic_Cape",
+          "name": "迷思力魔法斗篷",
+          "ratePerTenThousand": 5,
+          "type": "防具",
+          "weight": 40,
+          "attack": 0,
+          "defense": 8,
+          "slots": 1,
+          "description": "有著魔法保護的咒文施展的神秘的斗篷,隱藏著把自己的防禦力轉移成魔法防禦力的能力。\nMDEF+3。\n當受到魔法攻擊時, 有機率2秒內把所受到的所有魔法傷害-20%。\n相對的DEF-20%。\n系列: 披肩  防禦: 8\n重量: 40\n要求等級: 70\n裝備: 進階魔法師/服事/弓箭手 系列"
+        },
+        {
+          "itemId": 609,
+          "aegisName": "Amulet",
+          "name": "返魂符",
+          "ratePerTenThousand": 50,
+          "type": "消耗品",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可令死人死而復生的符咒,可以保持在半生半死的狀態,也就是成為不死的狀態。\n\n重量: 10"
+        },
+        {
+          "itemId": 7117,
+          "aegisName": "Rent_Spell_Book",
+          "name": "撕裂的魔法書",
+          "ratePerTenThousand": 750,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "算是魔法師生命的魔法書,已經被撕掉的書,不知道主人是誰,書本裡面的內容已經毀損的很厲害\n\n重量: 1"
+        },
+        {
+          "itemId": 4440,
+          "aegisName": "Necromancer_Card",
+          "name": "行妖術者卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "手杖系列時INT+1, 可忽視敵人的魔法防禦力2%。\n系列: 卡片\n裝置: 武器\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2736,
+      "aegisName": "C3_NECROMANCER",
+      "name": "菁英行妖術者",
+      "count": 2,
+      "respawnMinMs": 180000,
+      "respawnMaxMs": 180000,
+      "level": 133,
+      "hp": 456520,
+      "baseExp": 14950,
+      "jobExp": 49335,
+      "attackMin": 1630,
+      "attackMax": 1006,
+      "defense": 84,
+      "magicDefense": 73,
+      "size": "中型",
+      "race": "不死",
+      "element": "不死 4",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/championmobs.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 7752,
+          "aegisName": "Clattering_Skull",
+          "name": "搖晃的骷髏",
+          "ratePerTenThousand": 7500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "還在搖晃移動的骷髏,有時候還會唱歌的,可賣給收集品商人\n\n重量: 1"
+        },
+        {
+          "itemId": 1624,
+          "aegisName": "Lich_Bone_Wand",
+          "name": "里奇的骷髏魔杖",
+          "ratePerTenThousand": 50,
+          "type": "武器",
+          "weight": 80,
+          "attack": 60,
+          "defense": 0,
+          "slots": 2,
+          "description": "用強壯的里奇的骷髏所做成的杖,從杖裡不斷湧出的詛咒的氣息, 對威脅杖的主人下達詛咒\nMatk+170,Int+1, Dex+1。\n當受到物理攻擊時, 以較低的機率對畫面裡的所有敵人施展詛咒,\n依據精煉值的不同得到詛咒的機率更高,\n當精煉值9以上時, 額外增加 Matk+3%, MSP+300\n不死型屬性\n系列: 杖  攻擊: 60\n重量: 80\n武器等級: 3\n要求等級: 70\n裝備: 進階魔法師/服事 系列"
+        },
+        {
+          "itemId": 932,
+          "aegisName": "Skel_Bone",
+          "name": "死人遺骨",
+          "ratePerTenThousand": 10000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "不死的邪骸戰士的骨頭。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 2532,
+          "aegisName": "Mithril_Magic_Cape",
+          "name": "迷思力魔法斗篷",
+          "ratePerTenThousand": 25,
+          "type": "防具",
+          "weight": 40,
+          "attack": 0,
+          "defense": 8,
+          "slots": 1,
+          "description": "有著魔法保護的咒文施展的神秘的斗篷,隱藏著把自己的防禦力轉移成魔法防禦力的能力。\nMDEF+3。\n當受到魔法攻擊時, 有機率2秒內把所受到的所有魔法傷害-20%。\n相對的DEF-20%。\n系列: 披肩  防禦: 8\n重量: 40\n要求等級: 70\n裝備: 進階魔法師/服事/弓箭手 系列"
+        },
+        {
+          "itemId": 609,
+          "aegisName": "Amulet",
+          "name": "返魂符",
+          "ratePerTenThousand": 250,
+          "type": "消耗品",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可令死人死而復生的符咒,可以保持在半生半死的狀態,也就是成為不死的狀態。\n\n重量: 10"
+        },
+        {
+          "itemId": 7117,
+          "aegisName": "Rent_Spell_Book",
+          "name": "撕裂的魔法書",
+          "ratePerTenThousand": 3750,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "算是魔法師生命的魔法書,已經被撕掉的書,不知道主人是誰,書本裡面的內容已經毀損的很厲害\n\n重量: 1"
+        },
+        {
+          "itemId": 4440,
+          "aegisName": "Necromancer_Card",
+          "name": "行妖術者卡片",
+          "ratePerTenThousand": 5,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "手杖系列時INT+1, 可忽視敵人的魔法防禦力2%。\n系列: 卡片\n裝置: 武器\n重量: 1"
+        }
+      ]
+    }
+  ]
+}

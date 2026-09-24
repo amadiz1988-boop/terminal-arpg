@@ -1,0 +1,37 @@
+[
+  {
+    "path": "ops/ro-stack/production-promotion-gate.mjs",
+    "source_commit": "002c24b0162785bcf693a485f8116614213eb422",
+    "method": "Reviewed source-only governance reconstruction; not V4 merge ancestry"
+  },
+  {
+    "path": "ops/ro-stack/production-deployment-state.mjs",
+    "source_commit": "002c24b0162785bcf693a485f8116614213eb422",
+    "method": "Reviewed source-only governance reconstruction; not V4 merge ancestry"
+  },
+  {
+    "path": "ops/ro-stack/tests/test-production-promotion-governance.mjs",
+    "source_commit": "002c24b0162785bcf693a485f8116614213eb422",
+    "method": "Reviewed source-only governance reconstruction; not V4 merge ancestry"
+  },
+  {
+    "path": "ops/ro-stack/deploy-dashboard-manifest.ps1",
+    "source_commit": "002c24b0162785bcf693a485f8116614213eb422",
+    "method": "Reviewed source-only governance reconstruction; not V4 merge ancestry"
+  },
+  {
+    "path": "docs/project-control/production-capabilities.json",
+    "source_commit": "002c24b0162785bcf693a485f8116614213eb422",
+    "method": "Reviewed source-only governance reconstruction; not V4 merge ancestry"
+  },
+  {
+    "path": "docs/project-control/production-capability-decisions.json",
+    "source_commit": "002c24b0162785bcf693a485f8116614213eb422",
+    "method": "Reviewed source-only governance reconstruction; not V4 merge ancestry"
+  },
+  {
+    "path": "docs/project-control/github-first-production-promotion-protocol-v1.md",
+    "source_commit": "002c24b0162785bcf693a485f8116614213eb422",
+    "method": "Reviewed source-only governance reconstruction; not V4 merge ancestry"
+  }
+]

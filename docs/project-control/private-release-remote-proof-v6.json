@@ -1,0 +1,22 @@
+{
+  "available": true,
+  "repository": "amadiz1988-boop/ghost-island-assets",
+  "private": true,
+  "immutable": true,
+  "release_id": 395506630,
+  "release_tag": "web-runtime-assets-v1.1.0",
+  "archive_sha256": "ef5b6034d9aaf75cba0a9deba97c2cc7d001302df8db3d45d9795dd3977a2b4f",
+  "manifest_sha256": "a3e554a6586cc7a57e78c3a76c33e6fa7deea677f26400caacd7b74084ecf2f8",
+  "package_sha256": "3f2e1ac73f24c9dd777dc89fa852da450f2c31298a91b98faf67f1909a82029a",
+  "verification": {
+    "mode": "verify-package",
+    "manifest_asset_count": 5107,
+    "package_tree_sha256": "675299490154efca6365f26e715312ce7349340e78a3164bc5d7c5f1b110dfd5",
+    "required_asset_count": 5107,
+    "missing_asset_count": 0,
+    "hash_mismatch_count": 0,
+    "unmanifested_required_asset_count": 0,
+    "examples": [],
+    "ok": true
+  }
+}

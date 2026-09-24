@@ -1,0 +1,4 @@
+interface:
+  display_name: "Debug Bug"
+  short_description: "以證據定位 terminal-arpg 錯誤並做最小修正"
+  default_prompt: "請用 debug-bug 重現、定位、修正並驗證這項 terminal-arpg 錯誤。"

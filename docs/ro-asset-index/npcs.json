@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "kind": "npc",
+  "updatedAt": "2026-09-14",
+  "researchStatus": "WEB READY",
+  "coverage": {
+    "entries": 2,
+    "zhHantNames": 2,
+    "sprites": 2
+  },
+  "entries": [
+    {
+      "npcKey": "eden-secretary-lime-evenor",
+      "npcId": 15902,
+      "navigationId": 15902,
+      "scriptName": "Secretary Lime Evenor",
+      "classId": 952,
+      "viewId": 952,
+      "spriteClass": "4_F_EDEN_OFFICER",
+      "zhHantName": "秘書萊茵 伊貝努勒",
+      "canonicalZhHant": "秘書萊茵 伊貝努勒",
+      "enName": "Secretary Lime Evenor",
+      "aliases": [
+        "Secretary Lime Evenor",
+        "Lime Evenor",
+        "Laime Evenor",
+        "萊茵 伊貝努勒"
+      ],
+      "translationStatus": "verified-zh-hant",
+      "sprite": {
+        "sourcePath": "data0.grf:data/sprite/npc/4_f_eden_officer",
+        "webPath": "/ro/client/npcs/eden-secretary-lime-evenor.webp",
+        "actSha256": "27dfa29ef663f235ddf3c73c5005b9a70754dd8fae2a0b712371f73bd09e95fc",
+        "sprSha256": "7ae65ab8a9300ec30079a3cca25d2a8df8720a2c4a004882db546b21f9991ab9",
+        "outputSha256": "3136170e714a9a14c11fd6b98bbf739521fbf2be7c6556a52942d066ef1dc075",
+        "width": 96,
+        "height": 96
+      },
+      "map": "moc_para01",
+      "position": {
+        "x": 27,
+        "y": 35,
+        "direction": 5
+      },
+      "function": "伊甸園入團登記",
+      "questRefs": [
+        "eden_common"
+      ],
+      "assetStatus": "ready",
+      "verificationGrade": "A",
+      "diagnosticCode": null,
+      "provenance": [
+        {
+          "tier": 1,
+          "sourceType": "official-client-navigation",
+          "sourcePath": "data.grf:data/luafiles514/lua files/navigation/navi_npc_tw.lub entry 15902",
+          "verifiedAt": "2026-09-14"
+        },
+        {
+          "tier": 1,
+          "sourceType": "official-client-sprite",
+          "sourcePath": "data0.grf:data/sprite/npc/4_f_eden_officer",
+          "verifiedAt": "2026-09-14"
+        },
+        {
+          "tier": 2,
+          "sourceType": "rathena-npc",
+          "sourcePath": ".local/ro-stack/rathena/npc/re/quests/eden/eden_common.txt:28",
+          "verifiedAt": "2026-09-14"
+        }
+      ]
+    },
+    {
+      "npcKey": "eden-instructor-boya",
+      "npcId": 13161,
+      "navigationId": 13161,
+      "scriptName": "Instructor Boya#para01",
+      "classId": 469,
+      "viewId": 469,
+      "spriteClass": "4_M_KNIGHT_GOLD",
+      "zhHantName": "伊甸園教官 保亞",
+      "canonicalZhHant": "伊甸園教官 保亞",
+      "enName": "Instructor Boya",
+      "aliases": [
+        "Instructor Boya",
+        "Instructor Boya#para01",
+        "Boya",
+        "保亞"
+      ],
+      "translationStatus": "verified-zh-hant",
+      "sprite": {
+        "sourcePath": "data0.grf:data/sprite/npc/4_m_knight_gold",
+        "webPath": "/ro/client/npcs/eden-instructor-boya.webp",
+        "actSha256": "68b476e5e4225e4ddb26d98144b8e77f22e6f03ba2f974c26606122601a0ecd3",
+        "sprSha256": "da7b60c77a7e2cb409e5e105dd70aa2f78f214eaabf8f3ff4f8ea836482467b7",
+        "outputSha256": "058e1163c8f7e70fd100e33482dce67bce64fa927dfa0a8015e0fdee17b6fb02",
+        "width": 96,
+        "height": 96
+      },
+      "map": "moc_para01",
+      "position": {
+        "x": 25,
+        "y": 35,
+        "direction": 4
+      },
+      "function": "伊甸園裝備訓練",
+      "questRefs": [
+        "eden_quests"
+      ],
+      "assetStatus": "ready",
+      "verificationGrade": "A",
+      "diagnosticCode": null,
+      "provenance": [
+        {
+          "tier": 1,
+          "sourceType": "official-client-navigation",
+          "sourcePath": "data.grf:data/luafiles514/lua files/navigation/navi_npc_tw.lub entry 13161",
+          "verifiedAt": "2026-09-14"
+        },
+        {
+          "tier": 1,
+          "sourceType": "official-client-sprite",
+          "sourcePath": "data0.grf:data/sprite/npc/4_m_knight_gold",
+          "verifiedAt": "2026-09-14"
+        },
+        {
+          "tier": 2,
+          "sourceType": "rathena-npc",
+          "sourcePath": ".local/ro-stack/rathena/npc/re/quests/eden/eden_quests.txt:23",
+          "verifiedAt": "2026-09-14"
+        }
+      ]
+    }
+  ]
+}

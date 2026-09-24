@@ -1,0 +1,77 @@
+{
+  "PRE_IMPLEMENTATION_REUSE_GATE": {
+    "featureId": "m1-openkore-settings-ui-capability-gate",
+    "featureName": "M1 player settings capability gating",
+    "scope": "KNOWN_IMPLEMENTATION_TASK",
+    "taskCategory": "KNOWN_IMPLEMENTATION_TASK",
+    "inheritedFrom": "openkore-supply-combat-config-ui-replacement-v1",
+    "sameCapabilityScope": "NO",
+    "referenceCoverageStillComplete": "YES",
+    "noNewCapabilitySurface": "NO",
+    "categories": ["capability_ui", "configuration_semantics", "combat", "supply"],
+    "openKoreRelevant": true,
+    "checks": {
+      "currentProject": {
+        "status": "CHECKED",
+        "implementationFound": true,
+        "evidence": "ops/ro-stack/dashboard/config-editor.js renders CONFIG_FORM_SCHEMA; dashboard.mjs readPlayerConfig/savePlayerConfig explicitly return execution.applied=false and CONFIG_ONLY_NO_EXECUTOR_COMMAND; farm-execution-profile.mjs consumes only profile, attack mode/weapon and Fly enabled at start_farm. Reuse the editor and response instead of adding a second settings system."
+      },
+      "legacyProject": {
+        "status": "CHECKED",
+        "evidence": "docs/openkore-harvest-registry.md and docs/openkore-reference/mature-capability-census-v1.md preserve the incumbent behavior and unresolved execution gaps."
+      },
+      "reuseRegistry": {
+        "status": "REGISTRY_HIT",
+        "reference": "ops/research/config-ui-replacement-v1-reuse-gate.json; ops/research/external-reuse-registry.json openkore-supply-combat-config-ui-v1"
+      },
+      "rAthena": {
+        "status": "CHECKED",
+        "evidence": "rAthena remains item, skill, combat and world authority; this UI gate creates no runtime command, item use or gameplay decision."
+      },
+      "openKore": {
+        "status": "CHECKED",
+        "evidence": "Pinned 51de1ddfc4449ae5217f6886de702f87ca934030 control/config.txt attackAuto, attackSkillSlot, useSelf_item and teleportAuto_*; src/AI/Attack.pm, src/AI/CoreLogic.pm processAutoItemUse; docs/openkore-reference/mature-capability-census-v1.md records exact defaults and transitions."
+      },
+      "externalEcosystem": {
+        "status": "NOT_APPLICABLE",
+        "reason": "Existing Dashboard form and local pinned references cover this fail-closed UI change."
+      },
+      "genericOSS": {
+        "status": "NOT_APPLICABLE",
+        "reason": "No new UI dependency is needed for native disabled controls."
+      }
+    },
+    "decision": "DIRECT_REUSE",
+    "freshResearchPerformed": false,
+    "registryUpdateRequired": false,
+    "capabilityScope": "Disable unaccepted existing Player configuration controls and group them into M1 settings sections without changing persisted gameplay policy",
+    "matureReferenceApplicable": true,
+    "referenceGate": "PASS",
+    "deltaReferenceAuditRequired": true,
+    "capabilityDelta": {
+      "addsCapability": false,
+      "replacesCapability": false,
+      "changesBehavior": false,
+      "changesConfigurationSemantics": false,
+      "changesCapabilityUi": true,
+      "changesExceptionRecovery": false,
+      "changesMatureCapabilityDataModel": false
+    },
+    "matureReferenceMatrix": {
+      "currentGiCapability": "Dashboard /api/config stores schema rows while explicitly returning execution.applied=false; the browser editor currently enables every row except fixed loot flags.",
+      "openKoreCapability": "Pinned control/config.txt includes attackAuto, attackSkillSlot, useSelf_item, teleportAuto_* and service settings; their runtime behavior is documented per row in mature-capability-census-v1.md.",
+      "rAthenaCapability": "Authoritative skill, combat, inventory and item actions remain in rAthena; this gate does not implement them.",
+      "otherMatureReference": "NOT_APPLICABLE: the same existing Dashboard editor is the UI surface.",
+      "matureExceptionBehavior": "Config-only and unsupported fields remain visible but cannot be activated or submitted.",
+      "matureRecoveryBehavior": "A failed capability read remains fail-closed; no temporary enabled fallback is offered.",
+      "matureConfigSemantics": "Persisted schema and defaults stay unchanged; enabling awaits an explicit accepted capability response.",
+      "matureUiSemantics": "All displayed controls have SUPPORTED, PARTIAL or UNAVAILABLE state; only SUPPORTED may be interactive.",
+      "directReuse": "Reuse config-editor.js, config-schema.mjs, /api/config execution field and existing Player Web styles.",
+      "adapt": "Map existing schema paths to M1 sections and gate interaction from the response capability state.",
+      "projectPolicy": "Project Control UI_ENABLEMENT <= RUNTIME_CAPABILITY and no enabled UI no-op.",
+      "improvements": "Prevents config-only settings from misleading players while leaving existing stored data intact.",
+      "matureCapabilityLoss": "NONE",
+      "resultEquivalentOrBetter": "PASS"
+    }
+  }
+}

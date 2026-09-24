@@ -1,0 +1,191 @@
+diff --git a/npc/quests/skills/alchemist_skills.txt b/npc/quests/skills/alchemist_skills.txt
+--- a/npc/quests/skills/alchemist_skills.txt
++++ b/npc/quests/skills/alchemist_skills.txt
+@@ -1151,5 +1151,10 @@ yuno_in04,33,106,4	script	Pile of Books#qsk_al	111,{
+ // Start Bioethics quest
+ lhz_in01,224,140,3	script	Kellasus#qsk_al	57,{
++	if (BaseJob == Job_Alchemist && getskilllv("AM_BIOETHICS")) {
++		mes "[Kellasus]";
++		mes "你已經掌握這項技能。";
++		close;
++	}
+ 	if (BaseJob == Job_Alchemist && bioeth == 13) {
+ 		mes "[Kellasus]";
+ 		mes "Keep up the";
+diff --git a/npc/quests/skills/assassin_skills.txt b/npc/quests/skills/assassin_skills.txt
+--- a/npc/quests/skills/assassin_skills.txt
++++ b/npc/quests/skills/assassin_skills.txt
+@@ -16,5 +16,10 @@
+ 
+ in_moc_16,14,27,5	script	Assassin#realman	884,{
++	if (BaseJob == Job_Assassin && getskilllv("AS_VENOMKNIFE")) {
++		mes "[Killtin]";
++		mes "你已經掌握這項技能。";
++		close;
++	}
+ 	if (BaseJob == Job_Assassin && ASSN_SK2 == 1) {
+ 		if (getskilllv("AS_VENOMKNIFE") == 0) {
+ 			mes "[Killtin]";
+@@ -288,6 +293,11 @@ in_moc_16,14,27,5	script	Assassin#realman	884,{
+ }
+ 
+ in_moc_16,23,27,5	script	Assassin#realgirl	885,{
++	if (BaseJob == Job_Assassin && getskilllv("AS_SONICACCEL")) {
++		mes "[Esmille]";
++		mes "你已經掌握這項技能。";
++		close;
++	}
+ 	if (BaseJob == Job_Assassin && ASSN_SK == 7) {
+ 		if (getskilllv("AS_SONICACCEL") == 0) {
+ 			mes "[Esmille]";
+diff --git a/npc/quests/skills/bard_skills.txt b/npc/quests/skills/bard_skills.txt
+--- a/npc/quests/skills/bard_skills.txt
++++ b/npc/quests/skills/bard_skills.txt
+@@ -29,5 +29,10 @@
+ 
+ prontera,174,328,3	script	Young Man#bard_q1	89,3,3,{
++	if (BaseJob == Job_Bard && getskilllv("BA_PANGVOICE")) {
++		mes "[Timid Young Man]";
++		mes "你已經掌握這項技能。";
++		close;
++	}
+ 	if (BaseJob == Job_Bard) {
+ 		emotion ET_HUK;
+ 		mes "[Timid Young Man]";
+diff --git a/npc/quests/skills/blacksmith_skills.txt b/npc/quests/skills/blacksmith_skills.txt
+--- a/npc/quests/skills/blacksmith_skills.txt
++++ b/npc/quests/skills/blacksmith_skills.txt
+@@ -15,5 +15,10 @@
+ 
+ geffen,178,72,3	script	Akkie#qsk_bs	726,{
++	if (BaseJob == Job_Blacksmith && getskilllv("BS_UNFAIRLYTRICK")) {
++		mes "[Akkie]";
++		mes "你已經掌握這項技能。";
++		close;
++	}
+ 	if (BaseJob != Job_Blacksmith) {
+ 		mes "[Akkie]";
+ 		mes "Ah, today seems like";
+@@ -470,6 +475,11 @@ geffen,178,72,3	script	Akkie#qsk_bs	726,{
+ }
+ 
+ geffen,172,52,1	script	Goodman#qsk_bs	826,{
++	if (BaseJob == Job_Blacksmith && getskilllv("BS_GREED")) {
++		mes "[Goodman]";
++		mes "你已經掌握這項技能。";
++		close;
++	}
+ 	if (BaseJob != Job_Blacksmith) {
+ 		mes "[Goodman]";
+ 		mes "I feel like exploring";
+diff --git a/npc/quests/skills/crusader_skills.txt b/npc/quests/skills/crusader_skills.txt
+--- a/npc/quests/skills/crusader_skills.txt
++++ b/npc/quests/skills/crusader_skills.txt
+@@ -15,5 +15,10 @@
+ 
+ geffen,110,117,3	script	Ford#11	752,{
++	if (BaseJob == Job_Crusader && getskilllv("CR_SHRINK")) {
++		mes "[Ford]";
++		mes "你已經掌握這項技能。";
++		close;
++	}
+ 	if (BaseJob == Job_Crusader) {
+ 		if (CRUS_SK == 8 && getskilllv("CR_SHRINK") == 0) {
+ 			mes "[Ford]";
+diff --git a/npc/quests/skills/dancer_skills.txt b/npc/quests/skills/dancer_skills.txt
+--- a/npc/quests/skills/dancer_skills.txt
++++ b/npc/quests/skills/dancer_skills.txt
+@@ -17,5 +17,10 @@
+ 
+ comodo,204,172,5	script	Canell#qsk_dan01	724,{
++	if (BaseJob == Job_Dancer && getskilllv("DC_WINKCHARM")) {
++		mes "[Canell]";
++		mes "你已經掌握這項技能。";
++		close;
++	}
+ 	if (BaseJob == Job_Dancer && JobLevel > 39) {
+ 		if (DANCER_SK == 0) {
+ 			mes "[Canell]";
+diff --git a/npc/quests/skills/knight_skills.txt b/npc/quests/skills/knight_skills.txt
+--- a/npc/quests/skills/knight_skills.txt
++++ b/npc/quests/skills/knight_skills.txt
+@@ -15,5 +15,10 @@
+ 
+ prt_in,85,99,3	script	Knight#kabuto	734,{
++	if (BaseJob == Job_Knight && getskilllv("KN_CHARGEATK")) {
++		mes "[Essofeit]";
++		mes "你已經掌握這項技能。";
++		close;
++	}
+ 	if (BaseJob == Job_Knight) {
+ 		if (KNGT_SK == 10) {
+ 			mes "[Essofeit]";
+diff --git a/npc/quests/skills/monk_skills.txt b/npc/quests/skills/monk_skills.txt
+--- a/npc/quests/skills/monk_skills.txt
++++ b/npc/quests/skills/monk_skills.txt
+@@ -15,5 +15,10 @@
+ 
+ prt_monk,270,198,3	script	Apprentice Monk#qsk_mo	753,{
++	if (BaseJob == Job_Monk && getskilllv("MO_KITRANSLATION") && getskilllv("MO_BALKYOUNG")) {
++		mes "[Monk]";
++		mes "你已經掌握這些技能。";
++		close;
++	}
+ 	if (BaseJob == Job_Monk) {
+ 		if (MONK_SK == 7) {
+ 			mes "[Monk]";
+@@ -213,6 +218,11 @@ prt_monk,270,198,3	script	Apprentice Monk#qsk_mo	753,{
+ }
+ 
+ monk_test,316,69,5	script	Monk#qsk_mo	823,{
++	if (BaseJob == Job_Monk && getskilllv("MO_BALKYOUNG")) {
++		mes "[Monk]";
++		mes "你已經掌握這項技能。";
++		close;
++	}
+ 	if (BaseJob == Job_Monk) {
+ 		if (MONK_SK == 6) {
+ 			mes "[Monk]";
+diff --git a/npc/quests/skills/rogue_skills.txt b/npc/quests/skills/rogue_skills.txt
+--- a/npc/quests/skills/rogue_skills.txt
++++ b/npc/quests/skills/rogue_skills.txt
+@@ -133,6 +133,11 @@ OnTimer150000:
+ }
+ 
+ in_rogue,355,179,0	script	Haijara Greg#rogueguild	46,{
++	if (BaseJob == Job_Rogue && getskilllv("RG_CLOSECONFINE")) {
++		mes "[Haijara Greg]";
++		mes "你已經掌握這項技能。";
++		close;
++	}
+ 	if (BaseJob == Job_Rogue) {
+ 		if (ROG_SK == 12 && Upper == 1) {
+ 			mes "[Haijara Greg]";
+diff --git a/npc/quests/skills/sage_skills.txt b/npc/quests/skills/sage_skills.txt
+--- a/npc/quests/skills/sage_skills.txt
++++ b/npc/quests/skills/sage_skills.txt
+@@ -16,5 +16,10 @@
+ 
+ yuno_in03,176,24,3	script	Mischna	755,{
++	if (BaseJob == Job_Sage && getskilllv("SA_CREATECON") && getskilllv("SA_ELEMENTWATER") && getskilllv("SA_ELEMENTGROUND") && getskilllv("SA_ELEMENTFIRE") && getskilllv("SA_ELEMENTWIND")) {
++		mes "[Mishuna]";
++		mes "你已經掌握這些技能。";
++		close;
++	}
+ 	if(BaseJob != Job_Sage) {
+ 		mes "[Mishuna]";
+ 		mes "Good day, I'm Mishuna, one";
+diff --git a/npc/quests/skills/wizard_skills.txt b/npc/quests/skills/wizard_skills.txt
+--- a/npc/quests/skills/wizard_skills.txt
++++ b/npc/quests/skills/wizard_skills.txt
+@@ -16,5 +16,10 @@
+ 
+ gef_tower,115,36,4	script	Meow#q_wiz	876,{
++	if (BaseJob == Job_Wizard && getskilllv("WZ_SIGHTBLASTER")) {
++		mes "[Meow]";
++		mes "你已經掌握這項技能。";
++		close;
++	}
+ 	if (BaseJob == Job_Wizard) {
+ 		if (WIZ_SK == 100) {
+ 			if (getskilllv("WZ_SIGHTBLASTER") == 0) {

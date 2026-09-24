@@ -40,9 +40,12 @@ my $onboarding_original_auto_talk;
 my %onboarding_dialog_completed;
 my $eden_active = 0;
 my $eden_completed = 0;
+my $eden_task_id = 'member';
+my $eden_error = '';
 my $eden_phase = '';
 my $eden_started_at = 0;
 my $eden_last_action = 0;
+my $eden_phase_started_at = 0;
 my $eden_dialog_owned = 0;
 my $eden_dialog_seen = 0;
 my $eden_dialog_started_at = 0;
@@ -50,8 +53,18 @@ my $eden_dialog_phase = '';
 my $eden_select_step = 0;
 my $eden_text_step = 0;
 my $eden_original_auto_talk;
+my $eden_original_items_take_auto;
+my $eden_training_stage_hint = 0;
+my $eden_last_quest_id = 0;
+my $eden_target_missing_since = 0;
+my $eden_route_stuck_count = 0;
+my $eden_npc_failures = 0;
 my $eden_return_started_at = 0;
 my $eden_exit_recovery_attempted = 0;
+my $eden_supply_active = 0;
+my $eden_supply_started_at = 0;
+my $eden_supply_original_attack;
+my $eden_supply_original_take;
 my @task_events;
 my $last_task_event_key = '';
 my $last_task_map = '';
@@ -62,6 +75,12 @@ my $onboarding_stuck_pending = 0;
 my $last_stuck_recovery = 0;
 my $archer_repair_attempts = 0;
 my $last_archer_repair = 0;
+my $expanded_repair_attempts = 0;
+my $last_expanded_repair = 0;
+my $supply_guard_checked = 0;
+my $supply_retry_after = 0;
+my $supply_storage_started_weight;
+my %supply_buy_original_limits;
 my %onboarding_phase_info = (
   starting => ['準備新生訓練', '正在確認角色與 Renewal 任務狀態。', ''],
   respawning => ['返回重生點', '角色已倒下，等待伺服器完成重生。', ''],
@@ -94,8 +113,27 @@ my %eden_phase_info = (
   enter_headquarters => ['進入伊甸園總部', '正在使用遊戲內建伊甸園傳送服務。', '伊甸園傳送員'],
   route_secretary => ['尋找伊甸園秘書', '已抵達伊甸園總部，正在前往秘書 Lime Evenor。', '秘書 Lime Evenor'],
   register_member => ['辦理伊甸園入團', '正在依官方流程填寫成員資料。', '秘書 Lime Evenor'],
-  returning_hunt => ['返回掛機地圖', '伊甸園入團完成，正在返回普隆德拉原野 08。', '普隆德拉原野 08'],
-  complete => ['伊甸園入團完成', '已取得伊甸園徽章並恢復自動掛機。', '普隆德拉原野 08']
+  equipment_accept => ['接取 Lv.12 裝備訓練', '正在與 Instructor Boya 對話並接取原生任務 7128。', 'Instructor Boya'],
+  equipment_route_field => ['前往沙漠訓練地圖', '正在前往夢羅克南東方綠洲。', 'moc_fild11'],
+  equipment_dog => ['與 Talking Dog 對話', '正在同步下一個原生沙漠訓練任務。', 'Talking Dog'],
+  equipment_hunt_condor => ['擊殺 Condor', '正在完成原生任務 7129。', 'Condor 10 隻'],
+  equipment_hunt_wolf => ['擊殺 Baby Desert Wolf', '正在完成原生任務 7130。', 'Baby Desert Wolf 10 隻'],
+  equipment_hunt_scorpion => ['擊殺 Scorpion', '正在完成原生任務 7131。', 'Scorpion 5 隻'],
+  equipment26_accept => ['接取 Lv.26 裝備訓練', '正在與 Instructor Boya 對話並接取原生任務 7138。', 'Instructor Boya'],
+  equipment26_route_field => ['前往幽靈洞穴', '正在前往 Payon Cave 一樓。', 'pay_dun00'],
+  equipment26_karl => ['與 Eden Member Karl 對話', '正在同步幽靈洞穴的原生任務階段。', 'Eden Member Karl'],
+  equipment26_hunt_skeleton => ['擊殺 Skeleton', '正在完成原生任務 7139。', 'Skeleton 15 隻'],
+  equipment26_hunt_poporing => ['擊殺 Poporing', '正在完成原生任務 7140。', 'Poporing 10 隻'],
+  equipment26_report_boya => ['返回 Instructor Boya', '幽靈洞穴訓練完成，正在回報原生任務 7141。', 'Instructor Boya'],
+  equipment26_reward => ['領取第二套裝備', '正在向 Administrator Michael 領取原生 Lv.26 裝備。', 'Administrator Michael'],
+  equipment_sync_target => ['同步任務目標', '正在等候 OpenKore 收到原生 mob_goal 與 mob_count。', '任務怪物'],
+  equipment_report_boya => ['返回 Instructor Boya', '沙漠訓練完成，正在回報原生任務 7132。', 'Instructor Boya'],
+  equipment_reward => ['領取第一套裝備', '正在向 Administrator Michael 領取四件原生伊甸園裝備。', 'Administrator Michael'],
+  equipment_supply => ['任務途中補給', '恢復品不足，正在回城販售戰利品並補齊消耗品。', '普隆德拉道具商'],
+  equipment_returning_hunt => ['返回掛機地圖', '裝備已取得，正在前往目前等級的推薦掛機地圖。', '等級推薦地圖'],
+  equipment_complete => ['Lv.12 裝備訓練完成', '四件原生伊甸園裝備已存入角色道具欄。', '第一套伊甸園裝備'],
+  returning_hunt => ['返回掛機地圖', '伊甸園入團完成，正在前往目前等級的推薦掛機地圖。', '等級推薦地圖'],
+  complete => ['伊甸園入團完成', '已取得伊甸園徽章並恢復等級推薦掛機。', '等級推薦地圖']
 );
 my %job_routes = (
   swordman => ['iz_ac01', 60, 67],
@@ -104,6 +142,10 @@ my %job_routes = (
   acolyte => ['iz_ac01', 60, 67],
   merchant => ['iz_ac01', 60, 67],
   thief => ['iz_ac01', 60, 67],
+  supernovice => ['iz_ac01', 60, 67],
+  taekwon => ['iz_ac01', 60, 67],
+  gunslinger => ['iz_ac01', 60, 67],
+  ninja => ['iz_ac01', 60, 67],
 );
 
 sub job_route_target {
@@ -116,11 +158,20 @@ sub job_route_distance {
 }
 
 sub job_resume_target {
+  my $level = $char ? number_or_zero($char->{lv}) : 1;
+  return ['pay_dun00', 73, 78] if $level >= 26;
+  return ['moc_fild11', 180, 253] if $level >= 12;
   return ['prt_fild08', 170, 374];
 }
 Plugins::register($name, 'Exports the authoritative OpenKore status packet snapshot.', \&unload, \&unload);
 my $hooks = Plugins::addHooks(
   ['mainLoop_pre', \&export_status],
+  ['AI_storage_auto_limit_reached', \&prefer_sell_before_storage],
+  ['ai_canStartStorageSellBuy', \&guard_auto_supply_start],
+  ['AI_storage_auto_queued', \&record_supply_storage_start],
+  ['AI_storage_auto_completed', \&finish_supply_storage_cycle],
+  ['AI_buy_auto_queued', \&reserve_storage_zeny],
+  ['AI_buy_auto_completed', \&restore_supply_buy_limits],
   ['packet_pubMsg', \&record_public_chat],
   ['packet_selfChat', \&record_self_chat],
   ['packet_privMsg', \&record_private_chat],
@@ -138,7 +189,97 @@ my $hooks = Plugins::addHooks(
   ['route', \&record_route_status]
 );
 
-sub unload { Plugins::delHooks($hooks); }
+sub prefer_sell_before_storage {
+  my (undef, $args) = @_;
+  return if !$config{sellAuto} || !$config{sellAuto_npc};
+  # OpenKore checks storage before selling when both share the weight trigger.
+  # Defer that first storage attempt so the normal sell -> buy -> storage chain
+  # can liquidate loot before evaluating the character's buying power.
+  $args->{return} = 1;
+}
+
+sub eden_equipment_task_active {
+  return $eden_active
+    && ($eden_task_id eq 'equipment12' || $eden_task_id eq 'equipment26');
+}
+
+sub guard_auto_supply_start {
+  my (undef, $args) = @_;
+  if (eden_equipment_task_active() && !$eden_supply_active) {
+    $args->{return} = 1;
+    return;
+  }
+  $args->{return} = 1 if time < $supply_retry_after;
+}
+
+sub record_supply_storage_start {
+  $supply_storage_started_weight = Misc::percent_weight($char)
+    if $char && !defined($supply_storage_started_weight);
+}
+
+sub finish_supply_storage_cycle {
+  return if !$char || !defined($supply_storage_started_weight);
+  my $current_weight = Misc::percent_weight($char);
+  my $return_weight = number_or_zero($config{itemsMaxWeight_sellOrStore});
+  if ($return_weight > 0
+    && $current_weight >= $return_weight
+    && $current_weight >= $supply_storage_started_weight) {
+    $supply_retry_after = time + 300;
+    append_task_event(
+      'recovery',
+      '補給暫停重試',
+      '本次補給未降低負重，5分鐘後再嘗試，角色先留在目前流程。',
+      '',
+      join('|', 'supply_backoff', int($current_weight), int($supply_retry_after))
+    );
+  } else {
+    $supply_retry_after = 0;
+  }
+  undef $supply_storage_started_weight;
+}
+
+sub reserve_storage_zeny {
+  return if !$char || !$config{storageAuto};
+  my $reserve = number_or_zero($config{minStorageZeny});
+  return if $reserve < 1;
+  for (my $index = 0; exists $config{"buyAuto_$index"}; $index++) {
+    next if $config{"buyAuto_${index}_disabled"};
+    my $price = number_or_zero($config{"buyAuto_${index}_price"});
+    my $maximum = number_or_zero($config{"buyAuto_${index}_maxAmount"});
+    next if $price < 1 || $maximum < 1;
+    my $item_id = number_or_zero($config{"buyAuto_$index"});
+    next if $item_id < 1;
+    my $current = $char->inventory->sumByNameID(
+      $item_id,
+      $config{"buyAuto_${index}_onlyIdentified"}
+    );
+    my $available = number_or_zero($char->{zeny}) - $reserve;
+    $available = 0 if $available < 0;
+    my $safe_maximum = $current + int($available / $price);
+    next if $safe_maximum >= $maximum;
+    $supply_buy_original_limits{$index} = {
+      maxAmount => $config{"buyAuto_${index}_maxAmount"},
+      batchSize => $config{"buyAuto_${index}_batchSize"}
+    };
+    $config{"buyAuto_${index}_maxAmount"} = $safe_maximum;
+    $config{"buyAuto_${index}_batchSize"} = $safe_maximum - $current;
+  }
+}
+
+sub restore_supply_buy_limits {
+  for my $index (keys %supply_buy_original_limits) {
+    $config{"buyAuto_${index}_maxAmount"} =
+      $supply_buy_original_limits{$index}{maxAmount};
+    $config{"buyAuto_${index}_batchSize"} =
+      $supply_buy_original_limits{$index}{batchSize};
+  }
+  %supply_buy_original_limits = ();
+}
+
+sub unload {
+  &restore_supply_buy_limits;
+  Plugins::delHooks($hooks);
+}
 
 sub number_or_zero {
   my ($value) = @_;
@@ -259,6 +400,10 @@ sub record_route_status {
   my ($hook, $args) = @_;
   return if (!$onboarding_active && !$eden_active) || ($args->{status} || '') ne 'stuck';
   $onboarding_stuck_pending = 1;
+  if ($eden_active && ($eden_task_id eq 'equipment12' || $eden_task_id eq 'equipment26')) {
+    $eden_route_stuck_count++;
+    fail_eden_task('route_failed') if $eden_route_stuck_count >= 3;
+  }
 }
 
 sub actor_json {
@@ -357,6 +502,13 @@ sub inventory_amount {
   return 0 if !$char || !$char->inventory->isReady();
   my $item = $char->inventory->getByNameID($name_id);
   return $item ? number_or_zero($item->{amount}) : 0;
+}
+
+sub is_eden_eligible_job {
+  my ($job_id) = @_;
+  $job_id = number_or_zero($job_id);
+  return 1 if $job_id >= 1 && $job_id <= 6;
+  return scalar grep { $_ == $job_id } (21, 23, 24, 25, 4046);
 }
 
 sub set_onboarding_phase {
@@ -533,8 +685,334 @@ sub set_eden_phase {
   my ($phase) = @_;
   return if $eden_phase eq $phase;
   $eden_phase = $phase;
+  $eden_phase_started_at = time;
+  $eden_route_stuck_count = 0;
   my $info = $eden_phase_info{$phase};
   append_task_event('action', $info->[0], $info->[1], $info->[2], "eden_phase|$phase") if $info;
+}
+
+sub restore_eden_settings {
+  configModify('autoTalkCont', $eden_original_auto_talk, 1)
+    if defined($eden_original_auto_talk);
+  configModify('itemsTakeAuto', $eden_original_items_take_auto, 1)
+    if defined($eden_original_items_take_auto);
+}
+
+sub supply_guard_path {
+  my @control_folders = Settings::getControlFolders();
+  return if !@control_folders;
+  return File::Spec->catfile($control_folders[0], '..', 'supply-guard.txt');
+}
+
+sub write_supply_guard {
+  my $path = supply_guard_path();
+  return 0 if !$path;
+  my $temporary = $path . '.tmp';
+  open(my $file, '>:encoding(UTF-8)', $temporary) or return 0;
+  print $file 'attackAuto=' . number_or_zero($eden_supply_original_attack) . "\n";
+  print $file 'itemsTakeAuto=' . number_or_zero($eden_supply_original_take) . "\n";
+  close($file) or return 0;
+  return rename($temporary, $path) ? 1 : 0;
+}
+
+sub clear_supply_guard {
+  my $path = supply_guard_path();
+  unlink($path) if $path && -f $path;
+}
+
+sub recover_interrupted_supply {
+  return if $supply_guard_checked;
+  my $path = supply_guard_path();
+  if (!$path || !-f $path) {
+    $supply_guard_checked = 1;
+    return;
+  }
+  open(my $file, '<:encoding(UTF-8)', $path) or return;
+  my %saved;
+  while (my $line = <$file>) {
+    chomp($line);
+    my ($key, $value) = split(/=/, $line, 2);
+    $saved{$key} = $value if defined($key) && defined($value) && $value =~ /^\d+$/;
+  }
+  close($file);
+  configModify('attackAuto', $saved{attackAuto}, 1)
+    if defined($saved{attackAuto});
+  configModify('itemsTakeAuto', $saved{itemsTakeAuto}, 1)
+    if defined($saved{itemsTakeAuto});
+  clear_supply_guard();
+  $supply_guard_checked = 1;
+  append_task_event(
+    'recovery',
+    '補給中斷復原',
+    '已還原自動攻擊與拾取設定。',
+    '',
+    'supply_guard_recovered'
+  );
+}
+
+sub fail_eden_task {
+  my ($error) = @_;
+  return if !$eden_active;
+  AI::clear();
+  Commands::run('ai manual');
+  configModify('attackAuto', $eden_supply_original_attack, 1)
+    if $eden_supply_active && defined($eden_supply_original_attack);
+  restore_eden_settings();
+  $eden_error = $error;
+  $eden_active = 0;
+  $eden_completed = 0;
+  $eden_dialog_owned = 0;
+  $eden_dialog_seen = 0;
+  $eden_supply_active = 0;
+  $eden_supply_started_at = 0;
+  clear_supply_guard();
+  append_task_event('recovery', '伊甸園任務停止', $error, '', "eden_error|$error");
+}
+
+sub equip_eden_rewards {
+  return if !$char || !$char->inventory->isReady();
+  my @equipped;
+  foreach my $item_id (5583, 2560, 2456, 15009, 2457, 15010,
+    1192, 13423, 13050, 16004, 1747, 1650, 13112, 1699) {
+    my $item = $char->inventory->getByNameID($item_id);
+    next if !$item || !$item->equippable || $item->{equipped};
+    $item->equip;
+    push @equipped, $item->{name} || $item_id;
+  }
+  if (number_or_zero($char->{jobID}) == 3) {
+    my $arrow = $char->inventory->getByNameID(1750);
+    if ($arrow && $arrow->equippable && !$arrow->{equipped}) {
+      $arrow->equip;
+      push @equipped, $arrow->{name} || 1750;
+    }
+  }
+  append_task_event(
+    'action',
+    '自動穿上伊甸園裝備',
+    '已送出裝備指令：' . join('、', @equipped),
+    '裝備欄',
+    join('|', 'eden_auto_equip', $eden_task_id, @equipped)
+  ) if @equipped;
+}
+
+sub start_eden_equipment26_chain {
+  return 0 if $eden_task_id ne 'equipment12';
+  my $level = number_or_zero($char->{lv});
+  return 0 if $level < 26 || $level >= 33;
+  $eden_task_id = 'equipment26';
+  $eden_active = 1;
+  $eden_completed = 0;
+  $eden_error = '';
+  $eden_started_at = time;
+  $eden_last_action = 0;
+  $eden_phase_started_at = 0;
+  $eden_dialog_owned = 0;
+  $eden_dialog_seen = 0;
+  $eden_dialog_phase = '';
+  $eden_select_step = 0;
+  $eden_text_step = 0;
+  $eden_training_stage_hint = 12;
+  $eden_last_quest_id = 0;
+  $eden_target_missing_since = 0;
+  $eden_route_stuck_count = 0;
+  $eden_npc_failures = 0;
+  $eden_supply_active = 0;
+  $eden_supply_started_at = 0;
+  $job_resume_pending = 0;
+  append_task_event(
+    'action',
+    '接續 Lv.26 裝備訓練',
+    '角色等級符合條件，正在接續下一階段原生伊甸園任務。',
+    'Instructor Boya',
+    'eden_equipment26_chain'
+  );
+  set_eden_phase('equipment26_accept');
+  return 1;
+}
+
+sub process_eden_supply {
+  my $equipment_task = $eden_active
+    && ($eden_task_id eq 'equipment12' || $eden_task_id eq 'equipment26');
+  return 0 if !$equipment_task && !$job_resume_pending;
+  return 0 if !$char->inventory->isReady();
+  my $red_potions = inventory_amount(501);
+  if (!$eden_supply_active) {
+    return 0 if $red_potions > 20;
+    if ($field && $field->baseName eq 'moc_para01') {
+      set_eden_phase('equipment_supply');
+      eden_exit_step();
+      return 1;
+    }
+    configModify('teleportAuto_idle', 0, 1)
+      if number_or_zero($config{teleportAuto_idle}) != 0;
+    $eden_supply_original_attack = $config{attackAuto};
+    $eden_supply_original_take = $config{itemsTakeAuto};
+    if (!write_supply_guard()) {
+      append_task_event(
+        'recovery',
+        '補給安全鎖建立失敗',
+        '保留目前戰鬥設定並略過本次補給。',
+        '',
+        'supply_guard_write_failed'
+      );
+      return 0;
+    }
+    configModify('attackAuto', 0, 1)
+      if number_or_zero($config{attackAuto}) != 0;
+    configModify('itemsTakeAuto', 0, 1)
+      if number_or_zero($config{itemsTakeAuto}) != 0;
+    $messageSender->sendTalkCancel($talk{ID}) if $talk{ID};
+    $eden_dialog_owned = 0;
+    $eden_dialog_seen = 0;
+    AI::clear();
+    Commands::run('ai auto');
+    AI::queue('sellAuto');
+    $eden_supply_active = 1;
+    $eden_supply_started_at = time;
+    set_eden_phase('equipment_supply');
+    return 1;
+  }
+  if ($red_potions > 20) {
+    configModify('attackAuto', $eden_supply_original_attack, 1)
+      if defined($eden_supply_original_attack);
+    configModify('itemsTakeAuto', $eden_supply_original_take, 1)
+      if defined($eden_supply_original_take);
+    undef $eden_supply_original_attack;
+    undef $eden_supply_original_take;
+    $eden_supply_active = 0;
+    $eden_supply_started_at = 0;
+    $eden_last_action = 0;
+    clear_supply_guard();
+    append_task_event(
+      'action',
+      '補給完成',
+      "紅色藥水已補至 $red_potions 個，正在返回任務地圖。",
+      $equipment_task
+        ? ($eden_task_id eq 'equipment26' ? 'pay_dun00' : 'moc_fild11')
+        : job_resume_target()->[0],
+      join('|', 'eden_supply_complete', $eden_task_id, $red_potions)
+    );
+    return 0;
+  }
+  if (time - $eden_supply_started_at >= 180.0) {
+    if ($equipment_task) {
+      fail_eden_task('insufficient_zeny');
+    } else {
+      AI::clear();
+      Commands::run('ai manual');
+      configModify('attackAuto', $eden_supply_original_attack, 1)
+        if defined($eden_supply_original_attack);
+      configModify('itemsTakeAuto', $eden_supply_original_take, 1)
+        if defined($eden_supply_original_take);
+      undef $eden_supply_original_attack;
+      undef $eden_supply_original_take;
+      $job_resume_pending = 0;
+      $eden_supply_active = 0;
+      clear_supply_guard();
+      append_task_event('recovery', '補給停止', 'insufficient_zeny', '',
+        'hunt_supply_insufficient_zeny');
+    }
+    return 1;
+  }
+  return 1 if AI::inQueue('sellAuto', 'buyAuto', 'storageAuto', 'route', 'mapRoute', 'teleport', 'NPC');
+  return 1;
+}
+
+sub eden_equipment_rewards_complete {
+  foreach my $item_id (5583, 2560, 2456, 15009) {
+    return 0 if inventory_amount($item_id) < 1;
+  }
+  return 1;
+}
+
+sub eden_equipment26_rewards_complete {
+  return inventory_amount(2457) > 0 && inventory_amount(15010) > 0;
+}
+
+sub eden_equipment_quest_id {
+  return 0 if !$questList;
+  my @quest_ids = $eden_task_id eq 'equipment26'
+    ? (7138, 7139, 7140, 7141)
+    : (7128, 7129, 7130, 7131, 7132);
+  foreach my $quest_id (@quest_ids) {
+    if (exists $questList->{$quest_id}) {
+      $eden_last_quest_id = $quest_id;
+      return $quest_id;
+    }
+  }
+  return 0;
+}
+
+sub eden_equipment_mission {
+  my ($quest_id, $mob_id) = @_;
+  return undef if !$questList || !exists $questList->{$quest_id}{missions};
+  foreach my $mission (values %{ $questList->{$quest_id}{missions} }) {
+    return $mission if number_or_zero($mission->{mob_id}) == $mob_id;
+  }
+  return undef;
+}
+
+sub eden_equipment_hunt {
+  my ($quest_id, $mob_id, $phase) = @_;
+  my $mission = eden_equipment_mission($quest_id, $mob_id);
+  if (!$mission || number_or_zero($mission->{mob_goal}) < 1) {
+    if (!$eden_target_missing_since) {
+      $eden_target_missing_since = time;
+      set_eden_phase('equipment_sync_target');
+    } elsif (time - $eden_target_missing_since >= 15.0) {
+      fail_eden_task('target_unresolved');
+    }
+    return 1;
+  }
+  $eden_target_missing_since = 0;
+  my $count = number_or_zero($mission->{mob_count});
+  my $goal = number_or_zero($mission->{mob_goal});
+  if ($count >= $goal) {
+    if ($eden_phase ne 'equipment_dog') {
+      Commands::run('ai manual');
+      AI::clear();
+      set_eden_phase('equipment_dog');
+    }
+    eden_talk_at('moc_fild11', 180, 253, 7);
+    return 1;
+  }
+  set_eden_phase($phase);
+  configModify('teleportAuto_idle', 1, 1)
+    if number_or_zero($config{teleportAuto_idle}) != 1;
+  configModify('lockMap', 'moc_fild11', 1) if ($config{lockMap} || '') ne 'moc_fild11';
+  Commands::run('ai auto') if AI::action() eq 'manual' || AI::isIdle();
+  return 1;
+}
+
+sub eden_equipment26_hunt {
+  my ($quest_id, $mob_id, $phase) = @_;
+  my $mission = eden_equipment_mission($quest_id, $mob_id);
+  if (!$mission || number_or_zero($mission->{mob_goal}) < 1) {
+    if (!$eden_target_missing_since) {
+      $eden_target_missing_since = time;
+      set_eden_phase('equipment_sync_target');
+    } elsif (time - $eden_target_missing_since >= 15.0) {
+      fail_eden_task('target_unresolved');
+    }
+    return 1;
+  }
+  $eden_target_missing_since = 0;
+  my $count = number_or_zero($mission->{mob_count});
+  my $goal = number_or_zero($mission->{mob_goal});
+  if ($count >= $goal) {
+    configModify('lockMap', '', 1) if ($config{lockMap} || '') ne '';
+    Commands::run('ai manual') if AI::action() ne 'manual';
+    AI::clear();
+    set_eden_phase('equipment26_karl');
+    eden_move('pay_arche', 41, 136, 7);
+    return 1;
+  }
+  set_eden_phase($phase);
+  configModify('teleportAuto_idle', 1, 1)
+    if number_or_zero($config{teleportAuto_idle}) != 1;
+  configModify('lockMap', 'pay_dun00', 1) if ($config{lockMap} || '') ne 'pay_dun00';
+  Commands::run('ai auto') if AI::action() eq 'manual' || AI::isIdle();
+  return 1;
 }
 
 sub eden_action_ready {
@@ -545,6 +1023,8 @@ sub eden_action_ready {
 
 sub eden_move {
   my ($map, $x, $y, $distance) = @_;
+  configModify('teleportAuto_idle', 0, 1)
+    if number_or_zero($config{teleportAuto_idle}) != 0;
   return if !AI::isIdle() || !eden_action_ready(1.0);
   Commands::run("move $map $x $y $distance");
   $eden_last_action = time;
@@ -552,6 +1032,8 @@ sub eden_move {
 
 sub eden_talk_at {
   my ($map, $x, $y, $range) = @_;
+  configModify('teleportAuto_idle', 0, 1)
+    if number_or_zero($config{teleportAuto_idle}) != 0;
   my $npc = nearby_npc_at($map, $x, $y, $range);
   if (!$npc) {
     eden_move($map, $x, $y, 2);
@@ -576,9 +1058,19 @@ sub process_eden_dialog {
       $eden_dialog_seen = 0;
       return 0;
     }
+    if ($eden_dialog_owned && $eden_dialog_seen) {
+      $eden_dialog_owned = 0;
+      $eden_dialog_seen = 0;
+      return 0;
+    }
     if ($eden_dialog_owned && time - $eden_dialog_started_at > 30.0) {
       $eden_dialog_owned = 0;
       $eden_dialog_seen = 0;
+      $eden_npc_failures++;
+      if (($eden_task_id eq 'equipment12' || $eden_task_id eq 'equipment26')
+        && $eden_npc_failures >= 3) {
+        fail_eden_task('npc_failed');
+      }
     }
     return $eden_dialog_owned ? 1 : 0;
   }
@@ -589,9 +1081,16 @@ sub process_eden_dialog {
   if ($stage eq 'next') {
     $messageSender->sendTalkContinue($talk{ID});
   } elsif ($stage eq 'select' && $talk{responses}) {
-    my $choice = $eden_phase eq 'enter_headquarters'
-      ? 1
-      : $eden_select_step == 0 ? 2 : 1;
+    my %choices = (
+      enter_headquarters => [1],
+      register_member => [2, 1],
+      equipment_accept => [2, 1, 1],
+      equipment_dog => [2],
+      equipment_reward => [1, 2],
+      equipment26_reward => [1, 2]
+    );
+    my $phase_choices = $choices{$eden_phase} || [1];
+    my $choice = $phase_choices->[$eden_select_step] || 1;
     $messageSender->sendTalkResponse($talk{ID}, $choice);
     $eden_select_step++;
   } elsif ($stage eq 'text') {
@@ -609,17 +1108,69 @@ sub process_eden_dialog {
 sub finish_eden_enrollment {
   AI::clear();
   Commands::run('ai manual');
+  $eden_dialog_owned = 0;
+  $eden_dialog_seen = 0;
+  append_task_event('action', '伊甸園入團完成', '已取得伊甸園徽章。',
+    '伊甸園徽章', 'eden_member_complete');
+  my $level = number_or_zero($char->{lv});
+  if (($level >= 12 && $level < 20) || ($level >= 26 && $level < 33)) {
+    $eden_task_id = $level >= 26 ? 'equipment26' : 'equipment12';
+    $eden_active = 1;
+    $eden_completed = 0;
+    $eden_error = '';
+    $eden_started_at = time;
+    $eden_last_action = 0;
+    $eden_phase_started_at = 0;
+    $eden_training_stage_hint = 0;
+    $eden_last_quest_id = 0;
+    $eden_target_missing_since = 0;
+    $eden_route_stuck_count = 0;
+    $eden_npc_failures = 0;
+    $eden_supply_active = 0;
+    $eden_supply_started_at = 0;
+    $eden_original_items_take_auto = $config{itemsTakeAuto};
+    configModify('itemsTakeAuto', 0, 1)
+      if number_or_zero($config{itemsTakeAuto}) != 0;
+    set_eden_phase($eden_task_id eq 'equipment26'
+      ? 'equipment26_accept' : 'equipment_accept');
+    return;
+  }
   configModify('autoTalkCont', 0, 1);
   $eden_active = 0;
   $eden_completed = 1;
-  $eden_dialog_owned = 0;
-  $eden_dialog_seen = 0;
   set_eden_phase('returning_hunt');
   $eden_return_started_at = time;
   $eden_exit_recovery_attempted = 0;
   $job_resume_pending = 1;
   $job_resume_after = time + 1;
   $last_job_resume_retry = 0;
+}
+
+sub finish_eden_equipment {
+  AI::clear();
+  Commands::run('ai manual');
+  if ($talk{ID}) {
+    $messageSender->sendTalkCancel($talk{ID});
+    $dialog_cancel_until = time + 3;
+  }
+  $eden_dialog_owned = 0;
+  $eden_dialog_seen = 0;
+  my $tier = $eden_task_id eq 'equipment26' ? '第二套' : '第一套';
+  append_task_event('action', '任務完成', "由 rAthena 原生 NPC 發放${tier}伊甸園裝備。",
+    '伊甸園裝備', 'eden_equipment_reward_complete');
+  return if start_eden_equipment26_chain();
+  restore_eden_settings();
+  $eden_active = 0;
+  $eden_completed = 1;
+  $eden_supply_active = 0;
+  $eden_supply_started_at = 0;
+  set_eden_phase('equipment_returning_hunt');
+  $eden_return_started_at = time;
+  $eden_exit_recovery_attempted = 0;
+  $job_resume_pending = 1;
+  $job_resume_after = time + 1;
+  $last_job_resume_retry = 0;
+  $job_route_key = '';
 }
 
 sub process_eden_exit_dialog {
@@ -642,16 +1193,202 @@ sub process_eden_exit_dialog {
 sub process_eden {
   return 0 if !$eden_active || !$char || !$field || !$net
     || $net->getState() != Network::IN_GAME;
-  if (inventory_amount(6219) > 0 || inventory_amount(22508) > 0) {
+  my $member = inventory_amount(6219) > 0 || inventory_amount(22508) > 0;
+  if ($eden_task_id eq 'member' && $member) {
     return 1 if process_eden_exit_dialog();
     finish_eden_enrollment();
+    return 1;
+  }
+  if ($eden_task_id eq 'equipment12' && $member
+    && $eden_dialog_phase eq 'register_member') {
+    return 1 if process_eden_exit_dialog();
+    $eden_dialog_owned = 0;
+    $eden_dialog_seen = 0;
+  }
+  if (($eden_task_id eq 'equipment12' && eden_equipment_rewards_complete())
+    || ($eden_task_id eq 'equipment26' && eden_equipment26_rewards_complete())) {
+    return 1 if process_eden_exit_dialog();
+    finish_eden_equipment();
     return 1;
   }
   return 1 if process_eden_dialog();
   return 1 if time - $eden_started_at < 1.5;
   return 1 if number_or_zero($char->{dead});
+  return 1 if process_eden_supply();
+  if ((($eden_task_id eq 'equipment12'
+      && $eden_phase =~ /^(?:route_officer|enter_headquarters|route_secretary|equipment_route_field|equipment_report_boya)$/)
+    || ($eden_task_id eq 'equipment26'
+      && $eden_phase =~ /^(?:route_officer|enter_headquarters|route_secretary|equipment26_route_field|equipment26_report_boya)$/))
+    && $eden_phase_started_at > 0
+    && time - $eden_phase_started_at >= 300.0) {
+    fail_eden_task('route_failed');
+    return 1;
+  }
 
   my $map = $field->baseName;
+  if ($eden_task_id eq 'equipment12' && $member) {
+    my $quest_id = eden_equipment_quest_id();
+    if ($quest_id == 7128) {
+      $eden_training_stage_hint = 1;
+    } elsif ($quest_id >= 7129 && $quest_id <= 7131) {
+      $eden_training_stage_hint = $quest_id - 7127;
+    } elsif ($quest_id == 7132) {
+      $eden_training_stage_hint = $questList->{7132}{active} ? 5 : 11;
+    } elsif ($eden_last_quest_id == 7132 && $eden_training_stage_hint == 5) {
+      $eden_training_stage_hint = 11;
+    }
+
+    if ($map eq 'moc_fild11') {
+      if ($quest_id == 7128) {
+        if ($eden_phase ne 'equipment_dog') {
+          Commands::run('ai manual');
+          AI::clear();
+          set_eden_phase('equipment_dog');
+        }
+        eden_talk_at('moc_fild11', 180, 253, 7);
+      } elsif ($quest_id == 7129) {
+        eden_equipment_hunt(7129, 1009, 'equipment_hunt_condor');
+      } elsif ($quest_id == 7130) {
+        eden_equipment_hunt(7130, 1107, 'equipment_hunt_wolf');
+      } elsif ($quest_id == 7131) {
+        eden_equipment_hunt(7131, 1001, 'equipment_hunt_scorpion');
+      } else {
+        configModify('lockMap', '', 1) if ($config{lockMap} || '') ne '';
+        if ($eden_phase ne 'equipment_report_boya') {
+          Commands::run('ai manual');
+          AI::clear();
+          set_eden_phase('equipment_report_boya');
+        }
+        eden_move('prontera', 124, 76, 3);
+      }
+      return 1;
+    }
+
+    if ($map eq 'moc_para01') {
+      configModify('lockMap', '', 1) if ($config{lockMap} || '') ne '';
+      if ($eden_training_stage_hint == 11
+        || ($quest_id == 7132 && !$questList->{7132}{active})) {
+        if ($char->inventory->size() > 96) {
+          fail_eden_task('inventory_full');
+          return 1;
+        }
+        set_eden_phase('equipment_reward');
+        eden_talk_at('moc_para01', 112, 96, 7);
+      } elsif ($quest_id == 7132 || $eden_training_stage_hint == 5) {
+        set_eden_phase('equipment_report_boya');
+        eden_talk_at('moc_para01', 25, 35, 7);
+      } elsif ($quest_id >= 7128 && $quest_id <= 7131) {
+        set_eden_phase('equipment_route_field');
+        eden_exit_step();
+      } else {
+        set_eden_phase('equipment_accept');
+        eden_talk_at('moc_para01', 25, 35, 7);
+      }
+      return 1;
+    }
+
+    if ($quest_id >= 7128 && $quest_id <= 7131) {
+      set_eden_phase('equipment_route_field');
+      eden_move('moc_fild11', 180, 253, 7);
+      return 1;
+    }
+  }
+
+  if ($eden_task_id eq 'equipment26' && $member) {
+    my $quest_id = eden_equipment_quest_id();
+    if ($quest_id == 7138) {
+      $eden_training_stage_hint = 13;
+    } elsif ($quest_id == 7139) {
+      $eden_training_stage_hint = 14;
+    } elsif ($quest_id == 7140) {
+      $eden_training_stage_hint = 15;
+    } elsif ($quest_id == 7141) {
+      $eden_training_stage_hint = $questList->{7141}{active} ? 16 : 22;
+    } elsif ($eden_last_quest_id == 7141 && $eden_training_stage_hint == 16) {
+      $eden_training_stage_hint = 22;
+    }
+
+    if ($map eq 'pay_dun00') {
+      if ($quest_id == 7139) {
+        eden_equipment26_hunt(7139, 1076, 'equipment26_hunt_skeleton');
+      } elsif ($quest_id == 7140) {
+        eden_equipment26_hunt(7140, 1031, 'equipment26_hunt_poporing');
+      } else {
+        if ($eden_phase ne 'equipment26_karl') {
+          Commands::run('ai manual');
+          AI::clear();
+          set_eden_phase('equipment26_karl');
+        }
+        eden_move('pay_arche', 41, 136, 7);
+      }
+      return 1;
+    }
+
+    if ($map eq 'pay_arche') {
+      if ($quest_id >= 7138 && $quest_id <= 7140) {
+        if ($quest_id >= 7139
+          && number_or_zero($char->{hp}) < number_or_zero($char->{hp_max}) * 0.8) {
+          if ($eden_phase ne 'equipment26_karl') {
+            Commands::run('ai manual');
+            AI::clear();
+            set_eden_phase('equipment26_karl');
+          }
+          eden_talk_at('pay_arche', 41, 136, 7);
+          return 1;
+        }
+        if ($quest_id == 7139 || $quest_id == 7140) {
+          my $mob_id = $quest_id == 7139 ? 1076 : 1031;
+          my $mission = eden_equipment_mission($quest_id, $mob_id);
+          if ($mission && number_or_zero($mission->{mob_count})
+              < number_or_zero($mission->{mob_goal})) {
+            set_eden_phase($quest_id == 7139
+              ? 'equipment26_hunt_skeleton' : 'equipment26_hunt_poporing');
+            eden_move('pay_dun00', 73, 78, 20);
+            return 1;
+          }
+        }
+        if ($eden_phase ne 'equipment26_karl') {
+          Commands::run('ai manual') if AI::action() ne 'manual';
+          AI::clear();
+          set_eden_phase('equipment26_karl');
+        }
+        eden_talk_at('pay_arche', 41, 136, 7);
+      } else {
+        set_eden_phase('equipment26_report_boya');
+        eden_move('prontera', 124, 76, 3);
+      }
+      return 1;
+    }
+
+    if ($map eq 'moc_para01') {
+      configModify('lockMap', '', 1) if ($config{lockMap} || '') ne '';
+      if ($eden_training_stage_hint >= 22) {
+        if ($char->inventory->size() > 94) {
+          fail_eden_task('inventory_full');
+          return 1;
+        }
+        set_eden_phase('equipment26_reward');
+        eden_talk_at('moc_para01', 112, 96, 7);
+      } elsif ($quest_id == 7141 || $eden_training_stage_hint == 16) {
+        set_eden_phase('equipment26_report_boya');
+        eden_talk_at('moc_para01', 25, 35, 7);
+      } elsif ($quest_id >= 7138 && $quest_id <= 7140) {
+        set_eden_phase('equipment26_route_field');
+        eden_exit_step();
+      } else {
+        set_eden_phase('equipment26_accept');
+        eden_talk_at('moc_para01', 25, 35, 7);
+      }
+      return 1;
+    }
+
+    if ($quest_id >= 7138 && $quest_id <= 7140) {
+      set_eden_phase('equipment26_route_field');
+      eden_move('pay_arche', 41, 136, 7);
+      return 1;
+    }
+  }
+
   if ($map eq 'moc_para01') {
     my $npc = nearby_npc_at('moc_para01', 27, 35, 6);
     if ($npc) {
@@ -665,12 +1402,12 @@ sub process_eden {
   }
 
   if ($map eq 'prontera') {
-    set_eden_phase('route_officer');
     my $npc = nearby_npc_at('prontera', 124, 76, 6);
     if ($npc) {
       set_eden_phase('enter_headquarters');
       eden_talk_at('prontera', 124, 76, 6);
     } else {
+      set_eden_phase('route_officer');
       eden_move('prontera', 124, 76, 2);
     }
     return 1;
@@ -856,7 +1593,47 @@ sub process_onboarding {
     return 1;
   }
 
+  if ($map =~ /^(?:prt_fild08|moc_fild11|pay_dun00)$/
+    && number_or_zero($char->{jobID}) == 0) {
+    my ($training_map, $training_x, $training_y) = @{ job_resume_target() };
+    if ($map ne $training_map && number_or_zero($char->{lv}) < 45) {
+      set_onboarding_phase('supernovice_relocating');
+      set_onboarding_ai('manual');
+      onboarding_move($training_map, $training_x, $training_y, 10);
+    } else {
+      set_onboarding_phase(number_or_zero($char->{lv}) < 45
+        ? 'supernovice_training' : 'supernovice_ready');
+      configModify('lockMap', $training_map, 1)
+        if ($config{lockMap} || '') ne $training_map;
+      set_onboarding_ai('auto');
+    }
+    return 1;
+  }
+
   return 0;
+}
+
+sub process_expanded_onboarding_repair {
+  return if !$field || !$char || !$char->inventory->isReady();
+  my $job_id = number_or_zero($char->{jobID});
+  my ($minimum_level, $weapon_id, $ammo_id);
+  if ($job_id == 24) {
+    ($minimum_level, $weapon_id, $ammo_id) = (10, 13101, 13200);
+  } elsif ($job_id == 25) {
+    ($minimum_level, $weapon_id, $ammo_id) = (12, 13010, 13250);
+  } else {
+    return;
+  }
+  my $weapon = $char->inventory->getByNameID($weapon_id);
+  my $ammo = $char->inventory->getByNameID($ammo_id);
+  return if !$weapon || !$ammo;
+  return if number_or_zero($char->{lv}) >= $minimum_level
+    && $weapon->{equipped}
+    && $ammo->{equipped};
+  return if $expanded_repair_attempts >= 4 || time - $last_expanded_repair < 3;
+  $messageSender->sendChat('@terminal_expanded_repair');
+  $expanded_repair_attempts++;
+  $last_expanded_repair = time;
 }
 
 sub process_dialog_cancel {
@@ -871,16 +1648,28 @@ sub process_dialog_cancel {
 }
 
 sub eden_exit_step {
-  return if !AI::isIdle();
+  return if !AI::isIdle() || !eden_action_ready(1.5);
   Commands::run('move moc_para01 30 10 0');
+  $eden_last_action = time;
+}
+
+sub eden_return_to_hunt_step {
+  return if !AI::isIdle() || !eden_action_ready(1.5);
+  Commands::run('move moc_para01 30 10 0');
+  $eden_last_action = time;
 }
 
 sub process_job_resume {
   return if !$job_resume_pending || !$field || !$char;
   return if time < $job_resume_after;
+  return if !$char->inventory->isReady();
+  return if process_eden_supply();
   if ($job_resume_pending == 1) {
     return if $talk{ID};
     Commands::run('ai manual');
+    equip_eden_rewards()
+      if $eden_completed
+        && ($eden_task_id eq 'equipment12' || $eden_task_id eq 'equipment26');
     if ($char->{sitting}) {
       Commands::run('stand');
       $job_resume_pending = 2;
@@ -891,7 +1680,7 @@ sub process_job_resume {
   if ($job_resume_pending == 2) {
     return if $char->{sitting};
     if ($field->baseName eq 'moc_para01') {
-      eden_exit_step();
+      eden_return_to_hunt_step();
     } else {
       my ($map, $x, $y) = @{ job_resume_target() };
       Commands::run("move $map $x $y 10");
@@ -901,8 +1690,11 @@ sub process_job_resume {
     return;
   }
   if ($job_resume_pending == 3) {
-    if ($field->baseName eq 'prt_fild08') {
-      configModify('lockMap', 'prt_fild08', 1);
+    my ($map, $x, $y) = @{ job_resume_target() };
+    if ($field->baseName eq $map) {
+      configModify('lockMap', $map, 1);
+      configModify('teleportAuto_idle', 1, 1)
+        if number_or_zero($config{teleportAuto_idle}) != 1;
       if ($eden_completed && defined($eden_original_auto_talk)) {
         configModify('autoTalkCont', $eden_original_auto_talk, 1);
       }
@@ -910,27 +1702,31 @@ sub process_job_resume {
       $job_resume_pending = 0;
       set_onboarding_phase('awaiting_map') if $onboarding_completed;
       set_eden_phase('complete') if $eden_completed && $eden_phase eq 'returning_hunt';
+      set_eden_phase('equipment_complete')
+        if $eden_completed && $eden_phase eq 'equipment_returning_hunt';
       return;
     }
     if ($field->baseName eq 'moc_para01'
-      && !$eden_exit_recovery_attempted
       && $eden_return_started_at > 0
       && time - $eden_return_started_at >= 8.0
-      && time - $last_position_changed_at >= 8.0) {
+      && time - $last_position_changed_at >= 8.0
+      && time - $last_job_resume_retry >= 8.0) {
       append_task_event(
         'recovery',
         '重新同步移動狀態',
         '離開伊甸園總部時偵測到角色停滯，正在重新同步後繼續返回掛機地圖。',
-        '普隆德拉原野 08',
+        $map,
         join('|', 'eden_exit_relog', int(time))
       );
-      $messageSender->sendChat('@web_eden_return');
-      $eden_exit_recovery_attempted = 1;
+      AI::clear();
+      Commands::run('move moc_para01 30 10 0');
+      $eden_exit_recovery_attempted++;
+      $eden_last_action = time;
       return;
     }
     if (time - $last_job_resume_retry >= ($field->baseName eq 'moc_para01' ? 0.45 : 1.5)) {
       if ($field->baseName eq 'moc_para01') {
-        eden_exit_step();
+        eden_return_to_hunt_step();
       } else {
         return if !AI::isIdle();
         my ($map, $x, $y) = @{ job_resume_target() };
@@ -1080,6 +1876,7 @@ sub process_commands {
     close($input);
     chomp($action, $argument);
     my $ok = 0;
+    my $defer = 0;
     my $message = '無效指令';
     if ($action eq 'social_public') {
       if (!$net || $net->getState() != Network::IN_GAME) {
@@ -1162,7 +1959,11 @@ sub process_commands {
       } keys %{ $char->{skills} };
       my $skill = $handle ? $char->{skills}{$handle} : undef;
       if (!$net || $net->getState() != Network::IN_GAME) {
-        $message = '角色目前不在線上';
+        $defer = 1;
+        $message = '等待角色進入遊戲';
+      } elsif (!keys %{ $char->{skills} }) {
+        $defer = 1;
+        $message = '等待技能資料同步';
       } elsif (!$skill || !number_or_zero($skill->{up}) || number_or_zero($char->{points_skill}) < 1) {
         $message = '此技能目前無法提升';
       } else {
@@ -1310,12 +2111,12 @@ sub process_commands {
         }
       }
     } elsif ($action eq 'eden_join' && $argument eq '1') {
-      if (number_or_zero($char->{jobID}) < 1 || number_or_zero($char->{jobID}) > 6) {
+      if (!is_eden_eligible_job($char->{jobID})) {
         $message = '請先完成一轉，再加入伊甸園';
       } elsif (inventory_amount(6219) > 0 || inventory_amount(22508) > 0) {
         $message = '角色已經是伊甸園成員';
-      } elsif ($onboarding_active) {
-        $message = '請先完成新生訓練';
+      } elsif ($onboarding_active || $eden_active) {
+        $message = 'command_rejected';
       } else {
         $messageSender->sendTalkCancel($talk{ID}) if $talk{ID};
         Commands::run('ai manual');
@@ -1325,6 +2126,8 @@ sub process_commands {
         configModify('autoTalkCont', 0, 1) if number_or_zero($config{autoTalkCont}) != 0;
         $eden_active = 1;
         $eden_completed = 0;
+        $eden_task_id = 'member';
+        $eden_error = '';
         $eden_phase = '';
         $eden_started_at = time;
         $eden_last_action = 0;
@@ -1335,11 +2138,115 @@ sub process_commands {
         $eden_text_step = 0;
         $eden_return_started_at = 0;
         $eden_exit_recovery_attempted = 0;
+        $eden_training_stage_hint = 0;
+        $eden_last_quest_id = 0;
+        $eden_target_missing_since = 0;
+        $eden_route_stuck_count = 0;
+        $eden_npc_failures = 0;
+        $eden_supply_active = 0;
+        $eden_supply_started_at = 0;
         $job_resume_pending = 0;
         $job_route_key = '';
         set_eden_phase('route_officer');
         $ok = 1;
         $message = '已開始伊甸園入團流程';
+      }
+    } elsif ($action eq 'eden_equipment12' && $argument =~ /^(0|1|2|3|4|5|11)$/) {
+      if ($onboarding_active || $eden_active) {
+        $message = 'command_rejected';
+      } elsif (number_or_zero($char->{lv}) < 12) {
+        $message = 'prerequisite_incomplete';
+      } elsif ($argument == 0 && number_or_zero($char->{lv}) >= 20) {
+        $message = 'not_available';
+      } elsif ($argument >= 12 || eden_equipment_rewards_complete()) {
+        $message = 'already_completed';
+      } elsif ($char->inventory->size() > 96) {
+        $message = 'inventory_full';
+      } else {
+        $messageSender->sendTalkCancel($talk{ID}) if $talk{ID};
+        Commands::run('ai manual');
+        AI::clear();
+        configModify('lockMap', '', 1) if ($config{lockMap} || '') ne '';
+        $eden_original_auto_talk = $config{autoTalkCont};
+        $eden_original_items_take_auto = $config{itemsTakeAuto};
+        configModify('autoTalkCont', 0, 1)
+          if number_or_zero($config{autoTalkCont}) != 0;
+        configModify('itemsTakeAuto', 0, 1)
+          if number_or_zero($config{itemsTakeAuto}) != 0;
+        $eden_active = 1;
+        $eden_completed = 0;
+        $eden_task_id = 'equipment12';
+        $eden_error = '';
+        $eden_phase = '';
+        $eden_started_at = time;
+        $eden_last_action = 0;
+        $eden_phase_started_at = 0;
+        $eden_dialog_owned = 0;
+        $eden_dialog_seen = 0;
+        $eden_dialog_phase = '';
+        $eden_select_step = 0;
+        $eden_text_step = 0;
+        $eden_training_stage_hint = number_or_zero($argument);
+        $eden_last_quest_id = 0;
+        $eden_target_missing_since = 0;
+        $eden_route_stuck_count = 0;
+        $eden_npc_failures = 0;
+        $eden_supply_active = 0;
+        $eden_supply_started_at = 0;
+        $eden_return_started_at = 0;
+        $eden_exit_recovery_attempted = 0;
+        $job_resume_pending = 0;
+        $job_route_key = '';
+        set_eden_phase('route_officer');
+        $ok = 1;
+        $message = '已開始 Lv.12 伊甸園裝備訓練';
+      }
+    } elsif ($action eq 'eden_equipment26' && $argument =~ /^(0|13|14|15|16|22)$/) {
+      if ($onboarding_active || $eden_active) {
+        $message = 'command_rejected';
+      } elsif (number_or_zero($char->{lv}) < 26 || number_or_zero($char->{lv}) >= 33) {
+        $message = 'not_available';
+      } elsif ($argument >= 23) {
+        $message = 'already_completed';
+      } elsif ($char->inventory->size() > 94) {
+        $message = 'inventory_full';
+      } else {
+        $messageSender->sendTalkCancel($talk{ID}) if $talk{ID};
+        Commands::run('ai manual');
+        AI::clear();
+        configModify('lockMap', '', 1) if ($config{lockMap} || '') ne '';
+        $eden_original_auto_talk = $config{autoTalkCont};
+        $eden_original_items_take_auto = $config{itemsTakeAuto};
+        configModify('autoTalkCont', 0, 1)
+          if number_or_zero($config{autoTalkCont}) != 0;
+        configModify('itemsTakeAuto', 0, 1)
+          if number_or_zero($config{itemsTakeAuto}) != 0;
+        $eden_active = 1;
+        $eden_completed = 0;
+        $eden_task_id = 'equipment26';
+        $eden_error = '';
+        $eden_started_at = time;
+        $eden_last_action = 0;
+        $eden_phase_started_at = 0;
+        $eden_dialog_owned = 0;
+        $eden_dialog_seen = 0;
+        $eden_dialog_phase = '';
+        $eden_select_step = 0;
+        $eden_text_step = 0;
+        $eden_training_stage_hint = number_or_zero($argument);
+        $eden_last_quest_id = 0;
+        $eden_target_missing_since = 0;
+        $eden_route_stuck_count = 0;
+        $eden_npc_failures = 0;
+        $eden_supply_active = 0;
+        $eden_supply_started_at = 0;
+        $eden_return_started_at = 0;
+        $eden_exit_recovery_attempted = 0;
+        $job_resume_pending = 0;
+        $job_route_key = '';
+        set_eden_phase('route_officer');
+        $ok = 1;
+        $message = '已開始 Lv.26 伊甸園裝備訓練';
       }
     } elsif ($action eq 'onboarding_resume' && $argument eq '1') {
       if (number_or_zero($char->{jobID}) != 0 || $onboarding_completed) {
@@ -1370,6 +2277,19 @@ sub process_commands {
         $ok = 1;
         $message = '已請求恢復新生訓練';
       }
+    } elsif ($action eq 'job_resume' && $argument eq '1') {
+      $messageSender->sendTalkCancel($talk{ID}) if $talk{ID};
+      Commands::run('ai manual');
+      AI::clear();
+      configModify('lockMap', '', 1) if ($config{lockMap} || '') ne '';
+      configModify('teleportAuto_idle', 0, 1)
+        if number_or_zero($config{teleportAuto_idle}) != 0;
+      $job_resume_pending = 1;
+      $job_resume_after = time + 0.5;
+      $last_job_resume_retry = 0;
+      $eden_return_started_at = time;
+      $ok = 1;
+      $message = '已開始前往等級推薦掛機地圖';
     } elsif ($action eq 'job_route' && $job_routes{$argument}) {
       my ($map, $x, $y) = @{ job_route_target($argument) };
       my $distance = job_route_distance($argument);
@@ -1467,6 +2387,7 @@ sub process_commands {
         $message = '道具狀態不允許此操作';
       }
     }
+    next if $defer;
     if (!$ok && $action =~ /^social_(.+)$/) {
       my $channel = $1 eq 'emotion' ? 'public' : $1;
       append_social_event('error', $char->{name}, $message, $channel);
@@ -1485,11 +2406,13 @@ sub process_commands {
 
 sub export_status {
   return if !$char;
+  recover_interrupted_supply();
   update_task_position();
   process_stuck_recovery();
   process_dialog_cancel();
   process_commands();
   process_archer_onboarding_repair();
+  process_expanded_onboarding_repair();
   process_job_death();
   my $onboarding_handled = process_onboarding();
   my $eden_handled = $onboarding_handled ? 0 : process_eden();
@@ -1599,7 +2522,9 @@ sub export_status {
       . ',"questMissions":[' . join(',', @quest_missions) . ']'
       . ',"edenJourney":{"active":' . ($eden_active ? 'true' : 'false')
       . ',"completed":' . ($eden_completed ? 'true' : 'false')
+      . ',"taskId":' . json_string($eden_task_id)
       . ',"phase":' . json_string($eden_phase)
+      . ',"error":' . json_string($eden_error)
       . ',"resumePending":' . number_or_zero($job_resume_pending)
       . ',"sitting":' . ($char->{sitting} ? 'true' : 'false')
       . ',"member":' . ((inventory_amount(6219) > 0 || inventory_amount(22508) > 0) ? 'true' : 'false') . '}'
@@ -1613,7 +2538,12 @@ sub export_status {
       . ',"7472":' . quest_state(7472)
       . ',"7473":' . quest_state(7473)
       . ',"4269":' . quest_state(4269)
-      . ',"2293":' . quest_state(2293) . '}}'
+      . ',"2293":' . quest_state(2293)
+      . ',"7128":' . quest_state(7128)
+      . ',"7129":' . quest_state(7129)
+      . ',"7130":' . quest_state(7130)
+      . ',"7131":' . quest_state(7131)
+      . ',"7132":' . quest_state(7132) . '}}'
       . ',"npcDialog":{"active":' . ($npc_stage ? 'true' : 'false')
       . ',"stage":' . json_string($npc_stage)
       . ',"name":' . json_string($talk{name} || '')

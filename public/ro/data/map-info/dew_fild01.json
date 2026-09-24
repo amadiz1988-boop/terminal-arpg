@@ -1,0 +1,443 @@
+{
+  "id": "dew_fild01",
+  "name": "德瓦他原野_賈提族部落",
+  "category": "SERVICE_ONLY",
+  "dungeon": null,
+  "totalMonsters": 193,
+  "normalMonsterCount": 193,
+  "levelRange": {
+    "min": 75,
+    "max": 80
+  },
+  "fullLevelRange": {
+    "min": 75,
+    "max": 84
+  },
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [
+    {
+      "id": 2151,
+      "name": "泰坦魔芋花",
+      "level": 80,
+      "count": 100
+    },
+    {
+      "id": 1099,
+      "name": "艾吉歐蜈蚣",
+      "level": 75,
+      "count": 75
+    }
+  ],
+  "resourceMonsters": [],
+  "bossMonsters": [],
+  "monsters": [
+    {
+      "id": 1099,
+      "aegisName": "ARGIOPE",
+      "name": "艾吉歐蜈蚣",
+      "count": 75,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 75,
+      "hp": 3570,
+      "baseExp": 794,
+      "jobExp": 734,
+      "attackMin": 270,
+      "attackMax": 50,
+      "defense": 88,
+      "magicDefense": 32,
+      "size": "大型",
+      "race": "昆蟲",
+      "element": "毒 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/dewata.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 1042,
+          "aegisName": "Short_Leg",
+          "name": "昆蟲後腳",
+          "ratePerTenThousand": 2668,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "昆蟲又細又短的腿。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 912,
+          "aegisName": "Zargon",
+          "name": "剎勒空結晶",
+          "ratePerTenThousand": 600,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從一部份怪物身上得來的結晶,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 757,
+          "aegisName": "Elunium_Stone",
+          "name": "鋁原石",
+          "ratePerTenThousand": 88,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以拿來煉鋁的礦石,拿來提煉作成盔甲。\n\n重量: 20"
+        },
+        {
+          "itemId": 2406,
+          "aegisName": "Boots_",
+          "name": "戰士長靴",
+          "ratePerTenThousand": 3,
+          "type": "防具",
+          "weight": 60,
+          "attack": 0,
+          "defense": 16,
+          "slots": 1,
+          "description": "用堅硬的布料做成的長靴。\n系列: 鞋類  防禦: 16\n重量: 60\n裝備: 劍士系列/弓箭手系列/商人系列/盜賊系列/跆拳/拳聖/神槍手"
+        },
+        {
+          "itemId": 511,
+          "aegisName": "Green_Herb",
+          "name": "綠色藥草",
+          "ratePerTenThousand": 750,
+          "type": "恢復道具",
+          "weight": 3,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可中和所有毒性的珍貴藥草,具有治療的功效解毒。\n\n重量: 3"
+        },
+        {
+          "itemId": 719,
+          "aegisName": "Violet_Jewel",
+          "name": "紫寶石",
+          "ratePerTenThousand": 5,
+          "type": "其他",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "呈現出紫色光芒的寶石。\n\n重量: 10"
+        },
+        {
+          "itemId": 4114,
+          "aegisName": "Argiope_Card",
+          "name": "艾吉歐蜈蚣卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可將鎧甲的屬性轉變為毒屬性。\nDEF+1。\n系列: 卡片\n裝置: 鎧甲\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2151,
+      "aegisName": "ALNOLDI",
+      "name": "泰坦魔芋花",
+      "count": 100,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 80,
+      "hp": 3631,
+      "baseExp": 912,
+      "jobExp": 809,
+      "attackMin": 309,
+      "attackMax": 69,
+      "defense": 80,
+      "magicDefense": 20,
+      "size": "中型",
+      "race": "植物",
+      "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/dewata.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 705,
+          "aegisName": "Clover",
+          "name": "三葉幸運草",
+          "ratePerTenThousand": 125,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "有著三片心型葉子的植物,6至7月間會開著白色的花,有時候還可以找到有四片葉子的,這類的植物名為幸運草,傳說它會為人帶來好運。\n\n重量: 1"
+        },
+        {
+          "itemId": 520,
+          "aegisName": "Leaflet_Of_Hinal",
+          "name": "西納雷葉子",
+          "ratePerTenThousand": 213,
+          "type": "恢復道具",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "味道清新涼爽,具有令人忘卻苦痛的效果, 可使體力恢復也就是恢復定量的HP。\n\n重量: 1"
+        },
+        {
+          "itemId": 905,
+          "aegisName": "Stem",
+          "name": "植物梗",
+          "ratePerTenThousand": 2250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "植物細長的梗,可以當做藥材,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 711,
+          "aegisName": "Shoot",
+          "name": "芽苗",
+          "ratePerTenThousand": 150,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "剛剛才從這個世上出生的幼小植物,單純無瑕的樣子非常可愛。\n\n重量: 1"
+        },
+        {
+          "itemId": 521,
+          "aegisName": "Leaflet_Of_Aloe",
+          "name": "蘆薈葉子",
+          "ratePerTenThousand": 125,
+          "type": "恢復道具",
+          "weight": 2,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "將蘆薈的葉子剪下收集在一起,可恢復定量的HP。\n\n重量: 2"
+        },
+        {
+          "itemId": 2269,
+          "aegisName": "Centimental_Flower",
+          "name": "花葉",
+          "ratePerTenThousand": 50,
+          "type": "防具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "小小的花葉,含在嘴裡會讓人有幸福浪漫的感覺。\n受到植物型敵人的攻擊時, 可-3%的傷害度。\n系列: 頭具  防禦: 0\n位置: 下  重量: 10\n裝備: 初學者以外的全職業"
+        },
+        {
+          "itemId": 4515,
+          "aegisName": "Alnoldi_Card",
+          "name": "泰坦魔芋花卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "來自植物型敵人的傷害-30% 。\n系列: 卡片\n裝備: 盾牌\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2906,
+      "aegisName": "C1_ALNOLDI",
+      "name": "迅捷泰坦魔芋花",
+      "count": 2,
+      "respawnMinMs": 180000,
+      "respawnMaxMs": 180000,
+      "level": 80,
+      "hp": 18155,
+      "baseExp": 4560,
+      "jobExp": 12135,
+      "attackMin": 370,
+      "attackMax": 69,
+      "defense": 80,
+      "magicDefense": 20,
+      "size": "中型",
+      "race": "植物",
+      "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/championmobs.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 705,
+          "aegisName": "Clover",
+          "name": "三葉幸運草",
+          "ratePerTenThousand": 625,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "有著三片心型葉子的植物,6至7月間會開著白色的花,有時候還可以找到有四片葉子的,這類的植物名為幸運草,傳說它會為人帶來好運。\n\n重量: 1"
+        },
+        {
+          "itemId": 520,
+          "aegisName": "Leaflet_Of_Hinal",
+          "name": "西納雷葉子",
+          "ratePerTenThousand": 1065,
+          "type": "恢復道具",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "味道清新涼爽,具有令人忘卻苦痛的效果, 可使體力恢復也就是恢復定量的HP。\n\n重量: 1"
+        },
+        {
+          "itemId": 905,
+          "aegisName": "Stem",
+          "name": "植物梗",
+          "ratePerTenThousand": 10000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "植物細長的梗,可以當做藥材,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 711,
+          "aegisName": "Shoot",
+          "name": "芽苗",
+          "ratePerTenThousand": 750,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "剛剛才從這個世上出生的幼小植物,單純無瑕的樣子非常可愛。\n\n重量: 1"
+        },
+        {
+          "itemId": 521,
+          "aegisName": "Leaflet_Of_Aloe",
+          "name": "蘆薈葉子",
+          "ratePerTenThousand": 625,
+          "type": "恢復道具",
+          "weight": 2,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "將蘆薈的葉子剪下收集在一起,可恢復定量的HP。\n\n重量: 2"
+        },
+        {
+          "itemId": 2269,
+          "aegisName": "Centimental_Flower",
+          "name": "花葉",
+          "ratePerTenThousand": 250,
+          "type": "防具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "小小的花葉,含在嘴裡會讓人有幸福浪漫的感覺。\n受到植物型敵人的攻擊時, 可-3%的傷害度。\n系列: 頭具  防禦: 0\n位置: 下  重量: 10\n裝備: 初學者以外的全職業"
+        },
+        {
+          "itemId": 4515,
+          "aegisName": "Alnoldi_Card",
+          "name": "泰坦魔芋花卡片",
+          "ratePerTenThousand": 5,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "來自植物型敵人的傷害-30% 。\n系列: 卡片\n裝備: 盾牌\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2153,
+      "aegisName": "CENDRAWASIH",
+      "name": "天堂鳥",
+      "count": 16,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 84,
+      "hp": 4084,
+      "baseExp": 1002,
+      "jobExp": 937,
+      "attackMin": 313,
+      "attackMax": 170,
+      "defense": 72,
+      "magicDefense": 33,
+      "size": "中型",
+      "race": "天使",
+      "element": "風 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/dewata.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 6405,
+          "aegisName": "Cendrawasih_F",
+          "name": "天堂鳥羽毛",
+          "ratePerTenThousand": 4500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "天堂鳥的羽毛, 顏色相當艷麗。\n重量: 1"
+        },
+        {
+          "itemId": 7063,
+          "aegisName": "Soft_Feather",
+          "name": "柔軟的羽毛",
+          "ratePerTenThousand": 4000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在凌晨不想起床的時候,類似溫暖的被窩圍繞在自己身邊, 有著誘惑魔力的羽毛\n重量: 1"
+        },
+        {
+          "itemId": 916,
+          "aegisName": "Feather_Of_Birds",
+          "name": "羽毛",
+          "ratePerTenThousand": 4500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從飛行怪物或動物身上得來的毛,可以用來做衣服或裝飾用。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 4517,
+          "aegisName": "Cendrawasih_Card",
+          "name": "天堂鳥卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "INT+2,若是魔法師系列,則精煉每+3時 INT再+1。\n系列: 卡片\n裝備: 頭具\n重量: 1"
+        }
+      ]
+    }
+  ]
+}

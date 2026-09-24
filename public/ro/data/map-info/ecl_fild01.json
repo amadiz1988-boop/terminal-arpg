@@ -1,0 +1,296 @@
+{
+  "id": "ecl_fild01",
+  "name": "開枝散葉的大地",
+  "category": "SERVICE_ONLY",
+  "dungeon": null,
+  "totalMonsters": 147,
+  "normalMonsterCount": 147,
+  "levelRange": {
+    "min": 141,
+    "max": 143
+  },
+  "fullLevelRange": {
+    "min": 141,
+    "max": 143
+  },
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [
+    {
+      "id": 2364,
+      "name": "花瓣怪蟲",
+      "level": 141,
+      "count": 73
+    },
+    {
+      "id": 2363,
+      "name": "花妖精",
+      "level": 143,
+      "count": 73
+    }
+  ],
+  "resourceMonsters": [],
+  "bossMonsters": [],
+  "monsters": [
+    {
+      "id": 2364,
+      "aegisName": "PETAL",
+      "name": "花瓣怪蟲",
+      "count": 73,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 141,
+      "hp": 81031,
+      "baseExp": 4058,
+      "jobExp": 4436,
+      "attackMin": 671,
+      "attackMax": 173,
+      "defense": 73,
+      "magicDefense": 33,
+      "size": "中型",
+      "race": "動物",
+      "element": "風 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/eclage.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 6558,
+          "aegisName": "Pile_Of_Acorn",
+          "name": "橡實堆",
+          "ratePerTenThousand": 3000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "像是努力收集的一堆橡實, 只是個頭太小一手就能掌握。\n重量: 1"
+        },
+        {
+          "itemId": 12346,
+          "aegisName": "Unripe_Acorn",
+          "name": "未熟的橡實",
+          "ratePerTenThousand": 1000,
+          "type": "消耗品",
+          "weight": 0,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "苦苦的完全沒熟, 最好不要吃。\n\n重量: 0"
+        },
+        {
+          "itemId": 1026,
+          "aegisName": "Acorn",
+          "name": "橡實",
+          "ratePerTenThousand": 1000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "橡木的果實。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 6089,
+          "aegisName": "Piece_Of_Darkness",
+          "name": "神秘黑珠",
+          "ratePerTenThousand": 250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "黑色的珠子,專心注視著它似乎能看到宇宙的另一邊\n\n重量: 1"
+        },
+        {
+          "itemId": 12814,
+          "aegisName": "Slapping_Herb",
+          "name": "薄荷藥草",
+          "ratePerTenThousand": 5,
+          "type": "延遲消耗品",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "其強烈氣味會直衝腦門兒的藥草, 但具有心曠神怡的效果。\n可治療暈眩、恐怖、混亂、幻覺。\n冷卻時間5秒。\n重量: 1"
+        },
+        {
+          "itemId": 4594,
+          "aegisName": "Petal_Card",
+          "name": "花瓣怪蟲卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "基本屬性LUK每10 暴擊傷害+2%。\n系列: 卡片\n裝備: 披肩\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2363,
+      "aegisName": "MENBLATT",
+      "name": "花妖精",
+      "count": 73,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 143,
+      "hp": 82200,
+      "baseExp": 4150,
+      "jobExp": 4515,
+      "attackMin": 816,
+      "attackMax": 201,
+      "defense": 79,
+      "magicDefense": 50,
+      "size": "中型",
+      "race": "昆蟲",
+      "element": "風 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/eclage.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 6557,
+          "aegisName": "Fancy_Fairy_Wing",
+          "name": "絢麗精靈翅膀",
+          "ratePerTenThousand": 3000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "華麗而巨大之精靈翅膀, 應可高價賣出。\n重量: 1"
+        },
+        {
+          "itemId": 7168,
+          "aegisName": "Great_Wing",
+          "name": "巨大翅膀",
+          "ratePerTenThousand": 1000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "巨大的蝴蝶翅膀。不過好像沒有像蝴蝶翅膀般神奇的技能。\n\n重量: 1"
+        },
+        {
+          "itemId": 7163,
+          "aegisName": "Sharp_Feeler",
+          "name": "銳利的觸角",
+          "ratePerTenThousand": 2304,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "非常堅固又銳利的觸角。尖銳的尾端像似刀刃般練磨的很好。\n\n重量: 1"
+        },
+        {
+          "itemId": 12813,
+          "aegisName": "Peony_Mommy",
+          "name": "溫馨花瓣",
+          "ratePerTenThousand": 5,
+          "type": "延遲消耗品",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "粉紅又有暖意的神奇花瓣, 就像兒時母親的懷抱一樣溫暖。\n可治療冰凍、冷凍、冰封。\n冷卻時間5秒。\n重量: 1"
+        },
+        {
+          "itemId": 4593,
+          "aegisName": "Menblatt_Card",
+          "name": "花妖精卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "基本屬性DEX每10 遠距離攻擊力+1%。\n系列: 卡片\n裝備: 披肩\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2758,
+      "aegisName": "C5_MENBLATT",
+      "name": "狡猾花妖精",
+      "count": 1,
+      "respawnMinMs": 180000,
+      "respawnMaxMs": 180000,
+      "level": 143,
+      "hp": 411000,
+      "baseExp": 20750,
+      "jobExp": 67732,
+      "attackMin": 979,
+      "attackMax": 201,
+      "defense": 79,
+      "magicDefense": 50,
+      "size": "中型",
+      "race": "昆蟲",
+      "element": "風 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/championmobs.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 6557,
+          "aegisName": "Fancy_Fairy_Wing",
+          "name": "絢麗精靈翅膀",
+          "ratePerTenThousand": 10000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "華麗而巨大之精靈翅膀, 應可高價賣出。\n重量: 1"
+        },
+        {
+          "itemId": 7168,
+          "aegisName": "Great_Wing",
+          "name": "巨大翅膀",
+          "ratePerTenThousand": 5000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "巨大的蝴蝶翅膀。不過好像沒有像蝴蝶翅膀般神奇的技能。\n\n重量: 1"
+        },
+        {
+          "itemId": 7163,
+          "aegisName": "Sharp_Feeler",
+          "name": "銳利的觸角",
+          "ratePerTenThousand": 10000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "非常堅固又銳利的觸角。尖銳的尾端像似刀刃般練磨的很好。\n\n重量: 1"
+        },
+        {
+          "itemId": 12813,
+          "aegisName": "Peony_Mommy",
+          "name": "溫馨花瓣",
+          "ratePerTenThousand": 25,
+          "type": "延遲消耗品",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "粉紅又有暖意的神奇花瓣, 就像兒時母親的懷抱一樣溫暖。\n可治療冰凍、冷凍、冰封。\n冷卻時間5秒。\n重量: 1"
+        }
+      ]
+    }
+  ]
+}

@@ -5,6 +5,17 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 const origin = process.env.RO_DEMO_ORIGIN ?? 'http://127.0.0.1:8788';
+const dashboardSource = await readFile('ops/ro-stack/dashboard.mjs', 'utf8');
+const clientSource = await readFile('ops/ro-stack/dashboard/app.js', 'utf8');
+const dashboardHtml = await readFile('ops/ro-stack/dashboard/index.html', 'utf8');
+if (!dashboardSource.includes('damageFloatScale: 500'))
+  throw new Error('server damage float scale default is not 500%');
+if (!dashboardSource.includes('damage_float_scale SMALLINT UNSIGNED NOT NULL DEFAULT 500'))
+  throw new Error('database damage float scale default is not 500%');
+if (!clientSource.includes('damageFloatScale: 500'))
+  throw new Error('client damage float scale default is not 500%');
+if (!/id="damageFloatScale"[\s\S]*?value="500"[\s\S]*?>500%<\/output>/.test(dashboardHtml))
+  throw new Error('damage float scale control default is not 500%');
 const fixture = JSON.parse(
   await readFile(
     '.local/ro-stack/multiplayer-test-v2-credentials.json',
@@ -214,6 +225,98 @@ try {
       value.damageFloatPositionX === 35 &&
       value.damageFloatPositionY === 55 &&
       value.damageFloatArc === 140,
+  );
+  const directPosition = await evaluate(`(() => {
+    const preview=document.querySelector('#damageFloatPreview').getBoundingClientRect();
+    const reference=document.querySelector('.damage-preview-reference').getBoundingClientRect();
+    return {
+      startX:reference.left+reference.width/2,
+      startY:reference.top+reference.height/2,
+      endX:preview.left+preview.width*0.44,
+      endY:preview.top+preview.height*0.63
+    };
+  })()`);
+  await call('Input.dispatchMouseEvent', {
+    type: 'mousePressed',
+    x: directPosition.startX,
+    y: directPosition.startY,
+    button: 'left',
+    clickCount: 1,
+  });
+  await call('Input.dispatchMouseEvent', {
+    type: 'mouseMoved',
+    x: directPosition.endX,
+    y: directPosition.endY,
+    button: 'left',
+  });
+  await call('Input.dispatchMouseEvent', {
+    type: 'mouseReleased',
+    x: directPosition.endX,
+    y: directPosition.endY,
+    button: 'left',
+    clickCount: 1,
+  });
+  await waitFor(
+    () =>
+      evaluate(
+        "fetch('/api/preferences').then(r=>r.json()).then(v=>v.preferences)",
+      ),
+    (value) =>
+      value.damageFloatPositionX === 44 && value.damageFloatPositionY === 63,
+  );
+  await sleep(100);
+  const resizeHandle = await evaluate(`(() => {
+    const rect=document.querySelector('#damagePreviewResizeHandle').getBoundingClientRect();
+    return {x:rect.left+rect.width/2,y:rect.top+rect.height/2};
+  })()`);
+  await call('Input.dispatchMouseEvent', {
+    type: 'mousePressed',
+    x: resizeHandle.x,
+    y: resizeHandle.y,
+    button: 'left',
+    clickCount: 1,
+  });
+  await call('Input.dispatchMouseEvent', {
+    type: 'mouseMoved',
+    x: resizeHandle.x + 14,
+    y: resizeHandle.y + 14,
+    button: 'left',
+  });
+  await call('Input.dispatchMouseEvent', {
+    type: 'mouseReleased',
+    x: resizeHandle.x + 14,
+    y: resizeHandle.y + 14,
+    button: 'left',
+    clickCount: 1,
+  });
+  const directManipulation = await waitFor(
+    () =>
+      evaluate(`fetch('/api/preferences').then(r=>r.json()).then(v=>({
+        preferences:v.preferences,
+        scaleSlider:Number(document.querySelector('#damageFloatScale').value),
+        scaleOutput:document.querySelector('#damageFloatScaleValue').textContent,
+        positionXSlider:Number(document.querySelector('#damageFloatPositionX').value),
+        positionYSlider:Number(document.querySelector('#damageFloatPositionY').value),
+        resizeAria:Number(document.querySelector('#damagePreviewResizeHandle').getAttribute('aria-valuenow'))
+      }))`),
+    (value) => value.preferences.damageFloatScale === 130,
+  );
+  await evaluate(`(() => {
+    for(const [id,value] of [['damageFloatScale',80],['damageFloatPositionX',35],['damageFloatPositionY',55]]){
+      const input=document.querySelector('#'+id);
+      input.value=String(value);
+      input.dispatchEvent(new Event('input',{bubbles:true}));
+    }
+  })()`);
+  await waitFor(
+    () =>
+      evaluate(
+        "fetch('/api/preferences').then(r=>r.json()).then(v=>v.preferences)",
+      ),
+    (value) =>
+      value.damageFloatScale === 80 &&
+      value.damageFloatPositionX === 35 &&
+      value.damageFloatPositionY === 55,
   );
   const settingsScreenshot = await call('Page.captureScreenshot', {
     format: 'png',
@@ -432,7 +535,9 @@ try {
         const rect=node.getBoundingClientRect();
         if(rect.bottom<0 || rect.top>innerHeight) return null;
         const style=getComputedStyle(node,'::before');
-        return {text:node.textContent,font:getComputedStyle(node).fontSize,background:style.backgroundImage,clipPath:style.clipPath,y:rect.y,official:document.documentElement.classList.contains('official-damage-assets'),digitCount:node.querySelectorAll('.official-damage-digit').length,backgroundAsset:node.querySelector('.official-critical-background')?.getAttribute('src')||'',rayCount:document.querySelectorAll('.official-hit-rays img').length};
+        const ray=document.querySelector('.official-hit-rays img');
+        const rayStyle=ray?getComputedStyle(ray):null;
+        return {text:node.textContent,font:getComputedStyle(node).fontSize,background:style.backgroundImage,clipPath:style.clipPath,y:rect.y,official:document.documentElement.classList.contains('official-damage-assets'),digitCount:node.querySelectorAll('.official-damage-digit').length,backgroundAsset:node.querySelector('.official-critical-background')?.getAttribute('src')||'',rayCount:document.querySelectorAll('.official-hit-rays img').length,rayWidth:rayStyle?parseFloat(rayStyle.width):0,rayHeight:rayStyle?parseFloat(rayStyle.height):0,damageSize:parseFloat(getComputedStyle(document.querySelector('#damageFloatLayer')).getPropertyValue('--damage-float-size'))};
       })()`),
     Boolean,
     45000,
@@ -553,6 +658,14 @@ try {
     preference.damageFloatPositionX === 35 &&
     preference.damageFloatPositionY === 55 &&
     preference.damageFloatArc === 140 &&
+    directManipulation.preferences.damageFloatPositionX === 44 &&
+    directManipulation.preferences.damageFloatPositionY === 63 &&
+    directManipulation.preferences.damageFloatScale === 130 &&
+    directManipulation.scaleSlider === 130 &&
+    directManipulation.scaleOutput === '130%' &&
+    directManipulation.positionXSlider === 44 &&
+    directManipulation.positionYSlider === 63 &&
+    directManipulation.resizeAria === 130 &&
     segment.font === '22.4px' &&
     Number(segment.text) > 0 &&
     arcMoved &&
@@ -561,7 +674,9 @@ try {
     (critical.official
       ? critical.digitCount === 3 &&
         critical.backgroundAsset.endsWith('/critical-bg.png') &&
-        critical.rayCount === 8
+        critical.rayCount === 8 &&
+        Math.abs(critical.rayWidth / critical.damageSize - 0.42) < 0.02 &&
+        Math.abs(critical.rayHeight / critical.damageSize - 7.5) < 0.02
       : critical.background !== 'none' && critical.clipPath !== 'none') &&
     attackAudio.some(
       (entry) => entry.started === true && Number(entry.volume) === 0.35,
@@ -635,6 +750,7 @@ try {
         firstDamage,
         initialPreference,
         preference,
+        directManipulation,
         segment,
         moved,
         arcMoved,

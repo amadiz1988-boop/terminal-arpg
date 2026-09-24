@@ -1,0 +1,43 @@
+{
+  "PRE_IMPLEMENTATION_REUSE_GATE": {
+    "featureId": "m1-low-hp-no-recovery-policy",
+    "featureName": "M1 no-method recovery and Supply fallback",
+    "scope": "BUG_FIX",
+    "taskCategory": "BUG_FIX",
+    "categories": ["combat", "failure_recovery", "supply"],
+    "openKoreRelevant": true,
+    "checks": {
+      "currentProject": {"status": "CHECKED", "implementationFound": true, "evidence": "Native persistent_agent.cpp handle_survival, handle_supply and live_runtime_phase already own recovery, Supply and projection."},
+      "legacyProject": {"status": "CHECKED", "evidence": "docs/openkore-exit-source-of-truth.md Gate 1B establishes item recovery, not no-method behavior."},
+      "reuseRegistry": {"status": "REGISTRY_HIT", "reference": "ops/research/external-reuse-registry.json ok-combat-loot-recovery and ra-item-use."},
+      "rAthena": {"status": "CHECKED", "evidence": "Native pc_useitem, unit_skilluse_id, pc_setsit/pc_setstand and authoritative battle_status are already wired."},
+      "openKore": {"status": "CHECKED", "evidence": "Pinned 51de1dd CoreLogic.pm:2909-2962 processSitAuto and control/config.txt:290-295; see m1-basic-recovery-source-gate.md."},
+      "externalEcosystem": {"status": "NOT_APPLICABLE", "reason": "No new external runtime is authorized."},
+      "genericOSS": {"status": "NOT_APPLICABLE", "reason": "No generic package can replace rAthena authority."}
+    },
+    "decision": "PORTABLE_LOGIC",
+    "freshResearchPerformed": false,
+    "registryUpdateRequired": false,
+    "capabilityScope": "Safe no-method branch within existing Native recovery and Supply",
+    "matureReferenceApplicable": true,
+    "referenceGate": "PASS",
+    "deltaReferenceAuditRequired": true,
+    "capabilityDelta": {"addsCapability": false, "replacesCapability": false, "changesBehavior": true, "changesConfigurationSemantics": false, "changesCapabilityUi": false, "changesExceptionRecovery": true, "changesMatureCapabilityDataModel": false},
+    "matureReferenceMatrix": {
+      "currentGiCapability": "Existing item/skill recovery, unconditional sit fallback, Supply yield and quarantine on route failure.",
+      "openKoreCapability": "processSitAuto gates sit on Basic skill, weight, attack queue and aggressives; item/skill actions are condition-driven.",
+      "rAthenaCapability": "Native rAthena executes and validates item, skill, sit, Supply service and authoritative status.",
+      "otherMatureReference": "NOT_APPLICABLE: existing PA is the target architecture.",
+      "matureExceptionBehavior": "A false OpenKore sit predicate does not force sit.",
+      "matureRecoveryBehavior": "Sit only when eligible; stand at configured safe threshold.",
+      "matureConfigSemantics": "Existing GI thresholds and Supply policy retained.",
+      "matureUiSemantics": "Native phase read model only; no UI redesign.",
+      "directReuse": "Existing PA handle_survival, handle_supply, item/skill calls, rAthena status and phase projection.",
+      "adapt": "False sit predicate plus unavailable recovery/supply enters recoverable blocked phase with bounded recheck.",
+      "projectPolicy": "Explicit Project Control SAFE_IDLE policy; preserve AUTO_FARM parent and prohibit attacks while blocked.",
+      "improvements": "Avoids quarantine and combat continuation for unavailable recovery.",
+      "matureCapabilityLoss": "NONE",
+      "resultEquivalentOrBetter": "PASS"
+    }
+  }
+}

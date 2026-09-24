@@ -1,0 +1,633 @@
+{
+  "id": "prt_fild04",
+  "name": "普隆德拉原野",
+  "category": "SERVICE_ONLY",
+  "dungeon": null,
+  "totalMonsters": 146,
+  "normalMonsterCount": 146,
+  "levelRange": {
+    "min": 13,
+    "max": 19
+  },
+  "fullLevelRange": {
+    "min": 13,
+    "max": 19
+  },
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [
+    {
+      "id": 1094,
+      "name": "蝸牛",
+      "level": 19,
+      "count": 111
+    },
+    {
+      "id": 1012,
+      "name": "羅達蛙",
+      "level": 13,
+      "count": 27
+    }
+  ],
+  "resourceMonsters": [
+    {
+      "id": 1080,
+      "name": "綠草",
+      "level": 1,
+      "count": 5
+    }
+  ],
+  "bossMonsters": [],
+  "monsters": [
+    {
+      "id": 1080,
+      "aegisName": "GREEN_PLANT",
+      "name": "綠草",
+      "count": 5,
+      "respawnMinMs": 450000,
+      "respawnMaxMs": 900000,
+      "level": 1,
+      "hp": 5,
+      "baseExp": 0,
+      "jobExp": 0,
+      "attackMin": 1,
+      "attackMax": 1,
+      "defense": 100,
+      "magicDefense": 99,
+      "size": "小型",
+      "race": "植物",
+      "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": true,
+      "sourceFiles": [
+        "npc/re/mobs/fields/prontera.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 511,
+          "aegisName": "Green_Herb",
+          "name": "綠色藥草",
+          "ratePerTenThousand": 3500,
+          "type": "恢復道具",
+          "weight": 3,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可中和所有毒性的珍貴藥草,具有治療的功效解毒。\n\n重量: 3"
+        },
+        {
+          "itemId": 7934,
+          "aegisName": "Poison_Herb_Makulata",
+          "name": "毒香草",
+          "ratePerTenThousand": 150,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "危險: 小葉子有點像綠茶葉, 但味道卻不同。\n\n重量: 1"
+        },
+        {
+          "itemId": 621,
+          "aegisName": "Bitter_Herb",
+          "name": "苦味草",
+          "ratePerTenThousand": 10,
+          "type": "消耗品",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "非常苦的草,是怪物波波利最喜愛的食物。\n種類: 認養寵物之物品\n重量: 5"
+        },
+        {
+          "itemId": 905,
+          "aegisName": "Stem",
+          "name": "植物梗",
+          "ratePerTenThousand": 1500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "植物細長的梗,可以當做藥材,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 906,
+          "aegisName": "Pointed_Scale",
+          "name": "鱗片梗",
+          "ratePerTenThousand": 750,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "有著鱗片的梗,是從怪物森靈身上得來的,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 704,
+          "aegisName": "Aloe",
+          "name": "蘆薈",
+          "ratePerTenThousand": 25,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "只在森林深處開花的植物, 因為一年中只在特定的季節開花,所以不是那麼容易可以碰得到。\n\n重量: 1"
+        },
+        {
+          "itemId": 521,
+          "aegisName": "Leaflet_Of_Aloe",
+          "name": "蘆薈葉子",
+          "ratePerTenThousand": 25,
+          "type": "恢復道具",
+          "weight": 2,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "將蘆薈的葉子剪下收集在一起,可恢復定量的HP。\n\n重量: 2"
+        },
+        {
+          "itemId": 2270,
+          "aegisName": "Centimental_Leaf",
+          "name": "草葉",
+          "ratePerTenThousand": 1,
+          "type": "防具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "草葉,含在嘴裡時, 會隨著風飄蕩,有到處流浪的感覺。\n受到植物型敵人的攻擊時, 可-3%的傷害度。\n系列: 頭具  防禦: 0\n位置: 下  重量: 10\n裝備: 初學者以外的全職業"
+        }
+      ]
+    },
+    {
+      "id": 1012,
+      "aegisName": "RODA_FROG",
+      "name": "羅達蛙",
+      "count": 27,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 13,
+      "hp": 140,
+      "baseExp": 162,
+      "jobExp": 100,
+      "attackMin": 4,
+      "attackMax": 4,
+      "defense": 12,
+      "magicDefense": 5,
+      "size": "中型",
+      "race": "魚貝",
+      "element": "水 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/prontera.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 918,
+          "aegisName": "Sticky_Webfoot",
+          "name": "粘糊的蹼",
+          "ratePerTenThousand": 4500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "割下有蹼的怪物的後腳得來的物品。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 908,
+          "aegisName": "Spawn",
+          "name": "青蛙蛋",
+          "ratePerTenThousand": 500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從怪物羅達蛙取下來的卯,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 511,
+          "aegisName": "Green_Herb",
+          "name": "綠色藥草",
+          "ratePerTenThousand": 300,
+          "type": "恢復道具",
+          "weight": 3,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可中和所有毒性的珍貴藥草,具有治療的功效解毒。\n\n重量: 3"
+        },
+        {
+          "itemId": 721,
+          "aegisName": "Azure_Jewel",
+          "name": "綠寶石",
+          "ratePerTenThousand": 8,
+          "type": "其他",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "呈現出綠色光芒的寶石。\n\n重量: 10"
+        },
+        {
+          "itemId": 601,
+          "aegisName": "Wing_Of_Fly",
+          "name": "蒼蠅翅膀",
+          "ratePerTenThousand": 500,
+          "type": "延遲消耗品",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "將蒼蠅的翅膀剪下可以用來製作具有魔法力量的物品,可在地圖上移動至任意的位置上。\n\n重量: 0"
+        },
+        {
+          "itemId": 4014,
+          "aegisName": "Roda_Frog_Card",
+          "name": "羅達蛙卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "MHP+400\nMSP+50\n系列: 卡片\n裝置: 鎧甲\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1088,
+      "aegisName": "VOCAL",
+      "name": "搖滾蝗蟲",
+      "count": 1,
+      "respawnMinMs": 1200000,
+      "respawnMaxMs": 1800000,
+      "level": 18,
+      "hp": 3317,
+      "baseExp": 49,
+      "jobExp": 39,
+      "attackMin": 71,
+      "attackMax": 11,
+      "defense": 77,
+      "magicDefense": 26,
+      "size": "中型",
+      "race": "昆蟲",
+      "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/prontera.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 2247,
+          "aegisName": "Oldman's_Romance",
+          "name": "回憶帽",
+          "ratePerTenThousand": 25,
+          "type": "防具",
+          "weight": 40,
+          "attack": 0,
+          "defense": 5,
+          "slots": 0,
+          "description": "年老者戴的帽子,可以讓人回想起年少時期的歡樂時光。\n系列: 頭具  防禦: 5\n位置: 上  重量: 40\n裝備: 初學者以外的全職業"
+        },
+        {
+          "itemId": 940,
+          "aegisName": "Grasshopper's_Leg",
+          "name": "蝗蟲後腿",
+          "ratePerTenThousand": 4000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "怪物搖滾蝗蟲的後腿。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 721,
+          "aegisName": "Azure_Jewel",
+          "name": "綠寶石",
+          "ratePerTenThousand": 500,
+          "type": "其他",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "呈現出綠色光芒的寶石。\n\n重量: 10"
+        },
+        {
+          "itemId": 752,
+          "aegisName": "Grasshopper_Doll",
+          "name": "搖滾蝗蟲娃娃",
+          "ratePerTenThousand": 750,
+          "type": "其他",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "按照在草原上蹦蹦跳跳悠閒的拉著弦樂器的怪物搖滾蝗蟲的模樣所製做來的玩偶,\n雖然它們不和諧的音樂經常引起收割的農人不滿,但因為搖滾蝗蟲的外型看起來相當的討喜, 因此成為買氣相當旺盛的人氣商品。\n\n重量: 10"
+        },
+        {
+          "itemId": 2420,
+          "aegisName": "Angel's_Arrival",
+          "name": "天使之降臨",
+          "ratePerTenThousand": 500,
+          "type": "防具",
+          "weight": 30,
+          "attack": 0,
+          "defense": 8,
+          "slots": 1,
+          "description": "負責超級初學者的天使之便鞋, 穿上便鞋跳躍時感覺會飛上天去。\nMHP+100\n系列: 鞋類 防禦: 8\n重量: 30\n要求等級: 25\n裝備: 初學者系列"
+        },
+        {
+          "itemId": 7938,
+          "aegisName": "Light_Granule",
+          "name": "光粒",
+          "ratePerTenThousand": 250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "金光的結晶體, 猶如裝著太陽般的感覺。\n\n重量: 1"
+        },
+        {
+          "itemId": 1917,
+          "aegisName": "Guitar_Of_Gentle_Breeze",
+          "name": "涼風的吉他",
+          "ratePerTenThousand": 5,
+          "type": "武器",
+          "weight": 90,
+          "attack": 110,
+          "defense": 0,
+          "slots": 0,
+          "description": "演奏音樂時不知道從哪裡漂來一陣風,突然間想要讓你去旅行的吉他.\n系列: 樂器  攻擊: 110\n重量: 90 屬性 :風\n武器等級: 3\n要求等級: 27\n裝備: 吟遊詩人"
+        },
+        {
+          "itemId": 4211,
+          "aegisName": "Vocal_Card",
+          "name": "蝗蟲之王卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "MDEF+3。\n當裝備搖滾蝗蟲卡片時,迴避率+18\n系列: 卡片\n裝備: 披肩\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1094,
+      "aegisName": "AMBERNITE",
+      "name": "蝸牛",
+      "count": 111,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 19,
+      "hp": 265,
+      "baseExp": 178,
+      "jobExp": 130,
+      "attackMin": 9,
+      "attackMax": 11,
+      "defense": 28,
+      "magicDefense": 0,
+      "size": "大型",
+      "race": "昆蟲",
+      "element": "水 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/prontera.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 991,
+          "aegisName": "Crystal_Blue",
+          "name": "水靈礦石",
+          "ratePerTenThousand": 50,
+          "type": "其他",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "藍色的小礦石塊。擁有水屬性,提煉後可以製作出水靈原石。\n\n重量: 5"
+        },
+        {
+          "itemId": 946,
+          "aegisName": "Snail's_Shell",
+          "name": "蝸牛殼",
+          "ratePerTenThousand": 8000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "堅硬的蝸牛外殼。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 910,
+          "aegisName": "Garlet",
+          "name": "加勒結晶",
+          "ratePerTenThousand": 2000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從一部份怪物身上得來的結晶,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 935,
+          "aegisName": "Shell",
+          "name": "堅硬外殼",
+          "ratePerTenThousand": 3000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "怪物身上堅硬的外殼,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 601,
+          "aegisName": "Wing_Of_Fly",
+          "name": "蒼蠅翅膀",
+          "ratePerTenThousand": 500,
+          "type": "延遲消耗品",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "將蒼蠅的翅膀剪下可以用來製作具有魔法力量的物品,可在地圖上移動至任意的位置上。\n\n重量: 0"
+        },
+        {
+          "itemId": 757,
+          "aegisName": "Elunium_Stone",
+          "name": "鋁原石",
+          "ratePerTenThousand": 20,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以拿來煉鋁的礦石,拿來提煉作成盔甲。\n\n重量: 20"
+        },
+        {
+          "itemId": 1002,
+          "aegisName": "Iron_Ore",
+          "name": "鐵礦石",
+          "ratePerTenThousand": 200,
+          "type": "其他",
+          "weight": 15,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "含有鐵成分的礦石,提煉的話可得到鐵。\n\n重量: 15"
+        },
+        {
+          "itemId": 4032,
+          "aegisName": "Ambernite_Card",
+          "name": "蝸牛卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "DEF+2。\n系列: 卡片\n裝置: 盾牌\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2905,
+      "aegisName": "C5_AMBERNITE",
+      "name": "狡猾蝸牛",
+      "count": 2,
+      "respawnMinMs": 180000,
+      "respawnMaxMs": 180000,
+      "level": 19,
+      "hp": 1325,
+      "baseExp": 890,
+      "jobExp": 1950,
+      "attackMin": 10,
+      "attackMax": 11,
+      "defense": 28,
+      "magicDefense": 0,
+      "size": "大型",
+      "race": "昆蟲",
+      "element": "水 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/championmobs.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 991,
+          "aegisName": "Crystal_Blue",
+          "name": "水靈礦石",
+          "ratePerTenThousand": 250,
+          "type": "其他",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "藍色的小礦石塊。擁有水屬性,提煉後可以製作出水靈原石。\n\n重量: 5"
+        },
+        {
+          "itemId": 946,
+          "aegisName": "Snail's_Shell",
+          "name": "蝸牛殼",
+          "ratePerTenThousand": 10000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "堅硬的蝸牛外殼。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 910,
+          "aegisName": "Garlet",
+          "name": "加勒結晶",
+          "ratePerTenThousand": 10000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從一部份怪物身上得來的結晶,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 935,
+          "aegisName": "Shell",
+          "name": "堅硬外殼",
+          "ratePerTenThousand": 10000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "怪物身上堅硬的外殼,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 601,
+          "aegisName": "Wing_Of_Fly",
+          "name": "蒼蠅翅膀",
+          "ratePerTenThousand": 2500,
+          "type": "延遲消耗品",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "將蒼蠅的翅膀剪下可以用來製作具有魔法力量的物品,可在地圖上移動至任意的位置上。\n\n重量: 0"
+        },
+        {
+          "itemId": 757,
+          "aegisName": "Elunium_Stone",
+          "name": "鋁原石",
+          "ratePerTenThousand": 100,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以拿來煉鋁的礦石,拿來提煉作成盔甲。\n\n重量: 20"
+        },
+        {
+          "itemId": 1002,
+          "aegisName": "Iron_Ore",
+          "name": "鐵礦石",
+          "ratePerTenThousand": 1000,
+          "type": "其他",
+          "weight": 15,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "含有鐵成分的礦石,提煉的話可得到鐵。\n\n重量: 15"
+        },
+        {
+          "itemId": 4032,
+          "aegisName": "Ambernite_Card",
+          "name": "蝸牛卡片",
+          "ratePerTenThousand": 5,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "DEF+2。\n系列: 卡片\n裝置: 盾牌\n重量: 1"
+        }
+      ]
+    }
+  ]
+}

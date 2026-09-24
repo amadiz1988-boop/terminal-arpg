@@ -1,0 +1,164 @@
+schema: COMBAT_CAPABILITY_MATRIX_V1
+topic: MONSTER_AI_COMBAT_TARGET_RETARGET
+last_reviewed: '2026-09-21'
+authority:
+  rathena: C:/Users/Administrator/source/ghost-island-rathena
+  rathena_head: ff72578f608935d1df5d664b3e9df9d436361043
+  openkore_reference: 51de1ddfc4449ae5217f6886de702f87ca934030
+  project_runtime: PA/SERVER_AGENT -> rAthena
+  openkore_process_count: 0
+capabilities:
+  - id: monster_scan
+    mature_reference: 'AI::Attack visible actor scan and eligibility'
+    rathena_authority: 'live map mob blocks and mob DB'
+    current_project: 'farm_map_has_attackable_mob and find_target'
+    gap: 'map-only nearest legal policy'
+    classification: REUSE
+    reusable_now: true
+  - id: target_selection
+    mature_reference: 'Attack.pm, Actor::Monster, mon_control'
+    rathena_authority: 'battle_check_target and live mob state'
+    current_project: 'nearest legal non-claimed target'
+    gap: 'no full aggression, danger or mon_control parity'
+    classification: ADAPT
+    reusable_now: true
+  - id: target_lock
+    mature_reference: 'attackID and targetGone'
+    rathena_authority: 'entity validity and death state'
+    current_project: 'runtime.target_id and pending target HP'
+    gap: 'typed lock lifecycle events absent'
+    classification: REUSE
+    reusable_now: true
+  - id: retarget
+    mature_reference: 'targetGone, route reset, ai_attack_giveup'
+    rathena_authority: 'current target validity'
+    current_project: 'clear target and block for five seconds'
+    gap: 'no first-class RETARGET reason event'
+    classification: IMPROVE
+    reusable_now: false
+  - id: approach
+    mature_reference: 'Route.pm and attack range approach'
+    rathena_authority: 'path_search and unit_walktobl'
+    current_project: 'walk_to_farm_target with portal avoidance'
+    gap: 'arrival and range checkpoints are not all Ledger events'
+    classification: REUSE
+    reusable_now: true
+  - id: attack_range
+    mature_reference: 'attack_continue and range checks'
+    rathena_authority: 'unit_attack_timer_sub and battle range'
+    current_project: 'native melee/skill range checks'
+    gap: 'presentation does not expose range state'
+    classification: ADAPT
+    reusable_now: true
+  - id: attack_loop
+    mature_reference: 'bounded attack process and cadence'
+    rathena_authority: 'battle_weapon_attack and native timers'
+    current_project: 'issue_melee_attack -> unit_attack'
+    gap: 'attack acceptance is not hit proof'
+    classification: ADAPT
+    reusable_now: true
+  - id: miss
+    mature_reference: 'attack result and no-damage branch'
+    rathena_authority: 'ATK_MISS and damage calculation'
+    current_project: 'no MONSTER_MISS Ledger event'
+    gap: 'MISS/NO_DAMAGE cannot be distinguished in current event stream'
+    classification: IMPROVE
+    reusable_now: false
+  - id: hit
+    mature_reference: 'damage observation after attack'
+    rathena_authority: 'battle_damage/status_damage HP mutation'
+    current_project: 'report_melee_hit compares HP and emits MONSTER_HIT'
+    gap: 'skill and delayed-hit correlation remains partial'
+    classification: REUSE
+    reusable_now: true
+  - id: kill
+    mature_reference: 'kill/death transition before loot'
+    rathena_authority: 'mob_dead and damage log'
+    current_project: 'dead/removed target emits MONSTER_KILL'
+    gap: 'full attribution projection is not exposed to Web'
+    classification: ADAPT
+    reusable_now: true
+  - id: loot
+    mature_reference: 'CoreLogic item interruption and pickup confirmation'
+    rathena_authority: 'floor ownership, pc_takeitem and inventory'
+    current_project: 'find_loot and inventory delta before LOOT_ACQUIRED'
+    gap: 'reuse item dossier for capacity and ownership edge cases'
+    classification: ADAPT
+    reusable_now: true
+  - id: unreachable
+    mature_reference: 'route failure and target invalidation'
+    rathena_authority: 'path_search and walk result'
+    current_project: 'UNREACHABLE target block'
+    gap: 'reason taxonomy can be more granular'
+    classification: REUSE
+    reusable_now: true
+  - id: stuck
+    mature_reference: 'routeRepath, nudge and bounded unstuck'
+    rathena_authority: 'authoritative progress and position'
+    current_project: 'bounded target block, no general progress event'
+    gap: 'attempt, progress and backoff telemetry'
+    classification: IMPROVE
+    reusable_now: false
+  - id: blacklist_cooldown
+    mature_reference: 'temporary target/portal suppression'
+    rathena_authority: 'live target and map state'
+    current_project: 'blocked target and loot expiry maps'
+    gap: 'reason and key are log-only'
+    classification: ADAPT
+    reusable_now: true
+  - id: teleport_recovery
+    mature_reference: 'Task::Teleport and teleportAuto_search'
+    rathena_authority: 'item result and authoritative map/position'
+    current_project: 'Fly Wing semantics exist; roaming search absent'
+    gap: 'bounded roaming policy not implemented'
+    classification: ADAPT
+    reusable_now: false
+  - id: death_interruption
+    mature_reference: 'respawn and recovery task'
+    rathena_authority: 'death/savepoint/respawn'
+    current_project: 'clear_death_actions and handle_death'
+    gap: 'full player-flow acceptance is separate'
+    classification: REUSE
+    reusable_now: true
+  - id: supply_interruption
+    mature_reference: 'supply pause, return, resume and reacquire'
+    rathena_authority: 'item/service/map state'
+    current_project: 'handle_supply clears combat and resumes target scan'
+    gap: 'full supply chain evidence remains flow-specific'
+    classification: REUSE
+    reusable_now: true
+  - id: kill_steal_ownership
+    mature_reference: 'mon_control KS policy and server damage ownership'
+    rathena_authority: 'mob_log_damage, mob_dead and loot owner slots'
+    current_project: 'target_claimed plus rAthena attribution'
+    gap: 'party and external-player policy parity partial'
+    classification: ADAPT
+    reusable_now: true
+  - id: monster_ai_boundary
+    mature_reference: 'rAthena mob AI is separate from player AI'
+    rathena_authority: 'mob attack and damage lifecycle'
+    current_project: 'PA controls player-side intent only'
+    gap: 'do not merge actor responsibilities'
+    classification: REUSE
+    reusable_now: true
+  - id: client_damage_as_hit
+    mature_reference: 'client visual attack feedback'
+    rathena_authority: 'server HP mutation'
+    current_project: 'MONSTER_ATTACK remains intent'
+    gap: 'legacy presentation can overclaim damage'
+    classification: REJECT_LEGACY
+    reusable_now: false
+  - id: infinite_random_search
+    mature_reference: 'unbounded random walking failure pattern'
+    rathena_authority: 'bounded map and item legality'
+    current_project: 'no blind infinite roaming'
+    gap: 'safe idle/backoff is required'
+    classification: REJECT_LEGACY
+    reusable_now: true
+counts:
+  REUSE: 8
+  ADAPT: 8
+  IMPROVE: 3
+  REJECT_LEGACY: 2
+  NOT_APPLICABLE: 0
+decision: 'Reference-only. No Dashboard, PA, Native, rAthena, DB, runtime or Production change authorized.'

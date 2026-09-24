@@ -1,0 +1,78 @@
+{
+  "source_root": "C:\\Users\\Administrator\\.codex\\.chatgpt-projects\\g-p-6a9bcb57afdc8191966436643af8acdf\\terminal-arpg",
+  "files": [
+    {
+      "path": "docs/ro-asset-index/items.json",
+      "sha256": "3daf4bf4b8c53ff9233080d12943d057ab30c5e9bd2567e01b6c4f86174e2ff6",
+      "entries": 306,
+      "keys": [
+        "schemaVersion",
+        "kind",
+        "updatedAt",
+        "entries",
+        "researchStatus",
+        "coverage"
+      ],
+      "classification": "CURRENT_RUNTIME_REQUIRED_SOURCE_METADATA",
+      "evidence": "ops/ro-stack/ro-asset-resolver.mjs:indexFiles -> GET /api/ro-assets"
+    },
+    {
+      "path": "docs/ro-asset-index/equipment.json",
+      "sha256": "0a6c05f6c7b75d711d464ded331f67febb1508b604afd13d5a6bd1bf3e603259",
+      "entries": 150,
+      "keys": [
+        "schemaVersion",
+        "kind",
+        "updatedAt",
+        "entries",
+        "researchStatus",
+        "coverage"
+      ],
+      "classification": "CURRENT_RUNTIME_REQUIRED_SOURCE_METADATA",
+      "evidence": "ops/ro-stack/ro-asset-resolver.mjs:indexFiles -> GET /api/ro-assets"
+    },
+    {
+      "path": "docs/ro-asset-index/npcs.json",
+      "sha256": "cb58069faef21bb2e660b8704a5272c3d3ef98ba5a450f4e5542b583ce574a4c",
+      "entries": 2,
+      "keys": [
+        "schemaVersion",
+        "kind",
+        "updatedAt",
+        "researchStatus",
+        "coverage",
+        "entries"
+      ],
+      "classification": "CURRENT_RUNTIME_REQUIRED_SOURCE_METADATA",
+      "evidence": "ops/ro-stack/ro-asset-resolver.mjs:indexFiles -> GET /api/ro-assets"
+    },
+    {
+      "path": "docs/ro-asset-index/maps.json",
+      "sha256": "485b429620afe5971756c7d3524909e5288f8d7bb3b169329ab12c48e13db8ff",
+      "entries": 161,
+      "keys": [
+        "schemaVersion",
+        "kind",
+        "updatedAt",
+        "entries"
+      ],
+      "classification": "CURRENT_RUNTIME_REQUIRED_SOURCE_METADATA",
+      "evidence": "ops/ro-stack/ro-asset-resolver.mjs:indexFiles -> GET /api/ro-assets"
+    },
+    {
+      "path": "docs/ro-asset-index/paper-doll.json",
+      "sha256": "fb6c9ec3d1ca78e470dab4c1f6b5c5cee1677c54974e6b6ed5066c41743208b2",
+      "entries": 1,
+      "keys": [
+        "schemaVersion",
+        "kind",
+        "updatedAt",
+        "entries",
+        "researchStatus",
+        "coverage"
+      ],
+      "classification": "CURRENT_RUNTIME_REQUIRED_SOURCE_METADATA",
+      "evidence": "ops/ro-stack/ro-asset-resolver.mjs:indexFiles -> GET /api/ro-assets"
+    }
+  ]
+}

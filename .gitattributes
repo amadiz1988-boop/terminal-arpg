@@ -1,0 +1,6 @@
+public/ro/data/map-info.json text eol=lf
+public/ro/data/map-info/*.json text eol=lf
+public/ro/data/map-names.json text eol=lf
+public/ro/data/monster-names-tw.json text eol=lf
+public/ro/client/world-map/positions.json text eol=lf
+public/ro/client/world-map/manifest.json text eol=lf

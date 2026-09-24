@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Server Ops · 鬼島傳說</title>
+    <link rel="stylesheet" href="./server-ops.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-row">
+        <div class="brand">Server Ops<small>鬼島傳說 · 維運控制台</small></div>
+        <div id="overall" class="light"><span class="dot UNKNOWN"></span><span class="lbl">Overall</span><span class="val">–</span></div>
+        <div class="spacer"></div>
+        <input id="search" type="search" placeholder="搜尋角色 / AID / CID / PID / 服務 / Map…" autocomplete="off" />
+        <span id="sampled" class="muted"></span>
+      </div>
+      <div id="lights" class="lights"></div>
+    </header>
+    <div id="alerts" class="alerts"></div>
+    <nav id="tabs" class="tabs" role="tablist"></nav>
+    <main id="view"></main>
+    <div id="modal" class="modal"><div class="box"></div></div>
+    <script type="module" src="./server-ops.js"></script>
+  </body>
+</html>

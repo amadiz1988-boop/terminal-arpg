@@ -1,0 +1,913 @@
+atlas: OPENKORE_REFERENCE_ATLAS
+last_verified: 2026-09-21
+upstream:
+  repository: https://github.com/OpenKore/openkore
+  branch: master
+  commit: 51de1ddfc4449ae5217f6886de702f87ca934030
+  version_confidence: HIGH
+authority: PA / SERVER_AGENT -> rAthena
+openkore_runtime_count: 0
+classification_legend: [REPRODUCE, ADAPT, IMPROVE, REJECT_LEGACY, N/A]
+topic_defaults:
+  project_last_good: "See project-last-good-map.md and the linked historical file or acceptance record."
+  current_pa: "PA owns intent and lifecycle; rAthena owns world state."
+  current_pa_gap: "Confirm with the current PA source before implementation."
+  pa_design_implication: "Keep the behavior reusable by Life Director and Social Director."
+  pa_flexibility_allowed: "Yes, when server authority and player-visible equivalence are preserved."
+  common_misunderstandings: "Reference behavior is not permission to copy OpenKore runtime architecture."
+topics:
+  - id: 01
+    topic: AI_ACTION_QUEUE
+    keywords: [AI::queue, AI::clear, queue, priority]
+    upstream_paths: [src/AI.pm, src/AI/CoreLogic.pm]
+    symbols: [AI::queue, AI::clear, AI::isIdle, AI::process]
+    config_keys: [ai_seq, ai_attack_auto]
+    mature_behavior: "Prioritized actions are queued, observed and cleared at ownership boundaries."
+    state_transitions: "idle -> queued -> active -> complete or cleared"
+    retry_policy: "Action-specific timeout and bounded requeue."
+    recovery_policy: "Clear stale action, restore mode, re-enter the owning state."
+    edge_cases: "NPC, route and teleport actions can preempt combat."
+    project_last_good: "status-export.pl::process_eden and process_onboarding clear and restore AI around owned flows."
+    project_acceptance_evidence: "Gate 1A, Gate 1B and Gate 2 event ledgers."
+    current_pa: "AUTO_FARM and Quest Runtime own lifecycle; native PA remains authoritative."
+    current_pa_gap: "Generic persisted action queue equivalence is not proven."
+    reuse_classification: ADAPT
+    pa_design_implication: "Persist intent and idempotency, not client queue internals."
+    pa_flexibility_allowed: "Yes, event-driven transitions may replace polling."
+    common_misunderstandings: "An AI queue is not server authority."
+  - id: 02
+    topic: TASK_SYSTEM
+    keywords: [Task, Task::Route, Task::TalkNPC, task state]
+    upstream_paths: [src/Task.pm, src/Task/Route.pm, src/Task/TalkNPC.pm, src/Task/Timeout.pm]
+    symbols: [Task::new, Task::run, Task::DESTROY]
+    config_keys: [timeout, ai_npc_talk_wait_to_answer]
+    mature_behavior: "Tasks isolate route, movement, dialogue, teleport and timeout ownership."
+    state_transitions: "created -> running -> done, failed or timeout"
+    retry_policy: "Task-specific bounded retries."
+    recovery_policy: "Destroy failed task and let the parent state decide."
+    edge_cases: "Nested tasks and stale actors after map change."
+    project_last_good: "quest-runtime and status-export use phase-owned actions."
+    project_acceptance_evidence: "Quest Runtime acceptance files and Gate 2 service evidence."
+    current_pa: "Quest Runtime adapters plus native PA command surfaces."
+    current_pa_gap: "One generic task abstraction across combat and quest is not proven."
+    reuse_classification: ADAPT
+    pa_design_implication: "Keep task results explicit and idempotent."
+    pa_flexibility_allowed: "Yes, persisted phase machines are allowed."
+    common_misunderstandings: "Task classes are transport orchestration, not quest truth."
+  - id: 03
+    topic: NAVIGATION_ROUTE
+    keywords: [route, move, Task::Route, routeRepath]
+    upstream_paths: [src/Task/Route.pm, src/Task/MapRoute.pm, src/Task/CalcMapRoute.pm]
+    symbols: [Task::Route::run, routeRepath, getRoute]
+    config_keys: [route_step, route_avoidWalls, route_randomWalk, route_timeout]
+    mature_behavior: "Plan a same-map or map-route path, move, detect failure and repath."
+    state_transitions: "plan -> walk -> arrive, repath or fail"
+    retry_policy: "Bounded repath, route timeout and route teleport candidate."
+    recovery_policy: "Reset route state, try another portal or safe fallback."
+    edge_cases: "Missing portals, blocked cells, map change during walking."
+    project_last_good: "Gate 3 same-map and multi-map navigation; status-export job route retry."
+    project_acceptance_evidence: "Gate 3 PLAYER_FLOW_PASS."
+    current_pa: "Native PA navigation and relocation policy."
+    current_pa_gap: "Full portal-table parity and all timeout branches remain partial."
+    reuse_classification: ADAPT
+    pa_design_implication: "Use rAthena map state and persisted destination intent."
+    pa_flexibility_allowed: "Yes, server-side route planning can reduce polling."
+    common_misunderstandings: "A configured route does not prove it was selected."
+    project_refs: [docs/reference-mining/topics/navigation-warp-portal-pathfinding.md]
+  - id: 04
+    topic: PORTAL_MAP_TRANSITION
+    keywords: [portal, mapRoute, actorFinishedMovement, map change]
+    upstream_paths: [src/Task/MapRoute.pm, src/Actor/Portal.pm, src/Field.pm]
+    symbols: [MapRoute::run, portal_wait, portal_give_up, Actor::Portal]
+    config_keys: [route_maxNpcTries, route_teleport_maxTries]
+    mature_behavior: "Choose a portal or NPC transition, wait for authoritative map change, then resume route."
+    state_transitions: "portal candidate -> approach -> transition -> new map"
+    retry_policy: "Remove missing portal, try bounded alternatives, then give up."
+    recovery_policy: "Recompute from current map and retain destination."
+    edge_cases: "Portal moved, map load delay, guessed portal and airship route."
+    project_last_good: "Gate 3 multi-map navigation; canonical rAthena map change."
+    project_acceptance_evidence: "Gate 3 map logs and route events."
+    current_pa: "Native map transition and relocation executor."
+    current_pa_gap: "Portal-table completeness requires atlas verification."
+    reuse_classification: ADAPT
+    pa_design_implication: "Treat map change as server event, not client movement completion."
+    pa_flexibility_allowed: "Yes, route candidates may be generated from authoritative data."
+    common_misunderstandings: "Same-map movement success is not cross-map success."
+    project_refs: [docs/reference-mining/topics/navigation-warp-portal-pathfinding.md]
+  - id: 05
+    topic: FIELD_PATHFINDING
+    keywords: [Field, isWalkable, getRoute, avoidWalls]
+    upstream_paths: [src/Field.pm, src/Task/Route.pm, src/Task/CalcMapRoute.pm]
+    symbols: [Field::isWalkable, Field::getMeta, getRoute]
+    config_keys: [route_avoidWalls, route_useReadMap, route_step]
+    mature_behavior: "Use field collision data and bounded route steps to reach a tolerance."
+    state_transitions: "source -> route -> step -> tolerance"
+    retry_policy: "Trim or reset path when deviation exceeds threshold."
+    recovery_policy: "Repath from observed position."
+    edge_cases: "Occupied cells, diagonal paths, stale field data."
+    project_last_good: "status-export.pl::nudge_stalled_grind_target and Gate 3 route evidence."
+    project_acceptance_evidence: "Gate 3 same-map movement."
+    current_pa: "rAthena movement and native PA route planner."
+    current_pa_gap: "Client-path deviation parity is not a PA requirement and is unproven."
+    reuse_classification: IMPROVE
+    pa_design_implication: "Prefer authoritative movement outcome over client path replay."
+    pa_flexibility_allowed: "Yes, planner may differ if arrival and safety are equivalent."
+    common_misunderstandings: "A coordinate list alone is not a collision-aware path."
+    project_refs: [docs/reference-mining/topics/navigation-warp-portal-pathfinding.md]
+  - id: 06
+    topic: LOCKMAP_FARM
+    keywords: [lockMap, lockMap_x, lockMap_y, farm]
+    upstream_paths: [src/AI/CoreLogic.pm, control/config.txt]
+    symbols: [processLockMap, lockMap]
+    config_keys: [lockMap, lockMap_x, lockMap_y, lockMap_randX, lockMap_randY, attackAuto_outOfLock]
+    mature_behavior: "Keep farming bounded to one selected map and return after service or recovery."
+    state_transitions: "farm -> leave -> return -> reacquire"
+    retry_policy: "Return route retries are bounded by route and recovery policy."
+    recovery_policy: "Restore lockMap only after the destination map is authoritative."
+    edge_cases: "Town lockMap, missing map, route failure, death save point."
+    project_last_good: "Historical config and status-export job_resume plus AUTO_FARM resume."
+    project_acceptance_evidence: "Gate 1B post-respawn resume and Gate 2 return-to-farm."
+    current_pa: "AUTO_FARM target map and relocation policy."
+    current_pa_gap: "Persistent lockMap restoration after every restart is partial."
+    reuse_classification: REPRODUCE
+    pa_design_implication: "Player selects map; server agent selects valid target."
+    pa_flexibility_allowed: "Yes, target selection remains autonomous within the map."
+    common_misunderstandings: "lockMap names the farm map, not a monster."
+    project_refs: [docs/reference-mining/topics/navigation-warp-portal-pathfinding.md]
+  - id: 07
+    topic: TARGET_SELECTION
+    keywords: [target, attackID, priority, target selection]
+    upstream_paths: [src/AI/Attack.pm, src/Actor/Monster.pm, control/mon_control.txt]
+    symbols: [Attack::process, targetGone, Actor::Monster]
+    config_keys: [attackAuto, attackAuto_party, attackAuto_onlyWhenSafe, mon_control]
+    mature_behavior: "Choose an eligible visible target and retain it only while valid."
+    state_transitions: "scan -> candidate -> engaged -> killed, lost or rejected"
+    retry_policy: "Reacquire after loss, timeout or unreachable target."
+    recovery_policy: "Drop invalid target and resume scan or teleport search."
+    edge_cases: "Hidden, aggressive, party and kill-steal rules."
+    project_last_good: "Gate 1A natural mob scan and target selection."
+    project_acceptance_evidence: "AUTO_FARM target and attack logs."
+    current_pa: "AUTO_FARM server-side target selection."
+    current_pa_gap: "Full mon_control parity is not required and not proven."
+    reuse_classification: ADAPT
+    pa_design_implication: "Use authoritative monster eligibility and ownership."
+    pa_flexibility_allowed: "Yes, priority can include persistent character policy."
+    common_misunderstandings: "Player map choice does not imply player monster choice."
+    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md]
+  - id: 08
+    topic: MOB_SEARCH
+    keywords: [mob search, scan, aggressives, teleportAuto_search]
+    upstream_paths: [src/AI/Attack.pm, src/AI/CoreLogic.pm, src/Actor/Monster.pm]
+    symbols: [ai_getAggressives, targetGone, process]
+    config_keys: [teleportAuto_search, teleportAuto_minAggressives, attackAuto]
+    mature_behavior: "Scan visible actors and filter eligibility; pinned teleportAuto_search gates auto-attack by tagged search-monster count, not no-target teleport."
+    state_transitions: "idle -> tagged-monster count gate -> eligible target or continued scan"
+    retry_policy: "Bounded scan and search intervals."
+    recovery_policy: "Reset target and rescan; GI no-target Fly is a separate explicit project policy."
+    edge_cases: "No mobs, hidden mobs, map boundaries, stale actor IDs."
+    project_last_good: "Gate 1A mob scan; future Fly Wing roaming is research only."
+    project_acceptance_evidence: "Gate 1A PLAYER_FLOW_PASS."
+    current_pa: "AUTO_FARM scan and target state."
+    current_pa_gap: "GI no-target Fly source path exists; authoritative post-warp combat acceptance is open."
+    reuse_classification: ADAPT
+    pa_design_implication: "Separate scan policy from movement and teleport authority."
+    pa_flexibility_allowed: "Yes, autonomous search may use server-side indexes."
+    common_misunderstandings: "No visible target is evidence for search, not proof that no target exists."
+    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md]
+  - id: 09
+    topic: RETARGETING
+    keywords: [retarget, targetGone, lost target, target timeout]
+    upstream_paths: [src/AI/Attack.pm, src/AI/CoreLogic.pm]
+    symbols: [targetGone, approach_target_route_needs_reset, ai_attack_giveup]
+    config_keys: [teleportAuto_lostTarget, teleportAuto_dropTarget, attackAuto]
+    mature_behavior: "Drop stale or unreachable target, reset route and select another."
+    state_transitions: "engaged -> invalid -> reset -> scan"
+    retry_policy: "Approach route failures and target loss are bounded."
+    recovery_policy: "Clear target-specific state without clearing unrelated player intent."
+    edge_cases: "Target dies during movement, target warps, route failure."
+    project_last_good: "status-export grind target guard and Gate 1A target reacquisition."
+    project_acceptance_evidence: "AUTO_FARM post-kill and recovery events."
+    current_pa: "AUTO_FARM target lifecycle."
+    current_pa_gap: "Fine-grained target failure reasons are not fully exposed."
+    reuse_classification: REPRODUCE
+    pa_design_implication: "Make target invalidation observable and idempotent."
+    pa_flexibility_allowed: "Yes, event ledger may replace polling flags."
+    common_misunderstandings: "Repathing without target invalidation can create a no-progress loop."
+    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md]
+  - id: 10
+    topic: COMBAT
+    keywords: [attack, combat, hit, damage, AI::Attack]
+    upstream_paths: [src/AI/Attack.pm, src/AI/CoreLogic.pm, src/Actor/Monster.pm]
+    symbols: [Attack::process, attack, attack_continue]
+    config_keys: [attackAuto, attackAuto_onlyWhenSafe, attackCanSnipe]
+    mature_behavior: "Approach, attack, observe damage and finish with loot or retarget."
+    state_transitions: "approach -> attack -> hit -> kill or recover"
+    retry_policy: "Miss, route and timeout handling are bounded by attack state."
+    recovery_policy: "Stop attack when target or safety invariant fails."
+    edge_cases: "No damage, target hidden, player damaged, loot interruption."
+    project_last_good: "Gate 1A AUTO_FARM_ATTACK and AUTO_FARM_HIT."
+    project_acceptance_evidence: "Gate 1A player-flow logs."
+    current_pa: "Native PA combat and rAthena damage authority."
+    current_pa_gap: "OpenKore attack timing is not a PA contract."
+    reuse_classification: ADAPT
+    pa_design_implication: "Retain combat invariants, improve observability and authority."
+    pa_flexibility_allowed: "Yes, event-driven hit confirmation is preferred."
+    common_misunderstandings: "A command sent is not a confirmed hit."
+    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md]
+  - id: 11
+    topic: ATTACK_AUTO
+    keywords: [attackAuto, attackAuto_party, attackAuto_notInTown]
+    upstream_paths: [control/config.txt, src/AI/Attack.pm]
+    symbols: [Attack::process, processLockMap]
+    config_keys: [attackAuto, attackAuto_party, attackAuto_onlyWhenSafe, attackAuto_notInTown, attackAuto_notWhile_storageAuto]
+    mature_behavior: "Gate autonomous attacking by mode, map, safety and service state."
+    state_transitions: "disabled -> armed -> attacking -> paused"
+    retry_policy: "No attack while service or owned task is active."
+    recovery_policy: "Restore prior mode only after task completion."
+    edge_cases: "Town map, party target, storage and buy/sell suppression."
+    project_last_good: "status-export quiesces background AI during grind hub transition and supply."
+    project_acceptance_evidence: "Gate 2 supply pause and return."
+    current_pa: "AUTO_FARM mode and supply sub-state."
+    current_pa_gap: "Config projection does not equal full semantics."
+    reuse_classification: ADAPT
+    pa_design_implication: "Represent mode transitions in durable state."
+    pa_flexibility_allowed: "Yes, PA may use explicit state instead of config mutation."
+    common_misunderstandings: "attackAuto=1 does not prove the agent is currently attacking."
+    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md]
+  - id: 12
+    topic: MONSTER_CONTROL
+    keywords: [mon_control, avoid, KS, aggressive]
+    upstream_paths: [control/mon_control.txt, src/Actor/Monster.pm, src/AI/Attack.pm]
+    symbols: [Actor::Monster::is_controlled, targetGone]
+    config_keys: [mon_control, attackAuto_party, teleportAuto_minAggressives]
+    mature_behavior: "Apply per-monster priority, avoid, aggression and kill-steal policy."
+    state_transitions: "observed -> allowed, avoided or ignored"
+    retry_policy: "Ignored targets do not re-enter until observation changes."
+    recovery_policy: "Re-evaluate after map change or policy reload."
+    edge_cases: "Unknown IDs, party claims, MVP safety."
+    project_last_good: "Gate 1A server-side target eligibility; no full mon_control port."
+    project_acceptance_evidence: "Gate 1A target selection."
+    current_pa: "Server agent eligibility policy."
+    current_pa_gap: "Per-monster config parity is a documented gap."
+    reuse_classification: ADAPT
+    pa_design_implication: "Keep policy data separate from rAthena monster state."
+    pa_flexibility_allowed: "Yes, policy may be character-specific."
+    common_misunderstandings: "Avoiding a monster is not the same as failing to find it."
+    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md]
+  - id: 13
+    topic: LOOT
+    keywords: [itemsTakeAuto, pickupitems, item take, loot]
+    upstream_paths: [src/AI/CoreLogic.pm, src/Actor/Item.pm, control/pickupitems.txt]
+    symbols: [processTake, Actor::Item, pickupitems]
+    config_keys: [itemsTakeAuto, itemsTakeAuto_party, itemsTakeAuto_oversize]
+    mature_behavior: "Take eligible drops, interrupt safely, and resume combat or scan."
+    state_transitions: "drop observed -> approach -> pickup -> inventory update"
+    retry_policy: "Skip inaccessible or expired drops."
+    recovery_policy: "Resume target after pickup or clear stale item."
+    edge_cases: "Weight, party ownership, item expiry and map change."
+    project_last_good: "Gate 1A loot pickup and status-export item observation; docs/reference-mining/topics/item-loot-inventory-storage-weight.md."
+    project_acceptance_evidence: "Gate 1A PLAYER_FLOW_PASS."
+    current_pa: "Native PA loot and rAthena inventory authority."
+    current_pa_gap: "Fine-grained party loot policy is not proven."
+    reuse_classification: ADAPT
+    pa_design_implication: "Inventory update must be authoritative before resume."
+    pa_flexibility_allowed: "Yes, server event can replace item polling."
+    common_misunderstandings: "Configured pickup list does not prove an item was picked."
+    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md]
+  - id: 14
+    topic: ITEM_USE
+    keywords: [use, item, pc_useitem, item cooldown]
+    upstream_paths: [src/Commands.pm, src/InventoryList.pm, src/Task/Teleport.pm]
+    symbols: [Commands::use, InventoryList::getByNameID, Misc::getTeleportItemCooldownTimeoutSec]
+    config_keys: [useSelf_skill, useSelf_item, teleportAuto_useItemForRespawn]
+    mature_behavior: "Issue item intent, wait for authoritative result and respect cooldown."
+    state_transitions: "available -> requested -> confirmed or rejected"
+    retry_policy: "Retry only after cooldown or timeout."
+    recovery_policy: "Re-read inventory and state after rejection."
+    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md]
+    edge_cases: "Non-consumable custom item, map change and stale inventory."
+    project_last_good: "Gate 1B potion recovery and Fly Wing item 601 diagnostic; docs/reference-mining/topics/item-loot-inventory-storage-weight.md."
+    project_acceptance_evidence: "Gate 1B HP recovery and Fly Wing diagnostic evidence."
+    current_pa: "rAthena pc_useitem and native PA item intent."
+    current_pa_gap: "Generic item action coverage remains partial."
+    reuse_classification: ADAPT
+    pa_design_implication: "Never infer consumption from command success."
+    pa_flexibility_allowed: "Yes, non-consumable item policy is explicit."
+    common_misunderstandings: "OpenKore item counts cannot override rAthena item semantics."
+  - id: 15
+    topic: INVENTORY
+    keywords: [InventoryList, inventory, capacity, amount]
+    upstream_paths: [src/InventoryList.pm, src/Actor/Item.pm, src/Commands.pm]
+    symbols: [InventoryList::isReady, getByNameID, size]
+    config_keys: [itemsMaxWeight, itemsMaxWeight_sellOrStore, storageAuto]
+    mature_behavior: "Use observed inventory to gate supply, loot, item use and quest steps."
+    state_transitions: "unknown -> ready -> changed -> reconciled"
+    retry_policy: "Wait for inventory readiness and re-read after transaction."
+    recovery_policy: "Block dependent action until authoritative snapshot is ready."
+    edge_cases: "Full slots, overweight, delayed packet and duplicate item IDs."
+    project_last_good: "status-export inventory checks and Gate 2 inventory/Zeny confirmation; docs/reference-mining/topics/item-loot-inventory-storage-weight.md."
+    project_acceptance_evidence: "Gate 2 supply cycle."
+    current_pa: "rAthena inventory state and PA read model."
+    current_pa_gap: "Restart durability of every inventory-derived intent is partial."
+    reuse_classification: ADAPT
+    pa_design_implication: "Inventory is observation, never a local authority."
+    pa_flexibility_allowed: "Yes, event ledger may retain reconciliation history."
+    common_misunderstandings: "A stale snapshot cannot confirm a quest reward."
+  - id: 16
+    topic: EQUIPMENT
+    keywords: [equipment, equip, unequip, item_equip]
+    upstream_paths: [src/Commands.pm, src/InventoryList.pm, src/Actor/Item.pm]
+    symbols: [Commands::equip, Commands::unequip, InventoryList::getByNameID]
+    config_keys: [autoEquip, useSelf_item]
+    mature_behavior: "Select an owned item, issue equip intent and confirm server state."
+    state_transitions: "owned -> equip requested -> equipped or rejected"
+    retry_policy: "Bounded retry after inventory/equipment refresh."
+    recovery_policy: "Re-read slots and preserve task phase on failure."
+    edge_cases: "Wrong job, occupied slot, delayed status and quest reward timing."
+    project_last_good: "status-export process_eden equipment reward and job flow."
+    project_acceptance_evidence: "Eden source/quest evidence; full player-flow remains bounded."
+    current_pa: "Quest Runtime reward handling and rAthena equipment authority."
+    current_pa_gap: "Generic PA equipment action closure is outside this atlas task."
+    reuse_classification: ADAPT
+    pa_design_implication: "Keep equipment effects server-confirmed."
+    pa_flexibility_allowed: "Yes, reward adapters can be declarative."
+    common_misunderstandings: "Having an item is not proof it is equipped."
+  - id: 17
+    topic: SHOP_BUY
+    keywords: [buyAuto, buy, shop buy, zeny]
+    upstream_paths: [src/Commands.pm, src/AI/CoreLogic.pm, control/config.txt]
+    symbols: [buyAuto, shouldUseWarpToSaveMapForBuyOrSell]
+    config_keys: [buyAuto, buyAuto_minAmount, buyAuto_maxAmount, buyAuto_zeny, saveMap_warpToBuyOrSell]
+    mature_behavior: "Trigger on threshold, route to valid NPC, buy and confirm inventory/Zeny."
+    state_transitions: "low -> route -> shop -> transaction -> confirmed"
+    retry_policy: "Service timeout and bounded route retry."
+    recovery_policy: "Return failure to supply state; preserve unmet target."
+    edge_cases: "NPC missing, insufficient Zeny, capacity and item unavailable."
+    project_last_good: "Gate 2 buy-based SUPPLY_LOW -> SHOP_BUY -> target reached."
+    project_acceptance_evidence: "Gate 2 PLAYER_FLOW_PASS."
+    current_pa: "Native rAthena shop transaction through PA supply."
+    current_pa_gap: "Full generalized buyAuto schema is not required."
+    reuse_classification: ADAPT
+    pa_design_implication: "Use explicit target and authoritative transaction confirmation."
+    pa_flexibility_allowed: "Yes, PA can choose service route from server state."
+    common_misunderstandings: "Issuing buy command does not confirm purchase."
+  - id: 18
+    topic: SHOP_SELL
+    keywords: [sellAuto, sell, shop sell, overflow]
+    upstream_paths: [src/Commands.pm, src/AI/CoreLogic.pm, control/config.txt]
+    symbols: [sellAuto, shouldUseWarpToSaveMapForBuyOrSell]
+    config_keys: [sellAuto, sellAuto_npc, sellAuto_distance, sellAuto_standpoint]
+    mature_behavior: "Relocate to selling NPC, sell eligible items and reconcile inventory/Zeny."
+    state_transitions: "overflow -> route -> sell -> confirmed"
+    retry_policy: "Bounded NPC approach and service timeout."
+    recovery_policy: "Return to supply state or safe failure with preserved item policy."
+    edge_cases: "Protected items, no NPC, map transition and overweight."
+    project_last_good: "Historical status-export and Eden supply queue; Gate 2 focuses on buy."
+    project_acceptance_evidence: "Source evidence only for generalized sell path."
+    current_pa: "PA supply service route; rAthena transaction authority."
+    current_pa_gap: "General sell acceptance is not proven in this task."
+    reuse_classification: ADAPT
+    pa_design_implication: "Make sell policy explicit and auditable."
+    pa_flexibility_allowed: "Yes, server-side inventory query may replace local filters."
+    common_misunderstandings: "Overweight alone does not identify sellable items."
+  - id: 19
+    topic: STORAGE
+    keywords: [storageAuto, Kafra storage, storage, weight]
+    upstream_paths: [src/AI/CoreLogic.pm, src/Commands.pm, control/config.txt]
+    symbols: [storageAuto, storage, shouldUseWarpToSaveMapForBuyOrSell]
+    config_keys: [storageAuto, storageAuto_npc, storageAuto_distance, storageAuto_notAfterDeath]
+    mature_behavior: "Open storage, deposit eligible items, close and confirm capacity."
+    state_transitions: "need storage -> route -> open -> deposit -> close"
+    retry_policy: "NPC and storage session timeout."
+    recovery_policy: "Close stale session, restore supply intent and retry boundedly."
+    edge_cases: "Password, no NPC, death and storage capacity."
+    project_last_good: "Historical storageAuto config and Eden supply branch; docs/reference-mining/topics/item-loot-inventory-storage-weight.md."
+    project_acceptance_evidence: "Storage is reference branch; Gate 2 buy path is accepted."
+    current_pa: "Supply service contract with rAthena storage authority."
+    current_pa_gap: "Player-flow storage closure is not proven."
+    reuse_classification: ADAPT
+    pa_design_implication: "Storage remains a service transaction, not local inventory mutation."
+    pa_flexibility_allowed: "Yes, supply may defer storage when buy satisfies target."
+    common_misunderstandings: "Storage configuration does not prove storage was opened."
+  - id: 20
+    topic: KAFRA
+    keywords: [Kafra, save point, teleport service, NPC]
+    upstream_paths: [src/Task/TalkNPC.pm, src/AI/CoreLogic.pm, src/Commands.pm]
+    symbols: [TalkNPC::run, processNPC, sendTalkResponse]
+    config_keys: [saveMap, saveMap_warp, saveMap_warpToBuyOrSell]
+    mature_behavior: "Approach Kafra, save or use service, confirm map/save state and continue."
+    state_transitions: "approach -> dialogue -> service -> authoritative result"
+    retry_policy: "Dialogue and NPC route retries are bounded."
+    recovery_policy: "Cancel stale dialogue and re-enter owning phase."
+    edge_cases: "Eden free teleport, save point mismatch, NPC timeout."
+    project_last_good: "status-export::process_grind_hub_transition and Eden Kafra return."
+    project_acceptance_evidence: "Source and historical status evidence; current full Kafra closure partial."
+    current_pa: "Native rAthena service and relocation policy."
+    current_pa_gap: "Player-flow Kafra save acceptance is pending."
+    reuse_classification: ADAPT
+    pa_design_implication: "Separate service intent from map transition result."
+    pa_flexibility_allowed: "Yes, PA may call a server service directly when equivalent."
+    common_misunderstandings: "Being near Kafra does not confirm save point registration."
+  - id: 21
+    topic: SUPPLY_AUTOMATION
+    keywords: [buyAuto, sellAuto, storageAuto, SUPPLY_LOW]
+    upstream_paths: [src/AI/CoreLogic.pm, src/Task/CalcMapRoute.pm, control/config.txt]
+    symbols: [buyAuto, sellAuto, storageAuto, shouldUseWarpToSaveMapForBuyOrSell]
+    config_keys: [buyAuto, sellAuto, storageAuto, saveMap_warpToBuyOrSell]
+    mature_behavior: "Detect low resource, pause farm, relocate, transact and resume original intent."
+    state_transitions: "farm -> low -> out -> service -> back -> resume"
+    retry_policy: "Project three failures then five-minute backoff."
+    recovery_policy: "Safe idle or deferred retry without losing farm destination."
+    edge_cases: "No wing, insufficient Zeny, overweight, death, reconnect."
+    project_last_good: "docs/openkore-reference/supply.md and Gate 2 supply cycle."
+    project_acceptance_evidence: "Gate 2 SUPPLY_LOW through RETURN_TO_FARM."
+    current_pa: "PA supply sub-state with rAthena buy and inventory authority."
+    current_pa_gap: "Primary Butterfly Wing out leg remains an authorized migration target."
+    reuse_classification: ADAPT
+    pa_design_implication: "Preserve intent across supply substates and restart."
+    pa_flexibility_allowed: "Yes, PA may improve persistence and observability."
+    common_misunderstandings: "Walking fallback must not replace the primary save-point contract."
+    project_refs: [docs/openkore-reference/supply.md, docs/reference-mining/topics/reconnect-session-character-lifecycle.md]
+  - id: 22
+    topic: WEIGHT_THRESHOLDS
+    keywords: [itemsMaxWeight, weight, overweight, capacity]
+    upstream_paths: [src/AI/CoreLogic.pm, src/InventoryList.pm, control/config.txt]
+    symbols: [checkWeight, InventoryList::weight]
+    config_keys: [itemsMaxWeight, itemsMaxWeight_sellOrStore, storageAuto]
+    mature_behavior: "Trigger service before weight blocks movement or pickup."
+    state_transitions: "normal -> warning -> supply -> reconciled"
+    retry_policy: "Do not repeat service while weight state is unchanged."
+    recovery_policy: "Re-read weight after sell/store and resume only under threshold."
+    edge_cases: "Delayed weight packet, full slots and protected items."
+    project_last_good: "Historical config and status-export supply guard; docs/reference-mining/topics/item-loot-inventory-storage-weight.md."
+    project_acceptance_evidence: "Gate 2 supply target evidence; weight branch remains partial."
+    current_pa: "rAthena inventory weight observation."
+    current_pa_gap: "Full weight-triggered storage player flow is not proven."
+    reuse_classification: ADAPT
+    pa_design_implication: "Thresholds are policy inputs, not item mutation authority."
+    pa_flexibility_allowed: "Yes, PA may use server events."
+    common_misunderstandings: "A configured threshold does not prove a transition fired."
+  - id: 23
+    topic: DEATH_RESPAWN
+    keywords: [respawn, death, save point, dead]
+    upstream_paths: [src/Commands.pm, src/Task/Teleport.pm, src/AI/CoreLogic.pm]
+    symbols: [respawn, Task::Teleport::run, teleportAuto_useItemForRespawn]
+    config_keys: [teleportAuto_useItemForRespawn, saveMap]
+    mature_behavior: "Observe death, respawn at authoritative save point and resume intended route."
+    state_transitions: "alive -> dead -> respawning -> save point -> resume"
+    retry_policy: "Avoid duplicate respawn requests; wait for map and HP confirmation."
+    recovery_policy: "Restore lockMap, mode and target state after respawn."
+    edge_cases: "Death during quest, service, map change or reconnect."
+    project_last_good: "Gate 1B death/respawn and post-respawn farm resume."
+    project_acceptance_evidence: "Gate 1B PLAYER_FLOW_PASS."
+    current_pa: "Native pc_respawn and AUTO_FARM lifecycle."
+    current_pa_gap: "Quest-specific death resume remains phase-specific."
+    reuse_classification: REPRODUCE
+    pa_design_implication: "Server respawn event is the transition authority."
+    pa_flexibility_allowed: "Yes, state restoration may be more durable than config replay."
+    common_misunderstandings: "Issuing respawn is not proof of respawned map."
+    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md, docs/reference-mining/topics/reconnect-session-character-lifecycle.md]
+  - id: 24
+    topic: STUCK_RECOVERY
+    keywords: [stuck, route failure, nudge, unstuck]
+    upstream_paths: [src/Task/Route.pm, src/AI/Attack.pm, src/AI/CoreLogic.pm]
+    symbols: [routeRepath, note_approach_route_failure, nudge]
+    config_keys: [teleportAuto_unstuck, route_teleport_maxTries, route_randomWalk]
+    mature_behavior: "Detect no progress, clear stale route, nudge or repath, then back off."
+    state_transitions: "progress -> stalled -> recover -> resumed or blocked"
+    retry_policy: "Project three route failures and five-minute backoff; job resume uses bounded retries."
+    recovery_policy: "Safe idle and preserve destination intent."
+    edge_cases: "Occupied cells, NPC dialogue, map transition and target unreachable."
+    project_last_good: "status-export nudge_stalled_grind_target, process_job_resume and route abort."
+    project_acceptance_evidence: "Gate 3 route and status events; bounded source evidence."
+    current_pa: "PA relocation executor and persistent recovery state."
+    current_pa_gap: "All OpenKore unstuck heuristics are not required."
+    reuse_classification: IMPROVE
+    pa_design_implication: "Prefer explicit progress telemetry over blind random walking."
+    pa_flexibility_allowed: "Yes, recovery can be server-event driven."
+    common_misunderstandings: "Repeated move commands are not recovery."
+    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md]
+  - id: 25
+    topic: TIMEOUT_RETRY_BACKOFF
+    keywords: [timeout, retry, backoff, maxTries]
+    upstream_paths: [src/Task/Timeout.pm, src/Task/Route.pm, src/Task/TalkNPC.pm, control/timeouts.txt]
+    symbols: [Task::Timeout, route_maxNpcTries, NPC_TIMEOUT_AFTER_ASWER]
+    config_keys: [timeout, ai_npc_talk_wait_to_answer, route_teleport_maxTries]
+    mature_behavior: "Bound waits by operation, stop retry storms and expose failure."
+    state_transitions: "pending -> timeout -> retry or terminal failure"
+    retry_policy: "Use operation-specific count, delay and cooldown."
+    recovery_policy: "Cancel stale action, preserve parent intent, schedule bounded retry."
+    edge_cases: "Late packet after timeout and duplicate response."
+    project_last_good: "status-export dialogue, route abort and job resume timers."
+    project_acceptance_evidence: "Source evidence plus Gate 3 recovery events."
+    current_pa: "PA state transitions and event ledger."
+    current_pa_gap: "A single shared retry policy is not yet proven."
+    reuse_classification: REPRODUCE
+    pa_design_implication: "Every retry needs a reason, key, ceiling and next-at timestamp."
+    pa_flexibility_allowed: "Yes, PA may improve timing with event signals."
+    common_misunderstandings: "A timeout is a state transition, not permission to loop forever."
+    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md, docs/reference-mining/topics/reconnect-session-character-lifecycle.md]
+  - id: 26
+    topic: TELEPORT
+    keywords: [teleportAuto, Task::Teleport, random warp, respawn]
+    upstream_paths: [src/Task/Teleport.pm, src/AI/CoreLogic.pm, src/Task/CalcMapRoute.pm]
+    symbols: [Task::Teleport::run, ai_useTeleport, getTeleportItemCooldownTimeoutSec]
+    config_keys: [teleportAuto, teleportAuto_hp, teleportAuto_search, teleportAuto_deadly]
+    mature_behavior: "Use teleport for configured safety, route, target-loss or respawn reasons and wait for map result; teleportAuto_search is not a no-target teleport call."
+    state_transitions: "reason -> request -> cooldown/map wait -> reacquire"
+    retry_policy: "Cooldown-aware retry with bounded give-up."
+    recovery_policy: "Re-read map, target and inventory after teleport."
+    edge_cases: "No item, cooldown, non-consumable item and map load delay."
+    project_last_good: "Gate 1B escape/recovery and Fly Wing diagnostic."
+    project_acceptance_evidence: "Gate 1B and RO_FLY_WING_SOURCE_AUDIT."
+    current_pa: "rAthena item use and native PA relocation."
+    current_pa_gap: "Danger/escape and other reason-specific policies remain distinct from GI no-target Fly."
+    reuse_classification: ADAPT
+    pa_design_implication: "Record teleport reason and authoritative result."
+    pa_flexibility_allowed: "Yes, PA can use non-consumable item semantics."
+    common_misunderstandings: "Teleport command success does not prove reattachment or target reacquisition."
+    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md, docs/reference-mining/topics/reconnect-session-character-lifecycle.md]
+  - id: 27
+    topic: FLY_WING
+    keywords: [Fly Wing, item 601, random warp, teleport search]
+    upstream_paths: [src/Task/Teleport.pm, src/Task/CalcMapRoute.pm, control/config.txt]
+    symbols: [ai_useTeleport, route_warpByItem, processAutoAttack]
+    config_keys: [route_warpByItem, route_warpItem_minGain, teleportAuto_search]
+    mature_behavior: "Use random-warp item for exact configured teleport reasons; teleportAuto_search is only a tagged-monster count gate in processAutoAttack. GI no-target Fly is an explicit project override."
+    state_transitions: "configured reason -> item use -> authoritative random position -> rescan"
+    retry_policy: "Respect cooldown and bounded attempts."
+    recovery_policy: "Reacquire target or remain in lockMap policy."
+    edge_cases: "Project item 601 is non-consumable; random map result is authoritative."
+    project_last_good: "Gate 1A/1B Fly Wing diagnostic item 601 count 30 -> 30."
+    project_acceptance_evidence: "docs/RO_FLY_WING_SOURCE_AUDIT.md diagnostic PASS only."
+    current_pa: "Native rAthena Fly Wing item effect and GI no-target relocation path."
+    current_pa_gap: "GI no-target Fly post-warp rescan and combat live acceptance remain open."
+    reuse_classification: ADAPT
+    pa_design_implication: "Reuse reason, cooldown, result and reacquire semantics; preserve non-consumption."
+    pa_flexibility_allowed: "Yes, roaming planner remains open."
+    common_misunderstandings: "Fly Wing is not Butterfly Wing and does not select save point."
+    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md, docs/reference-mining/topics/reconnect-session-character-lifecycle.md]
+  - id: 28
+    topic: BUTTERFLY_WING
+    keywords: [Butterfly Wing, item 602, save point, return]
+    upstream_paths: [src/Task/Teleport.pm, src/Task/CalcMapRoute.pm, control/config.txt]
+    symbols: [ai_useTeleport, saveMap_warpToBuyOrSell]
+    config_keys: [saveMap_warp, saveMap_warpToBuyOrSell, saveMap_warp_minDistance]
+    mature_behavior: "Return to authoritative save point for service or recovery."
+    state_transitions: "supply low -> item use -> save point -> service"
+    retry_policy: "Only retry after map/result confirmation and bounded backoff."
+    recovery_policy: "Preserve supply intent and continue normal PA navigation."
+    edge_cases: "Project item 602 is non-consumable; Eden may use Kafra instead."
+    project_last_good: "Historical config and status-export item 602/savepoint evidence."
+    project_acceptance_evidence: "Current supply contract; runtime primary out remains migration target."
+    current_pa: "Relocation policy documents item 602 -> save point, with walking fallback."
+    current_pa_gap: "Full player-flow primary Butterfly Wing supply out is pending."
+    reuse_classification: ADAPT
+    pa_design_implication: "Project rule overrides item consumption while preserving save-point result."
+    pa_flexibility_allowed: "Yes, route planning after save point is PA-owned."
+    common_misunderstandings: "A non-consumable item can still have cooldown or state transition rules."
+    project_refs: [docs/reference-mining/topics/monster-ai-combat-target-retarget.md, docs/reference-mining/topics/reconnect-session-character-lifecycle.md]
+  - id: 29
+    topic: SKILL_AUTOMATION
+    keywords: [UseSkill, skill, raiseSkill, cast]
+    upstream_paths: [src/Task/UseSkill.pm, src/Skill.pm, plugins/raiseSkill]
+    symbols: [Task::UseSkill::run, Skill::use, raiseSkill]
+    config_keys: [useSelf_skill, useSelf_skill_maxUses, attackSkillSlot]
+    mature_behavior: "Select legal skill, respect cooldown/resource and confirm effect."
+    state_transitions: "eligible -> cast -> cooldown -> effect or fail"
+    retry_policy: "Cooldown and resource bounded retry."
+    recovery_policy: "Re-read skill state and continue parent combat/task phase."
+    edge_cases: "Target loss, map change, cast interruption."
+    project_last_good: "Project quest adapters reference skill use; no full generic PA skill closure."
+    project_acceptance_evidence: "Source/reference only."
+    current_pa: "rAthena skill authority; PA intent layer."
+    current_pa_gap: "Generic skill scheduler is not proven."
+    reuse_classification: ADAPT
+    pa_design_implication: "Do not copy client cooldown polling as authority."
+    pa_flexibility_allowed: "Yes, event-confirmed skill outcomes are preferred."
+    common_misunderstandings: "A cast request is not a successful skill effect."
+  - id: 30
+    topic: BUFF_HEAL_AUTOMATION
+    keywords: [sitAuto, heal, buff, useSelf_skill]
+    upstream_paths: [src/AI/CoreLogic.pm, src/Task/UseSkill.pm, control/config.txt]
+    symbols: [processSitAuto, useSelf_skill, Task::UseSkill]
+    config_keys: [sitAuto_hp_lower, sitAuto_sp_lower, sitAuto_idle, useSelf_skill]
+    mature_behavior: "Pause risky activity, recover HP/SP or apply buff, then resume."
+    state_transitions: "normal -> recovery -> threshold -> resume"
+    retry_policy: "Do not repeat while effect or threshold is unchanged."
+    recovery_policy: "Escape attackers, wait for authoritative HP/SP and restore mode."
+    edge_cases: "Aggressive mob while sitting, skill failure and death."
+    project_last_good: "Gate 1B Red Potion recovery and status-export Eden HP recovery."
+    project_acceptance_evidence: "Gate 1B HP recovery PLAYER_FLOW_PASS."
+    current_pa: "Native PA survival and rAthena item/skill authority."
+    current_pa_gap: "Generic buff scheduler is partial."
+    reuse_classification: ADAPT
+    pa_design_implication: "Recovery is a sub-state of autonomy, not a separate runtime."
+    pa_flexibility_allowed: "Yes, PA can use server events and ledger evidence."
+    common_misunderstandings: "Sitting locally is not proof that HP recovered."
+  - id: 31
+    topic: NPC_INTERACTION
+    keywords: [NPC, talk, npc_talk, talknpc]
+    upstream_paths: [src/Task/TalkNPC.pm, src/Commands.pm, src/Actor/NPC.pm]
+    symbols: [TalkNPC::run, Commands::talk, Actor::NPC]
+    config_keys: [autoTalkCont, ai_npc_talk_wait_to_answer]
+    mature_behavior: "Approach known NPC, acquire dialogue ownership and exchange responses."
+    state_transitions: "route -> talk open -> response -> close"
+    retry_policy: "Bounded approach and dialogue retries."
+    recovery_policy: "Cancel stale dialogue and return to phase owner."
+    edge_cases: "Wrong NPC, moved NPC, map transition, concurrent dialogue."
+    project_last_good: "status-export onboarding, Eden and Kafra dialogue handlers."
+    project_acceptance_evidence: "Historical source and quest runtime evidence."
+    current_pa: "Quest Runtime NPC primitives and rAthena NPC authority."
+    current_pa_gap: "Generic NPC interaction player-flow closure remains partial."
+    reuse_classification: ADAPT
+    pa_design_implication: "Dialogue ownership must be explicit and exclusive."
+    pa_flexibility_allowed: "Yes, phase adapters can be declarative."
+    common_misunderstandings: "Nearby NPC does not imply an open dialogue session."
+  - id: 32
+    topic: NPC_DIALOGUE
+    keywords: [sendTalkContinue, sendTalkResponse, sendTalkCancel, dialogue]
+    upstream_paths: [src/Task/TalkNPC.pm, src/Network/Send.pm, src/Network/Receive.pm]
+    symbols: [sendTalkContinue, sendTalkResponse, sendTalkCancel, NPC_TIMEOUT_AFTER_ASWER]
+    config_keys: [ai_npc_talk_wait_to_answer, autoTalkCont]
+    mature_behavior: "Observe next/select/close stages and respond with bounded timing."
+    state_transitions: "open -> next/select -> close or cancel"
+    retry_policy: "Wait, cancel stale session, retry parent action within ceiling."
+    recovery_policy: "Clear owner flags and re-observe authoritative quest state."
+    edge_cases: "Late response, no response, duplicate close, wrong choice."
+    project_last_good: "process_onboarding_dialog, process_eden_dialog, process_eden_exit_dialog."
+    project_acceptance_evidence: "Source functions and quest-flow docs."
+    current_pa: "Quest Runtime dialogue primitives."
+    current_pa_gap: "Full browser/player NPC flow is not proven for every phase."
+    reuse_classification: REPRODUCE
+    pa_design_implication: "Treat dialogue as a bounded protocol, not free-form text parsing."
+    pa_flexibility_allowed: "Yes, event ledger can capture each stage."
+    common_misunderstandings: "Disabling autoTalkCont is a safety guard, not dialogue completion."
+  - id: 33
+    topic: QUEST_OBSERVATION
+    keywords: [questList, quest state, quest id, progress]
+    upstream_paths: [src/Network/Receive.pm, src/Actor.pm, src/Commands.pm]
+    symbols: [questList, questStatus, processNPC]
+    config_keys: [eventMacro_conditions, autoTalkCont]
+    mature_behavior: "Observe server quest state and use it to select the next legal step."
+    state_transitions: "unknown -> active -> progressed -> complete"
+    retry_policy: "Re-read after dialogue, reward or map transition."
+    recovery_policy: "Never infer completion from local action; reconcile from rAthena state."
+    edge_cases: "Quest ID ambiguity, delayed packet, reward dialog and reset."
+    project_last_good: "process_onboarding and process_eden branch on quest_state and questList."
+    project_acceptance_evidence: "Quest Runtime specs and source evidence."
+    current_pa: "web_quest_runtime plus rAthena quest state."
+    current_pa_gap: "Some historical quest paths remain pending player-flow validation."
+    reuse_classification: REPRODUCE
+    pa_design_implication: "Quest observation remains server-authoritative."
+    pa_flexibility_allowed: "Yes, PA can persist normalized observations."
+    common_misunderstandings: "A completed dialogue action does not guarantee quest progress."
+  - id: 34
+    topic: QUEST_AUTOMATION_PATTERNS
+    keywords: [process_onboarding, process_eden, quest runtime, phase]
+    upstream_paths: [status-export.pl, ops/ro-stack/quest-runtime, src/Task/Route.pm, src/Task/TalkNPC.pm]
+    symbols: [process_onboarding, process_eden, quest_runtime_apply]
+    config_keys: [lockMap, autoTalkCont, itemsTakeAuto, attackAuto]
+    mature_behavior: "Compose route, dialogue, item, combat and observation primitives into phases."
+    state_transitions: "phase -> action -> observation -> next phase or failure"
+    retry_policy: "Per-phase timeout and bounded retry."
+    recovery_policy: "Persist phase, re-observe server state and resume idempotently."
+    edge_cases: "Death, supply, level gate, reward and reconnect."
+    project_last_good: "Novice onboarding and Eden functions in status-export.pl."
+    project_acceptance_evidence: "quest-content specs, Gate 1B recovery and historical Eden evidence."
+    current_pa: "Quest Runtime adapters and pending sequence specs."
+    current_pa_gap: "Do not claim all historical flows are PLAYER_FLOW_PASS."
+    reuse_classification: ADAPT
+    pa_design_implication: "Reuse primitives and phase semantics; keep quest truth in rAthena."
+    pa_flexibility_allowed: "Yes, generic phase machines may replace plugin branching."
+    common_misunderstandings: "Project custom quest automation is not upstream OpenKore capability."
+    project_refs: [docs/openkore-reference/quest-automation.md, docs/reference-mining/topics/reconnect-session-character-lifecycle.md]
+  - id: 35
+    topic: MACRO
+    keywords: [macro, macro plugin, macro command]
+    upstream_paths: [plugins/macro, plugins/macro/macro.pl]
+    symbols: [macro, macro::run, macro queue]
+    config_keys: [macro_file, macro_orphans]
+    mature_behavior: "Execute explicit ordered commands with variables, labels and bounded delays."
+    state_transitions: "loaded -> running -> wait -> next or stop"
+    retry_policy: "Macro author controls bounded retry and delay."
+    recovery_policy: "Stop or orphan safely when owning character/task changes."
+    edge_cases: "Infinite loop, stale condition, AI queue interference."
+    project_last_good: "Historical macros are reference only; no macro engine is PA authority."
+    project_acceptance_evidence: "Project config/plugin provenance, not current PA PASS."
+    current_pa: "Quest Runtime and command surfaces provide bounded primitives."
+    current_pa_gap: "Macro-compatible scripting is intentionally not a committed PA subsystem."
+    reuse_classification: REJECT_LEGACY
+    pa_design_implication: "Extract patterns, do not port the interpreter."
+    pa_flexibility_allowed: "Yes, phase data may be declarative."
+    common_misunderstandings: "A macro script is not a proof of normal-player quest flow."
+  - id: 36
+    topic: EVENTMACRO
+    keywords: [eventMacro, automacro, eventMacros.txt, condition]
+    upstream_paths: [plugins/eventMacro/eventMacro.pl, control/eventMacros.txt]
+    symbols: [automacro, macro, eventMacro, timeout, run-once]
+    config_keys: [eventMacro_delay, eventMacro_notWhenInQueue, eventMacro_auto]
+    mature_behavior: "Trigger condition-based macros on events, map, quest, inventory or chat state."
+    state_transitions: "condition false -> true -> trigger -> cooldown or completion"
+    retry_policy: "Use timeout, run-once, repeat and exclusive policies."
+    recovery_policy: "Pause, stop, disable or restore queue ownership safely."
+    edge_cases: "Event storms, queue clearing and overlapping automacros."
+    project_last_good: "Project eventMacro patterns are historical automation reference."
+    project_acceptance_evidence: "Upstream plugin plus project config provenance."
+    current_pa: "PA event ledger and Quest Runtime transitions."
+    current_pa_gap: "No generic eventMacro interpreter in PA."
+    reuse_classification: ADAPT
+    pa_design_implication: "Convert triggers into typed, bounded transitions."
+    pa_flexibility_allowed: "Yes, event-driven PA can improve polling behavior."
+    common_misunderstandings: "Automacro condition firing does not itself prove action success."
+  - id: 37
+    topic: PLUGINS
+    keywords: [Plugins, plugin hook, plugin event]
+    upstream_paths: [src/Plugins.pm, plugins]
+    symbols: [Plugins::callHook, Plugins::registerHook]
+    config_keys: [loadPlugins, plugin_folder]
+    mature_behavior: "Extend the client through hooks without rewriting core loops."
+    state_transitions: "load -> hook -> observe -> return"
+    retry_policy: "Plugin-specific and bounded."
+    recovery_policy: "Disable failing plugin and preserve core state."
+    edge_cases: "Hook order, stale plugin state and version drift."
+    project_last_good: "status-export plugin and historical Eden/onboarding hooks."
+    project_acceptance_evidence: "Project plugin source and Gate records."
+    current_pa: "PA modules and Quest Runtime adapters."
+    current_pa_gap: "Plugin loading is not a PA architecture requirement."
+    reuse_classification: REJECT_LEGACY
+    pa_design_implication: "Use explicit module contracts and observability."
+    pa_flexibility_allowed: "Yes, modules may be statically composed."
+    common_misunderstandings: "A plugin hook is not a durable state machine."
+  - id: 38
+    topic: CONFIG_SEMANTICS
+    keywords: [config.txt, semantics, defaults, projection]
+    upstream_paths: [control/config.txt, control/timeouts.txt, control/mon_control.txt]
+    symbols: [Settings::get, configModify]
+    config_keys: [lockMap, attackAuto, itemsTakeAuto, teleportAuto, route_teleport, buyAuto, storageAuto]
+    mature_behavior: "Map operator intent to runtime policy with explicit defaults and precedence."
+    state_transitions: "configured -> loaded -> projected -> runtime override"
+    retry_policy: "Configuration does not create retries without a state owner."
+    recovery_policy: "Restore prior values after owned task completion."
+    edge_cases: "Local override, stale generated config and runtime mutation."
+    project_last_good: "openkore-instance.ps1 generator and historical player config."
+    project_acceptance_evidence: "Generated config provenance and Gate records."
+    current_pa: "PA config projection and persistent state."
+    current_pa_gap: "OpenKore config parity is intentionally incomplete."
+    reuse_classification: ADAPT
+    pa_design_implication: "Treat config as policy input, not live authority."
+    pa_flexibility_allowed: "Yes, PA may normalize config into typed state."
+    common_misunderstandings: "A config key does not prove the corresponding behavior ran."
+  - id: 39
+    topic: PACKET_STATE_OBSERVATION
+    keywords: [Network, Receive, packet, status export]
+    upstream_paths: [src/Network/Receive.pm, src/Network/Send.pm, src/Actor.pm]
+    symbols: [Network::Receive, Actor::setPos, map_changed]
+    config_keys: [debug, verbose, status export]
+    mature_behavior: "Translate network observations into actor, map, inventory and dialogue state."
+    state_transitions: "packet -> parse -> observed state -> consumer"
+    retry_policy: "Wait for authoritative packet or timeout; do not invent state."
+    recovery_policy: "Reconnect or resync after sequence gaps."
+    edge_cases: "Out-of-order packet, map load, duplicate event and stale actor."
+    project_last_good: "status-export event ledger and no-client PA read model."
+    project_acceptance_evidence: "Gate 1A/1B/2/3 logs and status exports."
+    current_pa: "rAthena state plus PA read model."
+    current_pa_gap: "Complete packet-equivalent observation is unnecessary and unproven."
+    reuse_classification: IMPROVE
+    pa_design_implication: "Prefer direct authoritative state over packet emulation."
+    pa_flexibility_allowed: "Yes, PA can consume native state events."
+    common_misunderstandings: "A log line is evidence, not authority."
+  - id: 40
+    topic: RECONNECT_RECOVERY
+    keywords: [reconnect, relog, Network, resume]
+    upstream_paths: [plugins/reconnect, src/Network, src/Commands.pm]
+    symbols: [reconnect, relog, Network::connect]
+    config_keys: [reconnectDelay, relog, timeout]
+    mature_behavior: "Reconnect with delay, re-authenticate, reconcile map/state and resume intent."
+    state_transitions: "connected -> lost -> backoff -> connected -> reconcile"
+    retry_policy: "Delay and rate limit reconnect attempts."
+    recovery_policy: "Restore owned phase only after authoritative state is loaded."
+    edge_cases: "Duplicate session, stale map, service transaction and death."
+    project_last_good: "PA reconnect reconciliation events, job resume state and lifecycle dossier."
+    project_acceptance_evidence: "Persistent-agent audit references; full OpenKore reconnect is historical; see docs/reference-mining/topics/reconnect-session-character-lifecycle.md."
+    current_pa: "Native PA lifecycle, safe pause, runtime instance, execution epoch and persistent state."
+    current_pa_gap: "Production reconnect persistence acceptance, explicit SUPERSEDED status and service transaction ambiguity remain open."
+    reuse_classification: ADAPT
+    pa_design_implication: "Reconnect is reconciliation, not blind replay."
+    pa_flexibility_allowed: "Yes, server-side lease/state can be stronger."
+    common_misunderstandings: "A TCP reconnect does not prove gameplay resume."
+    project_refs: [docs/reference-mining/topics/reconnect-session-character-lifecycle.md, docs/reference-mining/reconnect-lifecycle-capability-matrix.yml]
+  - id: 41
+    topic: PARTY
+    keywords: [party, attackAuto_party, party share]
+    upstream_paths: [src/Actor.pm, src/AI/Attack.pm, src/Network/Receive.pm]
+    symbols: [attackAuto_party, party, Actor::Player]
+    config_keys: [attackAuto_party, itemsTakeAuto_party]
+    mature_behavior: "Respect party ownership, assist rules and loot policy."
+    state_transitions: "party observed -> policy applied -> assist or ignore"
+    retry_policy: "Reconcile party membership after map/reconnect."
+    recovery_policy: "Drop stale party actor references."
+    edge_cases: "Party member leaves, kill-steal and loot ownership."
+    project_last_good: "No current PA party acceptance is claimed."
+    project_acceptance_evidence: "Upstream source only."
+    current_pa: "N/A for current single-character acceptance."
+    current_pa_gap: "Party behavior needs explicit product decision."
+    reuse_classification: N/A
+    pa_design_implication: "Do not infer multiplayer semantics from solo AUTO_FARM."
+    pa_flexibility_allowed: "Requires Project Control decision before implementation."
+    common_misunderstandings: "Party config is not a substitute for server party state."
+  - id: 42
+    topic: CHAT
+    keywords: [chat, sendChat, public message, whisper]
+    upstream_paths: [src/Network/Send.pm, src/Network/Receive.pm, src/Commands.pm]
+    symbols: [sendChat, sendPrivateMsg, chat event]
+    config_keys: [chatLangCode, eventMacro conditions]
+    mature_behavior: "Send or observe chat as an event, with channel and recipient semantics."
+    state_transitions: "message -> transport -> observed or ignored"
+    retry_policy: "Bounded send retry; no spam loop."
+    recovery_policy: "Rate limit and preserve task state when chat fails."
+    edge_cases: "Private channel, encoding, command injection and event storms."
+    project_last_good: "status-export social event append and controlled chat commands."
+    project_acceptance_evidence: "Source evidence only; no broad chat acceptance claimed."
+    current_pa: "PA social event boundary, not gameplay authority."
+    current_pa_gap: "Social interaction runtime is not production."
+    reuse_classification: ADAPT
+    pa_design_implication: "Keep chat input untrusted and rate limited."
+    pa_flexibility_allowed: "Yes, Life/Social Director may consume events later."
+    common_misunderstandings: "A chat message cannot be treated as authoritative quest state."
+  - id: 43
+    topic: FIELD_PORTAL_TABLES
+    keywords: [portals_lut, portals_los, portal tables, map cache]
+    upstream_paths: [src/Task/CalcMapRoute.pm, src/Task/MapRoute.pm, tools]
+    symbols: ["%portals_lut", "%portals_los", "%portals_commands", "%portals_spawns"]
+    config_keys: [route_useTeleport, route_warpByItem, route_maxWarpFee]
+    mature_behavior: "Use indexed field/portal data to plan cross-map routes and fallback candidates."
+    state_transitions: "lookup -> candidate -> validate -> route"
+    retry_policy: "Drop missing portal, recompute and cap route cost/time."
+    recovery_policy: "Rebuild route from authoritative current map."
+    edge_cases: "Stale cache, guessed portal, NPC/airship and respawn route."
+    project_last_good: "scripts/build-openkore-renewal-portals.mjs and Gate 3 maps."
+    project_acceptance_evidence: "Gate 3 multi-map route evidence."
+    current_pa: "Native map data and relocation executor."
+    current_pa_gap: "Atlas completeness and freshness need per-map verification."
+    reuse_classification: ADAPT
+    pa_design_implication: "Generated lookup data is advisory; rAthena validates result."
+    pa_flexibility_allowed: "Yes, PA can use newer authoritative indexes."
+    common_misunderstandings: "A portal table entry does not prove the portal exists at runtime."
+  - id: 44
+    topic: PROJECT_LAST_GOOD_MAPPING
+    keywords: [Last-Good, Gate 1A, Gate 1B, Gate 2, Gate 3]
+    upstream_paths: [docs/openkore-exit-source-of-truth.md, docs/OPENKORE_FEATURE_AUDIT.md]
+    symbols: [AUTO_FARM, SUPPLY_LOW, POST_RESPAWN_FARM_RESUME]
+    config_keys: [lockMap, attackAuto, itemsTakeAuto]
+    mature_behavior: "Map historical OpenKore behavior to evidence-backed project outcomes."
+    state_transitions: "historical -> compared -> accepted, partial or gap"
+    retry_policy: "Use evidence status, not assumption."
+    recovery_policy: "Record UNKNOWN when evidence is insufficient."
+    edge_cases: "Source-only versus player-flow PASS, dirty historical trees."
+    project_last_good: "project-last-good-map.md is the canonical atlas mapping."
+    project_acceptance_evidence: "Gate 1A, 1B, 2 and 3 records."
+    current_pa: "Source of truth remains current PA plus rAthena evidence."
+    current_pa_gap: "OpenKore Exit is not globally complete."
+    reuse_classification: REPRODUCE
+    pa_design_implication: "Every implementation starts at the first broken transition."
+    pa_flexibility_allowed: "Yes, only with explicit deviation record."
+    common_misunderstandings: "Historical source evidence is not automatic live acceptance."
+  - id: 45
+    topic: SERVER_AGENT_ADAPTATION_PATTERNS
+    keywords: [SERVER_AGENT, PA, authority, adaptation]
+    upstream_paths: [docs/openkore-exit-source-of-truth.md, ops/ro-stack/persistent-agent]
+    symbols: [AUTO_FARM, attach_map_block, pc_respawn, handle_survival]
+    config_keys: [PersistentAgentRouteSupplyOut, PersistentAgentRouteSupplyBack]
+    mature_behavior: "Preserve player-visible outcomes while moving execution into server authority."
+    state_transitions: "intent -> authoritative action -> event -> durable resume"
+    retry_policy: "Bounded, reasoned retries with idempotency keys."
+    recovery_policy: "Reconcile server state before resuming autonomous intent."
+    edge_cases: "No-client fd=0, map reattach, duplicate owner, restart and stale state."
+    project_last_good: "Gate 1A/1B/2/3 no-client SERVER_AGENT evidence."
+    project_acceptance_evidence: "PLAYER_FLOW_PASS records and persistent-agent audit."
+    current_pa: "Canonical PA / SERVER_AGENT -> rAthena."
+    current_pa_gap: "OpenKore Exit and production readiness remain partial by source-of-truth docs."
+    reuse_classification: IMPROVE
+    pa_design_implication: "Reference semantics are a floor; PA may be more authoritative and observable."
+    pa_flexibility_allowed: "Yes, with WHY_DEVIATE and equivalence evidence."
+    common_misunderstandings: "Server authority migration does not mean OpenKore runtime returns."
+  - id: 46
+    topic: MINIMAP_FIELD_WX_MAP
+    keywords: [minimap, Field.pm, fld2, rawMap, XPM, Wx MapViewer, wx_map]
+    upstream_paths: [src/Field.pm, src/Interface/Wx/MapViewer.pm, src/Interface/Wx.pm, control/config.txt]
+    symbols: [Field::image, Field::loadFile, _updateBitmap, _posXYToView, setRoute, updateMapViewer]
+    config_keys: [wx_map_maxAutoSize, wx_map_monsterSticking, wx_map_npcSticking, wx_map_playersSticking, wx_map_portalSticking, wx_map_route, wx_map_namesDetail, wx_map_playerNameZoom, wx_map_partyNameZoom, wx_map_portalDestinations]
+    mature_behavior: "Keep FLD2 collision authority separate from best-available map imagery and render independent actor, portal and route overlays."
+    state_transitions: "field load -> image select or rawMap fallback -> coordinate scale -> overlays"
+    retry_policy: "No image retry loop; regenerate collision XPM and rebuild on field or zoom change."
+    recovery_policy: "Missing image falls back to rawMap collision without disabling overlays."
+    edge_cases: "Map alias, instance base name, non-square Field, missing image, viewport clamping and interaction sticking."
+    project_last_good: "Current Dashboard FLD2 collision renderer and authoritative live markers."
+    project_acceptance_evidence: "docs/openkore-reference/minimap-field-wx-map-v1.md"
+    current_pa: "rAthena live status supplies coordinates; Dashboard owns presentation only."
+    current_pa_gap: "NPC, portal, route and zoom projections are not currently supplied to the Player minimap."
+    reuse_classification: ADAPT
+    pa_design_implication: "Select original imagery independently while retaining collision fallback and marker authority."
+    pa_flexibility_allowed: "Yes, the Web renderer may improve labels and fallback diagnostics without changing gameplay authority."
+    common_misunderstandings: "A color minimap image is not pathfinding or collision authority."

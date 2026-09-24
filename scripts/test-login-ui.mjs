@@ -108,6 +108,9 @@ try {
       server: document.querySelector('#loginServerStatus').textContent,
       title: document.querySelector('.server-picker-title').textContent,
       confirmation: document.querySelector('.login-actions button').textContent.trim(),
+      loginButtonWidth: document.querySelector('#loginSubmit').getBoundingClientRect().width,
+      loginButtonHeight: document.querySelector('#loginSubmit').getBoundingClientRect().height,
+      loginButtonDisabled: document.querySelector('#loginSubmit').disabled,
       duplicateLogoCount: document.querySelectorAll('.classic-logo').length,
       loginSexCount: document.querySelectorAll('#loginForm [name=sex]').length,
       createSexCount: document.querySelectorAll('#characterForm [name=createSex]').length,
@@ -123,6 +126,9 @@ try {
       musicChecked: document.querySelector('#authMusicToggle').checked,
       musicCheckboxAsset: getComputedStyle(document.querySelector('#authMusicToggle')).backgroundImage,
       physicalMusicVolume: document.querySelector('#bgm').volume,
+      combatSoundRequestCount: performance.getEntriesByType('resource').filter(
+        (entry) => entry.name.includes('/ro/client/sfx/official/'),
+      ).length,
       crossOriginResources: resources.filter(x => x !== location.origin),
     };
   })()`);
@@ -156,7 +162,6 @@ try {
       const path = new URL(typeof input === 'string' ? input : input.url, location.href).pathname;
       if (path === '/api/session') return new Response(JSON.stringify({account:{username:'stale_session',sex:'F',characterName:'StaleCharacter'}}),{status:200,headers:{'content-type':'application/json'}});
       if (path === '/api/preferences') return new Response(JSON.stringify({preferences:{musicEnabled:true,soundEnabled:true,musicVolume:20,soundVolume:35}}),{status:200,headers:{'content-type':'application/json'}});
-      if (path === '/api/state') return new Response(JSON.stringify({account:{username:'stale_session'},needsCharacter:true,world:{online:true}}),{status:200,headers:{'content-type':'application/json'}});
       return originalFetch(input, options);
     };
     try {
@@ -170,6 +175,31 @@ try {
       window.fetch = originalFetch;
     }
   })()`);
+  const characterSelectDeferredLoads = await evaluate(`(async () => {
+    const originalFetch = window.fetch;
+    const requestedPaths = [];
+    performance.clearResourceTimings();
+    window.fetch = async (input, options) => {
+      const path = new URL(typeof input === 'string' ? input : input.url, location.href).pathname;
+      requestedPaths.push(path);
+      if (path === '/api/session') return new Response(JSON.stringify({account:{username:'select_session',sex:'M',characterId:1,characterName:'MobileHero',classId:0,hair:1,hairColor:0,baseLevel:1,jobLevel:1}}),{status:200,headers:{'content-type':'application/json'}});
+      if (path === '/api/health') return new Response(JSON.stringify({ok:true}),{status:200,headers:{'content-type':'application/json'}});
+      if (path === '/api/preferences') return new Response(JSON.stringify({preferences:{musicEnabled:true,soundEnabled:true,musicVolume:20,soundVolume:35}}),{status:200,headers:{'content-type':'application/json'}});
+      return originalFetch(input, options);
+    };
+    try {
+      await enter();
+      return {
+        characterSelectVisible: !document.querySelector('#characterSelectForm').classList.contains('hidden'),
+        requestedPaths,
+        gameAssetRequests: performance.getEntriesByType('resource').filter(
+          (entry) => entry.name.includes('/ro/client/sfx/official/') || entry.name.includes('/ro/client/damage/'),
+        ).length,
+      };
+    } finally {
+      window.fetch = originalFetch;
+    }
+  })()`);
   const pass =
     backgrounds.size === 2 &&
     layout.documentWidth <= layout.width &&
@@ -178,7 +208,10 @@ try {
     layout.cardHeight <= 844 &&
     layout.server === '伺服器正常' &&
     layout.title === '選擇伺服器' &&
-    layout.confirmation === '確定' &&
+    layout.confirmation === '登入／建立帳號' &&
+    layout.loginButtonWidth >= 84 &&
+    layout.loginButtonHeight >= 40 &&
+    layout.loginButtonDisabled === false &&
     layout.duplicateLogoCount === 0 &&
     layout.loginSexCount === 0 &&
     layout.createSexCount === 2 &&
@@ -193,6 +226,7 @@ try {
     layout.musicChecked === true &&
     layout.musicCheckboxAsset.includes('checkbox_1.png') &&
     Math.abs(layout.physicalMusicVolume - 0.1) < 0.001 &&
+    layout.combatSoundRequestCount === 0 &&
     femalePreview.includes('novice-female-hair-1.png') &&
     appearanceControls.hair === '2' &&
     appearanceControls.hairLabel === '2 / 42' &&
@@ -204,6 +238,12 @@ try {
     missingCharacterRecovery.characterFormVisible === true &&
     missingCharacterRecovery.selectedSex === 'F' &&
     missingCharacterRecovery.message === '請先建立角色' &&
+    characterSelectDeferredLoads.characterSelectVisible === true &&
+    !characterSelectDeferredLoads.requestedPaths.includes('/api/characters') &&
+    !characterSelectDeferredLoads.requestedPaths.includes('/api/state') &&
+    !characterSelectDeferredLoads.requestedPaths.includes('/api/events') &&
+    !characterSelectDeferredLoads.requestedPaths.includes('/api/social') &&
+    characterSelectDeferredLoads.gameAssetRequests === 0 &&
     layout.crossOriginResources.length === 0 &&
     errors.length === 0;
   console.log(
@@ -215,6 +255,7 @@ try {
         femalePreview,
         appearanceControls,
         missingCharacterRecovery,
+        characterSelectDeferredLoads,
         screenshot: 'tmp/login-ui-mobile.png',
         errors,
       },

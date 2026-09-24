@@ -1,0 +1,31 @@
+schema: RATHENA_AUTOCOMBAT_CAPABILITY_MATRIX_V1
+reference_checkpoint: 961ac3c
+classification: ADAPT
+current_version_applicability: PARTIAL
+mature_floor: SAME_MAP_SERVER_SIDE_COMBAT
+reference_is_floor_not_ceiling: true
+public_capability_claims:
+  target: true
+  retarget: true
+  same_map_pathing: true
+  attack: true
+  skill: true
+  buff: true
+  potion: true
+  loot: true
+  teleport: true
+  death_handling: true
+  partial_offline: true
+public_evidence_gaps:
+  cross_map_supply: NO_PUBLIC_EVIDENCE
+  return_to_farm: NO_PUBLIC_EVIDENCE
+  auto_resume_after_supply: NO_PUBLIC_EVIDENCE
+project_boundary:
+  local_hunting: STAGED_RATHENA_MIGRATION
+  intent_journey_interrupt_resume: PA
+  supply_return_quest_social_life: PA
+  global_autoloot: YES
+  global_autostore: NO
+evidence_rule:
+  no_public_evidence_means_not_supported: false
+  no_public_evidence_means_pass: false

@@ -38,3 +38,27 @@ next-env.d.ts
 /work/
 /tmp/
 /.local/
+/ops/ro-stack/runtime-evidence-*/
+
+# V6 private runtime delivery; source metadata stays tracked.
+/public/ro/client/**/*.png
+/public/ro/client/**/*.jpg
+/public/ro/client/**/*.jpeg
+/public/ro/client/**/*.gif
+/public/ro/client/**/*.bmp
+/public/ro/client/**/*.webp
+/public/ro/client/**/*.wav
+/public/ro/client/**/*.ogg
+/public/ro/client/**/*.mp3
+/public/ro/client/**/*.spr
+/public/ro/client/**/*.act
+/public/ro/client/**/*.grf
+/ops/ro-stack/dashboard/assets/pets/**/*.png
+/ops/ro-stack/dashboard/assets/pets/**/*.jpg
+/ops/ro-stack/dashboard/assets/pets/**/*.webp
+/ops/ro-stack/dashboard/assets/pets/**/*.gif
+/ops/ro-stack/dashboard/assets/pets/**/*.wav
+/ops/ro-stack/dashboard/assets/pets/**/*.mp3
+/public/ro/client/monsters/manifest.json
+/public/ro/client/npcs/manifest.json
+/ops/ro-stack/dashboard/skill-ui-assets.json

@@ -1,0 +1,43 @@
+{
+  "PRE_IMPLEMENTATION_REUSE_GATE": {
+    "featureId": "m1-ordered-attack-skill-pa-seam",
+    "featureName": "M1 ordered attack-skill rows in existing PA combat",
+    "scope": "NEW_CAPABILITY",
+    "taskCategory": "NEW_CAPABILITY",
+    "categories": ["combat", "skills", "configuration_semantics", "failure_recovery"],
+    "openKoreRelevant": true,
+    "checks": {
+      "currentProject": {"status": "CHECKED", "implementationFound": true, "evidence": "config-schema.mjs persists attackSlots; dashboard.mjs start_farm carries one skillId; Native persistent_agent.cpp already has the rAthena-backed skill path and SKILL_CAST no-weapon guard."},
+      "legacyProject": {"status": "CHECKED", "evidence": "docs/openkore-reference/mature-capability-census-v1.md C04/C05/C13 and docs/openkore-harvest-registry.md preserve legacy selection evidence."},
+      "reuseRegistry": {"status": "REGISTRY_HIT", "reference": "ops/research/external-reuse-registry.json ok-combat-loot-recovery; docs/openkore-reference/profile-contract-reuse-gate.json"},
+      "rAthena": {"status": "CHECKED", "evidence": "Native pc_checkskill, skill_get_requirement, skill_check_condition_castbegin, battle_check_range and unit_skilluse_id already execute and validate skills."},
+      "openKore": {"status": "CHECKED", "evidence": "Pinned 51de1ddfc4449ae5217f6886de702f87ca934030 control/config.txt:605-632 attackSkillSlot defaults; src/AI/Attack.pm:725-775,1057-1083 first-match/attempt transition; src/Misc.pm:5660-5675 learned-skill and SP-cost row gate, recorded in m1-attack-skill-source-gate.md."},
+      "externalEcosystem": {"status": "NOT_APPLICABLE", "reason": "No new external skill runtime is authorized."},
+      "genericOSS": {"status": "NOT_APPLICABLE", "reason": "Generic schedulers cannot substitute rAthena skill authority."}
+    },
+    "decision": "PORTABLE_LOGIC",
+    "freshResearchPerformed": false,
+    "registryUpdateRequired": false,
+    "capabilityScope": "Ordered numeric attack-skill rows through existing farm command and PA attack path",
+    "matureReferenceApplicable": true,
+    "referenceGate": "PASS",
+    "deltaReferenceAuditRequired": true,
+    "capabilityDelta": {"addsCapability": true, "replacesCapability": false, "changesBehavior": true, "changesConfigurationSemantics": true, "changesCapabilityUi": false, "changesExceptionRecovery": true, "changesMatureCapabilityDataModel": false},
+    "matureReferenceMatrix": {
+      "currentGiCapability": "Persisted attackSlots stop before command; one Native skill path already checks rAthena legality and explicit weapon fallback.",
+      "openKoreCapability": "AI::Attack::main scans numbered attackSkillSlot rows in order and selects first matching self/target predicates; checkSelfCondition skips unlearned or SP-unaffordable rows; chosen skill attempts stamp row/target time.",
+      "rAthenaCapability": "Native rAthena checks learning, SP, cooldown, range, items, ammo, cast legality and target effect.",
+      "otherMatureReference": "NOT_APPLICABLE: existing PA local combat is the target architecture.",
+      "matureExceptionBehavior": "Unsupported configured predicates fail typed; unavailable cast remains visible and never silently attacks normally in SKILL_CAST.",
+      "matureRecoveryBehavior": "Existing PA bounded no-method retarget and normal weapon fallback stay intact.",
+      "matureConfigSemantics": "Only numeric skill ID, level, HP/SP percent and timeout are admitted; all other row fields stay disabled for M1.",
+      "matureUiSemantics": "Skill array remains PARTIAL and disabled pending authoritative cast and Browser proof.",
+      "directReuse": "Reuse config attackSlots, farm command, Native skill attack block and rAthena skill functions.",
+      "adapt": "Ordered row transport and first-match predicate selection inside the existing attack block.",
+      "projectPolicy": "OpenKore behavior reference; no second combat scheduler; SKILL_CAST no normal attack.",
+      "improvements": "Can express more than one ordered skill without changing runtime authority.",
+      "matureCapabilityLoss": "NONE",
+      "resultEquivalentOrBetter": "PASS"
+    }
+  }
+}

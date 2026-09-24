@@ -1,0 +1,14 @@
+{
+  "authorization": "使用者於 2026-09-13 授權使用本機 Gravity RagnarokOnline 客戶端素材",
+  "sourceArchive": "Gravity RagnarokOnline/data.grf",
+  "sourceArchiveSha256": "1c7d68f70714937abbd3741a6b3aea34a7ed9da63428941d5df453efacd1c0ad",
+  "sourceImage": "data/texture/유저인터페이스/worldmap_mob.bmp",
+  "sourceImageSha256": "2c2dbe1d46bd8c6884c348dc1661a32ed26942602b3e89f6d8699459df378f77",
+  "sourcePositions": "data/luafiles514/lua files/worldviewdata/worldviewdata_table.lub",
+  "outputImage": "public/ro/client/world-map/world-map.webp",
+  "outputImageSha256": "302b8889c4e886a6a7aa6ebca1c92f0d14768c7e3d706665c2a67a0a409c6fef",
+  "width": 1280,
+  "height": 1024,
+  "positionCount": 363,
+  "conversion": "BMP to WebP quality 88; dimensions and content preserved"
+}

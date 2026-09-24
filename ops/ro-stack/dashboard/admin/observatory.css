@@ -1,0 +1,204 @@
+/* ── Observatory shell ── */
+.obs-shell {
+  min-height: 100dvh;
+  background: var(--bg, #1a2233);
+  color: var(--text, #d4dbe8);
+  font-family: inherit;
+  padding: 0 0 4rem;
+}
+.obs-topbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: .75rem 1.25rem;
+  background: rgba(0,0,0,.35);
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  flex-wrap: wrap;
+}
+.obs-topbar a.obs-back {
+  color: #8fa8c8;
+  text-decoration: none;
+  font-size: .85rem;
+  white-space: nowrap;
+}
+.obs-topbar a.obs-back:hover { color: #c8d8f0; }
+.obs-topbar h1 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #c8d8f0;
+  flex: 1;
+}
+.obs-source-badge {
+  font-size: .75rem;
+  padding: .25rem .6rem;
+  border-radius: 4px;
+  font-weight: 600;
+  letter-spacing: .04em;
+}
+.obs-source-badge.live   { background: #1a4a2a; color: #5ddc90; border: 1px solid #2a6a3a; }
+.obs-source-badge.synth  { background: #2a3a5a; color: #8fa8d8; border: 1px solid #3a4a6a; }
+.obs-mode-toggle {
+  display: flex;
+  gap: .25rem;
+}
+.obs-mode-toggle button {
+  padding: .3rem .7rem;
+  font-size: .78rem;
+  border-radius: 4px;
+  border: 1px solid rgba(255,255,255,.15);
+  background: transparent;
+  color: #8fa8c8;
+  cursor: pointer;
+}
+.obs-mode-toggle button.active {
+  background: #566d8b;
+  color: #fff;
+  border-color: #7a9abf;
+}
+.obs-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem 1rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+/* ── Panels ── */
+.obs-panel {
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.obs-panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .75rem 1rem;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  flex-wrap: wrap;
+}
+.obs-panel-head h2 {
+  margin: 0;
+  font-size: .95rem;
+  font-weight: 600;
+  color: #c8d8f0;
+}
+.obs-eyebrow {
+  font-size: .65rem;
+  letter-spacing: .08em;
+  color: #6a88a8;
+  font-weight: 600;
+  margin: 0 0 .2rem;
+}
+.obs-panel-body {
+  padding: .75rem 1rem;
+}
+/* ── Status pills ── */
+.s-pill {
+  display: inline-block;
+  padding: .15rem .5rem;
+  border-radius: 3px;
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .05em;
+}
+.s-RED    { background: #4a1010; color: #f87070; border: 1px solid #6a2020; }
+.s-YELLOW { background: #3a2e00; color: #e8c84a; border: 1px solid #5a4a00; }
+.s-GREEN  { background: #0e2e18; color: #5ddc90; border: 1px solid #1a4a28; }
+.s-GRAY   { background: #222a38; color: #7a8fa8; border: 1px solid #2e3a4a; }
+/* ── Health metrics row ── */
+.obs-health-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+.obs-hm {
+  padding: .4rem .7rem;
+  border-radius: 4px;
+  background: rgba(0,0,0,.2);
+  min-width: 7rem;
+}
+.obs-hm small { display: block; font-size: .65rem; color: #6a88a8; margin-bottom: .1rem; }
+.obs-hm strong { font-size: 1rem; }
+.obs-hm.t-RED strong    { color: #f87070; }
+.obs-hm.t-YELLOW strong { color: #e8c84a; }
+.obs-hm.t-GREEN strong  { color: #5ddc90; }
+/* ── Top problems ── */
+.obs-problems { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .5rem; }
+.obs-problem-card {
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 5px;
+  padding: .5rem .75rem;
+  background: rgba(0,0,0,.15);
+}
+.obs-problem-card.p-RED    { border-left: 3px solid #f87070; }
+.obs-problem-card.p-YELLOW { border-left: 3px solid #e8c84a; }
+.obs-problem-top { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+.obs-problem-name { font-size: .85rem; font-weight: 600; color: #c8d8f0; flex: 1; }
+.obs-problem-meta { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .35rem; font-size: .75rem; color: #8fa8c8; }
+.obs-problem-meta span small { color: #6a88a8; margin-right: .2rem; }
+.obs-problem-hint { font-size: .72rem; color: #7a8fa8; margin-top: .3rem; }
+/* ── Category grid ── */
+.obs-cat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+  gap: .5rem;
+}
+.obs-cat-card {
+  padding: .5rem .75rem;
+  border-radius: 5px;
+  background: rgba(0,0,0,.2);
+  border: 1px solid rgba(255,255,255,.07);
+}
+.obs-cat-card strong { display: block; font-size: .82rem; margin-bottom: .25rem; }
+.obs-cat-card .obs-cat-counts { display: flex; gap: .3rem; flex-wrap: wrap; }
+.obs-cat-card .obs-cat-counts .s-pill { font-size: .62rem; }
+/* ── Freshness grid ── */
+.obs-fresh-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: .5rem;
+}
+.obs-fresh-card {
+  padding: .5rem .75rem;
+  border-radius: 5px;
+  background: rgba(0,0,0,.2);
+  border: 1px solid rgba(255,255,255,.07);
+}
+.obs-fresh-card strong { display: block; font-size: .82rem; margin-bottom: .2rem; color: #c8d8f0; }
+.obs-fresh-card span { font-size: .72rem; color: #8fa8c8; }
+/* ── Deployment summary ── */
+.obs-dep-grid { display: flex; flex-wrap: wrap; gap: .5rem; }
+.obs-dep-item {
+  padding: .35rem .7rem;
+  background: rgba(0,0,0,.2);
+  border-radius: 4px;
+  min-width: 10rem;
+}
+.obs-dep-item dt { font-size: .65rem; color: #6a88a8; font-weight: 600; letter-spacing: .04em; }
+.obs-dep-item dd { font-size: .82rem; color: #c8d8f0; margin: .1rem 0 0; }
+/* ── Loading / error states ── */
+.obs-loading { padding: 2rem 1rem; text-align: center; color: #6a88a8; font-size: .85rem; }
+.obs-error   { padding: 1rem; color: #f87070; font-size: .82rem; background: rgba(180,40,40,.1); border-radius: 4px; }
+.obs-muted   { color: #6a88a8; font-size: .82rem; }
+/* ── Window selector ── */
+.obs-window-toggle { display: flex; gap: .25rem; }
+.obs-window-toggle button {
+  padding: .2rem .55rem;
+  font-size: .72rem;
+  border-radius: 3px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: transparent;
+  color: #8fa8c8;
+  cursor: pointer;
+}
+.obs-window-toggle button.active { background: #3a4e68; color: #c8d8f0; border-color: #5a7a9a; }
+/* ── Responsive ── */
+@media (max-width: 440px) {
+  .obs-topbar { padding: .5rem .75rem; }
+  .obs-content { padding: .5rem .5rem 0; gap: .75rem; }
+  .obs-panel-head h2 { font-size: .88rem; }
+}

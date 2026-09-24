@@ -1,0 +1,663 @@
+{
+  "id": "moc_fild03",
+  "name": "蘇克拉特沙漠",
+  "category": "SERVICE_ONLY",
+  "dungeon": null,
+  "totalMonsters": 226,
+  "normalMonsterCount": 226,
+  "levelRange": {
+    "min": 45,
+    "max": 48
+  },
+  "fullLevelRange": {
+    "min": 45,
+    "max": 48
+  },
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [
+    {
+      "id": 1013,
+      "name": "狼",
+      "level": 45,
+      "count": 164
+    },
+    {
+      "id": 1100,
+      "name": "艾斯蜘蛛",
+      "level": 47,
+      "count": 23
+    },
+    {
+      "id": 1042,
+      "name": "綠蒼蠅",
+      "level": 48,
+      "count": 23
+    }
+  ],
+  "resourceMonsters": [
+    {
+      "id": 1080,
+      "name": "綠草",
+      "level": 1,
+      "count": 14
+    }
+  ],
+  "bossMonsters": [],
+  "monsters": [
+    {
+      "id": 1080,
+      "aegisName": "GREEN_PLANT",
+      "name": "綠草",
+      "count": 14,
+      "respawnMinMs": 90000,
+      "respawnMaxMs": 180000,
+      "level": 1,
+      "hp": 5,
+      "baseExp": 0,
+      "jobExp": 0,
+      "attackMin": 1,
+      "attackMax": 1,
+      "defense": 100,
+      "magicDefense": 99,
+      "size": "小型",
+      "race": "植物",
+      "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": true,
+      "sourceFiles": [
+        "npc/re/mobs/fields/morocc.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 511,
+          "aegisName": "Green_Herb",
+          "name": "綠色藥草",
+          "ratePerTenThousand": 3500,
+          "type": "恢復道具",
+          "weight": 3,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可中和所有毒性的珍貴藥草,具有治療的功效解毒。\n\n重量: 3"
+        },
+        {
+          "itemId": 7934,
+          "aegisName": "Poison_Herb_Makulata",
+          "name": "毒香草",
+          "ratePerTenThousand": 150,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "危險: 小葉子有點像綠茶葉, 但味道卻不同。\n\n重量: 1"
+        },
+        {
+          "itemId": 621,
+          "aegisName": "Bitter_Herb",
+          "name": "苦味草",
+          "ratePerTenThousand": 10,
+          "type": "消耗品",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "非常苦的草,是怪物波波利最喜愛的食物。\n種類: 認養寵物之物品\n重量: 5"
+        },
+        {
+          "itemId": 905,
+          "aegisName": "Stem",
+          "name": "植物梗",
+          "ratePerTenThousand": 1500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "植物細長的梗,可以當做藥材,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 906,
+          "aegisName": "Pointed_Scale",
+          "name": "鱗片梗",
+          "ratePerTenThousand": 750,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "有著鱗片的梗,是從怪物森靈身上得來的,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 704,
+          "aegisName": "Aloe",
+          "name": "蘆薈",
+          "ratePerTenThousand": 25,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "只在森林深處開花的植物, 因為一年中只在特定的季節開花,所以不是那麼容易可以碰得到。\n\n重量: 1"
+        },
+        {
+          "itemId": 521,
+          "aegisName": "Leaflet_Of_Aloe",
+          "name": "蘆薈葉子",
+          "ratePerTenThousand": 25,
+          "type": "恢復道具",
+          "weight": 2,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "將蘆薈的葉子剪下收集在一起,可恢復定量的HP。\n\n重量: 2"
+        },
+        {
+          "itemId": 2270,
+          "aegisName": "Centimental_Leaf",
+          "name": "草葉",
+          "ratePerTenThousand": 1,
+          "type": "防具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "草葉,含在嘴裡時, 會隨著風飄蕩,有到處流浪的感覺。\n受到植物型敵人的攻擊時, 可-3%的傷害度。\n系列: 頭具  防禦: 0\n位置: 下  重量: 10\n裝備: 初學者以外的全職業"
+        }
+      ]
+    },
+    {
+      "id": 1013,
+      "aegisName": "WOLF",
+      "name": "狼",
+      "count": 164,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 45,
+      "hp": 1091,
+      "baseExp": 369,
+      "jobExp": 301,
+      "attackMin": 89,
+      "attackMax": 11,
+      "defense": 55,
+      "magicDefense": 3,
+      "size": "中型",
+      "race": "動物",
+      "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/morocc.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 1011,
+          "aegisName": "Emveretarcon",
+          "name": "強化武器金屬-級數二",
+          "ratePerTenThousand": 10,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "用來強化武器在製作武器所使用的金屬,可以強化級數二的武器。\n\n重量: 20"
+        },
+        {
+          "itemId": 920,
+          "aegisName": "Claw_Of_Wolves",
+          "name": "狼指甲",
+          "ratePerTenThousand": 4500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從狼的腳上剪下來的腳指甲,可向收集品購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 2308,
+          "aegisName": "Mantle_",
+          "name": "大衣",
+          "ratePerTenThousand": 5,
+          "type": "防具",
+          "weight": 60,
+          "attack": 0,
+          "defense": 37,
+          "slots": 1,
+          "description": "沒有腰身的長大衣。\n系列: 鎧甲  防禦: 37\n重量: 60\n裝備: 初學者以外的全職業"
+        },
+        {
+          "itemId": 601,
+          "aegisName": "Wing_Of_Fly",
+          "name": "蒼蠅翅膀",
+          "ratePerTenThousand": 500,
+          "type": "延遲消耗品",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "將蒼蠅的翅膀剪下可以用來製作具有魔法力量的物品,可在地圖上移動至任意的位置上。\n\n重量: 0"
+        },
+        {
+          "itemId": 528,
+          "aegisName": "Monster's_Feed",
+          "name": "魔物飼料",
+          "ratePerTenThousand": 525,
+          "type": "恢復道具",
+          "weight": 15,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "魔物們最喜愛的加工食品,可恢復少量的HP。\n\n重量: 15"
+        },
+        {
+          "itemId": 919,
+          "aegisName": "Animal's_Skin",
+          "name": "動物外皮",
+          "ratePerTenThousand": 2750,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "剝下動物的外皮得來的,可以用來折衣服或棉被等物品。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 578,
+          "aegisName": "Strawberry",
+          "name": "草莓",
+          "ratePerTenThousand": 300,
+          "type": "恢復道具",
+          "weight": 2,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "酸甜的滋味,深受大家喜愛的紅色果實 可以恢復少量的 SP\n\n重量: 2"
+        },
+        {
+          "itemId": 4029,
+          "aegisName": "Wolf_Card",
+          "name": "狼卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "ATK+15\n必殺攻擊+1。\n系列: 卡片\n裝置: 武器\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2613,
+      "aegisName": "C1_WOLF",
+      "name": "迅捷狼",
+      "count": 2,
+      "respawnMinMs": 180000,
+      "respawnMaxMs": 180000,
+      "level": 45,
+      "hp": 5455,
+      "baseExp": 1845,
+      "jobExp": 4515,
+      "attackMin": 106,
+      "attackMax": 11,
+      "defense": 55,
+      "magicDefense": 3,
+      "size": "中型",
+      "race": "動物",
+      "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/championmobs.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 1011,
+          "aegisName": "Emveretarcon",
+          "name": "強化武器金屬-級數二",
+          "ratePerTenThousand": 50,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "用來強化武器在製作武器所使用的金屬,可以強化級數二的武器。\n\n重量: 20"
+        },
+        {
+          "itemId": 920,
+          "aegisName": "Claw_Of_Wolves",
+          "name": "狼指甲",
+          "ratePerTenThousand": 10000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從狼的腳上剪下來的腳指甲,可向收集品購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 2308,
+          "aegisName": "Mantle_",
+          "name": "大衣",
+          "ratePerTenThousand": 25,
+          "type": "防具",
+          "weight": 60,
+          "attack": 0,
+          "defense": 37,
+          "slots": 1,
+          "description": "沒有腰身的長大衣。\n系列: 鎧甲  防禦: 37\n重量: 60\n裝備: 初學者以外的全職業"
+        },
+        {
+          "itemId": 601,
+          "aegisName": "Wing_Of_Fly",
+          "name": "蒼蠅翅膀",
+          "ratePerTenThousand": 2500,
+          "type": "延遲消耗品",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "將蒼蠅的翅膀剪下可以用來製作具有魔法力量的物品,可在地圖上移動至任意的位置上。\n\n重量: 0"
+        },
+        {
+          "itemId": 528,
+          "aegisName": "Monster's_Feed",
+          "name": "魔物飼料",
+          "ratePerTenThousand": 2625,
+          "type": "恢復道具",
+          "weight": 15,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "魔物們最喜愛的加工食品,可恢復少量的HP。\n\n重量: 15"
+        },
+        {
+          "itemId": 919,
+          "aegisName": "Animal's_Skin",
+          "name": "動物外皮",
+          "ratePerTenThousand": 10000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "剝下動物的外皮得來的,可以用來折衣服或棉被等物品。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 578,
+          "aegisName": "Strawberry",
+          "name": "草莓",
+          "ratePerTenThousand": 1500,
+          "type": "恢復道具",
+          "weight": 2,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "酸甜的滋味,深受大家喜愛的紅色果實 可以恢復少量的 SP\n\n重量: 2"
+        },
+        {
+          "itemId": 4029,
+          "aegisName": "Wolf_Card",
+          "name": "狼卡片",
+          "ratePerTenThousand": 5,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "ATK+15\n必殺攻擊+1。\n系列: 卡片\n裝置: 武器\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1100,
+      "aegisName": "ARGOS",
+      "name": "艾斯蜘蛛",
+      "count": 23,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 47,
+      "hp": 1300,
+      "baseExp": 370,
+      "jobExp": 319,
+      "attackMin": 97,
+      "attackMax": 33,
+      "defense": 58,
+      "magicDefense": 8,
+      "size": "大型",
+      "race": "昆蟲",
+      "element": "毒 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/morocc.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 1025,
+          "aegisName": "Spiderweb",
+          "name": "蜘蛛絲",
+          "ratePerTenThousand": 4500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "蜘蛛所吐出來的蜘蛛絲,具有黏性且相當結實。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 911,
+          "aegisName": "Scell",
+          "name": "雪勒結晶",
+          "ratePerTenThousand": 600,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從一部份怪物身上得來的結晶,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 1042,
+          "aegisName": "Short_Leg",
+          "name": "昆蟲後腳",
+          "ratePerTenThousand": 250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "昆蟲又細又短的腿。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 757,
+          "aegisName": "Elunium_Stone",
+          "name": "鋁原石",
+          "ratePerTenThousand": 31,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以拿來煉鋁的礦石,拿來提煉作成盔甲。\n\n重量: 20"
+        },
+        {
+          "itemId": 511,
+          "aegisName": "Green_Herb",
+          "name": "綠色藥草",
+          "ratePerTenThousand": 335,
+          "type": "恢復道具",
+          "weight": 3,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可中和所有毒性的珍貴藥草,具有治療的功效解毒。\n\n重量: 3"
+        },
+        {
+          "itemId": 601,
+          "aegisName": "Wing_Of_Fly",
+          "name": "蒼蠅翅膀",
+          "ratePerTenThousand": 500,
+          "type": "延遲消耗品",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "將蒼蠅的翅膀剪下可以用來製作具有魔法力量的物品,可在地圖上移動至任意的位置上。\n\n重量: 0"
+        },
+        {
+          "itemId": 10017,
+          "aegisName": "Bark_Shorts",
+          "name": "樹皮褲",
+          "ratePerTenThousand": 8,
+          "type": "Petarmor",
+          "weight": 0,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "用木頭與樹皮編成的褲子。\n種類: 可愛寵物裝備\n裝載: 毒魔菇、魔菇"
+        },
+        {
+          "itemId": 4075,
+          "aegisName": "Argos_Card",
+          "name": "艾斯蜘蛛卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "對石化的攻擊,可-20% 的傷害度。\nDEF+1。\n系列: 卡片\n裝置: 盾牌\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1042,
+      "aegisName": "STEEL_CHONCHON",
+      "name": "綠蒼蠅",
+      "count": 23,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 48,
+      "hp": 985,
+      "baseExp": 379,
+      "jobExp": 328,
+      "attackMin": 84,
+      "attackMax": 35,
+      "defense": 57,
+      "magicDefense": 20,
+      "size": "小型",
+      "race": "昆蟲",
+      "element": "風 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/morocc.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 992,
+          "aegisName": "Wind_Of_Verdure",
+          "name": "風靈礦石",
+          "ratePerTenThousand": 45,
+          "type": "其他",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "黃色的小礦石塊。擁有風屬性,提煉後可以製作出風靈原石。\n\n重量: 5"
+        },
+        {
+          "itemId": 999,
+          "aegisName": "Steel",
+          "name": "鋼鐵",
+          "ratePerTenThousand": 15,
+          "type": "其他",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "將鐵浸泡幾次特殊藥水後,可以使其強度更高,製造出來的武器或防具硬度更高。\n\n重量: 10"
+        },
+        {
+          "itemId": 910,
+          "aegisName": "Garlet",
+          "name": "加勒結晶",
+          "ratePerTenThousand": 1200,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從一部份怪物身上得來的結晶,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 935,
+          "aegisName": "Shell",
+          "name": "堅硬外殼",
+          "ratePerTenThousand": 4500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "怪物身上堅硬的外殼,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 943,
+          "aegisName": "Solid_Shell",
+          "name": "堅硬外皮",
+          "ratePerTenThousand": 15,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "怪物身上堅硬的外皮,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 998,
+          "aegisName": "Iron",
+          "name": "鐵",
+          "ratePerTenThousand": 100,
+          "type": "其他",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "除了硬度夠,它也較為輕薄,與其他金屬比較起來,加工較容易。\n\n重量: 5"
+        },
+        {
+          "itemId": 601,
+          "aegisName": "Wing_Of_Fly",
+          "name": "蒼蠅翅膀",
+          "ratePerTenThousand": 500,
+          "type": "延遲消耗品",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "將蒼蠅的翅膀剪下可以用來製作具有魔法力量的物品,可在地圖上移動至任意的位置上。\n\n重量: 0"
+        },
+        {
+          "itemId": 4042,
+          "aegisName": "Steel_Chonchon_Card",
+          "name": "綠蒼蠅卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "DEF+2。\n對風屬性的攻擊,可-10% 的傷害度。\n系列: 卡片\n裝置: 鎧甲\n重量: 1"
+        }
+      ]
+    }
+  ]
+}

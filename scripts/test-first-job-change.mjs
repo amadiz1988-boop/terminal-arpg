@@ -8,6 +8,8 @@ import { promisify } from 'node:util';
 const execFileAsync = promisify(execFile);
 const origin = process.env.RO_DEMO_ORIGIN ?? 'http://127.0.0.1:8788';
 const uiMode = process.argv.includes('--ui');
+const fastMode = process.argv.includes('--fast');
+const skillCheck = process.argv.includes('--skill-check');
 const requestedJob =
   process.argv.find((argument) => argument.startsWith('--job='))?.slice(6) ??
   'swordman';
@@ -74,6 +76,52 @@ const jobSpecs = {
     rewardKey: 'N_Battle_Axe',
     expectedSkillHandles: ['MC_INCCARRY', 'MC_DISCOUNT'],
     routeTimeout: 600_000,
+  },
+  supernovice: {
+    username: 'jobtest_supernovice',
+    characterName: 'JobTestSuperNovice',
+    displayName: '超級初心者',
+    jobId: 23,
+    rewardId: 1208,
+    rewardKey: 'Main_Gauche_',
+    expectedSkillHandles: [],
+    testSkillId: 2,
+    testSkillHandle: 'SM_SWORD',
+  },
+  taekwon: {
+    username: 'jobtest_taekwon',
+    characterName: 'JobTestTaekwon',
+    displayName: '跆拳',
+    jobId: 4046,
+    rewardId: 0,
+    rewardKey: '',
+    expectedSkillHandles: [],
+    testSkillId: 411,
+    testSkillHandle: 'TK_RUN',
+  },
+  gunslinger: {
+    username: 'jobtest_gunslinger',
+    characterName: 'JobTestGunslinger',
+    displayName: '神槍手',
+    jobId: 24,
+    rewardId: 13101,
+    rewardKey: 'Six_Shooter_',
+    extraRewardIds: [13200],
+    expectedSkillHandles: [],
+    testSkillId: 500,
+    testSkillHandle: 'GS_GLITTERING',
+  },
+  ninja: {
+    username: 'jobtest_ninja',
+    characterName: 'JobTestNinja',
+    displayName: '忍者',
+    jobId: 25,
+    rewardId: 13010,
+    rewardKey: 'Asura_',
+    extraRewardIds: [13250],
+    expectedSkillHandles: [],
+    testSkillId: 522,
+    testSkillHandle: 'NJ_TOBIDOUGU',
   },
 };
 const job = jobSpecs[requestedJob];
@@ -330,8 +378,13 @@ const charId = Number(
   ),
 );
 if (!Number.isInteger(charId)) throw new Error('test character id unavailable');
-const rewardIds = [job.rewardId, ...(job.extraRewardIds ?? [])];
-await sql(`UPDATE \`char\` SET class=0,base_level=80,job_level=10,job_exp=0,skill_point=0,zeny=100000,str=1,agi=50,vit=99,\`int\`=1,dex=50,luk=1,max_hp=10000,hp=10000,max_sp=1000,sp=1000,status_point=0,last_map='prt_fild08',last_x=170,last_y=374,online=0 WHERE char_id=${charId};
+const rewardIds = [job.rewardId, ...(job.extraRewardIds ?? [])].filter(
+  (itemId) => Number(itemId) > 0,
+);
+const startPoint = fastMode
+  ? { map: 'iz_ac01', x: 60, y: 64 }
+  : { map: 'prt_fild08', x: 170, y: 374 };
+await sql(`UPDATE \`char\` SET class=0,base_level=80,job_level=10,job_exp=0,skill_point=${skillCheck ? 1 : 0},zeny=100000,str=1,agi=50,vit=99,\`int\`=1,dex=50,luk=1,max_hp=10000,hp=10000,max_sp=1000,sp=1000,status_point=0,last_map='${startPoint.map}',last_x=${startPoint.x},last_y=${startPoint.y},online=0 WHERE char_id=${charId};
 DELETE FROM skill WHERE char_id=${charId};
 INSERT INTO skill (char_id,id,lv,flag) VALUES (${charId},1,9,0);
 DELETE FROM char_reg_num WHERE char_id=${charId} AND \`key\`='q_job_thief';
@@ -373,7 +426,7 @@ current = await waitFor(
   },
   job.routeTimeout ?? 240_000,
 );
-if (!routeTransitions.includes('izlude') || !routeTransitions.includes('iz_ac01'))
+if (!fastMode && (!routeTransitions.includes('izlude') || !routeTransitions.includes('iz_ac01')))
   throw new Error(`Academy route incomplete: ${routeTransitions.join(' -> ')}`);
 if (routeTransitions.some((map) => ['geffen_in', 'payon_in02', 'prt_church', 'alberta_in', 'moc_prydb1'].includes(map)))
   throw new Error(`Legacy guild route was used: ${routeTransitions.join(' -> ')}`);
@@ -394,7 +447,7 @@ for (let step = 0; step < 2; step += 1) {
   dialogSteps.push(current.npcDialog.message);
 }
 const graduationChoice = current.npcDialog.responses.findIndex((response) =>
-  /^Complete graduation\.$/i.test(response),
+  /^(?:Complete graduation\.|完成結業。)$/i.test(response),
 );
 if (graduationChoice < 0) throw new Error('Academy graduation choice unavailable');
 if (ui) await ui.click(`[data-npc-choice="${graduationChoice + 1}"]`);
@@ -408,13 +461,39 @@ current = await waitFor(
     ),
   20_000,
 );
+let skillEvidence = null;
+if (skillCheck) {
+  if (!job.testSkillId || !job.testSkillHandle)
+    throw new Error(`skill test definition missing for ${requestedJob}`);
+  await request('/api/skill-point', {
+    method: 'POST',
+    body: JSON.stringify({ skillId: job.testSkillId }),
+  });
+  current = await waitFor(
+    live,
+    (snapshot) =>
+      Number(snapshot?.skillPoint) === 0 &&
+      Number(
+        snapshot?.skills?.find(
+          (skill) => skill.handle === job.testSkillHandle,
+        )?.level,
+      ) === 1,
+    20_000,
+  );
+  skillEvidence = {
+    id: job.testSkillId,
+    handle: job.testSkillHandle,
+    level: 1,
+    remainingPoints: Number(current.skillPoint),
+  };
+}
 const resultAtGuild = {
   jobId: current.jobId,
   jobLevel: current.jobLevel,
   basicSkillLevel: current.basicSkillLevel,
-  receivedReward: current.inventory.some(
-    (item) => Number(item.itemId) === job.rewardId,
-  ),
+  receivedReward:
+    job.rewardId === 0 ||
+    current.inventory.some((item) => Number(item.itemId) === job.rewardId),
   rewardId: job.rewardId,
   rewardKey: job.rewardKey,
   receivedRewardIds: rewardIds.filter((rewardId) =>
@@ -501,9 +580,11 @@ if (ui) {
   };
   if (uiEvidence.errors.length || uiEvidence.failedResources.length)
     throw new Error(`browser errors: ${JSON.stringify(uiEvidence)}`);
-  await ui.click('[data-tab="skills"]');
-  await ui.click('#jobResume');
-} else await jobAction({ action: 'resume' });
+  if (!fastMode) {
+    await ui.click('[data-tab="skills"]');
+    await ui.click('#jobResume');
+  }
+} else if (!fastMode) await jobAction({ action: 'resume' });
 current = await waitFor(
   live,
   (snapshot) =>
@@ -536,6 +617,8 @@ console.log(
       account: username,
       character: characterName,
       route: requestedJob,
+      fastMode,
+      skillCheck: skillEvidence,
       routeTransitions,
       dialogSteps,
       atGuild: resultAtGuild,

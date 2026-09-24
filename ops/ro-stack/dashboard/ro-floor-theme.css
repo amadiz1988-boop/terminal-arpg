@@ -1,0 +1,93 @@
+:root {
+  --ro-floor-image: url('/ro/client/floors/prontera-stone.png?v=aed87291');
+  --ro-floor-size: 256px 256px;
+  --ro-floor-shade: rgb(0 0 0 / 42%);
+  background-color: #414445;
+}
+
+:root[data-ro-floor-theme='prt-bot01'] {
+  --ro-floor-image: url('/ro/client/floors/prt-bot01.png?v=561aa96f');
+}
+
+:root[data-ro-floor-theme='prt-bot03'] {
+  --ro-floor-image: url('/ro/client/floors/prt-bot03.png?v=ff3ca9fd');
+}
+
+:root[data-ro-floor-theme='prt-bot04'] {
+  --ro-floor-image: url('/ro/client/floors/prt-bot04.png?v=bd29974c');
+}
+
+:root[data-ro-floor-theme='prt-bot06'] {
+  --ro-floor-image: url('/ro/client/floors/prt-bot06.png?v=83ef6422');
+  --ro-floor-size: 256px 128px;
+}
+
+:root[data-ro-floor-theme='prt-city-bot02'] {
+  --ro-floor-image: url('/ro/client/floors/prt-city-bot02.png?v=1df1cd28');
+}
+
+:root[data-ro-floor-theme='prt-city-bot03'] {
+  --ro-floor-image: url('/ro/client/floors/prt-city-bot03.png?v=00e5944b');
+}
+
+:root[data-ro-floor-theme='prt-city-bot04'] {
+  --ro-floor-image: url('/ro/client/floors/prt-city-bot04.png?v=a0d8b7bf');
+}
+
+:root[data-ro-floor-theme='prt-city-bot05'] {
+  --ro-floor-image: url('/ro/client/floors/prt-city-bot05.png?v=30d4e4bd');
+}
+
+:root[data-ro-floor-theme='prt-pr-bottom01'] {
+  --ro-floor-image: url('/ro/client/floors/prt-pr-bottom01.png?v=a98798c5');
+  --ro-floor-shade: rgb(0 0 0 / 24%);
+}
+
+:root[data-ro-floor-theme='field-grass'] {
+  --ro-floor-image: url('/ro/client/floors/field-grass.png');
+  --ro-floor-shade: rgb(0 0 0 / 34%);
+}
+
+:root[data-ro-floor-theme='morocc-sand'] {
+  --ro-floor-image: url('/ro/client/floors/morocc-sand.png');
+  --ro-floor-shade: rgb(0 0 0 / 45%);
+}
+
+body,
+.auth {
+  background-color: #414445;
+  background-image:
+    linear-gradient(var(--ro-floor-shade), var(--ro-floor-shade)),
+    var(--ro-floor-image);
+  background-repeat: repeat;
+  background-size: auto, var(--ro-floor-size);
+}
+
+:root[data-ro-floor-theme='legacy-green'] body,
+:root[data-ro-floor-theme='legacy-green'] .auth {
+  background-color: #2d4926;
+  background-image:
+    linear-gradient(#294820cc, #294820cc),
+    repeating-linear-gradient(0deg, #416438 0 1px, #36592e 1px 24px);
+  background-size: auto;
+}
+
+:root[data-ro-floor-theme='legacy-green'] {
+  background-color: #2d4926;
+}
+
+.floor-theme-settings {
+  grid-template-columns: 1fr;
+}
+
+.floor-theme-settings label {
+  grid-template-columns: 90px minmax(0, 1fr);
+}
+
+.ro-floor-theme-preview {
+  width: min(100%, 512px);
+  height: 180px;
+  background-image: var(--ro-floor-image);
+  background-repeat: repeat;
+  background-size: var(--ro-floor-size);
+}

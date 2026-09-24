@@ -66,7 +66,11 @@ try {
       message.method === 'Log.entryAdded' &&
       message.params?.entry?.level === 'error'
     )
-      errors.push(message.params.entry.text);
+      errors.push(
+        [message.params.entry.text, message.params.entry.url]
+          .filter(Boolean)
+          .join(' '),
+      );
   };
   await new Promise((resolve) => {
     socket.onopen = resolve;
@@ -129,23 +133,82 @@ try {
       45000,
     );
   }
+  await waitFor(() => evaluate("!document.querySelector('#chatInput').disabled"));
   const channelUi = await evaluate(`(() => {
-    const buttons=[...document.querySelectorAll('[data-chat-channel]')];
-    document.querySelector('[data-chat-channel=private]').click();
+    const buttons=[...document.querySelectorAll('#chatChannels [data-chat-channel]')];
+    const sendChannel=document.querySelector('#chatSendChannel');
+    document.querySelector('[data-chat-channel=all]').click();
+    const allState={
+      view:document.querySelector('#chatChannel').textContent,
+      send:sendChannel.value,
+      placeholder:document.querySelector('#chatInput').placeholder,
+    };
+    sendChannel.value='private';
+    sendChannel.dispatchEvent(new Event('change',{bubbles:true}));
     const privateState={
       recipientVisible:!document.querySelector('#chatRecipientRow').classList.contains('hidden'),
       placeholder:document.querySelector('#chatInput').placeholder,
       voiceDisabled:document.querySelector('#voiceRecord').disabled,
     };
-    document.querySelector('[data-chat-channel=public]').click();
+    sendChannel.value='public';
+    sendChannel.dispatchEvent(new Event('change',{bubbles:true}));
+    document.querySelector('#chatFilterToggle').click();
+    const allVisibility=document.querySelector('[data-chat-visibility=all]');
+    allVisibility.checked=false;
+    allVisibility.dispatchEvent(new Event('change',{bubbles:true}));
+    const allCanClose=document.querySelector('[data-chat-channel=all]').hidden;
+    const visibleCount=buttons.filter((button)=>!button.hidden).length;
+    const fold=document.querySelector('.social-window .window-fold-button');
+    fold.click();
+    const collapsed=document.querySelector('.social-window').classList.contains('window-collapsed');
+    const collapsedIcon=getComputedStyle(fold).backgroundImage;
+    fold.click();
+    const expanded=!document.querySelector('.social-window').classList.contains('window-collapsed');
+    const expandedIcon=getComputedStyle(fold).backgroundImage;
+    const badgeRows=Object.keys(chatChannelBadges).map((channel)=>{
+      const row=socialNode({
+        at:Date.now(),
+        type:'chat',
+        channel,
+        sender:'測試玩家',
+        message:'測試訊息',
+      });
+      document.body.append(row);
+      const badge=row.querySelector('.chat-channel-badge');
+      const result={
+        channel,
+        label:badge?.textContent,
+        background:getComputedStyle(badge).backgroundColor,
+      };
+      row.remove();
+      return result;
+    });
+    const internalBefore=document.querySelectorAll('#chatFeed .chat-line').length;
+    renderSocialDelta([{
+      at:Date.now(),
+      type:'chat',
+      channel:'public',
+      sender:'測試玩家',
+      message:'@web_eden_return',
+    }]);
+    const internalFiltered=document.querySelectorAll('#chatFeed .chat-line').length===internalBefore;
     document.querySelector('.social-window').scrollIntoView();
     return {
       count:buttons.length,
       labels:buttons.map((button)=>button.textContent.trim()),
       pageWidth:document.documentElement.scrollWidth,
       viewportWidth:innerWidth,
+      allState,
       privateState,
       publicVoiceEnabled:!document.querySelector('#voiceRecord').disabled,
+      allCanClose,
+      visibleCount,
+      collapsed,
+      expanded,
+      collapsedIcon,
+      expandedIcon,
+      badgeRows,
+      internalFiltered,
     };
   })()`);
   const baselineVoiceId = await evaluate(
@@ -180,6 +243,7 @@ try {
           byteLength:data.byteLength,
           controls:audio.controls,
           channel:audio.closest('.chat-line')?.dataset.chatChannel,
+          label:audio.closest('.chat-line')?.querySelector('.chat-channel-badge')?.textContent,
         };
       })()`, true),
     (value) => value?.responseOk && value.byteLength > 128,
@@ -193,18 +257,57 @@ try {
     'tmp/chat-channels-voice-mobile.png',
     Buffer.from(screenshot.result.data, 'base64'),
   );
+  const expectedLabels={
+    public:'一般',
+    private:'密語',
+    party:'隊伍',
+    guild:'公會',
+    clan:'家族',
+    battleground:'戰場',
+    map:'地圖',
+    global:'全服',
+    trade:'交易',
+    support:'支援',
+    ally:'同盟',
+    system:'系統',
+  };
+  const expectedCustomColors={
+    global:'rgb(255, 255, 255)',
+    map:'rgb(255, 255, 144)',
+    trade:'rgb(182, 255, 0)',
+    support:'rgb(131, 207, 233)',
+    ally:'rgb(40, 191, 0)',
+  };
+  const unexpectedErrors=errors.filter(
+    (message)=>!message.includes('/ro/client/showcase/manifest.json'),
+  );
   const pass =
     channelUi.count === 13 &&
     channelUi.pageWidth <= channelUi.viewportWidth &&
+    channelUi.allState.view === '檢視：全部訊息' &&
+    channelUi.allState.send === 'public' &&
+    channelUi.allState.placeholder === '輸入一般頻道訊息' &&
     channelUi.privateState.recipientVisible &&
     channelUi.privateState.placeholder === '輸入密語內容' &&
     channelUi.privateState.voiceDisabled &&
     channelUi.publicVoiceEnabled &&
+    channelUi.allCanClose &&
+    channelUi.visibleCount >= 1 &&
+    channelUi.collapsed &&
+    channelUi.expanded &&
+    channelUi.collapsedIcon.includes('chat_open.png') &&
+    channelUi.expandedIcon.includes('chat_close.png') &&
+    channelUi.badgeRows.every((row)=>expectedLabels[row.channel]===row.label) &&
+    Object.entries(expectedCustomColors).every(([channel,color])=>
+      channelUi.badgeRows.some((row)=>row.channel===channel && row.background===color)
+    ) &&
+    channelUi.internalFiltered &&
     voiceUi.responseOk &&
     voiceUi.byteLength > 128 &&
     voiceUi.controls &&
     voiceUi.channel === 'public' &&
-    errors.length === 0;
+    voiceUi.label === '一般' &&
+    unexpectedErrors.length === 0;
   console.log(
     JSON.stringify(
       {
@@ -213,7 +316,7 @@ try {
         channelUi,
         voiceUi,
         screenshot: 'tmp/chat-channels-voice-mobile.png',
-        errors,
+        errors:unexpectedErrors,
       },
       null,
       2,

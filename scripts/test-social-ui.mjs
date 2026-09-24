@@ -343,6 +343,15 @@ try {
       mapHeight: mapField?.height ?? 0,
       aspectMatches: Boolean(mapField) && Math.abs(canvas.height/canvas.width-mapField.height/mapField.width)<0.01,
       mapStatus: document.querySelector('#mapPosition').textContent,
+      mapLegend: {
+        monsterCount: Number(document.querySelector('#mapMonsterCount')?.textContent ?? -1),
+        playerCount: Number(document.querySelector('#mapPlayerCount')?.textContent ?? -1),
+        mapMonsterTotal: Number(
+          mapInfoData?.maps?.[minimapLive?.map]?.totalMonsters ?? -1,
+        ),
+        mapPlayerTotal: Number(minimapLive?.mapPlayerCount ?? -1),
+        staticLabels: document.querySelector('.map-legend')?.textContent ?? '',
+      },
       paperdollHasHair:/novice-(male|female)-hair-\\d+\\.png$/.test(new URL(paperdoll.src).pathname) && paperdoll.complete && paperdoll.naturalWidth>0,
       paperdollSource:new URL(paperdoll.src).pathname,
     };
@@ -390,7 +399,7 @@ try {
   await evaluate("document.querySelector('[data-tab=mapInfo]').click()");
   for (let attempt = 0; attempt < 80; attempt += 1) {
     const loaded = await evaluate(
-      "document.querySelectorAll('#mapMonsterList .monster-entry').length === 5 && document.querySelectorAll('#mapMonsterList .drop-entry').length === 40",
+      "document.querySelectorAll('#mapMonsterList .monster-entry').length === 10 && document.querySelectorAll('#mapMonsterList .drop-entry').length === 80",
     );
     if (loaded) break;
     await new Promise((resolve) => setTimeout(resolve, 100));
@@ -561,10 +570,10 @@ try {
     audioUi.soundVisible &&
     audioUi.soundUpdated &&
     mapInfoUi.title === '普隆德拉原野 08' &&
-    mapInfoUi.total === '5 種／271 隻' &&
-    mapInfoUi.monsterCount === 5 &&
-    mapInfoUi.dropCount === 40 &&
-    mapInfoUi.descriptions === 40 &&
+    mapInfoUi.total === '10 種／276 隻' &&
+    mapInfoUi.monsterCount === 10 &&
+    mapInfoUi.dropCount === 80 &&
+    mapInfoUi.descriptions === 80 &&
     mapInfoUi.iconsLoaded === mapInfoUi.iconCount &&
     mapInfoUi.cardExpanded &&
     skillUi.count === 4 &&
@@ -580,6 +589,10 @@ try {
     desktopMap.canvasWidth >= desktopMap.wrapWidth - 13 &&
     desktopMap.aspectMatches &&
     desktopMap.rightGap <= 7 &&
+    layout.mapLegend.monsterCount === layout.mapLegend.mapMonsterTotal &&
+    layout.mapLegend.playerCount === layout.mapLegend.mapPlayerTotal &&
+    layout.mapLegend.staticLabels.includes('你') &&
+    layout.mapLegend.staticLabels.includes('交戰') &&
     (liveMotion.observed || (smoothing.duration >= 260 && smoothing.middleX > 10 && smoothing.middleX < 11)) &&
     Object.values(sfxState.counts).some((count) => count > 0) &&
     interactions.statConfirmed &&

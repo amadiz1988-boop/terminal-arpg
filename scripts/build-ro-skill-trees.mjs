@@ -11,7 +11,20 @@ const jobIds = {
   Acolyte: 4,
   Merchant: 5,
   Thief: 6,
-  Taekwon: 21,
+  Knight: 7,
+  Priest: 8,
+  Wizard: 9,
+  Blacksmith: 10,
+  Hunter: 11,
+  Assassin: 12,
+  Crusader: 14,
+  Monk: 15,
+  Sage: 16,
+  Rogue: 17,
+  Alchemist: 18,
+  Bard: 19,
+  Dancer: 20,
+  Taekwon: 4046,
   Supernovice: 23,
   Gunslinger: 24,
   Ninja: 25,
@@ -24,6 +37,19 @@ const jobNames = {
   Acolyte: '服事',
   Merchant: '商人',
   Thief: '盜賊',
+  Knight: '騎士',
+  Priest: '祭司',
+  Wizard: '巫師',
+  Blacksmith: '鐵匠',
+  Hunter: '獵人',
+  Assassin: '刺客',
+  Crusader: '十字軍',
+  Monk: '武僧',
+  Sage: '賢者',
+  Rogue: '流氓',
+  Alchemist: '鍊金術師',
+  Bard: '詩人',
+  Dancer: '舞孃',
   Taekwon: '跆拳',
   Supernovice: '超級初心者',
   Gunslinger: '神槍手',
@@ -107,6 +133,7 @@ const skillDatabase = new Map(
         range: Number.isFinite(Number(skill.Range)) ? Number(skill.Range) : 0,
         splash: skill.DamageFlags?.Splash === true,
         noDamage: skill.DamageFlags?.NoDamage === true,
+        quest: skill.Flags?.IsQuest === true,
         resources: {
           spCostByLevel: costByLevel(requires.SpCost, maxLevel),
           zenyCostByLevel: costByLevel(requires.ZenyCost, maxLevel),
@@ -127,11 +154,7 @@ function automationMode(handle, description, metadata) {
     selfBuffStatuses.has(handle)
   )
     return 'selfBuff';
-  if (
-    metadata.targetType === 'Self' &&
-    metadata.splash &&
-    !metadata.noDamage
-  )
+  if (metadata.targetType === 'Self' && metadata.splash && !metadata.noDamage)
     return 'attackSelf';
   if (
     ['Self', 'Support'].includes(metadata.targetType) &&
@@ -160,11 +183,17 @@ for (const line of (
         id: jobIds[currentJob],
         key: currentJob,
         name: jobNames[currentJob],
+        inherits: [],
         skills: [],
       };
     continue;
   }
   if (!currentJob) continue;
+  const inheritMatch = line.match(/^      (\w+): true$/);
+  if (inheritMatch && !currentSkill) {
+    jobs[jobIds[currentJob]].inherits.push(inheritMatch[1]);
+    continue;
+  }
   const skillMatch = line.match(/^      - Name: ([A-Z0-9_]+)$/);
   if (skillMatch) {
     const handle = skillMatch[1],
@@ -175,9 +204,10 @@ for (const line of (
         range: 0,
         splash: false,
         noDamage: false,
+        quest: false,
       };
     currentSkill = {
-      id: skillIds.get(handle) ?? null,
+      id: skillIds.get(handle) ?? metadata.id ?? null,
       handle,
       name: skillNames.get(handle) ?? handle,
       maxLevel: 1,
@@ -190,6 +220,7 @@ for (const line of (
       range: metadata.range,
       automationMode: automationMode(handle, description, metadata),
       automationStatus: selfBuffStatuses.get(handle) ?? null,
+      quest: metadata.quest === true,
       resources: metadata.resources ?? {
         spCostByLevel: [],
         zenyCostByLevel: [],
@@ -219,6 +250,55 @@ for (const line of (
   const levelMatch = line.match(/^            Level: (\d+)$/);
   if (levelMatch && currentRequirement)
     currentRequirement.level = Number(levelMatch[1]);
+}
+
+const resolvedSkills = new Map();
+function resolveJobSkills(jobKey, visiting = new Set()) {
+  if (resolvedSkills.has(jobKey)) return resolvedSkills.get(jobKey);
+  if (visiting.has(jobKey))
+    throw new Error(`skill tree inheritance cycle: ${jobKey}`);
+  const jobId = jobIds[jobKey],
+    job = jobs[jobId];
+  if (!job) return [];
+  visiting.add(jobKey);
+  const merged = new Map();
+  for (const parentKey of job.inherits) {
+    for (const skill of resolveJobSkills(parentKey, visiting))
+      if (!skill.excluded) merged.set(skill.handle, skill);
+  }
+  for (const skill of job.skills) merged.set(skill.handle, skill);
+  visiting.delete(jobKey);
+  const skills = [...merged.values()];
+  resolvedSkills.set(jobKey, skills);
+  return skills;
+}
+
+const jobsThatShowInheritedSkills = new Set([
+  'Knight',
+  'Priest',
+  'Wizard',
+  'Blacksmith',
+  'Hunter',
+  'Assassin',
+  'Crusader',
+  'Monk',
+  'Sage',
+  'Rogue',
+  'Alchemist',
+  'Bard',
+  'Dancer',
+]);
+const renderedSkills = new Map(
+  Object.values(jobs).map((job) => [
+    job.key,
+    jobsThatShowInheritedSkills.has(job.key)
+      ? resolveJobSkills(job.key)
+      : job.skills,
+  ]),
+);
+for (const job of Object.values(jobs)) {
+  job.skills = renderedSkills.get(job.key);
+  delete job.inherits;
 }
 
 await writeFile(

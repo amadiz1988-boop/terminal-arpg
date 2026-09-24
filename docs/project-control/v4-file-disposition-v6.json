@@ -1,0 +1,72 @@
+{
+  "v4_branch_promoted": false,
+  "v4_merge_commit_promoted": false,
+  "files": [
+    {
+      "path": "docs/project-control/web-main-lineage-commit-audit-v4.json",
+      "classification": "REUSE_AFTER_REVIEW",
+      "reason": "Exact 273-commit set matched current origin/main..e794ef5; classification reused as audit input only.",
+      "observed_sha256": "4545df3a899bb843196fcc5ae7972d427e2938bc2d6dbfe43b1c94f5ebab06ff"
+    },
+    {
+      "path": "docs/project-control/web-lineage-incremental-security-scan-v4.json",
+      "classification": "STALE",
+      "reason": "Covers old source range, not a V5 reconstructed candidate; not used for V5 publication clearance.",
+      "observed_sha256": "b16f5d09624fb7486fbbd58f861f073a419b90cd6bc2ef08a46fdcc03f6f2c3e"
+    },
+    {
+      "path": "docs/project-control/production-release-authority.json",
+      "classification": "RECONSTRUCT_UNDER_V5",
+      "reason": "Activation must wait for clean source authorities. No content copied.",
+      "observed_sha256": "14bd2e6a7b97fd59743355c9ab980e08bc9808ffda95df6496494ddf129b6ac2",
+      "v6_classification": "RECONSTRUCT_UNDER_V6",
+      "v6_result": "Independent V6 reconstruction, not copied from V4 dirty file"
+    },
+    {
+      "path": "docs/project-control/web-runtime-private-release-v1.json",
+      "classification": "RECONSTRUCT_UNDER_V5",
+      "reason": "Release identity and hashes independently read from live GitHub; saved in new V5 evidence.",
+      "observed_sha256": "75b8016eeea21fe883d3a2ff04a09975cd9ca9b39f050bb7b44bb8ac48cf2879",
+      "v6_classification": "RECONSTRUCT_UNDER_V6",
+      "v6_result": "Independent V6 reconstruction, not copied from V4 dirty file"
+    },
+    {
+      "path": "ops/ro-stack/production-promotion-gate.mjs",
+      "classification": "RECONSTRUCT_UNDER_V5",
+      "reason": "Depends on unpromoted V4 source; no activation or copy.",
+      "observed_sha256": "838b8694e4531442e98abb9929a40d7234c659daf682d1f59c2c383e9d1b132a",
+      "v6_classification": "RECONSTRUCT_UNDER_V6",
+      "v6_result": "Independent V6 reconstruction, not copied from V4 dirty file"
+    },
+    {
+      "path": "ops/ro-stack/private-asset-release-gate.mjs",
+      "classification": "RECONSTRUCT_UNDER_V5",
+      "reason": "Deploy integration pending source and complete asset gates; no copy.",
+      "observed_sha256": "b93e73d0dec284e1cb50aef9b9a67dd595ca86216c2d4566a7c66f26d8c66357",
+      "v6_classification": "RECONSTRUCT_UNDER_V6",
+      "v6_result": "Independent V6 reconstruction, not copied from V4 dirty file"
+    },
+    {
+      "path": "ops/ro-stack/tests/test-production-promotion-governance.mjs",
+      "classification": "RECONSTRUCT_UNDER_V5",
+      "reason": "V4 tests were not completed; never count them as V5 PASS.",
+      "observed_sha256": "f104ee5ab0a6ee59e078b44a627bd065cc9c6751f6831c118907f85c5afc8c2e",
+      "v6_classification": "RECONSTRUCT_UNDER_V6",
+      "v6_result": "Independent V6 reconstruction, not copied from V4 dirty file"
+    },
+    {
+      "path": "scripts/fetch-web-runtime-private-release.py",
+      "classification": "RECONSTRUCT_UNDER_V5",
+      "reason": "Replaced by an independently authored read-only V5 verifier; no V4 code executed.",
+      "observed_sha256": "8c022861c019b73a8cb91f92cd673b75601494152f62b4834464084e458fb8da",
+      "v6_classification": "RECONSTRUCT_UNDER_V6",
+      "v6_result": "Independent V6 reconstruction, not copied from V4 dirty file"
+    },
+    {
+      "path": "scripts/__pycache__/fetch-web-runtime-private-release.cpython-311.pyc",
+      "classification": "GENERATED_ARTIFACT",
+      "reason": "DO_NOT_COMMIT; left untouched in read-only V4 worktree.",
+      "observed_sha256": "eb554aea8dea4fe0c78bc1cee5172d9307977a4b0fe3c8df4cdbed37ad7af386"
+    }
+  ]
+}

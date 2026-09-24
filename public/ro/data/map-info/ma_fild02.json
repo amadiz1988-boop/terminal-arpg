@@ -1,0 +1,599 @@
+{
+  "id": "ma_fild02",
+  "name": "普勒斯特",
+  "category": "SERVICE_ONLY",
+  "dungeon": null,
+  "totalMonsters": 192,
+  "normalMonsterCount": 192,
+  "levelRange": {
+    "min": 100,
+    "max": 125
+  },
+  "fullLevelRange": {
+    "min": 100,
+    "max": 125
+  },
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [
+    {
+      "id": 2309,
+      "name": "獨眼怪",
+      "level": 121,
+      "count": 54
+    },
+    {
+      "id": 2312,
+      "name": "猛酷巫師",
+      "level": 110,
+      "count": 41
+    },
+    {
+      "id": 2315,
+      "name": "食屍鬼",
+      "level": 111,
+      "count": 34
+    },
+    {
+      "id": 2310,
+      "name": "昂坎圖",
+      "level": 125,
+      "count": 34
+    },
+    {
+      "id": 2316,
+      "name": "食人波利",
+      "level": 100,
+      "count": 27
+    }
+  ],
+  "resourceMonsters": [],
+  "bossMonsters": [],
+  "monsters": [
+    {
+      "id": 2316,
+      "aegisName": "JEJELING",
+      "name": "食人波利",
+      "count": 27,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 100,
+      "hp": 10617,
+      "baseExp": 1456,
+      "jobExp": 1316,
+      "attackMin": 563,
+      "attackMax": 715,
+      "defense": 100,
+      "magicDefense": 26,
+      "size": "大型",
+      "race": "植物",
+      "element": "地 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/malaya.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 6498,
+          "aegisName": "Jejellopy",
+          "name": "光澤傑勒比結晶",
+          "ratePerTenThousand": 2000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "與巨大傑勒比結晶類似, 結晶體卻更為光亮。\n\n重量: 1"
+        },
+        {
+          "itemId": 909,
+          "aegisName": "Jellopy",
+          "name": "傑勒比結晶",
+          "ratePerTenThousand": 1000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從一部份怪物身上得來的結晶,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 6511,
+          "aegisName": "Beautiful_Flower",
+          "name": "美麗花朵",
+          "ratePerTenThousand": 100,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "到處可見的一般花朵。\n重量: 1"
+        },
+        {
+          "itemId": 6510,
+          "aegisName": "Elegant_Flower",
+          "name": "典雅花朵",
+          "ratePerTenThousand": 100,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "高貴典雅的花朵。\n重量: 1"
+        },
+        {
+          "itemId": 6509,
+          "aegisName": "Mysterious_Flower",
+          "name": "神秘花朵",
+          "ratePerTenThousand": 100,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "花色鮮豔的神祕花朵。\n重量: 1"
+        },
+        {
+          "itemId": 12700,
+          "aegisName": "Insideout_Shirt",
+          "name": "翻面襯衫",
+          "ratePerTenThousand": 100,
+          "type": "消耗品",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "一般翻面的襯衫, 用做解除邪魔馬的迷路詛咒。\n直接使用時可返回馬來港。\n\n重量: 1"
+        },
+        {
+          "itemId": 4589,
+          "aegisName": "Jejeling_Card",
+          "name": "食人波利卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "基本屬性VIT每10 MHP+200。\n系列: 卡片\n裝備: 披肩\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2312,
+      "aegisName": "MANGKUKULAM",
+      "name": "猛酷巫師",
+      "count": 41,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 110,
+      "hp": 14557,
+      "baseExp": 1908,
+      "jobExp": 1822,
+      "attackMin": 656,
+      "attackMax": 196,
+      "defense": 89,
+      "magicDefense": 75,
+      "size": "中型",
+      "race": "惡魔",
+      "element": "無 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/malaya.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 7054,
+          "aegisName": "Brigan",
+          "name": "布里刊",
+          "ratePerTenThousand": 1000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "發出紅色光芒的稀有礦物,可賣給蒐集品商人\n重量: 1"
+        },
+        {
+          "itemId": 6510,
+          "aegisName": "Elegant_Flower",
+          "name": "典雅花朵",
+          "ratePerTenThousand": 1000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "高貴典雅的花朵。\n重量: 1"
+        },
+        {
+          "itemId": 7071,
+          "aegisName": "Tatters_Clothes",
+          "name": "破爛爛的衣服",
+          "ratePerTenThousand": 1000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "都已經是破爛爛的衣服了,不知道誰會來購買,不過賣的還不錯。\n重量: 1"
+        },
+        {
+          "itemId": 6511,
+          "aegisName": "Beautiful_Flower",
+          "name": "美麗花朵",
+          "ratePerTenThousand": 1000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "到處可見的一般花朵。\n重量: 1"
+        },
+        {
+          "itemId": 6509,
+          "aegisName": "Mysterious_Flower",
+          "name": "神秘花朵",
+          "ratePerTenThousand": 1000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "花色鮮豔的神祕花朵。\n重量: 1"
+        },
+        {
+          "itemId": 12700,
+          "aegisName": "Insideout_Shirt",
+          "name": "翻面襯衫",
+          "ratePerTenThousand": 100,
+          "type": "消耗品",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "一般翻面的襯衫, 用做解除邪魔馬的迷路詛咒。\n直接使用時可返回馬來港。\n\n重量: 1"
+        },
+        {
+          "itemId": 4585,
+          "aegisName": "Mangkukulam_Card",
+          "name": "猛酷巫師卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "MSP+10%.\n消滅敵人時HP消耗666。\n系列: 卡片\n裝備: 鎧甲\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2315,
+      "aegisName": "WAKWAK",
+      "name": "食屍鬼",
+      "count": 34,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 111,
+      "hp": 17869,
+      "baseExp": 2158,
+      "jobExp": 2062,
+      "attackMin": 544,
+      "attackMax": 301,
+      "defense": 24,
+      "magicDefense": 71,
+      "size": "小型",
+      "race": "惡魔",
+      "element": "暗 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/malaya.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 6508,
+          "aegisName": "Silver_Bracelet",
+          "name": "純銀手環",
+          "ratePerTenThousand": 1500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "令人怵目驚心的銀手鐲。\n重量: 1"
+        },
+        {
+          "itemId": 6509,
+          "aegisName": "Mysterious_Flower",
+          "name": "神秘花朵",
+          "ratePerTenThousand": 1000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "花色鮮豔的神祕花朵。\n重量: 1"
+        },
+        {
+          "itemId": 12700,
+          "aegisName": "Insideout_Shirt",
+          "name": "翻面襯衫",
+          "ratePerTenThousand": 200,
+          "type": "消耗品",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "一般翻面的襯衫, 用做解除邪魔馬的迷路詛咒。\n直接使用時可返回馬來港。\n\n重量: 1"
+        },
+        {
+          "itemId": 4588,
+          "aegisName": "Wakwak_Card",
+          "name": "食屍鬼卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "基本屬性STR每10 ATK+5。\n系列: 卡片\n裝備: 披肩\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2309,
+      "aegisName": "BUNGISNGIS",
+      "name": "獨眼怪",
+      "count": 54,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 121,
+      "hp": 33102,
+      "baseExp": 3199,
+      "jobExp": 2924,
+      "attackMin": 1130,
+      "attackMax": 151,
+      "defense": 115,
+      "magicDefense": 35,
+      "size": "大型",
+      "race": "Demihuman",
+      "element": "地 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/malaya.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 7054,
+          "aegisName": "Brigan",
+          "name": "布里刊",
+          "ratePerTenThousand": 1000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "發出紅色光芒的稀有礦物,可賣給蒐集品商人\n重量: 1"
+        },
+        {
+          "itemId": 6511,
+          "aegisName": "Beautiful_Flower",
+          "name": "美麗花朵",
+          "ratePerTenThousand": 1000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "到處可見的一般花朵。\n重量: 1"
+        },
+        {
+          "itemId": 985,
+          "aegisName": "Elunium",
+          "name": "鋁",
+          "ratePerTenThousand": 10,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "很輕且沒有毒性的金屬。常被拿來作成盔甲,以此製成的所有防具將變成更強。\n\n重量: 20"
+        },
+        {
+          "itemId": 12700,
+          "aegisName": "Insideout_Shirt",
+          "name": "翻面襯衫",
+          "ratePerTenThousand": 100,
+          "type": "消耗品",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "一般翻面的襯衫, 用做解除邪魔馬的迷路詛咒。\n直接使用時可返回馬來港。\n\n重量: 1"
+        },
+        {
+          "itemId": 4582,
+          "aegisName": "Bungisngis_Card",
+          "name": "獨眼怪卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "精煉每+2 MHP+1%。\n系列: 卡片\n裝備: 頭具\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2879,
+      "aegisName": "C2_BUNGISNGIS",
+      "name": "雄壯獨眼怪",
+      "count": 2,
+      "respawnMinMs": 180000,
+      "respawnMaxMs": 180000,
+      "level": 121,
+      "hp": 331020,
+      "baseExp": 15995,
+      "jobExp": 43860,
+      "attackMin": 1356,
+      "attackMax": 151,
+      "defense": 115,
+      "magicDefense": 35,
+      "size": "大型",
+      "race": "Demihuman",
+      "element": "地 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/championmobs.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 7054,
+          "aegisName": "Brigan",
+          "name": "布里刊",
+          "ratePerTenThousand": 5000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "發出紅色光芒的稀有礦物,可賣給蒐集品商人\n重量: 1"
+        },
+        {
+          "itemId": 6511,
+          "aegisName": "Beautiful_Flower",
+          "name": "美麗花朵",
+          "ratePerTenThousand": 5000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "到處可見的一般花朵。\n重量: 1"
+        },
+        {
+          "itemId": 985,
+          "aegisName": "Elunium",
+          "name": "鋁",
+          "ratePerTenThousand": 50,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "很輕且沒有毒性的金屬。常被拿來作成盔甲,以此製成的所有防具將變成更強。\n\n重量: 20"
+        },
+        {
+          "itemId": 12700,
+          "aegisName": "Insideout_Shirt",
+          "name": "翻面襯衫",
+          "ratePerTenThousand": 500,
+          "type": "消耗品",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "一般翻面的襯衫, 用做解除邪魔馬的迷路詛咒。\n直接使用時可返回馬來港。\n\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2310,
+      "aegisName": "ENGKANTO",
+      "name": "昂坎圖",
+      "count": 34,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 125,
+      "hp": 29275,
+      "baseExp": 3143,
+      "jobExp": 3020,
+      "attackMin": 1001,
+      "attackMax": 124,
+      "defense": 101,
+      "magicDefense": 41,
+      "size": "中型",
+      "race": "Demihuman",
+      "element": "無 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/malaya.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 7054,
+          "aegisName": "Brigan",
+          "name": "布里刊",
+          "ratePerTenThousand": 1000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "發出紅色光芒的稀有礦物,可賣給蒐集品商人\n重量: 1"
+        },
+        {
+          "itemId": 6511,
+          "aegisName": "Beautiful_Flower",
+          "name": "美麗花朵",
+          "ratePerTenThousand": 1000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "到處可見的一般花朵。\n重量: 1"
+        },
+        {
+          "itemId": 528,
+          "aegisName": "Monster's_Feed",
+          "name": "魔物飼料",
+          "ratePerTenThousand": 1000,
+          "type": "恢復道具",
+          "weight": 15,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "魔物們最喜愛的加工食品,可恢復少量的HP。\n\n重量: 15"
+        },
+        {
+          "itemId": 12700,
+          "aegisName": "Insideout_Shirt",
+          "name": "翻面襯衫",
+          "ratePerTenThousand": 100,
+          "type": "消耗品",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "一般翻面的襯衫, 用做解除邪魔馬的迷路詛咒。\n直接使用時可返回馬來港。\n\n重量: 1"
+        },
+        {
+          "itemId": 4583,
+          "aegisName": "Engkanto_Card",
+          "name": "昂坎圖卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "給予毒屬性的傷害+30%。\n植物型怪的防禦30%免疫。\n系列: 卡片\n裝備: 頭具\n重量: 1"
+        }
+      ]
+    }
+  ]
+}

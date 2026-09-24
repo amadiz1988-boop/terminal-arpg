@@ -1,0 +1,589 @@
+{
+  "id": "moc_fild20",
+  "name": "蘇克拉特沙漠次元裂縫",
+  "category": "NORMAL_FIELD",
+  "dungeon": null,
+  "totalMonsters": 5,
+  "normalMonsterCount": 1,
+  "levelRange": {
+    "min": 132,
+    "max": 132
+  },
+  "fullLevelRange": {
+    "min": 132,
+    "max": 132
+  },
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [
+    {
+      "id": 2744,
+      "name": "迅捷夢羅克門徒",
+      "level": 132,
+      "count": 1
+    }
+  ],
+  "resourceMonsters": [],
+  "bossMonsters": [
+    {
+      "id": 1918,
+      "name": "夢羅克門徒之邪靈",
+      "level": 132,
+      "count": 1,
+      "isMvp": false
+    },
+    {
+      "id": 1919,
+      "name": "夢羅克門徒之泥怪",
+      "level": 132,
+      "count": 1,
+      "isMvp": false
+    },
+    {
+      "id": 1920,
+      "name": "夢羅克門徒之活屍",
+      "level": 133,
+      "count": 1,
+      "isMvp": false
+    },
+    {
+      "id": 1921,
+      "name": "夢羅克門徒之喜樂",
+      "level": 134,
+      "count": 1,
+      "isMvp": false
+    }
+  ],
+  "monsters": [
+    {
+      "id": 1918,
+      "aegisName": "MOROCC_1",
+      "name": "夢羅克門徒之邪靈",
+      "count": 1,
+      "respawnMinMs": 30000,
+      "respawnMaxMs": 30000,
+      "level": 132,
+      "hp": 63900,
+      "baseExp": 2855,
+      "jobExp": 1811,
+      "attackMin": 1901,
+      "attackMax": 145,
+      "defense": 199,
+      "magicDefense": 35,
+      "size": "大型",
+      "race": "天使",
+      "element": "暗 1",
+      "isBoss": true,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/morocc.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 2111,
+          "aegisName": "Herald_Of_GOD",
+          "name": "大天使之盾",
+          "ratePerTenThousand": 5,
+          "type": "防具",
+          "weight": 160,
+          "attack": 0,
+          "defense": 120,
+          "slots": 0,
+          "description": "擁有神的旨意,從神的傳令那裡神直接賜給他,具有象徵性的盾牌\nINT+2, VIT+3, MDEF+3, 不可破壞。\n系列: 盾牌 防禦: 120\n重量: 140\n要求等級: 83\n裝備: 十字軍"
+        },
+        {
+          "itemId": 7799,
+          "aegisName": "Dark_Crystal",
+          "name": "黑暗之結晶體",
+          "ratePerTenThousand": 500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "內有不祥的強列黑暗力量之寶石結晶體, 具有能吸入周圍力量之危險氣息\n\n重量: 1"
+        },
+        {
+          "itemId": 7798,
+          "aegisName": "Dark_Debris",
+          "name": "黑暗之碎片",
+          "ratePerTenThousand": 1500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "具有黑暗氣息之陌生碎片, 光看著就好像就要被強烈力量吸進去一樣\n\n重量: 1"
+        },
+        {
+          "itemId": 985,
+          "aegisName": "Elunium",
+          "name": "鋁",
+          "ratePerTenThousand": 80,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "很輕且沒有毒性的金屬。常被拿來作成盔甲,以此製成的所有防具將變成更強。\n\n重量: 20"
+        },
+        {
+          "itemId": 7054,
+          "aegisName": "Brigan",
+          "name": "布里刊",
+          "ratePerTenThousand": 2425,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "發出紅色光芒的稀有礦物,可賣給蒐集品商人\n重量: 1"
+        },
+        {
+          "itemId": 2537,
+          "aegisName": "Diabolus_Manteau",
+          "name": "魔王的斗篷",
+          "ratePerTenThousand": 2,
+          "type": "防具",
+          "weight": 25,
+          "attack": 0,
+          "defense": 15,
+          "slots": 1,
+          "description": "充滿著黑影幢幢的斗篷, 只有克服黑暗的人才能使用\n無屬性傷害-5%, MHP+100\n對魔王夢羅克的物理傷害+10%。\n與魔王的長靴一起裝備時, MHP+6%。\n系列: 披肩 防禦: 15\n重量: 25\n裝備: 2進階職業以上才"
+        },
+        {
+          "itemId": 1541,
+          "aegisName": "Nemesis",
+          "name": "納米西斯錘",
+          "ratePerTenThousand": 10,
+          "type": "武器",
+          "weight": 90,
+          "attack": 120,
+          "defense": 0,
+          "slots": 0,
+          "description": "用於驅魔時的銀色巨型鈍器\n對惡魔型, 闇屬性敵人的傷害+10%。\n物理攻擊時有機率是自動念咒 天使之光 Lv.1(11級以上精煉時發動Lv.10), 且依精煉的程度, 天使之光的技能等級會加增發動\n物理攻擊時有較低機率20秒內ATK+50 \n系列: 鈍器    攻擊: 120\n重量: 90  屬性 :聖\n武器等級: 4\n要求等級: 60\n裝備: 服事系列"
+        }
+      ]
+    },
+    {
+      "id": 1919,
+      "aegisName": "MOROCC_2",
+      "name": "夢羅克門徒之泥怪",
+      "count": 1,
+      "respawnMinMs": 30000,
+      "respawnMaxMs": 30000,
+      "level": 132,
+      "hp": 64922,
+      "baseExp": 3311,
+      "jobExp": 2101,
+      "attackMin": 1625,
+      "attackMax": 159,
+      "defense": 92,
+      "magicDefense": 5,
+      "size": "中型",
+      "race": "惡魔",
+      "element": "暗 3",
+      "isBoss": true,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/morocc.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 2536,
+          "aegisName": "Skin_Of_Ventus",
+          "name": "魔王的表皮披肩",
+          "ratePerTenThousand": 2,
+          "type": "防具",
+          "weight": 25,
+          "attack": 0,
+          "defense": 7,
+          "slots": 1,
+          "description": "被惡魔語言下了詛咒的魔王表皮, 可當作披肩使用\nMDEF+2, MHP+200, FLEE+10。\n系列: 披肩 防禦: 7\n重量: 25\n要求等級: 60\n裝備: 除了初學者系列外全職業"
+        },
+        {
+          "itemId": 7799,
+          "aegisName": "Dark_Crystal",
+          "name": "黑暗之結晶體",
+          "ratePerTenThousand": 500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "內有不祥的強列黑暗力量之寶石結晶體, 具有能吸入周圍力量之危險氣息\n\n重量: 1"
+        },
+        {
+          "itemId": 7798,
+          "aegisName": "Dark_Debris",
+          "name": "黑暗之碎片",
+          "ratePerTenThousand": 1500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "具有黑暗氣息之陌生碎片, 光看著就好像就要被強烈力量吸進去一樣\n\n重量: 1"
+        },
+        {
+          "itemId": 984,
+          "aegisName": "Oridecon",
+          "name": "神之金屬",
+          "ratePerTenThousand": 80,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "被稱為神之金屬的神秘金屬,比什麼東西都堅硬,用它來製造武器可以得到相當強大的破壞力,可以強化等級三和等級四的武器。\n\n重量: 20"
+        },
+        {
+          "itemId": 7053,
+          "aegisName": "Cyfar",
+          "name": "賽依伐",
+          "ratePerTenThousand": 1750,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "發出藍色光芒的稀有礦物,可賣給蒐集品商人\n重量: 1"
+        },
+        {
+          "itemId": 2130,
+          "aegisName": "Cross_Shield",
+          "name": "十字鋼盾",
+          "ratePerTenThousand": 8,
+          "type": "防具",
+          "weight": 200,
+          "attack": 0,
+          "defense": 130,
+          "slots": 1,
+          "description": "大又厚的十字型盾牌, STR+1。\n連續盾擊, 迴旋盾擊的傷害+30%, 使用技能時SP消耗量+10%。\n系列: 盾牌 防禦: 130\n重量: 200\n要求等級: 80\n裝備: 十字軍"
+        }
+      ]
+    },
+    {
+      "id": 2744,
+      "aegisName": "C1_MOROCC_1",
+      "name": "迅捷夢羅克門徒",
+      "count": 1,
+      "respawnMinMs": 180000,
+      "respawnMaxMs": 180000,
+      "level": 132,
+      "hp": 319500,
+      "baseExp": 14275,
+      "jobExp": 27175,
+      "attackMin": 2281,
+      "attackMax": 145,
+      "defense": 199,
+      "magicDefense": 35,
+      "size": "大型",
+      "race": "天使",
+      "element": "暗 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/championmobs.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 2111,
+          "aegisName": "Herald_Of_GOD",
+          "name": "大天使之盾",
+          "ratePerTenThousand": 25,
+          "type": "防具",
+          "weight": 160,
+          "attack": 0,
+          "defense": 120,
+          "slots": 0,
+          "description": "擁有神的旨意,從神的傳令那裡神直接賜給他,具有象徵性的盾牌\nINT+2, VIT+3, MDEF+3, 不可破壞。\n系列: 盾牌 防禦: 120\n重量: 140\n要求等級: 83\n裝備: 十字軍"
+        },
+        {
+          "itemId": 7799,
+          "aegisName": "Dark_Crystal",
+          "name": "黑暗之結晶體",
+          "ratePerTenThousand": 2500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "內有不祥的強列黑暗力量之寶石結晶體, 具有能吸入周圍力量之危險氣息\n\n重量: 1"
+        },
+        {
+          "itemId": 7798,
+          "aegisName": "Dark_Debris",
+          "name": "黑暗之碎片",
+          "ratePerTenThousand": 7500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "具有黑暗氣息之陌生碎片, 光看著就好像就要被強烈力量吸進去一樣\n\n重量: 1"
+        },
+        {
+          "itemId": 985,
+          "aegisName": "Elunium",
+          "name": "鋁",
+          "ratePerTenThousand": 400,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "很輕且沒有毒性的金屬。常被拿來作成盔甲,以此製成的所有防具將變成更強。\n\n重量: 20"
+        },
+        {
+          "itemId": 7054,
+          "aegisName": "Brigan",
+          "name": "布里刊",
+          "ratePerTenThousand": 10000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "發出紅色光芒的稀有礦物,可賣給蒐集品商人\n重量: 1"
+        },
+        {
+          "itemId": 2537,
+          "aegisName": "Diabolus_Manteau",
+          "name": "魔王的斗篷",
+          "ratePerTenThousand": 10,
+          "type": "防具",
+          "weight": 25,
+          "attack": 0,
+          "defense": 15,
+          "slots": 1,
+          "description": "充滿著黑影幢幢的斗篷, 只有克服黑暗的人才能使用\n無屬性傷害-5%, MHP+100\n對魔王夢羅克的物理傷害+10%。\n與魔王的長靴一起裝備時, MHP+6%。\n系列: 披肩 防禦: 15\n重量: 25\n裝備: 2進階職業以上才"
+        },
+        {
+          "itemId": 1541,
+          "aegisName": "Nemesis",
+          "name": "納米西斯錘",
+          "ratePerTenThousand": 50,
+          "type": "武器",
+          "weight": 90,
+          "attack": 120,
+          "defense": 0,
+          "slots": 0,
+          "description": "用於驅魔時的銀色巨型鈍器\n對惡魔型, 闇屬性敵人的傷害+10%。\n物理攻擊時有機率是自動念咒 天使之光 Lv.1(11級以上精煉時發動Lv.10), 且依精煉的程度, 天使之光的技能等級會加增發動\n物理攻擊時有較低機率20秒內ATK+50 \n系列: 鈍器    攻擊: 120\n重量: 90  屬性 :聖\n武器等級: 4\n要求等級: 60\n裝備: 服事系列"
+        }
+      ]
+    },
+    {
+      "id": 1920,
+      "aegisName": "MOROCC_3",
+      "name": "夢羅克門徒之活屍",
+      "count": 1,
+      "respawnMinMs": 30000,
+      "respawnMaxMs": 30000,
+      "level": 133,
+      "hp": 94800,
+      "baseExp": 3393,
+      "jobExp": 2079,
+      "attackMin": 1218,
+      "attackMax": 363,
+      "defense": 111,
+      "magicDefense": 37,
+      "size": "中型",
+      "race": "惡魔",
+      "element": "不死 3",
+      "isBoss": true,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/morocc.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 2508,
+          "aegisName": "Ragamuffin_Cape",
+          "name": "抗魔斗篷",
+          "ratePerTenThousand": 5,
+          "type": "防具",
+          "weight": 50,
+          "attack": 0,
+          "defense": 4,
+          "slots": 0,
+          "description": "對魔法有優秀的防禦力斗篷。\n不可破壞, MDEF+10。\n系列: 披挂用  防禦: 4\n重量: 50\n裝備: 初學者以外的全職業"
+        },
+        {
+          "itemId": 7799,
+          "aegisName": "Dark_Crystal",
+          "name": "黑暗之結晶體",
+          "ratePerTenThousand": 500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "內有不祥的強列黑暗力量之寶石結晶體, 具有能吸入周圍力量之危險氣息\n\n重量: 1"
+        },
+        {
+          "itemId": 7798,
+          "aegisName": "Dark_Debris",
+          "name": "黑暗之碎片",
+          "ratePerTenThousand": 1500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "具有黑暗氣息之陌生碎片, 光看著就好像就要被強烈力量吸進去一樣\n\n重量: 1"
+        },
+        {
+          "itemId": 985,
+          "aegisName": "Elunium",
+          "name": "鋁",
+          "ratePerTenThousand": 80,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "很輕且沒有毒性的金屬。常被拿來作成盔甲,以此製成的所有防具將變成更強。\n\n重量: 20"
+        },
+        {
+          "itemId": 7054,
+          "aegisName": "Brigan",
+          "name": "布里刊",
+          "ratePerTenThousand": 2425,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "發出紅色光芒的稀有礦物,可賣給蒐集品商人\n重量: 1"
+        },
+        {
+          "itemId": 2728,
+          "aegisName": "Cursed_Hand",
+          "name": "巫蠱之手",
+          "ratePerTenThousand": 2,
+          "type": "防具",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 1,
+          "description": "已無生氣之乾枯之手, 有類似符咒的特性\n物理攻擊時有3% 的機率可發動致命的傷害\n命中+10, HP恢復力+20%。\n系列: 飾品\n防禦: 0      重量: 5\n要求等級: 80\n裝備: 除了初學者系列外全職業"
+        },
+        {
+          "itemId": 1182,
+          "aegisName": "Bloody_Eater",
+          "name": "血靈魔劍",
+          "ratePerTenThousand": 8,
+          "type": "武器",
+          "weight": 120,
+          "attack": 200,
+          "defense": 0,
+          "slots": 2,
+          "description": "陰森森的會發出靈氣的魔劍\n物理攻擊時, 以較低的機率5秒內CRI+100. ATK+50,近距離物理攻擊消滅怪物時, 恢復100的HP\n系列: 雙手劍  攻擊: 200\n重量: 120      屬性: 念\n武器等級: 4\n要求等級: 50\n裝備: 進階劍士系列"
+        }
+      ]
+    },
+    {
+      "id": 1921,
+      "aegisName": "MOROCC_4",
+      "name": "夢羅克門徒之喜樂",
+      "count": 1,
+      "respawnMinMs": 30000,
+      "respawnMaxMs": 30000,
+      "level": 134,
+      "hp": 77389,
+      "baseExp": 2995,
+      "jobExp": 2230,
+      "attackMin": 1235,
+      "attackMax": 599,
+      "defense": 109,
+      "magicDefense": 54,
+      "size": "中型",
+      "race": "惡魔",
+      "element": "念 3",
+      "isBoss": true,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/morocc.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 2729,
+          "aegisName": "Diabolus_Ring",
+          "name": "赤焰小惡魔魔戒",
+          "ratePerTenThousand": 3,
+          "type": "防具",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 1,
+          "description": "刻有神祕文字的戒指, 美麗到足以蠱惑人心\nMHP+100, MSP+100, 治癒術技能的效果+5%。\n對魔王夢羅克的物理傷害+10%。\n系列: 飾品 防禦: 0\n重量: 5\n裝備: 2進階職業以上才"
+        },
+        {
+          "itemId": 7799,
+          "aegisName": "Dark_Crystal",
+          "name": "黑暗之結晶體",
+          "ratePerTenThousand": 500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "內有不祥的強列黑暗力量之寶石結晶體, 具有能吸入周圍力量之危險氣息\n\n重量: 1"
+        },
+        {
+          "itemId": 7798,
+          "aegisName": "Dark_Debris",
+          "name": "黑暗之碎片",
+          "ratePerTenThousand": 1500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "具有黑暗氣息之陌生碎片, 光看著就好像就要被強烈力量吸進去一樣\n\n重量: 1"
+        },
+        {
+          "itemId": 984,
+          "aegisName": "Oridecon",
+          "name": "神之金屬",
+          "ratePerTenThousand": 80,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "被稱為神之金屬的神秘金屬,比什麼東西都堅硬,用它來製造武器可以得到相當強大的破壞力,可以強化等級三和等級四的武器。\n\n重量: 20"
+        },
+        {
+          "itemId": 7053,
+          "aegisName": "Cyfar",
+          "name": "賽依伐",
+          "ratePerTenThousand": 1750,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "發出藍色光芒的稀有礦物,可賣給蒐集品商人\n重量: 1"
+        },
+        {
+          "itemId": 2129,
+          "aegisName": "Exorcism_Bible",
+          "name": "驅魔寶典",
+          "ratePerTenThousand": 10,
+          "type": "防具",
+          "weight": 60,
+          "attack": 0,
+          "defense": 80,
+          "slots": 0,
+          "description": "聖職人員所必讀的厚厚書籍, HP, SP恢復速度3%、INT+1  \n與驅魔聖杖一起裝備時, 十字驅魔攻擊的攻擊力提升20%, 遭受傷害時有較低機率為自動念咒、轉生術 Lv.1.\n系列: 盾牌 防禦: 80\n重量: 60\n要求等級: 50\n裝備: 祭司/武道家"
+        }
+      ]
+    }
+  ]
+}

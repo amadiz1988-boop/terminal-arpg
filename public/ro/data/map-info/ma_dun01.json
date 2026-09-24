@@ -1,0 +1,413 @@
+{
+  "id": "ma_dun01",
+  "name": "噩夢醫院 1樓",
+  "category": "SERVICE_ONLY",
+  "dungeon": null,
+  "totalMonsters": 112,
+  "normalMonsterCount": 112,
+  "levelRange": {
+    "min": 105,
+    "max": 111
+  },
+  "fullLevelRange": {
+    "min": 105,
+    "max": 111
+  },
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [
+    {
+      "id": 2314,
+      "name": "惡魔嬰兒",
+      "level": 105,
+      "count": 40
+    },
+    {
+      "id": 2311,
+      "name": "瑪那能革",
+      "level": 107,
+      "count": 40
+    },
+    {
+      "id": 2315,
+      "name": "食屍鬼",
+      "level": 111,
+      "count": 30
+    }
+  ],
+  "resourceMonsters": [],
+  "bossMonsters": [],
+  "monsters": [
+    {
+      "id": 2314,
+      "aegisName": "TIYANAK",
+      "name": "惡魔嬰兒",
+      "count": 40,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 105,
+      "hp": 11589,
+      "baseExp": 1625,
+      "jobExp": 1547,
+      "attackMin": 441,
+      "attackMax": 251,
+      "defense": 76,
+      "magicDefense": 21,
+      "size": "小型",
+      "race": "惡魔",
+      "element": "暗 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/ma_dun.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 6508,
+          "aegisName": "Silver_Bracelet",
+          "name": "純銀手環",
+          "ratePerTenThousand": 1500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "令人怵目驚心的銀手鐲。\n重量: 1"
+        },
+        {
+          "itemId": 6509,
+          "aegisName": "Mysterious_Flower",
+          "name": "神秘花朵",
+          "ratePerTenThousand": 1000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "花色鮮豔的神祕花朵。\n重量: 1"
+        },
+        {
+          "itemId": 938,
+          "aegisName": "Sticky_Mucus",
+          "name": "粘稠液體",
+          "ratePerTenThousand": 1000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "不知名的黏稠液體,可向收集商購買。\n\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2311,
+      "aegisName": "MANANANGGAL",
+      "name": "瑪那能革",
+      "count": 40,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 107,
+      "hp": 15656,
+      "baseExp": 1845,
+      "jobExp": 1759,
+      "attackMin": 534,
+      "attackMax": 103,
+      "defense": 64,
+      "magicDefense": 31,
+      "size": "中型",
+      "race": "惡魔",
+      "element": "暗 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/ma_dun.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 6508,
+          "aegisName": "Silver_Bracelet",
+          "name": "純銀手環",
+          "ratePerTenThousand": 2000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "令人怵目驚心的銀手鐲。\n重量: 1"
+        },
+        {
+          "itemId": 6510,
+          "aegisName": "Elegant_Flower",
+          "name": "典雅花朵",
+          "ratePerTenThousand": 1000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "高貴典雅的花朵。\n重量: 1"
+        },
+        {
+          "itemId": 7006,
+          "aegisName": "Wing_Of_Red_Bat",
+          "name": "紅色蝙蝠翅膀",
+          "ratePerTenThousand": 1000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "紅色蝙蝠的翅膀。可向收集商人購買。\n\n重量 :1"
+        },
+        {
+          "itemId": 913,
+          "aegisName": "Tooth_Of_Bat",
+          "name": "蝙蝠牙",
+          "ratePerTenThousand": 1000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "怪物吸血蝙蝠尖銳的牙齒,可以用來做衣服或裝飾用。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 6511,
+          "aegisName": "Beautiful_Flower",
+          "name": "美麗花朵",
+          "ratePerTenThousand": 1000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "到處可見的一般花朵。\n重量: 1"
+        },
+        {
+          "itemId": 6509,
+          "aegisName": "Mysterious_Flower",
+          "name": "神秘花朵",
+          "ratePerTenThousand": 1000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "花色鮮豔的神祕花朵。\n重量: 1"
+        },
+        {
+          "itemId": 12700,
+          "aegisName": "Insideout_Shirt",
+          "name": "翻面襯衫",
+          "ratePerTenThousand": 100,
+          "type": "消耗品",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "一般翻面的襯衫, 用做解除邪魔馬的迷路詛咒。\n直接使用時可返回馬來港。\n\n重量: 1"
+        },
+        {
+          "itemId": 4584,
+          "aegisName": "Manananggal_Card",
+          "name": "瑪那能革卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "攻擊怪物時,每攻擊1次SP恢復1。\nMSP -1%。\n系列: 卡片\n裝備: 武器\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2766,
+      "aegisName": "C3_MANANANGGAL",
+      "name": "菁英瑪那能革",
+      "count": 2,
+      "respawnMinMs": 180000,
+      "respawnMaxMs": 180000,
+      "level": 107,
+      "hp": 78280,
+      "baseExp": 9225,
+      "jobExp": 26385,
+      "attackMin": 640,
+      "attackMax": 103,
+      "defense": 64,
+      "magicDefense": 31,
+      "size": "中型",
+      "race": "惡魔",
+      "element": "暗 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/championmobs.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 6508,
+          "aegisName": "Silver_Bracelet",
+          "name": "純銀手環",
+          "ratePerTenThousand": 10000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "令人怵目驚心的銀手鐲。\n重量: 1"
+        },
+        {
+          "itemId": 6510,
+          "aegisName": "Elegant_Flower",
+          "name": "典雅花朵",
+          "ratePerTenThousand": 5000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "高貴典雅的花朵。\n重量: 1"
+        },
+        {
+          "itemId": 7006,
+          "aegisName": "Wing_Of_Red_Bat",
+          "name": "紅色蝙蝠翅膀",
+          "ratePerTenThousand": 5000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "紅色蝙蝠的翅膀。可向收集商人購買。\n\n重量 :1"
+        },
+        {
+          "itemId": 913,
+          "aegisName": "Tooth_Of_Bat",
+          "name": "蝙蝠牙",
+          "ratePerTenThousand": 5000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "怪物吸血蝙蝠尖銳的牙齒,可以用來做衣服或裝飾用。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 6511,
+          "aegisName": "Beautiful_Flower",
+          "name": "美麗花朵",
+          "ratePerTenThousand": 5000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "到處可見的一般花朵。\n重量: 1"
+        },
+        {
+          "itemId": 6509,
+          "aegisName": "Mysterious_Flower",
+          "name": "神秘花朵",
+          "ratePerTenThousand": 5000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "花色鮮豔的神祕花朵。\n重量: 1"
+        },
+        {
+          "itemId": 12700,
+          "aegisName": "Insideout_Shirt",
+          "name": "翻面襯衫",
+          "ratePerTenThousand": 500,
+          "type": "消耗品",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "一般翻面的襯衫, 用做解除邪魔馬的迷路詛咒。\n直接使用時可返回馬來港。\n\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2315,
+      "aegisName": "WAKWAK",
+      "name": "食屍鬼",
+      "count": 30,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 111,
+      "hp": 17869,
+      "baseExp": 2158,
+      "jobExp": 2062,
+      "attackMin": 544,
+      "attackMax": 301,
+      "defense": 24,
+      "magicDefense": 71,
+      "size": "小型",
+      "race": "惡魔",
+      "element": "暗 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/ma_dun.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 6508,
+          "aegisName": "Silver_Bracelet",
+          "name": "純銀手環",
+          "ratePerTenThousand": 1500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "令人怵目驚心的銀手鐲。\n重量: 1"
+        },
+        {
+          "itemId": 6509,
+          "aegisName": "Mysterious_Flower",
+          "name": "神秘花朵",
+          "ratePerTenThousand": 1000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "花色鮮豔的神祕花朵。\n重量: 1"
+        },
+        {
+          "itemId": 12700,
+          "aegisName": "Insideout_Shirt",
+          "name": "翻面襯衫",
+          "ratePerTenThousand": 200,
+          "type": "消耗品",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "一般翻面的襯衫, 用做解除邪魔馬的迷路詛咒。\n直接使用時可返回馬來港。\n\n重量: 1"
+        },
+        {
+          "itemId": 4588,
+          "aegisName": "Wakwak_Card",
+          "name": "食屍鬼卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "基本屬性STR每10 ATK+5。\n系列: 卡片\n裝備: 披肩\n重量: 1"
+        }
+      ]
+    }
+  ]
+}

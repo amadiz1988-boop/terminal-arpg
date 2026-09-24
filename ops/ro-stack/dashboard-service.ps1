@@ -37,8 +37,11 @@ New-Item -ItemType Directory -Force -Path $runtime|Out-Null
 $stamp=Get-Date -Format 'yyyyMMdd-HHmmss'
 $stdout=Join-Path $runtime "$stamp.out.log";$stderr=Join-Path $runtime "$stamp.err.log"
 $previousHost=$env:RO_DASHBOARD_HOST
+$previousNativeSupplyPolicy=$env:PA_NATIVE_SUPPLY_POLICY_ENABLED
+$stackConfig=Import-PowerShellDataFile -LiteralPath (Join-Path $PSScriptRoot 'stack.config.psd1')
+$env:PA_NATIVE_SUPPLY_POLICY_ENABLED=if($stackConfig.WebNativeSupplyPolicyEnabled){'1'}else{'0'}
 $env:RO_DASHBOARD_HOST='127.0.0.1'
-try{$process=Start-Process -FilePath 'node' -ArgumentList @($scriptPath) -WorkingDirectory $projectRoot -WindowStyle Hidden -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru}finally{$env:RO_DASHBOARD_HOST=$previousHost}
+try{$process=Start-Process -FilePath 'node' -ArgumentList @($scriptPath) -WorkingDirectory $projectRoot -WindowStyle Hidden -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru}finally{$env:RO_DASHBOARD_HOST=$previousHost;if($null -eq $previousNativeSupplyPolicy){Remove-Item Env:PA_NATIVE_SUPPLY_POLICY_ENABLED -ErrorAction SilentlyContinue}else{$env:PA_NATIVE_SUPPLY_POLICY_ENABLED=$previousNativeSupplyPolicy}}
 @{pid=$process.Id;startedAt=[DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds();stdout=$stdout;stderr=$stderr}|ConvertTo-Json|Set-Content $statePath -Encoding utf8
 $deadline=(Get-Date).AddSeconds(10)
 do{try{
