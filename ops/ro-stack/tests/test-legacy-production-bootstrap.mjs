@@ -6,7 +6,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { evaluatePromotion } from '../production-promotion-gate.mjs';
 import { commitAcceptedBaseline } from '../production-deployment-state.mjs';
-import { FIRST_PROMOTION, LEGACY_MODE, UNKNOWN_SHA, verifyLegacyBaseline, digest, consumedPath, pendingPath, firstPromotionEvidence } from '../legacy-production-baseline.mjs';
+import { FIRST_PROMOTION, LEGACY_MODE, UNKNOWN_SHA, verifyLegacyBaseline, boundedPath, digest, consumedPath, pendingPath, firstPromotionEvidence } from '../legacy-production-baseline.mjs';
 const root = fs.mkdtempSync(path.join(os.tmpdir(), 'legacy-bootstrap-test-'));
 const write = (file, value) => { const full=path.join(root,file); fs.mkdirSync(path.dirname(full),{recursive:true}); fs.writeFileSync(full, typeof value === 'string' ? value : JSON.stringify(value)); return full; };
 const sha = 'a'.repeat(40), native='b'.repeat(40);
@@ -32,6 +32,9 @@ const leaseFile='.local/ro-stack/production-deployment-lease/lease.json';
 const stateTool=fileURLToPath(new URL('../production-deployment-state.mjs',import.meta.url));
 const cli=(...args)=>spawnSync(process.execPath,[stateTool,'--production-root',root,'--test-mode','true','--owner','F',...args],{encoding:'utf8',windowsHide:true});
 try {
+ test('legal existing apostrophe asset name stays inside root',()=>assert.equal(boundedPath(root,"public/ro/client/items/Angel's_Safeguard.png"),path.join(root,"public/ro/client/items/Angel's_Safeguard.png")));
+ test('traversal path stays forbidden',()=>assert.throws(()=>boundedPath(root,'public/ro/../secret'),/INVALID_BASELINE_PATH/));
+ test('Windows ADS path stays forbidden',()=>assert.throws(()=>boundedPath(root,'public/ro/file.json:secret'),/INVALID_BASELINE_PATH/));
  test('1 normal lease rejects legacy SHA',()=>blocked(check({promotionMode:'NORMAL'}),'PRODUCTION_GIT_BASELINE_INVALID'));
  test('normal CLI acquisition rejects unresolved legacy without network',()=>{const result=cli('--action','acquire','--web-sha',sha,'--native-sha',native);assert.notEqual(result.status,0);assert.match(result.stdout,/PRODUCTION_GIT_BASELINE_INVALID/);});
  test('2 verified legacy eligible in exact migration mode',()=>assert.equal(check().eligible,true));

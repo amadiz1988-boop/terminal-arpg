@@ -10,7 +10,7 @@ export const pendingPath = '.local/ro-stack/first-github-first-promotion.pending
 export const digest = file => createHash('sha256').update(fs.readFileSync(file)).digest('hex').toUpperCase();
 export const readJson = file => JSON.parse(fs.readFileSync(file, 'utf8'));
 export function boundedPath(root, relative) {
-  if (typeof relative !== 'string' || !/^[A-Za-z0-9_./-]+$/.test(relative) ||
+  if (typeof relative !== 'string' || /[\\:\x00-\x1f]/.test(relative) || path.isAbsolute(relative) ||
       relative.split('/').some(x => !x || x === '.' || x === '..')) throw Error('INVALID_BASELINE_PATH');
   let cursor = path.resolve(root);
   if (fs.lstatSync(cursor).isSymbolicLink()) throw Error('BASELINE_REPARSE_ROOT');

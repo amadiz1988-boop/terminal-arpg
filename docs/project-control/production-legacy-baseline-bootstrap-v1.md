@@ -97,3 +97,8 @@ Missing or incomplete final receipt after begin also leaves drift OPEN.
 No test acceleration, gameplay fixture, live acceptance or runtime restart is
 used by this task. Real bootstrap results are recorded separately after the
 source checkpoint is promoted to GitHub main and executed from a clean checkout.
+
+Read-only capture initially rejected existing apostrophe-named item assets.
+The bounded path validator now permits actual filename characters while
+rejecting absolute paths, dot segments, backslashes, control characters, ADS
+colon and reparse paths. Three additional fixture assertions cover this repair.
