@@ -1,12 +1,59 @@
 {
   "id": "prt_fild05",
   "name": "普隆德拉原野",
+  "category": "SERVICE_ONLY",
+  "dungeon": null,
   "totalMonsters": 292,
+  "normalMonsterCount": 292,
+  "levelRange": {
+    "min": 11,
+    "max": 21
+  },
+  "fullLevelRange": {
+    "min": 11,
+    "max": 21
+  },
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [
+    {
+      "id": 1004,
+      "name": "蜂兵",
+      "level": 11,
+      "count": 199
+    },
+    {
+      "id": 1048,
+      "name": "盜蟲卵",
+      "level": 20,
+      "count": 42
+    },
+    {
+      "id": 1051,
+      "name": "盜蟲",
+      "level": 21,
+      "count": 42
+    }
+  ],
+  "resourceMonsters": [
+    {
+      "id": 1079,
+      "name": "藍草",
+      "level": 1,
+      "count": 1
+    },
+    {
+      "id": 1080,
+      "name": "綠草",
+      "level": 1,
+      "count": 6
+    }
+  ],
+  "bossMonsters": [],
   "monsters": [
     {
       "id": 1079,
       "aegisName": "BLUE_PLANT",
-      "name": "Blue Plant",
+      "name": "藍草",
       "count": 1,
       "respawnMinMs": 450000,
       "respawnMaxMs": 900000,
@@ -21,6 +68,9 @@
       "size": "小型",
       "race": "植物",
       "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": true,
       "sourceFiles": [
         "npc/re/mobs/fields/prontera.txt"
       ],
@@ -126,7 +176,7 @@
     {
       "id": 1080,
       "aegisName": "GREEN_PLANT",
-      "name": "Green Plant",
+      "name": "綠草",
       "count": 6,
       "respawnMinMs": 450000,
       "respawnMaxMs": 900000,
@@ -141,6 +191,9 @@
       "size": "小型",
       "race": "植物",
       "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": true,
       "sourceFiles": [
         "npc/re/mobs/fields/prontera.txt"
       ],
@@ -246,7 +299,7 @@
     {
       "id": 1004,
       "aegisName": "HORNET",
-      "name": "Hornet",
+      "name": "蜂兵",
       "count": 199,
       "respawnMinMs": 5000,
       "respawnMaxMs": 5000,
@@ -261,6 +314,9 @@
       "size": "小型",
       "race": "昆蟲",
       "element": "風 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
       "sourceFiles": [
         "npc/re/mobs/fields/prontera.txt"
       ],
@@ -366,7 +422,7 @@
     {
       "id": 2798,
       "aegisName": "C5_HORNET",
-      "name": "Elusive Hornet",
+      "name": "狡猾蜂兵",
       "count": 2,
       "respawnMinMs": 180000,
       "respawnMaxMs": 180000,
@@ -381,6 +437,9 @@
       "size": "小型",
       "race": "昆蟲",
       "element": "風 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
       "sourceFiles": [
         "npc/re/mobs/championmobs.txt"
       ],
@@ -486,7 +545,7 @@
     {
       "id": 1048,
       "aegisName": "THIEF_BUG_EGG",
-      "name": "Thief Bug Egg",
+      "name": "盜蟲卵",
       "count": 42,
       "respawnMinMs": 5000,
       "respawnMaxMs": 5000,
@@ -501,6 +560,9 @@
       "size": "小型",
       "race": "昆蟲",
       "element": "暗 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
       "sourceFiles": [
         "npc/re/mobs/fields/prontera.txt"
       ],
@@ -606,7 +668,7 @@
     {
       "id": 1051,
       "aegisName": "THIEF_BUG",
-      "name": "Thief Bug",
+      "name": "盜蟲",
       "count": 42,
       "respawnMinMs": 5000,
       "respawnMaxMs": 5000,
@@ -621,6 +683,9 @@
       "size": "小型",
       "race": "昆蟲",
       "element": "無 3",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
       "sourceFiles": [
         "npc/re/mobs/fields/prontera.txt"
       ],

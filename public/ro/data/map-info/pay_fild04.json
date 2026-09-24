@@ -1,7 +1,77 @@
 {
   "id": "pay_fild04",
   "name": "蘇克拉特沙漠",
+  "category": "SERVICE_ONLY",
+  "dungeon": null,
   "totalMonsters": 222,
+  "normalMonsterCount": 218,
+  "levelRange": {
+    "min": 30,
+    "max": 37
+  },
+  "fullLevelRange": {
+    "min": 1,
+    "max": 37
+  },
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [
+    {
+      "id": 1031,
+      "name": "波波利",
+      "level": 30,
+      "count": 141
+    },
+    {
+      "id": 1242,
+      "name": "冰波利",
+      "level": 37,
+      "count": 32
+    }
+  ],
+  "resourceMonsters": [
+    {
+      "id": 1080,
+      "name": "綠草",
+      "level": 1,
+      "count": 5
+    },
+    {
+      "id": 1083,
+      "name": "光芒草",
+      "level": 1,
+      "count": 1
+    }
+  ],
+  "bossMonsters": [
+    {
+      "id": 1090,
+      "name": "波利之王",
+      "level": 42,
+      "count": 1,
+      "isMvp": false
+    },
+    {
+      "id": 1582,
+      "name": "惡魔波利",
+      "level": 66,
+      "count": 1,
+      "isMvp": false
+    },
+    {
+      "id": 1096,
+      "name": "天使波利",
+      "level": 77,
+      "count": 1,
+      "isMvp": false
+    },
+    {
+      "id": 1120,
+      "name": "幽靈波利",
+      "level": 90,
+      "count": 1,
+      "isMvp": false
+    }
+  ],
   "monsters": [
     {
       "id": 1002,
@@ -21,6 +91,9 @@
       "size": "中型",
       "race": "植物",
       "element": "水 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
       "sourceFiles": [
         "npc/re/mobs/fields/payon.txt"
       ],
@@ -126,7 +199,7 @@
     {
       "id": 1080,
       "aegisName": "GREEN_PLANT",
-      "name": "Green Plant",
+      "name": "綠草",
       "count": 5,
       "respawnMinMs": 180000,
       "respawnMaxMs": 360000,
@@ -141,6 +214,9 @@
       "size": "小型",
       "race": "植物",
       "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": true,
       "sourceFiles": [
         "npc/re/mobs/fields/payon.txt"
       ],
@@ -246,7 +322,7 @@
     {
       "id": 1083,
       "aegisName": "SHINING_PLANT",
-      "name": "Shining Plant",
+      "name": "光芒草",
       "count": 1,
       "respawnMinMs": 900000,
       "respawnMaxMs": 1800000,
@@ -261,6 +337,9 @@
       "size": "小型",
       "race": "植物",
       "element": "聖 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": true,
       "sourceFiles": [
         "npc/re/mobs/fields/payon.txt"
       ],
@@ -366,7 +445,7 @@
     {
       "id": 1113,
       "aegisName": "DROPS",
-      "name": "Drops",
+      "name": "土波利",
       "count": 21,
       "respawnMinMs": 5000,
       "respawnMaxMs": 5000,
@@ -381,6 +460,9 @@
       "size": "中型",
       "race": "植物",
       "element": "火 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
       "sourceFiles": [
         "npc/re/mobs/fields/payon.txt"
       ],
@@ -501,6 +583,9 @@
       "size": "中型",
       "race": "植物",
       "element": "毒 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
       "sourceFiles": [
         "npc/re/mobs/fields/payon.txt"
       ],
@@ -606,7 +691,7 @@
     {
       "id": 2703,
       "aegisName": "C5_POPORING",
-      "name": "Elusive Poporing",
+      "name": "狡猾波波利",
       "count": 2,
       "respawnMinMs": 180000,
       "respawnMaxMs": 180000,
@@ -621,6 +706,9 @@
       "size": "中型",
       "race": "植物",
       "element": "毒 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
       "sourceFiles": [
         "npc/re/mobs/championmobs.txt"
       ],
@@ -726,7 +814,7 @@
     {
       "id": 1242,
       "aegisName": "MARIN",
-      "name": "Marin",
+      "name": "冰波利",
       "count": 32,
       "respawnMinMs": 5000,
       "respawnMaxMs": 5000,
@@ -741,6 +829,9 @@
       "size": "中型",
       "race": "植物",
       "element": "水 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
       "sourceFiles": [
         "npc/re/mobs/fields/payon.txt"
       ],
@@ -846,7 +937,7 @@
     {
       "id": 1090,
       "aegisName": "MASTERING",
-      "name": "Mastering",
+      "name": "波利之王",
       "count": 1,
       "respawnMinMs": 1800000,
       "respawnMaxMs": 3600000,
@@ -861,6 +952,9 @@
       "size": "中型",
       "race": "植物",
       "element": "水 1",
+      "isBoss": true,
+      "isMvp": false,
+      "isResource": false,
       "sourceFiles": [
         "npc/re/mobs/fields/payon.txt"
       ],
@@ -966,7 +1060,7 @@
     {
       "id": 1582,
       "aegisName": "DEVILING",
-      "name": "Deviling",
+      "name": "惡魔波利",
       "count": 1,
       "respawnMinMs": 3600000,
       "respawnMaxMs": 7200000,
@@ -981,6 +1075,9 @@
       "size": "中型",
       "race": "惡魔",
       "element": "暗 4",
+      "isBoss": true,
+      "isMvp": false,
+      "isResource": false,
       "sourceFiles": [
         "npc/re/mobs/fields/payon.txt"
       ],
@@ -1074,7 +1171,7 @@
     {
       "id": 1096,
       "aegisName": "ANGELING",
-      "name": "Angeling",
+      "name": "天使波利",
       "count": 1,
       "respawnMinMs": 1800000,
       "respawnMaxMs": 3600000,
@@ -1089,6 +1186,9 @@
       "size": "中型",
       "race": "天使",
       "element": "聖 4",
+      "isBoss": true,
+      "isMvp": false,
+      "isResource": false,
       "sourceFiles": [
         "npc/re/mobs/fields/payon.txt"
       ],
@@ -1182,7 +1282,7 @@
     {
       "id": 1120,
       "aegisName": "GHOSTRING",
-      "name": "Ghostring",
+      "name": "幽靈波利",
       "count": 1,
       "respawnMinMs": 1800000,
       "respawnMaxMs": 3600000,
@@ -1197,6 +1297,9 @@
       "size": "中型",
       "race": "惡魔",
       "element": "念 4",
+      "isBoss": true,
+      "isMvp": false,
+      "isResource": false,
       "sourceFiles": [
         "npc/re/mobs/fields/payon.txt"
       ],

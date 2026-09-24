@@ -1,12 +1,53 @@
 {
   "id": "mjolnir_09",
   "name": "妙勒妙勒尼山脈 南邊山麓",
+  "category": "SERVICE_ONLY",
+  "dungeon": null,
   "totalMonsters": 240,
+  "normalMonsterCount": 240,
+  "levelRange": {
+    "min": 8,
+    "max": 14
+  },
+  "fullLevelRange": {
+    "min": 8,
+    "max": 14
+  },
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [
+    {
+      "id": 1167,
+      "name": "小野豬",
+      "level": 14,
+      "count": 159
+    },
+    {
+      "id": 1010,
+      "name": "樹精",
+      "level": 8,
+      "count": 34
+    },
+    {
+      "id": 1004,
+      "name": "蜂兵",
+      "level": 11,
+      "count": 34
+    }
+  ],
+  "resourceMonsters": [
+    {
+      "id": 1085,
+      "name": "紅菇",
+      "level": 1,
+      "count": 11
+    }
+  ],
+  "bossMonsters": [],
   "monsters": [
     {
       "id": 1085,
       "aegisName": "RED_MUSHROOM",
-      "name": "Red Mushroom",
+      "name": "紅菇",
       "count": 11,
       "respawnMinMs": 90000,
       "respawnMaxMs": 180000,
@@ -21,6 +62,9 @@
       "size": "小型",
       "race": "植物",
       "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": true,
       "sourceFiles": [
         "npc/re/mobs/fields/mjolnir.txt"
       ],
@@ -126,7 +170,7 @@
     {
       "id": 1010,
       "aegisName": "WILOW",
-      "name": "Willow",
+      "name": "樹精",
       "count": 34,
       "respawnMinMs": 5000,
       "respawnMaxMs": 5000,
@@ -141,6 +185,9 @@
       "size": "中型",
       "race": "植物",
       "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
       "sourceFiles": [
         "npc/re/mobs/fields/mjolnir.txt"
       ],
@@ -246,7 +293,7 @@
     {
       "id": 1004,
       "aegisName": "HORNET",
-      "name": "Hornet",
+      "name": "蜂兵",
       "count": 34,
       "respawnMinMs": 5000,
       "respawnMaxMs": 5000,
@@ -261,6 +308,9 @@
       "size": "小型",
       "race": "昆蟲",
       "element": "風 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
       "sourceFiles": [
         "npc/re/mobs/fields/mjolnir.txt"
       ],
@@ -366,7 +416,7 @@
     {
       "id": 1167,
       "aegisName": "SAVAGE_BABE",
-      "name": "Savage Babe",
+      "name": "小野豬",
       "count": 159,
       "respawnMinMs": 5000,
       "respawnMaxMs": 5000,
@@ -381,6 +431,9 @@
       "size": "小型",
       "race": "動物",
       "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
       "sourceFiles": [
         "npc/re/mobs/fields/mjolnir.txt"
       ],
@@ -486,7 +539,7 @@
     {
       "id": 2671,
       "aegisName": "C1_SAVAGE_BABE",
-      "name": "Swift Savage Babe",
+      "name": "迅捷小野豬",
       "count": 2,
       "respawnMinMs": 180000,
       "respawnMaxMs": 180000,
@@ -501,6 +554,9 @@
       "size": "小型",
       "race": "動物",
       "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
       "sourceFiles": [
         "npc/re/mobs/championmobs.txt"
       ],

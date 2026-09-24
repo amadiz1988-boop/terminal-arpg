@@ -1,0 +1,404 @@
+{
+  "id": "treasure01",
+  "name": "艾爾貝塔沈船 1樓",
+  "category": "SERVICE_ONLY",
+  "dungeon": null,
+  "totalMonsters": 137,
+  "normalMonsterCount": 137,
+  "levelRange": {
+    "min": 34,
+    "max": 48
+  },
+  "fullLevelRange": {
+    "min": 34,
+    "max": 48
+  },
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [
+    {
+      "id": 1068,
+      "name": "海葵",
+      "level": 34,
+      "count": 71
+    },
+    {
+      "id": 1071,
+      "name": "邪骸海盜",
+      "level": 48,
+      "count": 56
+    }
+  ],
+  "resourceMonsters": [],
+  "bossMonsters": [],
+  "monsters": [
+    {
+      "id": 1068,
+      "aegisName": "HYDRA",
+      "name": "海葵",
+      "count": 71,
+      "respawnMinMs": 90000,
+      "respawnMaxMs": 322000,
+      "level": 34,
+      "hp": 661,
+      "baseExp": 259,
+      "jobExp": 210,
+      "attackMin": 31,
+      "attackMax": 6,
+      "defense": 20,
+      "magicDefense": 32,
+      "size": "小型",
+      "race": "植物",
+      "element": "水 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/treasure.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 1011,
+          "aegisName": "Emveretarcon",
+          "name": "強化武器金屬-級數二",
+          "ratePerTenThousand": 13,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "用來強化武器在製作武器所使用的金屬,可以強化級數二的武器。\n\n重量: 20"
+        },
+        {
+          "itemId": 962,
+          "aegisName": "Tentacle",
+          "name": "觸鬚",
+          "ratePerTenThousand": 2750,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "濕濕地還殘留水分的觸鬚,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 938,
+          "aegisName": "Sticky_Mucus",
+          "name": "粘稠液體",
+          "ratePerTenThousand": 750,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "不知名的黏稠液體,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 971,
+          "aegisName": "Detrimindexta",
+          "name": "帝特立米藥水",
+          "ratePerTenThousand": 10,
+          "type": "其他",
+          "weight": 3,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "Detrimindexta的縮寫。是無法輕易得到的液體,有著無法與水混合的特性,非常的稀少,常常被用來製成中和劑。\n\n重量: 3"
+        },
+        {
+          "itemId": 525,
+          "aegisName": "Panacea",
+          "name": "萬能藥",
+          "ratePerTenThousand": 3,
+          "type": "恢復道具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "幾乎可以恢復所有陷入異常狀態的神秘藥水。\n\n重量: 10"
+        },
+        {
+          "itemId": 517,
+          "aegisName": "Meat",
+          "name": "肉",
+          "ratePerTenThousand": 350,
+          "type": "恢復道具",
+          "weight": 15,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "味道很棒。可恢復少量的HP。\n\n重量: 15"
+        },
+        {
+          "itemId": 601,
+          "aegisName": "Wing_Of_Fly",
+          "name": "蒼蠅翅膀",
+          "ratePerTenThousand": 500,
+          "type": "延遲消耗品",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "將蒼蠅的翅膀剪下可以用來製作具有魔法力量的物品,可在地圖上移動至任意的位置上。\n\n重量: 0"
+        },
+        {
+          "itemId": 4035,
+          "aegisName": "Hydra_Card",
+          "name": "海葵卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "對玩家人類型、人類型的物理攻擊力+20%。\n系列: 卡片\n裝置: 武器\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1070,
+      "aegisName": "KUKRE",
+      "name": "庫克雷",
+      "count": 10,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 42,
+      "hp": 962,
+      "baseExp": 328,
+      "jobExp": 277,
+      "attackMin": 50,
+      "attackMax": 28,
+      "defense": 33,
+      "magicDefense": 23,
+      "size": "小型",
+      "race": "魚貝",
+      "element": "水 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/treasure.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 991,
+          "aegisName": "Crystal_Blue",
+          "name": "水靈礦石",
+          "ratePerTenThousand": 15,
+          "type": "其他",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "藍色的小礦石塊。擁有水屬性,提煉後可以製作出水靈原石。\n\n重量: 5"
+        },
+        {
+          "itemId": 955,
+          "aegisName": "Worm_Peelings",
+          "name": "昆蟲外殼",
+          "ratePerTenThousand": 2750,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "怪物身上堅硬的外殼,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 910,
+          "aegisName": "Garlet",
+          "name": "加勒結晶",
+          "ratePerTenThousand": 200,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從一部份怪物身上得來的結晶,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 528,
+          "aegisName": "Monster's_Feed",
+          "name": "魔物飼料",
+          "ratePerTenThousand": 250,
+          "type": "恢復道具",
+          "weight": 15,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "魔物們最喜愛的加工食品,可恢復少量的HP。\n\n重量: 15"
+        },
+        {
+          "itemId": 601,
+          "aegisName": "Wing_Of_Fly",
+          "name": "蒼蠅翅膀",
+          "ratePerTenThousand": 500,
+          "type": "延遲消耗品",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "將蒼蠅的翅膀剪下可以用來製作具有魔法力量的物品,可在地圖上移動至任意的位置上。\n\n重量: 0"
+        },
+        {
+          "itemId": 928,
+          "aegisName": "Insect_Feeler",
+          "name": "昆蟲觸角",
+          "ratePerTenThousand": 225,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從部份怪物或昆蟲身上得來的觸鬚。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 623,
+          "aegisName": "Earthworm_The_Dude",
+          "name": "變態蚯蚓",
+          "ratePerTenThousand": 10,
+          "type": "消耗品",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "變態蚯蚓脖子上有紅色蝴蝶結, 是怪物小雞最喜愛的食物。\n活動怪、小兵怪則無法認養。\n種類: 認養寵物物品\n重量: 5"
+        },
+        {
+          "itemId": 4027,
+          "aegisName": "Kukre_Card",
+          "name": "庫克雷卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "AGI+2。\n系列: 卡片\n裝置: 飾品\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1071,
+      "aegisName": "PIRATE_SKEL",
+      "name": "邪骸海盜",
+      "count": 56,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 48,
+      "hp": 1351,
+      "baseExp": 416,
+      "jobExp": 310,
+      "attackMin": 93,
+      "attackMax": 20,
+      "defense": 53,
+      "magicDefense": 20,
+      "size": "中型",
+      "race": "不死",
+      "element": "不死 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/treasure.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 932,
+          "aegisName": "Skel_Bone",
+          "name": "死人遺骨",
+          "ratePerTenThousand": 1500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "不死的邪骸戰士的骨頭。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 2287,
+          "aegisName": "Pirate_Bandana",
+          "name": "海盜頭巾",
+          "ratePerTenThousand": 8,
+          "type": "防具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 4,
+          "slots": 0,
+          "description": "有象徵海盜骷髏頭的圖案,會賦予佩帶此頭巾的人勇猛的力量。\nSTR+1。\n系列: 頭具  防禦: 3\n位置: 上  重量: 10\n裝備: 初學者以外的全職業"
+        },
+        {
+          "itemId": 7477,
+          "aegisName": "Cookbook06",
+          "name": "6等料理書",
+          "ratePerTenThousand": 3,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "封面寫著\"\"在密室裡也能做出料理的人 -結果總是只有一種!料理在此鍋子裡!!\"\" 的字句, 是本令人印象深刻的書.\n紀載著所有6等料理的收據.\n重量: 1"
+        },
+        {
+          "itemId": 601,
+          "aegisName": "Wing_Of_Fly",
+          "name": "蒼蠅翅膀",
+          "ratePerTenThousand": 500,
+          "type": "延遲消耗品",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "將蒼蠅的翅膀剪下可以用來製作具有魔法力量的物品,可在地圖上移動至任意的位置上。\n\n重量: 0"
+        },
+        {
+          "itemId": 1104,
+          "aegisName": "Falchion",
+          "name": "圓月刀",
+          "ratePerTenThousand": 125,
+          "type": "武器",
+          "weight": 60,
+          "attack": 39,
+          "defense": 0,
+          "slots": 3,
+          "description": "有著圓刃的刀。\n系列: 劍  攻擊: 39\n重量: 60\n武器等級: 1\n要求等級: 2\n裝備: 初學者/劍士系列/商人系列/盜賊系列可以裝備"
+        },
+        {
+          "itemId": 756,
+          "aegisName": "Oridecon_Stone",
+          "name": "神之金屬原石",
+          "ratePerTenThousand": 22,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "是被稱為神之金屬的礦石。相當稀少,且得來不易,可以說是相當珍貴的物品。\n\n重量: 20"
+        },
+        {
+          "itemId": 628,
+          "aegisName": "Well_Dried_Bone",
+          "name": "營養大骨",
+          "ratePerTenThousand": 10,
+          "type": "消耗品",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在熾熱的陽光下曬乾而成的骨骼, 是怪物沙漠幼狼最喜愛的食物。\n活動怪、小兵怪則無法認養。\n種類: 認養寵物物品\n重量: 5"
+        },
+        {
+          "itemId": 4073,
+          "aegisName": "Pirate_Skel_Card",
+          "name": "邪骸海盜卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可使用[低價買進]Lv5技能\n系列: 卡片\n裝置: 飾品\n重量: 1"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,404 @@
+{
+  "id": "gl_dun01",
+  "name": "克雷斯特漢姆古城 地下洞穴 1樓",
+  "category": "SERVICE_ONLY",
+  "dungeon": null,
+  "totalMonsters": 97,
+  "normalMonsterCount": 97,
+  "levelRange": {
+    "min": 104,
+    "max": 107
+  },
+  "fullLevelRange": {
+    "min": 104,
+    "max": 107
+  },
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [
+    {
+      "id": 1194,
+      "name": "捲甲蟲",
+      "level": 107,
+      "count": 53
+    },
+    {
+      "id": 1207,
+      "name": "史汀",
+      "level": 104,
+      "count": 43
+    }
+  ],
+  "resourceMonsters": [],
+  "bossMonsters": [],
+  "monsters": [
+    {
+      "id": 1207,
+      "aegisName": "STING",
+      "name": "史汀",
+      "count": 43,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 104,
+      "hp": 12633,
+      "baseExp": 1685,
+      "jobExp": 1527,
+      "attackMin": 637,
+      "attackMax": 67,
+      "defense": 146,
+      "magicDefense": 34,
+      "size": "中型",
+      "race": "無形",
+      "element": "地 3",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/glastheim.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 7004,
+          "aegisName": "Mud_Lump",
+          "name": "泥團",
+          "ratePerTenThousand": 2425,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "濕黏,讓人感覺很不舒服的一團泥巴。可向收集商人購買。\n\n重量 :1"
+        },
+        {
+          "itemId": 28380,
+          "aegisName": "Fresh_G_Necklace",
+          "name": "青澀草項鍊",
+          "ratePerTenThousand": 20,
+          "type": "防具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 1,
+          "description": "用幸運草編製的青澀項鍊。\n完全迴避+5, 白鼠創傷技能冷卻時間 -5秒。\n系列 : 飾品 防禦 : 0\n重量 : 10\n要求等級 : 100\n裝備 : 喵族"
+        },
+        {
+          "itemId": 2624,
+          "aegisName": "Glove_",
+          "name": "防禦手套",
+          "ratePerTenThousand": 1,
+          "type": "防具",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 1,
+          "description": "古代的手套\nDEX+1。\n系列: 飾品\n防禦: 0      重量: 10\n要求等級: 90\n裝載: 初學者以外的全職業"
+        },
+        {
+          "itemId": 1003,
+          "aegisName": "Coal",
+          "name": "煤礦",
+          "ratePerTenThousand": 65,
+          "type": "其他",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "含有很多碳成分的礦石,和鐵一起提煉可以得到鋼鐵。\n\n重量: 5"
+        },
+        {
+          "itemId": 997,
+          "aegisName": "Great_Nature",
+          "name": "土靈原石",
+          "ratePerTenThousand": 13,
+          "type": "其他",
+          "weight": 30,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "擁有地屬性的礦石。\n\n重量: 30"
+        },
+        {
+          "itemId": 10007,
+          "aegisName": "Silk_Ribbon",
+          "name": "寵物髮帶",
+          "ratePerTenThousand": 5,
+          "type": "Petarmor",
+          "weight": 0,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "用柔軟的絲綢,所做成的高級蝴蝶結,戴起來非常舒適。\n種類: 可愛寵物裝備\n裝載: 瘋兔"
+        },
+        {
+          "itemId": 6213,
+          "aegisName": "Explosive_Powder",
+          "name": "炸藥粉",
+          "ratePerTenThousand": 400,
+          "type": "其他",
+          "weight": 0.1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "加溫時會爆炸的黑色粉末!火力比火藥更強!\n重量: 0.1"
+        },
+        {
+          "itemId": 4226,
+          "aegisName": "Sting_Card",
+          "name": "史汀卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "DEF+2。\n精練值9以上時,MDEF+5。\n系列: 卡片\n裝備: 盾牌\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1194,
+      "aegisName": "ARCLOUSE",
+      "name": "捲甲蟲",
+      "count": 53,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 107,
+      "hp": 14944,
+      "baseExp": 1937,
+      "jobExp": 1759,
+      "attackMin": 681,
+      "attackMax": 40,
+      "defense": 101,
+      "magicDefense": 36,
+      "size": "中型",
+      "race": "昆蟲",
+      "element": "地 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/glastheim.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 1096,
+          "aegisName": "Round_Shell",
+          "name": "圓形外皮",
+          "ratePerTenThousand": 1750,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "捲成圓形經過乾燥後而成的外皮。可向收集商人購買。\n\n重量 :1"
+        },
+        {
+          "itemId": 938,
+          "aegisName": "Sticky_Mucus",
+          "name": "粘稠液體",
+          "ratePerTenThousand": 1500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "不知名的黏稠液體,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 943,
+          "aegisName": "Solid_Shell",
+          "name": "堅硬外皮",
+          "ratePerTenThousand": 400,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "怪物身上堅硬的外皮,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 912,
+          "aegisName": "Zargon",
+          "name": "剎勒空結晶",
+          "ratePerTenThousand": 225,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從一部份怪物身上得來的結晶,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 716,
+          "aegisName": "Red_Gemstone",
+          "name": "紅色魔力礦石",
+          "ratePerTenThousand": 150,
+          "type": "其他",
+          "weight": 0.1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "具有魔法力量的礦石，使用魔法時可以代替施法者抵消魔法的反作用力。\n\n重量 : 0.1"
+        },
+        {
+          "itemId": 997,
+          "aegisName": "Great_Nature",
+          "name": "土靈原石",
+          "ratePerTenThousand": 10,
+          "type": "其他",
+          "weight": 30,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "擁有地屬性的礦石。\n\n重量: 30"
+        },
+        {
+          "itemId": 912,
+          "aegisName": "Zargon",
+          "name": "剎勒空結晶",
+          "ratePerTenThousand": 1250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從一部份怪物身上得來的結晶,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 4240,
+          "aegisName": "Arclouse_Card",
+          "name": "捲甲蟲卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "當精練+5以下時,DEF+2,MDEF+3。\n系列: 卡片\n裝備: 盾牌\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2893,
+      "aegisName": "C2_ARCLOUSE",
+      "name": "雄壯捲甲蟲",
+      "count": 1,
+      "respawnMinMs": 180000,
+      "respawnMaxMs": 180000,
+      "level": 107,
+      "hp": 149440,
+      "baseExp": 9685,
+      "jobExp": 26385,
+      "attackMin": 817,
+      "attackMax": 40,
+      "defense": 101,
+      "magicDefense": 36,
+      "size": "中型",
+      "race": "昆蟲",
+      "element": "地 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/championmobs.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 1096,
+          "aegisName": "Round_Shell",
+          "name": "圓形外皮",
+          "ratePerTenThousand": 8750,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "捲成圓形經過乾燥後而成的外皮。可向收集商人購買。\n\n重量 :1"
+        },
+        {
+          "itemId": 938,
+          "aegisName": "Sticky_Mucus",
+          "name": "粘稠液體",
+          "ratePerTenThousand": 7500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "不知名的黏稠液體,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 943,
+          "aegisName": "Solid_Shell",
+          "name": "堅硬外皮",
+          "ratePerTenThousand": 2000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "怪物身上堅硬的外皮,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 912,
+          "aegisName": "Zargon",
+          "name": "剎勒空結晶",
+          "ratePerTenThousand": 1125,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從一部份怪物身上得來的結晶,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 716,
+          "aegisName": "Red_Gemstone",
+          "name": "紅色魔力礦石",
+          "ratePerTenThousand": 750,
+          "type": "其他",
+          "weight": 0.1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "具有魔法力量的礦石，使用魔法時可以代替施法者抵消魔法的反作用力。\n\n重量 : 0.1"
+        },
+        {
+          "itemId": 997,
+          "aegisName": "Great_Nature",
+          "name": "土靈原石",
+          "ratePerTenThousand": 50,
+          "type": "其他",
+          "weight": 30,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "擁有地屬性的礦石。\n\n重量: 30"
+        },
+        {
+          "itemId": 912,
+          "aegisName": "Zargon",
+          "name": "剎勒空結晶",
+          "ratePerTenThousand": 6250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從一部份怪物身上得來的結晶,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 4240,
+          "aegisName": "Arclouse_Card",
+          "name": "捲甲蟲卡片",
+          "ratePerTenThousand": 5,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "當精練+5以下時,DEF+2,MDEF+3。\n系列: 卡片\n裝備: 盾牌\n重量: 1"
+        }
+      ]
+    }
+  ]
+}

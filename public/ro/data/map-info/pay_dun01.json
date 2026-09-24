@@ -2,6 +2,13 @@
   "id": "pay_dun01",
   "name": "斐揚洞穴 2樓",
   "category": "SERVICE_ONLY",
+  "dungeon": {
+    "id": "payon_cave",
+    "name": "斐揚洞穴",
+    "entranceMapId": "pay_dun00",
+    "floorLabel": "2樓",
+    "order": 2
+  },
   "totalMonsters": 125,
   "normalMonsterCount": 125,
   "levelRange": {
@@ -16,19 +23,19 @@
   "primaryMonsters": [
     {
       "id": 1028,
-      "name": "Soldier Skeleton",
+      "name": "邪骸士兵",
       "level": 34,
       "count": 53
     },
     {
       "id": 1016,
-      "name": "Archer Skeleton",
+      "name": "邪骸弓箭手",
       "level": 50,
       "count": 32
     },
     {
       "id": 1116,
-      "name": "Eggyra",
+      "name": "轉轉蛋",
       "level": 53,
       "count": 16
     }
@@ -298,7 +305,7 @@
     {
       "id": 1028,
       "aegisName": "SOLDIER_SKELETON",
-      "name": "Soldier Skeleton",
+      "name": "邪骸士兵",
       "count": 53,
       "respawnMinMs": 5000,
       "respawnMaxMs": 5000,
@@ -421,7 +428,7 @@
     {
       "id": 2649,
       "aegisName": "C4_SOLDIER_SKELETON",
-      "name": "Furious Soldier Skeleton",
+      "name": "憤怒邪骸士兵",
       "count": 2,
       "respawnMinMs": 180000,
       "respawnMaxMs": 180000,
@@ -544,7 +551,7 @@
     {
       "id": 1111,
       "aegisName": "DRAINLIAR",
-      "name": "Drainliar",
+      "name": "紅蝙蝠",
       "count": 5,
       "respawnMinMs": 5000,
       "respawnMaxMs": 5000,
@@ -569,7 +576,7 @@
         {
           "itemId": 101331,
           "aegisName": "Fruits_Set_Trap",
-          "name": "Fruit Set Trap",
+          "name": "道具 #101331",
           "ratePerTenThousand": 10,
           "type": "消耗品",
           "weight": 1,
@@ -667,7 +674,7 @@
     {
       "id": 1016,
       "aegisName": "ARCHER_SKELETON",
-      "name": "Archer Skeleton",
+      "name": "邪骸弓箭手",
       "count": 32,
       "respawnMinMs": 5000,
       "respawnMaxMs": 5000,
@@ -790,7 +797,7 @@
     {
       "id": 1116,
       "aegisName": "EGGYRA",
-      "name": "Eggyra",
+      "name": "轉轉蛋",
       "count": 16,
       "respawnMinMs": 5000,
       "respawnMaxMs": 5000,

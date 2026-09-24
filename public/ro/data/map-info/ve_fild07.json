@@ -1,0 +1,663 @@
+{
+  "id": "ve_fild07",
+  "name": "菲音斯原野",
+  "category": "SERVICE_ONLY",
+  "dungeon": null,
+  "totalMonsters": 242,
+  "normalMonsterCount": 242,
+  "levelRange": {
+    "min": 95,
+    "max": 105
+  },
+  "fullLevelRange": {
+    "min": 95,
+    "max": 105
+  },
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [
+    {
+      "id": 1784,
+      "name": "石頭波利",
+      "level": 95,
+      "count": 128
+    },
+    {
+      "id": 1781,
+      "name": "捕蟲草",
+      "level": 101,
+      "count": 64
+    },
+    {
+      "id": 1780,
+      "name": "吃人草",
+      "level": 105,
+      "count": 38
+    }
+  ],
+  "resourceMonsters": [
+    {
+      "id": 1082,
+      "name": "白草",
+      "level": 1,
+      "count": 10
+    }
+  ],
+  "bossMonsters": [],
+  "monsters": [
+    {
+      "id": 1082,
+      "aegisName": "WHITE_PLANT",
+      "name": "白草",
+      "count": 10,
+      "respawnMinMs": 600000,
+      "respawnMaxMs": 600000,
+      "level": 1,
+      "hp": 7,
+      "baseExp": 0,
+      "jobExp": 0,
+      "attackMin": 1,
+      "attackMax": 1,
+      "defense": 100,
+      "magicDefense": 99,
+      "size": "小型",
+      "race": "植物",
+      "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": true,
+      "sourceFiles": [
+        "npc/re/mobs/fields/veins.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 509,
+          "aegisName": "White_Herb",
+          "name": "白色藥草",
+          "ratePerTenThousand": 2750,
+          "type": "恢復道具",
+          "weight": 7,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在治療傷處上功效相當顯著的珍貴藥草,可恢復少量的HP。\n\n重量: 7"
+        },
+        {
+          "itemId": 712,
+          "aegisName": "Flower",
+          "name": "花",
+          "ratePerTenThousand": 500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "沒有名稱的花。沒有香味也沒有荊棘。\n\n重量: 1"
+        },
+        {
+          "itemId": 631,
+          "aegisName": "Deadly_Noxious_Herb",
+          "name": "青嫩毒草",
+          "ratePerTenThousand": 10,
+          "type": "消耗品",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "喝飲清擁有劇毒的草, 是怪物毒魔菇最喜愛的食物。\n活動怪、小兵怪則無法認養。\n種類: 認養寵物物品\n重量: 5"
+        },
+        {
+          "itemId": 905,
+          "aegisName": "Stem",
+          "name": "植物梗",
+          "ratePerTenThousand": 1500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "植物細長的梗,可以當做藥材,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 7935,
+          "aegisName": "Poison_Herb_Seratum",
+          "name": "蛇足毒草",
+          "ratePerTenThousand": 150,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "危險: 不像美麗的外表, 卻沒有香味。\n\n重量: 1"
+        },
+        {
+          "itemId": 521,
+          "aegisName": "Leaflet_Of_Aloe",
+          "name": "蘆薈葉子",
+          "ratePerTenThousand": 25,
+          "type": "恢復道具",
+          "weight": 2,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "將蘆薈的葉子剪下收集在一起,可恢復定量的HP。\n\n重量: 2"
+        },
+        {
+          "itemId": 703,
+          "aegisName": "Hinalle",
+          "name": "西納雷花",
+          "ratePerTenThousand": 25,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "世界各地隨處都可見到的普通植物,雖沒什麼香味,外觀也不顯眼,卻可給很多人帶來淡淡喜悅。\n\n重量: 1"
+        },
+        {
+          "itemId": 2269,
+          "aegisName": "Centimental_Flower",
+          "name": "花葉",
+          "ratePerTenThousand": 1,
+          "type": "防具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "小小的花葉,含在嘴裡會讓人有幸福浪漫的感覺。\n受到植物型敵人的攻擊時, 可-3%的傷害度。\n系列: 頭具  防禦: 0\n位置: 下  重量: 10\n裝備: 初學者以外的全職業"
+        }
+      ]
+    },
+    {
+      "id": 1784,
+      "aegisName": "STAPO",
+      "name": "石頭波利",
+      "count": 128,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 95,
+      "hp": 6984,
+      "baseExp": 1356,
+      "jobExp": 1221,
+      "attackMin": 426,
+      "attackMax": 51,
+      "defense": 129,
+      "magicDefense": 36,
+      "size": "小型",
+      "race": "無形",
+      "element": "地 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/veins.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 909,
+          "aegisName": "Jellopy",
+          "name": "傑勒比結晶",
+          "ratePerTenThousand": 500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從一部份怪物身上得來的結晶,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 7312,
+          "aegisName": "Jubilee",
+          "name": "朱畢雷",
+          "ratePerTenThousand": 500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從怪物身上可以獲得的結晶,上面寫著 '慶祝'這兩個字。\n\n重量: 1"
+        },
+        {
+          "itemId": 512,
+          "aegisName": "Apple",
+          "name": "蘋果",
+          "ratePerTenThousand": 500,
+          "type": "恢復道具",
+          "weight": 2,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "清爽香甜的水果,可恢復少量的HP。\n\n重量: 2"
+        },
+        {
+          "itemId": 7126,
+          "aegisName": "Large_Jellopy",
+          "name": "巨大傑勒比結晶",
+          "ratePerTenThousand": 50,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "不知道是屬於那裡的。反正是一個大塊傑勒比結晶\n\n重量: 1"
+        },
+        {
+          "itemId": 993,
+          "aegisName": "Yellow_Live",
+          "name": "地靈礦石",
+          "ratePerTenThousand": 5,
+          "type": "其他",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "綠色的小礦石塊。擁有地屬性,提煉後可以製作出地靈原石。\n\n重量: 5"
+        },
+        {
+          "itemId": 1821,
+          "aegisName": "Seismic_Fist",
+          "name": "大地拳套",
+          "ratePerTenThousand": 2,
+          "type": "武器",
+          "weight": 65,
+          "attack": 80,
+          "defense": 0,
+          "slots": 3,
+          "description": "聚集著大地氣息的拳套,有時候顯現的大地氣息不管是對什麼樣的敵人都可以擊敗般的強力。對敵人是冷酷的大地的氣息, 對裝載者表現出的是 無限溫暖大地女神的包容\n當攻擊時, 以較低的機率對自己使用 自動念咒、地屬性附加Lv.5。\n系列: 拳套  攻擊: 80\n重量: 65\n武器等級: 3\n要求等級: 75\n裝備: 祭司/武道家"
+        },
+        {
+          "itemId": 28381,
+          "aegisName": "Pretty_G_Necklace",
+          "name": "萌萌草項鍊",
+          "ratePerTenThousand": 20,
+          "type": "防具",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 1,
+          "description": "用幸運草編製的可愛項鍊。\n治癒量+5%, 鮪魚派對的技能冷卻時間 -7秒。\n系列 : 飾品 防禦 : 0\n重量 : 1\n要求等級 : 100\n裝備 : 喵族"
+        },
+        {
+          "itemId": 4424,
+          "aegisName": "Stapo_Card",
+          "name": "石頭波利卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以使用撿石頭和投擲石頭技能\n系列: 卡片\n裝置: 飾品\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2643,
+      "aegisName": "C3_STAPO",
+      "name": "菁英石頭波利",
+      "count": 2,
+      "respawnMinMs": 180000,
+      "respawnMaxMs": 180000,
+      "level": 95,
+      "hp": 34920,
+      "baseExp": 6780,
+      "jobExp": 18315,
+      "attackMin": 511,
+      "attackMax": 51,
+      "defense": 129,
+      "magicDefense": 36,
+      "size": "小型",
+      "race": "無形",
+      "element": "地 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/championmobs.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 909,
+          "aegisName": "Jellopy",
+          "name": "傑勒比結晶",
+          "ratePerTenThousand": 2500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從一部份怪物身上得來的結晶,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 7312,
+          "aegisName": "Jubilee",
+          "name": "朱畢雷",
+          "ratePerTenThousand": 2500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從怪物身上可以獲得的結晶,上面寫著 '慶祝'這兩個字。\n\n重量: 1"
+        },
+        {
+          "itemId": 512,
+          "aegisName": "Apple",
+          "name": "蘋果",
+          "ratePerTenThousand": 2500,
+          "type": "恢復道具",
+          "weight": 2,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "清爽香甜的水果,可恢復少量的HP。\n\n重量: 2"
+        },
+        {
+          "itemId": 7126,
+          "aegisName": "Large_Jellopy",
+          "name": "巨大傑勒比結晶",
+          "ratePerTenThousand": 250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "不知道是屬於那裡的。反正是一個大塊傑勒比結晶\n\n重量: 1"
+        },
+        {
+          "itemId": 993,
+          "aegisName": "Yellow_Live",
+          "name": "地靈礦石",
+          "ratePerTenThousand": 25,
+          "type": "其他",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "綠色的小礦石塊。擁有地屬性,提煉後可以製作出地靈原石。\n\n重量: 5"
+        },
+        {
+          "itemId": 1821,
+          "aegisName": "Seismic_Fist",
+          "name": "大地拳套",
+          "ratePerTenThousand": 10,
+          "type": "武器",
+          "weight": 65,
+          "attack": 80,
+          "defense": 0,
+          "slots": 3,
+          "description": "聚集著大地氣息的拳套,有時候顯現的大地氣息不管是對什麼樣的敵人都可以擊敗般的強力。對敵人是冷酷的大地的氣息, 對裝載者表現出的是 無限溫暖大地女神的包容\n當攻擊時, 以較低的機率對自己使用 自動念咒、地屬性附加Lv.5。\n系列: 拳套  攻擊: 80\n重量: 65\n武器等級: 3\n要求等級: 75\n裝備: 祭司/武道家"
+        },
+        {
+          "itemId": 28381,
+          "aegisName": "Pretty_G_Necklace",
+          "name": "萌萌草項鍊",
+          "ratePerTenThousand": 100,
+          "type": "防具",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 1,
+          "description": "用幸運草編製的可愛項鍊。\n治癒量+5%, 鮪魚派對的技能冷卻時間 -7秒。\n系列 : 飾品 防禦 : 0\n重量 : 1\n要求等級 : 100\n裝備 : 喵族"
+        },
+        {
+          "itemId": 4424,
+          "aegisName": "Stapo_Card",
+          "name": "石頭波利卡片",
+          "ratePerTenThousand": 5,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以使用撿石頭和投擲石頭技能\n系列: 卡片\n裝置: 飾品\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1781,
+      "aegisName": "DROSERA",
+      "name": "捕蟲草",
+      "count": 64,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 101,
+      "hp": 11179,
+      "baseExp": 1622,
+      "jobExp": 1467,
+      "attackMin": 518,
+      "attackMax": 54,
+      "defense": 86,
+      "magicDefense": 52,
+      "size": "中型",
+      "race": "植物",
+      "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/veins.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 7565,
+          "aegisName": "Sticky_Poison",
+          "name": "粘稠的毒",
+          "ratePerTenThousand": 1500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從植物那裡可以獲得到的粘稠的毒, 毒性很強會用在很多地方\n\n重量: 1"
+        },
+        {
+          "itemId": 6259,
+          "aegisName": "Drocera_Tentacle",
+          "name": "捕蟲草觸鬚",
+          "ratePerTenThousand": 50,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在阿盧納貝茲大地上到處生長的捕蟲草之粘粘觸鬚, 因不容掉落採集時要注意\n重量: 1"
+        },
+        {
+          "itemId": 1032,
+          "aegisName": "Blossom_Of_Maneater",
+          "name": "噬人樹花",
+          "ratePerTenThousand": 1000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "像人一般擁有各種器官的花。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 1033,
+          "aegisName": "Root_Of_Maneater",
+          "name": "噬人樹根",
+          "ratePerTenThousand": 1000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "如筋肉或血管般結實的植物的根。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 621,
+          "aegisName": "Bitter_Herb",
+          "name": "苦味草",
+          "ratePerTenThousand": 2,
+          "type": "消耗品",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "非常苦的草,是怪物波波利最喜愛的食物。\n種類: 認養寵物之物品\n重量: 5"
+        },
+        {
+          "itemId": 905,
+          "aegisName": "Stem",
+          "name": "植物梗",
+          "ratePerTenThousand": 500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "植物細長的梗,可以當做藥材,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 6217,
+          "aegisName": "Mandragora_Flowerpot",
+          "name": "曼陀羅魔花盆",
+          "ratePerTenThousand": 100,
+          "type": "其他",
+          "weight": 0.1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "實驗之用的曼陀羅魔花盆, 警告: 絕對不可摘取\n重量: 0.1"
+        },
+        {
+          "itemId": 4421,
+          "aegisName": "Drosera_Card",
+          "name": "捕蟲草卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "遠距離物理攻擊時CRI+15\n系列: 卡片\n裝置: 武器\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1780,
+      "aegisName": "MUSCIPULAR",
+      "name": "吃人草",
+      "count": 38,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 105,
+      "hp": 11589,
+      "baseExp": 1706,
+      "jobExp": 1547,
+      "attackMin": 606,
+      "attackMax": 76,
+      "defense": 114,
+      "magicDefense": 43,
+      "size": "中型",
+      "race": "植物",
+      "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/veins.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 7565,
+          "aegisName": "Sticky_Poison",
+          "name": "粘稠的毒",
+          "ratePerTenThousand": 1500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從植物那裡可以獲得到的粘稠的毒, 毒性很強會用在很多地方\n\n重量: 1"
+        },
+        {
+          "itemId": 1032,
+          "aegisName": "Blossom_Of_Maneater",
+          "name": "噬人樹花",
+          "ratePerTenThousand": 1500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "像人一般擁有各種器官的花。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 629,
+          "aegisName": "Singing_Flower",
+          "name": "呢喃花",
+          "ratePerTenThousand": 1,
+          "type": "消耗品",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "唱歌草上所開出來的花。是怪物搖滾蝗蟲最喜愛的食物。\n種類: 認養寵物之物品\n重量: 5"
+        },
+        {
+          "itemId": 1033,
+          "aegisName": "Root_Of_Maneater",
+          "name": "噬人樹根",
+          "ratePerTenThousand": 1000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "如筋肉或血管般結實的植物的根。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 905,
+          "aegisName": "Stem",
+          "name": "植物梗",
+          "ratePerTenThousand": 500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "植物細長的梗,可以當做藥材,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 631,
+          "aegisName": "Deadly_Noxious_Herb",
+          "name": "青嫩毒草",
+          "ratePerTenThousand": 2,
+          "type": "消耗品",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "喝飲清擁有劇毒的草, 是怪物毒魔菇最喜愛的食物。\n活動怪、小兵怪則無法認養。\n種類: 認養寵物物品\n重量: 5"
+        },
+        {
+          "itemId": 6217,
+          "aegisName": "Mandragora_Flowerpot",
+          "name": "曼陀羅魔花盆",
+          "ratePerTenThousand": 200,
+          "type": "其他",
+          "weight": 0.1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "實驗之用的曼陀羅魔花盆, 警告: 絕對不可摘取\n重量: 0.1"
+        },
+        {
+          "itemId": 4420,
+          "aegisName": "Muscipular_Card",
+          "name": "吃人草卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "受到近距離物理傷害時有機率對自己發動治癒術 Lv.1, 敏捷性增加Lv.1\n系列: 卡片\n裝置: 盾牌\n重量: 1"
+        }
+      ]
+    }
+  ]
+}

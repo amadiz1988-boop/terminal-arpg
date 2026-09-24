@@ -2,6 +2,13 @@
   "id": "pay_dun02",
   "name": "斐揚洞穴 3樓",
   "category": "SERVICE_ONLY",
+  "dungeon": {
+    "id": "payon_cave",
+    "name": "斐揚洞穴",
+    "entranceMapId": "pay_dun00",
+    "floorLabel": "3樓",
+    "order": 3
+  },
   "totalMonsters": 205,
   "normalMonsterCount": 205,
   "levelRange": {
@@ -16,31 +23,31 @@
   "primaryMonsters": [
     {
       "id": 1028,
-      "name": "Soldier Skeleton",
+      "name": "邪骸士兵",
       "level": 34,
       "count": 45
     },
     {
       "id": 1026,
-      "name": "Munak",
+      "name": "僵屍",
       "level": 58,
       "count": 40
     },
     {
       "id": 1068,
-      "name": "Hydra",
+      "name": "海葵",
       "level": 34,
       "count": 31
     },
     {
       "id": 1188,
-      "name": "Bongun",
+      "name": "妖道",
       "level": 59,
       "count": 30
     },
     {
       "id": 1016,
-      "name": "Archer Skeleton",
+      "name": "邪骸弓箭手",
       "level": 50,
       "count": 20
     }
@@ -54,7 +61,7 @@
     },
     {
       "id": 1082,
-      "name": "White Plant",
+      "name": "白草",
       "level": 1,
       "count": 6
     },
@@ -193,7 +200,7 @@
     {
       "id": 1082,
       "aegisName": "WHITE_PLANT",
-      "name": "White Plant",
+      "name": "白草",
       "count": 6,
       "respawnMinMs": 90000,
       "respawnMaxMs": 180000,
@@ -439,7 +446,7 @@
     {
       "id": 1020,
       "aegisName": "MANDRAGORA",
-      "name": "Mandragora",
+      "name": "曼陀羅魔花",
       "count": 3,
       "respawnMinMs": 100000,
       "respawnMaxMs": 300000,
@@ -685,7 +692,7 @@
     {
       "id": 1028,
       "aegisName": "SOLDIER_SKELETON",
-      "name": "Soldier Skeleton",
+      "name": "邪骸士兵",
       "count": 45,
       "respawnMinMs": 5000,
       "respawnMaxMs": 5000,
@@ -808,7 +815,7 @@
     {
       "id": 1068,
       "aegisName": "HYDRA",
-      "name": "Hydra",
+      "name": "海葵",
       "count": 31,
       "respawnMinMs": 100000,
       "respawnMaxMs": 374000,
@@ -931,7 +938,7 @@
     {
       "id": 2648,
       "aegisName": "C3_SOLDIER_SKELETON",
-      "name": "Soldier Skeleton Ringlea",
+      "name": "菁英邪骸士兵",
       "count": 3,
       "respawnMinMs": 180000,
       "respawnMaxMs": 180000,
@@ -1054,7 +1061,7 @@
     {
       "id": 1016,
       "aegisName": "ARCHER_SKELETON",
-      "name": "Archer Skeleton",
+      "name": "邪骸弓箭手",
       "count": 20,
       "respawnMinMs": 5000,
       "respawnMaxMs": 5000,
@@ -1177,7 +1184,7 @@
     {
       "id": 1026,
       "aegisName": "MUNAK",
-      "name": "Munak",
+      "name": "僵屍",
       "count": 40,
       "respawnMinMs": 5000,
       "respawnMaxMs": 5000,
@@ -1300,7 +1307,7 @@
     {
       "id": 1188,
       "aegisName": "BON_GUN",
-      "name": "Bongun",
+      "name": "妖道",
       "count": 30,
       "respawnMinMs": 5000,
       "respawnMaxMs": 5000,
@@ -1423,7 +1430,7 @@
     {
       "id": 1180,
       "aegisName": "NINE_TAIL",
-      "name": "Nine Tail",
+      "name": "九尾狐",
       "count": 1,
       "respawnMinMs": 5000,
       "respawnMaxMs": 5000,

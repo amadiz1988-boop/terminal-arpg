@@ -1,7 +1,66 @@
 {
   "id": "pay_dun00",
   "name": "斐揚洞穴 1樓",
+  "category": "SERVICE_ONLY",
+  "dungeon": {
+    "id": "payon_cave",
+    "name": "斐揚洞穴",
+    "entranceMapId": "pay_dun00",
+    "floorLabel": "1樓",
+    "order": 1
+  },
   "totalMonsters": 125,
+  "normalMonsterCount": 125,
+  "levelRange": {
+    "min": 17,
+    "max": 30
+  },
+  "fullLevelRange": {
+    "min": 17,
+    "max": 30
+  },
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [
+    {
+      "id": 1015,
+      "name": "殭屍",
+      "level": 17,
+      "count": 40
+    },
+    {
+      "id": 1076,
+      "name": "骷髏",
+      "level": 27,
+      "count": 35
+    },
+    {
+      "id": 1005,
+      "name": "吸血蝙蝠",
+      "level": 24,
+      "count": 15
+    },
+    {
+      "id": 1031,
+      "name": "波波利",
+      "level": 30,
+      "count": 15
+    }
+  ],
+  "resourceMonsters": [
+    {
+      "id": 1078,
+      "name": "紅色植物",
+      "level": 1,
+      "count": 15
+    },
+    {
+      "id": 1084,
+      "name": "黑菇",
+      "level": 1,
+      "count": 3
+    }
+  ],
+  "bossMonsters": [],
   "monsters": [
     {
       "id": 1078,
@@ -21,6 +80,9 @@
       "size": "小型",
       "race": "植物",
       "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": true,
       "sourceFiles": [
         "npc/re/mobs/dungeons/pay_dun.txt"
       ],
@@ -141,6 +203,9 @@
       "size": "小型",
       "race": "植物",
       "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": true,
       "sourceFiles": [
         "npc/re/mobs/dungeons/pay_dun.txt"
       ],
@@ -261,6 +326,9 @@
       "size": "中型",
       "race": "不死",
       "element": "不死 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
       "sourceFiles": [
         "npc/re/mobs/dungeons/pay_dun.txt"
       ],
@@ -354,7 +422,7 @@
     {
       "id": 2606,
       "aegisName": "C4_ZOMBIE",
-      "name": "Furious Zombie",
+      "name": "憤怒腐屍",
       "count": 2,
       "respawnMinMs": 180000,
       "respawnMaxMs": 180000,
@@ -369,6 +437,9 @@
       "size": "中型",
       "race": "不死",
       "element": "不死 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
       "sourceFiles": [
         "npc/re/mobs/championmobs.txt"
       ],
@@ -477,6 +548,9 @@
       "size": "小型",
       "race": "動物",
       "element": "暗 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
       "sourceFiles": [
         "npc/re/mobs/dungeons/pay_dun.txt"
       ],
@@ -597,6 +671,9 @@
       "size": "中型",
       "race": "不死",
       "element": "不死 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
       "sourceFiles": [
         "npc/re/mobs/dungeons/pay_dun.txt"
       ],
@@ -717,6 +794,9 @@
       "size": "中型",
       "race": "植物",
       "element": "毒 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
       "sourceFiles": [
         "npc/re/mobs/dungeons/pay_dun.txt"
       ],

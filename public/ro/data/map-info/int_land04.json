@@ -1,12 +1,34 @@
 {
   "id": "int_land04",
   "name": "int_land04",
+  "category": "SCRIPT_GATED",
+  "dungeon": null,
   "totalMonsters": 40,
+  "normalMonsterCount": 40,
+  "levelRange": {
+    "min": 1,
+    "max": 1
+  },
+  "fullLevelRange": {
+    "min": 1,
+    "max": 1
+  },
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [
+    {
+      "id": 2401,
+      "name": "波利",
+      "level": 1,
+      "count": 40
+    }
+  ],
+  "resourceMonsters": [],
+  "bossMonsters": [],
   "monsters": [
     {
       "id": 2401,
       "aegisName": "G_PORING",
-      "name": "Poring",
+      "name": "波利",
       "count": 40,
       "respawnMinMs": 5000,
       "respawnMaxMs": 5000,
@@ -21,6 +43,9 @@
       "size": "中型",
       "race": "植物",
       "element": "水 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
       "sourceFiles": [
         "npc/re/mobs/int_land.txt"
       ],

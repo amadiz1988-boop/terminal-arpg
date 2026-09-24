@@ -1,0 +1,485 @@
+{
+  "id": "ayo_dun02",
+  "name": "哎喲泰雅 古神殿內部",
+  "category": "SERVICE_ONLY",
+  "dungeon": null,
+  "totalMonsters": 164,
+  "normalMonsterCount": 164,
+  "levelRange": {
+    "min": 46,
+    "max": 73
+  },
+  "fullLevelRange": {
+    "min": 46,
+    "max": 73
+  },
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [
+    {
+      "id": 1584,
+      "name": "塔嚕安",
+      "level": 73,
+      "count": 116
+    },
+    {
+      "id": 1179,
+      "name": "白幽靈",
+      "level": 46,
+      "count": 23
+    },
+    {
+      "id": 1587,
+      "name": "克萊本",
+      "level": 70,
+      "count": 23
+    }
+  ],
+  "resourceMonsters": [],
+  "bossMonsters": [],
+  "monsters": [
+    {
+      "id": 1179,
+      "aegisName": "WHISPER",
+      "name": "白幽靈",
+      "count": 23,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 46,
+      "hp": 796,
+      "baseExp": 325,
+      "jobExp": 328,
+      "attackMin": 77,
+      "attackMax": 55,
+      "defense": 20,
+      "magicDefense": 40,
+      "size": "小型",
+      "race": "惡魔",
+      "element": "念 3",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/ayo_dun.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 1001,
+          "aegisName": "Sparkling_Dust",
+          "name": "星星的粉末",
+          "ratePerTenThousand": 75,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "星星的一角,提煉之後可以製造星星的碎片。\n\n重量: 1"
+        },
+        {
+          "itemId": 1059,
+          "aegisName": "Transparent_Cloth",
+          "name": "透明之布",
+          "ratePerTenThousand": 2668,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "透明而且裡面會發光神奇的布塊。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 2282,
+          "aegisName": "Spirit_Chain",
+          "name": "光環",
+          "ratePerTenThousand": 1,
+          "type": "防具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "亡者前往天國時頭上出現的光環,配帶時並不會有隱匿的效果。\n對聖屬性的攻擊,可-15% 的傷害度。\n系列: 頭具  防禦: 0\n位置: 上  重量: 10\n裝備: 全職業"
+        },
+        {
+          "itemId": 2333,
+          "aegisName": "Silver_Robe_",
+          "name": "秘銀之衣",
+          "ratePerTenThousand": 5,
+          "type": "防具",
+          "weight": 70,
+          "attack": 0,
+          "defense": 23,
+          "slots": 1,
+          "description": "以價值不斐的銀絲所編製成的衣服。\n系列: 鎧甲  防禦: 23\n重量: 70\n裝備: 魔法師系列/悟靈士"
+        },
+        {
+          "itemId": 601,
+          "aegisName": "Wing_Of_Fly",
+          "name": "蒼蠅翅膀",
+          "ratePerTenThousand": 500,
+          "type": "延遲消耗品",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "將蒼蠅的翅膀剪下可以用來製作具有魔法力量的物品,可在地圖上移動至任意的位置上。\n\n重量: 0"
+        },
+        {
+          "itemId": 4102,
+          "aegisName": "Whisper_Card",
+          "name": "白幽靈卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "受念屬性怪物攻擊時,會+50%的傷害。\n迴避+20\n系列: 卡片\n裝置: 披挂用\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1587,
+      "aegisName": "KRABEN",
+      "name": "克萊本",
+      "count": 23,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 70,
+      "hp": 2159,
+      "baseExp": 610,
+      "jobExp": 654,
+      "attackMin": 211,
+      "attackMax": 45,
+      "defense": 108,
+      "magicDefense": 20,
+      "size": "中型",
+      "race": "無形",
+      "element": "念 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/ayo_dun.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 912,
+          "aegisName": "Zargon",
+          "name": "剎勒空結晶",
+          "ratePerTenThousand": 1750,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從一部份怪物身上得來的結晶,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 519,
+          "aegisName": "Milk",
+          "name": "牛奶",
+          "ratePerTenThousand": 1500,
+          "type": "恢復道具",
+          "weight": 3,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "牛奶加工而成的液體,被視為小孩子成長期時最具營養價值的食品。\n可恢復少量HP。 \n\n重量: 3"
+        },
+        {
+          "itemId": 521,
+          "aegisName": "Leaflet_Of_Aloe",
+          "name": "蘆薈葉子",
+          "ratePerTenThousand": 500,
+          "type": "恢復道具",
+          "weight": 2,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "將蘆薈的葉子剪下收集在一起,可恢復定量的HP。\n\n重量: 2"
+        },
+        {
+          "itemId": 2102,
+          "aegisName": "Guard_",
+          "name": "鐵盾",
+          "ratePerTenThousand": 1,
+          "type": "防具",
+          "weight": 30,
+          "attack": 0,
+          "defense": 20,
+          "slots": 1,
+          "description": "可以抵擋敵人攻擊的簡易道具。\n系列: 盾牌  防禦: 20\n重量: 30\n裝備: 全職業"
+        },
+        {
+          "itemId": 7299,
+          "aegisName": "Bamboo_Basket",
+          "name": "竹籃",
+          "ratePerTenThousand": 2425,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "利用植物的梗製作的藍子,用水洗完後一定要記得曬乾喔。\n\n重量: 1"
+        },
+        {
+          "itemId": 7286,
+          "aegisName": "Chilli",
+          "name": "紅辣椒",
+          "ratePerTenThousand": 500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "主要是做為香料使用,看起來就是強烈的紅色,當它放入口中時, 瞬間會感受到地獄火焰般的辣味。\n\n重量: 1"
+        },
+        {
+          "itemId": 603,
+          "aegisName": "Old_Blue_Box",
+          "name": "神秘箱子",
+          "ratePerTenThousand": 5,
+          "type": "消耗品",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "會散發出神秘藍色光芒的舊箱子,打開的話好像有什麼東西會跑出來似的。\n\n重量: 20"
+        },
+        {
+          "itemId": 4295,
+          "aegisName": "Kraben_Card",
+          "name": "克萊本卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "受到物理傷害時,有機率讓敵人陷入黑暗。\n系列: 卡片\n裝備: 鎧甲\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1584,
+      "aegisName": "TAMRUAN",
+      "name": "塔嚕安",
+      "count": 116,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 73,
+      "hp": 3717,
+      "baseExp": 766,
+      "jobExp": 706,
+      "attackMin": 232,
+      "attackMax": 37,
+      "defense": 63,
+      "magicDefense": 30,
+      "size": "大型",
+      "race": "惡魔",
+      "element": "暗 3",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/ayo_dun.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 7301,
+          "aegisName": "Sword_Accessory",
+          "name": "紅色流蘇",
+          "ratePerTenThousand": 2425,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "綁在刀柄底部的裝飾,有著多條的紅線。\n\n重量: 1"
+        },
+        {
+          "itemId": 7069,
+          "aegisName": "Broken_Armor_Piece",
+          "name": "破裂的鎧甲一角",
+          "ratePerTenThousand": 1500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "看起來再也不能使用的鎧甲破碎的一角,也許廢鐵商人會購買也不一定。\n重量: 1"
+        },
+        {
+          "itemId": 21015,
+          "aegisName": "Scarlet_Twohand_Sword",
+          "name": "緋紅色雙手巨劍",
+          "ratePerTenThousand": 50,
+          "type": "武器",
+          "weight": 170,
+          "attack": 170,
+          "defense": 0,
+          "slots": 2,
+          "description": "劍身上散發著紅光的雙手劍\nATK增加至(精煉值*精煉值) (精煉上限為+15)\nMATK增加至(精煉值*精煉值)/2 (精煉上限為+15)\n角色等級70以上: BaseLv每上升10時ATK+5。\n系列: 雙手劍 攻擊: 170\n重量: 170\n武器等級: 3\n要求等級: 70\n裝備: 劍士系列"
+        },
+        {
+          "itemId": 1155,
+          "aegisName": "Bastard_Sword_",
+          "name": "亞爾特劍",
+          "ratePerTenThousand": 4,
+          "type": "武器",
+          "weight": 160,
+          "attack": 115,
+          "defense": 0,
+          "slots": 3,
+          "description": "不論什麼砍殺或是刺殺時都很好使用的雙手劍\n系列: 雙手劍  攻擊: 115\n重量: 160\n武器等級: 2\n要求等級: 18\n裝備: 劍士系列"
+        },
+        {
+          "itemId": 2315,
+          "aegisName": "Chain_Mail_",
+          "name": "鋼鐵鎖子甲",
+          "ratePerTenThousand": 2,
+          "type": "防具",
+          "weight": 330,
+          "attack": 0,
+          "defense": 55,
+          "slots": 1,
+          "description": "堅硬的金屬編成的鎧甲。\n系列: 鎧甲  防禦: 55\n重量: 330\n裝備: 劍士系列/商人系列/盜賊系列"
+        },
+        {
+          "itemId": 12736,
+          "aegisName": "Runstone_Mystic",
+          "name": "神秘盧恩原石",
+          "ratePerTenThousand": 150,
+          "type": "恢復道具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "神祕色澤的盧恩原石\n\n重量: 10"
+        },
+        {
+          "itemId": 4304,
+          "aegisName": "Tamruan_Card",
+          "name": "塔嚕安卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "盾擊和迴旋盾擊,傷害+10%,DEF+2。\n系列: 卡片\n裝備: 盾牌\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2639,
+      "aegisName": "C4_TAMRUAN",
+      "name": "憤怒塔嚕安",
+      "count": 2,
+      "respawnMinMs": 180000,
+      "respawnMaxMs": 180000,
+      "level": 73,
+      "hp": 18585,
+      "baseExp": 3830,
+      "jobExp": 10590,
+      "attackMin": 278,
+      "attackMax": 37,
+      "defense": 63,
+      "magicDefense": 30,
+      "size": "大型",
+      "race": "惡魔",
+      "element": "暗 3",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/championmobs.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 7301,
+          "aegisName": "Sword_Accessory",
+          "name": "紅色流蘇",
+          "ratePerTenThousand": 10000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "綁在刀柄底部的裝飾,有著多條的紅線。\n\n重量: 1"
+        },
+        {
+          "itemId": 7069,
+          "aegisName": "Broken_Armor_Piece",
+          "name": "破裂的鎧甲一角",
+          "ratePerTenThousand": 7500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "看起來再也不能使用的鎧甲破碎的一角,也許廢鐵商人會購買也不一定。\n重量: 1"
+        },
+        {
+          "itemId": 21015,
+          "aegisName": "Scarlet_Twohand_Sword",
+          "name": "緋紅色雙手巨劍",
+          "ratePerTenThousand": 250,
+          "type": "武器",
+          "weight": 170,
+          "attack": 170,
+          "defense": 0,
+          "slots": 2,
+          "description": "劍身上散發著紅光的雙手劍\nATK增加至(精煉值*精煉值) (精煉上限為+15)\nMATK增加至(精煉值*精煉值)/2 (精煉上限為+15)\n角色等級70以上: BaseLv每上升10時ATK+5。\n系列: 雙手劍 攻擊: 170\n重量: 170\n武器等級: 3\n要求等級: 70\n裝備: 劍士系列"
+        },
+        {
+          "itemId": 1155,
+          "aegisName": "Bastard_Sword_",
+          "name": "亞爾特劍",
+          "ratePerTenThousand": 20,
+          "type": "武器",
+          "weight": 160,
+          "attack": 115,
+          "defense": 0,
+          "slots": 3,
+          "description": "不論什麼砍殺或是刺殺時都很好使用的雙手劍\n系列: 雙手劍  攻擊: 115\n重量: 160\n武器等級: 2\n要求等級: 18\n裝備: 劍士系列"
+        },
+        {
+          "itemId": 2315,
+          "aegisName": "Chain_Mail_",
+          "name": "鋼鐵鎖子甲",
+          "ratePerTenThousand": 10,
+          "type": "防具",
+          "weight": 330,
+          "attack": 0,
+          "defense": 55,
+          "slots": 1,
+          "description": "堅硬的金屬編成的鎧甲。\n系列: 鎧甲  防禦: 55\n重量: 330\n裝備: 劍士系列/商人系列/盜賊系列"
+        },
+        {
+          "itemId": 12736,
+          "aegisName": "Runstone_Mystic",
+          "name": "神秘盧恩原石",
+          "ratePerTenThousand": 750,
+          "type": "恢復道具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "神祕色澤的盧恩原石\n\n重量: 10"
+        },
+        {
+          "itemId": 4304,
+          "aegisName": "Tamruan_Card",
+          "name": "塔嚕安卡片",
+          "ratePerTenThousand": 5,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "盾擊和迴旋盾擊,傷害+10%,DEF+2。\n系列: 卡片\n裝備: 盾牌\n重量: 1"
+        }
+      ]
+    }
+  ]
+}

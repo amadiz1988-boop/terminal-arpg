@@ -1,6 +1,15 @@
 {
   "id": "iz_ac02_a",
-  "name": "魔法學院2樓",
+  "name": "學院 2樓",
+  "category": "QUEST_GATED",
+  "dungeon": null,
   "totalMonsters": 0,
+  "normalMonsterCount": 0,
+  "levelRange": null,
+  "fullLevelRange": null,
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [],
+  "resourceMonsters": [],
+  "bossMonsters": [],
   "monsters": []
 }

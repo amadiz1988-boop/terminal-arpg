@@ -1,6 +1,7 @@
 {
   "id": "pay_dun04",
   "name": "斐揚洞穴 5樓",
+  "category": "SERVICE_ONLY",
   "dungeon": {
     "id": "payon_cave",
     "name": "斐揚洞穴",

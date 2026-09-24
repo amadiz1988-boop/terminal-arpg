@@ -1,0 +1,591 @@
+{
+  "id": "ein_fild06",
+  "name": "艾音布羅克原野",
+  "category": "SERVICE_ONLY",
+  "dungeon": null,
+  "totalMonsters": 152,
+  "normalMonsterCount": 152,
+  "levelRange": {
+    "min": 81,
+    "max": 85
+  },
+  "fullLevelRange": {
+    "min": 81,
+    "max": 85
+  },
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [
+    {
+      "id": 1628,
+      "name": "摩爾",
+      "level": 85,
+      "count": 100
+    },
+    {
+      "id": 1613,
+      "name": "金屬波利",
+      "level": 81,
+      "count": 30
+    }
+  ],
+  "resourceMonsters": [
+    {
+      "id": 1078,
+      "name": "紅色植物",
+      "level": 1,
+      "count": 10
+    },
+    {
+      "id": 1081,
+      "name": "黃草",
+      "level": 1,
+      "count": 10
+    }
+  ],
+  "bossMonsters": [],
+  "monsters": [
+    {
+      "id": 1078,
+      "aegisName": "RED_PLANT",
+      "name": "紅色植物",
+      "count": 10,
+      "respawnMinMs": 60000,
+      "respawnMaxMs": 120000,
+      "level": 1,
+      "hp": 5,
+      "baseExp": 0,
+      "jobExp": 0,
+      "attackMin": 1,
+      "attackMax": 1,
+      "defense": 100,
+      "magicDefense": 99,
+      "size": "小型",
+      "race": "植物",
+      "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": true,
+      "sourceFiles": [
+        "npc/re/mobs/fields/einbroch.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 507,
+          "aegisName": "Red_Herb",
+          "name": "紅色藥草",
+          "ratePerTenThousand": 5000,
+          "type": "恢復道具",
+          "weight": 3,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在治療傷處上有一定功效的珍貴藥草,可恢復少量的HP。\n\n重量: 3"
+        },
+        {
+          "itemId": 712,
+          "aegisName": "Flower",
+          "name": "花",
+          "ratePerTenThousand": 500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "沒有名稱的花。沒有香味也沒有荊棘。\n\n重量: 1"
+        },
+        {
+          "itemId": 711,
+          "aegisName": "Shoot",
+          "name": "芽苗",
+          "ratePerTenThousand": 500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "剛剛才從這個世上出生的幼小植物,單純無瑕的樣子非常可愛。\n\n重量: 1"
+        },
+        {
+          "itemId": 905,
+          "aegisName": "Stem",
+          "name": "植物梗",
+          "ratePerTenThousand": 500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "植物細長的梗,可以當做藥材,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 7933,
+          "aegisName": "Poison_Herb_Rantana",
+          "name": "毒馬櫻丹 ",
+          "ratePerTenThousand": 150,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "危險: 看起來美味的紅果實, 其味道猶如動物的排泄物。\n\n重量: 1"
+        },
+        {
+          "itemId": 914,
+          "aegisName": "Fluff",
+          "name": "毛",
+          "ratePerTenThousand": 250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "小型怪身上的毛,可以用來做衣服的原料,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 708,
+          "aegisName": "Ment",
+          "name": "曼特花",
+          "ratePerTenThousand": 50,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可消除記憶的白色植物,含有讓人忘卻苦痛的成分。\n\n重量: 1"
+        },
+        {
+          "itemId": 2269,
+          "aegisName": "Centimental_Flower",
+          "name": "花葉",
+          "ratePerTenThousand": 20,
+          "type": "防具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "小小的花葉,含在嘴裡會讓人有幸福浪漫的感覺。\n受到植物型敵人的攻擊時, 可-3%的傷害度。\n系列: 頭具  防禦: 0\n位置: 下  重量: 10\n裝備: 初學者以外的全職業"
+        }
+      ]
+    },
+    {
+      "id": 1081,
+      "aegisName": "YELLOW_PLANT",
+      "name": "黃草",
+      "count": 10,
+      "respawnMinMs": 60000,
+      "respawnMaxMs": 120000,
+      "level": 1,
+      "hp": 6,
+      "baseExp": 0,
+      "jobExp": 0,
+      "attackMin": 1,
+      "attackMax": 1,
+      "defense": 100,
+      "magicDefense": 99,
+      "size": "小型",
+      "race": "植物",
+      "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": true,
+      "sourceFiles": [
+        "npc/re/mobs/fields/einbroch.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 508,
+          "aegisName": "Yellow_Herb",
+          "name": "黃色藥草",
+          "ratePerTenThousand": 2750,
+          "type": "恢復道具",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在治療傷處上有相當功效的珍貴藥草,可恢復少量的HP。\n\n重量: 5"
+        },
+        {
+          "itemId": 712,
+          "aegisName": "Flower",
+          "name": "花",
+          "ratePerTenThousand": 500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "沒有名稱的花。沒有香味也沒有荊棘。\n\n重量: 1"
+        },
+        {
+          "itemId": 711,
+          "aegisName": "Shoot",
+          "name": "芽苗",
+          "ratePerTenThousand": 500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "剛剛才從這個世上出生的幼小植物,單純無瑕的樣子非常可愛。\n\n重量: 1"
+        },
+        {
+          "itemId": 905,
+          "aegisName": "Stem",
+          "name": "植物梗",
+          "ratePerTenThousand": 250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "植物細長的梗,可以當做藥材,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 7935,
+          "aegisName": "Poison_Herb_Seratum",
+          "name": "蛇足毒草",
+          "ratePerTenThousand": 150,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "危險: 不像美麗的外表, 卻沒有香味。\n\n重量: 1"
+        },
+        {
+          "itemId": 707,
+          "aegisName": "Singing_Plant",
+          "name": "哀唱草",
+          "ratePerTenThousand": 3,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "一到有滿月的夜晚就會獨自唱著哀傷的歌曲的神秘植物,傳說以前有位少女,她唱著歌思念離開很久的戀人,但是心愛的他終究沒有歸來,等著等著她就這樣化成了一株草。\n\n重量: 1"
+        },
+        {
+          "itemId": 914,
+          "aegisName": "Fluff",
+          "name": "毛",
+          "ratePerTenThousand": 250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "小型怪身上的毛,可以用來做衣服的原料,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 2269,
+          "aegisName": "Centimental_Flower",
+          "name": "花葉",
+          "ratePerTenThousand": 1,
+          "type": "防具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "小小的花葉,含在嘴裡會讓人有幸福浪漫的感覺。\n受到植物型敵人的攻擊時, 可-3%的傷害度。\n系列: 頭具  防禦: 0\n位置: 下  重量: 10\n裝備: 初學者以外的全職業"
+        }
+      ]
+    },
+    {
+      "id": 1613,
+      "aegisName": "METALING",
+      "name": "金屬波利",
+      "count": 30,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 81,
+      "hp": 3862,
+      "baseExp": 954,
+      "jobExp": 889,
+      "attackMin": 261,
+      "attackMax": 39,
+      "defense": 69,
+      "magicDefense": 28,
+      "size": "小型",
+      "race": "無形",
+      "element": "無 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/einbroch.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 7325,
+          "aegisName": "Tube",
+          "name": "軟管",
+          "ratePerTenThousand": 2000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可讓液體或是氣體狀態的某樣東西,可通過的小管,非常柔軟的管子。\n\n重量: 1"
+        },
+        {
+          "itemId": 1002,
+          "aegisName": "Iron_Ore",
+          "name": "鐵礦石",
+          "ratePerTenThousand": 500,
+          "type": "其他",
+          "weight": 15,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "含有鐵成分的礦石,提煉的話可得到鐵。\n\n重量: 15"
+        },
+        {
+          "itemId": 998,
+          "aegisName": "Iron",
+          "name": "鐵",
+          "ratePerTenThousand": 250,
+          "type": "其他",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "除了硬度夠,它也較為輕薄,與其他金屬比較起來,加工較容易。\n\n重量: 5"
+        },
+        {
+          "itemId": 7126,
+          "aegisName": "Large_Jellopy",
+          "name": "巨大傑勒比結晶",
+          "ratePerTenThousand": 500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "不知道是屬於那裡的。反正是一個大塊傑勒比結晶\n\n重量: 1"
+        },
+        {
+          "itemId": 7317,
+          "aegisName": "Screw",
+          "name": "生鏽的螺絲",
+          "ratePerTenThousand": 100,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "被丟棄的某個物品的一部份,好好擦乾淨的話也許還可以使用。\n\n重量: 1"
+        },
+        {
+          "itemId": 13127,
+          "aegisName": "Scarlet_Revolver",
+          "name": "緋紅色左輪手槍",
+          "ratePerTenThousand": 50,
+          "type": "武器",
+          "weight": 100,
+          "attack": 100,
+          "defense": 0,
+          "slots": 2,
+          "description": "槍身上散發著紅光的手槍。\nATK增加至(精煉值*精煉值) (精煉上限為+15)\n角色等級70以上: BaseLv每上升10時ATK+5。\n系列: 矛枝類 攻擊: 100\n重量: 100\n武器等級: 3\n要求等級: 70\n裝備: 神槍手系列"
+        },
+        {
+          "itemId": 7312,
+          "aegisName": "Jubilee",
+          "name": "朱畢雷",
+          "ratePerTenThousand": 2500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從怪物身上可以獲得的結晶,上面寫著 '慶祝'這兩個字。\n\n重量: 1"
+        },
+        {
+          "itemId": 4341,
+          "aegisName": "Metaling_Card",
+          "name": "金屬波利卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "物理攻擊時,有機率會使用卸除武器 1技能\n系列: 卡片\n裝備: 武器\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1628,
+      "aegisName": "MOLE",
+      "name": "摩爾",
+      "count": 100,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 85,
+      "hp": 4390,
+      "baseExp": 1068,
+      "jobExp": 953,
+      "attackMin": 337,
+      "attackMax": 49,
+      "defense": 82,
+      "magicDefense": 16,
+      "size": "小型",
+      "race": "動物",
+      "element": "地 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/einbroch.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 1017,
+          "aegisName": "Moustache_Of_Mole",
+          "name": "鼠鬚",
+          "ratePerTenThousand": 2500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "剪下鼠類鬍鬚所得到的東西,可向收集商購賣。\n\n重量: 1"
+        },
+        {
+          "itemId": 1018,
+          "aegisName": "Nail_Of_Mole",
+          "name": "鼠指甲",
+          "ratePerTenThousand": 2500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "鼠類的手指甲, 因為常用手指甲來挖地,所以相當的尖硬。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 5119,
+          "aegisName": "Super_Novice_Hat_",
+          "name": "超級初學者之帽",
+          "ratePerTenThousand": 25,
+          "type": "防具",
+          "weight": 40,
+          "attack": 0,
+          "defense": 8,
+          "slots": 1,
+          "description": "象徵著超級初學者的帽子,和超級初學者的服裝很搭配的設計\n所有屬性+1。\n系列: 頭具 防禦: 8\n位置: 頭上 重量: 40\n要求等級: 40\n裝備: 初學者系列"
+        },
+        {
+          "itemId": 13127,
+          "aegisName": "Scarlet_Revolver",
+          "name": "緋紅色左輪手槍",
+          "ratePerTenThousand": 50,
+          "type": "武器",
+          "weight": 100,
+          "attack": 100,
+          "defense": 0,
+          "slots": 2,
+          "description": "槍身上散發著紅光的手槍。\nATK增加至(精煉值*精煉值) (精煉上限為+15)\n角色等級70以上: BaseLv每上升10時ATK+5。\n系列: 矛枝類 攻擊: 100\n重量: 100\n武器等級: 3\n要求等級: 70\n裝備: 神槍手系列"
+        },
+        {
+          "itemId": 4343,
+          "aegisName": "Mole_Card",
+          "name": "摩爾卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "LUK+2。\n當和拉鏈熊, 小花豹, 奈吉鳥, 摩卡卡片一起裝備時,金錢攻擊傷害+20%,攻擊時Sp 1恢復, MHP+7%,MSP+7%,STR+4。\n鍊金術師裝備時,物理攻擊時,有機率使用自動念咒、 速度激發 1技能. 當抓到怪物時有機率會得到護貝藥、植物梗\n系列: 卡片\n裝備: 頭具\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2745,
+      "aegisName": "C2_MOLE",
+      "name": "雄壯摩爾",
+      "count": 2,
+      "respawnMinMs": 180000,
+      "respawnMaxMs": 180000,
+      "level": 85,
+      "hp": 43900,
+      "baseExp": 5340,
+      "jobExp": 14295,
+      "attackMin": 404,
+      "attackMax": 49,
+      "defense": 82,
+      "magicDefense": 16,
+      "size": "小型",
+      "race": "動物",
+      "element": "地 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/championmobs.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 1017,
+          "aegisName": "Moustache_Of_Mole",
+          "name": "鼠鬚",
+          "ratePerTenThousand": 10000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "剪下鼠類鬍鬚所得到的東西,可向收集商購賣。\n\n重量: 1"
+        },
+        {
+          "itemId": 1018,
+          "aegisName": "Nail_Of_Mole",
+          "name": "鼠指甲",
+          "ratePerTenThousand": 10000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "鼠類的手指甲, 因為常用手指甲來挖地,所以相當的尖硬。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 5119,
+          "aegisName": "Super_Novice_Hat_",
+          "name": "超級初學者之帽",
+          "ratePerTenThousand": 125,
+          "type": "防具",
+          "weight": 40,
+          "attack": 0,
+          "defense": 8,
+          "slots": 1,
+          "description": "象徵著超級初學者的帽子,和超級初學者的服裝很搭配的設計\n所有屬性+1。\n系列: 頭具 防禦: 8\n位置: 頭上 重量: 40\n要求等級: 40\n裝備: 初學者系列"
+        },
+        {
+          "itemId": 13127,
+          "aegisName": "Scarlet_Revolver",
+          "name": "緋紅色左輪手槍",
+          "ratePerTenThousand": 250,
+          "type": "武器",
+          "weight": 100,
+          "attack": 100,
+          "defense": 0,
+          "slots": 2,
+          "description": "槍身上散發著紅光的手槍。\nATK增加至(精煉值*精煉值) (精煉上限為+15)\n角色等級70以上: BaseLv每上升10時ATK+5。\n系列: 矛枝類 攻擊: 100\n重量: 100\n武器等級: 3\n要求等級: 70\n裝備: 神槍手系列"
+        },
+        {
+          "itemId": 4343,
+          "aegisName": "Mole_Card",
+          "name": "摩爾卡片",
+          "ratePerTenThousand": 5,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "LUK+2。\n當和拉鏈熊, 小花豹, 奈吉鳥, 摩卡卡片一起裝備時,金錢攻擊傷害+20%,攻擊時Sp 1恢復, MHP+7%,MSP+7%,STR+4。\n鍊金術師裝備時,物理攻擊時,有機率使用自動念咒、 速度激發 1技能. 當抓到怪物時有機率會得到護貝藥、植物梗\n系列: 卡片\n裝備: 頭具\n重量: 1"
+        }
+      ]
+    }
+  ]
+}

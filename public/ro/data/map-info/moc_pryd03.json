@@ -1,6 +1,7 @@
 {
   "id": "moc_pryd03",
   "name": "夢羅克金字塔 3樓",
+  "category": "SERVICE_ONLY",
   "dungeon": {
     "id": "morocc_pyramid",
     "name": "夢羅克金字塔",

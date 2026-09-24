@@ -1,0 +1,305 @@
+{
+  "id": "verus03",
+  "name": "貝魯茲 中央廣場",
+  "category": "SERVICE_ONLY",
+  "dungeon": null,
+  "totalMonsters": 150,
+  "normalMonsterCount": 150,
+  "levelRange": {
+    "min": 155,
+    "max": 168
+  },
+  "fullLevelRange": {
+    "min": 100,
+    "max": 168
+  },
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [
+    {
+      "id": 3155,
+      "name": "修繕機器人",
+      "level": 155,
+      "count": 50
+    },
+    {
+      "id": 3156,
+      "name": "勘查機器人",
+      "level": 168,
+      "count": 50
+    }
+  ],
+  "resourceMonsters": [
+    {
+      "id": 3159,
+      "name": "違法傳單",
+      "level": 100,
+      "count": 40
+    }
+  ],
+  "bossMonsters": [],
+  "monsters": [
+    {
+      "id": 3158,
+      "aegisName": "RUIN_BELIEVER2",
+      "name": "滅亡祈福會信徒",
+      "count": 10,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 100,
+      "hp": 61350,
+      "baseExp": 4666,
+      "jobExp": 3874,
+      "attackMin": 993,
+      "attackMax": 250,
+      "defense": 91,
+      "magicDefense": 50,
+      "size": "中型",
+      "race": "Demihuman",
+      "element": "無 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/verus.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 6753,
+          "aegisName": "Sign_Of_Destruction",
+          "name": "滅亡信物",
+          "ratePerTenThousand": 10000,
+          "type": "其他",
+          "weight": 0,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "不可與其他帳號交易的物品\n滅亡祈福會的信徒隨身攜帶的信物。\n重量: 0"
+        },
+        {
+          "itemId": 6961,
+          "aegisName": "LargeScrap",
+          "name": "大型廢鐵",
+          "ratePerTenThousand": 50,
+          "type": "其他",
+          "weight": 100,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "多少還有用途的廢鐵, 應該會有人收購吧?!\n重量: 100"
+        },
+        {
+          "itemId": 6962,
+          "aegisName": "OldTank",
+          "name": "老舊油桶",
+          "ratePerTenThousand": 50,
+          "type": "其他",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "油桶看起來有點老舊, 但裡面還有剩餘的燃料, 應該還可使用。\n重量: 10"
+        }
+      ]
+    },
+    {
+      "id": 3159,
+      "aegisName": "ILLEGAL_PROMOTION",
+      "name": "違法傳單",
+      "count": 40,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 100,
+      "hp": 10,
+      "baseExp": 0,
+      "jobExp": 0,
+      "attackMin": 1,
+      "attackMax": 1,
+      "defense": 1,
+      "magicDefense": 50,
+      "size": "小型",
+      "race": "無形",
+      "element": "無 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": true,
+      "sourceFiles": [
+        "npc/re/mobs/verus.txt"
+      ],
+      "drops": []
+    },
+    {
+      "id": 3155,
+      "aegisName": "REPAIR_ROBOT",
+      "name": "修繕機器人",
+      "count": 50,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 155,
+      "hp": 154760,
+      "baseExp": 11748,
+      "jobExp": 13237,
+      "attackMin": 2051,
+      "attackMax": 216,
+      "defense": 99,
+      "magicDefense": 55,
+      "size": "小型",
+      "race": "植物",
+      "element": "風 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/verus.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 25728,
+          "aegisName": "Shadowdecon_Ore",
+          "name": "影子神秘原石",
+          "ratePerTenThousand": 50,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以打造影子神秘金屬的原石, 可以提煉用於製作特殊裝備的影子神祕金屬。\n\n重量 : 1"
+        },
+        {
+          "itemId": 25730,
+          "aegisName": "Zelunium_Ore",
+          "name": "鍺金原石",
+          "ratePerTenThousand": 50,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以打造鍺金石的原石, 可以提煉用於製作各類武器的鍺金石。\n\n重量 : 1"
+        },
+        {
+          "itemId": 1002,
+          "aegisName": "Iron_Ore",
+          "name": "鐵礦石",
+          "ratePerTenThousand": 250,
+          "type": "其他",
+          "weight": 15,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "含有鐵成分的礦石,提煉的話可得到鐵。\n\n重量: 15"
+        },
+        {
+          "itemId": 6961,
+          "aegisName": "LargeScrap",
+          "name": "大型廢鐵",
+          "ratePerTenThousand": 50,
+          "type": "其他",
+          "weight": 100,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "多少還有用途的廢鐵, 應該會有人收購吧?!\n重量: 100"
+        },
+        {
+          "itemId": 7507,
+          "aegisName": "Sturdy_Iron_Piece",
+          "name": "堅硬鐵碎片",
+          "ratePerTenThousand": 250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "四角形的鐵碎片感覺上有點生鏽但看起來很堅固\n\n重量: 1"
+        },
+        {
+          "itemId": 7319,
+          "aegisName": "Old_Steel_Plate",
+          "name": "老舊的鐵板",
+          "ratePerTenThousand": 2000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "接合部份因老舊掉落的鐵板,要補任何一個缺口的話滿好使用的樣子\n\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 3156,
+      "aegisName": "EXPLORATION_ROVER",
+      "name": "勘查機器人",
+      "count": 50,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 168,
+      "hp": 293640,
+      "baseExp": 18172,
+      "jobExp": 35065,
+      "attackMin": 2513,
+      "attackMax": 802,
+      "defense": 105,
+      "magicDefense": 41,
+      "size": "大型",
+      "race": "Demihuman",
+      "element": "無 4",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/verus.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 998,
+          "aegisName": "Iron",
+          "name": "鐵",
+          "ratePerTenThousand": 5000,
+          "type": "其他",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "除了硬度夠,它也較為輕薄,與其他金屬比較起來,加工較容易。\n\n重量: 5"
+        },
+        {
+          "itemId": 756,
+          "aegisName": "Oridecon_Stone",
+          "name": "神之金屬原石",
+          "ratePerTenThousand": 1,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "是被稱為神之金屬的礦石。相當稀少,且得來不易,可以說是相當珍貴的物品。\n\n重量: 20"
+        },
+        {
+          "itemId": 999,
+          "aegisName": "Steel",
+          "name": "鋼鐵",
+          "ratePerTenThousand": 1,
+          "type": "其他",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "將鐵浸泡幾次特殊藥水後,可以使其強度更高,製造出來的武器或防具硬度更高。\n\n重量: 10"
+        },
+        {
+          "itemId": 6961,
+          "aegisName": "LargeScrap",
+          "name": "大型廢鐵",
+          "ratePerTenThousand": 1,
+          "type": "其他",
+          "weight": 100,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "多少還有用途的廢鐵, 應該會有人收購吧?!\n重量: 100"
+        }
+      ]
+    }
+  ]
+}

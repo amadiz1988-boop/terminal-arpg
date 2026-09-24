@@ -1,0 +1,506 @@
+{
+  "id": "dic_dun01",
+  "name": "卡米達隧道",
+  "category": "SERVICE_ONLY",
+  "dungeon": null,
+  "totalMonsters": 127,
+  "normalMonsterCount": 127,
+  "levelRange": {
+    "min": 125,
+    "max": 134
+  },
+  "fullLevelRange": {
+    "min": 125,
+    "max": 134
+  },
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [
+    {
+      "id": 2083,
+      "name": "獨角甲蟲",
+      "level": 130,
+      "count": 50
+    },
+    {
+      "id": 2084,
+      "name": "雙角甲蟲",
+      "level": 134,
+      "count": 45
+    },
+    {
+      "id": 2088,
+      "name": "獨角甲蟲卵",
+      "level": 125,
+      "count": 15
+    },
+    {
+      "id": 2089,
+      "name": "雙角甲蟲卵",
+      "level": 126,
+      "count": 15
+    }
+  ],
+  "resourceMonsters": [],
+  "bossMonsters": [],
+  "monsters": [
+    {
+      "id": 2088,
+      "aegisName": "HORN_SCARABA_EGG",
+      "name": "獨角甲蟲卵",
+      "count": 15,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 125,
+      "hp": 63000,
+      "baseExp": 2600,
+      "jobExp": 1980,
+      "attackMin": 1,
+      "attackMax": 1,
+      "defense": 230,
+      "magicDefense": 55,
+      "size": "小型",
+      "race": "昆蟲",
+      "element": "無 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/dic_dun.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 7032,
+          "aegisName": "Piece_Of_Egg_Shell",
+          "name": "蛋殼碎片",
+          "ratePerTenThousand": 2500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "破掉的蛋殼碎片,賣給收集品商人。\n\n重量: 1"
+        },
+        {
+          "itemId": 518,
+          "aegisName": "Honey",
+          "name": "蜂蜜",
+          "ratePerTenThousand": 50,
+          "type": "恢復道具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "味道香甜的液體,營養價值相當高,常被拿來治療用 可恢復少量HP 與 SP。\n\n重量: 10"
+        },
+        {
+          "itemId": 985,
+          "aegisName": "Elunium",
+          "name": "鋁",
+          "ratePerTenThousand": 5,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "很輕且沒有毒性的金屬。常被拿來作成盔甲,以此製成的所有防具將變成更強。\n\n重量: 20"
+        }
+      ]
+    },
+    {
+      "id": 2089,
+      "aegisName": "HORN_SCARABA2_EGG",
+      "name": "雙角甲蟲卵",
+      "count": 15,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 126,
+      "hp": 66000,
+      "baseExp": 2600,
+      "jobExp": 1980,
+      "attackMin": 1,
+      "attackMax": 1,
+      "defense": 250,
+      "magicDefense": 62,
+      "size": "小型",
+      "race": "昆蟲",
+      "element": "無 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/dic_dun.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 7032,
+          "aegisName": "Piece_Of_Egg_Shell",
+          "name": "蛋殼碎片",
+          "ratePerTenThousand": 2500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "破掉的蛋殼碎片,賣給收集品商人。\n\n重量: 1"
+        },
+        {
+          "itemId": 518,
+          "aegisName": "Honey",
+          "name": "蜂蜜",
+          "ratePerTenThousand": 50,
+          "type": "恢復道具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "味道香甜的液體,營養價值相當高,常被拿來治療用 可恢復少量HP 與 SP。\n\n重量: 10"
+        },
+        {
+          "itemId": 985,
+          "aegisName": "Elunium",
+          "name": "鋁",
+          "ratePerTenThousand": 5,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "很輕且沒有毒性的金屬。常被拿來作成盔甲,以此製成的所有防具將變成更強。\n\n重量: 20"
+        }
+      ]
+    },
+    {
+      "id": 2083,
+      "aegisName": "HORN_SCARABA",
+      "name": "獨角甲蟲",
+      "count": 50,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 130,
+      "hp": 51100,
+      "baseExp": 2610,
+      "jobExp": 2646,
+      "attackMin": 886,
+      "attackMax": 91,
+      "defense": 135,
+      "magicDefense": 20,
+      "size": "小型",
+      "race": "昆蟲",
+      "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/dic_dun.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 6324,
+          "aegisName": "Singlehorn_Helm",
+          "name": "獨角頭盔",
+          "ratePerTenThousand": 3250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "單個角裝飾而成的頭盔, 可以賣給收集品商人。\n重量：1"
+        },
+        {
+          "itemId": 1433,
+          "aegisName": "Imperial_Spear",
+          "name": "帝國長矛",
+          "ratePerTenThousand": 5,
+          "type": "武器",
+          "weight": 180,
+          "attack": 180,
+          "defense": 0,
+          "slots": 1,
+          "description": "刻有盧恩王國花紋的美麗槍。\n加農砲攻擊, 放逐攻擊的攻擊力+20%, 該技能的攻擊力精煉每+2時+3%。\n裝備帝國黃金盾後聖十字審判, 創世之光的攻擊力+10%。\nMATK+40\n系列: 單手矛 攻擊: 180\n重量: 180\n武器等級: 3\n要求等級: 102\n裝備: 皇家禁衛隊"
+        },
+        {
+          "itemId": 12735,
+          "aegisName": "Runstone_Ancient",
+          "name": "古代盧恩原石",
+          "ratePerTenThousand": 5,
+          "type": "恢復道具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "古代所製成的盧恩原石\n\n重量: 10"
+        },
+        {
+          "itemId": 7939,
+          "aegisName": "Elder_Branch",
+          "name": "古老樹枝",
+          "ratePerTenThousand": 50,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "生長在聖地的古老樹上採的小樹枝。\n\n重量: 1"
+        },
+        {
+          "itemId": 993,
+          "aegisName": "Yellow_Live",
+          "name": "地靈礦石",
+          "ratePerTenThousand": 50,
+          "type": "其他",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "綠色的小礦石塊。擁有地屬性,提煉後可以製作出地靈原石。\n\n重量: 5"
+        },
+        {
+          "itemId": 15129,
+          "aegisName": "Doram_High_Suit",
+          "name": "喵族高級外套",
+          "ratePerTenThousand": 20,
+          "type": "防具",
+          "weight": 80,
+          "attack": 0,
+          "defense": 100,
+          "slots": 1,
+          "description": "愛乾淨的喵族所喜愛的高級輕裝。\nMHP+10%, MSP+10%。\n精煉值每+2時, DEX+1、INT+1。\n搭配喵族高級外套, 喵族高級鞋子, 喵族高級斗篷時, \nMHP+3000, 詠唱不會中斷。\n固定詠唱 -20%。(依外套, 鞋子, 斗篷的精煉值總和固定詠唱會再減少)\n系列: 鎧甲 防禦: 100\n重量: 80\n要求等級: 140\n裝備: 喵族"
+        },
+        {
+          "itemId": 4505,
+          "aegisName": "Scaraba_Card",
+          "name": "甲蟲卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "MATK+20,MSP -1%。\n系列: 卡片\n裝備: 飾品\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2799,
+      "aegisName": "C1_HORN_SCARABA",
+      "name": "迅捷獨角甲蟲",
+      "count": 2,
+      "respawnMinMs": 180000,
+      "respawnMaxMs": 180000,
+      "level": 130,
+      "hp": 255500,
+      "baseExp": 13050,
+      "jobExp": 39699,
+      "attackMin": 1063,
+      "attackMax": 91,
+      "defense": 135,
+      "magicDefense": 20,
+      "size": "小型",
+      "race": "昆蟲",
+      "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/championmobs.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 6324,
+          "aegisName": "Singlehorn_Helm",
+          "name": "獨角頭盔",
+          "ratePerTenThousand": 10000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "單個角裝飾而成的頭盔, 可以賣給收集品商人。\n重量：1"
+        },
+        {
+          "itemId": 1433,
+          "aegisName": "Imperial_Spear",
+          "name": "帝國長矛",
+          "ratePerTenThousand": 25,
+          "type": "武器",
+          "weight": 180,
+          "attack": 180,
+          "defense": 0,
+          "slots": 1,
+          "description": "刻有盧恩王國花紋的美麗槍。\n加農砲攻擊, 放逐攻擊的攻擊力+20%, 該技能的攻擊力精煉每+2時+3%。\n裝備帝國黃金盾後聖十字審判, 創世之光的攻擊力+10%。\nMATK+40\n系列: 單手矛 攻擊: 180\n重量: 180\n武器等級: 3\n要求等級: 102\n裝備: 皇家禁衛隊"
+        },
+        {
+          "itemId": 12735,
+          "aegisName": "Runstone_Ancient",
+          "name": "古代盧恩原石",
+          "ratePerTenThousand": 25,
+          "type": "恢復道具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "古代所製成的盧恩原石\n\n重量: 10"
+        },
+        {
+          "itemId": 7939,
+          "aegisName": "Elder_Branch",
+          "name": "古老樹枝",
+          "ratePerTenThousand": 250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "生長在聖地的古老樹上採的小樹枝。\n\n重量: 1"
+        },
+        {
+          "itemId": 993,
+          "aegisName": "Yellow_Live",
+          "name": "地靈礦石",
+          "ratePerTenThousand": 250,
+          "type": "其他",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "綠色的小礦石塊。擁有地屬性,提煉後可以製作出地靈原石。\n\n重量: 5"
+        },
+        {
+          "itemId": 15129,
+          "aegisName": "Doram_High_Suit",
+          "name": "喵族高級外套",
+          "ratePerTenThousand": 30,
+          "type": "防具",
+          "weight": 80,
+          "attack": 0,
+          "defense": 100,
+          "slots": 1,
+          "description": "愛乾淨的喵族所喜愛的高級輕裝。\nMHP+10%, MSP+10%。\n精煉值每+2時, DEX+1、INT+1。\n搭配喵族高級外套, 喵族高級鞋子, 喵族高級斗篷時, \nMHP+3000, 詠唱不會中斷。\n固定詠唱 -20%。(依外套, 鞋子, 斗篷的精煉值總和固定詠唱會再減少)\n系列: 鎧甲 防禦: 100\n重量: 80\n要求等級: 140\n裝備: 喵族"
+        },
+        {
+          "itemId": 4505,
+          "aegisName": "Scaraba_Card",
+          "name": "甲蟲卡片",
+          "ratePerTenThousand": 5,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "MATK+20,MSP -1%。\n系列: 卡片\n裝備: 飾品\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2084,
+      "aegisName": "HORN_SCARABA2",
+      "name": "雙角甲蟲",
+      "count": 45,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 134,
+      "hp": 58900,
+      "baseExp": 2890,
+      "jobExp": 3000,
+      "attackMin": 1935,
+      "attackMax": 105,
+      "defense": 150,
+      "magicDefense": 38,
+      "size": "小型",
+      "race": "昆蟲",
+      "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/dic_dun.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 6323,
+          "aegisName": "Twinhorn_Helm",
+          "name": "雙角頭盔",
+          "ratePerTenThousand": 3250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "分出的兩個小角往兩端突起的頭盔, 可以賣給收集品商人。\n重量：1"
+        },
+        {
+          "itemId": 13061,
+          "aegisName": "Black_Wing",
+          "name": "齒輪短劍",
+          "ratePerTenThousand": 5,
+          "type": "武器",
+          "weight": 60,
+          "attack": 142,
+          "defense": 0,
+          "slots": 1,
+          "description": "由流氓公會製作的黑色齒輪狀短劍。\n致命威脅的攻擊力+30%, 自6精煉起每次精煉時該技能的攻擊力+2%, MATK+3.\n裝備黑貓墜子時HIT+5, MATK+5。使用面具:無力, 面具:憂鬱時SP 消耗量 -20 .\n系列: 短劍 攻擊: 142\n重量: 60\n武器等級: 3\n要求等級: 102\n裝備: 魅影追蹤者"
+        },
+        {
+          "itemId": 12735,
+          "aegisName": "Runstone_Ancient",
+          "name": "古代盧恩原石",
+          "ratePerTenThousand": 5,
+          "type": "恢復道具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "古代所製成的盧恩原石\n\n重量: 10"
+        },
+        {
+          "itemId": 7939,
+          "aegisName": "Elder_Branch",
+          "name": "古老樹枝",
+          "ratePerTenThousand": 50,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "生長在聖地的古老樹上採的小樹枝。\n\n重量: 1"
+        },
+        {
+          "itemId": 993,
+          "aegisName": "Yellow_Live",
+          "name": "地靈礦石",
+          "ratePerTenThousand": 50,
+          "type": "其他",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "綠色的小礦石塊。擁有地屬性,提煉後可以製作出地靈原石。\n\n重量: 5"
+        },
+        {
+          "itemId": 22084,
+          "aegisName": "Doram_High_Shoes",
+          "name": "喵族高級鞋子",
+          "ratePerTenThousand": 20,
+          "type": "防具",
+          "weight": 60,
+          "attack": 0,
+          "defense": 30,
+          "slots": 1,
+          "description": "依喵族的小腳而訂做的專屬鞋子。\nMHP+300, MSP+100。\n精煉值每+3時, HP恢復速度+20%, SP恢復速度+20%。\n系列: 鞋類 防禦: 30\n重量: 60\n要求等級: 140\n裝備: 喵族"
+        },
+        {
+          "itemId": 4505,
+          "aegisName": "Scaraba_Card",
+          "name": "甲蟲卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "MATK+20,MSP -1%。\n系列: 卡片\n裝備: 飾品\n重量: 1"
+        }
+      ]
+    }
+  ]
+}

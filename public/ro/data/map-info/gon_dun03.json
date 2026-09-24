@@ -1,0 +1,663 @@
+{
+  "id": "gon_dun03",
+  "name": "崑崙武陵道院",
+  "category": "SERVICE_ONLY",
+  "dungeon": null,
+  "totalMonsters": 148,
+  "normalMonsterCount": 148,
+  "levelRange": {
+    "min": 90,
+    "max": 97
+  },
+  "fullLevelRange": {
+    "min": 90,
+    "max": 97
+  },
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [
+    {
+      "id": 1416,
+      "name": "妖仙女",
+      "level": 97,
+      "count": 67
+    },
+    {
+      "id": 1412,
+      "name": "惡雲仙人",
+      "level": 96,
+      "count": 40
+    },
+    {
+      "id": 1413,
+      "name": "人蔘精",
+      "level": 90,
+      "count": 26
+    }
+  ],
+  "resourceMonsters": [
+    {
+      "id": 1082,
+      "name": "白草",
+      "level": 1,
+      "count": 13
+    }
+  ],
+  "bossMonsters": [],
+  "monsters": [
+    {
+      "id": 1082,
+      "aegisName": "WHITE_PLANT",
+      "name": "白草",
+      "count": 13,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 1,
+      "hp": 7,
+      "baseExp": 0,
+      "jobExp": 0,
+      "attackMin": 1,
+      "attackMax": 1,
+      "defense": 100,
+      "magicDefense": 99,
+      "size": "小型",
+      "race": "植物",
+      "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": true,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/gon_dun.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 509,
+          "aegisName": "White_Herb",
+          "name": "白色藥草",
+          "ratePerTenThousand": 2750,
+          "type": "恢復道具",
+          "weight": 7,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在治療傷處上功效相當顯著的珍貴藥草,可恢復少量的HP。\n\n重量: 7"
+        },
+        {
+          "itemId": 712,
+          "aegisName": "Flower",
+          "name": "花",
+          "ratePerTenThousand": 500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "沒有名稱的花。沒有香味也沒有荊棘。\n\n重量: 1"
+        },
+        {
+          "itemId": 631,
+          "aegisName": "Deadly_Noxious_Herb",
+          "name": "青嫩毒草",
+          "ratePerTenThousand": 10,
+          "type": "消耗品",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "喝飲清擁有劇毒的草, 是怪物毒魔菇最喜愛的食物。\n活動怪、小兵怪則無法認養。\n種類: 認養寵物物品\n重量: 5"
+        },
+        {
+          "itemId": 905,
+          "aegisName": "Stem",
+          "name": "植物梗",
+          "ratePerTenThousand": 1500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "植物細長的梗,可以當做藥材,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 7935,
+          "aegisName": "Poison_Herb_Seratum",
+          "name": "蛇足毒草",
+          "ratePerTenThousand": 150,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "危險: 不像美麗的外表, 卻沒有香味。\n\n重量: 1"
+        },
+        {
+          "itemId": 521,
+          "aegisName": "Leaflet_Of_Aloe",
+          "name": "蘆薈葉子",
+          "ratePerTenThousand": 25,
+          "type": "恢復道具",
+          "weight": 2,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "將蘆薈的葉子剪下收集在一起,可恢復定量的HP。\n\n重量: 2"
+        },
+        {
+          "itemId": 703,
+          "aegisName": "Hinalle",
+          "name": "西納雷花",
+          "ratePerTenThousand": 25,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "世界各地隨處都可見到的普通植物,雖沒什麼香味,外觀也不顯眼,卻可給很多人帶來淡淡喜悅。\n\n重量: 1"
+        },
+        {
+          "itemId": 2269,
+          "aegisName": "Centimental_Flower",
+          "name": "花葉",
+          "ratePerTenThousand": 1,
+          "type": "防具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "小小的花葉,含在嘴裡會讓人有幸福浪漫的感覺。\n受到植物型敵人的攻擊時, 可-3%的傷害度。\n系列: 頭具  防禦: 0\n位置: 下  重量: 10\n裝備: 初學者以外的全職業"
+        }
+      ]
+    },
+    {
+      "id": 1413,
+      "aegisName": "WILD_GINSENG",
+      "name": "人蔘精",
+      "count": 26,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 90,
+      "hp": 4381,
+      "baseExp": 1103,
+      "jobExp": 1038,
+      "attackMin": 325,
+      "attackMax": 71,
+      "defense": 56,
+      "magicDefense": 62,
+      "size": "小型",
+      "race": "植物",
+      "element": "火 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/gon_dun.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 520,
+          "aegisName": "Leaflet_Of_Hinal",
+          "name": "西納雷葉子",
+          "ratePerTenThousand": 1750,
+          "type": "恢復道具",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "味道清新涼爽,具有令人忘卻苦痛的效果, 可使體力恢復也就是恢復定量的HP。\n\n重量: 1"
+        },
+        {
+          "itemId": 521,
+          "aegisName": "Leaflet_Of_Aloe",
+          "name": "蘆薈葉子",
+          "ratePerTenThousand": 1750,
+          "type": "恢復道具",
+          "weight": 2,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "將蘆薈的葉子剪下收集在一起,可恢復定量的HP。\n\n重量: 2"
+        },
+        {
+          "itemId": 1033,
+          "aegisName": "Root_Of_Maneater",
+          "name": "噬人樹根",
+          "ratePerTenThousand": 1900,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "如筋肉或血管般結實的植物的根。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 1032,
+          "aegisName": "Blossom_Of_Maneater",
+          "name": "噬人樹花",
+          "ratePerTenThousand": 2400,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "像人一般擁有各種器官的花。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 6217,
+          "aegisName": "Mandragora_Flowerpot",
+          "name": "曼陀羅魔花盆",
+          "ratePerTenThousand": 400,
+          "type": "其他",
+          "weight": 0.1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "實驗之用的曼陀羅魔花盆, 警告: 絕對不可摘取\n重量: 0.1"
+        },
+        {
+          "itemId": 1995,
+          "aegisName": "Scarlet_Wire",
+          "name": "緋紅色鋼鐵鞭子",
+          "ratePerTenThousand": 50,
+          "type": "武器",
+          "weight": 80,
+          "attack": 80,
+          "defense": 0,
+          "slots": 2,
+          "description": "散發著紅光的鞭子。\nATK增加至(精煉值*精煉值) (精煉上限為+15)\n角色等級70以上: BaseLv每上升10時ATK+5。\n系列: 鞭子 攻擊: 80\n重量: 80\n武器等級: 3\n要求等級: 70\n裝備: 舞孃系列"
+        },
+        {
+          "itemId": 578,
+          "aegisName": "Strawberry",
+          "name": "草莓",
+          "ratePerTenThousand": 500,
+          "type": "恢復道具",
+          "weight": 2,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "酸甜的滋味,深受大家喜愛的紅色果實 可以恢復少量的 SP\n\n重量: 2"
+        },
+        {
+          "itemId": 4232,
+          "aegisName": "Wild_Ginseng_Card",
+          "name": "人蔘精卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "每次擊殺植物型怪時,有機率會掉落紅色藥草、黃色藥草、白色藥草。\n吃下藥草類物品時,HP恢復量+50%。\n系列: 卡片\n裝備: 飾品\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1412,
+      "aegisName": "EVIL_CLOUD_HERMIT",
+      "name": "惡雲仙人",
+      "count": 40,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 96,
+      "hp": 9727,
+      "baseExp": 1311,
+      "jobExp": 1240,
+      "attackMin": 456,
+      "attackMax": 30,
+      "defense": 66,
+      "magicDefense": 46,
+      "size": "大型",
+      "race": "無形",
+      "element": "無 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/gon_dun.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 7162,
+          "aegisName": "Cloud_Piece",
+          "name": "片雲",
+          "ratePerTenThousand": 2328,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "把片雲裝在瓶子裡,看著這些瓶子裡的片雲變成幾何的樣子就令人入迷。\n\n重量: 1"
+        },
+        {
+          "itemId": 548,
+          "aegisName": "Cheese",
+          "name": "起士",
+          "ratePerTenThousand": 2800,
+          "type": "恢復道具",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "補充部份SP的,獨特香味特徵的小吃\n\n重量: 5"
+        },
+        {
+          "itemId": 550,
+          "aegisName": "Popped_Rice",
+          "name": "仙貝",
+          "ratePerTenThousand": 2250,
+          "type": "恢復道具",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "吃下去還是有點空虛感,女性們為了減肥時經常食用,幾乎沒有什麼營養價值\n\n重量: 1"
+        },
+        {
+          "itemId": 553,
+          "aegisName": "Bun",
+          "name": "包子",
+          "ratePerTenThousand": 3400,
+          "type": "恢復道具",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在東方的國家從老早以前開始喜愛吃的一種,熱呼呼的裡頭包滿著香香的肉餡,有著看起來很好吃的外表。最近裡頭也包有別種口味等,有著各式各樣示範的食物。\n\n重量: 5"
+        },
+        {
+          "itemId": 1908,
+          "aegisName": "Guitar_",
+          "name": "吉他",
+          "ratePerTenThousand": 1,
+          "type": "武器",
+          "weight": 90,
+          "attack": 142,
+          "defense": 0,
+          "slots": 1,
+          "description": "用手指撥拉絃彈奏的絃樂器。\n系列: 樂器  攻擊: 142\n重量: 90\n武器等級: 3\n要求等級: 27\n裝備: 吟遊詩人"
+        },
+        {
+          "itemId": 757,
+          "aegisName": "Elunium_Stone",
+          "name": "鋁原石",
+          "ratePerTenThousand": 75,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以拿來煉鋁的礦石,拿來提煉作成盔甲。\n\n重量: 20"
+        },
+        {
+          "itemId": 693,
+          "aegisName": "Wind_Scroll_1_5",
+          "name": "雷擊術等級5",
+          "ratePerTenThousand": 50,
+          "type": "延遲消耗品",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "以古代魔道學精髓而製成,並有著魔法師咒文的紙張,有著風屬性的魔法,可使用等級5的雷擊術。\n\n重量: 1"
+        },
+        {
+          "itemId": 4262,
+          "aegisName": "Evil_Cloud_Hermit_Card",
+          "name": "惡雲仙人卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "每次擊殺植物型怪時,有機率得到'憂鬱的箱子'。\n系列: 卡片\n裝備: 飾品\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1416,
+      "aegisName": "WICKED_NYMPH",
+      "name": "妖仙女",
+      "count": 67,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 97,
+      "hp": 9832,
+      "baseExp": 1330,
+      "jobExp": 1259,
+      "attackMin": 382,
+      "attackMax": 128,
+      "defense": 46,
+      "magicDefense": 45,
+      "size": "中型",
+      "race": "惡魔",
+      "element": "暗 3",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/gon_dun.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 7165,
+          "aegisName": "Limpid_Celestial_Robe",
+          "name": "害羞之服",
+          "ratePerTenThousand": 1989,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "透明且可以看到裡面的衣服。非常的輕而薄,它飄動的樣子很美。\n\n重量: 1"
+        },
+        {
+          "itemId": 7166,
+          "aegisName": "Soft_Silk_Cloth",
+          "name": "柔軟的綢緞布",
+          "ratePerTenThousand": 690,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "非常柔軟當皮膚碰到時, 感觸很好的綢緞所做成的布。\n\n重量: 1"
+        },
+        {
+          "itemId": 984,
+          "aegisName": "Oridecon",
+          "name": "神之金屬",
+          "ratePerTenThousand": 5,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "被稱為神之金屬的神秘金屬,比什麼東西都堅硬,用它來製造武器可以得到相當強大的破壞力,可以強化等級三和等級四的武器。\n\n重量: 20"
+        },
+        {
+          "itemId": 1939,
+          "aegisName": "Scarlet_Viollin",
+          "name": "緋紅色小提琴",
+          "ratePerTenThousand": 50,
+          "type": "武器",
+          "weight": 80,
+          "attack": 80,
+          "defense": 0,
+          "slots": 2,
+          "description": "散發著紅光的小提琴。\nATK增加至(精煉值*精煉值) (精煉上限為+15)\n角色等級70以上: BaseLv每上升10時ATK+5。\n系列: 樂器 攻擊: 80\n重量: 80\n武器等級: 3\n要求等級: 70\n裝備: 吟遊詩人系列"
+        },
+        {
+          "itemId": 1995,
+          "aegisName": "Scarlet_Wire",
+          "name": "緋紅色鋼鐵鞭子",
+          "ratePerTenThousand": 50,
+          "type": "武器",
+          "weight": 80,
+          "attack": 80,
+          "defense": 0,
+          "slots": 2,
+          "description": "散發著紅光的鞭子。\nATK增加至(精煉值*精煉值) (精煉上限為+15)\n角色等級70以上: BaseLv每上升10時ATK+5。\n系列: 鞭子 攻擊: 80\n重量: 80\n武器等級: 3\n要求等級: 70\n裝備: 舞孃系列"
+        },
+        {
+          "itemId": 12002,
+          "aegisName": "Holy_Scroll_1_5",
+          "name": "治癒術等級5",
+          "ratePerTenThousand": 50,
+          "type": "延遲消耗品",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "經過崇古的祭司洗禮過的紙張,並有著聖屬性的魔法,可使用等級5的治癒術。\n\n重量: 1"
+        },
+        {
+          "itemId": 1918,
+          "aegisName": "Oriental_Lute",
+          "name": "琵琶",
+          "ratePerTenThousand": 5,
+          "type": "武器",
+          "weight": 120,
+          "attack": 150,
+          "defense": 0,
+          "slots": 0,
+          "description": "在斐揚、天津町、龍之城等地分怖的撥旋樂器,主奏的方式被遺忘了,目前得知沒有一個人會演奏它的.\n奧義箭亂舞、樂器攻擊,攻擊力+10%。\n系列: 樂器  攻擊: 150\n重量: 120 屬性 :無\n武器等級: 4\n要求等級: 65\n裝備: 吟遊詩人"
+        },
+        {
+          "itemId": 4258,
+          "aegisName": "Wicked_Nymph_Card",
+          "name": "妖仙女卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "INT+1,MAXSP+50\n系列: 卡片\n裝備: 頭具\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2617,
+      "aegisName": "C5_WICKED_NYMPH",
+      "name": "狡猾妖仙女",
+      "count": 2,
+      "respawnMinMs": 180000,
+      "respawnMaxMs": 180000,
+      "level": 97,
+      "hp": 49160,
+      "baseExp": 6650,
+      "jobExp": 18885,
+      "attackMin": 458,
+      "attackMax": 128,
+      "defense": 46,
+      "magicDefense": 45,
+      "size": "中型",
+      "race": "惡魔",
+      "element": "暗 3",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/championmobs.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 7165,
+          "aegisName": "Limpid_Celestial_Robe",
+          "name": "害羞之服",
+          "ratePerTenThousand": 9945,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "透明且可以看到裡面的衣服。非常的輕而薄,它飄動的樣子很美。\n\n重量: 1"
+        },
+        {
+          "itemId": 7166,
+          "aegisName": "Soft_Silk_Cloth",
+          "name": "柔軟的綢緞布",
+          "ratePerTenThousand": 3450,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "非常柔軟當皮膚碰到時, 感觸很好的綢緞所做成的布。\n\n重量: 1"
+        },
+        {
+          "itemId": 984,
+          "aegisName": "Oridecon",
+          "name": "神之金屬",
+          "ratePerTenThousand": 25,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "被稱為神之金屬的神秘金屬,比什麼東西都堅硬,用它來製造武器可以得到相當強大的破壞力,可以強化等級三和等級四的武器。\n\n重量: 20"
+        },
+        {
+          "itemId": 1939,
+          "aegisName": "Scarlet_Viollin",
+          "name": "緋紅色小提琴",
+          "ratePerTenThousand": 250,
+          "type": "武器",
+          "weight": 80,
+          "attack": 80,
+          "defense": 0,
+          "slots": 2,
+          "description": "散發著紅光的小提琴。\nATK增加至(精煉值*精煉值) (精煉上限為+15)\n角色等級70以上: BaseLv每上升10時ATK+5。\n系列: 樂器 攻擊: 80\n重量: 80\n武器等級: 3\n要求等級: 70\n裝備: 吟遊詩人系列"
+        },
+        {
+          "itemId": 1995,
+          "aegisName": "Scarlet_Wire",
+          "name": "緋紅色鋼鐵鞭子",
+          "ratePerTenThousand": 250,
+          "type": "武器",
+          "weight": 80,
+          "attack": 80,
+          "defense": 0,
+          "slots": 2,
+          "description": "散發著紅光的鞭子。\nATK增加至(精煉值*精煉值) (精煉上限為+15)\n角色等級70以上: BaseLv每上升10時ATK+5。\n系列: 鞭子 攻擊: 80\n重量: 80\n武器等級: 3\n要求等級: 70\n裝備: 舞孃系列"
+        },
+        {
+          "itemId": 12002,
+          "aegisName": "Holy_Scroll_1_5",
+          "name": "治癒術等級5",
+          "ratePerTenThousand": 250,
+          "type": "延遲消耗品",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "經過崇古的祭司洗禮過的紙張,並有著聖屬性的魔法,可使用等級5的治癒術。\n\n重量: 1"
+        },
+        {
+          "itemId": 1918,
+          "aegisName": "Oriental_Lute",
+          "name": "琵琶",
+          "ratePerTenThousand": 25,
+          "type": "武器",
+          "weight": 120,
+          "attack": 150,
+          "defense": 0,
+          "slots": 0,
+          "description": "在斐揚、天津町、龍之城等地分怖的撥旋樂器,主奏的方式被遺忘了,目前得知沒有一個人會演奏它的.\n奧義箭亂舞、樂器攻擊,攻擊力+10%。\n系列: 樂器  攻擊: 150\n重量: 120 屬性 :無\n武器等級: 4\n要求等級: 65\n裝備: 吟遊詩人"
+        },
+        {
+          "itemId": 4258,
+          "aegisName": "Wicked_Nymph_Card",
+          "name": "妖仙女卡片",
+          "ratePerTenThousand": 5,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "INT+1,MAXSP+50\n系列: 卡片\n裝備: 頭具\n重量: 1"
+        }
+      ]
+    }
+  ]
+}

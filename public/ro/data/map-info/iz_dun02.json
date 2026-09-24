@@ -1,6 +1,7 @@
 {
   "id": "iz_dun02",
   "name": "海底洞穴 3樓",
+  "category": "SERVICE_ONLY",
   "dungeon": {
     "id": "undersea_tunnel",
     "name": "海底洞穴",

@@ -1,0 +1,482 @@
+{
+  "id": "ecl_tdun02",
+  "name": "彩虹橋高塔 2樓",
+  "category": "SERVICE_ONLY",
+  "dungeon": null,
+  "totalMonsters": 41,
+  "normalMonsterCount": 41,
+  "levelRange": {
+    "min": 146,
+    "max": 149
+  },
+  "fullLevelRange": {
+    "min": 146,
+    "max": 149
+  },
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [
+    {
+      "id": 2365,
+      "name": "惡靈之霧",
+      "level": 146,
+      "count": 15
+    },
+    {
+      "id": 2366,
+      "name": "古靈精怪書",
+      "level": 148,
+      "count": 15
+    },
+    {
+      "id": 2368,
+      "name": "元素鬼火(綠)",
+      "level": 147,
+      "count": 5
+    },
+    {
+      "id": 2369,
+      "name": "元素鬼火(紅)",
+      "level": 149,
+      "count": 5
+    }
+  ],
+  "resourceMonsters": [],
+  "bossMonsters": [],
+  "monsters": [
+    {
+      "id": 2365,
+      "aegisName": "CENERE",
+      "name": "惡靈之霧",
+      "count": 15,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 146,
+      "hp": 130131,
+      "baseExp": 7117,
+      "jobExp": 7539,
+      "attackMin": 1802,
+      "attackMax": 1031,
+      "defense": 87,
+      "magicDefense": 81,
+      "size": "小型",
+      "race": "植物",
+      "element": "風 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/ecl_tdun.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 6561,
+          "aegisName": "Dustball",
+          "name": "塵埃",
+          "ratePerTenThousand": 1250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可能會引起氣管方面疾病的灰塵。\n重量: 1"
+        },
+        {
+          "itemId": 7322,
+          "aegisName": "Poisonous_Gas",
+          "name": "有毒瓦斯",
+          "ratePerTenThousand": 500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "被吸入的話會咳嗽或是流眼淚,具有毒性的瓦斯, 對人類是非常有害的氣體。\n\n重量: 1"
+        },
+        {
+          "itemId": 7001,
+          "aegisName": "Mould_Powder",
+          "name": "黴菌粉末",
+          "ratePerTenThousand": 1500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "黴菌柔軟的粉末。可向收集商人購買。\n\n重量 :1"
+        },
+        {
+          "itemId": 7320,
+          "aegisName": "Air_Pollutant",
+          "name": "粉塵",
+          "ratePerTenThousand": 1000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "分佈在空氣中的小小物質,是大氣污染的物質,讓呼吸困難或是眼睛疼痛都是這個原因。\n\n重量: 1"
+        },
+        {
+          "itemId": 12815,
+          "aegisName": "Yggdrasil_Dust",
+          "name": "世界樹灰塵",
+          "ratePerTenThousand": 500,
+          "type": "延遲消耗品",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "又名生命樹, 散布在神聖天地樹的樹幹及樹葉上的灰塵, 但長年累月吸收了生命樹的日月精華而具有高度的精華效果。\n石化、黑暗、詛咒、毒、緩速術、變成獸人面孔.\n冷卻時間5秒。\n重量: 1"
+        },
+        {
+          "itemId": 4595,
+          "aegisName": "Cenere_Card",
+          "name": "惡靈之霧卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "基本屬性AGI每10 攻擊速度增加。 (攻擊後延遲-2%)\n系列: 卡片\n裝備: 披肩\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2368,
+      "aegisName": "LICHTERN_Y",
+      "name": "元素鬼火(綠)",
+      "count": 5,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 147,
+      "hp": 131513,
+      "baseExp": 7071,
+      "jobExp": 7669,
+      "attackMin": 1416,
+      "attackMax": 1561,
+      "defense": 84,
+      "magicDefense": 51,
+      "size": "小型",
+      "race": "無形",
+      "element": "念 4",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/ecl_tdun.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 1000,
+          "aegisName": "Star_Crumb",
+          "name": "星星的角",
+          "ratePerTenThousand": 150,
+          "type": "其他",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "掛在天空著的星群碎片,用來製造武器時可提高武器的強度。\n\n重量: 10"
+        },
+        {
+          "itemId": 1001,
+          "aegisName": "Sparkling_Dust",
+          "name": "星星的粉末",
+          "ratePerTenThousand": 300,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "星星的一角,提煉之後可以製造星星的碎片。\n\n重量: 1"
+        },
+        {
+          "itemId": 996,
+          "aegisName": "Rough_Wind",
+          "name": "風靈原石",
+          "ratePerTenThousand": 20,
+          "type": "其他",
+          "weight": 30,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "擁有風屬性的礦石。\n\n重量: 30"
+        },
+        {
+          "itemId": 12815,
+          "aegisName": "Yggdrasil_Dust",
+          "name": "世界樹灰塵",
+          "ratePerTenThousand": 5,
+          "type": "延遲消耗品",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "又名生命樹, 散布在神聖天地樹的樹幹及樹葉上的灰塵, 但長年累月吸收了生命樹的日月精華而具有高度的精華效果。\n石化、黑暗、詛咒、毒、緩速術、變成獸人面孔.\n冷卻時間5秒。\n重量: 1"
+        },
+        {
+          "itemId": 4598,
+          "aegisName": "LichternY_Card",
+          "name": "元素鬼火(綠)卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "MATK+10,念屬性魔法攻擊力+5%。\n精煉+9以上時,念屬性魔法攻擊力再+5%。\n系列: 卡片\n裝備: 頭具\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2366,
+      "aegisName": "ANTIQUE_BOOK",
+      "name": "古靈精怪書",
+      "count": 15,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 148,
+      "hp": 134615,
+      "baseExp": 7225,
+      "jobExp": 7748,
+      "attackMin": 1861,
+      "attackMax": 1213,
+      "defense": 74,
+      "magicDefense": 42,
+      "size": "小型",
+      "race": "無形",
+      "element": "無 3",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/ecl_tdun.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 6560,
+          "aegisName": "Leaf_Bookmark",
+          "name": "楓葉書籤",
+          "ratePerTenThousand": 1250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "似乎夾在書裡被遺忘很久的書籤, 葉已乾枯小心碎掉。\n重量: 1"
+        },
+        {
+          "itemId": 7015,
+          "aegisName": "Bookclip_In_Memory",
+          "name": "回憶書籤",
+          "ratePerTenThousand": 500,
+          "type": "其他",
+          "weight": 2,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "以落葉製成的書籤。裡頭似乎充滿了它的主人的許多回憶…\n\n重量 :2"
+        },
+        {
+          "itemId": 1097,
+          "aegisName": "Worn_Out_Page",
+          "name": "破舊書頁",
+          "ratePerTenThousand": 1000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "破舊的書的內頁。雖然字體已經模糊不清,但仍舊可以隱約看到上面寫著某些文字。可向收集商人購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 12812,
+          "aegisName": "Snow_Flip",
+          "name": "冰雪花瓣",
+          "ratePerTenThousand": 5,
+          "type": "延遲消耗品",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "雪白又有涼意的神奇花瓣, 使用時要特別小心。\n可治療著火、出血、沉睡、睡眠。\n冷卻時間5秒。\n重量: 1"
+        },
+        {
+          "itemId": 4596,
+          "aegisName": "AntiqueBook_Card",
+          "name": "古靈精怪書卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "基本屬性INT每10 MATK+5。\n系列: 卡片\n裝備: 披肩\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2898,
+      "aegisName": "C2_ANTIQUE_BOOK",
+      "name": "雄壯古靈精怪書",
+      "count": 1,
+      "respawnMinMs": 180000,
+      "respawnMaxMs": 180000,
+      "level": 148,
+      "hp": 1346150,
+      "baseExp": 36125,
+      "jobExp": 116226,
+      "attackMin": 2233,
+      "attackMax": 1213,
+      "defense": 74,
+      "magicDefense": 42,
+      "size": "小型",
+      "race": "無形",
+      "element": "無 3",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/championmobs.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 6560,
+          "aegisName": "Leaf_Bookmark",
+          "name": "楓葉書籤",
+          "ratePerTenThousand": 6250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "似乎夾在書裡被遺忘很久的書籤, 葉已乾枯小心碎掉。\n重量: 1"
+        },
+        {
+          "itemId": 7015,
+          "aegisName": "Bookclip_In_Memory",
+          "name": "回憶書籤",
+          "ratePerTenThousand": 2500,
+          "type": "其他",
+          "weight": 2,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "以落葉製成的書籤。裡頭似乎充滿了它的主人的許多回憶…\n\n重量 :2"
+        },
+        {
+          "itemId": 1097,
+          "aegisName": "Worn_Out_Page",
+          "name": "破舊書頁",
+          "ratePerTenThousand": 5000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "破舊的書的內頁。雖然字體已經模糊不清,但仍舊可以隱約看到上面寫著某些文字。可向收集商人購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 12812,
+          "aegisName": "Snow_Flip",
+          "name": "冰雪花瓣",
+          "ratePerTenThousand": 25,
+          "type": "延遲消耗品",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "雪白又有涼意的神奇花瓣, 使用時要特別小心。\n可治療著火、出血、沉睡、睡眠。\n冷卻時間5秒。\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2369,
+      "aegisName": "LICHTERN_R",
+      "name": "元素鬼火(紅)",
+      "count": 5,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 149,
+      "hp": 135718,
+      "baseExp": 7201,
+      "jobExp": 7936,
+      "attackMin": 1647,
+      "attackMax": 1449,
+      "defense": 111,
+      "magicDefense": 53,
+      "size": "小型",
+      "race": "無形",
+      "element": "火 4",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/ecl_tdun.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 1000,
+          "aegisName": "Star_Crumb",
+          "name": "星星的角",
+          "ratePerTenThousand": 150,
+          "type": "其他",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "掛在天空著的星群碎片,用來製造武器時可提高武器的強度。\n\n重量: 10"
+        },
+        {
+          "itemId": 1001,
+          "aegisName": "Sparkling_Dust",
+          "name": "星星的粉末",
+          "ratePerTenThousand": 300,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "星星的一角,提煉之後可以製造星星的碎片。\n\n重量: 1"
+        },
+        {
+          "itemId": 994,
+          "aegisName": "Flame_Heart",
+          "name": "火靈原石",
+          "ratePerTenThousand": 20,
+          "type": "其他",
+          "weight": 30,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "擁有火屬性的礦石。\n\n重量: 30"
+        },
+        {
+          "itemId": 12813,
+          "aegisName": "Peony_Mommy",
+          "name": "溫馨花瓣",
+          "ratePerTenThousand": 5,
+          "type": "延遲消耗品",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "粉紅又有暖意的神奇花瓣, 就像兒時母親的懷抱一樣溫暖。\n可治療冰凍、冷凍、冰封。\n冷卻時間5秒。\n重量: 1"
+        },
+        {
+          "itemId": 4599,
+          "aegisName": "LichternR_Card",
+          "name": "元素鬼火(紅)卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "MATK+10,火屬性魔法攻擊力+5%。\n精煉+9以上時,火屬性魔法攻擊力再+5%。\n系列: 卡片\n裝備: 頭具\n重量: 1"
+        }
+      ]
+    }
+  ]
+}

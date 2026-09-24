@@ -1,0 +1,765 @@
+{
+  "id": "hu_fild04",
+  "name": "毀葛原野",
+  "category": "SERVICE_ONLY",
+  "dungeon": null,
+  "totalMonsters": 198,
+  "normalMonsterCount": 198,
+  "levelRange": {
+    "min": 73,
+    "max": 119
+  },
+  "fullLevelRange": {
+    "min": 73,
+    "max": 119
+  },
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [
+    {
+      "id": 1718,
+      "name": "黃諾博斯",
+      "level": 84,
+      "count": 100
+    },
+    {
+      "id": 1368,
+      "name": "邪惡向日葵",
+      "level": 73,
+      "count": 30
+    },
+    {
+      "id": 1715,
+      "name": "諾博斯",
+      "level": 90,
+      "count": 30
+    },
+    {
+      "id": 1721,
+      "name": "龍蛋",
+      "level": 119,
+      "count": 20
+    }
+  ],
+  "resourceMonsters": [
+    {
+      "id": 1079,
+      "name": "藍草",
+      "level": 1,
+      "count": 6
+    },
+    {
+      "id": 1081,
+      "name": "黃草",
+      "level": 1,
+      "count": 10
+    }
+  ],
+  "bossMonsters": [],
+  "monsters": [
+    {
+      "id": 1079,
+      "aegisName": "BLUE_PLANT",
+      "name": "藍草",
+      "count": 6,
+      "respawnMinMs": 120000,
+      "respawnMaxMs": 600000,
+      "level": 1,
+      "hp": 10,
+      "baseExp": 0,
+      "jobExp": 0,
+      "attackMin": 1,
+      "attackMax": 1,
+      "defense": 100,
+      "magicDefense": 99,
+      "size": "小型",
+      "race": "植物",
+      "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": true,
+      "sourceFiles": [
+        "npc/re/mobs/fields/hugel.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 510,
+          "aegisName": "Blue_Herb",
+          "name": "藍色藥草",
+          "ratePerTenThousand": 2750,
+          "type": "恢復道具",
+          "weight": 7,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "擁有特殊香味且能使精神飽滿的珍貴藥草,可恢復少量的SP。\n\n重量: 7"
+        },
+        {
+          "itemId": 712,
+          "aegisName": "Flower",
+          "name": "花",
+          "ratePerTenThousand": 500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "沒有名稱的花。沒有香味也沒有荊棘。\n\n重量: 1"
+        },
+        {
+          "itemId": 711,
+          "aegisName": "Shoot",
+          "name": "芽苗",
+          "ratePerTenThousand": 500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "剛剛才從這個世上出生的幼小植物,單純無瑕的樣子非常可愛。\n\n重量: 1"
+        },
+        {
+          "itemId": 905,
+          "aegisName": "Stem",
+          "name": "植物梗",
+          "ratePerTenThousand": 250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "植物細長的梗,可以當做藥材,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 7932,
+          "aegisName": "Poison_Herb_Nerium",
+          "name": "毒夾竹桃",
+          "ratePerTenThousand": 150,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "危險: 不要被漂亮紅花和花香所蠱惑。\n\n重量: 1"
+        },
+        {
+          "itemId": 522,
+          "aegisName": "Fruit_Of_Mastela",
+          "name": "瑪絲黛拉果實",
+          "ratePerTenThousand": 25,
+          "type": "恢復道具",
+          "weight": 3,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "瑪絲黛拉樹上采下的紫色果實,可恢復大量的HP。\n\n重量: 3"
+        },
+        {
+          "itemId": 514,
+          "aegisName": "Grape",
+          "name": "葡萄",
+          "ratePerTenThousand": 500,
+          "type": "恢復道具",
+          "weight": 2,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "清新且味道酸的水果,可恢復少量SP。\n\n重量: 2"
+        },
+        {
+          "itemId": 2270,
+          "aegisName": "Centimental_Leaf",
+          "name": "草葉",
+          "ratePerTenThousand": 1,
+          "type": "防具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "草葉,含在嘴裡時, 會隨著風飄蕩,有到處流浪的感覺。\n受到植物型敵人的攻擊時, 可-3%的傷害度。\n系列: 頭具  防禦: 0\n位置: 下  重量: 10\n裝備: 初學者以外的全職業"
+        }
+      ]
+    },
+    {
+      "id": 1081,
+      "aegisName": "YELLOW_PLANT",
+      "name": "黃草",
+      "count": 10,
+      "respawnMinMs": 0,
+      "respawnMaxMs": 0,
+      "level": 1,
+      "hp": 6,
+      "baseExp": 0,
+      "jobExp": 0,
+      "attackMin": 1,
+      "attackMax": 1,
+      "defense": 100,
+      "magicDefense": 99,
+      "size": "小型",
+      "race": "植物",
+      "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": true,
+      "sourceFiles": [
+        "npc/re/mobs/fields/hugel.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 508,
+          "aegisName": "Yellow_Herb",
+          "name": "黃色藥草",
+          "ratePerTenThousand": 2750,
+          "type": "恢復道具",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在治療傷處上有相當功效的珍貴藥草,可恢復少量的HP。\n\n重量: 5"
+        },
+        {
+          "itemId": 712,
+          "aegisName": "Flower",
+          "name": "花",
+          "ratePerTenThousand": 500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "沒有名稱的花。沒有香味也沒有荊棘。\n\n重量: 1"
+        },
+        {
+          "itemId": 711,
+          "aegisName": "Shoot",
+          "name": "芽苗",
+          "ratePerTenThousand": 500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "剛剛才從這個世上出生的幼小植物,單純無瑕的樣子非常可愛。\n\n重量: 1"
+        },
+        {
+          "itemId": 905,
+          "aegisName": "Stem",
+          "name": "植物梗",
+          "ratePerTenThousand": 250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "植物細長的梗,可以當做藥材,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 7935,
+          "aegisName": "Poison_Herb_Seratum",
+          "name": "蛇足毒草",
+          "ratePerTenThousand": 150,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "危險: 不像美麗的外表, 卻沒有香味。\n\n重量: 1"
+        },
+        {
+          "itemId": 707,
+          "aegisName": "Singing_Plant",
+          "name": "哀唱草",
+          "ratePerTenThousand": 3,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "一到有滿月的夜晚就會獨自唱著哀傷的歌曲的神秘植物,傳說以前有位少女,她唱著歌思念離開很久的戀人,但是心愛的他終究沒有歸來,等著等著她就這樣化成了一株草。\n\n重量: 1"
+        },
+        {
+          "itemId": 914,
+          "aegisName": "Fluff",
+          "name": "毛",
+          "ratePerTenThousand": 250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "小型怪身上的毛,可以用來做衣服的原料,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 2269,
+          "aegisName": "Centimental_Flower",
+          "name": "花葉",
+          "ratePerTenThousand": 1,
+          "type": "防具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "小小的花葉,含在嘴裡會讓人有幸福浪漫的感覺。\n受到植物型敵人的攻擊時, 可-3%的傷害度。\n系列: 頭具  防禦: 0\n位置: 下  重量: 10\n裝備: 初學者以外的全職業"
+        }
+      ]
+    },
+    {
+      "id": 1368,
+      "aegisName": "GEOGRAPHER",
+      "name": "邪惡向日葵",
+      "count": 30,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 73,
+      "hp": 3408,
+      "baseExp": 804,
+      "jobExp": 706,
+      "attackMin": 278,
+      "attackMax": 82,
+      "defense": 158,
+      "magicDefense": 42,
+      "size": "中型",
+      "race": "植物",
+      "element": "地 3",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/hugel.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 1032,
+          "aegisName": "Blossom_Of_Maneater",
+          "name": "噬人樹花",
+          "ratePerTenThousand": 3100,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "像人一般擁有各種器官的花。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 1033,
+          "aegisName": "Root_Of_Maneater",
+          "name": "噬人樹根",
+          "ratePerTenThousand": 2750,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "如筋肉或血管般結實的植物的根。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 2253,
+          "aegisName": "Sunflower",
+          "name": "向日葵頭飾",
+          "ratePerTenThousand": 15,
+          "type": "防具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 1,
+          "slots": 0,
+          "description": "戴在頭上裝飾用的向日葵頭飾。\n受到昆蟲係怪物的攻擊時, 傷害-10%\n系列: 頭具  防禦: 1\n位置: 上  重量: 10\n裝備: 全職業"
+        },
+        {
+          "itemId": 2207,
+          "aegisName": "Fancy_Flower",
+          "name": "花朵頭飾",
+          "ratePerTenThousand": 25,
+          "type": "防具",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "用來插在頭上當裝飾的花。\n受到植物型怪的攻擊時, 可-10% 的傷害度。\n系列: 頭具  防禦: 0\n位置: 上  重量: 10\n裝備: 全職業"
+        },
+        {
+          "itemId": 12002,
+          "aegisName": "Holy_Scroll_1_5",
+          "name": "治癒術等級5",
+          "ratePerTenThousand": 50,
+          "type": "延遲消耗品",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "經過崇古的祭司洗禮過的紙張,並有著聖屬性的魔法,可使用等級5的治癒術。\n\n重量: 1"
+        },
+        {
+          "itemId": 12359,
+          "aegisName": "Very_Soft_Plant",
+          "name": "光滑柔軟草",
+          "ratePerTenThousand": 5,
+          "type": "消耗品",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "淡綠色的柔軟光滑的草, 是群葉貓的最愛。\n活動怪、小兵怪則無法認養。 \n\n種類 : 認養寵物物品\n重量 : 5"
+        },
+        {
+          "itemId": 4280,
+          "aegisName": "Geographer_Card",
+          "name": "邪惡向日葵卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "受到物理傷害時,當習得自動念咒、天使之賜福2技能、天使之賜福10技能時,可使用10技能天使之賜福。\n飛行魔書、猴桃木、甜餅人、海豹寶寶卡片一起裝備時,詠唱時間-10%。\n技能使用時SP消耗量,-10%。\nVIT+10。\n當套裝裝備者是服事系列角色時,從惡魔型和不死型怪受到的傷害-30%,打死惡魔型和不死型怪時,所得到的經驗值+5%。\n系列: 卡片\n裝備: 鎧甲\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1718,
+      "aegisName": "NOVUS_",
+      "name": "黃諾博斯",
+      "count": 100,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 84,
+      "hp": 4084,
+      "baseExp": 1002,
+      "jobExp": 937,
+      "attackMin": 282,
+      "attackMax": 48,
+      "defense": 88,
+      "magicDefense": 28,
+      "size": "小型",
+      "race": "龍族",
+      "element": "無 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/hugel.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 508,
+          "aegisName": "Yellow_Herb",
+          "name": "黃色藥草",
+          "ratePerTenThousand": 1000,
+          "type": "恢復道具",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在治療傷處上有相當功效的珍貴藥草,可恢復少量的HP。\n\n重量: 5"
+        },
+        {
+          "itemId": 7053,
+          "aegisName": "Cyfar",
+          "name": "賽依伐",
+          "ratePerTenThousand": 518,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "發出藍色光芒的稀有礦物,可賣給蒐集品商人\n重量: 1"
+        },
+        {
+          "itemId": 1036,
+          "aegisName": "Dragon_Scale",
+          "name": "龍鱗",
+          "ratePerTenThousand": 295,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "龍的鱗片,如鋼鐵般堅硬,傳說對於耐冷或耐熱都有非常大的效果。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 4382,
+          "aegisName": "Novus__Card",
+          "name": "黃諾博斯卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "HP+500, HP恢復力+10%。\n當和妖仙女, 鳥人哈比, 米雅畢, 血蝴蝶卡片一起裝備時,崩裂術, 雷爆術的傷害+10%, Int+3。\n賢者裝備時,魔法反射機率增加20%, 當每次殺掉怪物時以較低的機率掉落紅色魔力礦石, 黃色魔力礦石.變動詠唱時間-20%。\n系列: 卡片\n裝備: 鎧甲\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1715,
+      "aegisName": "NOVUS",
+      "name": "諾博斯",
+      "count": 30,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 90,
+      "hp": 5257,
+      "baseExp": 1103,
+      "jobExp": 1038,
+      "attackMin": 325,
+      "attackMax": 57,
+      "defense": 95,
+      "magicDefense": 48,
+      "size": "小型",
+      "race": "龍族",
+      "element": "無 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/hugel.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 511,
+          "aegisName": "Green_Herb",
+          "name": "綠色藥草",
+          "ratePerTenThousand": 1500,
+          "type": "恢復道具",
+          "weight": 3,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可中和所有毒性的珍貴藥草,具有治療的功效解毒。\n\n重量: 3"
+        },
+        {
+          "itemId": 7053,
+          "aegisName": "Cyfar",
+          "name": "賽依伐",
+          "ratePerTenThousand": 518,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "發出藍色光芒的稀有礦物,可賣給蒐集品商人\n重量: 1"
+        },
+        {
+          "itemId": 1036,
+          "aegisName": "Dragon_Scale",
+          "name": "龍鱗",
+          "ratePerTenThousand": 295,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "龍的鱗片,如鋼鐵般堅硬,傳說對於耐冷或耐熱都有非常大的效果。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 4383,
+          "aegisName": "Novus_Card",
+          "name": "諾博斯卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "當受到物理攻擊時,以較高的機率給敵人和自己施法混亂\n系列: 卡片\n裝備: 鎧甲\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 2729,
+      "aegisName": "C1_NOVUS",
+      "name": "迅捷諾博斯",
+      "count": 2,
+      "respawnMinMs": 180000,
+      "respawnMaxMs": 180000,
+      "level": 90,
+      "hp": 26285,
+      "baseExp": 5515,
+      "jobExp": 15570,
+      "attackMin": 390,
+      "attackMax": 57,
+      "defense": 95,
+      "magicDefense": 48,
+      "size": "小型",
+      "race": "龍族",
+      "element": "無 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/championmobs.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 511,
+          "aegisName": "Green_Herb",
+          "name": "綠色藥草",
+          "ratePerTenThousand": 7500,
+          "type": "恢復道具",
+          "weight": 3,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可中和所有毒性的珍貴藥草,具有治療的功效解毒。\n\n重量: 3"
+        },
+        {
+          "itemId": 7053,
+          "aegisName": "Cyfar",
+          "name": "賽依伐",
+          "ratePerTenThousand": 2590,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "發出藍色光芒的稀有礦物,可賣給蒐集品商人\n重量: 1"
+        },
+        {
+          "itemId": 1036,
+          "aegisName": "Dragon_Scale",
+          "name": "龍鱗",
+          "ratePerTenThousand": 1475,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "龍的鱗片,如鋼鐵般堅硬,傳說對於耐冷或耐熱都有非常大的效果。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 4383,
+          "aegisName": "Novus_Card",
+          "name": "諾博斯卡片",
+          "ratePerTenThousand": 5,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "當受到物理攻擊時,以較高的機率給敵人和自己施法混亂\n系列: 卡片\n裝備: 鎧甲\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1721,
+      "aegisName": "DRAGON_EGG",
+      "name": "龍蛋",
+      "count": 20,
+      "respawnMinMs": 5000,
+      "respawnMaxMs": 5000,
+      "level": 119,
+      "hp": 27826,
+      "baseExp": 2629,
+      "jobExp": 2521,
+      "attackMin": 1,
+      "attackMax": 1,
+      "defense": 172,
+      "magicDefense": 85,
+      "size": "中型",
+      "race": "龍族",
+      "element": "無 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/hugel.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 985,
+          "aegisName": "Elunium",
+          "name": "鋁",
+          "ratePerTenThousand": 3,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "很輕且沒有毒性的金屬。常被拿來作成盔甲,以此製成的所有防具將變成更強。\n\n重量: 20"
+        },
+        {
+          "itemId": 7032,
+          "aegisName": "Piece_Of_Egg_Shell",
+          "name": "蛋殼碎片",
+          "ratePerTenThousand": 50,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "破掉的蛋殼碎片,賣給收集品商人。\n\n重量: 1"
+        },
+        {
+          "itemId": 731,
+          "aegisName": "Crystal_Jewel_",
+          "name": "2克拉鑽石",
+          "ratePerTenThousand": 5,
+          "type": "其他",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "透明且晶瑩剔透的寶石。\n\n重量: 10"
+        },
+        {
+          "itemId": 732,
+          "aegisName": "Crystal_Jewel__",
+          "name": "3克拉鑽石",
+          "ratePerTenThousand": 3,
+          "type": "其他",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "透明且晶瑩剔透的寶石。\n\n重量: 10"
+        },
+        {
+          "itemId": 718,
+          "aegisName": "Dark_Red_Jewel",
+          "name": "深紅寶石",
+          "ratePerTenThousand": 5,
+          "type": "其他",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "呈現出黑紅色光芒的寶石。\n\n重量: 10"
+        },
+        {
+          "itemId": 720,
+          "aegisName": "Skyblue_Jewel",
+          "name": "天藍寶石",
+          "ratePerTenThousand": 5,
+          "type": "其他",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "呈現出天空藍之光芒的寶石。\n\n重量: 10"
+        },
+        {
+          "itemId": 728,
+          "aegisName": "Golden_Jewel",
+          "name": "黃寶石",
+          "ratePerTenThousand": 5,
+          "type": "其他",
+          "weight": 10,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "呈現出黃色光芒的寶石。\n\n重量: 10"
+        },
+        {
+          "itemId": 4385,
+          "aegisName": "Dragon_Egg_Card",
+          "name": "龍蛋卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "當抓到龍族怪物時,有機率掉落藥草蜂蜜茶\n系列: 卡片\n裝備: 飾品\n重量: 1"
+        }
+      ]
+    }
+  ]
+}

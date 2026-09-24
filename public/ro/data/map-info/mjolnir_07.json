@@ -1,12 +1,65 @@
 {
   "id": "mjolnir_07",
   "name": "妙勒妙勒尼山脈南區",
+  "category": "SERVICE_ONLY",
+  "dungeon": null,
   "totalMonsters": 243,
+  "normalMonsterCount": 243,
+  "levelRange": {
+    "min": 55,
+    "max": 59
+  },
+  "fullLevelRange": {
+    "min": 55,
+    "max": 59
+  },
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [
+    {
+      "id": 1166,
+      "name": "野豬",
+      "level": 59,
+      "count": 161
+    },
+    {
+      "id": 1494,
+      "name": "巨象甲蟲",
+      "level": 55,
+      "count": 34
+    },
+    {
+      "id": 1118,
+      "name": "噬人花",
+      "level": 59,
+      "count": 34
+    }
+  ],
+  "resourceMonsters": [
+    {
+      "id": 1079,
+      "name": "藍草",
+      "level": 1,
+      "count": 2
+    },
+    {
+      "id": 1080,
+      "name": "綠草",
+      "level": 1,
+      "count": 7
+    },
+    {
+      "id": 1085,
+      "name": "紅菇",
+      "level": 1,
+      "count": 2
+    }
+  ],
+  "bossMonsters": [],
   "monsters": [
     {
       "id": 1079,
       "aegisName": "BLUE_PLANT",
-      "name": "Blue Plant",
+      "name": "藍草",
       "count": 2,
       "respawnMinMs": 180000,
       "respawnMaxMs": 360000,
@@ -21,6 +74,9 @@
       "size": "小型",
       "race": "植物",
       "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": true,
       "sourceFiles": [
         "npc/re/mobs/fields/mjolnir.txt"
       ],
@@ -126,7 +182,7 @@
     {
       "id": 1080,
       "aegisName": "GREEN_PLANT",
-      "name": "Green Plant",
+      "name": "綠草",
       "count": 7,
       "respawnMinMs": 90000,
       "respawnMaxMs": 180000,
@@ -141,6 +197,9 @@
       "size": "小型",
       "race": "植物",
       "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": true,
       "sourceFiles": [
         "npc/re/mobs/fields/mjolnir.txt"
       ],
@@ -246,7 +305,7 @@
     {
       "id": 1085,
       "aegisName": "RED_MUSHROOM",
-      "name": "Red Mushroom",
+      "name": "紅菇",
       "count": 2,
       "respawnMinMs": 90000,
       "respawnMaxMs": 180000,
@@ -261,6 +320,9 @@
       "size": "小型",
       "race": "植物",
       "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": true,
       "sourceFiles": [
         "npc/re/mobs/fields/mjolnir.txt"
       ],
@@ -366,7 +428,7 @@
     {
       "id": 1494,
       "aegisName": "KIND_OF_BEETLE",
-      "name": "Beetle King",
+      "name": "巨象甲蟲",
       "count": 34,
       "respawnMinMs": 5000,
       "respawnMaxMs": 5000,
@@ -381,6 +443,9 @@
       "size": "小型",
       "race": "昆蟲",
       "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
       "sourceFiles": [
         "npc/re/mobs/fields/mjolnir.txt"
       ],
@@ -462,7 +527,7 @@
     {
       "id": 1118,
       "aegisName": "FLORA",
-      "name": "Flora",
+      "name": "噬人花",
       "count": 34,
       "respawnMinMs": 5000,
       "respawnMaxMs": 5000,
@@ -477,6 +542,9 @@
       "size": "大型",
       "race": "植物",
       "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
       "sourceFiles": [
         "npc/re/mobs/fields/mjolnir.txt"
       ],
@@ -582,7 +650,7 @@
     {
       "id": 1166,
       "aegisName": "SAVAGE",
-      "name": "Savage",
+      "name": "野豬",
       "count": 161,
       "respawnMinMs": 5000,
       "respawnMaxMs": 5000,
@@ -597,6 +665,9 @@
       "size": "大型",
       "race": "動物",
       "element": "地 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
       "sourceFiles": [
         "npc/re/mobs/fields/mjolnir.txt"
       ],
@@ -702,7 +773,7 @@
     {
       "id": 2673,
       "aegisName": "C3_SAVAGE",
-      "name": "Savage Ringleader",
+      "name": "菁英野豬",
       "count": 3,
       "respawnMinMs": 180000,
       "respawnMaxMs": 180000,
@@ -717,6 +788,9 @@
       "size": "大型",
       "race": "動物",
       "element": "地 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
       "sourceFiles": [
         "npc/re/mobs/championmobs.txt"
       ],

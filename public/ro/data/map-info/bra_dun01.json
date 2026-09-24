@@ -1,0 +1,152 @@
+{
+  "id": "bra_dun01",
+  "name": "瀑布內的洞窟",
+  "category": "SERVICE_ONLY",
+  "dungeon": null,
+  "totalMonsters": 2,
+  "normalMonsterCount": 2,
+  "levelRange": {
+    "min": 75,
+    "max": 75
+  },
+  "fullLevelRange": {
+    "min": 75,
+    "max": 75
+  },
+  "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
+  "primaryMonsters": [
+    {
+      "id": 2709,
+      "name": "迅捷食人魚",
+      "level": 75,
+      "count": 2
+    }
+  ],
+  "resourceMonsters": [],
+  "bossMonsters": [],
+  "monsters": [
+    {
+      "id": 2709,
+      "aegisName": "C1_PIRANHA",
+      "name": "迅捷食人魚",
+      "count": 2,
+      "respawnMinMs": 180000,
+      "respawnMaxMs": 180000,
+      "level": 75,
+      "hp": 21095,
+      "baseExp": 3970,
+      "jobExp": 11010,
+      "attackMin": 265,
+      "attackMax": 41,
+      "defense": 7,
+      "magicDefense": 12,
+      "size": "大型",
+      "race": "魚貝",
+      "element": "水 3",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/championmobs.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 956,
+          "aegisName": "Gill",
+          "name": "鰓刺",
+          "ratePerTenThousand": 1500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從魚類或某些怪物身上得來的鰓刺,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 995,
+          "aegisName": "Mistic_Frozen",
+          "name": "水靈原石",
+          "ratePerTenThousand": 15,
+          "type": "其他",
+          "weight": 30,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "擁有水屬性的礦石。\n\n重量: 30"
+        },
+        {
+          "itemId": 963,
+          "aegisName": "Sharp_Scale",
+          "name": "銳利麟片",
+          "ratePerTenThousand": 10000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "像刀子般銳利的鱗片,加工後可以製成多種相當有用的道具。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 1053,
+          "aegisName": "Tooth_Of_Ancient_Fish",
+          "name": "人魚之牙",
+          "ratePerTenThousand": 1250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從生長在深海中的魚類身上得來的牙齒。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 1054,
+          "aegisName": "Lip_Of_Ancient_Fish",
+          "name": "人魚嘴巴",
+          "ratePerTenThousand": 1250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從生長在深海中的魚類身上得來的嘴巴。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 13027,
+          "aegisName": "Scalpel",
+          "name": "解剖刀",
+          "ratePerTenThousand": 5,
+          "type": "武器",
+          "weight": 50,
+          "attack": 120,
+          "defense": 0,
+          "slots": 3,
+          "description": "短小輕巧又非常銳利的刀, 最適當用於切割人的皮膚。\n當攻擊時, 讓敵人有機率出血。\n系列: 短劍    攻擊: 120\n重量: 50\n武器等級: 4\n要求等級: 55\n裝備: 進階劍士/魔法師/弓箭手/商人/盜賊系列"
+        },
+        {
+          "itemId": 1249,
+          "aegisName": "Fisherman's_Dagger",
+          "name": "漁夫短劍",
+          "ratePerTenThousand": 15,
+          "type": "武器",
+          "weight": 60,
+          "attack": 39,
+          "defense": 0,
+          "slots": 0,
+          "description": "在海裡採取牡蠣或蛤蜊時所使用的短劍,有海洋的味道.\n系列: 短劍    攻擊: 39\n重量: 60      屬性: 水\n武器等級: 1\n要求等級: 沒有\n裝備: 除了服事系列外全職業"
+        },
+        {
+          "itemId": 27121,
+          "aegisName": "Piranha_Card",
+          "name": "食人魚卡片",
+          "ratePerTenThousand": 5,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "給予魚貝型怪的物理/魔法傷害+10%。\n鞋子精煉+9時, 給予魚貝型怪的物理/魔法傷害再+5%。\n系列 : 卡片\n裝備 : 鞋子\n重量 : 1"
+        }
+      ]
+    }
+  ]
+}

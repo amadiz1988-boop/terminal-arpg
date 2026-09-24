@@ -1,7 +1,14 @@
 {
   "id": "pay_dun03",
-  "name": "斐揚洞穴 4樓(廢村)",
+  "name": "斐揚洞穴 4樓",
   "category": "SERVICE_ONLY",
+  "dungeon": {
+    "id": "payon_cave",
+    "name": "斐揚洞穴",
+    "entranceMapId": "pay_dun00",
+    "floorLabel": "4樓",
+    "order": 4
+  },
   "totalMonsters": 139,
   "normalMonsterCount": 139,
   "levelRange": {
@@ -16,13 +23,13 @@
   "primaryMonsters": [
     {
       "id": 1170,
-      "name": "Sohee",
+      "name": "鬼女",
       "level": 64,
       "count": 70
     },
     {
       "id": 1068,
-      "name": "Hydra",
+      "name": "海葵",
       "level": 34,
       "count": 17
     }
@@ -36,25 +43,25 @@
     },
     {
       "id": 1079,
-      "name": "Blue Plant",
+      "name": "藍草",
       "level": 1,
       "count": 1
     },
     {
       "id": 1080,
-      "name": "Green Plant",
+      "name": "綠草",
       "level": 1,
       "count": 1
     },
     {
       "id": 1081,
-      "name": "Yellow Plant",
+      "name": "黃草",
       "level": 1,
       "count": 1
     },
     {
       "id": 1082,
-      "name": "White Plant",
+      "name": "白草",
       "level": 1,
       "count": 5
     }
@@ -187,7 +194,7 @@
     {
       "id": 1079,
       "aegisName": "BLUE_PLANT",
-      "name": "Blue Plant",
+      "name": "藍草",
       "count": 1,
       "respawnMinMs": 300000,
       "respawnMaxMs": 600000,
@@ -310,7 +317,7 @@
     {
       "id": 1080,
       "aegisName": "GREEN_PLANT",
-      "name": "Green Plant",
+      "name": "綠草",
       "count": 1,
       "respawnMinMs": 300000,
       "respawnMaxMs": 600000,
@@ -433,7 +440,7 @@
     {
       "id": 1081,
       "aegisName": "YELLOW_PLANT",
-      "name": "Yellow Plant",
+      "name": "黃草",
       "count": 1,
       "respawnMinMs": 300000,
       "respawnMaxMs": 600000,
@@ -556,7 +563,7 @@
     {
       "id": 1082,
       "aegisName": "WHITE_PLANT",
-      "name": "White Plant",
+      "name": "白草",
       "count": 5,
       "respawnMinMs": 90000,
       "respawnMaxMs": 180000,
@@ -679,7 +686,7 @@
     {
       "id": 1020,
       "aegisName": "MANDRAGORA",
-      "name": "Mandragora",
+      "name": "曼陀羅魔花",
       "count": 10,
       "respawnMinMs": 100000,
       "respawnMaxMs": 300000,
@@ -802,7 +809,7 @@
     {
       "id": 1068,
       "aegisName": "HYDRA",
-      "name": "Hydra",
+      "name": "海葵",
       "count": 17,
       "respawnMinMs": 300000,
       "respawnMaxMs": 600000,
@@ -925,7 +932,7 @@
     {
       "id": 1185,
       "aegisName": "WHISPER_",
-      "name": "Whisper",
+      "name": "白幽靈",
       "count": 4,
       "respawnMinMs": 1800000,
       "respawnMaxMs": 1800000,
@@ -988,7 +995,7 @@
     {
       "id": 1277,
       "aegisName": "GREATEST_GENERAL",
-      "name": "Greatest General",
+      "name": "將軍魔碑",
       "count": 3,
       "respawnMinMs": 5000,
       "respawnMaxMs": 5000,
@@ -1111,7 +1118,7 @@
     {
       "id": 1026,
       "aegisName": "MUNAK",
-      "name": "Munak",
+      "name": "僵屍",
       "count": 3,
       "respawnMinMs": 5000,
       "respawnMaxMs": 5000,
@@ -1234,7 +1241,7 @@
     {
       "id": 1188,
       "aegisName": "BON_GUN",
-      "name": "Bongun",
+      "name": "妖道",
       "count": 3,
       "respawnMinMs": 5000,
       "respawnMaxMs": 5000,
@@ -1357,7 +1364,7 @@
     {
       "id": 1170,
       "aegisName": "SOHEE",
-      "name": "Sohee",
+      "name": "鬼女",
       "count": 70,
       "respawnMinMs": 5000,
       "respawnMaxMs": 5000,
@@ -1480,7 +1487,7 @@
     {
       "id": 2651,
       "aegisName": "C1_SOHEE",
-      "name": "Swift Sohee",
+      "name": "迅捷鬼女",
       "count": 2,
       "respawnMinMs": 180000,
       "respawnMaxMs": 180000,
@@ -1603,7 +1610,7 @@
     {
       "id": 1186,
       "aegisName": "WHISPER_BOSS",
-      "name": "Giant Whisper",
+      "name": "巨大白幽靈",
       "count": 1,
       "respawnMinMs": 14400000,
       "respawnMaxMs": 14400000,
@@ -1690,7 +1697,7 @@
     {
       "id": 1180,
       "aegisName": "NINE_TAIL",
-      "name": "Nine Tail",
+      "name": "九尾狐",
       "count": 2,
       "respawnMinMs": 5000,
       "respawnMaxMs": 5000,

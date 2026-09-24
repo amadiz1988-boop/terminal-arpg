@@ -1,6 +1,7 @@
 {
   "id": "moc_fild20",
   "name": "蘇克拉特沙漠次元裂縫",
+  "category": "NORMAL_FIELD",
   "dungeon": null,
   "totalMonsters": 5,
   "normalMonsterCount": 1,
