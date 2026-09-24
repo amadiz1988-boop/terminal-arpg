@@ -7,6 +7,13 @@ const DEFAULT_CONFIG = Object.freeze({
   canaryCharacterIds: [],
 });
 
+// SERVER_AGENT combat events are projected through native Event Ledger polling.
+// The text-log SSE stream would hide those events for agent-owned characters.
+export function gateCombatSseForServerAgent(state, serverAgentControlled) {
+  if (!state || !serverAgentControlled) return state;
+  return { ...state, eligible: false, transport: 'polling' };
+}
+
 function clamp(value, minimum, maximum) {
   return Math.min(maximum, Math.max(minimum, Number(value) || 0));
 }

@@ -1,0 +1,27 @@
+{
+  "contentId": "first_job_v1",
+  "academy": {
+    "identity": "terminal_academy_guide",
+    "sourceScript": "學院結業導師#terminal",
+    "map": "iz_ac01",
+    "x": 60,
+    "y": 67
+  },
+  "routes": {
+    "swordman": { "map": "iz_ac01", "x": 60, "y": 67 },
+    "mage": { "map": "iz_ac01", "x": 60, "y": 67 },
+    "archer": { "map": "iz_ac01", "x": 60, "y": 67 },
+    "acolyte": { "map": "iz_ac01", "x": 60, "y": 67 },
+    "merchant": { "map": "iz_ac01", "x": 60, "y": 67 },
+    "thief": { "map": "iz_ac01", "x": 60, "y": 67 },
+    "supernovice": { "map": "iz_ac01", "x": 60, "y": 67 },
+    "taekwon": { "map": "iz_ac01", "x": 60, "y": 67 },
+    "gunslinger": { "map": "iz_ac01", "x": 60, "y": 67 },
+    "ninja": { "map": "iz_ac01", "x": 60, "y": 67 }
+  },
+  "resumeTargets": [
+    { "minimumBaseLevel": 26, "map": "pay_dun00", "x": 73, "y": 78 },
+    { "minimumBaseLevel": 12, "map": "moc_fild11", "x": 180, "y": 253 },
+    { "minimumBaseLevel": 1, "map": "prt_fild08", "x": 170, "y": 374 }
+  ]
+}

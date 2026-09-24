@@ -1,0 +1,621 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "DESIGN_ONLY",
+  "generatedAt": "2026-09-15",
+  "sourceEvidence": [
+    "docs/web-ux-latency-audit.md",
+    "docs/web-ui-action-response-audit.md",
+    "docs/web-e2e-latency-tracing.md",
+    "docs/WEB_DELIVERY_V1_CAPACITY.md",
+    "ops/ro-stack/web-latency-trace.mjs",
+    "ops/ro-stack/web-observation.mjs",
+    "ops/ro-stack/combat-sse.mjs"
+  ],
+  "immediacyClasses": [
+    "IMMEDIATE",
+    "INTERACTIVE",
+    "NAVIGATION",
+    "BACKGROUND"
+  ],
+  "measurementSupportValues": [
+    "FULL",
+    "PARTIAL",
+    "BROWSER_ONLY",
+    "UNKNOWN"
+  ],
+  "actions": [
+    {
+      "actionId": "stat_allocate",
+      "category": "CHARACTER",
+      "displayName": "能力加點",
+      "immediacyClass": "INTERACTIVE",
+      "authoritySource": [
+        "RATHENA_NATIVE",
+        "FILE_BASED"
+      ],
+      "visibleResult": "能力值與剩餘能力點更新",
+      "expectedFrequency": "on_player_action; rapid burst possible",
+      "supportsRapidAction": true,
+      "isPlayerBlocking": false,
+      "isStateFreshnessSensitive": true,
+      "openKoreDependent": false,
+      "currentMeasurementSupport": "FULL: 60 successful production authority samples plus rapid x5/x10 evidence"
+    },
+    {
+      "actionId": "equip_item",
+      "category": "CHARACTER",
+      "displayName": "穿上裝備",
+      "immediacyClass": "INTERACTIVE",
+      "authoritySource": ["RATHENA_NATIVE", "DATABASE"],
+      "visibleResult": "裝備欄位與紙娃娃可見變更",
+      "expectedFrequency": "on_player_action",
+      "supportsRapidAction": false,
+      "isPlayerBlocking": false,
+      "isStateFreshnessSensitive": true,
+      "openKoreDependent": false,
+      "currentMeasurementSupport": "PARTIAL: V1 real-user trace (WEB_REAL_USER_EXPERIENCE_V1)"
+    },
+    {
+      "actionId": "unequip_item",
+      "category": "CHARACTER",
+      "displayName": "卸下裝備",
+      "immediacyClass": "INTERACTIVE",
+      "authoritySource": ["RATHENA_NATIVE", "DATABASE"],
+      "visibleResult": "裝備欄位清空且背包可見更新",
+      "expectedFrequency": "on_player_action",
+      "supportsRapidAction": false,
+      "isPlayerBlocking": false,
+      "isStateFreshnessSensitive": true,
+      "openKoreDependent": false,
+      "currentMeasurementSupport": "PARTIAL: V1 real-user trace (WEB_REAL_USER_EXPERIENCE_V1)"
+    },
+    {
+      "actionId": "use_item",
+      "category": "CHARACTER",
+      "displayName": "使用道具",
+      "immediacyClass": "INTERACTIVE",
+      "authoritySource": ["RATHENA_NATIVE", "DATABASE"],
+      "visibleResult": "道具數量與角色效果可見更新",
+      "expectedFrequency": "on_player_action",
+      "supportsRapidAction": true,
+      "isPlayerBlocking": false,
+      "isStateFreshnessSensitive": true,
+      "openKoreDependent": false,
+      "currentMeasurementSupport": "PARTIAL: V1 real-user trace (WEB_REAL_USER_EXPERIENCE_V1)"
+    },
+    {
+      "actionId": "npc_dialog_action",
+      "category": "QUEST",
+      "displayName": "NPC 對話操作",
+      "immediacyClass": "INTERACTIVE",
+      "authoritySource": ["RATHENA_NATIVE", "DATABASE"],
+      "visibleResult": "下一個 NPC 對話狀態可見",
+      "expectedFrequency": "on_quest_step",
+      "supportsRapidAction": false,
+      "isPlayerBlocking": true,
+      "isStateFreshnessSensitive": true,
+      "openKoreDependent": false,
+      "currentMeasurementSupport": "PARTIAL: V1 real-user trace (WEB_REAL_USER_EXPERIENCE_V1)"
+    },
+    {
+      "actionId": "minimap_freshness",
+      "category": "MAP",
+      "displayName": "小地圖即時性",
+      "immediacyClass": "IMMEDIATE",
+      "authoritySource": ["RATHENA_NATIVE", "FILE_BASED", "SSE"],
+      "visibleResult": "角色標記反映最新 authoritative timestamp",
+      "expectedFrequency": "high; map delta cadence",
+      "supportsRapidAction": false,
+      "isPlayerBlocking": false,
+      "isStateFreshnessSensitive": true,
+      "openKoreDependent": false,
+      "currentMeasurementSupport": "PARTIAL: V1 real-user trace (WEB_REAL_USER_EXPERIENCE_V1)"
+    },
+    {
+      "actionId": "skill_allocate",
+      "category": "CHARACTER",
+      "displayName": "技能加點",
+      "immediacyClass": "INTERACTIVE",
+      "authoritySource": [
+        "RATHENA_NATIVE",
+        "FILE_BASED"
+      ],
+      "visibleResult": "技能等級與剩餘技能點更新",
+      "expectedFrequency": "on_player_action",
+      "supportsRapidAction": true,
+      "isPlayerBlocking": false,
+      "isStateFreshnessSensitive": true,
+      "openKoreDependent": false,
+      "currentMeasurementSupport": "PARTIAL: one mutation path sample; full distribution pending"
+    },
+    {
+      "actionId": "equipment_change",
+      "category": "CHARACTER",
+      "displayName": "裝備變更",
+      "immediacyClass": "INTERACTIVE",
+      "authoritySource": [
+        "RATHENA_NATIVE",
+        "FILE_BASED"
+      ],
+      "visibleResult": "裝備欄與紙娃娃同步",
+      "expectedFrequency": "on_player_action",
+      "supportsRapidAction": false,
+      "isPlayerBlocking": false,
+      "isStateFreshnessSensitive": true,
+      "openKoreDependent": false,
+      "currentMeasurementSupport": "UNKNOWN"
+    },
+    {
+      "actionId": "item_use",
+      "category": "CHARACTER",
+      "displayName": "使用道具",
+      "immediacyClass": "INTERACTIVE",
+      "authoritySource": [
+        "RATHENA_NATIVE",
+        "FILE_BASED"
+      ],
+      "visibleResult": "道具數量與角色效果更新",
+      "expectedFrequency": "on_player_action",
+      "supportsRapidAction": true,
+      "isPlayerBlocking": false,
+      "isStateFreshnessSensitive": true,
+      "openKoreDependent": false,
+      "currentMeasurementSupport": "UNKNOWN"
+    },
+    {
+      "actionId": "automation_start",
+      "category": "AUTOMATION",
+      "displayName": "開始掛機",
+      "immediacyClass": "INTERACTIVE",
+      "authoritySource": [
+        "WEB_ONLY",
+        "FILE_BASED"
+      ],
+      "visibleResult": "掛機狀態顯示為啟動中或掛機中",
+      "expectedFrequency": "rare; on_player_action",
+      "supportsRapidAction": false,
+      "isPlayerBlocking": true,
+      "isStateFreshnessSensitive": true,
+      "openKoreDependent": false,
+      "currentMeasurementSupport": "PARTIAL: production and isolated path samples"
+    },
+    {
+      "actionId": "automation_stop",
+      "category": "AUTOMATION",
+      "displayName": "停止掛機",
+      "immediacyClass": "INTERACTIVE",
+      "authoritySource": [
+        "WEB_ONLY",
+        "FILE_BASED"
+      ],
+      "visibleResult": "掛機狀態顯示為停止或待機",
+      "expectedFrequency": "rare; on_player_action",
+      "supportsRapidAction": false,
+      "isPlayerBlocking": false,
+      "isStateFreshnessSensitive": true,
+      "openKoreDependent": false,
+      "currentMeasurementSupport": "PARTIAL: production and isolated path samples"
+    },
+    {
+      "actionId": "mode_switch",
+      "category": "AUTOMATION",
+      "displayName": "模式切換",
+      "immediacyClass": "INTERACTIVE",
+      "authoritySource": [
+        "WEB_ONLY",
+        "FILE_BASED"
+      ],
+      "visibleResult": "自動模式與控制狀態更新",
+      "expectedFrequency": "on_player_action",
+      "supportsRapidAction": true,
+      "isPlayerBlocking": false,
+      "isStateFreshnessSensitive": true,
+      "openKoreDependent": false,
+      "currentMeasurementSupport": "PARTIAL: mode-switch evidence available"
+    },
+    {
+      "actionId": "target_switch",
+      "category": "AUTOMATION",
+      "displayName": "目標切換",
+      "immediacyClass": "INTERACTIVE",
+      "authoritySource": [
+        "WEB_ONLY",
+        "FILE_BASED"
+      ],
+      "visibleResult": "目前目標與戰鬥目標更新",
+      "expectedFrequency": "on_player_action; occasional",
+      "supportsRapidAction": true,
+      "isPlayerBlocking": false,
+      "isStateFreshnessSensitive": true,
+      "openKoreDependent": false,
+      "currentMeasurementSupport": "UNKNOWN"
+    },
+    {
+      "actionId": "farm_map_switch",
+      "category": "AUTOMATION",
+      "displayName": "掛機地圖切換",
+      "immediacyClass": "INTERACTIVE",
+      "authoritySource": [
+        "DATABASE",
+        "FILE_BASED",
+        "RATHENA_NATIVE"
+      ],
+      "visibleResult": "掛機目標地圖與導航狀態更新",
+      "expectedFrequency": "rare; on_player_action",
+      "supportsRapidAction": false,
+      "isPlayerBlocking": true,
+      "isStateFreshnessSensitive": true,
+      "openKoreDependent": false,
+      "currentMeasurementSupport": "UNKNOWN"
+    },
+    {
+      "actionId": "minimap_marker_update",
+      "category": "MAP",
+      "displayName": "小地圖角色標記更新",
+      "immediacyClass": "IMMEDIATE",
+      "authoritySource": [
+        "FILE_BASED",
+        "CACHE",
+        "SSE"
+      ],
+      "visibleResult": "角色標記移到最新座標",
+      "expectedFrequency": "high; map delta cadence",
+      "supportsRapidAction": false,
+      "isPlayerBlocking": false,
+      "isStateFreshnessSensitive": true,
+      "openKoreDependent": false,
+      "currentMeasurementSupport": "PARTIAL: candidate map-delta and external marker timing evidence"
+    },
+    {
+      "actionId": "minimap_open",
+      "category": "MAP",
+      "displayName": "開啟小地圖",
+      "immediacyClass": "IMMEDIATE",
+      "authoritySource": [
+        "WEB_ONLY",
+        "FILE_BASED"
+      ],
+      "visibleResult": "小地圖面板可見",
+      "expectedFrequency": "on_player_action",
+      "supportsRapidAction": false,
+      "isPlayerBlocking": false,
+      "isStateFreshnessSensitive": false,
+      "openKoreDependent": false,
+      "currentMeasurementSupport": "BROWSER_ONLY"
+    },
+    {
+      "actionId": "minimap_close",
+      "category": "MAP",
+      "displayName": "關閉小地圖",
+      "immediacyClass": "IMMEDIATE",
+      "authoritySource": [
+        "WEB_ONLY"
+      ],
+      "visibleResult": "小地圖面板隱藏",
+      "expectedFrequency": "on_player_action",
+      "supportsRapidAction": false,
+      "isPlayerBlocking": false,
+      "isStateFreshnessSensitive": false,
+      "openKoreDependent": false,
+      "currentMeasurementSupport": "BROWSER_ONLY"
+    },
+    {
+      "actionId": "map_transition_visible",
+      "category": "MAP",
+      "displayName": "地圖切換可見",
+      "immediacyClass": "NAVIGATION",
+      "authoritySource": [
+        "RATHENA_NATIVE",
+        "FILE_BASED",
+        "CACHE"
+      ],
+      "visibleResult": "新地圖名稱、地形與座標可見",
+      "expectedFrequency": "on_map_transition",
+      "supportsRapidAction": false,
+      "isPlayerBlocking": true,
+      "isStateFreshnessSensitive": true,
+      "openKoreDependent": false,
+      "currentMeasurementSupport": "PARTIAL: desktop and mobile terrain transition evidence"
+    },
+    {
+      "actionId": "quest_open",
+      "category": "QUEST",
+      "displayName": "開啟任務頁",
+      "immediacyClass": "NAVIGATION",
+      "authoritySource": [
+        "WEB_ONLY",
+        "CACHE",
+        "DATABASE",
+        "FILE_BASED"
+      ],
+      "visibleResult": "任務列表與目前狀態可見",
+      "expectedFrequency": "on_player_action; occasional",
+      "supportsRapidAction": false,
+      "isPlayerBlocking": false,
+      "isStateFreshnessSensitive": true,
+      "openKoreDependent": false,
+      "currentMeasurementSupport": "PARTIAL: full-state cold/warm evidence"
+    },
+    {
+      "actionId": "dialog_visible",
+      "category": "QUEST",
+      "displayName": "任務對話可見",
+      "immediacyClass": "INTERACTIVE",
+      "authoritySource": [
+        "RATHENA_NATIVE",
+        "DATABASE",
+        "FILE_BASED"
+      ],
+      "visibleResult": "NPC 對話行與目前階段可見",
+      "expectedFrequency": "on_quest_step",
+      "supportsRapidAction": false,
+      "isPlayerBlocking": true,
+      "isStateFreshnessSensitive": true,
+      "openKoreDependent": false,
+      "currentMeasurementSupport": "UNKNOWN"
+    },
+    {
+      "actionId": "choice_submit",
+      "category": "QUEST",
+      "displayName": "提交任務選項",
+      "immediacyClass": "INTERACTIVE",
+      "authoritySource": [
+        "RATHENA_NATIVE",
+        "DATABASE"
+      ],
+      "visibleResult": "選項結果與任務階段更新",
+      "expectedFrequency": "on_quest_step",
+      "supportsRapidAction": false,
+      "isPlayerBlocking": true,
+      "isStateFreshnessSensitive": true,
+      "openKoreDependent": false,
+      "currentMeasurementSupport": "UNKNOWN"
+    },
+    {
+      "actionId": "journal_update",
+      "category": "QUEST",
+      "displayName": "任務日誌更新",
+      "immediacyClass": "BACKGROUND",
+      "authoritySource": [
+        "DATABASE",
+        "FILE_BASED",
+        "CACHE"
+      ],
+      "visibleResult": "任務進度摘要與行動紀錄更新",
+      "expectedFrequency": "event-driven; low frequency",
+      "supportsRapidAction": false,
+      "isPlayerBlocking": false,
+      "isStateFreshnessSensitive": true,
+      "openKoreDependent": false,
+      "currentMeasurementSupport": "UNKNOWN"
+    },
+    {
+      "actionId": "inventory_open",
+      "category": "INVENTORY",
+      "displayName": "開啟道具欄",
+      "immediacyClass": "NAVIGATION",
+      "authoritySource": [
+        "FILE_BASED",
+        "CACHE",
+        "DATABASE"
+      ],
+      "visibleResult": "最新背包內容可見",
+      "expectedFrequency": "on_player_action; occasional",
+      "supportsRapidAction": false,
+      "isPlayerBlocking": false,
+      "isStateFreshnessSensitive": true,
+      "openKoreDependent": false,
+      "currentMeasurementSupport": "PARTIAL: lean warm path; full inventory action distribution pending"
+    },
+    {
+      "actionId": "storage_open",
+      "category": "INVENTORY",
+      "displayName": "開啟倉庫",
+      "immediacyClass": "NAVIGATION",
+      "authoritySource": [
+        "RATHENA_NATIVE",
+        "DATABASE"
+      ],
+      "visibleResult": "倉庫內容可見",
+      "expectedFrequency": "rare; on_player_action",
+      "supportsRapidAction": false,
+      "isPlayerBlocking": false,
+      "isStateFreshnessSensitive": true,
+      "openKoreDependent": false,
+      "currentMeasurementSupport": "UNKNOWN"
+    },
+    {
+      "actionId": "shop_open",
+      "category": "INVENTORY",
+      "displayName": "開啟商店",
+      "immediacyClass": "NAVIGATION",
+      "authoritySource": [
+        "RATHENA_NATIVE",
+        "DATABASE"
+      ],
+      "visibleResult": "商店品項與可交易狀態可見",
+      "expectedFrequency": "rare; on_player_action",
+      "supportsRapidAction": false,
+      "isPlayerBlocking": false,
+      "isStateFreshnessSensitive": true,
+      "openKoreDependent": false,
+      "currentMeasurementSupport": "UNKNOWN"
+    },
+    {
+      "actionId": "login",
+      "category": "SYSTEM",
+      "displayName": "登入",
+      "immediacyClass": "NAVIGATION",
+      "authoritySource": [
+        "DATABASE",
+        "WEB_ONLY"
+      ],
+      "visibleResult": "帳號驗證完成並進入選角",
+      "expectedFrequency": "on_session_start",
+      "supportsRapidAction": false,
+      "isPlayerBlocking": true,
+      "isStateFreshnessSensitive": false,
+      "openKoreDependent": false,
+      "currentMeasurementSupport": "PARTIAL: five-sample tracing run; full long-term distribution pending"
+    },
+    {
+      "actionId": "character_select",
+      "category": "SYSTEM",
+      "displayName": "選擇角色",
+      "immediacyClass": "NAVIGATION",
+      "authoritySource": [
+        "DATABASE",
+        "CACHE",
+        "WEB_ONLY"
+      ],
+      "visibleResult": "角色選擇畫面與角色資料可見",
+      "expectedFrequency": "on_session_start",
+      "supportsRapidAction": false,
+      "isPlayerBlocking": true,
+      "isStateFreshnessSensitive": true,
+      "openKoreDependent": false,
+      "currentMeasurementSupport": "PARTIAL: session proxy and UI evidence"
+    },
+    {
+      "actionId": "enter_game",
+      "category": "SYSTEM",
+      "displayName": "進入遊戲",
+      "immediacyClass": "NAVIGATION",
+      "authoritySource": [
+        "DATABASE",
+        "FILE_BASED",
+        "CACHE"
+      ],
+      "visibleResult": "第一個可操作遊戲畫面可見",
+      "expectedFrequency": "on_session_start",
+      "supportsRapidAction": false,
+      "isPlayerBlocking": true,
+      "isStateFreshnessSensitive": true,
+      "openKoreDependent": false,
+      "currentMeasurementSupport": "FULL: lean entry, tracing and external latency evidence"
+    },
+    {
+      "actionId": "combat_state_visible",
+      "category": "COMBAT",
+      "displayName": "戰鬥狀態可見",
+      "immediacyClass": "IMMEDIATE",
+      "authoritySource": [
+        "FILE_BASED",
+        "SSE",
+        "CACHE"
+      ],
+      "visibleResult": "HP/SP、傷害、擊殺與戰鬥狀態更新",
+      "expectedFrequency": "high; combat SSE delta",
+      "supportsRapidAction": false,
+      "isPlayerBlocking": false,
+      "isStateFreshnessSensitive": true,
+      "openKoreDependent": false,
+      "currentMeasurementSupport": "FULL: canonical external 1000-viewer combat p50/p95/p99 141/143/143ms"
+    },
+    {
+      "actionId": "target_change_visible",
+      "category": "COMBAT",
+      "displayName": "戰鬥目標變更可見",
+      "immediacyClass": "IMMEDIATE",
+      "authoritySource": [
+        "FILE_BASED",
+        "SSE",
+        "CACHE"
+      ],
+      "visibleResult": "目前攻擊目標與相關標示更新",
+      "expectedFrequency": "high; combat SSE delta",
+      "supportsRapidAction": false,
+      "isPlayerBlocking": false,
+      "isStateFreshnessSensitive": true,
+      "openKoreDependent": false,
+      "currentMeasurementSupport": "PARTIAL: shares canonical combat stream path; target-specific distribution pending"
+    }
+  ],
+  "stateFreshnessDomains": [
+    {
+      "domain": "minimap",
+      "authority": [
+        "RATHENA_NATIVE",
+        "FILE_BASED"
+      ],
+      "revision": "mapRevision",
+      "freshnessObservations": [
+        "staleOver500ms",
+        "staleOver1000ms",
+        "staleOver2000ms"
+      ],
+      "delivery": "map delta or lean live projection"
+    },
+    {
+      "domain": "automation",
+      "authority": [
+        "DATABASE",
+        "FILE_BASED"
+      ],
+      "revision": "automationRevision",
+      "freshnessObservations": [
+        "staleOver500ms",
+        "staleOver1000ms",
+        "staleOver2000ms"
+      ],
+      "delivery": "typed command acknowledgement plus live summary"
+    },
+    {
+      "domain": "combat",
+      "authority": [
+        "RATHENA_NATIVE",
+        "SSE"
+      ],
+      "revision": "combatRevision",
+      "freshnessObservations": [
+        "staleOver500ms",
+        "staleOver1000ms",
+        "staleOver2000ms"
+      ],
+      "delivery": "Combat SSE delta"
+    },
+    {
+      "domain": "quest",
+      "authority": [
+        "RATHENA_NATIVE",
+        "DATABASE"
+      ],
+      "revision": "questRevision",
+      "freshnessObservations": [
+        "staleOver500ms",
+        "staleOver1000ms",
+        "staleOver2000ms"
+      ],
+      "delivery": "revision or on-demand projection"
+    },
+    {
+      "domain": "inventory",
+      "authority": [
+        "RATHENA_NATIVE",
+        "DATABASE"
+      ],
+      "revision": "inventoryRevision",
+      "freshnessObservations": [
+        "staleOver500ms",
+        "staleOver1000ms",
+        "staleOver2000ms"
+      ],
+      "delivery": "event-driven or page-open projection"
+    },
+    {
+      "domain": "supply_recovery",
+      "authority": [
+        "RATHENA_NATIVE",
+        "DATABASE"
+      ],
+      "revision": "supplyRevision",
+      "freshnessObservations": [
+        "staleOver500ms",
+        "staleOver1000ms",
+        "staleOver2000ms"
+      ],
+      "delivery": "event-driven safety summary"
+    }
+  ],
+  "authorityNote": "OpenKore Exit complete (2026-09-18). Authority is rAthena + native SERVER_AGENT; OPENKORE_BRIDGE is no longer a valid player-UI authority source."
+}

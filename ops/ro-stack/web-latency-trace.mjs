@@ -1,6 +1,6 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { performance } from 'node:perf_hooks';
-import { randomUUID } from 'node:crypto';
+import { randomUUID, timingSafeEqual } from 'node:crypto';
 
 const interactionIdPattern = /^[a-zA-Z0-9][a-zA-Z0-9._:-]{0,95}$/;
 const stageNames = Object.freeze([
@@ -13,6 +13,8 @@ const stageNames = Object.freeze([
 export const webLatencyTraceEnabled = /^(?:1|true|on)$/i.test(
   String(process.env.WEB_LATENCY_TRACE ?? '').trim(),
 );
+export const webHotPathDiagnosticEnabled = webLatencyTraceEnabled &&
+  /^(?:1|true|on)$/i.test(String(process.env.WEB_HOT_PATH_DIAGNOSTIC ?? '').trim());
 
 const traceStorage = new AsyncLocalStorage();
 
@@ -31,6 +33,27 @@ function metricValue(value) {
 
 export function currentWebLatencyTrace() {
   return traceStorage.getStore() ?? null;
+}
+
+export function recordWebDiagnosticQuery(category = 'player_required') {
+  const counts = currentWebLatencyTrace()?.queryCounts;
+  if (!counts) return;
+  counts.db_query_count_total += 1;
+  if (category === 'support_session_lookup') counts.support_session_query_count += 1;
+  if (category === 'admin_data') counts.admin_data_query_count += 1;
+  if (category === 'sync_monitoring_write') counts.sync_monitoring_write_count += 1;
+}
+
+function authorizedDiagnosticRequest(request) {
+  if (!webHotPathDiagnosticEnabled) return false;
+  const address = request.socket?.remoteAddress;
+  if (!['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(address)) return false;
+  const expected = String(process.env.WEB_HOT_PATH_DIAGNOSTIC_TOKEN ?? '');
+  const supplied = String(request.headers['x-web-hot-path-diagnostic-token'] ?? '');
+  if (!/^[A-Za-z0-9_-]{32,128}$/.test(expected) ||
+      !/^[A-Za-z0-9_-]{32,128}$/.test(supplied) ||
+      supplied.length !== expected.length) return false;
+  return timingSafeEqual(Buffer.from(supplied), Buffer.from(expected));
 }
 
 export async function withWebLatencyStage(stage, operation) {
@@ -74,6 +97,10 @@ function headersWithTrace(headers, trace) {
     'server-timing': webLatencyServerTiming(trace),
     'x-interaction-id': trace.interactionId,
     'x-web-latency-trace': 'on',
+    ...(trace.queryCounts ? {
+      'x-web-hot-path-query-counts': Object.entries(trace.queryCounts)
+        .map(([name, value]) => `${name}=${value}`).join(';'),
+    } : {}),
   };
 }
 
@@ -103,6 +130,12 @@ export function runWithWebLatencyTrace(request, response, handler) {
     stages: Object.fromEntries(stageNames.map((stage) => [stage, 0])),
     counts: Object.fromEntries(stageNames.map((stage) => [stage, 0])),
     openKoreDependent: false,
+    queryCounts: authorizedDiagnosticRequest(request) ? {
+      db_query_count_total: 0,
+      support_session_query_count: 0,
+      admin_data_query_count: 0,
+      sync_monitoring_write_count: 0,
+    } : null,
   };
   installResponseHeaders(response, trace);
   return traceStorage.run(trace, handler);

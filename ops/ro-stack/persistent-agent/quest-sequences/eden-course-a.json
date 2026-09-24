@@ -1,0 +1,286 @@
+{
+  "taskId": 7113001,
+  "sequenceId": "eden_course_a_v1",
+  "steps": [
+    {
+      "type": "GO_NPC",
+      "npcName": "Instructor Boya#para01",
+      "map": "moc_para01",
+      "destinationType": "NPC",
+      "route": [
+        { "map": "moc_para01", "x": 22, "y": 22 },
+        { "map": "moc_para01", "x": 14, "y": 30 },
+        { "map": "moc_para01", "x": 18, "y": 34 },
+        { "map": "moc_para01", "x": 23, "y": 34 }
+      ],
+      "retryPolicy": { "maxRetries": 3, "timeoutMs": 120000 },
+      "expectedArrivalCondition": "NPC_INTERACTION_RANGE"
+    },
+    { "type": "TALK_NPC", "npcName": "Instructor Boya#para01", "map": "moc_para01" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "DIALOG_MENU_SELECT", "expectedDialogState": "WAIT_MENU", "index": 1 },
+    { "type": "WAIT_QUEST_STATE", "questId": 7128, "expectedState": "ABSENT" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "DIALOG_MENU_SELECT", "expectedDialogState": "WAIT_MENU", "index": 1 },
+    { "type": "WAIT_QUEST_STATE", "questId": 7128, "expectedState": "ABSENT" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "ACCEPT_QUEST", "questId": 7128, "expectedState": "ACTIVE" },
+
+    {
+      "type": "GO_NPC",
+      "npcName": "#eden_out",
+      "map": "moc_para01",
+      "destinationType": "NPC",
+      "route": [
+        { "map": "moc_para01", "x": 17, "y": 34 },
+        { "map": "moc_para01", "x": 14, "y": 30 },
+        { "map": "moc_para01", "x": 22, "y": 22 },
+        { "map": "moc_para01", "x": 28, "y": 14 },
+        { "map": "moc_para01", "x": 30, "y": 11 }
+      ],
+      "retryPolicy": { "maxRetries": 3, "timeoutMs": 120000 },
+      "expectedArrivalCondition": "NPC_INTERACTION_RANGE"
+    },
+    { "type": "WAIT_QUEST_STATE", "questId": 7128, "expectedState": "ACTIVE" },
+    {
+      "type": "GO_NPC",
+      "npcName": "Kafra Teleportation#morocc",
+      "map": "morocc",
+      "destinationType": "NPC",
+      "route": [
+        { "map": "morocc", "x": 152, "y": 106 },
+        { "map": "morocc", "x": 155, "y": 118 },
+        { "map": "morocc", "x": 154, "y": 130 },
+        { "map": "morocc", "x": 152, "y": 142 },
+        { "map": "morocc", "x": 142, "y": 154 },
+        { "map": "morocc", "x": 139, "y": 166 },
+        { "map": "morocc", "x": 143, "y": 178 },
+        { "map": "morocc", "x": 154, "y": 190 },
+        { "map": "morocc", "x": 154, "y": 202 },
+        { "map": "morocc", "x": 154, "y": 214 },
+        { "map": "morocc", "x": 155, "y": 226 },
+        { "map": "morocc", "x": 151, "y": 238 },
+        { "map": "morocc", "x": 151, "y": 250 },
+        { "map": "morocc", "x": 154, "y": 256 }
+      ],
+      "retryPolicy": { "maxRetries": 3, "timeoutMs": 120000 },
+      "expectedArrivalCondition": "NPC_INTERACTION_RANGE"
+    },
+    { "type": "TALK_NPC", "npcName": "Kafra Teleportation#morocc", "map": "morocc" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "DIALOG_MENU_SELECT", "expectedDialogState": "WAIT_MENU", "index": 3 },
+    { "type": "WAIT_QUEST_STATE", "questId": 7128, "expectedState": "ACTIVE" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "DIALOG_MENU_SELECT", "expectedDialogState": "WAIT_MENU", "index": 1 },
+    { "type": "WAIT_QUEST_STATE", "questId": 7128, "expectedState": "ACTIVE" },
+
+    {
+      "type": "GO_MAP",
+      "map": "moc_fild11",
+      "x": 284,
+      "y": 211,
+      "destinationType": "MAP_POSITION",
+      "route": [
+        { "map": "moc_fild11", "x": 258, "y": 115 },
+        { "map": "moc_fild11", "x": 246, "y": 127 },
+        { "map": "moc_fild11", "x": 254, "y": 139 },
+        { "map": "moc_fild11", "x": 266, "y": 151 },
+        { "map": "moc_fild11", "x": 275, "y": 163 },
+        { "map": "moc_fild11", "x": 275, "y": 175 },
+        { "map": "moc_fild11", "x": 281, "y": 187 },
+        { "map": "moc_fild11", "x": 284, "y": 199 },
+        { "map": "moc_fild11", "x": 284, "y": 211 }
+      ],
+      "retryPolicy": { "maxRetries": 3, "timeoutMs": 120000 },
+      "expectedArrivalCondition": "MAP_POSITION"
+    },
+    {
+      "type": "GO_NPC",
+      "npcName": "Talking Dog#para03",
+      "map": "moc_fild11",
+      "destinationType": "NPC",
+      "route": [
+        { "map": "moc_fild11", "x": 284, "y": 223 },
+        { "map": "moc_fild11", "x": 280, "y": 232 },
+        { "map": "moc_fild11", "x": 268, "y": 226 },
+        { "map": "moc_fild11", "x": 256, "y": 214 },
+        { "map": "moc_fild11", "x": 244, "y": 202 },
+        { "map": "moc_fild11", "x": 232, "y": 201 },
+        { "map": "moc_fild11", "x": 220, "y": 213 },
+        { "map": "moc_fild11", "x": 208, "y": 225 },
+        { "map": "moc_fild11", "x": 196, "y": 237 },
+        { "map": "moc_fild11", "x": 184, "y": 249 },
+        { "map": "moc_fild11", "x": 182, "y": 251 }
+      ],
+      "retryPolicy": { "maxRetries": 3, "timeoutMs": 120000 },
+      "expectedArrivalCondition": "NPC_INTERACTION_RANGE"
+    },
+    { "type": "TALK_NPC", "npcName": "Talking Dog#para03", "map": "moc_fild11" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "DIALOG_MENU_SELECT", "expectedDialogState": "WAIT_MENU", "index": 2 },
+    { "type": "WAIT_QUEST_STATE", "questId": 7128, "expectedState": "ACTIVE" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "WAIT_QUEST_STATE", "questId": 7129, "expectedState": "ACTIVE" },
+    { "type": "KILL_MONSTER", "map": "moc_fild11", "questId": 7129, "mobId": 1009, "count": 10, "leashX": 180, "leashY": 250, "leashRange": 90 },
+
+    {
+      "type": "RETURN_NPC",
+      "npcName": "Talking Dog#para03",
+      "map": "moc_fild11",
+      "destinationType": "NPC",
+      "route": [{ "map": "moc_fild11", "x": 180, "y": 250 }],
+      "retryPolicy": { "maxRetries": 3, "timeoutMs": 120000 },
+      "expectedArrivalCondition": "NPC_INTERACTION_RANGE"
+    },
+    { "type": "TALK_NPC", "npcName": "Talking Dog#para03", "map": "moc_fild11" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "WAIT_QUEST_STATE", "questId": 7130, "expectedState": "ACTIVE" },
+    { "type": "KILL_MONSTER", "map": "moc_fild11", "questId": 7130, "mobId": 1107, "count": 10, "leashX": 180, "leashY": 250, "leashRange": 90 },
+
+    {
+      "type": "RETURN_NPC",
+      "npcName": "Talking Dog#para03",
+      "map": "moc_fild11",
+      "destinationType": "NPC",
+      "route": [{ "map": "moc_fild11", "x": 180, "y": 250 }],
+      "retryPolicy": { "maxRetries": 3, "timeoutMs": 120000 },
+      "expectedArrivalCondition": "NPC_INTERACTION_RANGE"
+    },
+    { "type": "TALK_NPC", "npcName": "Talking Dog#para03", "map": "moc_fild11" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "WAIT_QUEST_STATE", "questId": 7131, "expectedState": "ACTIVE" },
+    {
+      "type": "KILL_MONSTER",
+      "map": "moc_fild11",
+      "questId": 7131,
+      "mobId": 1001,
+      "count": 5,
+      "leashX": 180,
+      "leashY": 250,
+      "leashRange": 90
+    },
+
+    {
+      "type": "RETURN_NPC",
+      "npcName": "Talking Dog#para03",
+      "map": "moc_fild11",
+      "destinationType": "NPC",
+      "route": [{ "map": "moc_fild11", "x": 180, "y": 250 }],
+      "retryPolicy": { "maxRetries": 3, "timeoutMs": 120000 },
+      "expectedArrivalCondition": "NPC_INTERACTION_RANGE"
+    },
+    { "type": "TALK_NPC", "npcName": "Talking Dog#para03", "map": "moc_fild11" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "WAIT_QUEST_STATE", "questId": 7132, "expectedState": "ACTIVE" },
+
+    { "type": "USE_ITEM", "itemId": 22508 },
+
+    {
+      "type": "GO_NPC",
+      "npcName": "Instructor Boya#para01",
+      "map": "moc_para01",
+      "destinationType": "NPC",
+      "route": [
+        { "map": "moc_para01", "x": 171, "y": 101 },
+        { "map": "moc_para01", "x": 178, "y": 94 },
+        { "map": "moc_para01", "x": 179, "y": 90, "portalTo": "moc_para01" },
+        { "map": "moc_para01", "x": 47, "y": 161, "portalTo": "moc_para01" },
+        { "map": "moc_para01", "x": 39, "y": 22 },
+        { "map": "moc_para01", "x": 31, "y": 30 },
+        { "map": "moc_para01", "x": 22, "y": 22 },
+        { "map": "moc_para01", "x": 14, "y": 30 },
+        { "map": "moc_para01", "x": 18, "y": 34 },
+        { "map": "moc_para01", "x": 23, "y": 34 }
+      ],
+      "retryPolicy": { "maxRetries": 3, "timeoutMs": 120000 },
+      "expectedArrivalCondition": "NPC_INTERACTION_RANGE"
+    },
+    { "type": "TALK_NPC", "npcName": "Instructor Boya#para01", "map": "moc_para01" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "COMPLETE_QUEST", "questId": 7132, "expectedState": "COMPLETE" },
+
+    {
+      "type": "GO_NPC",
+      "npcName": "#warp_2_pass",
+      "map": "moc_para01",
+      "destinationType": "NPC",
+      "route": [
+        { "map": "moc_para01", "x": 21, "y": 37 },
+        { "map": "moc_para01", "x": 20, "y": 31 },
+        { "map": "moc_para01", "x": 28, "y": 31 },
+        { "map": "moc_para01", "x": 36, "y": 31 },
+        { "map": "moc_para01", "x": 44, "y": 35 },
+        { "map": "moc_para01", "x": 47, "y": 39 }
+      ],
+      "retryPolicy": { "maxRetries": 3, "timeoutMs": 120000 },
+      "expectedArrivalCondition": "NPC_INTERACTION_RANGE"
+    },
+    { "type": "TALK_NPC", "npcName": "#warp_2_pass", "map": "moc_para01" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "DIALOG_MENU_SELECT", "expectedDialogState": "WAIT_MENU", "index": 1 },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "WAIT_QUEST_STATE", "questId": 7132, "expectedState": "COMPLETE" },
+
+    {
+      "type": "GO_NPC",
+      "npcName": "Administrator Michael",
+      "map": "moc_para01",
+      "destinationType": "NPC",
+      "route": [
+        { "map": "moc_para01", "x": 109, "y": 33 },
+        { "map": "moc_para01", "x": 113, "y": 32, "portalTo": "moc_para01" }
+      ],
+      "retryPolicy": { "maxRetries": 3, "timeoutMs": 120000 },
+      "expectedArrivalCondition": "NPC_INTERACTION_RANGE"
+    },
+    { "type": "TALK_NPC", "npcName": "Administrator Michael", "map": "moc_para01" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "DIALOG_MENU_SELECT", "expectedDialogState": "WAIT_MENU", "index": 1 },
+    { "type": "WAIT_QUEST_STATE", "questId": 7132, "expectedState": "COMPLETE" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "DIALOG_MENU_SELECT", "expectedDialogState": "WAIT_MENU", "index": 2 },
+    { "type": "WAIT_QUEST_STATE", "questId": 7132, "expectedState": "COMPLETE" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    { "type": "DIALOG_NEXT", "expectedDialogState": "WAIT_NEXT" },
+    {
+      "type": "CONFIRM_REWARD",
+      "expectedRewards": [
+        { "itemId": 5583, "count": 1 },
+        { "itemId": 2560, "count": 1 },
+        { "itemId": 2456, "count": 1 },
+        { "itemId": 15009, "count": 1 }
+      ],
+      "minimumBaseExpDelta": 0,
+      "minimumJobExpDelta": 0,
+      "minimumZenyDelta": 0
+    }
+  ]
+}

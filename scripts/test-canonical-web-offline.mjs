@@ -2,6 +2,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 const root = fileURLToPath(new URL('../', import.meta.url));
 const programs = [
+ 'scripts/test-web-candidate-completeness.mjs',
  'ops/ro-stack/tests/test-production-promotion-governance.mjs',
  'scripts/test-web-full-production-superset.mjs',
  'scripts/test-world-map-supply-cutover.mjs',

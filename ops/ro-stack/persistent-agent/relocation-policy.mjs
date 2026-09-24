@@ -64,6 +64,25 @@ export const STEP = Object.freeze({
   START_FARM: 'START_FARM',
 });
 
+// The coordinator deadline follows the already resolved route length. Native
+// execution remains authoritative for movement, retries and arrival.
+export const RELOCATION_STEP_BUDGET_MS = 120_000;
+export const RELOCATION_STEP_CAP = 16;
+export const RELOCATION_BUDGET_CAP_MS = 3_600_000;
+export const RELOCATION_COORDINATOR_GRACE_MS = 60_000;
+
+export function coordinatorDeadlineMsForRouteSteps(routeSteps) {
+  const requested = Number.isFinite(Number(routeSteps))
+    ? Math.trunc(Number(routeSteps))
+    : 1;
+  const steps = Math.max(1, Math.min(requested, RELOCATION_STEP_CAP));
+  const budget = Math.min(
+    steps * RELOCATION_STEP_BUDGET_MS,
+    RELOCATION_BUDGET_CAP_MS,
+  );
+  return budget + RELOCATION_COORDINATOR_GRACE_MS;
+}
+
 const mapIdPattern = /^[a-z0-9_]{1,31}$/;
 
 function isUsableTarget(target) {
