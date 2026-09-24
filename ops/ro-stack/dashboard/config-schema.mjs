@@ -211,6 +211,11 @@ function parseConfig(configText) {
 }
 const decode = (descriptor,value) => descriptor.type==='checkbox' ? Number(value)!==0 : descriptor.type==='number' ? value==='' && descriptor.nullable ? null : Number(value) : descriptor.type==='select' && typeof descriptor.default==='number' ? Number(value) : String(value);
 const gameplayKey = key => /^(?:attack|useSelf_|partySkill|buyAuto|sellAuto|storageAuto|getAuto|items(?:Take|Gather|Max)|teleportAuto|follow|minStorageZeny|relogAfterStorage)/.test(key) && !/password|encrypt|token|secret/i.test(key);
+// M1 does not execute per-item OpenKore disposition (storage, sell, granular
+// pickup). Legacy items_control/pickupitems templates hold ~1666 rows; only the
+// identities owned by the canonical contract are projected. Every source line
+// stays verbatim in migration.retained for a later authorized capability.
+export const LEGACY_ITEM_RULE_BASELINE = Object.freeze(['all','501','601','602']);
 export function migrateLegacyConfig({supplyCycle={},configText='',skillAutomation={},itemsControlText='',pickupText='',monControlText='',source='legacy'}={}) {
   const config=defaultCanonicalConfig(0); const mappings=[]; const unmapped=[];
   const parsed=parseConfig(configText); const retained={supplyCycle:clone(supplyCycle),scalars:{},blocks:[],itemsControl:[],pickup:[],monControl:[]};
@@ -263,19 +268,29 @@ export function migrateLegacyConfig({supplyCycle={},configText='',skillAutomatio
     add('supply-cycle.json.redPotionMin/redPotionMax','supply.services.buy.rules[item=501].minAmount/maxAmount','ADAPT');
   }
   const policyRows=new Map();
+  const baselineItems=new Set(LEGACY_ITEM_RULE_BASELINE);
+  const projection={itemsControlRows:0,pickupRows:0,projected:0,retainedOutsideM1:0,duplicates:0,invalid:0};
+  const outsideSeen=new Set();
+  const retainOutside=(item)=>{ if(outsideSeen.has(item)) projection.duplicates++; else { outsideSeen.add(item); projection.retainedOutsideM1++; } };
   const parseControls=(input,kind)=>String(input??'').split(/\r?\n/).map(line=>line.replace(/\s*#.*$/,'').trim()).filter(Boolean).map(line=>{
     retained[kind].push(line); return line;
   });
   for(const line of parseControls(itemsControlText,'itemsControl')) {
+    projection.itemsControlRows++;
     const match=line.match(/^(.+?)\s+(\d+)\s+([01])\s+([01])(?:\s+([01]))?(?:\s+([01]))?$/);
-    if(!match) { unmapped.push(`items_control 無法映射：${line}`); continue; }
+    if(!match) { projection.invalid++; unmapped.push(`items_control 無法映射：${line}`); continue; }
+    if(!baselineItems.has(match[1])) { retainOutside(match[1]); continue; }
+    if(policyRows.has(match[1])) projection.duplicates++;
     const row={...defaultConfigRow('itemRule'),item:match[1],keepAmount:Number(match[2]),storage:match[3]==='1',sell:match[4]==='1',cartAdd:match[5]==='1',cartGet:match[6]==='1'};
     policyRows.set(row.item,row); add(`items_control ${row.item}`,'supply.itemRules[]','ADAPT');
   }
   for(const line of parseControls(pickupText,'pickup')) {
-    const match=line.match(/^(.+?)\s+(-1|0|1|2)$/); if(!match) { unmapped.push(`pickupitems 無法映射：${line}`); continue; }
+    projection.pickupRows++;
+    const match=line.match(/^(.+?)\s+(-1|0|1|2)$/); if(!match) { projection.invalid++; unmapped.push(`pickupitems 無法映射：${line}`); continue; }
+    if(!baselineItems.has(match[1])) { retainOutside(match[1]); continue; }
     const row=policyRows.get(match[1])??{...defaultConfigRow('itemRule'),item:match[1]}; row.pickup=Number(match[2]); policyRows.set(row.item,row); add(`pickupitems ${row.item}`,'supply.itemRules[].pickup','ADAPT');
   }
+  if(projection.retainedOutsideM1) add(`items_control/pickupitems ${projection.retainedOutsideM1} 項逐項規則`,'migration.retained.itemsControl/pickup','RETAIN_OUTSIDE_M1','M1 不執行逐項存倉、販售與拾取；原文完整保留');
   for(const rule of Array.isArray(supplyCycle.rules)?supplyCycle.rules:[]) {
     if(!SUPPLY_RULE_ACTIONS.includes(rule.action)) { unmapped.push(`未知道具規則 ${rule.itemId} 已保留`); continue; }
     const row={...defaultConfigRow('itemRule'),item:String(rule.itemId)};
@@ -290,6 +305,7 @@ export function migrateLegacyConfig({supplyCycle={},configText='',skillAutomatio
   for(const item of ['601','602']) if(!policyRows.has(item)) policyRows.set(item,{...defaultConfigRow('itemRule'),item,keepAmount:1,storage:false,sell:false});
   for(const item of ['601','602']) if(policyRows.has(item)) { Object.assign(policyRows.get(item),{pickup:1,storage:false,sell:false,cartAdd:false,keepAmount:1}); add(`items_control ${item}`,'permanent travel tool policy','ADAPT','永久道具固定保留，原值保留於遷移記錄'); }
   config.supply.itemRules=[...policyRows.values()];
+  projection.projected=config.supply.itemRules.length;
   for(const line of parseControls(monControlText,'monControl')) {
     const match=line.match(/^(.+?)\s+(-?\d+)((?:\s+-?[\d.]+)*)$/); if(!match) {unmapped.push(`mon_control 無法映射：${line}`);continue;}
     const row=defaultConfigRow('target'); row.monster=match[1]; const values=[match[2],...match[3].trim().split(/\s+/).filter(Boolean)];
@@ -309,7 +325,7 @@ export function migrateLegacyConfig({supplyCycle={},configText='',skillAutomatio
   if(config.combat.attack.mode===-1) config.combat.profile=config.combat.skills.selfSkills.some(row=>/heal/i.test(row.skill))?'HEAL_SUPPORT':config.combat.skills.partySkills.length?'COMBAT_SUPPORT':'PASSIVE_FOLLOW';
   else config.combat.profile=!config.combat.attack.useWeapon?'SKILL_CAST':config.combat.skills.attackSlots.length?'HYBRID_DAMAGE':config.combat.attack.maxDistance>2?'RANGED_DAMAGE':'MELEE_DAMAGE';
   add('GLOBAL_AUTOLOOT/GLOBAL_AUTOSTORE','supply.loot','KEEP','專案固定政策');
-  const migration={source,sourceVersion:'legacy-openkore-web-v1',mappings,unmapped:[...new Set(unmapped)],retained,policy:{fixedOverlays:['GLOBAL_AUTOLOOT=YES','GLOBAL_AUTOSTORE=NO','Butterfly presence/non-consumable/weight=0','Fly default=ON']}};
+  const migration={source,sourceVersion:'legacy-openkore-web-v1',mappings,unmapped:[...new Set(unmapped)],retained,itemRuleProjection:projection,policy:{fixedOverlays:['GLOBAL_AUTOLOOT=YES','GLOBAL_AUTOSTORE=NO','Butterfly presence/non-consumable/weight=0','Fly default=ON']}};
   assertCanonicalConfig(config); return {config,migration};
 }
 const encode=value=>typeof value==='boolean'?value?1:0:value===null?'':value;
