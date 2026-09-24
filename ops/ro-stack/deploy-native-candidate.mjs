@@ -31,9 +31,12 @@ export async function executeNative({root,file,sha256,owner,leaseId,authority,ad
   const dir=boundedPath(root,'.local/ro-stack'), stateFile=path.join(dir,'production-deployment-state.json');
   const leaseFile=path.join(dir,'production-deployment-lease/lease.json');
   const state=readJson(stateFile),lease=readJson(leaseFile);
-  check(!fs.existsSync(path.join(dir,'native-deploy.lock')),'NATIVE_DEPLOY_BUSY');
+  const lock=path.join(dir,'native-deploy.lock'),operationFile=path.join(lock,'operation.json');
+  check(!fs.existsSync(lock),'NATIVE_DEPLOY_BUSY');
   // Durable operation claim. An interrupted attempt cannot be silently replayed.
-  fs.mkdirSync(path.join(dir,'native-deploy.lock'));
+  fs.mkdirSync(lock);
+  write(operationFile,{schema_version:'native-deploy-operation-v1',owner_task_id:owner,lease_id:leaseId,
+    candidate_manifest_sha256:sha256,started_at:new Date().toISOString()});
   let started=false,complete=false;
   try {
     check(equalHash(digest(lease.admission_manifest),lease.admission_manifest_sha256),'WEB_MANIFEST_CHANGED');
@@ -96,23 +99,73 @@ export async function executeNative({root,file,sha256,owner,leaseId,authority,ad
     // Never auto-close drift or restart again after a partial mutation. Retain
     // operation journal and exact rollback reference for owner reconciliation.
     if(!started || complete){
-      const lock=path.join(dir,'native-deploy.lock');
       if(complete)fs.renameSync(lock,path.join(dir,'native-deploy-completed-'+leaseId));
-      else if(!fs.readdirSync(lock).length)fs.rmdirSync(lock);
+      else if(fs.readdirSync(lock).every(name=>name==='operation.json')){
+        if(fs.existsSync(operationFile))fs.unlinkSync(operationFile);
+        fs.rmdirSync(lock);
+      }
     }
   }
+}
+
+// A failed attempt keeps native-deploy.lock as its operation journal. Once the
+// owner has released the lease through release-failed, drift is CLOSED and the
+// current Native bytes equal the accepted baseline, this records the outcome
+// and renames the journal. Staged candidate bytes are retained for audit.
+export const failedOperationPrefix='native-deploy-failed-';
+export function archiveFailedNativeOperation({root,owner,governanceSha,now=new Date()}) {
+  check(typeof owner==='string' && owner.length>0,'ARCHIVE_OWNER_REQUIRED');
+  const dir=boundedPath(root,'.local/ro-stack'),lock=path.join(dir,'native-deploy.lock');
+  check(fs.existsSync(lock),'NATIVE_OPERATION_RECORD_ABSENT');
+  const lockStat=fs.lstatSync(lock);
+  check(lockStat.isDirectory() && !lockStat.isSymbolicLink(),'NATIVE_OPERATION_RECORD_INVALID');
+  check(!fs.existsSync(path.join(dir,'production-deployment-lease')),'DEPLOYMENT_LEASE_ACTIVE');
+  check(!fs.existsSync(boundedPath(root,pendingPath)),'FIRST_PROMOTION_PENDING');
+  const state=readJson(path.join(dir,'production-deployment-state.json'));
+  check(state.production_drift==='CLOSED' && !state.drift_reason,'PRODUCTION_DRIFT_OPEN');
+  check(Array.isArray(state.native_binaries) && state.native_binaries.length>0 &&
+    state.native_binaries.every(x=>equalHash(digest(boundedPath(root,x.path)),x.sha256)),'NATIVE_BASELINE_CHANGED');
+  check(!fs.readdirSync(boundedPath(root,'.local/ro-stack/rathena')).some(name=>name.includes('.candidate-')),
+    'NATIVE_REPLACEMENT_TEMPORARY_PRESENT');
+  const entries=fs.readdirSync(lock).sort();
+  check(entries.every(name=>name==='operation.json' || name==='stage'),'NATIVE_OPERATION_RECORD_UNEXPECTED_CONTENT');
+  const operation=entries.includes('operation.json') ? readJson(path.join(lock,'operation.json')) : null;
+  const staged=[];
+  if(entries.includes('stage')){
+    const stage=path.join(lock,'stage'),stageStat=fs.lstatSync(stage);
+    check(stageStat.isDirectory() && !stageStat.isSymbolicLink(),'NATIVE_STAGE_UNEXPECTED_CONTENT');
+    for(const name of fs.readdirSync(stage).sort()){
+      const file=path.join(stage,name),info=fs.lstatSync(file);
+      check(info.isFile() && !info.isSymbolicLink(),'NATIVE_STAGE_UNEXPECTED_CONTENT');
+      staged.push({path:'stage/'+name,bytes:info.size,sha256:digest(file)});
+    }
+  }
+  const archiveId=failedOperationPrefix+now.toISOString().replace(/[-:.]/g,'')+'-'+randomUUID().slice(0,8);
+  const record={schema_version:'native-deploy-failed-operation-v1',classification:'COMPLETED_FAILED_OPERATION_RECORD',
+    archive_id:archiveId,archived_at:now.toISOString(),archived_by:owner,governance_git_sha:governanceSha||null,
+    operation:operation || {recorded:false,reason:'CLAIM_PREDATES_OPERATION_JOURNAL'},staged_artifacts:staged,
+    production_drift:'CLOSED',deployment_lease:'FREE',native_binaries_match_baseline:true,
+    current_native_binary_sha256:state.current_native_binary_sha256,blocks_new_deploy:false};
+  write(path.join(lock,'failed-operation-record.json'),record);
+  fs.renameSync(lock,path.join(dir,archiveId));
+  return record;
 }
 
 async function main(){
   const argv=process.argv.slice(2),a=Object.fromEntries(argv.flatMap((x,i)=>x.startsWith('--')?[[x.slice(2),argv[i+1]]]:[]));
   const root=path.resolve(a['production-root']||'');
   check(root.toLowerCase()==='c:\\users\\administrator\\ghost-island-production\\ro-stack','CANONICAL_ROOT_REQUIRED');
-  check(a['candidate-manifest'] && a['manifest-sha256'] && a.owner && a.lease,'DEPLOY_ARGUMENTS_REQUIRED');
   check(git(sourceRoot,'status','--porcelain=v1','--untracked-files=all')==='','GOVERNANCE_SOURCE_DIRTY');
   const sha=git(sourceRoot,'rev-parse','HEAD'),url=git(sourceRoot,'remote','get-url','origin');
   check(url==='https://github.com/amadiz1988-boop/terminal-arpg.git','GOVERNANCE_REMOTE_INVALID');
   const tip=git(sourceRoot,'ls-remote','--exit-code','origin','refs/heads/main').split(/\s/)[0];
   git(sourceRoot,'fetch','--no-tags','--no-write-fetch-head','origin','refs/heads/main');git(sourceRoot,'merge-base','--is-ancestor',sha,tip);
+  if(a.action==='archive-failed-operation'){
+    console.log(JSON.stringify({archived:true,record:archiveFailedNativeOperation({root,owner:a.owner,governanceSha:sha})}));
+    return;
+  }
+  check(!a.action,'INVALID_NATIVE_ACTION');
+  check(a['candidate-manifest'] && a['manifest-sha256'] && a.owner && a.lease,'DEPLOY_ARGUMENTS_REQUIRED');
   const lease=readJson(boundedPath(root,'.local/ro-stack/production-deployment-lease/lease.json'));
   const authority=readJson(path.join(sourceRoot,'docs/project-control/production-release-authority.json')).native;
   const preflight=()=>call([path.join(here,'production-promotion-gate.mjs'),'--mode','precheck','--manifest',lease.admission_manifest,'--production-root',root,'--owner',a.owner]);

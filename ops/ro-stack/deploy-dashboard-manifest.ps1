@@ -15,6 +15,10 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'governance-json.ps1')
+# Node child output and this tool's JSON result use UTF-8 explicitly, independent
+# of the console code page inherited by a redirected process.
+try { [Console]::OutputEncoding = Get-GovernanceUtf8Encoding } catch { throw 'CONSOLE_UTF8_ENCODING_UNAVAILABLE' }
 $canonicalProduction = 'C:\Users\Administrator\ghost-island-production\ro-stack'
 $watchdogName = 'GhostIslandRO-WebInfraWatchdog'
 $script:fixtureDashboardPid = 9000
@@ -22,7 +26,7 @@ $script:watchdogWasEnabled = $false
 $script:watchdogChanged = $false
 $script:simulatedStartFailureConsumed = $false
 $script:completePaths = $null
-$manifestPolicy = Get-Content -LiteralPath (Join-Path $PSScriptRoot '../../docs/project-control/web-manifest-safety-policy.json') -Raw | ConvertFrom-Json
+$manifestPolicy = Read-GovernanceJson ([IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../docs/project-control/web-manifest-safety-policy.json')))
 function Invoke-CompleteCheck([string]$Mode, [string]$File, [string]$Root) {
   $output = & node (Join-Path $PSScriptRoot 'web-complete-manifest.mjs') $Mode $File $Root 2>&1 | Out-String
   if ($LASTEXITCODE -ne 0) { throw "COMPLETE_MANIFEST_FAILED:$($output.Trim())" }
@@ -99,7 +103,7 @@ function Read-Plan {
       -not (Test-Path -LiteralPath $manifestInput -PathType Leaf)) { throw 'MANIFEST_ABSOLUTE_PATH_REQUIRED' }
   $manifestPath = (Resolve-Path -LiteralPath $manifestInput).Path
   if ((Get-Item -LiteralPath $manifestPath).Length -gt $manifestPolicy.max_manifest_bytes) { throw 'MANIFEST_BYTES_EXCEED_POLICY' }
-  $data = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
+  $data = Read-GovernanceJson $manifestPath
   $complete = $data.schema_version -eq 'web-complete-v1'
   if ($complete) {
     Invoke-CompleteCheck 'schema' $manifestPath $ProductionRoot | Out-Null
@@ -141,7 +145,7 @@ function Read-Plan {
     $minimapRoot = if ($Rollback) { $production } else { $candidate }
     $minimapSource = Join-Path $minimapRoot ($minimapManifestPath.Replace('/', '\'))
     if (-not (Test-Path -LiteralPath $minimapSource -PathType Leaf)) { throw 'MINIMAP_MANIFEST_MISSING' }
-    $minimapData = Get-Content -LiteralPath $minimapSource -Raw | ConvertFrom-Json
+    $minimapData = Read-GovernanceJson $minimapSource
     foreach ($entry in @($minimapData.entries)) {
       if ([string]$entry.availability -ne 'AVAILABLE') { continue }
       $asset = [string]$entry.webAsset
@@ -282,9 +286,7 @@ function Assert-Topology($State, [int[]]$ExpectedNativePids = @(), [switch]$Allo
 }
 
 function Write-Receipt([string]$Path, $Value) {
-  $bytes = [Text.Encoding]::UTF8.GetBytes(($Value | ConvertTo-Json -Depth 12))
-  $stream = [IO.File]::Open($Path, [IO.FileMode]::CreateNew, [IO.FileAccess]::Write)
-  try { $stream.Write($bytes, 0, $bytes.Length) } finally { $stream.Dispose() }
+  Write-GovernanceJson -Path $Path -Value $Value -CreateNew
 }
 
 function Replace-FileAtomic([string]$Source, [string]$Target) {
@@ -442,7 +444,7 @@ try {
   $plan = Read-Plan
   if (-not $TestMode -and -not $Rollback -and ($gateOutput | ConvertFrom-Json).admission_manifest_sha256 -ne $plan.ManifestHash) { throw 'ADMISSION_MANIFEST_CHANGED' }
   $predeployBaseline = if ($Rollback) { $null } elseif ($TestMode) { 'ISOLATED_FIXTURE' } else {
-    (Get-Content -LiteralPath (Join-Path $plan.Production '.local/ro-stack/production-deployment-state.json') -Raw | ConvertFrom-Json).current_deploy_id
+    (Read-GovernanceJson (Join-Path $plan.Production '.local\ro-stack\production-deployment-state.json')).current_deploy_id
   }
   $failurePhase = 'TOPOLOGY_PRECHECK'
   $before = Get-Topology
@@ -483,7 +485,7 @@ try {
     }
     if (-not $TestMode) {
       $leaseFile = Join-Path $plan.Production '.local\ro-stack\production-deployment-lease\lease.json'
-      $lease = Get-Content -LiteralPath $leaseFile -Raw | ConvertFrom-Json
+      $lease = Read-GovernanceJson $leaseFile
       if ($lease.admission_manifest_sha256 -ne $plan.ManifestHash -or $lease.manifest_digest -ne $plan.Data.manifest_digest) { throw 'LEASE_MANIFEST_CHANGED' }
       if ($lease.promotion_mode -eq 'FIRST_GITHUB_FIRST_PROMOTION') {
         $stateTool = Join-Path $PSScriptRoot 'production-deployment-state.mjs'
@@ -529,7 +531,7 @@ try {
       result = 'CANDIDATE_ACTIVE'; manifest_sha256 = $plan.ManifestHash; candidate_commit = $plan.Commit;
       owner_task_id = $OwnerTaskId; web_git_sha = $plan.Commit;
       native_git_sha = if ($TestMode) { $null } else {
-        (Get-Content -LiteralPath (Join-Path $plan.Production '.local\ro-stack\production-deployment-state.json') -Raw | ConvertFrom-Json).current_native_git_sha };
+        (Read-GovernanceJson (Join-Path $plan.Production '.local\ro-stack\production-deployment-state.json')).current_native_git_sha };
       final_promotion_receipt_required = $true;
       candidate_root = $plan.Candidate;
       production_root = $plan.Production; test_mode = [bool]$TestMode;
@@ -569,7 +571,7 @@ try {
       (Split-Path -Parent $runRoot) -ine $expectedReceipts) {
     throw 'ROLLBACK_RECEIPT_PATH_INVALID'
   }
-  $receipt = Get-Content -LiteralPath $receiptFile -Raw | ConvertFrom-Json
+  $receipt = Read-GovernanceJson $receiptFile
   if ($receipt.mode -ne 'DEPLOY' -or $receipt.result -ne 'CANDIDATE_ACTIVE' -or
       $receipt.manifest_sha256 -ne $plan.ManifestHash -or
       $receipt.candidate_commit -ne $plan.Commit -or

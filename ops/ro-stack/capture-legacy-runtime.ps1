@@ -1,4 +1,5 @@
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'governance-json.ps1')
 $root = 'C:\Users\Administrator\ghost-island-production\ro-stack'
 $all = @(Get-CimInstance Win32_Process)
 $services = @{}
@@ -26,7 +27,7 @@ foreach ($service in @('login','char','map')) {
 }
 $db = @(Get-NetTCPConnection -State Listen -LocalPort 3307)
 if ($db.Count -lt 1 -or @($db.OwningProcess | Select-Object -Unique).Count -ne 1) { throw 'DATABASE_LISTENER_INVALID' }
-$attachment = Get-Content -LiteralPath (Join-Path $root '.local\ro-stack\procdump-attachment-state.json') -Raw | ConvertFrom-Json
+$attachment = Read-GovernanceJson (Join-Path $root '.local\ro-stack\procdump-attachment-state.json')
 $observer = @($all | Where-Object { $_.ProcessId -eq $attachment.procdumpProcessId -and $_.Name -eq 'procdump64.exe' })
 if ($attachment.mapPid -ne $services.map.pid -or $attachment.procdumpAttachedPid -ne $services.map.pid -or $attachment.procdumpAttachStatus -ne 'ATTACHED' -or $observer.Count -ne 1) { throw 'PROCDUMP_ATTACHMENT_INVALID' }
-@{ observed_at=[DateTimeOffset]::UtcNow.ToString('o'); services=$services; openkore_runtime_count=$openkore; database_target='127.0.0.1:3307/ragnarok'; database_pid=[int]$db[0].OwningProcess; procdump_pid=[int]$observer[0].ProcessId; procdump_map_pid=$services.map.pid } | ConvertTo-Json -Depth 6 -Compress
+Write-GovernanceJsonStdout @{ observed_at=[DateTimeOffset]::UtcNow.ToString('o'); services=$services; openkore_runtime_count=$openkore; database_target='127.0.0.1:3307/ragnarok'; database_pid=[int]$db[0].OwningProcess; procdump_pid=[int]$observer[0].ProcessId; procdump_map_pid=$services.map.pid } 6

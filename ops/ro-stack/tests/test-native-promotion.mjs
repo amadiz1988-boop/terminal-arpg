@@ -112,6 +112,8 @@ try {
      adapter:async a=>{actions.push(a);if(a==='stop')throw Error('fixture stop failure');return x.runtime;},inspect:o=>inspectNativeCandidate({...o,remoteVerifier:()=>true}),webAdmission:async()=>({eligible:true,candidate_capabilities:ids})}),/stop failure/);
    assert.deepEqual(actions,['snapshot','stop']);assert.equal(readJson(path.join(x.root,'.local/ro-stack/production-deployment-state.json')).production_drift,'OPEN');
    assert.equal(digest(path.join(x.root,nativeArtifacts[2])),x.state.current_native_binary_sha256);assert.equal(fs.existsSync(path.join(x.root,'.local/ro-stack/native-deploy.lock')),true);
+   const operation=readJson(path.join(x.root,'.local/ro-stack/native-deploy.lock/operation.json'));
+   assert.equal(operation.owner_task_id,'F');assert.equal(operation.lease_id,x.lease.lease_id);assert.equal(operation.candidate_manifest_sha256,digest(x.file));
  });
  console.log(`NATIVE_PROMOTION_TOOL_TEST_COUNT=${count}`);
 }finally{

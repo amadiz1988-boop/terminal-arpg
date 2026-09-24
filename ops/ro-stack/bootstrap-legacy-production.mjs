@@ -3,7 +3,7 @@ import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { digest, boundedPath, verifyLegacyBaseline, consumedPath, LEGACY_MODE, UNKNOWN_SHA } from './legacy-production-baseline.mjs';
+import { digest, boundedPath, verifyLegacyBaseline, consumedPath, LEGACY_MODE, UNKNOWN_SHA, readJson } from './legacy-production-baseline.mjs';
 import { gitRefReachable } from './production-promotion-gate.mjs';
 
 const source = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -11,7 +11,7 @@ const root = 'C:\\Users\\Administrator\\ghost-island-production\\ro-stack';
 const args = process.argv.slice(2);
 const apply = args.includes('--apply');
 const git = (...argv) => execFileSync('git', argv, { cwd: source, encoding: 'utf8', windowsHide: true }).trim();
-const json = file => JSON.parse(fs.readFileSync(file, 'utf8'));
+const json = readJson;
 const bytes = value => JSON.stringify(value, null, 2) + '\n';
 const hash = value => createHash('sha256').update(value).digest('hex').toUpperCase();
 const ensure = (condition, message) => { if (!condition) throw Error(message); };

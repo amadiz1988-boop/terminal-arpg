@@ -8,11 +8,11 @@ import { fileURLToPath } from 'node:url';
 
 import { verifyWebReceipt, safeRelative, readManifest } from './web-complete-manifest.mjs';
 import { nativeReceiptValid, nativeReceiptPath, equalHash } from './native-promotion-contract.mjs';
-import { FIRST_PROMOTION, legacyIdentity, verifyLegacyBaseline, transitionedState, consumedPath, pendingPath } from './legacy-production-baseline.mjs';
+import { FIRST_PROMOTION, legacyIdentity, verifyLegacyBaseline, transitionedState, consumedPath, pendingPath, readJson } from './legacy-production-baseline.mjs';
 
 const sha = value => /^[0-9a-f]{40}$/i.test(String(value || ''));
 const hash = file => createHash('sha256').update(fs.readFileSync(file)).digest('hex').toUpperCase();
-const read = file => JSON.parse(fs.readFileSync(file, 'utf8'));
+const read = readJson;
 const fail = code => { throw new Error(code); };
 const safePath = (root, relative) => {
   safeRelative(relative);

@@ -7,6 +7,7 @@ if($errors.Count){throw 'ADAPTER_PARSE_FAILED'}
 $function=$ast.Find({param($node) $node -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq 'Get-Snapshot'},$true)
 Invoke-Expression $function.Extent.Text
 . (Join-Path $PSScriptRoot '..\procdump-process-identity.ps1')
+. (Join-Path $PSScriptRoot '..\governance-json.ps1')
 $runtime=Join-Path $env:TEMP 'native-adapter-fixture'
 $native=Join-Path $runtime 'rathena'
 $script:fixtureCount=1
@@ -27,8 +28,9 @@ function Get-NetTCPConnection {
   $i=11;foreach($port in $script:ports){[pscustomobject]@{LocalPort=$port;OwningProcess=$i};$i++}
 }
 function Test-Path {return $true}
-function Get-Content {
-  @{mapPid=$(if($script:wrongMap){99}else{13});procdumpAttachedPid=13;procdumpAttachStatus='ATTACHED';procdumpProcessId=20;mapProcessStartTime=$script:receiptStarted.ToString('o');mapBinaryPath=(Join-Path $native 'map-server.exe')} | ConvertTo-Json
+# In-memory receipt bytes decoded by the real explicit UTF-8 reader.
+function Read-GovernanceJson([string]$Path) {
+  ConvertFrom-GovernanceJsonBytes (ConvertTo-GovernanceJsonBytes @{mapPid=$(if($script:wrongMap){99}else{13});procdumpAttachedPid=13;procdumpAttachStatus='ATTACHED';procdumpProcessId=20;mapProcessStartTime=$script:receiptStarted.ToString('o');mapBinaryPath=(Join-Path $native 'map-server.exe')})
 }
 function Get-FileHash {[pscustomobject]@{Hash='D1FC99AE304BD1D2BF28ABEB62531DA959E2431916194981B88C958FD713A8E6'}}
 function Get-Process {[pscustomobject]@{Id=13;StartTime=$script:started;HasExited=$false}}

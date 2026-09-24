@@ -3,6 +3,7 @@ import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { canonicalManifestBytes, validateManifest, validatePackage } from '../../scripts/materialize-web-runtime-assets.mjs';
+import { readJson } from './legacy-production-baseline.mjs';
 
 export function assetReleaseErrors(expected, actual) {
   if (!expected || expected.repository !== 'amadiz1988-boop/ghost-island-assets' ||
@@ -26,7 +27,7 @@ export function inspectPrivatePackage(root, packageRoot, expected) {
       '--checkout', root, '--verify-release-only'], { encoding: 'utf8', windowsHide: true, timeout: 90000 });
     if (result.status !== 0) return { available: false };
     const remote = JSON.parse(result.stdout);
-    const read = file => JSON.parse(fs.readFileSync(path.join(root, 'docs/project-control', file), 'utf8'));
+    const read = file => readJson(path.join(root, 'docs/project-control', file));
     const manifestBytes = canonicalManifestBytes(fs.readFileSync(path.join(root, 'docs/project-control/web-runtime-assets-manifest-v1.json')));
     const manifest = JSON.parse(manifestBytes);
     const lock = read('web-runtime-asset-package-lock-v1.json');

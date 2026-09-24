@@ -5,7 +5,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
-import { FIRST_PROMOTION, legacyIdentity, verifyLegacyBaseline, firstPromotionEvidence, consumedPath, pendingPath } from './legacy-production-baseline.mjs';
+import { FIRST_PROMOTION, legacyIdentity, verifyLegacyBaseline, firstPromotionEvidence, consumedPath, pendingPath, readJson } from './legacy-production-baseline.mjs';
 import { inspectNativeCandidate, verifyNativeStage } from './native-promotion-contract.mjs';
 import { admission, assertLeaseManifest, safeRelative, readManifest } from './web-complete-manifest.mjs';
 import { receiptComplete } from './production-deployment-state.mjs';
@@ -15,7 +15,6 @@ const sourceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '.
 const authorityFile = path.join(sourceRoot, 'docs/project-control/production-release-authority.json');
 const sha = value => /^[0-9a-f]{40}$/i.test(String(value || ''));
 const fileHash = file => createHash('sha256').update(fs.readFileSync(file)).digest('hex').toUpperCase();
-const readJson = file => JSON.parse(fs.readFileSync(file, 'utf8'));
 const fail = code => { throw new Error(code); };
 const run = (cwd, ...args) => {
   const result = spawnSync('git', args, { cwd, encoding: 'utf8', windowsHide: true });

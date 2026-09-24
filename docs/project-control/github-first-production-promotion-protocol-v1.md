@@ -219,6 +219,16 @@ mandatory. Start-time delta is at most one Windows tick (100 ns). Source,
 isolated tests and read-only current receipt evidence are recorded in
 `docs/project-control/procdump-process-identity-precision-v1.md`.
 
+## Governance JSON encoding
+
+`POWERSHELL51_UTF8_GOVERNANCE_JSON_FIX_V1`: deployment-critical JSON is UTF-8
+without BOM and is read and written with explicit strict UTF-8 in Node and
+PowerShell (`ops/ro-stack/governance-json.ps1`). Implicit PowerShell 5.1
+default decoding is forbidden. Unicode owner and task names are exact
+identities compared ordinally. A failed Native operation journal is closed only
+through `deploy-native-candidate.mjs --action archive-failed-operation`.
+Evidence: `docs/project-control/powershell51-utf8-governance-json-v1.md`.
+
 ## Native GitHub-first promotion entry V1
 
 `NATIVE_PROMOTION_PATH = AVAILABLE`. This entry implements the one-time first

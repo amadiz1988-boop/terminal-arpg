@@ -19,7 +19,15 @@ function Protect-IncidentText([string]$value) {
 
 function Read-IncidentJson([string]$path) {
   if (-not (Test-Path -LiteralPath $path)) { return $null }
-  try { return Get-Content -LiteralPath $path -Raw | ConvertFrom-Json } catch { return $null }
+  # Explicit UTF-8 without BOM, matching Write-IncidentJson. Invalid bytes throw
+  # and are treated like an unreadable record. Kept self-contained because this
+  # library is delivered with the Production sentinel.
+  try {
+    $bytes = [IO.File]::ReadAllBytes((Resolve-Path -LiteralPath $path).ProviderPath)
+    if ($bytes.Length -ge 3 -and $bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF) { return $null }
+    $text = (New-Object System.Text.UTF8Encoding -ArgumentList $false, $true).GetString($bytes)
+    return ConvertFrom-Json -InputObject $text -ErrorAction Stop
+  } catch { return $null }
 }
 
 function Write-IncidentJson([string]$path, $value) {
