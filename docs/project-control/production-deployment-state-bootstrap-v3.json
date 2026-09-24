@@ -1,0 +1,25 @@
+{
+  "schema": 3,
+  "current_deploy_id": "UNRESOLVED",
+  "current_web_git_sha": "UNRESOLVED",
+  "current_native_git_sha": "UNRESOLVED",
+  "last_deploy_receipt": "UNRESOLVED",
+  "production_drift": "UNRESOLVED",
+  "deployment_lease": "NONE_OBSERVED",
+  "accepted_capabilities": [],
+  "current_production_runtime": {
+    "last_observed_receipt": ".local/ro-stack/dashboard/deploy-receipts/manifest-f11bd7720e35405480d92bdc9ad04f83/deploy-receipt.json",
+    "last_observed_receipt_timestamp": "2026-09-24T08:04:49.2399079+08:00",
+    "last_observed_receipt_status": "CANDIDATE_ACTIVE",
+    "last_observed_candidate_commit": "be9ddb39c4786f8d0a6f93a65346d8d73fcf06e9",
+    "legacy_native_binary_baseline": "LEGACY_PRODUCTION_BINARY_BASELINE_UNRESOLVED"
+  },
+  "canonical_git_authority": {
+    "web_repository": "https://github.com/amadiz1988-boop/terminal-arpg.git",
+    "web_release_ref": "UNRESOLVED",
+    "web_git_sha": "UNRESOLVED",
+    "native_github_repository": "UNRESOLVED",
+    "native_release_ref": "UNRESOLVED",
+    "native_git_sha": "UNRESOLVED"
+  }
+}

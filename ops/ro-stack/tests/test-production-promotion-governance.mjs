@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
+import { fileURLToPath } from 'node:url';
 import { evaluatePromotion } from '../production-promotion-gate.mjs';
 import { receiptComplete, canCloseDrift } from '../production-deployment-state.mjs';
 
@@ -26,6 +27,8 @@ test('clean pushed canonical SHA eligible', () => assert.equal(check().eligible,
 test('dirty worktree blocked', () => blocked(check({ candidate: { ...candidate, dirty: true } }), 'CANDIDATE_WORKTREE_DIRTY'));
 test('untracked required asset blocked', () => blocked(check({ candidate: { ...candidate, requiredFilesTracked: false } }), 'UNTRACKED_REQUIRED_ASSET'));
 test('local only SHA blocked', () => blocked(check({ candidate: { ...candidate, pushed: false } }), 'DEPLOY_SHA_NOT_ON_CANONICAL_GITHUB_REF'));
+test('pushed SHA on wrong ref blocked', () => blocked(check({ candidate: { ...candidate, ref: 'refs/heads/feature' } }), 'CANONICAL_RELEASE_REF_UNDEFINED'));
+test('Native GitHub authority unavailable blocks promotion', () => blocked(check({ candidate: { ...candidate, nativePushed: false } }), 'NATIVE_BASELINE_NOT_ON_CANONICAL_GITHUB_REF'));
 test('second lease owner blocked', () => blocked(check({ lease: { ...lease, owner_task_id: 'OTHER' } }), 'DEPLOYMENT_LEASE_HELD_BY_OTHER'));
 test('Production receipt hash drift blocked', () => blocked(check({ currentHashes: { pass: false } }), 'PRODUCTION_ARTIFACT_RECEIPT_MISMATCH'));
 test('lost capability blocked', () => blocked(check({ candidate: { ...candidate, capabilities: [] } }), 'CANDIDATE_MISSING_CAPABILITY'));
@@ -67,6 +70,13 @@ try {
       source_reconstructed: true, bounded_tests_pass: true, github_promoted: true, behavior_equivalent: true } }, root), true);
   });
   test('missing Git SHA invalidates baseline', () => blocked(check({ state: { ...state, current_native_git_sha: null } }), 'PRODUCTION_GIT_BASELINE_INVALID'));
+  test('unresolved bootstrap preserves history and blocks promotion', () => {
+    const here = path.dirname(fileURLToPath(import.meta.url));
+    const bootstrap = JSON.parse(fs.readFileSync(path.resolve(here, '../../../docs/project-control/production-deployment-state-bootstrap-v3.json'), 'utf8'));
+    assert.equal(bootstrap.current_production_runtime.last_observed_receipt_status, 'CANDIDATE_ACTIVE');
+    assert.equal(bootstrap.canonical_git_authority.native_git_sha, 'UNRESOLVED');
+    blocked(check({ state: bootstrap }), 'PRODUCTION_GIT_BASELINE_INVALID');
+  });
   test('deploy requires owner lease', () => blocked(check({ lease: null }, 'deploy'), 'DEPLOYMENT_LEASE_NOT_OWNED'));
   test('undefined release ref blocks deploy', () => blocked(check({ authority: { web: { repository: repo, release_ref: null } } }), 'CANONICAL_RELEASE_REF_UNDEFINED'));
 } finally { fs.rmSync(root, { recursive: true, force: true }); }

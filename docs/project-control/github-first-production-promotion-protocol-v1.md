@@ -102,6 +102,35 @@ baseline schema. This governance task does not reconstruct or change the
 current M1/Web deployment. Until the separate W2 reconciliation creates a
 complete accepted baseline, the gate blocks new general Web deployments.
 
+### Activation audit, 2026-09-24
+
+The remote advertises `refs/heads/main`,
+`refs/heads/recovery/2026-09-13-working-tree`, and
+`refs/heads/feat/official-ro-damage-visuals`. None is identified as an
+authorized Production release ref in existing deployment docs. `main` does not
+contain `deploy-dashboard-manifest.ps1`. The local governance branch has no
+upstream and diverges from the fetched remote `main` by five remote-only and
+269 local-only commits. A push of its HEAD would publish those 269 commits;
+this task does not do so. `WEB_RELEASE_REF_CLASSIFICATION=NO_RELEASE_REF_DEFINED`.
+The local `b975021` and later `be9ddb39` Web receipt candidate SHAs are not
+reachable from fetched `origin/main`. A receipt with `CANDIDATE_ACTIVE` remains
+runtime evidence without final canonical Git authority.
+
+Native `origin` remains the local `rathena-p2-native.bundle`. The inspected
+Native source and shared governance files name no private canonical GitHub
+repository. The public `amadiz1988-boop` GitHub listing exposed only
+`terminal-arpg`; private repository existence remains unverified.
+`NATIVE_GITHUB_REMOTE_REQUIRED=YES`. No Native source was published.
+
+`production-deployment-state-bootstrap-v3.json` is source-side governance
+metadata. It distinguishes the last observed runtime receipt from canonical
+Git authority. All unresolved historical SHAs and the formal deploy ID are
+literal `UNRESOLVED`. The latest observed Web receipt is dated
+2026-09-24 08:04:49 +08:00 and records `CANDIDATE_ACTIVE` for `be9ddb39`.
+The Production state file was absent at inspection; no Production file was
+created. The gate rejects this bootstrap template for deployment until a
+separate accepted-baseline reconciliation fills exact GitHub-reachable SHAs.
+
 `deploy-dashboard-checkpoint.ps1`, `deploy-web-journey-atomic.ps1`, direct
 copies, direct binary replacement, manual service restarts with a candidate,
 and Production side edits are `UNSUPPORTED_DEPLOY_PATH`. Existing historical
