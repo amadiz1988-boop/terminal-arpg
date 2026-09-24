@@ -65,12 +65,12 @@ Browser 僅提交意圖。伺服器權威決定當前與目的地圖、角色 Ba
 
 返程採 TOWN → FIELD 規則：Lv.66 以下免費，Lv.67 起收目的掛機地圖最低等級 ×10 Zeny，成功後 60 秒冷卻。購物前保留 `RETURN_TELEPORT_COST`，不可花掉離城所需 Zeny。若補給觸發時沒有支援的 Saved Town，回報 `SUPPLY_HOME_REQUIRED` 或現行精確等價狀態，保留掛機意圖，安全停下，不猜主城、不隔離、不無限重試。Navigation 仍服務城內補給、Quest/M2、未來角色自主移動與其他同圖移動；`PLAYER_WORLD_NAVIGATION_SETTINGS=NOT_APPLICABLE`。
 
-### M1 補給觸發與背包安全補充決策
+### 歷史：M1 補給觸發與背包安全補充決策
 
-2026-09-24 使用者決策明確取代本文件先前的 `M1_SUPPLY_TRIGGER=COMBAT_CONTINUITY_ITEMS_ONLY`、`M1_WEIGHT_TRIGGER_SUPPLY=NO`、`M1_INVENTORY_TRIGGER_SUPPLY=NO`、`AUTO_SELL=OUTSIDE_M1`、`AUTO_STORAGE=OUTSIDE_M1` 與將重量／格數服務歸為 `GI_EXPLICIT_OVERRIDE` 的分類。上述文字保留為歷史決策，狀態為 `HISTORICAL / SUPERSEDED_BY = M1_SUPPLY_STORAGE_SELL_AND_PREFLIGHT_V1`。原有 `GLOBAL_AUTOSTORE=NO` 是舊固定拾取政策，不得用作否決本節已授權的服務階段存倉；設定與執行映射須明確區分拾取政策及服務存倉。
+此段 2026-09-24 的重量／格數補給與服務存倉／販售決策保留為歷史證據；最新 `M1_NONCONSUMABLE_TRAVEL_AND_AMMO_OVERRIDE_V1` 指示明確恢復下方的戰鬥延續物品限定補給規則。此段狀態為 `HISTORICAL / SUPERSEDED_BY = M1_NONCONSUMABLE_TRAVEL_AND_AMMO_OVERRIDE_V1`，不得作為現行 M1 執行或 UI 開關依據。
 
 ```text
-M1_SUPPLY_STORAGE_SELL_AND_PREFLIGHT_V1 = CANONICAL / ACTIVE
+M1_SUPPLY_STORAGE_SELL_AND_PREFLIGHT_V1 = HISTORICAL / SUPERSEDED
 M1_SUPPLY_TRIGGER = COMBAT_CONTINUITY_ITEMS_OR_WEIGHT_OR_SLOTS
 M1_WEIGHT_TRIGGER_SUPPLY = YES
 M1_INVENTORY_TRIGGER_SUPPLY = YES
@@ -100,6 +100,20 @@ ARROW_CONSUMPTION = NO
 蒼蠅翅膀仍須完成權威同圖隨機移動，蝴蝶翅膀仍須完成權威 Saved Town 回城；成功與否以地圖、座標及權威到達結果判定，數量保持不變。遠程攻擊保留 rAthena 的彈藥類型、裝備、武器、射程、傷害及技能合法性判定；具備相容彈藥後，命中不扣箭矢或子彈數量。缺少必要相容彈藥時，保留安全的戰鬥資源阻擋狀態與掛機父意圖，不隔離角色。
 
 四類非消耗資源均不適用數量耗盡補給門檻，不以其數量下降觸發 Supply，也不顯示補貨或耗盡閾值設定。此條款只凍結四類資源的非消耗性及其補給排除；其他補給、重量、格數與服務政策依本文件各自的現行決策處理。
+
+### 現行 M1 補給觸發與背包安全決策
+
+```text
+M1_NONCONSUMABLE_TRAVEL_AND_AMMO_OVERRIDE_V1 = CANONICAL / ACTIVE
+M1_SUPPLY_TRIGGER_MODEL = COMBAT_CONTINUITY_ITEMS_ONLY
+M1_WEIGHT_TRIGGER_SUPPLY = NO
+M1_INVENTORY_TRIGGER_SUPPLY = NO
+GLOBAL_AUTOSTORE = NO
+AUTO_SELL = OUTSIDE_M1
+AUTO_STORAGE = OUTSIDE_M1
+```
+
+補給耗盡觸發只涵蓋實際消耗的 HP／SP 物品及現行 M1 runtime 已支援的技能必需消耗物；蒼蠅翅膀、蝴蝶翅膀、箭矢、子彈均排除。缺少必要相容彈藥屬於合法性／可用性阻擋，不建立彈藥耗盡補貨循環。背包滿格或重量阻擋保持安全、可恢復、無隔離與有界重試；不得自動觸發 M1 存倉或販售。切換掛機地圖的權威補給預檢保留，僅檢查現行 M1 支援的戰鬥延續消耗物與安全條件。
 
 ## M1 設定與 Fly Wing 拒絕
 

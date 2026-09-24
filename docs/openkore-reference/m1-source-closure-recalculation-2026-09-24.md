@@ -3,7 +3,7 @@
 This is a source-only accounting snapshot for the 38 `M1_REQUIRED` IDs in
 `m1-core-hunting-closure.md`. Product authority is
 `../project-control/canonical-m1-world-travel-supply-ui-v1.md` at `38cf0bb2`
-with Supply-trigger amendment `e69f4bb4`.
+with the latest `M1_NONCONSUMABLE_TRAVEL_AND_AMMO_OVERRIDE_V1` decision.
 The pinned OpenKore symbols, defaults and transitions remain in
 `mature-capability-census-v1.md`. `PASS(partial)` means the named test passed
 for a narrower seam, not for the full capability. `LIVE_REQUIRED=YES` is the
@@ -35,7 +35,7 @@ capability-specific checkpoints.
 | C06 | PARTIAL retry | NONE | N | YES | Approach, cast and target retry ceilings untested. |
 | C07 | PARTIAL invalidation | NONE | N | YES | Lost, unreachable and killed target reasons not independently exercised. |
 | C08 | PARTIAL rAthena range/walk | NONE | N | YES | Legal LOS and blocked-wall fixtures absent. |
-| C09 | PARTIAL rAthena ammo authority | NONE | N | YES | Enabled attack/skill ammo shortage and refill transitions absent. |
+| C09 | PARTIAL rAthena ammo authority with GI nonconsumption override | `Test-NonConsumableAmmo.ps1` PASS(partial) | `633aacb` | YES | Arrow/bullet decrement suppression is source-tested; compatible-ammo presence/type, missing-ammo safe blocked state and multiple authoritative ranged HIT/count checks remain open. Depletion/refill is not an M1 capability. |
 | C10 | PARTIAL rAthena equipment authority | NONE | N | YES | Per-enabled-action equipment prerequisite fixture absent. |
 | C13 | PARTIAL row predicate adapter | `test-m1-attack-skill-profile.mjs` PASS(partial) | `25dede8a`/`2e7d4fb` | YES | Enabled predicate subset and final cast rejection fallthrough incomplete. |
 | C19 | PARTIAL native target priority | NONE | N | YES | Aggressive, party and clean-target priority matrix absent. |
@@ -47,7 +47,7 @@ capability-specific checkpoints.
 | R07 | PARTIAL loot and ledger | `test-farm-stats-pa-projection.mjs` PASS(partial) | W/N | YES | Inventory-add and factual loot event in one source fixture absent. |
 | R08 | PARTIAL inventory authority | NONE | N | YES | Inventory count/capacity, safe `INVENTORY_BLOCKED` or precise equivalent, blocked purchase and no-quarantine matrix absent. Inventory-slot-triggered Supply is outside M1. |
 | R09 | PARTIAL weight safety | NONE | N | YES | Sit/loot and unsafe-continuation weight guards lack bounded source/live tests. Weight-triggered storage/sell is outside M1 and is not a Supply trigger. |
-| R10 | PARTIAL Supply trigger | `test-world-map-supply-cutover.mjs` PASS(partial) | `a815a82f`/`1865cea` | YES | Combat-continuity HP/SP item and applicable ammo/required-item shortage through paused combat and journey start untested. |
+| R10 | PARTIAL Supply trigger | `test-world-map-supply-cutover.mjs` PASS(partial) | `a815a82f`/`1865cea` | YES | Genuinely consumable HP/SP and currently supported skill-required-item shortage through paused combat and journey start remain untested; Fly/Butterfly/arrow/bullet depletion triggers are excluded. |
 | R11 | PARTIAL shop buy | `test-supply-service-route-controller.mjs` PASS(partial) | W/N | YES | Actual price, Zeny, quantity and inventory delta/failure matrix absent. |
 | R14 | PARTIAL direct Supply return | `test-world-map-supply-cutover.mjs` PASS(partial) | `a815a82f`/`1865cea` | YES | Saved Town, service, direct return, resume and renewed HIT chain absent. |
 | R15 | PARTIAL action timers | NONE | N | YES | Per-action retry and timeout ceilings untested. |
@@ -57,11 +57,10 @@ capability-specific checkpoints.
 | R20 | PARTIAL state projection | `test-farm-stats-pa-projection.mjs` PASS(partial); live Start/Stop mode transition PASS(partial) | W/N | YES | Group-0 150095 live mode converged to AUTO_FARM then PERSISTENT_IDLE; Fly/Supply position and post-HIT revision coverage remains open. |
 | R21 | PARTIAL factual Event Ledger | `test-player-scenario-runner.mjs` PASS(partial); 12-second live combat observer FAIL | W/N | YES | ATTACK/HIT/KILL summary observed, but TARGET/LOOT absent and no per-hit monster HP-before/after correlation for the Fly window. |
 
-Recalculation against the amended canonical policy: 38 classified,
+Recalculation against the latest nonconsumable canonical policy: 38 classified,
 `SOURCE_CLOSED=1` (`C01`), `SOURCE_REMAINING=37`;
 `PRODUCT_CLOSED=0`, `PRODUCT_REMAINING=38`. The new policy removes only
-storage/sell-trigger semantics from R08/R09/R10; their listed M1 safety and
-combat-continuity transitions remain open. The current runtime's successful
+storage/sell-trigger and arrow/bullet depletion/refill semantics from R08/R09/R10/C09; their listed M1 safety, ammo-legality and combat-continuity transitions remain open. The current runtime's successful
 item-601 relocation does not close H05/H12 without the required
 automatic-Fly-to-authoritative-HIT chain.
 No row is held open solely for the superseded player cross-map Navigation
@@ -88,6 +87,12 @@ requires an accepted executor contract before enablement.
 | OBSOLETE | none of the 42 | 0 | `combat.attack.routeToLock` is hidden from Player settings and retained only for migration. |
 
 The path partition is `6+12+24+0=42`, with zero enabled no-op fields.
+`GI_EXPLICIT_OVERRIDE_NOT_APPLICABLE=0` within these 42 paths: no Fly,
+Butterfly, arrow or bullet depletion/refill threshold is among the twelve
+missing paths. The two weight/slot trigger paths stay in `OUTSIDE_M1` under
+the latest product decision. The twelve missing mappings remain open until
+real executor contracts and bounded tests exist; no reclassification alone
+can close them.
 OpenKore source/default/transition evidence is indexed by the H/C/R rows in
 `mature-capability-census-v1.md` and each schema descriptor's `matureKey`;
 this table does not introduce a new combat or recovery policy.
