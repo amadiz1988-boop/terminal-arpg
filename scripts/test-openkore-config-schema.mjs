@@ -23,6 +23,7 @@ const legacyText = [
   'attackAuto 0', 'attackUseWeapon 0', 'attackDistance 2', 'attackMaxDistance 4',
   'itemsMaxNum_sellOrStore 88',
   'attackCheckLOS 1', 'attackCanSnipe 0', 'attackAuto_routeToLock 1',
+  'attackRouteMaxPathDistance 17',
   'teleportAuto_hp 15%', 'teleportAuto_sp > 20%',
   'attackSkillSlot_0 SM_BASH', 'attackSkillSlot_0_lvl 5', 'attackSkillSlot_0_dist 2',
   'attackSkillSlot_0_maxDist 4', 'attackSkillSlot_0_maxCastTime 350',
@@ -63,6 +64,8 @@ assert.equal(migrated.config.combat.profile, 'SKILL_CAST');
 assert.equal(migrated.config.combat.travel.teleport.sp, '> 20%');
 assert.equal(migrated.config.combat.attack.distance, 2);
 assert.equal(migrated.config.combat.attack.maxDistance, 4);
+assert.equal(migrated.config.combat.attack.maxRouteDistance, 17);
+assert.equal(base.combat.attack.maxRouteDistance, 20);
 assert.equal(migrated.config.supply.loot.autoLoot, true);
 assert.equal(migrated.config.supply.loot.autoStore, false);
 assert.equal(migrated.config.combat.travel.flyWing.enabled, true);
@@ -81,6 +84,8 @@ expectValid(flyOff);
 const preview = canonicalToOpenKorePreview(migrated.config);
 assert.match(preview.configText, /attackAuto 0/);
 assert.match(preview.configText, /attackUseWeapon 0/);
+assert.match(preview.configText, /attackRouteMaxPathDistance 17/);
+assert.doesNotMatch(preview.configText, /attackMaxRouteDistance/);
 assert.match(preview.configText, /itemsTakeAuto 2/);
 assert.match(preview.configText, /getAuto Fly Wing/);
 assert.match(preview.pickupitems, /911 0/);

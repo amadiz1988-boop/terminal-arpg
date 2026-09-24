@@ -89,7 +89,7 @@ export const GHOST_ISLAND_COMBAT_CONFIG_SCHEMA = Object.freeze({
     flag('combat.attack.checkLOS','檢查視線',true,{group:'目標進階',advanced:true,matureKey:'attackCheckLOS'}),
     flag('combat.attack.canSnipe','允許狙擊',false,{group:'目標進階',advanced:true,matureKey:'attackCanSnipe'}),
     flag('combat.attack.changeTarget','允許改換目標',true,{group:'目標進階',advanced:true,matureKey:'attackChangeTarget'}),
-    num('combat.attack.maxRouteDistance','最大追擊距離',100,{group:'目標進階',advanced:true,matureKey:'attackMaxRouteDistance'}),
+    num('combat.attack.maxRouteDistance','最大追擊距離',20,{group:'目標進階',advanced:true,matureKey:'attackRouteMaxPathDistance'}),
     num('combat.attack.maxRouteTime','最大追擊時間（秒）',4,{step:0.1,group:'目標進階',advanced:true,matureKey:'attackMaxRouteTime'}),
     flag('combat.follow.enabled','跟隨隊友',false,{group:'跟隨',matureKey:'follow'}),txt('combat.follow.target','跟隨對象','',{group:'跟隨',matureKey:'followTarget'}),
     num('combat.follow.distanceMin','最小跟隨距離',3,{max:30,group:'跟隨',matureKey:'followDistanceMin'}),num('combat.follow.distanceMax','最大跟隨距離',6,{max:30,group:'跟隨',matureKey:'followDistanceMax'}),
