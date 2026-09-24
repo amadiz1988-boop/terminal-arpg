@@ -127,3 +127,38 @@ partial Web, ProcDump, OpenKore, duplicate map, executable path and start time,
 old PID/API/tool result bindings, no receipt on failure, receipt generation,
 legacy baseline kept, same-lease Web resume, second Native attempt blocked,
 immutable failed record, and the real long-lived child suite).
+
+Regression: UTF-8 governance 22, legacy bootstrap 29, promotion governance 31,
+full Web manifest 35, private path policy 1, Dashboard manifest deploy 26,
+Native adapter 6 (PowerShell 7 and 5.1), ProcDump identity 23, ProcDump
+sidecar 14, runtime incident 31, sentinel 11. All PASS.
+
+## Production reconciliation
+
+Governance SHA `515187624a058684db4d5fce4341045d21fcd460`, reachable from
+GitHub `main`. A `--dry-run true` pass was eligible, then the formal action
+ran against the live stage without stop, start or Native copy.
+
+| Role | Previous | Current = expected |
+| --- | --- | --- |
+| login | `05900C07…7B620` | `E8111B3F…FEB2` |
+| char | `C9907E89…CA9D` | `D701489D…FDD7` |
+| map | `294482A6…9B0B` | `2C396313…508F` |
+
+Old PIDs login 5248, char 24024, map 47184 (pinned evidence
+`1141B936…4940`); running login 2876, char 22084, map 46636 at the canonical
+paths, one listener each, Dashboard and database present, OpenKore 0,
+`/api/health` 200. ProcDump 7868 targets 46636, identity YES (7 ticks inside
+the CIM microsecond rule).
+
+Receipt `.local/ro-stack/native-promotion-receipt.json`, deploy id
+`native-reconciled-59630363-cf7b-470f-b8f0-96471f3a269b`, SHA-256
+`F3B21421D9B381E7C743526226ED7B239D015E39B1845FAF9C6B457F38220584`, evidence
+digest `F107076BE81C3C508C63CD7D6D68A3B16E70D4EEC7232BF4D6068B14B8336472`.
+Pending hash matches; `nativeReceiptValid` and `verifyNativeStage` pass.
+State: LEGACY baseline, drift OPEN, phase
+`FIRST_PROMOTION_NATIVE_STAGE_COMPLETE`. Lease `869f1725…` remains ACTIVE with
+owner `F｜M1 最終整合`. Journal renamed to
+`native-deploy-reconciled-869f1725-dbd0-452d-b9dd-37ee79cc3f9a` with
+`operation.json` hash unchanged; the failed tool output
+(`5AF85EBF…1504`) is unchanged. Web deployment is pending under the same lease.
