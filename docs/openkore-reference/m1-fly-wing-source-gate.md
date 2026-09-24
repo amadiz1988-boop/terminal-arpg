@@ -31,3 +31,12 @@ PRODUCT_CLOSED = NO
 ```
 
 This gap is not resolved by enabling a global Fly switch or equating `MONSTER_ATTACK` with a hit. No new retry/fallback policy is introduced here.
+
+V2 source continuation at Native `f2a268b`: successful item 601 use now records
+the rAthena position and count delta in `FLY_WING_RELOCATED`, forces the existing
+live-status export, and arms the existing post-relocation target/attack/HIT
+observer. `Test-PostWarpObservation.ps1` and the Fly rejection suite pass;
+Release x64 solution build passes. These are source checks. No legal runtime
+fixture has executed the chain under this checkpoint, so
+`FLY_RELOCATION_CONFIRMED=NOT_MEASURED`, `FLY_TO_HIT=NOT_MEASURED`, and
+`FLY_WING_M1_SOURCE_CLOSED=NO` remain exact.

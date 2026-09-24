@@ -60,3 +60,20 @@ The authorized Gravity World Map image supplies visible red/white label appearan
 The Web checkpoint contains the World Map source and the standard-map registry. The large `public/ro/data/map-info.json` and per-map detail files remain mixed generated working-tree output. A fresh checkout must regenerate them with `node scripts/build-ro-map-info.mjs` before running the visible-coverage test or serving the new overlay. `index.html` also has another workline's `app.js` cache-key edit; deployment must reconcile that exact attribute with the final app bundle. The current checkpoint alone is not a deployable Web artifact. The source Browser matrix clicked all 19 rectangles whose own element was covered by another region or town label, then verified direct selection or an overlap choice for the intended map. The searchable region index also exposes all 249 labels. Production Browser acceptance remains open.
 
 The map-info sync is byte-idempotent on the current generated input. The local source UI matrix at desktop and 390×844 reports 251 exposed farm maps and 249 selectable regions. This is a source fixture, not an authenticated Production Browser or authoritative gameplay result. The older mixed `scripts/test-map-info-sync.mjs` retains another workline's 28-map and 14-region assumptions and fails after the policy upgrade; owner-safe reconciliation is required before the complete regression suite can pass.
+
+## V2 source continuation
+
+Web checkpoints `1a67113b` through `20aa5bb1` commit all M1 map-info inputs
+and 394 generated files with deterministic LF checkout rules. A clean Git
+archive regenerated the same bytes and passed the 249-root, 360-visible-map,
+251-farm-map canonical test. The active `test:map-info` and `test:world-map`
+source entrypoints pass; the obsolete 28-map Browser test is no longer an
+active M1 source gate. The untouched mixed historical test still requires a
+separate Browser-semantics update before it is reused for UI acceptance.
+
+Native `f2a268b` preserves the post-Supply observer through attack until
+authoritative HP decrease, then emits `POST_SUPPLY_HIT`. The Native Release x64
+solution build and `Test-PostWarpObservation.ps1` pass. This does not establish
+Saved Town arrival, city service, return teleport or renewed HIT in a legal
+runtime fixture; `SUPPLY_RETURN_TO_HIT=NOT_MEASURED` and source closure remain
+open. No Production files, server process or DB schema were changed.
