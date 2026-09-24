@@ -69,6 +69,7 @@ function staticString(node) {
 function scanJavaScript(path, content) {
   const ast = parse(content, { ecmaVersion: 'latest', sourceType: 'module', allowHashBang: true });
   const startupPaths = new Map();
+  const projectRoots = new Set();
   const isModuleDirectory = (node) => {
     const filePath = node?.arguments?.[0];
     const metaUrl = filePath?.arguments?.[0];
@@ -86,6 +87,7 @@ function scanJavaScript(path, content) {
       const segments = call.arguments.slice(1).map(staticString);
       if (segments.length && segments.every((segment) => segment !== null)) {
         startupPaths.set(declaration.id.name, `./${segments.join('/')}`);
+        if (join(dirname(path), ...segments) === '.') projectRoots.add(declaration.id.name);
       }
     }
   }
@@ -93,10 +95,18 @@ function scanJavaScript(path, content) {
     if (!node || typeof node !== 'object' ||
         ['FunctionDeclaration', 'FunctionExpression', 'ArrowFunctionExpression',
           'ClassDeclaration', 'ClassExpression'].includes(node.type)) return;
-    if (node.type === 'CallExpression' && node.callee?.name === 'readFile' &&
-        node.arguments[0]?.type === 'Identifier') {
-      const specifier = startupPaths.get(node.arguments[0].name);
-      if (specifier) add(path, specifier, 'startup-asset');
+    if (node.type === 'CallExpression' && node.callee?.name === 'readFile') {
+      const target = node.arguments[0];
+      if (target?.type === 'Identifier') {
+        const specifier = startupPaths.get(target.name);
+        if (specifier) add(path, specifier, 'startup-asset');
+      } else if (target?.type === 'CallExpression' && target.callee?.name === 'join' &&
+                 target.arguments[0]?.type === 'Identifier' && projectRoots.has(target.arguments[0].name)) {
+        const segments = target.arguments.slice(1).map(staticString);
+        if (segments.length && segments.every((segment) => segment !== null)) {
+          add(path, `${relative(dirname(path), '.').replaceAll('\\', '/')}/${segments.join('/')}`, 'startup-asset');
+        }
+      }
     }
     for (const value of Object.values(node)) {
       if (Array.isArray(value)) {
