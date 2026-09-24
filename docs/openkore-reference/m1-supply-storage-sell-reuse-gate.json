@@ -1,0 +1,52 @@
+{
+  "PRE_IMPLEMENTATION_REUSE_GATE": {
+    "featureId": "m1-supply-storage-sell-map-preflight",
+    "featureName": "M1 authoritative storage, sell, buy and map-switch supply preflight",
+    "scope": "NEW_CAPABILITY",
+    "taskCategory": "NEW_CAPABILITY",
+    "categories": ["inventory", "supply", "buy_sell_storage", "navigation", "failure_recovery", "configuration_semantics"],
+    "openKoreRelevant": true,
+    "checks": {
+      "currentProject": { "status": "CHECKED", "implementationFound": true, "evidence": "Native src/map/persistent_agent.cpp handle_supply checks one supply item; execute_service already has one-item storage deposit, shop sell and shop buy primitives. Web ops/ro-stack/dashboard.mjs queuePlayerWorldMapTeleport stops farming before supply preflight." },
+      "legacyProject": { "status": "CHECKED", "evidence": "docs/openkore-reference/supply.md and docs/openkore-exit-source-of-truth.md Gate 2 record low consumable supply and return; docs/openkore-reference/m1-supply-storage-sell-preflight-gate.md records the unclosed storage and sell delta." },
+      "reuseRegistry": { "status": "REGISTRY_HIT", "reference": "ops/research/external-reuse-registry.json ra-storage, ra-shop, ok-buy-sell, ok-storageauto; check-registry.mjs reports rAthena entries FRESH and the prior supply-combat config entry STALE." },
+      "rAthena": { "status": "CHECKED", "evidence": "src/map/persistent_agent.cpp execute_service and src/map/storage.cpp storage_storageadd, plus src/map/pc.cpp NPC trade and Zeny functions, are the existing authoritative primitives." },
+      "openKore": { "status": "CHECKED", "evidence": "Pinned 51de1dd src/AI.pm shouldStartAutoStorage and shouldStartAutoSell, then buy; src/AI/CoreLogic.pm item sell checks; historical player_2000034 config.txt:207-209 and items_control.txt; docs/openkore-reference/m1-supply-storage-sell-preflight-gate.md." },
+      "externalEcosystem": { "status": "NOT_APPLICABLE", "reason": "The pinned rAthena and OpenKore sources cover the required semantics and server primitives; the task authorizes no additional runtime." },
+      "genericOSS": { "status": "NOT_APPLICABLE", "reason": "A generic library cannot adjudicate rAthena inventory, NPC service, storage capacity or Zeny." }
+    },
+    "decision": "PORTABLE_LOGIC",
+    "whyNotReuse": "",
+    "freshResearchPerformed": false,
+    "registryUpdateRequired": false,
+    "capabilityScope": "Native storage, sell, buy and map-switch preflight under rAthena authority with preserved selected farm map and parent intent",
+    "matureReferenceApplicable": true,
+    "referenceGate": "PASS",
+    "deltaReferenceAuditRequired": true,
+    "capabilityDelta": {
+      "addsCapability": true,
+      "replacesCapability": false,
+      "changesBehavior": true,
+      "changesConfigurationSemantics": true,
+      "changesCapabilityUi": true,
+      "changesExceptionRecovery": true,
+      "changesMatureCapabilityDataModel": false
+    },
+    "matureReferenceMatrix": {
+      "currentGiCapability": "One-item Native supply triggers and individual storage, sell and buy primitives exist; the current map-switch path stops AUTO_FARM before any supply preflight.",
+      "openKoreCapability": "AI.pm checks storage, sell and buy in order using weight and inventory-slot thresholds; items_control has item-level keep, storage and sell policy with all 0 1 0 fallback.",
+      "rAthenaCapability": "Authoritative character inventory, equipment, item sellability, storage capacity, NPC transactions, weight and Zeny are evaluated in the existing map server.",
+      "otherMatureReference": "NOT_APPLICABLE: no second gameplay runtime is authorized.",
+      "matureExceptionBehavior": "Equipped and unsellable items are excluded from sell; sell amount is capped at quantity above keep; missing NPC service, full storage and insufficient Zeny do not count as success.",
+      "matureRecoveryBehavior": "Supply and map-switch intent remain resumable with bounded retry on service failure; no uncontrolled sell or repeated no-progress loop is accepted.",
+      "matureConfigSemantics": "Historical config thresholds are character-specific evidence: itemsMaxWeight 89, itemsMaxWeight_sellOrStore 68 and itemsMaxNum_sellOrStore 99. Per-item items_control rules and default storage are retained without hard-coding one player's values for everyone.",
+      "matureUiSemantics": "The selected farm map remains visible and pending while service is required; a setting control is enabled only after its Native command contract is executable.",
+      "directReuse": "Existing Native execute_service storage, shop sell and buy primitives, rAthena character state, Web world-map controller, command transport and saved-town return policy.",
+      "adapt": "Port OpenKore trigger order and items_control policy into one Native-owned service flow; expose a typed preflight to Web before stop, fee, cooldown or teleport; resume the original selected-map intent after service.",
+      "projectPolicy": "The 2026-09-24 user decision in docs/project-control/canonical-m1-world-travel-supply-ui-v1.md supersedes combat-consumables-only supply and includes weight, slots, storage, sell and pre-map-switch service.",
+      "improvements": "Use rAthena transaction results and explicit bounded blocking so failures retain the parent intent and cannot report a false map-switch success.",
+      "matureCapabilityLoss": "NONE",
+      "resultEquivalentOrBetter": "PASS"
+    }
+  }
+}
