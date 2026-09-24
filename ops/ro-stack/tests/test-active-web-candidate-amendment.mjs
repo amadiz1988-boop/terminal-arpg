@@ -107,6 +107,19 @@ test('pending Native stage not reconciled',x=>{x.pending.native_stage_reconciled
     const receipt={web_git_sha:newSha,web_candidate_amendments:structuredClone(history)};
     assert.equal(webAmendmentHistoryValid(root,lease,pending,receipt),true);
     assert.equal(webAmendmentHistoryValid(root,lease,pending,{...receipt,web_candidate_amendments:[]}),false);
+    const finalSha='d'.repeat(40);
+    const audit2Path=path.join(local,'audit-v2.json');
+    const receipt2Path=path.join(local,'second-web.json');
+    fs.writeFileSync(audit2Path,JSON.stringify({lease_id:leaseId,old_web_git_sha:newSha,new_web_git_sha:finalSha}));
+    fs.writeFileSync(receipt2Path,JSON.stringify({result:'CANDIDATE_ACTIVE',web_git_sha:newSha}));
+    const second={old_web_git_sha:newSha,new_web_git_sha:finalSha,
+      audit_receipt:'.local/ro-stack/audit-v2.json',audit_sha256:hash(audit2Path),
+      previous_web_candidate_receipt:'.local/ro-stack/second-web.json',
+      previous_web_candidate_receipt_sha256:hash(receipt2Path)};
+    const chain=[...history,second];
+    assert.equal(webAmendmentHistoryValid(root,{...lease,web_deploy_git_sha:finalSha,web_candidate_amendments:chain},
+      {web_candidate_amendments:structuredClone(chain)},
+      {web_git_sha:finalSha,web_candidate_amendments:structuredClone(chain)}),true);
     fs.writeFileSync(oldReceiptPath,'changed');
     assert.equal(webAmendmentHistoryValid(root,lease,pending,receipt),false);
     console.log(`PASS ${++count} final receipt binds complete immutable amendment history`);

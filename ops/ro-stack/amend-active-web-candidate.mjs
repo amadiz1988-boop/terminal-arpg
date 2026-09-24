@@ -10,6 +10,7 @@ import { admission, readManifest, validateHeader } from './web-complete-manifest
 import { FIRST_PROMOTION, firstPromotionEvidence, legacyIdentity, pendingPath, consumedPath, readJson } from './legacy-production-baseline.mjs';
 import { nativeReceiptValid, nativeReceiptPath, equalHash } from './native-promotion-contract.mjs';
 import { capabilityRegistry } from './production-promotion-gate.mjs';
+import { webAmendmentHistoryValid } from './production-deployment-state.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const governanceRoot = path.resolve(here, '../..');
@@ -97,6 +98,8 @@ export function planActiveWebAmendment({root,owner,leaseId,oldSha,newSha,newMani
   const files={state:path.join(local,'production-deployment-state.json'),lease:path.join(local,'production-deployment-lease/lease.json'),
     pending:inside(root,pendingPath), native:inside(root,nativeReceiptPath)};
   const state=readJson(files.state),lease=readJson(files.lease),pending=readJson(files.pending);
+  if (!webAmendmentHistoryValid(root,lease,pending,{web_git_sha:oldSha,
+    web_candidate_amendments:lease.web_candidate_amendments})) fail('PRIOR_WEB_AMENDMENT_HISTORY_INVALID');
   const oldManifestFile=path.resolve(lease.admission_manifest);
   const oldManifest=readManifest(oldManifestFile), nextManifest=readManifest(newManifestFile);
   validateHeader(oldManifest);validateHeader(nextManifest);
@@ -119,11 +122,14 @@ export function planActiveWebAmendment({root,owner,leaseId,oldSha,newSha,newMani
     !run(nextManifest.candidate_root,'git',['status','--porcelain=v1','--untracked-files=all']);
   const offline=run(nextManifest.candidate_root,'node',['scripts/test-canonical-web-offline.mjs']);
   const migration=run(nextManifest.candidate_root,'node',['scripts/test-legacy-item-rule-migration.mjs']);
+  const targeted=reason==='START_FARM_HYBRID_PROFILE_SKILL_ENABLED_DEFAULTING_V1'
+    ? run(nextManifest.candidate_root,'node',['scripts/test-start-farm-hybrid-skill-default.mjs']) : null;
   const evidenceFile=path.resolve(path.dirname(newManifestFile),nextManifest.first_promotion_evidence?.path || '');
   const evidence=readJson(evidenceFile);
   const firstEvidence=equalHash(digest(evidenceFile),nextManifest.first_promotion_evidence.sha256) &&
     firstPromotionEvidence(evidence,newSha,lease.native_deploy_git_sha);
-  const preflight={remoteCheckout,sourceRegression:offline.includes('"failures":0') && migration.includes('LEGACY_ITEM_RULE_MIGRATION_PASS'),
+  const preflight={remoteCheckout,sourceRegression:offline.includes('"failures":0') && migration.includes('LEGACY_ITEM_RULE_MIGRATION_PASS') &&
+      (!targeted || targeted.includes('START_FARM_HYBRID_SKILL_DEFAULT_PASS cases=11')),
     manifestAdmission:admitted.PRESTAGE_COMPLETE===true,rollbackCoverage:admitted.ROLLBACK_UNCOVERED_PATH_COUNT===0 && admitted.ROLLBACK_COVERAGE_FILE_COUNT===nextManifest.file_count,
     capabilitySuperset:capabilitiesPreserved(nextManifest,lease,state),assetAuthority:admitted.assetPackage?.valid===true,firstEvidence};
   validateActiveWebAmendment({state,lease,pending,oldManifest,nextManifest,oldReceipt,leaseId,owner,oldSha,newSha,nativeValid,preflight});
@@ -134,9 +140,13 @@ export function planActiveWebAmendment({root,owner,leaseId,oldSha,newSha,newMani
     promotion_id:leaseId,old_web_git_sha:oldSha,new_web_git_sha:newSha,reason,source_fix_checkpoint:sourceFixCheckpoint,
     timestamp:new Date().toISOString(),native_stage_receipt_reference:{path:nativeReceiptPath,sha256:digest(files.native)},
     previous_web_candidate_receipt_reference:{path:oldReceiptRelative,sha256:digest(oldReceiptFile)},
+    prior_web_candidate_receipts:[...(lease.web_candidate_amendments || []).map(item=>({
+      path:item.previous_web_candidate_receipt,sha256:item.previous_web_candidate_receipt_sha256})),
+      {path:oldReceiptRelative,sha256:digest(oldReceiptFile)}],
     old_manifest_sha256:digest(oldManifestFile),new_manifest_sha256:digest(newManifestFile),
+    new_manifest_digest:nextManifest.manifest_digest,
     governance_sha:run(governanceRoot,'git',['rev-parse','HEAD']),
-    amendment_evidence_digest:createHash('sha256').update(JSON.stringify({preflight,offline,migration,evidence_sha256:digest(evidenceFile)})).digest('hex').toUpperCase(),
+    amendment_evidence_digest:createHash('sha256').update(JSON.stringify({preflight,offline,migration,targeted,evidence_sha256:digest(evidenceFile)})).digest('hex').toUpperCase(),
     preflight};
   const history={old_web_git_sha:oldSha,new_web_git_sha:newSha,audit_receipt:auditRelative,audit_sha256:createHash('sha256').update(JSON.stringify(audit,null,2)+'\n').digest('hex').toUpperCase(),
     previous_web_candidate_receipt:oldReceiptRelative,previous_web_candidate_receipt_sha256:digest(oldReceiptFile)};

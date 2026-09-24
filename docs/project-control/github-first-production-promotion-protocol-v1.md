@@ -365,8 +365,10 @@ governance code is on GitHub `main`. Supply `--production-root`, `--owner`,
 
 The action keeps the lease ID and Native stage, advances the lease and pending
 Web SHA together, and writes an immutable amendment audit receipt. The old Web
-deployment receipt remains in place. A repeated invocation with the exact same
-completed identity reports `idempotent: true`; a partial or conflicting state
+deployment receipt remains in place. The audit pins the new manifest digest,
+every prior Web candidate receipt and the source regression evidence. A repeated
+invocation with the exact same completed identity reports `idempotent: true`;
+a partial or conflicting state
 fails closed. The final first-promotion receipt must copy the lease's
 `web_candidate_amendments` array exactly. Finalization verifies the audit and
 previous Web receipt hashes before accepting the new Web baseline. F owns the
