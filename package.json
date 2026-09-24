@@ -65,6 +65,7 @@
     "test:minimap-original": "node scripts/test-original-minimap.mjs",
     "test:minimap-terrain": "node scripts/test-minimap-terrain.mjs",
     "test:map-info": "node scripts/test-m1-map-info-canonical.mjs",
+    "test:world-map": "node scripts/test-world-map-supply-cutover.mjs && node scripts/test-m1-map-info-canonical.mjs",
     "test:map-bgm": "node scripts/test-map-bgm.mjs",
     "test:foldable-windows-ui": "node scripts/test-foldable-windows-ui.mjs"
   },
