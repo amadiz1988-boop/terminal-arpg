@@ -82,6 +82,7 @@ $entries = [ordered]@{
   'item_drink_potion.wav' = 'data\wav\se_drink_potion.wav'
   'fly_wing.wav' = 'data\wav\effect\ef_teleportation.wav'
   'warp.wav' = 'data\wav\effect\warp.wav'
+  'ready_portal.wav' = 'data\wav\effect\ef_readyportal.wav'
   'portal.wav' = 'data\wav\effect\ef_portal.wav'
   'heal.wav' = 'data\wav\effect\ef_healsp.wav'
   'level_up.wav' = 'data\wav\levelup.wav'

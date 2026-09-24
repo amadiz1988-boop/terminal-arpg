@@ -1,6 +1,6 @@
 # RO 傳送之陣與瞬移音效考據
 
-查核日：2026-09-24。狀態：`RESEARCHING`。本文件只記錄素材與未來 Presentation Layer 時序；`WARP_PORTAL_OPEN_SFX`、`FLY_TELEPORT_SFX` 均為 `UNRESOLVED`，等待玩家試聽與原廠 Client 事件驗證。
+查核日：2026-09-24。素材考據狀態：`CLIENT_TRIGGER_UNRESOLVED`。產品 Presentation Layer 音效選擇已由使用者定案為 A `ef_readyportal.wav`、B `ef_portal.wav`、C `warp.wav`、D `ef_teleportation.wav`。此選擇不宣稱原廠 Client 事件觸發鏈已獲證實。
 
 ## 證據邊界
 
@@ -33,7 +33,7 @@
 | 傳送之陣 C：既有 Web 換圖聲 | `warp.wav`；`data0.grf:data/wav/effect/warp.wav` | 251,012／125,440／5.688889 | `d74f63cb03879178d647ee3a3982a93b7ee949083e20e6bc3e8c7ea5715cbe08` | 檔案已證實；`AL_WARP` 關聯目前只見檔名推配及本專案既有映射；`UNRESOLVED` |
 | Teleport／Fly Wing A | `ef_teleportation.wav`；`data0.grf:data/wav/effect/ef_teleportation.wav` | 54,828／27,392／1.242268 | `7527a65b58ba61ddc664c9b1da5c03f2058417a6ef1036b6cef6d24c26ff5ffd` | EffectTable `34/304` → 此 WAV；物品 601 → 技能 26；Client 觸發仍待驗證，`CANDIDATE` |
 
-上述四檔位於 `.local/ro-warp-audio/` 供本機試聽；`ef_portal`、`warp`、`ef_teleportation` 另已存在於 `public/ro/client/sfx/official/`，輸出名稱分別為 `portal.wav`、`warp.wav`、`fly_wing.wav`，hash 同上。`.local` 內容不提交、不部署。`listen.html` 僅提供獨立播放控制，不執行遊戲指令。
+上述四檔位於 `.local/ro-warp-audio/` 供本機試聽；四檔亦以原始 PCM bytes 匯入 `public/ro/client/sfx/official/`，輸出名稱依序為 `ready_portal.wav`、`portal.wav`、`warp.wav`、`fly_wing.wav`，hash 同上。來源、bytes、SHA-256 見 `combat-manifest.json`。`.local` 內容不提交、不部署。`listen.html` 僅提供獨立播放控制，不執行遊戲指令。
 
 ## 原文、編碼與 alias
 
@@ -54,7 +54,7 @@ GRF 清單對 `.wav`、`.ogg`、`.mp3`、`.str`、`.spr`、`.act`、`.lub`、`.l
 
 `WARP_PORTAL_VISUAL_ASSET_FOUND = YES`，範圍限於「來源與獨立效果表對照」：`EF_READYPORTAL2=316`、`EF_PORTAL2=317` 均用圓環幾何與 `data0.grf:data/texture/effect/ring_blue.tga`；317 另用 `alpha1.tga`；舊版 35 使用 `alpha_down.tga`。[EffectTable 316/317](https://github.com/MrAntares/roBrowserLegacy/blob/6470972260221c0fe0cd4825b66c5ac5fb20055a/src/DB/Effects/EffectTable.js#L6822-L6905) 有對應 texture 與音效欄位。唯讀抽取後 hash：`ring_blue.tga` `4afb6b406b03b119ca39579af295ab2a858123f95d93120f4d9e58f852225f54`；`alpha1.tga` `faa164ba1256cfda6c1c20ef9cb241be6bb5f5cd9759d86801483252c541db51`；`alpha_down.tga` `315a4ae73bfe1a9c59692bea35a18169fe1d1907e7077cd82fc7ed21e3b0ad65`。GRF 另含 `al_warp.act/.spr`、`al_teleport.act/.spr`，目前沒有證據可把它們直接指定為 Portal 地面效果。已檢索 `data0.grf` 的 2,785 筆、`data.grf` 的 510 筆 STR 檔名，沒有名稱直指 warp／portal／teleport 的檔案；上述效果為表內 `CYLINDER`，不依賴同名 STR。視覺效果在本輪不接入 Web。
 
-## 未來 World Travel 音訊銜接
+## 歷史研究階段的 World Travel 音訊方案
 
 目前 `ops/ro-stack/dashboard/app.js` 用單一 `#bgm`、`setMusicContext(map)` 選曲，沒有 fade 控制；世界地圖傳送在 `waitForWorldMapAuthority` 回傳後播放 `warp` 並顯示抵達。以下只是一份 Presentation Layer 方案，不更動 Server Direct Teleport 或到達判定：
 
@@ -63,14 +63,20 @@ GRF 清單對 `.wav`、`.ogg`、`.mp3`、`.str`、`.spr`、`.act`、`.lub`、`.l
 3. Server relocation 與音訊並行。只有 `ARRIVAL_CONFIRMED` 且所選音訊序列完成，才能關閉過場、揭露目的地並對目的地 BGM fade in。音訊先結束就保持等待；Server 先到就等音訊。失敗時維持未抵達狀態並恢復當前地圖 BGM。
 4. 在過場期間需暫緩現有 `setMusicContext(map)` 的自動 BGM 換曲，確保 old BGM、Portal、Teleport、new BGM 不同時互蓋；完成後才交回既有 map BGM 選曲機制。這項是未來接入需求，本輪未實作或驗收。
 
+## 已定案的產品時序與來源實作
+
+World Map 開啟時 A 播一次，B 進入單一持續 loop；取消與關閉停止 B。合法 Dashboard preflight 接受後停止 B，C 以實際 `ended` 播完，接續 D 以實際 `ended` 播完。rAthena 權威到達與 D 完成同時成立後，才關閉過場、揭露目的地並交回既有 BGM。音效不延遲或創造伺服器移動。成功的蒼蠅翅膀權威位移僅播放 D；拒絕不播放。來源實作在 `ops/ro-stack/dashboard/world-map-teleport-presentation.mjs`，`ops/ro-stack/dashboard/app.js` 只接入既有聲音播放器、Dashboard API 及狀態投影。視覺效果與本機 Gravity Client 的實際事件觸發仍待證實；目前沿用既有 RO 相容 World Map 容器。
+
+本節產品選擇取代上節歷史方案的未來時序與「等待玩家試聽」標記；不修改上節對原廠 Client 考據的保留結論。來源測試與正式 Browser 驗收分開記錄，尚未將此功能部署至 Production。
+
 ## 尚未解決
 
 - 這份 `Ragnarok.exe` 的技能／效果封包到聲音播放呼叫點，尚無直接證據。`AL_WARP → 316/317 → ef_readyportal/ef_portal`、`AL_TELEPORT → 304 → ef_teleportation` 均維持候選鏈，不能標 `CONFIRMED`。
 - `warp.wav` 的實際 Client 觸發事件及 5.689 秒是否包含沉默尾段未驗證。
 - Fly Wing 與手動 Teleport 技能是否完全同一聲音、同圖瞬移與跨圖是否相同、Classic／Renewal／JRO／IRO 版差異，均未取得同版本實機與多版本 hash。
 - 韓文 Sprite 父資料夾的 raw GRF bytes 尚未還原；音效候選檔名為 ASCII，不受此缺口影響。
-- 玩家尚未試聽確認。試聽喜好不會替代 Client 事件考據。
+- 玩家已定案 A/B/C/D 的產品試聽選擇；此選擇不替代 Client 事件考據。
 
 ## 本輪界線
 
-`PRODUCTION_TOUCHED=NO`；`RUNTIME_RESTARTED=NO`；`M1_RUNTIME_INTEGRATION=NO`。不新增正式音訊 mapping，也不把 `sourceVerified` 推論為 `clientBehaviorVerified`。
+`PRODUCTION_TOUCHED=NO`；`RUNTIME_RESTARTED=NO`；`M1_SOURCE_PRESENTATION=IMPLEMENTED`；`BROWSER_ACCEPTANCE=PENDING`。不把 `sourceVerified` 推論為 `clientBehaviorVerified`。

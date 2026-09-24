@@ -60,7 +60,8 @@ for (const id of ['worldMapTownLabels', 'worldMapSavedTown', 'worldMapSavedTownH
   assert.ok(html.includes(`id="${id}"`), id);
 assert.match(app, /button\.onclick = \(event\) => \{[\s\S]*?selectTownWorldMap\(town\.map\)/);
 assert.match(app, /await waitForWorldMapAuthority\(\(state\) =>\s*state\.player\?\.currentMap === mapId\)/);
-assert.match(app, /playCombatSound\('warp'/);
+assert.match(app, /worldMapTravelPresentation\.preflightAccepted\(/);
+assert.match(app, /playCue: playTravelCue/);
 assert.match(app, /detail\.replaceChildren\(\s*title,\s*controls,\s*teleportInfo/);
 assert.match(dashboard, /'SAVED_TOWN_REQUIRES_PRESENCE'/);
 assert.match(dashboard, /savedTownSetupRequired: !savedTown/);
@@ -74,5 +75,6 @@ assert.ok(worldQueue.indexOf("if (kind === 'farm' && currentMap === mapId)") <
   worldQueue.indexOf('readFarmMapSupplyPreflight(account, controller)'),
   'same-map IDLE starts a farm before cross-map supply preflight');
 assert.match(dashboard, /sameMapIdleFarmStart[\s\S]*?live\?\.agentMode === 'PERSISTENT_IDLE'/);
-assert.match(app, /if \(result.reason === 'WORLD_MAP_FARM_START_QUEUED'\) \{[\s\S]*?\} else \{\s*playCombatSound\('warp'/);
-console.log(`WORLD_MAP_SUPPLY_CUTOVER_SOURCE_PASS towns=${towns.length} routes=${towns.length} tests=68`);
+assert.match(app, /if \(result.reason !== 'WORLD_MAP_FARM_START_QUEUED'\)\s*worldMapTravelPresentation\.preflightAccepted/);
+assert.match(app, /if \(result.reason === 'WORLD_MAP_FARM_START_QUEUED'\) \{[\s\S]*?worldMapTravelPresentation\.preflightRejected/);
+console.log(`WORLD_MAP_SUPPLY_CUTOVER_SOURCE_PASS towns=${towns.length} routes=${towns.length} tests=70`);

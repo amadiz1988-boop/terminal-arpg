@@ -744,3 +744,9 @@
 - 1,000 reconnect 全數恢復；分批 hidden → foreground 全數恢復；5 個刻意 slow viewers 均被 64 KiB queue gate 要求 resnapshot，正常 viewers 未受拖累；單角色第 9 viewer 正確拒絕。
 - 最終封存時正式 `play.g8land.com` direct canary 為 p50/p95/p99 141/143/143ms；390×844 UI 三次均通過，p95 分別為 148/143/147ms、resume 最大 627.4ms、polling request 0、application error 0，未觀察到真人 Web 體驗退化。
 - rAthena、production Dashboard、OpenKore 均未重啟。DB 沒有 query storm，connection pool 維持 deferred。完整證據位於 `.local/ro-stack/evidence/PHASE4_1000_SSE_CANONICAL`。
+
+## 2026-09-24 M1 World Map 傳送音效來源候選
+
+- 使用者定案的原始 Client WAV 為 A `ef_readyportal.wav`、B `ef_portal.wav`、C `warp.wav`、D `ef_teleportation.wav`；來源與 hash 記於 `docs/ro-original-ui/ro-warp-portal-teleport-audio-provenance.md`。
+- World Map 過場來源接入既有 Dashboard preflight、權威到達與 Web 音訊系統；取消或拒絕不播放 C/D，到達與 D 完成都成立後才揭露目的地並恢復 BGM。蒼蠅翅膀音效僅在權威成功位移時觸發，物品不消耗規則未更動。
+- 此為 source candidate。Production 未部署、runtime 未重啟；桌面與 390×844 Player Browser 聲音及視覺驗收仍待受控部署後執行。

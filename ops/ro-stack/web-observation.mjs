@@ -723,6 +723,7 @@ export const NATIVE_COMBAT_EVENT_TYPES = Object.freeze([
   'MONSTER_KILL',
   'LOOT_ACQUIRED',
   'MAP_CHANGED',
+  'FLY_WING_RELOCATED',
   'NPC_INTERACTION',
   'SESSION_STARTED',
   'SESSION_ENDED',
@@ -789,6 +790,8 @@ export function nativeLifeEventLine(event = {}) {
     }
     case 'MAP_CHANGED':
       return `Map Change: ${String(event.map ?? facts.map ?? '').trim() || 'unknown'}`;
+    case 'FLY_WING_RELOCATED':
+      return 'Fly Wing relocated';
     case 'NPC_INTERACTION':
       return `NPC Interaction: ${String(facts.npc ?? 'npc')}${facts.cancelled ? ' (cancelled)' : ''}`;
     case 'SESSION_STARTED':

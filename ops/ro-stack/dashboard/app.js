@@ -383,6 +383,7 @@ const combatSounds = {
   itemDrinkPotion: `${officialCombatSoundRoot}/item_drink_potion.wav`,
   flyWing: `${officialCombatSoundRoot}/fly_wing.wav`,
   warp: `${officialCombatSoundRoot}/warp.wav`,
+  readyPortal: `${officialCombatSoundRoot}/ready_portal.wav`,
   portal: `${officialCombatSoundRoot}/portal.wav`,
   heal: `${officialCombatSoundRoot}/heal.wav`,
   levelUp: `${officialCombatSoundRoot}/level_up.wav`,
@@ -441,7 +442,10 @@ const monsterSoundProfiles = Object.freeze({
     death: [],
   },
 });
-const uiSoundKeys = new Set(['uiConfirm', 'uiCancel', 'uiOpen', 'uiClose']);
+const travelCueKeys = new Set(['readyPortal', 'portal', 'warp', 'flyWing']);
+const uiSoundKeys = new Set([
+  'uiConfirm', 'uiCancel', 'uiOpen', 'uiClose', ...travelCueKeys,
+]);
 const combatAudio = Object.fromEntries(
   Object.entries(combatSounds).map(([key, source]) => [
     key,
@@ -460,6 +464,7 @@ const combatAudioCursor = Object.fromEntries(
 let combatAudioContext = null;
 const combatAudioBuffers = new Map();
 const combatAudioBufferLoads = new Map();
+const travelCueSessions = new Map();
 const emotions = [
   { id: 0, symbol: '❗', label: '驚嘆', source: '*!*' },
   { id: 1, symbol: '❓', label: '疑問', source: '*?*' },
@@ -727,6 +732,9 @@ let audioPrefs = (() => {
     return { ...defaultAudio };
   }
 })();
+let worldMapTravelPresentation = null;
+let worldMapTravelModulePromise = null;
+let worldMapOpenGeneration = 0;
 let accountPreferences = null;
 let availableItemIcons = null;
 let itemIconManifestPromise = null;
@@ -3223,6 +3231,7 @@ function syncAudioControls() {
   // Preserve the displayed percentage while halving physical BGM output.
   bgm.volume = Math.max(0, Math.min(0.5, audioPrefs.musicVolume / 200));
   bgm.muted = !(audioPrefs.musicEnabled && !audioPrefs.muted);
+  for (const session of travelCueSessions.values()) session.updateVolume?.();
   const audioToggle = $('#quickAudio');
   if (audioToggle) {
     const muted = Boolean(audioPrefs.muted);
@@ -3450,7 +3459,8 @@ function prepareCombatAudio(key) {
   return loading;
 }
 function unlockAudio(fromUserGesture = false) {
-  if (audioPrefs.musicEnabled && audioPrefs.musicVolume > 0)
+  if (!worldMapTravelPresentation?.isTransitionActive() &&
+      audioPrefs.musicEnabled && audioPrefs.musicVolume > 0)
     $('#bgm')
       .play()
       .catch(() => {});
@@ -3464,6 +3474,7 @@ function unlockAudio(fromUserGesture = false) {
   }
 }
 function setMusicContext(context) {
+  if (worldMapTravelPresentation?.isTransitionActive()) return;
   const bgm = $('#bgm');
   const source = musicSources[context];
   if (!source) {
@@ -3477,7 +3488,10 @@ function setMusicContext(context) {
     bgm.load();
     return;
   }
-  if (source === currentMusic) return;
+  if (source === currentMusic) {
+    if (bgm.paused) unlockAudio();
+    return;
+  }
   currentMusic = source;
   bgm.src = source;
   bgm.load();
@@ -3485,6 +3499,76 @@ function setMusicContext(context) {
 }
 function reportCombatSound(detail) {
   document.dispatchEvent(new CustomEvent('ro-combat-sound', { detail }));
+}
+function stopTravelCue(key) {
+  travelCueSessions.get(key)?.stop();
+}
+function playTravelCue(key, { loop = false } = {}) {
+  if (!travelCueKeys.has(key)) return Promise.reject(new Error('unknown travel cue'));
+  stopTravelCue(key);
+  return new Promise((resolve, reject) => {
+    const session = { source: null, gain: null, audio: null, settled: false };
+    const volume = () => Math.max(0, Math.min(1, audioPrefs.soundVolume / 100));
+    const audible = () => audioPrefs.soundEnabled && !audioPrefs.muted;
+    const settle = (result, error = null) => {
+      if (session.settled) return;
+      session.settled = true;
+      if (travelCueSessions.get(key) === session) travelCueSessions.delete(key);
+      if (session.audio) {
+        session.audio.onended = null;
+        session.audio.onerror = null;
+        session.audio.loop = false;
+      }
+      if (error) reject(error);
+      else resolve(result);
+    };
+    session.updateVolume = () => {
+      if (session.gain) session.gain.gain.value = audible() ? volume() : 0;
+      if (session.audio) {
+        session.audio.volume = volume();
+        session.audio.muted = !audible();
+      }
+    };
+    session.stop = () => {
+      if (session.source) {
+        session.source.onended = null;
+        try { session.source.stop(); } catch {}
+      }
+      if (session.audio) session.audio.pause();
+      settle('cancelled');
+    };
+    travelCueSessions.set(key, session);
+    void prepareCombatAudio(key).then(() => {
+      if (session.settled) return;
+      const buffer = combatAudioBuffers.get(key);
+      if (combatAudioContext?.state === 'running' && buffer) {
+        session.source = combatAudioContext.createBufferSource();
+        session.gain = combatAudioContext.createGain();
+        session.source.buffer = buffer;
+        session.source.loop = loop;
+        session.source.connect(session.gain);
+        session.gain.connect(combatAudioContext.destination);
+        session.updateVolume();
+        session.source.onended = () => settle('ended');
+        session.source.start();
+        reportCombatSound({ key, backend: 'web-audio', started: true,
+          loop, volume: audible() ? volume() : 0 });
+        return;
+      }
+      session.audio = combatAudio[key]?.at(-1);
+      if (!session.audio) throw new Error(`音效不存在：${key}`);
+      session.audio.pause();
+      session.audio.currentTime = 0;
+      session.audio.loop = loop;
+      session.updateVolume();
+      session.audio.onended = () => settle('ended');
+      session.audio.onerror = () => settle(null, new Error(`音效播放失敗：${key}`));
+      void session.audio.play().then(() => {
+        reportCombatSound({ key, backend: 'html-audio', started: true,
+          loop, volume: audible() ? volume() : 0 });
+      }).catch((error) => settle(null, error));
+    }).catch((error) => settle(null, error));
+  });
 }
 function playCombatSound(
   key,
@@ -3532,7 +3616,8 @@ function playCombatSound(
     }
     const pool = combatAudio[key];
     if (!pool?.length) return;
-    const cursor = combatAudioCursor[key]++ % pool.length,
+    const available = travelCueKeys.has(key) ? pool.length - 1 : pool.length,
+      cursor = combatAudioCursor[key]++ % available,
       sound = pool[cursor];
     sound.currentTime = 0;
     sound.muted = false;
@@ -3927,12 +4012,9 @@ function playMonsterSoundSequence(
     playCombatSound(key, baseDelay + offset, combatEventId, hitIndex, 0.88);
 }
 function playInterfaceEventSound(line) {
-  if (/Fly Wing|蝶翅膀|蒼蠅翅膀/i.test(line)) {
+  if (/^Fly Wing relocated$/.test(line)) {
+    if (worldMapTravelPresentation?.isTransitionActive()) return;
     playCombatSound('flyWing', 0, '', 0, 0.72);
-    return;
-  }
-  if (/Map Change|teleport|warp|傳送/i.test(line)) {
-    playCombatSound('warp', 0, '', 0, 0.62);
     return;
   }
   if (/Item .+ picked up|picked up .+|取得道具|獲得物品/i.test(line)) {
@@ -4089,7 +4171,8 @@ function renderEventDelta(lines, reset = false) {
   for (const line of playerLogLines) {
     const row = eventNode(line);
     log.append(row);
-    playInterfaceEventSound(line);
+    if (!reset || !/^Fly Wing relocated$/.test(line))
+      playInterfaceEventSound(line);
     if (!reset) requestAnimationFrame(() => presentCombatEvent(row, line));
   }
   while (log.childElementCount > 220) {
@@ -6583,60 +6666,80 @@ async function selectWorldMap(mapId) {
           ? `${availability.cooldownRemaining} 秒後可再次傳送`
           : buttonState === 'INSUFFICIENT_ZENY'
             ? `Zeny 不足：需 ${availability.cost}，現有 ${availability.currentZeny}`
-            : '設定為掛機地圖';
+            : '更換該地圖掛機';
     apply.disabled = buttonState !== 'AVAILABLE';
   }
-  apply.onclick = async () => {
-    apply.disabled = true;
-    apply.textContent = '正在套用';
-    try {
-      const result = await api('/api/grind-target', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ mapId }),
-      });
-      if (result.reason === 'ALREADY_ON_TARGET_MAP') {
-        $('#worldMapStatus').textContent = '已在該地圖掛機';
-        apply.disabled = false;
-        apply.textContent = '設定為掛機地圖';
-        return;
-      }
-      $('#worldMapStatus').textContent = result.message ??
-        (result.reason === 'WORLD_MAP_SUPPLY_QUEUED'
-          ? `已保留 ${map.name}，正在完成補給並等待返程掛機`
-          : `已送出 ${map.name} 傳送，等待伺服器確認抵達並啟動掛機`);
-      apply.textContent = '等待伺服器確認';
-      await waitForWorldMapAuthority((state) =>
-        state.player?.currentMap === mapId && state.player?.phase === 'AUTO_FARM',
-      result.reason === 'WORLD_MAP_SUPPLY_QUEUED' ? 300000 : 30000,
-      result.reason === 'WORLD_MAP_SUPPLY_QUEUED' ? result.command : null);
-      if (result.reason === 'WORLD_MAP_FARM_START_QUEUED') {
-        $('#worldMapStatus').textContent = '已在目標地圖開始掛機';
-      } else {
-        playCombatSound('warp', 0, '', 0, 0.62);
-        showWorldMapArrival(map.name);
-      }
-      renderWorldMapNodes();
-      void refresh({ full: false });
-    } catch (error) {
-      if (error?.code === 'NON_JSON_RESPONSE') {
-        try {
-          const reconciledTarget = await reconcileFarmTargetAfterNonJsonResponse(mapId);
-          if (reconciledTarget?.mapId === mapId) {
-            syncGrindTargetSummary(reconciledTarget);
-            renderWorldMapNodes();
-            apply.textContent = '等待伺服器確認';
-            $('#worldMapStatus').textContent = `已送出 ${map.name} 傳送，等待伺服器確認`;
-            return;
-          }
-        } catch {
-          // Fall through to the bounded user-facing error below.
+  apply.onclick = () => {
+    if (worldMapTravelPresentation?.state !== 'MAP_PORTAL_OPEN') return;
+    const confirm = $('#worldMapConfirm');
+    $('#worldMapConfirmTitle').textContent = `是否更換至${map.name}掛機？`;
+    $('#worldMapConfirmCost').textContent =
+      `傳送費用：${availability?.cost === 0 ? '免費' : `${availability?.cost ?? '待確認'} Zeny`}`;
+    const submit = $('#worldMapConfirmSubmit');
+    submit.textContent = '確定更換';
+    submit.disabled = false;
+    confirm.classList.remove('hidden');
+    $('#worldMapConfirmCancel').onclick = () => closeWorldMap();
+    submit.onclick = async () => {
+      if (!worldMapTravelPresentation?.beginSubmission()) return;
+      submit.disabled = true;
+      apply.disabled = true;
+      try {
+        const result = await api('/api/grind-target', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ mapId }),
+        });
+        if (result.reason === 'ALREADY_ON_TARGET_MAP') {
+          worldMapTravelPresentation.preflightRejected();
+          confirm.classList.add('hidden');
+          $('#worldMapStatus').textContent = '已在該地圖掛機';
+          return;
         }
+        confirm.classList.add('hidden');
+        if (result.reason !== 'WORLD_MAP_FARM_START_QUEUED')
+          worldMapTravelPresentation.preflightAccepted({ mapId, name: map.name });
+        $('#worldMapStatus').textContent = result.message ??
+          (result.reason === 'WORLD_MAP_SUPPLY_QUEUED'
+            ? `已保留 ${map.name}，正在完成補給並等待返程掛機`
+            : `已送出 ${map.name} 傳送，等待伺服器確認抵達並啟動掛機`);
+        await waitForWorldMapAuthority((state) =>
+          state.player?.currentMap === mapId && state.player?.phase === 'AUTO_FARM',
+        result.reason === 'WORLD_MAP_SUPPLY_QUEUED' ? 300000 : 30000,
+        result.reason === 'WORLD_MAP_SUPPLY_QUEUED' ? result.command : null);
+        if (result.reason === 'WORLD_MAP_FARM_START_QUEUED') {
+          worldMapTravelPresentation.preflightRejected();
+          closeWorldMap();
+          renderWorldMapNodes();
+          void refresh({ full: false });
+        } else {
+          await refresh({ full: false });
+          worldMapTravelPresentation.authoritativeArrival(mapId);
+        }
+      } catch (error) {
+        if (error?.code === 'NON_JSON_RESPONSE') {
+          try {
+            const reconciledTarget = await reconcileFarmTargetAfterNonJsonResponse(mapId);
+            if (reconciledTarget?.mapId === mapId) {
+              syncGrindTargetSummary(reconciledTarget);
+              renderWorldMapNodes();
+              worldMapTravelPresentation.preflightRejected();
+              $('#worldMapStatus').textContent =
+                `已送出 ${map.name} 傳送，等待伺服器確認`;
+              return;
+            }
+          } catch {}
+        }
+        if (!worldMapTravelPresentation.failed(error))
+          worldMapTravelPresentation.preflightRejected();
+        confirm.classList.add('hidden');
+        $('#worldMapStatus').textContent = farmTargetBlockedMessage(error.message);
+      } finally {
+        submit.disabled = false;
+        apply.disabled = false;
       }
-      apply.disabled = false;
-      apply.textContent = '設定為掛機地圖';
-      $('#worldMapStatus').textContent = farmTargetBlockedMessage(error.message);
-    }
+    };
+    submit.focus();
   };
   controls.append(apply);
   const farmNote = document.createElement('p');
@@ -6683,27 +6786,82 @@ function renderWorldMapRegionIndex(regions) {
   input.oninput = render;
   render();
 }
+async function ensureWorldMapTravelPresentation() {
+  if (worldMapTravelPresentation) return worldMapTravelPresentation;
+  worldMapTravelModulePromise ||= import('/world-map-teleport-presentation.mjs');
+  const { createWorldMapTeleportPresentation } =
+    await worldMapTravelModulePromise;
+  if (worldMapTravelPresentation) return worldMapTravelPresentation;
+  worldMapTravelPresentation = createWorldMapTeleportPresentation({
+    playCue: playTravelCue,
+    stopCue: stopTravelCue,
+    pauseBgm: () => $('#bgm').pause(),
+    resumeBgm: (mapId) => setMusicContext(mapId ||
+      farmMapAvailabilityData?.player?.currentMap || lastState?.derived?.map),
+    onStage: (stage) => {
+      const locked = ['PREFLIGHT_PENDING', 'TELEPORT_CONFIRMED',
+        'FINAL_TELEPORT', 'WAIT_FOR_ARRIVAL'].includes(stage);
+      $('#worldMapOverlay').dataset.travelState = stage;
+      $('#worldMapOverlay').setAttribute('aria-busy', String(locked));
+      $('#worldMapOverlay').querySelector('.world-map-layout').inert = locked;
+      $('#closeWorldMap').disabled = locked;
+      $('#worldMapConfirmCancel').disabled = locked;
+      const label = {
+        MAP_PORTAL_OPEN: '傳送之陣已啟動，請選擇目的地',
+        PREFLIGHT_PENDING: '正在確認傳送資格',
+        TELEPORT_CONFIRMED: '傳送之陣正在啟動',
+        FINAL_TELEPORT: '正在傳送',
+        WAIT_FOR_ARRIVAL: '等待伺服器確認抵達',
+      }[stage];
+      if (label) $('#worldMapStatus').textContent = label;
+    },
+    onComplete: ({ mapId, name }) => {
+      $('#worldMapConfirm').classList.add('hidden');
+      closeWorldMap();
+      showWorldMapArrival(name || mapId);
+      void refresh({ full: false });
+    },
+    onFailure: (error) => {
+      $('#worldMapStatus').textContent =
+        farmTargetBlockedMessage(error?.message ?? '傳送音效播放失敗');
+    },
+  });
+  return worldMapTravelPresentation;
+}
 async function openWorldMap() {
+  const presentation = await ensureWorldMapTravelPresentation();
+  if (!presentation.open()) return;
+  const generation = ++worldMapOpenGeneration;
+  $('#worldMapOverlay').classList.remove('hidden');
+  document.body.classList.add('world-map-open');
   activateDeferredGameImages();
   farmMapAvailabilityData = null;
   farmMapAvailabilityPromise = null;
-  await Promise.all([
-    mapInfoData ? Promise.resolve() : loadMapInfo(currentMapInfoId()),
-    loadFarmMapAvailability(),
-  ]);
+  try {
+    await Promise.all([
+      mapInfoData ? Promise.resolve() : loadMapInfo(currentMapInfoId()),
+      loadFarmMapAvailability(),
+    ]);
+  } catch (error) {
+    closeWorldMap();
+    throw error;
+  }
+  if (generation !== worldMapOpenGeneration ||
+      presentation.state !== 'MAP_PORTAL_OPEN') return;
   for (const row of farmMapAvailabilityData?.maps ?? [])
     if (row.summary && !mapInfoData.maps[row.map])
       mapInfoData.maps[row.map] = row.summary;
   renderWorldMapNodes();
   syncGrindTargetSummary();
-  $('#worldMapOverlay').classList.remove('hidden');
-  document.body.classList.add('world-map-open');
   void reportWebPresence();
   restartCombatDelivery();
   restartStatePolling();
   $('#closeWorldMap').focus();
 }
 function closeWorldMap() {
+  if (worldMapTravelPresentation?.isTransitionActive()) return;
+  worldMapOpenGeneration += 1;
+  worldMapTravelPresentation?.cancel();
   $('#worldMapConfirm').classList.add('hidden');
   $('#worldMapOverlay').classList.add('hidden');
   document.body.classList.remove('world-map-open');
@@ -8043,28 +8201,39 @@ function selectTownWorldMap(mapId) {
       : `傳送至${town.name ?? town.map}`;
   action.disabled = town.buttonState !== 'AVAILABLE';
   action.onclick = () => {
+    if (worldMapTravelPresentation?.state !== 'MAP_PORTAL_OPEN') return;
     const confirm = $('#worldMapConfirm');
     $('#worldMapConfirmTitle').textContent = `是否傳送至${town.name ?? town.map}？`;
     $('#worldMapConfirmCost').textContent = '傳送費用：免費';
+    $('#worldMapConfirmSubmit').textContent = '確定傳送';
     confirm.classList.remove('hidden');
-    $('#worldMapConfirmCancel').onclick = () => confirm.classList.add('hidden');
+    $('#worldMapConfirmCancel').onclick = () => closeWorldMap();
     $('#worldMapConfirmSubmit').onclick = async () => {
       const submit = $('#worldMapConfirmSubmit');
+      if (!worldMapTravelPresentation?.beginSubmission()) return;
       submit.disabled = true;
       try {
-        await api('/api/world-map-teleport', {
+        const result = await api('/api/world-map-teleport', {
           method: 'POST', headers: { 'content-type': 'application/json' },
           body: JSON.stringify({ mapId }),
         });
-        const arrived = await waitForWorldMapAuthority((state) =>
-          state.player?.currentMap === mapId);
+        if (result.reason === 'ALREADY_ON_TARGET_MAP') {
+          worldMapTravelPresentation.preflightRejected();
+          confirm.classList.add('hidden');
+          $('#worldMapStatus').textContent = '已在該地圖';
+          return;
+        }
         confirm.classList.add('hidden');
-        playCombatSound('warp', 0, '', 0, 0.62);
-        showWorldMapArrival(town.name ?? town.map);
-        renderWorldMapTowns();
-        selectTownWorldMap(mapId);
-        void refresh({ full: false });
+        worldMapTravelPresentation.preflightAccepted({
+          mapId, name: town.name ?? town.map,
+        });
+        await waitForWorldMapAuthority((state) =>
+          state.player?.currentMap === mapId);
+        await refresh({ full: false });
+        worldMapTravelPresentation.authoritativeArrival(mapId);
       } catch (error) {
+        if (!worldMapTravelPresentation.failed(error))
+          worldMapTravelPresentation.preflightRejected();
         $('#worldMapStatus').textContent = farmTargetBlockedMessage(error.message);
         confirm.classList.add('hidden');
       } finally { submit.disabled = false; }
@@ -8521,6 +8690,27 @@ async function enter(latencyTrace = null) {
   scheduleGameplayModuleWarmup();
 }
 const persistentLifeState = { charId: null, data: null, timelineOpen: false };
+
+// rAthena applies the travel effect without consuming these project-defined
+// permanent items. Their authoritative success signal is movement, not a
+// quantity decrement.
+const nonConsumableTravelItemIds = new Set([601, 602]);
+
+function authoritativePositionOf(live) {
+  return {
+    map: String(live?.map ?? ''),
+    x: Number(live?.x ?? live?.playerX),
+    y: Number(live?.y ?? live?.playerY),
+  };
+}
+
+function authoritativePositionChanged(before, after) {
+  return Boolean(after?.map) && (
+    before?.map !== after.map ||
+    (Number.isFinite(before?.x) && Number.isFinite(after?.x) && before.x !== after.x) ||
+    (Number.isFinite(before?.y) && Number.isFinite(after?.y) && before.y !== after.y)
+  );
+}
 
 function formatPersistentLifeDuration(session) {
   if (!session?.startedAt || !session?.endedAt) return null;
@@ -10277,10 +10467,10 @@ $('#worldMapOverlay').addEventListener('click', (event) => {
 });
 addEventListener('keydown', (event) => {
   if (event.key !== 'Escape') return;
-  if (!$('#worldMapConfirm').classList.contains('hidden'))
-    $('#worldMapConfirm').classList.add('hidden');
-  else if (!$('#worldMapOverlay').classList.contains('hidden')) closeWorldMap();
+  if (!$('#worldMapConfirm').classList.contains('hidden') ||
+      !$('#worldMapOverlay').classList.contains('hidden')) closeWorldMap();
 });
+addEventListener('pagehide', () => worldMapTravelPresentation?.dispose());
 setInterval(() => {
   if (!$('#game').classList.contains('hidden'))
     $('#duration').textContent = duration(sessionStartedAt, sessionEndedAt);
@@ -10317,6 +10507,9 @@ function setItemActionNotice(message) {
 }
 async function confirmItemAction(action, trackedIdentity, before, experienceTrace = null) {
   const deadline = Date.now() + 7000;
+  const beforePosition = authoritativePositionOf(lastState?.derived);
+  const nonConsumableTravelItem =
+    action === 'use' && nonConsumableTravelItemIds.has(Number(before?.itemId));
   let confirmed = false,
     after = null,
     latestLive = null;
@@ -10326,6 +10519,7 @@ async function confirmItemAction(action, trackedIdentity, before, experienceTrac
     latestLive = events.live ?? latestLive;
     after = events.live?.inventory?.find((entry) =>
       inventoryMatchesIdentity(entry, trackedIdentity));
+    const afterPosition = authoritativePositionOf(events.live);
     confirmed =
       action === 'card'
         ? !after || Number(after.amount) < Number(before?.amount ?? 0)
@@ -10333,11 +10527,17 @@ async function confirmItemAction(action, trackedIdentity, before, experienceTrac
           ? after?.equipped === true
           : action === 'unequip'
             ? after?.equipped === false
+          : nonConsumableTravelItem
+            ? Boolean(after) &&
+              Number(after.amount) === Number(before?.amount) &&
+              authoritativePositionChanged(beforePosition, afterPosition)
             : !after || Number(after.amount) < Number(before?.amount ?? 0);
     if (confirmed) break;
   }
   if (confirmed) {
     markExperienceAuthoritative(experienceTrace);
+    if (action === 'use' && Number(before?.itemId) === 601)
+      playCombatSound('flyWing', 0, '', 0, 0.72);
     if (after) {
       inventoryItems = inventoryItems.map((item) =>
         inventoryMatchesIdentity(item, trackedIdentity)
