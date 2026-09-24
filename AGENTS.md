@@ -49,6 +49,9 @@ GitHub First Production 硬規則：`GITHUB_CANONICAL_SOURCE_OF_TRUTH=YES`、
 可追溯性、clean/tracked source、Production receipt/hash、capability superset、
 同一 owner lease、完成後的 live acceptance 與 Git SHA receipt。release ref 或基線
 未定即 `DEPLOYMENT=BLOCKED`。使用者自開視窗及緊急 hotfix 同樣適用。
+`deploy-dashboard-checkpoint.ps1`、`deploy-web-journey-atomic.ps1`、直接複製
+Production 檔案、直接替換 Native binary、以新 candidate 手動 restart 均禁止作正式部署路徑。
+Native GitHub remote/ref 與准入工具未完成前，Native Production promotion 暫停。
 完整流程與目前阻擋項見
 `docs/project-control/github-first-production-promotion-protocol-v1.md`。
 
