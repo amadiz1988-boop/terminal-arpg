@@ -3,6 +3,8 @@ $script:approvedProcDumpPath = 'C:\Users\Administrator\AppData\Local\Microsoft\S
 $script:approvedProcDumpHash = 'D1FC99AE304BD1D2BF28ABEB62531DA959E2431916194981B88C958FD713A8E6'
 $script:approvedProcDumpFilter = '*C0000005*,*C000008D*,*C000008E*,*C000008F*,*C0000090*,*C0000091*,*C0000092*,*C0000093*,*C0000094*,*C0000095*'
 
+. (Join-Path $PSScriptRoot 'procdump-process-identity.ps1')
+
 function Test-ApprovedMapProcDump($sidecar, [int]$mapPid, [string]$captureRoot) {
   $line = [string]$sidecar.CommandLine
   if ([string]$sidecar.ExecutablePath -ine $script:approvedProcDumpPath) { return $false }
@@ -92,8 +94,8 @@ function Invoke-MapProcDumpTick([string]$runtimeRoot, [string]$canonicalRoot, $s
     Write-IncidentJson $statePath $record
     return $record
   }
-  $sameStart = $false
-  try { $sameStart = [Math]::Abs(([DateTimeOffset]::Parse([string]$prior.mapProcessStartTime) - [DateTimeOffset]::Parse([string]$map.start)).TotalSeconds) -lt 2 } catch {}
+  $startDelta = Get-ProcDumpStartDelta $prior.mapProcessStartTime $map.start
+  $sameStart = $startDelta.valid -and $startDelta.start_time_delta_ticks -le $script:procdumpMaxStartTimeDeltaTicks
   $sameMap = $prior -and [int]$prior.mapPid -eq [int]$map.pid -and $sameStart -and [string]$prior.runtimeGenerationId -eq $generation
   if ($decision.status -eq 'ALREADY_ATTACHED') {
     if ($sameMap -and [int]$prior.procdumpProcessId -eq [int]$decision.sidecar.ProcessId -and $prior.procdumpAttachStatus -eq 'ATTACHED') { return $prior }

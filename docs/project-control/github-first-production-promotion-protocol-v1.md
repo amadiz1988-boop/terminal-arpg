@@ -210,6 +210,15 @@ current artifact/rollback verification and capability superset remain required.
 After the first final successful receipt a permanent consumption marker disables
 migration and atomic state transition establishes the real GITHUB_FIRST baseline.
 
+## ProcDump process identity precision
+
+`PROCDUMP_PROCESS_IDENTITY_PRECISION_FIX_V1` uses the shared UTC-tick
+comparison in `ops/ro-stack/procdump-process-identity.ps1`. Exact PID, live
+process, executable/role, ProcDump receipt and command-target checks remain
+mandatory. Start-time delta is at most one Windows tick (100 ns). Source,
+isolated tests and read-only current receipt evidence are recorded in
+`docs/project-control/procdump-process-identity-precision-v1.md`.
+
 ## Native GitHub-first promotion entry V1
 
 `NATIVE_PROMOTION_PATH = AVAILABLE`. This entry implements the one-time first

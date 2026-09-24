@@ -10,6 +10,7 @@ if ([IO.Path]::GetFullPath($ProductionRoot).TrimEnd('\') -ine $expectedRoot) { t
 $runtime = Join-Path $ProductionRoot '.local\ro-stack'
 $native = Join-Path $runtime 'rathena'
 $launcher = Join-Path $ProductionRoot 'ops\ro-stack\ro-stack.ps1'
+. (Join-Path $PSScriptRoot 'procdump-process-identity.ps1')
 
 function Get-Snapshot {
   $all = @(Get-CimInstance Win32_Process)
@@ -34,29 +35,28 @@ function Get-Snapshot {
   $db = @($listeners | Where-Object LocalPort -eq 3307 | Select-Object -ExpandProperty OwningProcess -Unique)
   if ($dashboard.Count -ne 1 -or $db.Count -ne 1 -or $openkore -ne 0) { $pass = $false }
   $capture = $null
+  $identity = $null
   $captureFile = Join-Path $runtime 'procdump-attachment-state.json'
   if (Test-Path -LiteralPath $captureFile) {
     $capture = Get-Content -LiteralPath $captureFile -Raw | ConvertFrom-Json
     $sidecars = @($all | Where-Object Name -match '^procdump(64|64a)?\.exe$')
-    if ($capture.mapPid -ne $pids.map -or $capture.procdumpAttachStatus -ne 'ATTACHED' -or
-        $sidecars.Count -ne 1 -or $sidecars[0].ProcessId -ne $capture.procdumpProcessId -or
-        [string]$sidecars[0].CommandLine -notmatch ('(?<!\d){0}(?!\d)' -f $pids.map)) { $capture = $null }
-    if ($capture) {
-      $approved = 'C:\Users\Administrator\AppData\Local\Microsoft\Sysinternals\ProcDump-12.01\procdump64.exe'
-      if ([string]$sidecars[0].ExecutablePath -ine $approved -or
-          (Get-FileHash -LiteralPath $approved -Algorithm SHA256).Hash -ne 'D1FC99AE304BD1D2BF28ABEB62531DA959E2431916194981B88C958FD713A8E6') { $capture = $null }
-      if ($capture) {
-        $mapProcess = Get-Process -Id $pids.map -ErrorAction Stop
-        $filter = '*C0000005*,*C000008D*,*C000008E*,*C000008F*,*C0000090*,*C0000091*,*C0000092*,*C0000093*,*C0000094*,*C0000095*'
-        if ([DateTime]::Parse($capture.mapProcessStartTime).ToUniversalTime() -ne $mapProcess.StartTime.ToUniversalTime() -or
-            ([string]$sidecars[0].CommandLine).IndexOf('-ma -n 2 -e 1 -f '+$filter,[StringComparison]::OrdinalIgnoreCase) -lt 0 -or
-            [string]$capture.mapBinaryPath -ine (Join-Path $native 'map-server.exe')) { $capture = $null }
-      }
+    $mapEntry = @($all | Where-Object Name -eq 'map-server.exe')
+    $mapProcess = if ($pids.map) { Get-Process -Id $pids.map -ErrorAction SilentlyContinue } else { $null }
+    $approved = 'C:\Users\Administrator\AppData\Local\Microsoft\Sysinternals\ProcDump-12.01\procdump64.exe'
+    $filter = '*C0000005*,*C000008D*,*C000008E*,*C000008F*,*C0000090*,*C0000091*,*C0000092*,*C0000093*,*C0000094*,*C0000095*'
+    $identity = Compare-ProcDumpProcessIdentity $capture ([int]$pids.map) $(if ($mapEntry.Count -eq 1) { $mapEntry[0] } else { $null }) $mapProcess $sidecars (Join-Path $native 'map-server.exe') $approved $filter
+    $approvedHash = try {
+      (Get-FileHash -LiteralPath $approved -Algorithm SHA256 -ErrorAction Stop).Hash -eq 'D1FC99AE304BD1D2BF28ABEB62531DA959E2431916194981B88C958FD713A8E6'
+    } catch { $false }
+    if (-not $approvedHash) {
+      $identity.PROCESS_IDENTITY_MATCH = 'NO'
+      $identity.reason = 'PROCDUMP_HASH_MISMATCH'
     }
+    if ($identity.PROCESS_IDENTITY_MATCH -ne 'YES') { $capture = $null }
   }
   return [pscustomobject]@{pass=$pass; counts=$counts; pids=$pids; openkore_runtime_count=$openkore;
     dashboard_pid= $(if($dashboard.Count -eq 1){$dashboard[0]}else{0}); database_pid=$(if($db.Count -eq 1){$db[0]}else{0});
-    procdump_receipt=$capture; measured_at=[DateTime]::UtcNow.ToString('o')}
+    procdump_receipt=$capture; procdump_process_identity=$identity; measured_at=[DateTime]::UtcNow.ToString('o')}
 }
 
 if ($Action -eq 'snapshot') { Get-Snapshot | ConvertTo-Json -Depth 12 -Compress; exit 0 }
