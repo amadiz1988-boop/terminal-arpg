@@ -33,6 +33,17 @@ function Test-MapProcDumpOutput([string]$output, [int]$mapPid, [string]$mapPath,
   return $true
 }
 
+function Get-MapProcDumpFolder($sidecar, [string]$captureRoot) {
+  $line = [string]$sidecar.CommandLine
+  $offset = $line.IndexOf($captureRoot, [StringComparison]::OrdinalIgnoreCase)
+  if ($offset -lt 0) { return $null }
+  $folder = $line.Substring($offset).Trim().Trim('"')
+  $root = [IO.Path]::GetFullPath($captureRoot).TrimEnd('\') + '\'
+  try { $resolved = [IO.Path]::GetFullPath($folder) } catch { return $null }
+  if (-not $resolved.StartsWith($root, [StringComparison]::OrdinalIgnoreCase)) { return $null }
+  return $resolved
+}
+
 function Get-MapProcDumpDecision($state, $servers, $guard, $sidecars, [string]$canonicalRoot, [string]$runtimeRoot) {
   $map = @($state.processes | Where-Object name -eq 'map')
   $liveMaps = @($servers | Where-Object name -eq 'map-server.exe')
@@ -86,12 +97,16 @@ function Invoke-MapProcDumpTick([string]$runtimeRoot, [string]$canonicalRoot, $s
   $sameMap = $prior -and [int]$prior.mapPid -eq [int]$map.pid -and $sameStart -and [string]$prior.runtimeGenerationId -eq $generation
   if ($decision.status -eq 'ALREADY_ATTACHED') {
     if ($sameMap -and [int]$prior.procdumpProcessId -eq [int]$decision.sidecar.ProcessId -and $prior.procdumpAttachStatus -eq 'ATTACHED') { return $prior }
-    if ($sameMap -and $prior.procdumpAttachStatus -eq 'FAILED' -and $prior.dumpDirectory) {
-      $outPath = Join-Path ([string]$prior.dumpDirectory) 'procdump.stdout.log'
-      $out = if (Test-Path -LiteralPath $outPath) { Get-Content -LiteralPath $outPath -Raw -Encoding Unicode -ErrorAction SilentlyContinue } else { '' }
-      if (-not (Test-MapProcDumpOutput $out ([int]$map.pid) ([string]$map.path) ([string]$prior.dumpDirectory))) { return $prior }
+    $folder = Get-MapProcDumpFolder $decision.sidecar (Join-Path $runtimeRoot 'crash-capture')
+    $outPath = if ($folder) { Join-Path $folder 'procdump.stdout.log' } else { $null }
+    $out = if ($outPath -and (Test-Path -LiteralPath $outPath)) { Get-Content -LiteralPath $outPath -Raw -Encoding Unicode -ErrorAction SilentlyContinue } else { '' }
+    if (-not $folder -or -not (Test-MapProcDumpOutput $out ([int]$map.pid) ([string]$map.path) $folder)) {
+      if ($sameMap -and $prior.procdumpAttachStatus -eq 'FAILED' -and [int]$prior.procdumpProcessId -eq [int]$decision.sidecar.ProcessId) { return $prior }
+      $record = [pscustomobject]@{ runtimeGenerationId = $generation; mapPid = [int]$map.pid; mapProcessStartTime = [string]$map.start; mapBinaryPath = [string]$map.path; procdumpAttachedPid = $null; procdumpAttachedAt = $null; procdumpProcessId = [int]$decision.sidecar.ProcessId; procdumpAttachStatus = 'FAILED'; procdumpAttachError = 'PROCDUMP_OUTPUT_UNVERIFIED'; dumpDirectory = $folder; mapRuntimeUnaffected = 'YES'; previous = if ($sameMap) { $prior.previous } else { Get-ProcDumpHistoricalState $prior } }
+      Write-IncidentJson $statePath $record
+      return $record
     }
-    $record = [pscustomobject]@{ runtimeGenerationId = $generation; mapPid = [int]$map.pid; mapProcessStartTime = [string]$map.start; mapBinaryPath = [string]$map.path; procdumpAttachedPid = [int]$map.pid; procdumpAttachedAt = [DateTimeOffset]::UtcNow.ToString('o'); procdumpProcessId = [int]$decision.sidecar.ProcessId; procdumpAttachStatus = 'ATTACHED'; procdumpAttachError = $null; mapRuntimeUnaffected = 'YES'; previous = if ($sameMap) { $prior.previous } else { Get-ProcDumpHistoricalState $prior } }
+    $record = [pscustomobject]@{ runtimeGenerationId = $generation; mapPid = [int]$map.pid; mapProcessStartTime = [string]$map.start; mapBinaryPath = [string]$map.path; procdumpAttachedPid = [int]$map.pid; procdumpAttachedAt = [DateTimeOffset]::UtcNow.ToString('o'); procdumpProcessId = [int]$decision.sidecar.ProcessId; procdumpAttachStatus = 'ATTACHED'; procdumpAttachError = $null; dumpDirectory = $folder; mapRuntimeUnaffected = 'YES'; previous = if ($sameMap) { $prior.previous } else { Get-ProcDumpHistoricalState $prior } }
     Write-IncidentJson $statePath $record
     return $record
   }

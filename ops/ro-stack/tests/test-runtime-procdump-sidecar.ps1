@@ -102,6 +102,13 @@ try {
   Check ($silent.procdumpAttachStatus -eq 'FAILED' -and $silent.procdumpAttachError -eq 'PROCDUMP_OUTPUT_UNVERIFIED') 'live sidecar without attach output is not confirmed'
   $unchanged = Invoke-MapProcDumpTick $runtimeRoot $canonicalRoot @((Server 107 $mapPath)) $guard $true
   Check ($unchanged.procdumpAttachStatus -eq 'FAILED' -and $unchanged.procdumpAttachedPid -eq $null) 'unverified sidecar cannot self-confirm'
+  $script:sidecars = @()
+  $script:emitAttachOutput = $true
+  $newFolder = Join-Path $runtimeRoot 'crash-capture\manual-reattach'
+  New-Item -ItemType Directory -Force -Path $newFolder | Out-Null
+  $newSidecar = Start-Process -FilePath $script:approvedProcDumpPath -ArgumentList @('-ma', '-n', '2', '-e', '1', '-f', $script:approvedProcDumpFilter, '107', $newFolder) -RedirectStandardOutput (Join-Path $newFolder 'procdump.stdout.log') -RedirectStandardError (Join-Path $newFolder 'procdump.stderr.log') -PassThru
+  $reattached = Invoke-MapProcDumpTick $runtimeRoot $canonicalRoot @((Server 107 $mapPath)) $guard $true
+  Check ($reattached.procdumpAttachStatus -eq 'ATTACHED' -and $reattached.procdumpProcessId -eq $newSidecar.Id -and $reattached.dumpDirectory -eq $newFolder) 'new sidecar uses its own verified output, not old failed folder'
   Write-Output "RUNTIME_PROCDUMP_TEST_PASS count=$count"
 } finally {
   $resolved = [IO.Path]::GetFullPath($root)
