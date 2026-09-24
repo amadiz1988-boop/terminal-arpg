@@ -3,7 +3,8 @@
   "governance_task": "SAFE_CANONICAL_GITHUB_RECONSTRUCTION_V6",
   "web": {
     "repository": "https://github.com/amadiz1988-boop/terminal-arpg.git",
-    "release_ref": "refs/heads/main"
+    "release_ref": "refs/heads/main",
+    "accepted_source_sha": "bca31b31985a4181b51fc42db17a50fd0dcb0b20"
   },
   "native": {
     "source_root": "C:\\Users\\Administrator\\.codex\\worktrees\\github-reconstruction-v6\\native-remote",
@@ -43,5 +44,7 @@
     "through_commit": "6b61e318927ffe3e624cbc707b315ca3b051fd3e",
     "ro_binary_count": 478,
     "new_public_licensed_binary_allowed": false
-  }
+  },
+  "governance_production_active": true,
+  "activation_scope": "SOURCE_AUTHORITY_AND_ADMISSION_POLICY_ONLY"
 }

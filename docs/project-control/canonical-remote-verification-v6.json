@@ -1,0 +1,170 @@
+{
+  "task": "SAFE_CANONICAL_GITHUB_RECONSTRUCTION_V6",
+  "verified_at": "2026-09-24T09:22:44.086434+00:00",
+  "web_verified_github_main_sha": "bca31b31985a4181b51fc42db17a50fd0dcb0b20",
+  "web_source_checkpoint": "6c6fb444887deb69af4749f2a7589460ab9fff0f",
+  "web_fresh_github_clone": true,
+  "web_clean_after_materialization": true,
+  "web_offline_programs": 15,
+  "web_offline_failures": 0,
+  "web_governance_contract_assertions": 31,
+  "private_asset_remote_download": {
+    "available": true,
+    "repository": "amadiz1988-boop/ghost-island-assets",
+    "private": true,
+    "immutable": true,
+    "release_id": 395506630,
+    "release_tag": "web-runtime-assets-v1.1.0",
+    "archive_sha256": "ef5b6034d9aaf75cba0a9deba97c2cc7d001302df8db3d45d9795dd3977a2b4f",
+    "manifest_sha256": "a3e554a6586cc7a57e78c3a76c33e6fa7deea677f26400caacd7b74084ecf2f8",
+    "package_sha256": "3f2e1ac73f24c9dd777dc89fa852da450f2c31298a91b98faf67f1909a82029a",
+    "verification": {
+      "mode": "materialize",
+      "manifest_asset_count": 5107,
+      "package_tree_sha256": "675299490154efca6365f26e715312ce7349340e78a3164bc5d7c5f1b110dfd5",
+      "required_asset_count": 5107,
+      "missing_asset_count": 0,
+      "hash_mismatch_count": 0,
+      "unmanifested_required_asset_count": 0,
+      "examples": [],
+      "ok": true
+    }
+  },
+  "native_verified_github_main_sha": "a4c736d865eeedca398aad97aeff1c1036f2dc39",
+  "native_fresh_github_clone": true,
+  "native_full_release_x64_build_exit_code": 0,
+  "native_build_log_sha256": "01dad76fbe4e35e11b3b2b7f83827f4455647d5002851763f8b3246497cca516",
+  "native_offline_program_results": [
+    {
+      "test": "tools/pa-command-contract/Test-PaCommandContract.ps1",
+      "exitCode": 0
+    },
+    {
+      "test": "tools/pa-command-contract/build-and-test-pa-contract.ps1",
+      "exitCode": 0
+    },
+    {
+      "test": "tools/pa-quarantine-idle-recovery/build-and-test.ps1",
+      "exitCode": 0
+    },
+    {
+      "test": "tools/pa-restart-restore/Test-PaRestartRestore.ps1",
+      "exitCode": 0
+    },
+    {
+      "test": "tools/pa-command-contract/Test-M1CanonicalSource.ps1",
+      "exitCode": 0
+    },
+    {
+      "test": "tools/pa-command-contract/Test-M1AmmoBlockedSource.ps1",
+      "exitCode": 0
+    },
+    {
+      "test": "tools/pa-post-warp-observation/Test-NonConsumableAmmo.ps1",
+      "exitCode": 0
+    },
+    {
+      "test": "tools/pa-post-warp-observation/Test-PostWarpObservation.ps1",
+      "exitCode": 0
+    },
+    {
+      "test": "tools/pa-fly-rejection/build-and-test-fly-rejection.ps1",
+      "exitCode": 0
+    },
+    {
+      "test": "tools/pa-recovery-policy/build-and-test-recovery-policy.ps1",
+      "exitCode": 0
+    },
+    {
+      "test": "tools/pa-auto-farm-target/test-auto-farm-target-acquisition.mjs",
+      "exitCode": 0
+    },
+    {
+      "test": "tools/pa-supply-recovery/test-supply-recovery.mjs",
+      "exitCode": 0
+    },
+    {
+      "test": "C++ M1 supply policy",
+      "exitCode": 0
+    }
+  ],
+  "upstream_snapshot": {
+    "UPSTREAM_REPOSITORY": "https://github.com/rathena/rathena.git",
+    "UPSTREAM_BASE_SHA": "e985006171d2eb320ee512a653f4c83aea3d81b6",
+    "UPSTREAM_SOURCE_TREE_HASH": "0347f6a039796544822fc6ba3840d2c3813489f7",
+    "SNAPSHOT_METHOD": "git archive exact verified upstream tree; new root without upstream ancestry",
+    "AUTHORIZATION": "SAFE_CANONICAL_GITHUB_RECONSTRUCTION_V6 sections E/F",
+    "GEOIP_CLASSIFICATION": "UPSTREAM_RUNTIME_DEPENDENCY / UPSTREAM_LICENSE_PASSTHROUGH_UNRESOLVED",
+    "GEOIP_PRIVATE_CANONICAL_BLOCKER": false,
+    "GEOIP_PATH": "db/GeoIP.dat",
+    "GEOIP_SHA256": "56c7079dc309168d9c41dd4a7a61033acd264a120ca8d2e2182abb5b9ae6b0a3",
+    "LICENSE_NOTE": "Private-source governance permission only; no third-party licensing conclusion.",
+    "HISTORICAL_PROVENANCE_HEAD": "de168f566325f140c87b355a1d442dddabf0b8ad"
+  },
+  "github_state": {
+    "terminal-arpg": {
+      "id": 1357958991,
+      "full_name": "amadiz1988-boop/terminal-arpg",
+      "private": false,
+      "default_branch": "main",
+      "main_sha": "bca31b31985a4181b51fc42db17a50fd0dcb0b20"
+    },
+    "ghost-island-rathena": {
+      "id": 1385120085,
+      "full_name": "amadiz1988-boop/ghost-island-rathena",
+      "private": true,
+      "default_branch": "main",
+      "main_sha": "a4c736d865eeedca398aad97aeff1c1036f2dc39"
+    },
+    "ghost-island-assets": {
+      "id": 1385005403,
+      "full_name": "amadiz1988-boop/ghost-island-assets",
+      "private": true,
+      "default_branch": "main"
+    },
+    "web-runtime-assets-v1.0.0": {
+      "id": 395459994,
+      "immutable": true,
+      "assets": [
+        {
+          "id": 585452166,
+          "name": "ghost-island-web-runtime-assets-v1.0.0.zip",
+          "size": 43467847,
+          "digest": "sha256:837be8cb922aaa20939504a06217a0dc3629f9a8f351baa7ca0508f960e341cb"
+        },
+        {
+          "id": 585452304,
+          "name": "manifest.json",
+          "size": 2134253,
+          "digest": "sha256:db44144b004d9665427d2ea580a043b33c2c2221d8ea7b914467568b3e1818cc"
+        }
+      ]
+    },
+    "web-runtime-assets-v1.1.0": {
+      "id": 395506630,
+      "immutable": true,
+      "assets": [
+        {
+          "id": 585562130,
+          "name": "ghost-island-web-runtime-assets-v1.1.0.zip",
+          "size": 95686109,
+          "digest": "sha256:ef5b6034d9aaf75cba0a9deba97c2cc7d001302df8db3d45d9795dd3977a2b4f"
+        },
+        {
+          "id": 585562398,
+          "name": "manifest.json",
+          "size": 3214881,
+          "digest": "sha256:a3e554a6586cc7a57e78c3a76c33e6fa7deea677f26400caacd7b74084ecf2f8"
+        }
+      ]
+    }
+  },
+  "GITHUB_FIRST_GATE": "PASS",
+  "GOVERNANCE_PRODUCTION_ACTIVE": "YES",
+  "governance_activation_scope": "SOURCE_AUTHORITY_AND_ADMISSION_POLICY_ONLY",
+  "production_files_changed": false,
+  "production_endpoint_contacted": false,
+  "game_runtime_touched": false,
+  "runtime_restarted": false,
+  "browser_acceptance": "NOT_RUN_NO_PRODUCTION_SCOPE"
+}

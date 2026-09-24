@@ -92,9 +92,37 @@ Uncommitted V4 disposition: 1 inventory reused as audit input, 6 independently
 reconstructed, 2 stale/generated excluded; no bulk copy and no pycache commit.
 Details: v4-file-disposition-v6.json.
 
-Remote Web fresh-clone acceptance and final authority activation are recorded
-in the final verification section after normal main promotion. This candidate
-report does not assert that pending step has already completed.
+## Final remote verification and activation
+
+Verified GitHub Web main: bca31b31985a4181b51fc42db17a50fd0dcb0b20.
+Gameplay/source checkpoint: 6c6fb444887deb69af4749f2a7589460ab9fff0f.
+The final governance report is a normal documentation-only descendant of that
+verified main. Its exact final SHA is obtained from the current main ref.
+Native main: a4c736d865eeedca398aad97aeff1c1036f2dc39.
+
+REMOTE_WEB_FRESH_CHECKOUT = PASS
+REMOTE_PRIVATE_ASSET_FETCH = PASS
+REMOTE_NATIVE_FRESH_CLONE = PASS
+REMOTE_NATIVE_BUILD = PASS
+REMOTE_NATIVE_REGRESSION = PASS
+WEB_CANONICAL_MAIN_REACHABLE = YES
+NATIVE_CANONICAL_MAIN_REACHABLE = YES
+WEB_ACCEPTED_CAPABILITIES_MISSING = 0
+NEW_PUBLIC_LICENSED_BINARY_COUNT = 0
+GITHUB_FIRST_GATE = PASS
+GOVERNANCE_PRODUCTION_ACTIVE = YES
+READY = YES_SOURCE_GOVERNANCE_ONLY
+
+Evidence: canonical-remote-verification-v6.json, publication review, per-asset
+classification and old/new commit mapping. Web remote clone passed all 15
+offline programs after authenticated download and exact materialization, with
+5107 assets, missing 0, hash mismatch 0, unmanifested assets 0. Current API checks
+confirmed both Native and Assets PRIVATE and both V1.0/V1.1 releases immutable.
+
+GOVERNANCE_PRODUCTION_ACTIVE activates the GitHub-first source policy. Runtime
+deployment, Production baseline receipts, native binary cutover and live
+acceptance remain separately controlled. Historical de168f5 is provenance only.
+Production was neither inspected nor modified during V6.
 
 PRODUCTION_FILES_CHANGED = NO
 PRODUCTION_ENDPOINT_CONTACTED = NO

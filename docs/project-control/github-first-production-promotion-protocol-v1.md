@@ -1,6 +1,6 @@
 # GitHub First Production Promotion Protocol V1
 
-Status: `GITHUB_FIRST_SOURCE_POLICY_V6`; source authority activation is recorded in the V6 report. Production baseline migration requires separate runtime evidence.
+Status: `GITHUB_FIRST_SOURCE_POLICY_V6`; GOVERNANCE_PRODUCTION_ACTIVE=YES, verified in canonical-remote-verification-v6.json. Production baseline migration requires separate runtime evidence.
 Authority: `AGENTS.md`, `WORKSPACE_INDEX.md`, and the committed product decisions.
 
 ## V6 cutover authority
