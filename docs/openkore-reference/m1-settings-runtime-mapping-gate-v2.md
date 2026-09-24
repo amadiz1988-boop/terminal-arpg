@@ -4,8 +4,9 @@
 
 Pinned OpenKore: `51de1ddfc4449ae5217f6886de702f87ca934030`.
 Product authority: `docs/project-control/canonical-m1-world-travel-supply-ui-v1.md`
-at `38cf0bb2`, with the combat-continuity Supply amendment `e69f4bb4`.
-Current Web source: `13f017ae`; Native source: `f2a268b`.
+at `c0450b1c`, including the combat-continuity Supply amendment.
+Current Web source: `e98d5f91` (Supply adapter at `b1498f21`);
+Native source: `de168f5`.
 This is a source classification, not Player Browser acceptance. The source
 `/api/config` contract reports `CONFIG_ONLY_NO_EXECUTOR_COMMAND`; all 42
 adjustable controls are disabled in that source candidate, so source
@@ -48,3 +49,36 @@ deployed map-server does not contain the source-candidate
 `FLY_WING_RELOCATED` or `POST_SUPPLY_HIT` observer strings, so neither
 `FLY_TO_HIT` nor `SUPPLY_RETURN_TO_HIT` has authoritative HP-before/after
 acceptance. No new Native source was deployed or restarted for this test.
+
+## Per-path execution attestation, current source
+
+`SOURCE_IMPLEMENTED=PARTIAL` means the schema field reaches the conditional
+Native Supply command. It does not establish successful execution or Player UI
+enablement. `RUNTIME_EVIDENCE=NOT_MEASURED` preserves the current Production
+gate. All twelve fields below remain disabled while
+`PA_NATIVE_SUPPLY_POLICY_ENABLED` is off.
+
+| Path | Source runtime owner | Source implemented | Source test | Runtime evidence | UI state |
+| --- | --- | --- | --- | --- | --- |
+| `supply.enabled` | Dashboard `nativeSupplyPolicy`; Native `parse_m1_supply_policy` | PARTIAL, conditional policy command | `test-native-supply-policy.mjs` PASS, source adapter only | NOT_MEASURED | DISABLED |
+| `supply.services.buy.enabled` | Dashboard `nativeSupplyPolicy`; Native `parse_m1_supply_policy` | PARTIAL, conditional policy command | `test-native-supply-policy.mjs` PASS, source adapter only | NOT_MEASURED | DISABLED |
+| `supply.services.buy.rules` | Dashboard `nativeSupplyPolicy`; Native `parse_m1_supply_policy` | PARTIAL, healing-only rows | `test-native-supply-policy.mjs` PASS, source adapter only | NOT_MEASURED | DISABLED |
+| `combat.attack.distance` | Native PA/rAthena weapon range | NO per-character executor mapping | NONE per field | NOT_MEASURED | DISABLED |
+| `combat.attack.maxDistance` | Native PA/rAthena range authority | NO per-character executor mapping | NONE per field | NOT_MEASURED | DISABLED |
+| `combat.attack.checkLOS` | Native PA/rAthena fixed range/LOS authority | NO configurable executor mapping | NONE per field | NOT_MEASURED | DISABLED |
+| `combat.attack.canSnipe` | Native PA/rAthena range/LOS authority | NO configurable executor mapping | NONE per field | NOT_MEASURED | DISABLED |
+| `combat.attack.changeTarget` | Native PA target priority | NO per-character executor mapping | NONE per field | NOT_MEASURED | DISABLED |
+| `combat.attack.maxRouteDistance` | Native PA same-map target approach | NO per-character executor mapping | NONE per field | NOT_MEASURED | DISABLED |
+| `combat.attack.maxRouteTime` | Native PA same-map target approach | NO per-character executor mapping | NONE per field | NOT_MEASURED | DISABLED |
+| `combat.skills.selfSkills` | Native PA/rAthena skill authority | NO ordered per-character row mapping | NONE per field | NOT_MEASURED | DISABLED |
+| `combat.targets` | Native PA target policy | NO per-monster execution mapping | NONE per field | NOT_MEASURED | DISABLED |
+
+The current Web source attests eight Supply paths as `SUPPORTED` when the
+feature flag is on. Five of those paths, `supply.weightTriggerPercent`,
+`supply.inventorySlotTrigger`, `supply.services.storage.enabled`,
+`supply.services.sell.enabled`, and `supply.itemRules`, are ignored by Native
+`parse_m1_supply_policy` under the current M1 rule. This source-level
+attestation mismatch is an enabled-no-op risk if the flag is turned on.
+The flag remains off; source `ENABLED_UI_NO_OP_COUNT=0` is conditional on that
+state. Web owner correction and per-path source/runtime tests are required
+before enabling it.

@@ -2,7 +2,7 @@
 
 This is a source-only accounting snapshot for the 38 `M1_REQUIRED` IDs in
 `m1-core-hunting-closure.md`. Product authority is
-`../project-control/canonical-m1-world-travel-supply-ui-v1.md` at `38cf0bb2`
+`../project-control/canonical-m1-world-travel-supply-ui-v1.md` at `c0450b1c`
 with the latest `M1_NONCONSUMABLE_TRAVEL_AND_AMMO_OVERRIDE_V1` decision.
 The pinned OpenKore symbols, defaults and transitions remain in
 `mature-capability-census-v1.md`. `PASS(partial)` means the named test passed
@@ -35,7 +35,7 @@ capability-specific checkpoints.
 | C06 | PARTIAL retry | NONE | N | YES | Approach, cast and target retry ceilings untested. |
 | C07 | PARTIAL invalidation | NONE | N | YES | Lost, unreachable and killed target reasons not independently exercised. |
 | C08 | PARTIAL rAthena range/walk | NONE | N | YES | Legal LOS and blocked-wall fixtures absent. |
-| C09 | PARTIAL rAthena ammo authority with GI nonconsumption override | `Test-NonConsumableAmmo.ps1` PASS(partial) | `633aacb` | YES | Arrow/bullet decrement suppression is source-tested; compatible-ammo presence/type, missing-ammo safe blocked state and multiple authoritative ranged HIT/count checks remain open. Depletion/refill is not an M1 capability. |
+| C09 | PARTIAL rAthena ammo authority with GI nonconsumption override | `Test-NonConsumableAmmo.ps1` and `Test-M1AmmoBlockedSource.ps1` PASS(partial) | `633aacb`/`de168f5` | YES | Decrement suppression and missing-ammo safe block are source-tested; compatible-ammo presence/type, missing-ammo runtime state, and multiple authoritative ranged HIT/count checks remain open. Depletion/refill is not an M1 capability. |
 | C10 | PARTIAL rAthena equipment authority | NONE | N | YES | Per-enabled-action equipment prerequisite fixture absent. |
 | C13 | PARTIAL row predicate adapter | `test-m1-attack-skill-profile.mjs` PASS(partial) | `25dede8a`/`2e7d4fb` | YES | Enabled predicate subset and final cast rejection fallthrough incomplete. |
 | C19 | PARTIAL native target priority | NONE | N | YES | Aggressive, party and clean-target priority matrix absent. |
@@ -87,6 +87,11 @@ requires an accepted executor contract before enablement.
 | OBSOLETE | none of the 42 | 0 | `combat.attack.routeToLock` is hidden from Player settings and retained only for migration. |
 
 The path partition is `6+12+24+0=42`, with zero enabled no-op fields.
+This no-op count depends on the Native Supply policy feature flag remaining
+off. If enabled unchanged, Web source would attest five M1-excluded Supply
+paths as supported while Native ignores them; see
+`m1-settings-runtime-mapping-gate-v2.md`. The twelve missing per-path mappings
+retain their current classification.
 `GI_EXPLICIT_OVERRIDE_NOT_APPLICABLE=0` within these 42 paths: no Fly,
 Butterfly, arrow or bullet depletion/refill threshold is among the twelve
 missing paths. The two weight/slot trigger paths stay in `OUTSIDE_M1` under
