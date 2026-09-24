@@ -65,6 +65,12 @@ Browser 僅提交意圖。伺服器權威決定當前與目的地圖、角色 Ba
 
 返程採 TOWN → FIELD 規則：Lv.66 以下免費，Lv.67 起收目的掛機地圖最低等級 ×10 Zeny，成功後 60 秒冷卻。購物前保留 `RETURN_TELEPORT_COST`，不可花掉離城所需 Zeny。若補給觸發時沒有支援的 Saved Town，回報 `SUPPLY_HOME_REQUIRED` 或現行精確等價狀態，保留掛機意圖，安全停下，不猜主城、不隔離、不無限重試。Navigation 仍服務城內補給、Quest/M2、未來角色自主移動與其他同圖移動；`PLAYER_WORLD_NAVIGATION_SETTINGS=NOT_APPLICABLE`。
 
+### M1 補給觸發與背包安全補充決策
+
+`M1_SUPPLY_TRIGGER=COMBAT_CONTINUITY_ITEMS_ONLY`。M1 補給只由 HP／SP 消耗品低於門檻，以及目前啟用的戰鬥 Profile／技能實際需要的彈藥或技能消耗品低於門檻觸發；不使用該資源的角色標記 `NOT_APPLICABLE`。`M1_WEIGHT_TRIGGER_SUPPLY=NO`、`M1_INVENTORY_TRIGGER_SUPPLY=NO`、`GLOBAL_AUTOSTORE=NO`、`AUTO_SELL=OUTSIDE_M1`、`AUTO_STORAGE=OUTSIDE_M1`。OpenKore 重量與格數門檻導向儲存／販售的成熟行為在此分類為 `GI_EXPLICIT_OVERRIDE`，不轉成購買觸發。
+
+權威背包已滿，或重量狀態妨礙合法拾取、購買、戰鬥延續時，進入 `INVENTORY_BLOCKED` 或現有最接近的精確安全狀態：保留 `AUTO_FARM` 父意圖；延續不安全時停止攻擊；背包無法容納時阻止補給購買；不隔離、不自動儲存／販售、不無限重試。此狀態為 `SAFE / RECOVERABLE / NO_QUARANTINE`，等待玩家處理或後續明確授權的背包管理能力。
+
 ## M1 設定與 Fly Wing 拒絕
 
 玩家設定區順序為：1 掛機、2 戰鬥、3 技能、4 HP / SP、5 補給、6 蒼蠅翅膀、7 蝴蝶翅膀 / 回城、8 恢復、9 進階 / 尚未支援；不加入玩家 Navigation 區。每個設定須可追溯 `OPENKORE_FILE`、`OPENKORE_SYMBOL`、`OPENKORE_CONFIG`、`OPENKORE_DEFAULT`、`OPENKORE_BEHAVIOR`、`GI_RUNTIME_MAPPING`、`UI_CONTROL`、`UI_STATE`。`UI_ENABLEMENT <= RUNTIME_CAPABILITY`，`ENABLED_UI_NO_OP_COUNT=0`；執行尚未接通的控制須停用或唯讀。
