@@ -229,3 +229,29 @@ mapping are in [m1-source-closure-recalculation-2026-09-24.md](m1-source-closure
 It retains `SOURCE_CLOSED=1/38` and `PRODUCT_CLOSED=0/38` from current
 implementation, tests and checkpoint evidence. Obsolete player cross-map
 Navigation is not counted as a blocker.
+
+## Combat-continuity Supply policy and bounded live check
+
+The canonical Supply amendment `e69f4bb4` limits M1 triggers to HP/SP
+consumables and applicable active-profile ammo or skill consumables. Weight and
+inventory-slot thresholds for storage/sell are `GI_EXPLICIT_OVERRIDE / OUTSIDE_M1`;
+capacity and weight remain safe-blocking predicates. The 38-row recalculation
+is updated in `m1-source-closure-recalculation-2026-09-24.md`: all 38 IDs remain
+classified, source closed `1/38` (`C01`), source remaining `37/38`, product
+closed `0/38`, product remaining `38/38`. The settings partition is now
+supported `6`, M1 mapping missing `12`, outside M1 `24`.
+
+On the single canonical runtime, verified `is_test=1`, group-0 character
+150095 passed bounded synthetic Start, item-601 use and Stop. During AUTO_FARM,
+the item action was Native-confirmed; position moved within `pay_fild07` and
+item count remained 59. The 12-second combat observer failed at Event Ledger:
+`MONSTER_TARGET` and `LOOT_ACQUIRED` were not observed. The active map-server
+does not contain the candidate `FLY_WING_RELOCATED` or `POST_SUPPLY_HIT` marker.
+This establishes item relocation only. Automatic no-target Fly, post-Fly
+authoritative monster HP decrease and the complete Supply return-to-HIT chain
+remain unproven. The test character was stopped back to `PERSISTENT_IDLE`.
+No candidate binary was deployed and no runtime was restarted for this check.
+The earlier uncommitted map-info warning above was superseded by V2 map-info
+checkpoints; the active `test:map-info` and `test:world-map` entrypoints pass.
+Authenticated `GET /api/config` on the current canonical Dashboard returned
+HTTP 404; the settings contract and zero enabled no-op count are source-only.
