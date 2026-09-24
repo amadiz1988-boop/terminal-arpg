@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "web": {
+    "repository": "https://github.com/amadiz1988-boop/terminal-arpg.git",
+    "release_ref": null
+  },
+  "native": {
+    "source_root": "C:\\Users\\Administrator\\source\\ghost-island-rathena",
+    "repository": "C:\\Users\\Administrator\\ghost-island-source-backup\\rathena-p2-native.bundle",
+    "github_repository": null,
+    "release_ref": null
+  }
+}

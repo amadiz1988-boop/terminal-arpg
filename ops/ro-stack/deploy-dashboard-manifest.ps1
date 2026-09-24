@@ -7,6 +7,7 @@ param(
   [Parameter(Mandatory = $true)][string]$ProductionRoot,
   [string]$ReceiptPath,
   [string]$ReceiptDirectory,
+  [string]$OwnerTaskId,
   [switch]$TestMode,
   [int]$SimulateFailureAfter = 0,
   [switch]$SimulateStartFailure,
@@ -406,6 +407,14 @@ $failurePhase = 'READ_PLAN'
 $script:changedPaths = @()
 $script:restoredPaths = @()
 try {
+  if (-not $TestMode -and -not $Rollback) {
+    if (-not $OwnerTaskId) { throw 'DEPLOYMENT_OWNER_TASK_ID_REQUIRED' }
+    $gate = Join-Path $PSScriptRoot 'production-promotion-gate.mjs'
+    if (-not (Test-Path -LiteralPath $gate -PathType Leaf)) { throw 'PRODUCTION_PROMOTION_GATE_MISSING' }
+    $gateMode = if ($Deploy) { 'deploy' } else { 'precheck' }
+    $gateOutput = & node $gate --mode $gateMode --manifest $Manifest --production-root $ProductionRoot --owner $OwnerTaskId 2>&1 | Out-String
+    if ($LASTEXITCODE -ne 0) { throw "PRODUCTION_PROMOTION_GATE_BLOCKED:$($gateOutput.Trim())" }
+  }
   if ($SimulateDashboardDown) { $script:fixtureDashboardPid = 0 }
   $plan = Read-Plan
   $failurePhase = 'TOPOLOGY_PRECHECK'
@@ -478,6 +487,10 @@ try {
     if ($after.DashboardPid -eq $before.DashboardPid) { throw 'DASHBOARD_PID_UNCHANGED' }
     $receipt = [ordered]@{ timestamp = [DateTimeOffset]::UtcNow.ToString('o'); mode = 'DEPLOY';
       result = 'CANDIDATE_ACTIVE'; manifest_sha256 = $plan.ManifestHash; candidate_commit = $plan.Commit;
+      owner_task_id = $OwnerTaskId; web_git_sha = $plan.Commit;
+      native_git_sha = if ($TestMode) { $null } else {
+        (Get-Content -LiteralPath (Join-Path $plan.Production '.local\ro-stack\production-deployment-state.json') -Raw | ConvertFrom-Json).current_native_git_sha };
+      final_promotion_receipt_required = $true;
       candidate_root = $plan.Candidate;
       production_root = $plan.Production; test_mode = [bool]$TestMode;
       files_changed = @($plan.Entries | ForEach-Object { $_.Path });

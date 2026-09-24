@@ -43,6 +43,15 @@ Browser acceptance、真實使用者 evidence 與 Git checkpoint 操作規則，
 - Git checkpoint 必須精確對應本次 patch；mixed file 無法隔離時標記 `BLOCKED_BY_MIXED_FILE`。
 - Production Web 多檔部署只走 manifest-driven `deploy-dashboard-manifest.ps1`；先通過唯讀 precheck，保留完整 rollback 與 receipt，僅由 `dashboard-service.ps1` 管理單一 Dashboard。不得直接複製檔案或重啟 rAthena；完整契約與驗收狀態見 `docs/project-control/web-production-deployment.md`。
 
+GitHub First Production 硬規則：`GITHUB_CANONICAL_SOURCE_OF_TRUTH=YES`、
+`DEPLOY_FROM_CANONICAL_GIT_SHA_ONLY=YES`、`SINGLE_PRODUCTION_DEPLOYMENT_OWNER=YES`、
+`PRODUCTION_DRIFT_BLOCKS_DEPLOY=YES`。正式部署需 exact SHA、authorized GitHub ref
+可追溯性、clean/tracked source、Production receipt/hash、capability superset、
+同一 owner lease、完成後的 live acceptance 與 Git SHA receipt。release ref 或基線
+未定即 `DEPLOYMENT=BLOCKED`。使用者自開視窗及緊急 hotfix 同樣適用。
+完整流程與目前阻擋項見
+`docs/project-control/github-first-production-promotion-protocol-v1.md`。
+
 本節固定 Project Control 1／2／3 歸納出的開發方法，避免更換 Project Control 對話後：開發方向遺失、已完成能力被重新實作、派工格式退化、工作線 scope 失控、大量 recursive search、infrastructure／refactor 蓋過玩家功能恢復，或功能恢復而沒有 Git checkpoint。
 
 ### 1. Development Method
