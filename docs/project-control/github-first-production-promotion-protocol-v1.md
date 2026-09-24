@@ -202,6 +202,9 @@ promotion. Actual deployment belongs to F and requires explicit runtime authorit
 This tooling work performed no Production application mutation or restart.
 Governance commit must be newer than `0863037c016562017c058ae4794182552aea6b85`
 and reachable from `terminal-arpg/main`; use a clean governance checkout.
+First-mode capability definitions come from that published governance SHA. Their
+source paths are still verified against the exact Web/Native gameplay SHAs, so
+the approved Web `4a0b6979` need not contain later governance metadata itself.
 
 ### Build and candidate preparation
 

@@ -34,6 +34,13 @@ function reachable(root, remote, ref, commit) {
   if (!/^https:\/\/github\.com\//.test(remote || '')) return false;
   return gitRefReachable(root, remote, ref, commit);
 }
+// Governance definitions can advance without changing an approved gameplay SHA.
+// All source-path checks below still run against the exact gameplay candidate.
+export function capabilityRegistry(root, commit, governanceRoot, promotionMode) {
+  const registryRoot=promotionMode===FIRST_PROMOTION ? governanceRoot : root;
+  const registryCommit=promotionMode===FIRST_PROMOTION ? run(governanceRoot,'rev-parse','HEAD') : commit;
+  return JSON.parse(run(registryRoot,'show',`${registryCommit}:docs/project-control/production-capabilities.json`));
+}
 const within = (root, relative) => {
   if (typeof relative !== 'string' || !/^[A-Za-z0-9_./-]+$/.test(relative) ||
       relative.split('/').some(part => part === '.' || part === '..' || !part)) fail('INVALID_PATH');
@@ -127,12 +134,10 @@ function facts(manifest, authority, state, owner, productionRoot, promotionMode,
   const nativePushed = reachable(authority.native?.source_root, authority.native?.github_repository,
     authority.native?.release_ref, nativeSha);
   const decisionsPath = 'docs/project-control/production-capability-decisions.json';
-  const capabilityPath = 'docs/project-control/production-capabilities.json';
-  const capabilityBlob = spawnSync('git', ['show', `${commit}:${capabilityPath}`], { cwd: root, encoding: 'utf8', windowsHide: true });
-  if (capabilityBlob.status !== 0) requiredFilesTracked = false;
+  let registry=null;
+  try { registry=capabilityRegistry(root,commit,sourceRoot,promotionMode); } catch { requiredFilesTracked=false; }
   let capabilities = [];
-  if (capabilityBlob.status === 0) {
-    const registry = JSON.parse(capabilityBlob.stdout);
+  if (registry) {
     capabilities = (registry.capabilities || []).filter(item => item.id && Array.isArray(item.source_paths) &&
       item.source_paths.length && item.source_paths.every(relative => {
         if (item.scope === 'NATIVE') {
@@ -193,6 +198,11 @@ function main() {
   const manifest = readJson(args.manifest);
   manifest._manifestPath = path.resolve(args.manifest);
   const promotionMode = args['promotion-mode'] || manifest.promotion_mode || 'NORMAL';
+  if(promotionMode===FIRST_PROMOTION){
+    const governanceSha=run(sourceRoot,'rev-parse','HEAD');
+    if(run(sourceRoot,'status','--porcelain=v1','--untracked-files=all') ||
+      !reachable(sourceRoot,authority.web.repository,authority.web.release_ref,governanceSha)) fail('GOVERNANCE_CHECKOUT_NOT_CANONICAL');
+  }
   const productionRoot = path.resolve(args['production-root']);
   const statePath = path.join(productionRoot, '.local/ro-stack/production-deployment-state.json');
   const leasePath = path.join(productionRoot, '.local/ro-stack/production-deployment-lease/lease.json');

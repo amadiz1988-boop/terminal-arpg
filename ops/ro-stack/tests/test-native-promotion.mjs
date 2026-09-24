@@ -5,7 +5,7 @@ import os from 'node:os';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { evaluateNative,inspectNativeCandidate,nativeReceiptValid,nativeReceiptPath,nativeArtifacts,NATIVE_REPOSITORY,groups,verifyNativeStage } from '../native-promotion-contract.mjs';
-import { evaluatePromotion } from '../production-promotion-gate.mjs';
+import { evaluatePromotion,capabilityRegistry } from '../production-promotion-gate.mjs';
 import { receiptComplete,commitAcceptedBaseline } from '../production-deployment-state.mjs';
 import { executeNative } from '../deploy-native-candidate.mjs';
 import { digest,readJson,FIRST_PROMOTION,LEGACY_MODE,UNKNOWN_SHA,pendingPath } from '../legacy-production-baseline.mjs';
@@ -53,6 +53,16 @@ function fixture(){
 function rejected(f,patch,code){let r;try{r=f.inspect(patch);}catch(e){assert.match(e.message,code);return;}assert.equal(r.eligible,false);assert.match(r.errors.join(','),code);}
 try {
  const f=fixture();
+ await test('new governance registry admits inspection of earlier gameplay SHA',()=>{
+   const git=(...args)=>execFileSync('git',args,{cwd:f.source,encoding:'utf8',windowsHide:true}).trim();
+   f.write('build/source/docs/project-control/production-capabilities.json',{capabilities:ids.map(id=>({id}))});
+   git('add','--','docs/project-control/production-capabilities.json');git('commit','-qm','later governance fixture');
+   assert.equal(capabilityRegistry(f.source,f.sha,f.source,FIRST_PROMOTION).capabilities.length,18);
+   assert.throws(()=>capabilityRegistry(f.source,f.sha,f.source,'NORMAL'),/GIT_FAILED:show/);
+   // Return to the earlier tracked fixture with a detached checkout. No changes
+   // are discarded: both commits remain available in this isolated temp repo.
+   git('checkout','--detach','-q',f.sha);
+ });
  await test('1 canonical source and clean receipt valid',()=>assert.equal(f.inspect().eligible,true));
  await test('2 noncanonical remote SHA blocked',()=>rejected(f,{remoteVerifier:()=>false},/NOT_CANONICAL/));
  await test('3 changed candidate binary blocked',()=>{f.write('build/source/map-server.exe','tampered');rejected(f,{},/BINARY_MISMATCH/);f.write('build/source/map-server.exe','candidate-map');});
