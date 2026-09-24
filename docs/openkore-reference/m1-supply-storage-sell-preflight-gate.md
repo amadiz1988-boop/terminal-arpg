@@ -5,6 +5,7 @@ TASK_ID = OPENKORE_MATURE_CAPABILITY_GAP_CENSUS_AND_CLOSURE_V1
 PRODUCT_AUTHORITY = docs/project-control/canonical-m1-world-travel-supply-ui-v1.md
 PINNED_OPENKORE = 51de1ddfc4449ae5217f6886de702f87ca934030
 REFERENCE_CLASS = ADAPT
+PRE_IMPLEMENTATION_REUSE_GATE = PASS / m1-supply-storage-sell-reuse-gate.json
 SOURCE_STATUS = IN_PROGRESS
 VERIFIED_TEST_PLAYER_FLOW = NOT_MEASURED
 BROWSER_ACCEPTANCE = NOT_MEASURED
@@ -23,6 +24,8 @@ PRODUCTION = NOT_TOUCHED
 | 販售篩選 | `.local/ro-stack/openkore/src/AI/CoreLogic.pm` 約 1976-1990 | 排除 equipped 與 unsellable；僅 `control.sell` 且數量高於 keep 時販售超額 |
 | 歷史玩家結果 | `docs/openkore-reference/supply.md`、`docs/openkore-exit-source-of-truth.md` Gate 2 | 低補給到購買再返回掛機曾有玩家流程證據；廣義存倉與販售仍缺玩家流程閉合 |
 | 現行 rAthena 權威 | `src/map/persistent_agent.cpp::execute_service`、`storage_storageadd`、`npc_selllist`、`npc_buylist`；`src/map/storage.cpp` 與 `src/map/pc.cpp` | Native 提交意圖並核對前後結果；rAthena 裁定背包、重量、容量、交易與 Zeny |
+| 七城存倉腳本 | `npc/kafras/kafras.txt`、`npc/re/kafras/kafras.txt`、`npc/kafras/functions_kafras.txt::F_Kafra/F_KafStor` | Kafra 先執行對話、選單、技能及費用判定，再 `openstorage`；6 城存倉選項為 2，Izlude 為 1；Native 須核對實際選單 |
+| 服務權限邊界 | `ops/ro-stack/stack.config.psd1::PersistentAgentServiceMapAllowlist/PersistentAgentServiceNpcAllowlist/PersistentAgentServiceItemAllowlist`；`src/map/persistent_agent.cpp::parse_service_payload` | 原通用服務命令只允許設定清單內單一物品；逐項政策的自動服務需另有有界、角色專屬、權威驗證的內部契約 |
 
 ## FIRST_BROKEN_TRANSITION
 
