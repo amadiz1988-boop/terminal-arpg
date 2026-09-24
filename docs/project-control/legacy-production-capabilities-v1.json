@@ -1,0 +1,214 @@
+{
+  "schema_version": 1,
+  "scope": "ACCEPTED_LEGACY_PRODUCTION_CAPABILITIES",
+  "capabilities": [
+    {
+      "id": "skill-tree",
+      "name": "Skill Tree",
+      "scope": "WEB",
+      "acceptance_authority": "PRODUCTION_LEGACY_BASELINE_BOOTSTRAP_V1 Phase 3",
+      "historical_evidence": [
+        "docs/project-control/m1-web-full-production-superset-v2.md",
+        "docs/project-control/admin-access-boundary.md"
+      ],
+      "verification": "Accepted behavior inherited; actual current bytes pinned by captured legacy manifest. No new live acceptance."
+    },
+    {
+      "id": "skill-loader",
+      "name": "Skill asset loading",
+      "scope": "WEB",
+      "acceptance_authority": "PRODUCTION_LEGACY_BASELINE_BOOTSTRAP_V1 Phase 3",
+      "historical_evidence": [
+        "docs/project-control/m1-web-full-production-superset-v2.md",
+        "docs/project-control/admin-access-boundary.md"
+      ],
+      "verification": "Accepted behavior inherited; actual current bytes pinned by captured legacy manifest. No new live acceptance."
+    },
+    {
+      "id": "original-ro-button-audio",
+      "name": "Original RO button sounds",
+      "scope": "WEB",
+      "acceptance_authority": "PRODUCTION_LEGACY_BASELINE_BOOTSTRAP_V1 Phase 3",
+      "historical_evidence": [
+        "docs/project-control/m1-web-full-production-superset-v2.md",
+        "docs/project-control/admin-access-boundary.md"
+      ],
+      "verification": "Accepted behavior inherited; actual current bytes pinned by captured legacy manifest. No new live acceptance."
+    },
+    {
+      "id": "admin-quarantine-recovery",
+      "name": "Admin quarantine recovery",
+      "scope": "WEB",
+      "acceptance_authority": "PRODUCTION_LEGACY_BASELINE_BOOTSTRAP_V1 Phase 3",
+      "historical_evidence": [
+        "docs/project-control/m1-web-full-production-superset-v2.md",
+        "docs/project-control/admin-access-boundary.md"
+      ],
+      "verification": "Accepted behavior inherited; actual current bytes pinned by captured legacy manifest. No new live acceptance."
+    },
+    {
+      "id": "admin-security",
+      "name": "Admin security boundary",
+      "scope": "WEB",
+      "acceptance_authority": "PRODUCTION_LEGACY_BASELINE_BOOTSTRAP_V1 Phase 3",
+      "historical_evidence": [
+        "docs/project-control/m1-web-full-production-superset-v2.md",
+        "docs/project-control/admin-access-boundary.md"
+      ],
+      "verification": "Accepted behavior inherited; actual current bytes pinned by captured legacy manifest. No new live acceptance."
+    },
+    {
+      "id": "current-player-web",
+      "name": "Current accepted Player Web",
+      "scope": "WEB",
+      "acceptance_authority": "PRODUCTION_LEGACY_BASELINE_BOOTSTRAP_V1 Phase 3",
+      "historical_evidence": [
+        "docs/project-control/m1-web-full-production-superset-v2.md",
+        "docs/project-control/admin-access-boundary.md"
+      ],
+      "verification": "Accepted behavior inherited; actual current bytes pinned by captured legacy manifest. No new live acceptance."
+    },
+    {
+      "id": "pet-runtime-presentation",
+      "name": "Accepted pet/runtime presentation",
+      "scope": "WEB",
+      "acceptance_authority": "PRODUCTION_LEGACY_BASELINE_BOOTSTRAP_V1 Phase 3",
+      "historical_evidence": [
+        "docs/project-control/m1-web-full-production-superset-v2.md",
+        "docs/project-control/admin-access-boundary.md"
+      ],
+      "verification": "Accepted behavior inherited; actual current bytes pinned by captured legacy manifest. No new live acceptance."
+    },
+    {
+      "id": "dashboard-runtime",
+      "name": "Accepted Dashboard/runtime behavior",
+      "scope": "WEB",
+      "acceptance_authority": "PRODUCTION_LEGACY_BASELINE_BOOTSTRAP_V1 Phase 3",
+      "historical_evidence": [
+        "docs/project-control/m1-web-full-production-superset-v2.md",
+        "docs/project-control/admin-access-boundary.md"
+      ],
+      "verification": "Accepted behavior inherited; actual current bytes pinned by captured legacy manifest. No new live acceptance."
+    },
+    {
+      "id": "native-server-agent",
+      "name": "SERVER_AGENT",
+      "scope": "NATIVE",
+      "acceptance_authority": "PRODUCTION_LEGACY_BASELINE_BOOTSTRAP_V1 Phase 3",
+      "historical_evidence": [
+        "PRIVATE Native tools/pa-command-contract",
+        "PRIVATE Native tools/pa-quarantine-idle-recovery",
+        "PRIVATE Native tools/pa-restart-restore"
+      ],
+      "verification": "Accepted behavior inherited from Project Control decision; current binaries pinned independently of unresolved historical Git provenance."
+    },
+    {
+      "id": "native-persistent-idle",
+      "name": "PERSISTENT_IDLE",
+      "scope": "NATIVE",
+      "acceptance_authority": "PRODUCTION_LEGACY_BASELINE_BOOTSTRAP_V1 Phase 3",
+      "historical_evidence": [
+        "PRIVATE Native tools/pa-command-contract",
+        "PRIVATE Native tools/pa-quarantine-idle-recovery",
+        "PRIVATE Native tools/pa-restart-restore"
+      ],
+      "verification": "Accepted behavior inherited from Project Control decision; current binaries pinned independently of unresolved historical Git provenance."
+    },
+    {
+      "id": "native-quarantine-safe-recovery",
+      "name": "Quarantine safe recovery",
+      "scope": "NATIVE",
+      "acceptance_authority": "PRODUCTION_LEGACY_BASELINE_BOOTSTRAP_V1 Phase 3",
+      "historical_evidence": [
+        "PRIVATE Native tools/pa-command-contract",
+        "PRIVATE Native tools/pa-quarantine-idle-recovery",
+        "PRIVATE Native tools/pa-restart-restore"
+      ],
+      "verification": "Accepted behavior inherited from Project Control decision; current binaries pinned independently of unresolved historical Git provenance."
+    },
+    {
+      "id": "native-stale-task-cleanup",
+      "name": "Stale task cleanup",
+      "scope": "NATIVE",
+      "acceptance_authority": "PRODUCTION_LEGACY_BASELINE_BOOTSTRAP_V1 Phase 3",
+      "historical_evidence": [
+        "PRIVATE Native tools/pa-command-contract",
+        "PRIVATE Native tools/pa-quarantine-idle-recovery",
+        "PRIVATE Native tools/pa-restart-restore"
+      ],
+      "verification": "Accepted behavior inherited from Project Control decision; current binaries pinned independently of unresolved historical Git provenance."
+    },
+    {
+      "id": "native-stale-owner-cleanup",
+      "name": "Stale owner cleanup",
+      "scope": "NATIVE",
+      "acceptance_authority": "PRODUCTION_LEGACY_BASELINE_BOOTSTRAP_V1 Phase 3",
+      "historical_evidence": [
+        "PRIVATE Native tools/pa-command-contract",
+        "PRIVATE Native tools/pa-quarantine-idle-recovery",
+        "PRIVATE Native tools/pa-restart-restore"
+      ],
+      "verification": "Accepted behavior inherited from Project Control decision; current binaries pinned independently of unresolved historical Git provenance."
+    },
+    {
+      "id": "native-stale-target-cleanup",
+      "name": "Stale target cleanup",
+      "scope": "NATIVE",
+      "acceptance_authority": "PRODUCTION_LEGACY_BASELINE_BOOTSTRAP_V1 Phase 3",
+      "historical_evidence": [
+        "PRIVATE Native tools/pa-command-contract",
+        "PRIVATE Native tools/pa-quarantine-idle-recovery",
+        "PRIVATE Native tools/pa-restart-restore"
+      ],
+      "verification": "Accepted behavior inherited from Project Control decision; current binaries pinned independently of unresolved historical Git provenance."
+    },
+    {
+      "id": "native-command-contract",
+      "name": "Command contract",
+      "scope": "NATIVE",
+      "acceptance_authority": "PRODUCTION_LEGACY_BASELINE_BOOTSTRAP_V1 Phase 3",
+      "historical_evidence": [
+        "PRIVATE Native tools/pa-command-contract",
+        "PRIVATE Native tools/pa-quarantine-idle-recovery",
+        "PRIVATE Native tools/pa-restart-restore"
+      ],
+      "verification": "Accepted behavior inherited from Project Control decision; current binaries pinned independently of unresolved historical Git provenance."
+    },
+    {
+      "id": "native-graceful-shutdown",
+      "name": "Graceful shutdown",
+      "scope": "NATIVE",
+      "acceptance_authority": "PRODUCTION_LEGACY_BASELINE_BOOTSTRAP_V1 Phase 3",
+      "historical_evidence": [
+        "PRIVATE Native tools/pa-command-contract",
+        "PRIVATE Native tools/pa-quarantine-idle-recovery",
+        "PRIVATE Native tools/pa-restart-restore"
+      ],
+      "verification": "Accepted behavior inherited from Project Control decision; current binaries pinned independently of unresolved historical Git provenance."
+    },
+    {
+      "id": "native-farm-combat-authority",
+      "name": "Farm/combat authority",
+      "scope": "NATIVE",
+      "acceptance_authority": "PRODUCTION_LEGACY_BASELINE_BOOTSTRAP_V1 Phase 3",
+      "historical_evidence": [
+        "PRIVATE Native tools/pa-command-contract",
+        "PRIVATE Native tools/pa-quarantine-idle-recovery",
+        "PRIVATE Native tools/pa-restart-restore"
+      ],
+      "verification": "Accepted behavior inherited from Project Control decision; current binaries pinned independently of unresolved historical Git provenance."
+    },
+    {
+      "id": "native-openkore-zero",
+      "name": "OpenKore runtime zero",
+      "scope": "NATIVE",
+      "acceptance_authority": "PRODUCTION_LEGACY_BASELINE_BOOTSTRAP_V1 Phase 3",
+      "historical_evidence": [
+        "PRIVATE Native tools/pa-command-contract",
+        "PRIVATE Native tools/pa-quarantine-idle-recovery",
+        "PRIVATE Native tools/pa-restart-restore"
+      ],
+      "verification": "Accepted behavior inherited from Project Control decision; current binaries pinned independently of unresolved historical Git provenance."
+    }
+  ]
+}

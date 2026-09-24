@@ -183,3 +183,14 @@ isolated state fixtures and covers eligibility, dirty/untracked source,
 GitHub reachability, lease conflict, drift, capability loss and intentional
 removal, receipt completeness, artifact hash, hotfix normalization, and missing
 Git SHA. No Production endpoint or runtime is involved.
+
+## Authorized legacy baseline migration
+
+PRODUCTION_LEGACY_BASELINE_BOOTSTRAP_V1 authorizes the exact one-time
+FIRST_GITHUB_FIRST_PROMOTION mode described in
+[the migration contract](production-legacy-baseline-bootstrap-v1.md).
+NORMAL admission still requires valid existing canonical Git SHAs. Explicit
+legacy provenance is never replaced with the future candidate's SHA. Both
+current artifact/rollback verification and capability superset remain required.
+After the first final successful receipt a permanent consumption marker disables
+migration and atomic state transition establishes the real GITHUB_FIRST baseline.

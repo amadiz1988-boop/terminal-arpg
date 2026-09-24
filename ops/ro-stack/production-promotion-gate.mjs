@@ -5,6 +5,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
+import { FIRST_PROMOTION, legacyIdentity, verifyLegacyBaseline, firstPromotionEvidence, consumedPath, pendingPath } from './legacy-production-baseline.mjs';
 import { receiptComplete } from './production-deployment-state.mjs';
 import { assetReleaseErrors, inspectPrivatePackage } from './private-asset-release-gate.mjs';
 
@@ -45,7 +46,7 @@ const within = (root, relative) => {
   return full;
 };
 
-export function evaluatePromotion({ authority, state, candidate, currentHashes, lease, mode = 'precheck' }) {
+export function evaluatePromotion({ authority, state, candidate, currentHashes, lease, mode = 'precheck', promotionMode = 'NORMAL' }) {
   const errors = [];
   const reject = code => errors.push(code);
   if (authority.web?.repository !== candidate.repository ||
@@ -57,14 +58,22 @@ export function evaluatePromotion({ authority, state, candidate, currentHashes, 
   if (!candidate.nativePushed) reject('NATIVE_BASELINE_NOT_ON_CANONICAL_GITHUB_REF');
   errors.push(...assetReleaseErrors(authority.assets, candidate.assetPackage));
   if (!candidate.requiredFilesTracked) reject('UNTRACKED_REQUIRED_ASSET');
-  if (!state || !sha(state.current_web_git_sha) || !sha(state.current_native_git_sha) ||
+  if (!['NORMAL', FIRST_PROMOTION].includes(promotionMode)) reject('PROMOTION_MODE_INVALID');
+  if (promotionMode === FIRST_PROMOTION) {
+    if (!legacyIdentity(state) || currentHashes?.consumed) reject('LEGACY_BOOTSTRAP_UNAVAILABLE');
+    if (!currentHashes?.rollbackReady) reject('LEGACY_ROLLBACK_NOT_READY');
+    if (!candidate.firstPromotionEvidencePass) reject('FIRST_PROMOTION_EVIDENCE_REQUIRED');
+    if (mode === 'acquire' && lease) reject('FIRST_PROMOTION_REQUIRES_FREE_LEASE');
+    if (mode === 'deploy' && lease?.promotion_mode !== FIRST_PROMOTION) reject('LEASE_MODE_MISMATCH');
+    if (mode === 'deploy' && lease?.native_deploy_git_sha !== candidate.nativeSha) reject('LEASE_NATIVE_SHA_MISMATCH');
+  } else if (!state || !sha(state.current_web_git_sha) || !sha(state.current_native_git_sha) ||
       !state.current_deploy_id || !state.last_deploy_receipt) reject('PRODUCTION_GIT_BASELINE_INVALID');
   if (state?.production_drift !== 'CLOSED') reject('PRODUCTION_DRIFT_OPEN');
   if (!currentHashes?.pass) reject('PRODUCTION_ARTIFACT_RECEIPT_MISMATCH');
   const accepted = state?.accepted_capabilities || [];
   const preserved = new Set(candidate.capabilities || []);
-  const removed = new Set(candidate.intentionalRemovals || []);
-  const decisions = new Set(candidate.committedDecisions || []);
+  const removed = new Set(promotionMode === FIRST_PROMOTION ? [] : candidate.intentionalRemovals || []);
+  const decisions = new Set(promotionMode === FIRST_PROMOTION ? [] : candidate.committedDecisions || []);
   for (const capability of accepted) {
     if (!preserved.has(capability) && !(removed.has(capability) && decisions.has(capability))) {
       reject(`CANDIDATE_MISSING_CAPABILITY:${capability}`);
@@ -80,7 +89,7 @@ export function evaluatePromotion({ authority, state, candidate, currentHashes, 
     candidate_missing: accepted.filter(id => !preserved.has(id) && !(removed.has(id) && decisions.has(id))).length };
 }
 
-function facts(manifest, authority, state, owner, productionRoot) {
+function facts(manifest, authority, state, owner, productionRoot, promotionMode) {
   const root = path.resolve(manifest.candidate_root);
   const commit = String(manifest.candidate_commit || '').toLowerCase();
   const remote = run(root, 'remote', 'get-url', 'origin');
@@ -97,6 +106,7 @@ function facts(manifest, authority, state, owner, productionRoot) {
     const baselinePath = within(productionRoot, state.last_deploy_receipt);
     if (fs.existsSync(baselinePath)) baselineFiles = new Map((readJson(baselinePath).files || []).map(x => [x.path, String(x.sha256 || '').toUpperCase()]));
   }
+  if (promotionMode === FIRST_PROMOTION) baselineFiles = new Map((verifyLegacyBaseline(productionRoot, state).files || []).map(x => [x.path, x.sha256.toUpperCase()]));
   const manifestFiles = new Map((manifest.files || []).map(x => [x.path, String(x.candidate_sha256 || '').toUpperCase()]));
   let requiredFilesTracked = required.length > 0;
   for (const relative of required) {
@@ -110,8 +120,9 @@ function facts(manifest, authority, state, owner, productionRoot) {
   }
   const pushed = remote === authority.web?.repository && commitExists &&
     reachable(root, remote, authority.web.release_ref, commit);
+  const nativeSha = promotionMode === FIRST_PROMOTION ? manifest.candidate_native_commit : state?.current_native_git_sha;
   const nativePushed = reachable(authority.native?.source_root, authority.native?.github_repository,
-    authority.native?.release_ref, state?.current_native_git_sha);
+    authority.native?.release_ref, nativeSha);
   const decisionsPath = 'docs/project-control/production-capability-decisions.json';
   const capabilityPath = 'docs/project-control/production-capabilities.json';
   const capabilityBlob = spawnSync('git', ['show', `${commit}:${capabilityPath}`], { cwd: root, encoding: 'utf8', windowsHide: true });
@@ -121,6 +132,10 @@ function facts(manifest, authority, state, owner, productionRoot) {
     const registry = JSON.parse(capabilityBlob.stdout);
     capabilities = (registry.capabilities || []).filter(item => item.id && Array.isArray(item.source_paths) &&
       item.source_paths.length && item.source_paths.every(relative => {
+        if (item.scope === 'NATIVE') {
+          const check = spawnSync('git', ['cat-file', '-e', `${nativeSha}:${relative}`], { cwd: authority.native.source_root, windowsHide: true });
+          return nativePushed && check.status === 0;
+        }
         const local = within(root, relative);
         const tracked = spawnSync('git', ['ls-tree', '-r', '--name-only', commit, '--', relative], { cwd: root, encoding: 'utf8', windowsHide: true });
         return tracked.status === 0 && tracked.stdout.trim() === relative && fs.existsSync(local) &&
@@ -134,12 +149,20 @@ function facts(manifest, authority, state, owner, productionRoot) {
     committedDecisions = (decisions.intentional_removals || []).filter(x =>
       ['INTENTIONALLY_REMOVED', 'SUPERSEDED'].includes(x.disposition) && x.decision).map(x => x.capability);
   }
+  let firstPromotionEvidencePass = false;
+  if (promotionMode === FIRST_PROMOTION && manifest.first_promotion_evidence?.path && /^[a-f0-9]{64}$/i.test(manifest.first_promotion_evidence.sha256 || '')) {
+    const evidencePath = path.resolve(path.dirname(manifest._manifestPath), manifest.first_promotion_evidence.path);
+    firstPromotionEvidencePass = fs.existsSync(evidencePath) && fileHash(evidencePath) === manifest.first_promotion_evidence.sha256.toUpperCase() &&
+      firstPromotionEvidence(readJson(evidencePath), commit, nativeSha);
+  }
   return { repository: remote, ref: authority.web?.release_ref, sha: commit, head,
-    commitExists, dirty: !!status, pushed, nativePushed, assetPackage, requiredFilesTracked, owner,
+    commitExists, dirty: !!status, pushed, nativePushed, nativeSha, firstPromotionEvidencePass, assetPackage, requiredFilesTracked, owner,
     capabilities, intentionalRemovals: manifest.intentional_removals || [], committedDecisions };
 }
 
-function productionHashes(productionRoot, state) {
+function productionHashes(productionRoot, state, promotionMode) {
+  if (promotionMode === FIRST_PROMOTION) return { ...verifyLegacyBaseline(productionRoot, state), consumed: fs.existsSync(within(productionRoot, consumedPath)) };
+  if (fs.existsSync(within(productionRoot, pendingPath))) return { pass: false };
   if (!state?.last_deploy_receipt) return { pass: false };
   const receiptPath = within(productionRoot, state.last_deploy_receipt);
   if (!fs.existsSync(receiptPath)) return { pass: false };
@@ -152,16 +175,18 @@ function productionHashes(productionRoot, state) {
 function main() {
   const args = Object.fromEntries(process.argv.slice(2).map((value, index, all) => value.startsWith('--') ? [value.slice(2), all[index + 1]] : null).filter(Boolean));
   const mode = args.mode || 'precheck';
-  if (!['precheck', 'deploy'].includes(mode) || !args.manifest || !args['production-root'] || !args.owner) fail('GATE_ARGUMENTS_REQUIRED');
+  if (!['precheck', 'acquire', 'deploy'].includes(mode) || !args.manifest || !args['production-root'] || !args.owner) fail('GATE_ARGUMENTS_REQUIRED');
   const authority = readJson(authorityFile);
   const manifest = readJson(args.manifest);
+  manifest._manifestPath = path.resolve(args.manifest);
+  const promotionMode = args['promotion-mode'] || manifest.promotion_mode || 'NORMAL';
   const productionRoot = path.resolve(args['production-root']);
   const statePath = path.join(productionRoot, '.local/ro-stack/production-deployment-state.json');
   const leasePath = path.join(productionRoot, '.local/ro-stack/production-deployment-lease/lease.json');
   const state = fs.existsSync(statePath) ? readJson(statePath) : null;
-  const lease = fs.existsSync(leasePath) ? readJson(leasePath) : null;
-  const result = evaluatePromotion({ authority, state, candidate: facts(manifest, authority, state, args.owner, productionRoot),
-    currentHashes: productionHashes(productionRoot, state), lease, mode });
+  const lease = fs.existsSync(leasePath) ? readJson(leasePath) : fs.existsSync(path.dirname(leasePath)) ? { status: 'INVALID' } : null;
+  const result = evaluatePromotion({ authority, state, candidate: facts(manifest, authority, state, args.owner, productionRoot, promotionMode),
+    currentHashes: productionHashes(productionRoot, state, promotionMode), lease, mode, promotionMode });
   process.stdout.write(JSON.stringify(result) + '\n');
   if (!result.eligible) process.exitCode = 1;
 }

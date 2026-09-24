@@ -454,6 +454,15 @@ try {
         Copy-Validated -Source $entry.Target -Target (Join-Path $runRoot ('backup\' + $entry.Path.Replace('/', '\'))) -Expected $entry.PreimageHash
       }
     }
+    if (-not $TestMode) {
+      $leaseFile = Join-Path $plan.Production '.local\ro-stack\production-deployment-lease\lease.json'
+      $lease = Get-Content -LiteralPath $leaseFile -Raw | ConvertFrom-Json
+      if ($lease.promotion_mode -eq 'FIRST_GITHUB_FIRST_PROMOTION') {
+        $stateTool = Join-Path $PSScriptRoot 'production-deployment-state.mjs'
+        $begin = & node $stateTool --action begin-first-promotion --production-root $plan.Production --owner $OwnerTaskId 2>&1 | Out-String
+        if ($LASTEXITCODE -ne 0) { throw "FIRST_PROMOTION_BEGIN_FAILED:$($begin.Trim())" }
+      }
+    }
     Suspend-WebWatchdog
     $productionTouched = $true
     $dashboardStopped = $true

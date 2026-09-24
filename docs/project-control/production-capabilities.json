@@ -118,6 +118,123 @@
       ],
       "offline_test": "scripts/test-web-runtime-asset-materialization.mjs",
       "acceptance_scope": "SOURCE_ONLY_NO_PRODUCTION"
+    },
+    {
+      "id": "current-player-web",
+      "scope": "WEB",
+      "source_paths": [
+        "ops/ro-stack/dashboard.mjs",
+        "ops/ro-stack/dashboard/app.js"
+      ],
+      "acceptance_authority": "PRODUCTION_LEGACY_BASELINE_BOOTSTRAP_V1 Phase 3"
+    },
+    {
+      "id": "pet-runtime-presentation",
+      "scope": "WEB",
+      "source_paths": [
+        "ops/ro-stack/dashboard.mjs",
+        "ops/ro-stack/dashboard/app.js"
+      ],
+      "acceptance_authority": "PRODUCTION_LEGACY_BASELINE_BOOTSTRAP_V1 Phase 3"
+    },
+    {
+      "id": "dashboard-runtime",
+      "scope": "WEB",
+      "source_paths": [
+        "ops/ro-stack/dashboard.mjs",
+        "ops/ro-stack/dashboard/app.js"
+      ],
+      "acceptance_authority": "PRODUCTION_LEGACY_BASELINE_BOOTSTRAP_V1 Phase 3"
+    },
+    {
+      "id": "native-server-agent",
+      "scope": "NATIVE",
+      "source_paths": [
+        "src/map/persistent_agent.cpp",
+        "src/map/persistent_agent.hpp"
+      ],
+      "acceptance_authority": "PRODUCTION_LEGACY_BASELINE_BOOTSTRAP_V1 Phase 3"
+    },
+    {
+      "id": "native-persistent-idle",
+      "scope": "NATIVE",
+      "source_paths": [
+        "src/map/persistent_agent.cpp",
+        "src/map/persistent_agent.hpp"
+      ],
+      "acceptance_authority": "PRODUCTION_LEGACY_BASELINE_BOOTSTRAP_V1 Phase 3"
+    },
+    {
+      "id": "native-quarantine-safe-recovery",
+      "scope": "NATIVE",
+      "source_paths": [
+        "src/map/persistent_agent.cpp",
+        "src/map/persistent_agent.hpp"
+      ],
+      "acceptance_authority": "PRODUCTION_LEGACY_BASELINE_BOOTSTRAP_V1 Phase 3"
+    },
+    {
+      "id": "native-stale-task-cleanup",
+      "scope": "NATIVE",
+      "source_paths": [
+        "src/map/persistent_agent.cpp",
+        "src/map/persistent_agent.hpp"
+      ],
+      "acceptance_authority": "PRODUCTION_LEGACY_BASELINE_BOOTSTRAP_V1 Phase 3"
+    },
+    {
+      "id": "native-stale-owner-cleanup",
+      "scope": "NATIVE",
+      "source_paths": [
+        "src/map/persistent_agent.cpp",
+        "src/map/persistent_agent.hpp"
+      ],
+      "acceptance_authority": "PRODUCTION_LEGACY_BASELINE_BOOTSTRAP_V1 Phase 3"
+    },
+    {
+      "id": "native-stale-target-cleanup",
+      "scope": "NATIVE",
+      "source_paths": [
+        "src/map/persistent_agent.cpp",
+        "src/map/persistent_agent.hpp"
+      ],
+      "acceptance_authority": "PRODUCTION_LEGACY_BASELINE_BOOTSTRAP_V1 Phase 3"
+    },
+    {
+      "id": "native-command-contract",
+      "scope": "NATIVE",
+      "source_paths": [
+        "src/map/persistent_agent.cpp",
+        "src/map/persistent_agent.hpp"
+      ],
+      "acceptance_authority": "PRODUCTION_LEGACY_BASELINE_BOOTSTRAP_V1 Phase 3"
+    },
+    {
+      "id": "native-graceful-shutdown",
+      "scope": "NATIVE",
+      "source_paths": [
+        "src/map/persistent_agent.cpp",
+        "src/map/persistent_agent.hpp"
+      ],
+      "acceptance_authority": "PRODUCTION_LEGACY_BASELINE_BOOTSTRAP_V1 Phase 3"
+    },
+    {
+      "id": "native-farm-combat-authority",
+      "scope": "NATIVE",
+      "source_paths": [
+        "src/map/persistent_agent.cpp",
+        "src/map/persistent_agent.hpp"
+      ],
+      "acceptance_authority": "PRODUCTION_LEGACY_BASELINE_BOOTSTRAP_V1 Phase 3"
+    },
+    {
+      "id": "native-openkore-zero",
+      "scope": "NATIVE",
+      "source_paths": [
+        "src/map/persistent_agent.cpp",
+        "src/map/persistent_agent.hpp"
+      ],
+      "acceptance_authority": "PRODUCTION_LEGACY_BASELINE_BOOTSTRAP_V1 Phase 3"
     }
   ]
 }
