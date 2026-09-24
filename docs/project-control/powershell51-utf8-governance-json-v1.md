@@ -102,6 +102,29 @@ directory to `native-deploy-failed-<UTC>-<id>`. Staged bytes are retained.
 New attempts now write `operation.json` with owner, lease id and manifest hash
 when the claim is created.
 
+Executed from governance SHA `55e5105d175a47c3d71ebfdea2d5cb248277ff1e` at
+2026-09-24T14:19:32Z: archive
+`.local/ro-stack/native-deploy-failed-20260924T141932666Z-a9b2dcaf`. The
+guards confirmed lease FREE, pending absent, drift `CLOSED` and all three
+current Native binaries equal to the state baseline (map
+`294482A6…9B0B`). Staged candidate hashes retained: login `E8111B3F…FEB2`,
+char `D701489D…FDD7`, map `2C396313…508F`. The claim predates
+`operation.json`, so the record marks the operation journal as not recorded;
+the lease id remains in F's release-failed history. After archive,
+`native-deploy.lock` is absent and FAILED_OPERATION_RECORD_BLOCKS_NEW_DEPLOY =
+NO.
+
+## Runtime observation outside this workline
+
+Read-only checks during this workline found login, char and map absent. The
+sentinel incident `16a72f9ab96b45a79faadb690991c8e4` records all three exiting
+with code 0 at 2026-09-24T13:55:15Z, about 5.5 minutes after the state file's
+release-failed write, with no Windows fault event and no launcher or sentinel
+action. Port 8788 was also empty at 13:55:20Z; a new Dashboard later listened
+on 8788. The cause is UNRESOLVED. This workline did not stop, start or restart
+any process. A Native retry requires a healthy canonical runtime snapshot, so
+restoration is a Project Control decision.
+
 ## Verification
 
 `ops/ro-stack/tests/test-governance-json-utf8.mjs` runs real Windows
