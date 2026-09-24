@@ -1,5 +1,7 @@
 # M1 settings runtime mapping gate V2
 
+> 本文件的重量／格數觸發及自動存倉／販售 `GI_EXPLICIT_OVERRIDE`、`OUTSIDE_M1` 分類是 2026-09-24 先前來源快照。使用者新決策已將它們納入 M1；`SUPERSEDED_BY = ../project-control/canonical-m1-world-travel-supply-ui-v1.md#M1-補給觸發與背包安全補充決策`。下方 6+12+24 分類數字保留歷史證據，待 Native/Web 權威驗收後重算；本註記不啟用尚未接通的 UI 控制。
+
 Pinned OpenKore: `51de1ddfc4449ae5217f6886de702f87ca934030`.
 Product authority: `docs/project-control/canonical-m1-world-travel-supply-ui-v1.md`
 at `38cf0bb2`, with the combat-continuity Supply amendment `e69f4bb4`.

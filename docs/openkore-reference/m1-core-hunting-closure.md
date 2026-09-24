@@ -1,5 +1,7 @@
 # M1 core hunting capability closure
 
+> 2026-09-24 M1 補給新增重量／格數觸發與 `items_control` 存倉、販售，並要求玩家切圖前服務判定。先前將 R12/R13 留在 `M1_OPTIONAL`、以單物品購買解釋 R09/R10 的分類，對新決策為 `HISTORICAL / SUPERSEDED_BY = ../project-control/canonical-m1-world-travel-supply-ui-v1.md`。原 38 項的來源與產品 closed 數字保留為舊驗收快照；新能力須完成權威驗收後才重算，不因規格改動直接提升計數。
+
 > 本文件是能力與來源證據。世界移動、補給與 M1 UI 的產品決策以 [canonical-m1-world-travel-supply-ui-v1.md](../project-control/canonical-m1-world-travel-supply-ui-v1.md) 為唯一權威。下方 H04/H16 的歷史跨圖路線欄位保留作 OpenKore 對照；`SUPERSEDED_BY = canonical-m1-world-travel-supply-ui-v1.md`。
 
 ```text

@@ -40,3 +40,18 @@ test('visible-root policy and retained city navigation supersede historical bloc
   }
   assert.match(read('docs/openkore-reference/m1-world-map-supply-cutover-source.md'), /HISTORICAL \/ SUPERSEDED_BY/);
 });
+
+test('M1 supply replacement preserves old decision as history and protects item disposal', () => {
+  assert.match(decision, /M1_SUPPLY_STORAGE_SELL_AND_PREFLIGHT_V1 = CANONICAL \/ ACTIVE/);
+  assert.match(decision, /M1_SUPPLY_TRIGGER=COMBAT_CONTINUITY_ITEMS_ONLY/);
+  assert.match(decision, /HISTORICAL \/ SUPERSEDED_BY = M1_SUPPLY_STORAGE_SELL_AND_PREFLIGHT_V1/);
+  assert.match(decision, /PLAYER_FARM_MAP_CHANGE_PREFLIGHT = BEFORE_FARM_STOP_FEE_COOLDOWN_TELEPORT/);
+  assert.match(decision, /AUTO_STORAGE = IN_M1_WHEN_POLICY_AND_SERVICE_AVAILABLE/);
+  assert.match(decision, /AUTO_SELL = IN_M1_WHEN_EXPLICIT_ITEM_RULE_AND_SERVICE_AVAILABLE/);
+  assert.match(decision, /未逐項列出的物品預設存倉/);
+  assert.match(decision, /裝備中、不可販售或受保護物品不得販售/);
+  assert.match(decision, /保留父意圖與所選地圖/);
+  const routing = read('WORKSPACE_INDEX.md');
+  assert.match(routing, /NATIVE_ACTIVE_WORKTREE: C:\\Users\\Administrator\\source\\ghost-island-rathena/);
+  assert.match(routing, /WEB_ACTIVE_WORKTREE: C:\\Users\\Administrator\\\.codex\\/);
+});

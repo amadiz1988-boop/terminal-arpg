@@ -98,6 +98,27 @@ Detailed future roadmap:   docs/roadmap/
 
 ## Persistent Agent Native Source Authority
 
+### M1 Local Hunting continuation routing, 2026-09-24
+
+```text
+WORKLINE_ID: OPENKORE_MATURE_CAPABILITY_GAP_CENSUS_AND_CLOSURE_V1
+F_ROLE: OpenKore pinned-source comparison and evidence only
+F_PHASE: REFERENCE_RECONCILIATION
+NATIVE_OWNER: canonical Native source
+NATIVE_ACTIVE_WORKTREE: C:\Users\Administrator\source\ghost-island-rathena
+NATIVE_EXACT_FILES_FIRST: src/map/persistent_agent.cpp, src/map/persistent_agent.hpp, tools/pa-command-contract/
+NATIVE_PHASE: SUPPLY_AND_INVENTORY_SOURCE_RECONCILIATION
+WEB_OWNER: canonical Web source, Workline B
+WEB_ACTIVE_WORKTREE: C:\Users\Administrator\.codex\.chatgpt-projects\g-p-6a9bcb57afdc8191966436643af8acdf\terminal-arpg
+WEB_EXACT_FILES_FIRST: ops/ro-stack/dashboard.mjs, ops/ro-stack/dashboard/config-schema.mjs, ops/ro-stack/persistent-agent/, scripts/test-world-map-teleport.mjs
+WEB_PHASE: FARM_MAP_PREFLIGHT_AND_SETTINGS_SOURCE_RECONCILIATION
+PRODUCT_AUTHORITY: docs/project-control/canonical-m1-world-travel-supply-ui-v1.md
+VALIDATION_PHASE: SOURCE_AND_SYNTHETIC_FIRST; VERIFIED_TEST_AND_BROWSER_AFTER_CONTROLLED_DEPLOY
+HISTORICAL_TMP_WORKTREE_IMPLEMENTATION: FORBIDDEN
+```
+
+本段處理現行 M1 續作的 owner 路由；下方 F 區塊仍只描述 W1–W4 歷史來源，不授權在其 `.tmp-*` 工作樹施工。兩個 canonical 工作樹開始修改前各自核對 branch、HEAD 與既有 dirty 變更。
+
 CANONICAL_NATIVE_SOURCE:
 C:\Users\Administrator\source\ghost-island-rathena
 

@@ -10,7 +10,7 @@ IMPLEMENTATION_STATUS = SEPARATE_SOURCE_AND_LIVE_GATES
 SUPERSEDED_BY = NONE
 ```
 
-本文件是 M1 世界地圖移動、掛機地圖、主城、儲存主城、蝴蝶翅膀、補給、設定介面及最終玩家驗收的唯一產品決策。來源證據與歷史測試數字保留在上述文件；它們不會修改本規格。F 工作線負責實作與來源驗證。`SOURCE_PASS`、本機 Browser 檢查及 Production 玩家 Browser 驗收分別記錄，不互相替代。
+本文件是 M1 世界地圖移動、掛機地圖、主城、儲存主城、蝴蝶翅膀、補給、設定介面及最終玩家驗收的唯一產品決策。來源證據與歷史測試數字保留在上述文件；它們不會修改本規格。F 保留鎖定 OpenKore 來源比對，Native 補給與背包管理屬 canonical Native owner，Web 切圖前判定與設定屬 canonical Web owner。`SOURCE_PASS`、本機 Browser 檢查及 Production 玩家 Browser 驗收分別記錄，不互相替代。
 
 ## CANONICAL_DECISION_MATRIX
 
@@ -67,9 +67,25 @@ Browser 僅提交意圖。伺服器權威決定當前與目的地圖、角色 Ba
 
 ### M1 補給觸發與背包安全補充決策
 
-`M1_SUPPLY_TRIGGER=COMBAT_CONTINUITY_ITEMS_ONLY`。M1 補給只由 HP／SP 消耗品低於門檻，以及目前啟用的戰鬥 Profile／技能實際需要的彈藥或技能消耗品低於門檻觸發；不使用該資源的角色標記 `NOT_APPLICABLE`。`M1_WEIGHT_TRIGGER_SUPPLY=NO`、`M1_INVENTORY_TRIGGER_SUPPLY=NO`、`GLOBAL_AUTOSTORE=NO`、`AUTO_SELL=OUTSIDE_M1`、`AUTO_STORAGE=OUTSIDE_M1`。OpenKore 重量與格數門檻導向儲存／販售的成熟行為在此分類為 `GI_EXPLICIT_OVERRIDE`，不轉成購買觸發。
+2026-09-24 使用者決策明確取代本文件先前的 `M1_SUPPLY_TRIGGER=COMBAT_CONTINUITY_ITEMS_ONLY`、`M1_WEIGHT_TRIGGER_SUPPLY=NO`、`M1_INVENTORY_TRIGGER_SUPPLY=NO`、`AUTO_SELL=OUTSIDE_M1`、`AUTO_STORAGE=OUTSIDE_M1` 與將重量／格數服務歸為 `GI_EXPLICIT_OVERRIDE` 的分類。上述文字保留為歷史決策，狀態為 `HISTORICAL / SUPERSEDED_BY = M1_SUPPLY_STORAGE_SELL_AND_PREFLIGHT_V1`。原有 `GLOBAL_AUTOSTORE=NO` 是舊固定拾取政策，不得用作否決本節已授權的服務階段存倉；設定與執行映射須明確區分拾取政策及服務存倉。
 
-權威背包已滿，或重量狀態妨礙合法拾取、購買、戰鬥延續時，進入 `INVENTORY_BLOCKED` 或現有最接近的精確安全狀態：保留 `AUTO_FARM` 父意圖；延續不安全時停止攻擊；背包無法容納時阻止補給購買；不隔離、不自動儲存／販售、不無限重試。此狀態為 `SAFE / RECOVERABLE / NO_QUARANTINE`，等待玩家處理或後續明確授權的背包管理能力。
+```text
+M1_SUPPLY_STORAGE_SELL_AND_PREFLIGHT_V1 = CANONICAL / ACTIVE
+M1_SUPPLY_TRIGGER = COMBAT_CONTINUITY_ITEMS_OR_WEIGHT_OR_SLOTS
+M1_WEIGHT_TRIGGER_SUPPLY = YES
+M1_INVENTORY_TRIGGER_SUPPLY = YES
+AUTO_STORAGE = IN_M1_WHEN_POLICY_AND_SERVICE_AVAILABLE
+AUTO_SELL = IN_M1_WHEN_EXPLICIT_ITEM_RULE_AND_SERVICE_AVAILABLE
+PLAYER_FARM_MAP_CHANGE_PREFLIGHT = BEFORE_FARM_STOP_FEE_COOLDOWN_TELEPORT
+```
+
+以鎖定 OpenKore `src/AI.pm` 的服務順序為參考：重量或已用背包格數達門檻時，依序判定存倉、販售，再判定需購買的戰鬥延續物品。歷史角色 `config.txt` 的 `itemsMaxWeight_sellOrStore=68`、`itemsMaxNum_sellOrStore=99`、`itemsMaxWeight=89` 是可追溯的角色範例；角色設定與權威狀態決定實際門檻。單一購買物品不足仍可觸發補給；未使用該戰鬥資源的角色保持 `NOT_APPLICABLE`。
+
+逐項物品處置沿用 `items_control.txt` 的最小保留量、存倉、販售及優先順序。歷史 `all 0 1 0` 代表未逐項列出的物品預設存倉；販售只依明確逐項設定與可賣數量進行。存倉優先；存倉滿或不可用不授權無條件販售。裝備中、不可販售或受保護物品不得販售。rAthena 裁定物品合法性、倉庫容量、NPC 交易、背包、重量及 Zeny 的實際結果；每步以權威前後狀態確認。
+
+玩家切換掛機地圖時，在停止原掛機、扣費、寫冷卻及傳送之前，由權威角色狀態判定是否需補給。若需服務，保留所選地圖與原掛機父意圖，返回有效 Saved Town，依序完成城內存倉、合規販售及購買，核對背包、重量、Zeny 與 `RETURN_TELEPORT_COST`，再直接傳往所選地圖並恢復 `AUTO_FARM`。不可先切圖再補判，也不可用 Browser 自報的背包狀態作權威。
+
+服務不可用、倉庫滿、處置後仍超重或滿格、Zeny 不足及交易拒絕時，保留父意圖與所選地圖，進入可恢復的安全阻擋狀態。重試必須有進度條件與總次數／時間上限；禁止隔離、空轉及用販售取代無法完成的存倉。此狀態為 `SAFE / RECOVERABLE / NO_QUARANTINE`，待權威狀態變化或明確玩家處理後續行。
 
 ## M1 設定與 Fly Wing 拒絕
 
