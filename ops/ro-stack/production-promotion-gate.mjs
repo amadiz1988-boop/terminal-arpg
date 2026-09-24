@@ -6,6 +6,7 @@ import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { FIRST_PROMOTION, legacyIdentity, verifyLegacyBaseline, firstPromotionEvidence, consumedPath, pendingPath } from './legacy-production-baseline.mjs';
+import { inspectNativeCandidate, verifyNativeStage, equalHash } from './native-promotion-contract.mjs';
 import { receiptComplete } from './production-deployment-state.mjs';
 import { assetReleaseErrors, inspectPrivatePackage } from './private-asset-release-gate.mjs';
 
@@ -62,13 +63,15 @@ export function evaluatePromotion({ authority, state, candidate, currentHashes, 
   if (promotionMode === FIRST_PROMOTION) {
     if (!legacyIdentity(state) || currentHashes?.consumed) reject('LEGACY_BOOTSTRAP_UNAVAILABLE');
     if (!currentHashes?.rollbackReady) reject('LEGACY_ROLLBACK_NOT_READY');
+    if (!candidate.nativeCandidatePass) reject('NATIVE_CANDIDATE_PREFLIGHT_REQUIRED');
+    if (mode === 'deploy' && !currentHashes?.nativeStage) reject('NATIVE_STAGE_RECEIPT_REQUIRED');
     if (!candidate.firstPromotionEvidencePass) reject('FIRST_PROMOTION_EVIDENCE_REQUIRED');
     if (mode === 'acquire' && lease) reject('FIRST_PROMOTION_REQUIRES_FREE_LEASE');
     if (mode === 'deploy' && lease?.promotion_mode !== FIRST_PROMOTION) reject('LEASE_MODE_MISMATCH');
     if (mode === 'deploy' && lease?.native_deploy_git_sha !== candidate.nativeSha) reject('LEASE_NATIVE_SHA_MISMATCH');
   } else if (!state || !sha(state.current_web_git_sha) || !sha(state.current_native_git_sha) ||
       !state.current_deploy_id || !state.last_deploy_receipt) reject('PRODUCTION_GIT_BASELINE_INVALID');
-  if (state?.production_drift !== 'CLOSED') reject('PRODUCTION_DRIFT_OPEN');
+  if (state?.production_drift !== 'CLOSED' && !(promotionMode === FIRST_PROMOTION && currentHashes?.nativeStage === true)) reject('PRODUCTION_DRIFT_OPEN');
   if (!currentHashes?.pass) reject('PRODUCTION_ARTIFACT_RECEIPT_MISMATCH');
   const accepted = state?.accepted_capabilities || [];
   const preserved = new Set(candidate.capabilities || []);
@@ -89,7 +92,7 @@ export function evaluatePromotion({ authority, state, candidate, currentHashes, 
     candidate_missing: accepted.filter(id => !preserved.has(id) && !(removed.has(id) && decisions.has(id))).length };
 }
 
-function facts(manifest, authority, state, owner, productionRoot, promotionMode) {
+function facts(manifest, authority, state, owner, productionRoot, promotionMode, currentHashes) {
   const root = path.resolve(manifest.candidate_root);
   const commit = String(manifest.candidate_commit || '').toLowerCase();
   const remote = run(root, 'remote', 'get-url', 'origin');
@@ -155,12 +158,22 @@ function facts(manifest, authority, state, owner, productionRoot, promotionMode)
     firstPromotionEvidencePass = fs.existsSync(evidencePath) && fileHash(evidencePath) === manifest.first_promotion_evidence.sha256.toUpperCase() &&
       firstPromotionEvidence(readJson(evidencePath), commit, nativeSha);
   }
-  return { repository: remote, ref: authority.web?.release_ref, sha: commit, head,
+  let nativeCandidatePass = false;
+  if (promotionMode === FIRST_PROMOTION && manifest.native_candidate_manifest?.path) {
+    const nativeFile = path.resolve(path.dirname(manifest._manifestPath), manifest.native_candidate_manifest.path);
+    const admittedState = currentHashes?.nativeStage ? {...state, production_drift:'CLOSED'} : state;
+    const inspected = inspectNativeCandidate({file:nativeFile,sha256:manifest.native_candidate_manifest.sha256,
+      root:productionRoot,state:admittedState,authority:authority.native,webCapabilities:capabilities,webRoot:root,webSha:commit});
+    nativeCandidatePass = inspected.eligible && inspected.manifest.native_git_sha === nativeSha;
+    if(nativeCandidatePass) for(const row of inspected.capability_rows) if(row.classification==='INTENTIONALLY_SUPERSEDED' && !capabilities.includes(row.id)) capabilities.push(row.id);
+  }
+  return { nativeCandidatePass, repository: remote, ref: authority.web?.release_ref, sha: commit, head,
     commitExists, dirty: !!status, pushed, nativePushed, nativeSha, firstPromotionEvidencePass, assetPackage, requiredFilesTracked, owner,
     capabilities, intentionalRemovals: manifest.intentional_removals || [], committedDecisions };
 }
 
-function productionHashes(productionRoot, state, promotionMode) {
+function productionHashes(productionRoot, state, promotionMode, lease, manifestHash) {
+  if (promotionMode === FIRST_PROMOTION && state?.production_drift === 'OPEN') return verifyNativeStage(productionRoot,state,lease,manifestHash);
   if (promotionMode === FIRST_PROMOTION) return { ...verifyLegacyBaseline(productionRoot, state), consumed: fs.existsSync(within(productionRoot, consumedPath)) };
   if (fs.existsSync(within(productionRoot, pendingPath))) return { pass: false };
   if (!state?.last_deploy_receipt) return { pass: false };
@@ -185,8 +198,10 @@ function main() {
   const leasePath = path.join(productionRoot, '.local/ro-stack/production-deployment-lease/lease.json');
   const state = fs.existsSync(statePath) ? readJson(statePath) : null;
   const lease = fs.existsSync(leasePath) ? readJson(leasePath) : fs.existsSync(path.dirname(leasePath)) ? { status: 'INVALID' } : null;
-  const result = evaluatePromotion({ authority, state, candidate: facts(manifest, authority, state, args.owner, productionRoot, promotionMode),
-    currentHashes: productionHashes(productionRoot, state, promotionMode), lease, mode, promotionMode });
+  if (lease?.status === 'ACTIVE' && !equalHash(lease.admission_manifest_sha256,fileHash(args.manifest))) fail('LEASE_MANIFEST_CHANGED');
+  const currentHashes = productionHashes(productionRoot,state,promotionMode,lease,fileHash(args.manifest));
+  const result = evaluatePromotion({ authority,state,candidate:facts(manifest,authority,state,args.owner,productionRoot,promotionMode,currentHashes),
+    currentHashes,lease,mode,promotionMode });
   process.stdout.write(JSON.stringify(result) + '\n');
   if (!result.eligible) process.exitCode = 1;
 }

@@ -153,8 +153,8 @@ separate accepted-baseline reconciliation fills exact GitHub-reachable SHAs.
 copies, direct binary replacement, manual service restarts with a candidate,
 and Production side edits are `UNSUPPORTED_DEPLOY_PATH`. Existing historical
 receipts remain evidence. Rollback through the existing manifest tool remains
-available for recovery under its exact receipt contract. Native deployment
-does not yet have an integrated GitHub admission gate and is blocked by policy.
+available for recovery under its exact receipt contract. That audit predates the Native entry below. Native promotion now uses its
+integrated GitHub admission gate; direct replacement remains unsupported.
 Every user opened window reads `AGENTS.md`, `WORKSPACE_INDEX.md`, the current
 receipt, and lease before promotion or Production mutation.
 
@@ -194,3 +194,115 @@ legacy provenance is never replaced with the future candidate's SHA. Both
 current artifact/rollback verification and capability superset remain required.
 After the first final successful receipt a permanent consumption marker disables
 migration and atomic state transition establishes the real GITHUB_FIRST baseline.
+
+## Native GitHub-first promotion entry V1
+
+`NATIVE_PROMOTION_PATH = AVAILABLE`. This entry implements the one-time first
+promotion. Actual deployment belongs to F and requires explicit runtime authority.
+This tooling work performed no Production application mutation or restart.
+Governance commit must be newer than `0863037c016562017c058ae4794182552aea6b85`
+and reachable from `terminal-arpg/main`; use a clean governance checkout.
+
+### Build and candidate preparation
+
+```powershell
+python scripts/build-native-candidate.py --sha a4c736d865eeedca398aad97aeff1c1036f2dc39 --output <new-private-build-directory>
+node scripts/prepare-native-candidate.mjs --build-root <private-build-directory> --production-root C:\Users\Administrator\ghost-island-production\ro-stack
+```
+
+The first command verifies current GitHub PRIVATE visibility and main, clones a
+new source directory, verifies approved SHA ancestry, builds `rAthena.sln` Release
+x64 and runs the canonical offline suite. Source is checked clean before and after;
+only exact generated test executables/objects inside the fresh clone are removed.
+The three built executables stay in that clone. Source and build outputs must be
+retained until finalization. Build logs and every suite log are hash-pinned.
+There are no hardcoded historical test-count thresholds.
+
+`native-build-v1` fields: schema_version, build_id, built_at, native_git_sha,
+canonical_repository, canonical_branch, build_configuration, toolchain,
+binary_path, binary_sha256, source_root, source_tree_state, tests_run, tests_result,
+artifacts and build_log. Each suite records test_suite, result and receipt
+{path, sha256}. Artifacts are exactly login-server.exe, char-server.exe and
+map-server.exe from the fresh build. An executable outside that receipt and fresh
+source layout is inadmissible. CLEAN means tracked source plus untracked source
+checks pass; ignored compiler outputs remain covered by artifact hashes.
+
+Preparation reads actual Production legacy manifests and rollback without changing
+Production. It writes `native-candidate-v1`, `native-regression-v1` and
+`native-capabilities-v1` privately beside the build receipt using create-new writes.
+Candidate fields: candidate_id, native_git_sha, binary_sha256, build_receipt,
+regression, required_database, required_runtime_ports, required_openkore_count,
+required_capability_baseline, capability_comparison, rollback_reference,
+canonical_repository, canonical_branch and lifecycle_files. All references have
+path and SHA256. Candidate SHA256 is the immutable admission identity; changes
+require a new candidate and preflight, never editing an admitted candidate.
+
+Seventeen named regression groups cover PA/C++ commands, SERVER_AGENT, idle,
+quarantine, stale task/owner/target, shutdown/restart, farm/combat, M1 Supply,
+Fly/Butterfly/Arrow/Bullet nonconsumption, missing ammo and AUTO_FARM. Additional
+source assertions check native shutdown prepare/confirm ordering. These prove
+source/build contracts; F must separately prove runtime restoration and gameplay.
+
+All 18 accepted legacy IDs must be classified PRESERVED or
+INTENTIONALLY_SUPERSEDED, with MISSING=0 and UNKNOWN=0. Web rows require the
+independent combined Web preflight. Native rows require canonical source paths
+and the regression evidence. Supersession additionally requires a hash-pinned JSON
+product decision tracked at the exact canonical Web SHA with capability,
+disposition INTENTIONALLY_SUPERSEDED, approved_by PROJECT_CONTROL, reason and
+replacement. The replacement must pass candidate capability verification. The
+logical legacy capability ID remains represented in the final accepted set.
+
+### Combined admission and controlled execution
+
+The ordinary first-promotion Web manifest additionally pins
+`native_candidate_manifest: {path, sha256}`. Paths are relative to their containing
+manifest and stay within its directory. Put the combined Web manifest in a parent
+folder of the build bundle when preparing F's evidence. Existing assets, Web
+regression, runtime preflight and all legacy rollback requirements remain mandatory.
+Use the existing state tool's acquire action after combined precheck PASS. The
+lease stores both exact Git SHAs, the Web manifest hash, Native manifest hash and
+unique lease_id. This work never acquires F's real lease.
+
+```powershell
+node ops/ro-stack/deploy-native-candidate.mjs --candidate-manifest <candidate.json> --manifest-sha256 <SHA256> --production-root C:\Users\Administrator\ghost-island-production\ro-stack --owner <owner-task-id> --lease <lease-id>
+```
+
+The default is read-only preflight. Only an authorized owner adds `--execute true`.
+Native runs first from CLOSED drift. It takes a durable operation claim, stages
+and hashes the three authorized executables, rechecks ownership and legacy
+preimages/rollback, opens the pending transaction, then uses the existing
+Production `ro-stack.ps1` graceful stop and guarded start. Launcher, helper, guard,
+guard library and configuration are pinned before mutation. Missing tracked runtime
+state is rejected to exclude the historical force-stop fallback. Dashboard and
+MariaDB PIDs must stay unchanged. Start requires zero old game processes/listeners;
+postcheck requires exactly one replacement each, canonical ports, OpenKore=0 and
+verified sentinel ProcDump attachment to the new map PID. No second runtime or
+new observer is created. A failure after opening drift never retries/restarts or
+claims success automatically; retained operation state and rollback reference are
+owned reconciliation evidence.
+
+After the Native receipt, the existing Web manifest tool can continue only when
+all untouched legacy Web bytes, new Native bytes, original rollback bytes and
+lease/pending identities match. This bounded continuation permits the owned
+Native stage's OPEN state. It never accepts unrelated drift. No final baseline
+transition occurs until Web deployment and F's required live acceptance complete.
+
+### Receipts and verification
+
+`native-deploy-v1`: deploy_id, lease_id, native_git_sha, native_build_sha256,
+candidate_manifest_sha256, previous_binary_sha256, new_binary_sha256, old_map_pid,
+new_map_pid, procdump_receipt, runtime_health, openkore_runtime_count,
+rollback_reference, acceptance_status and artifacts. The intermediate status is
+NATIVE_CANDIDATE_ACTIVE. The pending marker pins the receipt bytes.
+
+The overall final receipt must include matching lease_id and
+`native_deployment_receipt: {path: ".local/ro-stack/native-promotion-receipt.json",
+sha256: "..."}`. Validation rechecks receipt schema, lease/SHA/manifest identities,
+all three deployed binary hashes and the original final live-acceptance gates.
+Missing Native receipt cannot consume bootstrap or transition the baseline.
+
+`node ops/ro-stack/tests/test-native-promotion.mjs` runs isolated full contract
+fixtures, combined admission, staged replacement through an injected fixture
+lifecycle, Web continuation, receipt finalization and failure retention. The CLI
+has no fixture-root or alternate runtime adapter option. Also run the existing
+legacy bootstrap, promotion governance and Dashboard manifest fixture suites.

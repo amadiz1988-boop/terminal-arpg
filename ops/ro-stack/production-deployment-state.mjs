@@ -2,10 +2,11 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
+import { nativeReceiptValid, nativeReceiptPath, equalHash } from './native-promotion-contract.mjs';
 import { FIRST_PROMOTION, legacyIdentity, verifyLegacyBaseline, transitionedState, consumedPath, pendingPath } from './legacy-production-baseline.mjs';
 
 const sha = value => /^[0-9a-f]{40}$/i.test(String(value || ''));
@@ -50,6 +51,15 @@ export function receiptComplete(receipt, root) {
       receipt.runtime_pids.some(pid => !Number.isInteger(pid) || pid <= 0) ||
       receipt.openkore_runtime_count !== 0 || receipt.live_acceptance_results?.pass !== true ||
       !receipt.rollback_artifact || !Array.isArray(receipt.files) || !receipt.files.length) return false;
+  if (receipt.first_github_first_gates || receipt.native_deployment_receipt) {
+    try {
+      const ref=receipt.native_deployment_receipt;
+      if (ref?.path !== nativeReceiptPath || !equalHash(hash(safePath(root,ref.path)),ref.sha256)) return false;
+      const native=read(safePath(root,ref.path));
+      if (!nativeReceiptValid(native,{nativeSha:receipt.native_git_sha,binaryHash:receipt.native_build_sha256,leaseId:receipt.lease_id}) ||
+          !native.artifacts.every(x=>equalHash(hash(safePath(root,x.path)),x.sha256))) return false;
+    } catch { return false; }
+  }
   const webManifest = safePath(root, receipt.web_build_manifest);
   if (!fs.existsSync(webManifest) || !/^[0-9a-f]{64}$/i.test(receipt.web_build_manifest_sha256 || '') ||
       hash(webManifest) !== receipt.web_build_manifest_sha256.toUpperCase()) return false;
@@ -82,8 +92,16 @@ export function commitAcceptedBaseline(root, state, lease, receipt) {
   if (!receiptComplete(receipt, root) || receipt.owner_task_id !== lease.owner_task_id ||
       (!lease.emergency && (receipt.web_git_sha !== lease.web_deploy_git_sha || receipt.native_git_sha !== lease.native_deploy_git_sha)))
     fail('POSTDEPLOY_RECEIPT_INCOMPLETE');
+  if (first && (!receipt.native_deployment_receipt || !receipt.lease_id || receipt.lease_id !== lease.lease_id ||
+      !nativeReceiptValid(read(safePath(root,nativeReceiptPath)),{nativeSha:lease.native_deploy_git_sha,leaseId:lease.lease_id,manifestHash:lease.native_candidate_manifest_sha256}))) fail('NATIVE_POSTDEPLOY_RECEIPT_REQUIRED');
   if (first && (!legacyIdentity(state) || state.production_drift !== 'OPEN' ||
       !fs.existsSync(safePath(root, pendingPath)) || fs.existsSync(safePath(root, consumedPath)))) fail('LEGACY_BOOTSTRAP_UNAVAILABLE');
+  if (first) {
+    const pending=read(safePath(root,pendingPath));
+    if(pending.lease_id!==lease.lease_id || pending.owner_task_id!==lease.owner_task_id ||
+      pending.native_git_sha!==lease.native_deploy_git_sha || pending.web_git_sha!==lease.web_deploy_git_sha ||
+      !equalHash(pending.native_receipt_sha256,receipt.native_deployment_receipt.sha256)) fail('NATIVE_PENDING_RECEIPT_MISMATCH');
+  }
   if (first && (receipt.result !== 'PROMOTED' ||
       !['source_regression', 'native_build', 'asset_hash', 'rollback', 'single_owner', 'procdump', 'runtime_health', 'live_acceptance']
         .every(key => receipt.first_github_first_gates?.[key]?.pass === true && receipt.first_github_first_gates[key].evidence) ||
@@ -124,6 +142,7 @@ function main() {
   if (action === 'acquire' || action === 'acquire-emergency') {
     if (!args.owner || !sha(args['web-sha']) || !sha(args['native-sha'])) fail('LEASE_ARGUMENTS_REQUIRED');
     let capabilities = [];
+    const admissionHash=args.manifest ? hash(args.manifest) : null;
     const promotionMode = args['promotion-mode'] || (args.manifest ? read(args.manifest).promotion_mode : null) || 'NORMAL';
     if (promotionMode === FIRST_PROMOTION && action !== 'acquire') fail('LEGACY_EMERGENCY_FORBIDDEN');
     if (promotionMode !== FIRST_PROMOTION && (!sha(state.current_web_git_sha) || !sha(state.current_native_git_sha))) fail('PRODUCTION_GIT_BASELINE_INVALID');
@@ -134,6 +153,7 @@ function main() {
         '--production-root', root, '--owner', args.owner, '--promotion-mode', promotionMode], { encoding: 'utf8', windowsHide: true });
       if (verification.status !== 0) fail(`PRODUCTION_PROMOTION_GATE_BLOCKED:${verification.stdout.trim()}`);
       const verified = JSON.parse(verification.stdout);
+      if(hash(args.manifest)!==admissionHash) fail('ADMISSION_MANIFEST_CHANGED');
       capabilities = verified.candidate_capabilities;
       if (String(read(args.manifest).candidate_commit).toLowerCase() !== args['web-sha'].toLowerCase() ||
           String(promotionMode === FIRST_PROMOTION ? read(args.manifest).candidate_native_commit : state.current_native_git_sha).toLowerCase() !== args['native-sha'].toLowerCase()) fail('LEASE_SHA_MISMATCH');
@@ -141,7 +161,7 @@ function main() {
       if (state.production_drift !== 'OPEN' || !args.incident || !args['git-flow-unavailable-reason']) fail('EMERGENCY_EVIDENCE_REQUIRED');
       capabilities = state.accepted_capabilities || [];
     }
-    const lease = { owner_task_id: args.owner, owner_window: args.window || '', acquired_at: new Date().toISOString(),
+    const lease = { lease_id: randomUUID(), native_candidate_manifest_sha256: args.manifest ? read(args.manifest).native_candidate_manifest?.sha256 : null, owner_task_id: args.owner, owner_window: args.window || '', acquired_at: new Date().toISOString(),
       target_scope: args.scope || '', web_deploy_git_sha: args['web-sha'], native_deploy_git_sha: args['native-sha'],
       candidate_capabilities: capabilities, status: 'ACTIVE', promotion_mode: promotionMode, admission_manifest: args.manifest || null, admission_manifest_sha256: args.manifest ? hash(args.manifest) : null, emergency: action === 'acquire-emergency',
       incident: action === 'acquire-emergency' ? args.incident : null,
@@ -149,6 +169,7 @@ function main() {
     fs.mkdirSync(leaseDir); // Atomic claim. Existing owner is never displaced.
     try {
       if (hash(stateFile) !== initialStateHash) fail('BASELINE_CHANGED_DURING_ADMISSION');
+      if(args.manifest && hash(args.manifest)!==admissionHash) fail('ADMISSION_MANIFEST_CHANGED');
       if (promotionMode === FIRST_PROMOTION) { const verified = verifyLegacyBaseline(root, state); if (!verified.pass || !verified.rollbackReady) fail('LEGACY_CHANGED_DURING_ADMISSION'); }
       writeNew(leaseFile, lease);
     } catch (error) { fs.rmdirSync(leaseDir); throw error; }
@@ -164,12 +185,12 @@ function main() {
     if (!first || !legacyIdentity(state) || fs.existsSync(safePath(root, consumedPath))) fail('LEGACY_BOOTSTRAP_UNAVAILABLE');
     if (fs.existsSync(pendingFile)) {
       const pending = read(pendingFile);
-      if (pending.owner_task_id !== args.owner || pending.web_git_sha !== lease.web_deploy_git_sha || pending.native_git_sha !== lease.native_deploy_git_sha) fail('PENDING_PROMOTION_CONFLICT');
+      if (pending.lease_id !== lease.lease_id || pending.owner_task_id !== args.owner || pending.web_git_sha !== lease.web_deploy_git_sha || pending.native_git_sha !== lease.native_deploy_git_sha) fail('PENDING_PROMOTION_CONFLICT');
       if (state.production_drift !== 'OPEN') fail('PENDING_PROMOTION_STATE_INVALID');
     } else {
       const checked = verifyLegacyBaseline(root, state);
       if (!checked.pass || !checked.rollbackReady || state.production_drift !== 'CLOSED') fail('LEGACY_PREMUTATION_CHECK_FAILED');
-      writeNew(pendingFile, { owner_task_id: args.owner, web_git_sha: lease.web_deploy_git_sha,
+      writeNew(pendingFile, { lease_id:lease.lease_id, owner_task_id: args.owner, web_git_sha: lease.web_deploy_git_sha,
         native_git_sha: lease.native_deploy_git_sha, started_at: new Date().toISOString() });
       writeAtomic(stateFile, { ...state, production_drift: 'OPEN', drift_reason: 'FIRST_PROMOTION_PENDING_FINAL_RECEIPT' });
     }

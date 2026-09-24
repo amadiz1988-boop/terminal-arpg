@@ -54,18 +54,29 @@ same owner lease. The directory claim remains atomic and repeat acquisition is
 blocked. State's deployment_lease field records bootstrap-time FREE; the live
 lease directory/lease.json remains the authoritative owner record.
 
-Before the first application mutation, the owner calls action
-begin-first-promotion. The Web manifest deployment tool does this automatically
-immediately before its controlled Dashboard stop. For a coordinated Native
-operation, F must call the same action before any Native binary mutation.
-This writes a durable pending marker and opens drift until final acceptance.
-Only the existing owner can reconcile it. The current Web admission precheck
-requires unchanged legacy artifacts, so complete Web admission/prechecks before
-any Native binary replacement. Ordering and runtime deployment remain F's scope.
-A later request to re-admit a partially deployed candidate remains blocked until
-reconciliation; this mechanism provides no skip or partial-deployment bypass.
+Native promotion admission is now AVAILABLE through
+`node ops/ro-stack/deploy-native-candidate.mjs`. See the Native entry contract in
+`github-first-production-promotion-protocol-v1.md` for exact arguments and schemas.
+The combined Web manifest MUST pin `native_candidate_manifest: {path, sha256}`.
+The lease records a unique `lease_id` and that Native manifest hash.
+
+The fixed first-promotion order is combined preflight, lease, Native deployment,
+Web manifest deployment, live acceptance, and finalization. The Native entry alone
+starts application mutation from CLOSED, records the owned pending transaction,
+and opens drift. It performs controlled stop, replaces the three approved Native
+executables, invokes the existing canonical start procedure, verifies one runtime
+and the sentinel's new-map ProcDump attachment, and emits its hash-pinned receipt.
+
+Web admission after Native requires the same owner, lease id, exact Web manifest,
+Native receipt hash, new Native artifact hashes, unchanged legacy Web bytes and
+all original rollback hashes. This is an owned continuation stage; unrelated OPEN
+drift remains blocked. Web-before-Native deployment is rejected. No retry can
+re-enter Native replacement with OPEN drift. A failed mutation retains the lease,
+operation journal and OPEN state for exact rollback/reconciliation by its owner.
+A never-started or fully restored attempt can use the existing release-failed path.
 
 The final successful receipt must pass the existing complete-receipt validator,
+include `lease_id` and `native_deployment_receipt: {path, sha256}`,
 match the lease's exact Web/Native SHAs, preserve all accepted capabilities and
 have result PROMOTED. It additionally records first_github_first_gates with
 source_regression, native_build, asset_hash, rollback, single_owner, procdump,

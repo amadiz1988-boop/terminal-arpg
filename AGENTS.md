@@ -1,3 +1,14 @@
+## Native first-promotion entry
+
+NATIVE_PROMOTION_PATH = AVAILABLE. Native candidates are built only through
+`scripts/build-native-candidate.py`, admitted with a pinned
+`scripts/prepare-native-candidate.mjs` manifest, and deployed only through
+`ops/ro-stack/deploy-native-candidate.mjs` using an owned first-promotion lease.
+The default entry is read-only; actual mutation requires explicit Production
+authority and `--execute true`. Native precedes Web. Exact hashes, 18-capability
+superset, rollback, one runtime, ProcDump and final linked receipts are mandatory.
+Canonical contract: `docs/project-control/github-first-production-promotion-protocol-v1.md`.
+
 ## GitHub canonical authority V6, 2026-09-24
 
 SAFE_CANONICAL_GITHUB_RECONSTRUCTION_V6 supersedes older local source-authority

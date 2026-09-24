@@ -5,6 +5,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { evaluatePromotion } from '../production-promotion-gate.mjs';
+import { nativeReceiptPath, nativeArtifacts } from '../native-promotion-contract.mjs';
 import { commitAcceptedBaseline } from '../production-deployment-state.mjs';
 import { FIRST_PROMOTION, LEGACY_MODE, UNKNOWN_SHA, verifyLegacyBaseline, boundedPath, digest, consumedPath, pendingPath, firstPromotionEvidence } from '../legacy-production-baseline.mjs';
 const root = fs.mkdtempSync(path.join(os.tmpdir(), 'legacy-bootstrap-test-'));
@@ -12,7 +13,7 @@ const write = (file, value) => { const full=path.join(root,file); fs.mkdirSync(p
 const sha = 'a'.repeat(40), native='b'.repeat(40);
 const asset = { repository:'amadiz1988-boop/ghost-island-assets', immutable_required:true, release_id:1, release_tag:'test', package_id:'test', package_version:'1.1.0', asset_count:1, package_sha256:'1'.repeat(64), manifest_sha256:'2'.repeat(64), archive:{sha256:'3'.repeat(64)} };
 const authority = {web:{repository:'https://github.com/example/test.git',release_ref:'refs/heads/main'},assets:asset};
-const candidate = {repository:authority.web.repository, ref:'refs/heads/main', sha,head:sha,commitExists:true,dirty:false,pushed:true,nativePushed:true,nativeSha:native,requiredFilesTracked:true,firstPromotionEvidencePass:true,owner:'F',capabilities:['skill-tree','native-server-agent'],assetPackage:{...asset,available:true,private:true,immutable:true,valid:true,archive_sha256:asset.archive.sha256}};
+const candidate = {repository:authority.web.repository, ref:'refs/heads/main', sha,head:sha,commitExists:true,dirty:false,pushed:true,nativePushed:true,nativeSha:native,requiredFilesTracked:true,firstPromotionEvidencePass:true,nativeCandidatePass:true,owner:'F',capabilities:['skill-tree','native-server-agent'],assetPackage:{...asset,available:true,private:true,immutable:true,valid:true,archive_sha256:asset.archive.sha256}};
 const statePath='.local/ro-stack/production-deployment-state.json';
 const state = {schema_version:2,baseline_mode:LEGACY_MODE,historical_provenance:'UNRESOLVED',current_deploy_id:'LEGACY_BOOTSTRAP_0123456789abcdef',current_web_git_sha:UNKNOWN_SHA,current_native_git_sha:UNKNOWN_SHA,legacy_bootstrap_available:true,production_drift:'CLOSED',accepted_capabilities:candidate.capabilities,current_web_artifact_manifest:'.local/ro-stack/legacy/web.json',accepted_capability_manifest:'.local/ro-stack/legacy/caps.json',native_binaries:[],legacy_rollback:{root:'.local/ro-stack/legacy/rollback',web_manifest:'.local/ro-stack/legacy/rollback-web.json'}};
 write('app.js','legacy-web'); write('map.exe','legacy-map');
@@ -27,7 +28,7 @@ write(statePath,state);
 const check=(patch={})=>evaluatePromotion({authority,state,candidate,currentHashes:verifyLegacyBaseline(root,state),lease:null,promotionMode:FIRST_PROMOTION,mode:'acquire',...patch});
 const blocked=(result,code)=>assert.ok(result.errors.some(x=>x.startsWith(code)),JSON.stringify(result));
 let count=0;const test=(name,fn)=>{fn();console.log(`PASS ${++count} ${name}`);};
-const lease={owner_task_id:'F',status:'ACTIVE',promotion_mode:FIRST_PROMOTION,web_deploy_git_sha:sha,native_deploy_git_sha:native,candidate_capabilities:candidate.capabilities};
+const lease={lease_id:'fixture-lease',native_candidate_manifest_sha256:'c'.repeat(64),owner_task_id:'F',status:'ACTIVE',promotion_mode:FIRST_PROMOTION,web_deploy_git_sha:sha,native_deploy_git_sha:native,candidate_capabilities:candidate.capabilities};
 const leaseFile='.local/ro-stack/production-deployment-lease/lease.json';
 const stateTool=fileURLToPath(new URL('../production-deployment-state.mjs',import.meta.url));
 const cli=(...args)=>spawnSync(process.execPath,[stateTool,'--production-root',root,'--test-mode','true','--owner','F',...args],{encoding:'utf8',windowsHide:true});
@@ -55,7 +56,10 @@ try {
  test('source/build evidence must bind both exact SHAs',()=>{const e={web_git_sha:sha,native_git_sha:native};for(const key of ['web_regression','native_build','native_regression','procdump_gate','runtime_health_gate'])e[key]={pass:true,evidence:'fixture evidence'};assert.equal(firstPromotionEvidence(e,sha,native),true);assert.equal(firstPromotionEvidence(e,sha,'c'.repeat(40)),false);delete e.procdump_gate;assert.equal(firstPromotionEvidence(e,sha,native),false);});
  write(leaseFile,lease);assert.equal(cli('--action','begin-first-promotion').status,0);
  const pending=JSON.parse(fs.readFileSync(path.join(root,statePath)));
- const receipt={result:'PROMOTED',deploy_id:'first_github_first',deployed_at:new Date().toISOString(),owner_task_id:'F',canonical_product_checkpoint:sha,web_git_sha:sha,native_git_sha:native,github_remote:authority.web.repository,github_ref:'refs/heads/main',web_build_manifest:state.current_web_artifact_manifest,web_build_manifest_sha256:state.current_web_manifest_sha256,native_artifact_path:'map.exe',native_build_sha256:state.native_binaries[0].sha256,runtime_pids:[11,12,13,14],openkore_runtime_count:0,live_acceptance_results:{pass:true},rollback_artifact:state.legacy_rollback.root,files,accepted_capabilities:candidate.capabilities,first_github_first_gates:{}};
+ const nr={schema_version:'native-deploy-v1',deploy_id:'native-fixture',lease_id:lease.lease_id,native_git_sha:native,native_build_sha256:state.native_binaries[0].sha256,new_binary_sha256:state.native_binaries[0].sha256,previous_binary_sha256:state.native_binaries[0].sha256,candidate_manifest_sha256:lease.native_candidate_manifest_sha256,old_map_pid:1,new_map_pid:2,procdump_receipt:{mapPid:2,procdumpAttachStatus:'ATTACHED'},runtime_health:{pass:true,counts:{login:1,char:1,map:1}},openkore_runtime_count:0,rollback_reference:state.legacy_rollback.root,acceptance_status:'NATIVE_CANDIDATE_ACTIVE',artifacts:nativeArtifacts.map(p=>({path:p,sha256:digest(write(p,'legacy-map'))}))};
+ const nativePin={path:nativeReceiptPath,sha256:digest(write(nativeReceiptPath,nr))};
+ write(pendingPath,{...JSON.parse(fs.readFileSync(path.join(root,pendingPath))),native_receipt_sha256:nativePin.sha256});
+ const receipt={lease_id:lease.lease_id,native_deployment_receipt:nativePin,result:'PROMOTED',deploy_id:'first_github_first',deployed_at:new Date().toISOString(),owner_task_id:'F',canonical_product_checkpoint:sha,web_git_sha:sha,native_git_sha:native,github_remote:authority.web.repository,github_ref:'refs/heads/main',web_build_manifest:state.current_web_artifact_manifest,web_build_manifest_sha256:state.current_web_manifest_sha256,native_artifact_path:'map.exe',native_build_sha256:state.native_binaries[0].sha256,runtime_pids:[11,12,13,14],openkore_runtime_count:0,live_acceptance_results:{pass:true},rollback_artifact:state.legacy_rollback.root,files,accepted_capabilities:candidate.capabilities,first_github_first_gates:{}};
  for(const key of ['source_regression','native_build','asset_hash','rollback','single_owner','procdump','runtime_health','live_acceptance'])receipt.first_github_first_gates[key]={pass:true,evidence:'isolated fixture'};
  test('incomplete postdeploy gate cannot finalize',()=>assert.throws(()=>commitAcceptedBaseline(root,pending,lease,{...receipt,first_github_first_gates:{}}),/FINAL_GATES_INCOMPLETE/));
  test('state-write failure leaves consumed marker and drift blocking',()=>{
