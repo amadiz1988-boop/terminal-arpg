@@ -21,12 +21,12 @@ try {
   const files = ['map-info.json', ...readdirSync(join(dataRoots[0], 'map-info'))
     .filter((name) => name.endsWith('.json')).map((name) => join('map-info', name))];
   for (const file of files)
-    assert.deepEqual(readFileSync(join(dataRoots[0], file)),
-      readFileSync(join(dataRoots[1], file)), `nondeterministic output: ${file}`);
+    assert.ok(readFileSync(join(dataRoots[0], file)).equals(
+      readFileSync(join(dataRoots[1], file))), `nondeterministic output: ${file}`);
   const checkedInDataRoot = join(root, 'public', 'ro', 'data');
   for (const file of files)
-    assert.deepEqual(readFileSync(join(dataRoots[0], file)),
-      readFileSync(join(checkedInDataRoot, file)), `stale generated output: ${file}`);
+    assert.ok(readFileSync(join(dataRoots[0], file)).equals(
+      readFileSync(join(checkedInDataRoot, file))), `stale generated output: ${file}`);
 
   const index = JSON.parse(readFileSync(join(dataRoots[0], 'map-info.json'), 'utf8'));
   const visible = new Set(index.worldMap.regions.flatMap((region) => region.mapIds));
