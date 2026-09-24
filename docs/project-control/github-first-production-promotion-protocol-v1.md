@@ -140,6 +140,24 @@ does not yet have an integrated GitHub admission gate and is blocked by policy.
 Every user opened window reads `AGENTS.md`, `WORKSPACE_INDEX.md`, the current
 receipt, and lease before promotion or Production mutation.
 
+### Lineage continuation audit, 2026-09-24
+
+The [Web lineage report](web-main-lineage-reconciliation-v1.md) freezes
+`origin/main` at `6b61e318` and local Web HEAD at `1d16484b` before active W2
+changes. Exact divergence is five remote-only and 271 local-only commits.
+Every local-only commit has a classification. Eleven commits contain client or
+collaboration binary assets whose public-repository redistribution authority
+is unconfirmed. `WEB_MAIN_PROMOTION=PUBLICATION_BLOCKED`; no push occurred.
+
+The [Native full-history audit](native-github-bootstrap-audit-v1.md) restored
+the shallow source's official rAthena ancestry and found historical account
+data, execution logs, removed generated binaries, and third-party binary
+license questions. The user's zero-risk publication gates fail.
+`NATIVE_GITHUB_REMOTE_REQUIRED=YES` remains in force; the proposed private
+`ghost-island-rathena` repository was not created or pushed. The existing Web
+promotion gate checks Native GitHub reachability and therefore fails closed.
+An integrated Native deployment SHA gate remains pending.
+
 ## Verification
 
 `node ops/ro-stack/tests/test-production-promotion-governance.mjs` uses only

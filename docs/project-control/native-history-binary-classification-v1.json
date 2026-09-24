@@ -1,0 +1,468 @@
+{
+  "path_count": 77,
+  "unknown_count": 0,
+  "paths": [
+    {
+      "path": "3rdparty/mysql/lib/Win32/libmysql.dll",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": true,
+      "evidence": "Inherited upstream library or build dependency; no project-delta binary was added."
+    },
+    {
+      "path": "3rdparty/mysql/lib/Win32/libmysql.lib",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": true,
+      "evidence": "Inherited upstream library or build dependency; no project-delta binary was added."
+    },
+    {
+      "path": "3rdparty/mysql/lib/libmysql.lib",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream library or build dependency; no project-delta binary was added."
+    },
+    {
+      "path": "3rdparty/mysql/lib/x64/libmysql.dll",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": true,
+      "evidence": "Inherited upstream library or build dependency; no project-delta binary was added."
+    },
+    {
+      "path": "3rdparty/mysql/lib/x64/libmysql.lib",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": true,
+      "evidence": "Inherited upstream library or build dependency; no project-delta binary was added."
+    },
+    {
+      "path": "3rdparty/mysql/mysql-5.5.24-win32-libmysql.tar.gz",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream library or build dependency; no project-delta binary was added."
+    },
+    {
+      "path": "3rdparty/mysql/mysql-5.5.24-winx64-libmysql.tar.gz",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream library or build dependency; no project-delta binary was added."
+    },
+    {
+      "path": "3rdparty/pcre/lib/Win32/pcre8.dll",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": true,
+      "evidence": "Inherited upstream library or build dependency; no project-delta binary was added."
+    },
+    {
+      "path": "3rdparty/pcre/lib/Win32/pcre8.lib",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": true,
+      "evidence": "Inherited upstream library or build dependency; no project-delta binary was added."
+    },
+    {
+      "path": "3rdparty/pcre/lib/libpcre.dll.a",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream library or build dependency; no project-delta binary was added."
+    },
+    {
+      "path": "3rdparty/pcre/lib/pcre.lib",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream library or build dependency; no project-delta binary was added."
+    },
+    {
+      "path": "3rdparty/pcre/lib/x64/pcre8.dll",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": true,
+      "evidence": "Inherited upstream library or build dependency; no project-delta binary was added."
+    },
+    {
+      "path": "3rdparty/pcre/lib/x64/pcre8.lib",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": true,
+      "evidence": "Inherited upstream library or build dependency; no project-delta binary was added."
+    },
+    {
+      "path": "3rdparty/zlib/lib/Win32/zlib.dll",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": true,
+      "evidence": "Inherited upstream library or build dependency; no project-delta binary was added."
+    },
+    {
+      "path": "3rdparty/zlib/lib/Win32/zlib.lib",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": true,
+      "evidence": "Inherited upstream library or build dependency; no project-delta binary was added."
+    },
+    {
+      "path": "3rdparty/zlib/lib/x64/zlib.dll",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": true,
+      "evidence": "Inherited upstream library or build dependency; no project-delta binary was added."
+    },
+    {
+      "path": "3rdparty/zlib/lib/x64/zlib.lib",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": true,
+      "evidence": "Inherited upstream library or build dependency; no project-delta binary was added."
+    },
+    {
+      "path": "3rdparty/zlib/lib/zdll.lib",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream library or build dependency; no project-delta binary was added."
+    },
+    {
+      "path": "db/GeoIP.dat",
+      "classification": "LICENSE_PUBLICATION_RISK",
+      "tracked_at_head": true,
+      "evidence": "Tracked third-party GeoIP database; redistribution terms for this binary were not established in this audit."
+    },
+    {
+      "path": "db/bgemblem_1.ebm",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream game data or schema-support input."
+    },
+    {
+      "path": "db/bgemblem_2.ebm",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream game data or schema-support input."
+    },
+    {
+      "path": "db/import-tmpl/map_cache.dat",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": true,
+      "evidence": "Inherited upstream game data or schema-support input."
+    },
+    {
+      "path": "db/map_cache.dat",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": true,
+      "evidence": "Inherited upstream game data or schema-support input."
+    },
+    {
+      "path": "db/pre-re/map_cache.dat",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": true,
+      "evidence": "Inherited upstream game data or schema-support input."
+    },
+    {
+      "path": "db/re/map_cache.dat",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": true,
+      "evidence": "Inherited upstream game data or schema-support input."
+    },
+    {
+      "path": "dbghelp.dll",
+      "classification": "LICENSE_PUBLICATION_RISK",
+      "tracked_at_head": false,
+      "evidence": "Historical commit describes it as a Microsoft debugger-package DLL; repository redistribution terms were not established in this audit."
+    },
+    {
+      "path": "doc/Model_Relation.png",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream documentation asset or editable design source."
+    },
+    {
+      "path": "doc/logo.png",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": true,
+      "evidence": "Inherited upstream documentation asset or editable design source."
+    },
+    {
+      "path": "doc/model/Model_Relation.mwb",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": true,
+      "evidence": "Inherited upstream documentation asset or editable design source."
+    },
+    {
+      "path": "doc/model/Model_Relation.png",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": true,
+      "evidence": "Inherited upstream documentation asset or editable design source."
+    },
+    {
+      "path": "doc/model/rathena.vpp",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": true,
+      "evidence": "Inherited upstream documentation asset or editable design source."
+    },
+    {
+      "path": "doc/rathena.vpp",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream documentation asset or editable design source."
+    },
+    {
+      "path": "lib/libmysql.lib",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream library or build dependency; no project-delta binary was added."
+    },
+    {
+      "path": "lib/mysqlclient.lib",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream library or build dependency; no project-delta binary was added."
+    },
+    {
+      "path": "lib/pcre.lib",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream library or build dependency; no project-delta binary was added."
+    },
+    {
+      "path": "lib/zlib-1.2.3",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream library or build dependency; no project-delta binary was added."
+    },
+    {
+      "path": "libmysql.dll",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream library or build dependency; no project-delta binary was added."
+    },
+    {
+      "path": "mac.rathena-start.scpt",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": true,
+      "evidence": "Inherited upstream support source or historical asset; not a project-delta binary."
+    },
+    {
+      "path": "pcre3.dll",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream library or build dependency; no project-delta binary was added."
+    },
+    {
+      "path": "plugins/dbghelpplug.dll",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream library or build dependency; no project-delta binary was added."
+    },
+    {
+      "path": "plugins/exchndl.dll",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream library or build dependency; no project-delta binary was added."
+    },
+    {
+      "path": "plugins/upnp.dll",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream library or build dependency; no project-delta binary was added."
+    },
+    {
+      "path": "readme/banner.jpg",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream documentation asset or editable design source."
+    },
+    {
+      "path": "readme/btmcontentbg.jpg",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream documentation asset or editable design source."
+    },
+    {
+      "path": "readme/btmleftcontent.jpg",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream documentation asset or editable design source."
+    },
+    {
+      "path": "readme/btmrightcontent.jpg",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream documentation asset or editable design source."
+    },
+    {
+      "path": "readme/btwngreentab.jpg",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream documentation asset or editable design source."
+    },
+    {
+      "path": "readme/finalwhttab.jpg",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream documentation asset or editable design source."
+    },
+    {
+      "path": "readme/grnlefttab.jpg",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream documentation asset or editable design source."
+    },
+    {
+      "path": "readme/grntabbg.jpg",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream documentation asset or editable design source."
+    },
+    {
+      "path": "readme/grntabfinalright.jpg",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream documentation asset or editable design source."
+    },
+    {
+      "path": "readme/grnwhttab.jpg",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream documentation asset or editable design source."
+    },
+    {
+      "path": "readme/images/banner.gif",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream documentation asset or editable design source."
+    },
+    {
+      "path": "readme/images/bg.gif",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream documentation asset or editable design source."
+    },
+    {
+      "path": "readme/images/btmborder.gif",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream documentation asset or editable design source."
+    },
+    {
+      "path": "readme/images/btmborderbg.gif",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream documentation asset or editable design source."
+    },
+    {
+      "path": "readme/images/chara.gif",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream documentation asset or editable design source."
+    },
+    {
+      "path": "readme/images/clown.png",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream documentation asset or editable design source."
+    },
+    {
+      "path": "readme/images/leftbg.gif",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream documentation asset or editable design source."
+    },
+    {
+      "path": "readme/images/leftborder.gif",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream documentation asset or editable design source."
+    },
+    {
+      "path": "readme/images/logo.gif",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream documentation asset or editable design source."
+    },
+    {
+      "path": "readme/images/logobtm.gif",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream documentation asset or editable design source."
+    },
+    {
+      "path": "readme/images/rightbg.gif",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream documentation asset or editable design source."
+    },
+    {
+      "path": "readme/images/rightborder.gif",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream documentation asset or editable design source."
+    },
+    {
+      "path": "readme/images/textbg.gif",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream documentation asset or editable design source."
+    },
+    {
+      "path": "readme/readmelefttab.jpg",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream documentation asset or editable design source."
+    },
+    {
+      "path": "readme/readmerighttab.jpg",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream documentation asset or editable design source."
+    },
+    {
+      "path": "readme/rightcontentbg.jpg",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream documentation asset or editable design source."
+    },
+    {
+      "path": "readme/topcontentbg.jpg",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream documentation asset or editable design source."
+    },
+    {
+      "path": "readme/toprightcontent.jpg",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream documentation asset or editable design source."
+    },
+    {
+      "path": "readme/whttabbg.jpg",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream documentation asset or editable design source."
+    },
+    {
+      "path": "src/webserver/Webserver.exe",
+      "classification": "GENERATED_ARTIFACT",
+      "tracked_at_head": false,
+      "evidence": "Compiled executable added in SVN-era history and deleted in the next revision; absent at current HEAD."
+    },
+    {
+      "path": "vcproj-6/char/char.ncb",
+      "classification": "GENERATED_ARTIFACT",
+      "tracked_at_head": false,
+      "evidence": "Visual Studio browse cache added and later deleted; absent at current HEAD."
+    },
+    {
+      "path": "vcproj-6/char/char.opt",
+      "classification": "GENERATED_ARTIFACT",
+      "tracked_at_head": false,
+      "evidence": "Visual Studio user options cache added and later deleted; absent at current HEAD."
+    },
+    {
+      "path": "vcproj-6/trunk.ncb",
+      "classification": "GENERATED_ARTIFACT",
+      "tracked_at_head": false,
+      "evidence": "Visual Studio browse cache added and later deleted; absent at current HEAD."
+    },
+    {
+      "path": "vcproj-6/trunk.opt",
+      "classification": "GENERATED_ARTIFACT",
+      "tracked_at_head": false,
+      "evidence": "Visual Studio user options cache added and later deleted; absent at current HEAD."
+    },
+    {
+      "path": "zlib1.dll",
+      "classification": "SAFE_SOURCE",
+      "tracked_at_head": false,
+      "evidence": "Inherited upstream library or build dependency; no project-delta binary was added."
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "repository": "C:\\Users\\Administrator\\source\\ghost-island-rathena",
+  "range": "e985006171d2eb320ee512a653f4c83aea3d81b6..HEAD",
+  "object_count": 766,
+  "blob_count": 317,
+  "text_blobs_scanned": 300,
+  "large_text_not_scanned": [],
+  "secret_pattern_counts": {},
+  "secret_findings": [],
+  "path_flags": [],
+  "large_blobs_over_5mb": [],
+  "tracked_binary_extension_counts": {}
+}

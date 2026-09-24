@@ -1,0 +1,878 @@
+{
+  "repository": "C:\\Users\\Administrator\\source\\ghost-island-rathena",
+  "range": "HEAD",
+  "object_count": 177479,
+  "blob_count": 83465,
+  "text_blobs_scanned": 82260,
+  "large_text_not_scanned": [],
+  "secret_pattern_counts": {
+    "ASSIGNED_CREDENTIAL": 39
+  },
+  "secret_findings": [
+    {
+      "object": "660f571c16e88d62cee340aa33fac6192adcd367",
+      "path": "3rdparty/rapidyaml/ext/c4core/.github/vagrant/Vagrantfile",
+      "line": 34,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "9b2126beecef20afaee1b13a04514370cb2ca133",
+      "path": "tools/config.pl",
+      "line": 314,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "9b2126beecef20afaee1b13a04514370cb2ca133",
+      "path": "tools/config.pl",
+      "line": 325,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "c04abf493866fb488ac5dffe37f6ed59d5b013b5",
+      "path": "tools/config.pl",
+      "line": 315,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "c04abf493866fb488ac5dffe37f6ed59d5b013b5",
+      "path": "tools/config.pl",
+      "line": 326,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "2ec3dea28342d4a3d040fb072144fdb27fe30cc6",
+      "path": "tools/config.pl",
+      "line": 315,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "2ec3dea28342d4a3d040fb072144fdb27fe30cc6",
+      "path": "tools/config.pl",
+      "line": 326,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "3434f35b375de9464c46d1e0877a3a7d4ea0f763",
+      "path": "tools/config.pl",
+      "line": 315,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "3434f35b375de9464c46d1e0877a3a7d4ea0f763",
+      "path": "tools/config.pl",
+      "line": 326,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "74f8b18d0bc1fcdc8a785fd74121d98bdba33e70",
+      "path": "tools/config.pl",
+      "line": 297,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "74f8b18d0bc1fcdc8a785fd74121d98bdba33e70",
+      "path": "tools/config.pl",
+      "line": 307,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "c28982f065f5c610742f28f8ce5348f106befcea",
+      "path": "tools/config.pl",
+      "line": 298,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "c28982f065f5c610742f28f8ce5348f106befcea",
+      "path": "tools/config.pl",
+      "line": 308,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "17ac99f55881326e333fb2ef7f1aea0e33acf437",
+      "path": "tools/config.pl",
+      "line": 305,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "17ac99f55881326e333fb2ef7f1aea0e33acf437",
+      "path": "tools/config.pl",
+      "line": 315,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "1d91fc6aee28ecb89de3d95e871d0da0074e26d4",
+      "path": "tools/config.pl",
+      "line": 292,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "1d91fc6aee28ecb89de3d95e871d0da0074e26d4",
+      "path": "tools/config.pl",
+      "line": 302,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "681bc04ce3b9df16f3f7c93da0a6677bcd818195",
+      "path": "tools/config.pl",
+      "line": 283,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "681bc04ce3b9df16f3f7c93da0a6677bcd818195",
+      "path": "tools/config.pl",
+      "line": 293,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "e371180c3b4c2d04b1a8c369d20054e33ac6f79b",
+      "path": "tools/config.pl",
+      "line": 255,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "e371180c3b4c2d04b1a8c369d20054e33ac6f79b",
+      "path": "tools/config.pl",
+      "line": 265,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "b2f266fa5dcc34ecf6add898b683e843274b3461",
+      "path": "tools/config.pl",
+      "line": 255,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "b2f266fa5dcc34ecf6add898b683e843274b3461",
+      "path": "tools/config.pl",
+      "line": 265,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "671bc3a54c7705305afc8beef5af3ac57150505e",
+      "path": "tools/config.pl",
+      "line": 253,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "671bc3a54c7705305afc8beef5af3ac57150505e",
+      "path": "tools/config.pl",
+      "line": 263,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "3f565d336b13edf65e0e1e65beed4f224cb84f7b",
+      "path": "config.pl",
+      "line": 201,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "3f565d336b13edf65e0e1e65beed4f224cb84f7b",
+      "path": "config.pl",
+      "line": 211,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "549a13503107099c6e605bda2080b59fe029954b",
+      "path": "tools/config.pl",
+      "line": 215,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "549a13503107099c6e605bda2080b59fe029954b",
+      "path": "tools/config.pl",
+      "line": 225,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "452ef445b6d323274e9324eef6a709c49279d301",
+      "path": "tools/config.pl",
+      "line": 215,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "452ef445b6d323274e9324eef6a709c49279d301",
+      "path": "tools/config.pl",
+      "line": 225,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "9a8edd53ac6b3a70144bb765b3888cbf378f5403",
+      "path": "config.pl",
+      "line": 201,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "9a8edd53ac6b3a70144bb765b3888cbf378f5403",
+      "path": "config.pl",
+      "line": 211,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "559354a6753f357feb73521a0f3f50275f6544ed",
+      "path": "tools/config.pl",
+      "line": 215,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "559354a6753f357feb73521a0f3f50275f6544ed",
+      "path": "tools/config.pl",
+      "line": 225,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "b59e08a19cf9de1cf538f32607d1e0ddbd630b2d",
+      "path": "tools/config.pl",
+      "line": 213,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "b59e08a19cf9de1cf538f32607d1e0ddbd630b2d",
+      "path": "tools/config.pl",
+      "line": 223,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "4115c8abb2de3fc6f7dc9d66fce7ff1ee275c0f6",
+      "path": "tools/config.pl",
+      "line": 191,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "4115c8abb2de3fc6f7dc9d66fce7ff1ee275c0f6",
+      "path": "tools/config.pl",
+      "line": 201,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    }
+  ],
+  "path_flags": [
+    {
+      "object": "939c7eee7f13a8ae5d9afaf03d67ca491e1d69e0",
+      "path": "tools/backup.pl",
+      "bytes": 2632
+    },
+    {
+      "object": "a097f2086f131234147d39486f998f28e95cbb3c",
+      "path": "3rdparty/mysql/mysql-5.5.24-win32-libmysql.tar.gz",
+      "bytes": 2094955
+    },
+    {
+      "object": "56a39a59a90494b718f3915070b3955b35269882",
+      "path": "3rdparty/mysql/mysql-5.5.24-winx64-libmysql.tar.gz",
+      "bytes": 2076879
+    }
+  ],
+  "large_blobs_over_5mb": [
+    {
+      "object": "dbac991a7ab184410db168612d7dc3e0764fdaf9",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6155801
+    },
+    {
+      "object": "b719007c0ff03b68271905b49180a773e6d577a8",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6155799
+    },
+    {
+      "object": "68c31bafd10f72bb2000e1850eb8a970d283af7e",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6155799
+    },
+    {
+      "object": "f3ece41059a404e2b4b26166a34e901ea9936a11",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6153803
+    },
+    {
+      "object": "f629fde6195feaf1c57f035befc55561a29dc717",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6153535
+    },
+    {
+      "object": "ce503a613d93f8cb24fa891d19598e67ae37fea1",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6151769
+    },
+    {
+      "object": "3b4e235b85c0e1c9b23f4f5646283b614725a0d6",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6151615
+    },
+    {
+      "object": "4493191aae4c42e9a39b4d6dfc7be2bc26787e71",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6150404
+    },
+    {
+      "object": "2db50d297273183dacd67a8cc504ea747cb0830d",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6149286
+    },
+    {
+      "object": "26043c1eff259c306d1b921baf4e241ab3e7578f",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6149077
+    },
+    {
+      "object": "be8b2df773cfbf399efd3363e211d78d5a1ee0ab",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6147866
+    },
+    {
+      "object": "1741a812359b132b50a33ef986e2db2ffb7fb1e0",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6147827
+    },
+    {
+      "object": "26078fb8201b435145f26df56bf9b6b1c06fb82d",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6145839
+    },
+    {
+      "object": "ea8c8bc6bb98732567e0533cfe2e08f3786f0453",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6145315
+    },
+    {
+      "object": "6e555ef771fbadae2cdd74165a746f79a5ef6bf3",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6143174
+    },
+    {
+      "object": "934a4f5796c74cd325b10bc0dd13c271159ec587",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6143073
+    },
+    {
+      "object": "cda3a2c7f3823535ed76752adb2cb18c02669315",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6140006
+    },
+    {
+      "object": "4976c04a66233765fad1772190a04ad85c73a1b7",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6139814
+    },
+    {
+      "object": "48aba3ed115eb7c9a1d3ca7bac549e95b5845654",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6137270
+    },
+    {
+      "object": "4f3f93b3fadc8c70a24fe82e300ad88858167b7f",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6137061
+    },
+    {
+      "object": "44cde6fdd1b31eaa5d3f390282f1a0cbb8ae5afa",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6137040
+    },
+    {
+      "object": "db04dc89cb54334ffba39da4c4988755d9255d50",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6135347
+    },
+    {
+      "object": "bd38b9dd17c82a4456fd7d3dcd65aa04cd3f1745",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6135281
+    },
+    {
+      "object": "64d0621e9081ebafb5c54bb2d1270d24620a13cf",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6133984
+    },
+    {
+      "object": "249f8d2dce7e7b3d9f4e23fc617bb1a2880bac7e",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6133934
+    },
+    {
+      "object": "216922802c5178f0fec2c0441e536f9eb230bbf8",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6131341
+    },
+    {
+      "object": "4a5543eb8d3ad3d23734452d5bbea36d4d633919",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6131272
+    },
+    {
+      "object": "b527733367cdecd9a222bc602c6f446105091976",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6129834
+    },
+    {
+      "object": "d00628647c42a48353516e470a10c6f2fa7192f4",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6129799
+    },
+    {
+      "object": "f93bf7f31da932d675b19480ead7cbe1daed7b5d",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6129778
+    },
+    {
+      "object": "6a5aa5bf698fa77cb6e025a1353756d4c977ab32",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6128072
+    },
+    {
+      "object": "2dedde49cbf72143ea25e50df3a78a155ccf46f9",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6126527
+    },
+    {
+      "object": "b2bbd816af158129e7deecb09bf30b3c420a74f2",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6126278
+    },
+    {
+      "object": "830e9dc84ce5c9bd18a3688a6c368721ef8d9050",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6125215
+    },
+    {
+      "object": "6f15e24c08b684e3928eb60f8f1fff32640ef4c7",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6124762
+    },
+    {
+      "object": "2afcf1872d8f08d2ed99239d75344f561e0bd8dd",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6123745
+    },
+    {
+      "object": "628eec228e53466c56d7dfd8f35b0020e9b4cdb0",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6122797
+    },
+    {
+      "object": "282737ca5d297fb1382771890b2efdb950025ab6",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6122776
+    },
+    {
+      "object": "1d30a092b798e3e2fa4a50bd8ee92595bb6ae184",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6121286
+    },
+    {
+      "object": "a31c3e357e4be3db24b571e6cc07f1832461e7c9",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6120611
+    },
+    {
+      "object": "da3ec03b648b9716850a6eabcb98da90310a01e4",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6120545
+    },
+    {
+      "object": "f87cd7ca0c5a714e546986f2ba9611aa4e4c3185",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6120495
+    },
+    {
+      "object": "572371888f1d4980300e083a0a97bf50c52b50fe",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6120491
+    },
+    {
+      "object": "ca4f139188c03b0c175f8db99956eb147a2144d8",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6119663
+    },
+    {
+      "object": "ac9bf8db62620acf490cb8ff5f078255028c14b7",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6119624
+    },
+    {
+      "object": "e203e98f0d5dd287b9b12bcafb47133872464f3f",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6118360
+    },
+    {
+      "object": "a5c275c867867f391669e777e2be6bfe14ddd329",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6115103
+    },
+    {
+      "object": "adfbecfd0377535dccb02b2109c436cc13e8c73c",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6115102
+    },
+    {
+      "object": "f9a01bf6da32f7fc3bc43f97d9d85697b48829ed",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6115072
+    },
+    {
+      "object": "b191de74a8907b58fde19bceaec0b5ad9608ebf1",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6115031
+    },
+    {
+      "object": "80f9eaf9a04ddce9e1ec486f421189656843a9d8",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6114528
+    },
+    {
+      "object": "72682d0149a1aa0784a1680f4ae94b97e8d6aa5c",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6114512
+    },
+    {
+      "object": "204da5405ede7d4189daf99de8b3fe60a397226e",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6114189
+    },
+    {
+      "object": "62d2209e496c8bfd2976f2ff7232a193b537118c",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6110300
+    },
+    {
+      "object": "a6dab09e0d556251e5735f485485f2d9f16bf608",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6110252
+    },
+    {
+      "object": "589a450085c18efc67916b4b4c3722cad021e2cb",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6110098
+    },
+    {
+      "object": "ebb2cf9f07e9f258502ccde0cfdcb7627a335f34",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6110083
+    },
+    {
+      "object": "e901cade1fb5c46fdf9ed77880e1d840502a3433",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6109905
+    },
+    {
+      "object": "64f8098921f129c58f38d63a7bda1d6b5b11983f",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6109765
+    },
+    {
+      "object": "e8d3746a046a9d88bce0efbf0c56e076ccfa82c7",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6082284
+    },
+    {
+      "object": "1739ee16d5f86951fd0ea969a92a0bb871938667",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 6082245
+    },
+    {
+      "object": "84ce9e55964f3c902010157d865dc3f37cbc96ab",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5941099
+    },
+    {
+      "object": "5d7bb3a81802429a738899d1728f651218cfbf68",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5940691
+    },
+    {
+      "object": "a3cc36da63d6ac450ad074dfdba6715c2d2c19fe",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5940229
+    },
+    {
+      "object": "999a569b32780e6b32fc30a508b684478bfbfa15",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5940218
+    },
+    {
+      "object": "bf65b96ab5f44dc3a1cab12b80114e20f3603202",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5940203
+    },
+    {
+      "object": "6184256ad594d3a6cfd056e9fb71b440ee9d2608",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5939966
+    },
+    {
+      "object": "31430b218e947bb29734013eea5cc01e25a6cee2",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5937795
+    },
+    {
+      "object": "21818ac62a7b5b1c46b6d90b20fdf5e9ab0a2bf3",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5937795
+    },
+    {
+      "object": "e634af9ffc6c7329af97a8342dc753cc50aae397",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5911890
+    },
+    {
+      "object": "c9bd51c5e1a8edc0ae8cf3185b3a69ec72df0a28",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5911889
+    },
+    {
+      "object": "f3e13754b0e79e0570bcece9c85ba03a1911de8d",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5908643
+    },
+    {
+      "object": "d57f60b8a6685aec9513f929c87ebb5741552fda",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5873226
+    },
+    {
+      "object": "ca591ba1ce26d4b71fadf963ca08c74710a4d534",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5852400
+    },
+    {
+      "object": "0fc8a977925953bb29eec552dd3298232a06f878",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5852343
+    },
+    {
+      "object": "4d59f597b7bbc591c9a1314014ef89ec5c73b95d",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5805223
+    },
+    {
+      "object": "845419a684077ceab7c06aff51fc7fd2e18fa83c",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5680048
+    },
+    {
+      "object": "cd8e7d1e1fb88e97a999aacfd391f8520b394075",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5679250
+    },
+    {
+      "object": "60bacc3e92b55d76c9071cc88f61b8b2bef860d7",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5657712
+    },
+    {
+      "object": "4dcbab704fc9a4d23a085fb57dac7154ac09af22",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5654785
+    },
+    {
+      "object": "a5b0c1716b485336475c2fb2eedbc16b5b370f3a",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5652474
+    },
+    {
+      "object": "f7f92c3171b342ea88e68cae924fe77abc75848a",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5652416
+    },
+    {
+      "object": "12b1c11d5e4241215706134d1b989e78cafac256",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5631768
+    },
+    {
+      "object": "ef5cc0bb3098314e12539ce46daf5e16ff84603c",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5631761
+    },
+    {
+      "object": "cd95724253a69e9ca901b384e3c91da9906ab55b",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5577545
+    },
+    {
+      "object": "4b74bdd20eb1014cc0242b74b192efb50cba4110",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5577518
+    },
+    {
+      "object": "d369168eaebe953808b8bb8440ab927f8ab73665",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5576838
+    },
+    {
+      "object": "54b626c0fc002086ee32bcb86b8a5c330121321e",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5551709
+    },
+    {
+      "object": "d7034049a208a80ba2564f7a716cacf84e427580",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5551453
+    },
+    {
+      "object": "ef35d01138198842f032539f231d832dd1ae065c",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5523221
+    },
+    {
+      "object": "d7dfd5957ca0f352ba270979e38df1912541fa3d",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5523219
+    },
+    {
+      "object": "edf2c6135dfc910548673abc32c0bb56e733c8a2",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5522925
+    },
+    {
+      "object": "021aee761879ec310fca70ca3767c1755c6973f4",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5522924
+    },
+    {
+      "object": "acf278079f334a990df346f2b188fae7b7b4ee4d",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5522920
+    },
+    {
+      "object": "6baf1d2f6617b861a5cc0d60eefbcb1b0428e0e5",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5522918
+    },
+    {
+      "object": "2347cbfd6a800ffeb24eb88ccc8a54bab7a9d5ee",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5522845
+    },
+    {
+      "object": "639b3f117f7c6b0f1894063bd5c0e7b2c5a01fa0",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5522845
+    },
+    {
+      "object": "84e1ccffbea22c95c5f2e236c0061f64198700d6",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5490266
+    },
+    {
+      "object": "bc913c1bc0e994f405f22b323c7f4682ef4f56b6",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5490262
+    },
+    {
+      "object": "9da40130fc45e1ef7a4bf219c367d4b184274695",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5490140
+    },
+    {
+      "object": "2abd4460b171c152124107d87fdda4ee8f9a0ee7",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5489543
+    },
+    {
+      "object": "d2783859f6f550bc279527ee0dbf54345d03247e",
+      "path": "3rdparty/mysql/lib/x64/libmysql.dll",
+      "bytes": 5482496
+    },
+    {
+      "object": "57348108e805768192ade8ec666a3f78e546b106",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5324155
+    },
+    {
+      "object": "213a678d082e680e469ed24bae189d884ec3b0c6",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5284673
+    },
+    {
+      "object": "8be2f24a591aa4f133364b9021e35cbaab336104",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5255722
+    },
+    {
+      "object": "e6b7bd1378cb9da82d484a9b16863d44da239465",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5249363
+    },
+    {
+      "object": "2b3c1443dc50de20c81a85d7e227a7c38bb3b492",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5249134
+    },
+    {
+      "object": "0535a66a17993594e7d460b944122af11beafa18",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5249131
+    },
+    {
+      "object": "8b0db0a8e033f889fd22255350bf3466b58a67e8",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5248780
+    },
+    {
+      "object": "34e991ec9d28c3e3a0c9b1a05182c4db5e810377",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5248163
+    },
+    {
+      "object": "895fc23e6af9790d1dbc1451e7614502434517f0",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5245434
+    },
+    {
+      "object": "7aa1d2ad9b4b63f52f9d64b841f5e6c2a8303008",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5245061
+    },
+    {
+      "object": "bd272aa03670f961173e08dc4e58716bacdcf038",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5245056
+    },
+    {
+      "object": "9b1143e9f81fc34cd9b9261fd64f9cd601b0c7b5",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5241286
+    },
+    {
+      "object": "fb9120f81227065f9adc53fcb6159c8a6e07ca59",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5221157
+    },
+    {
+      "object": "ad6ad7fb7df0bfbe432d23f74409d0d51b7de50d",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5221101
+    },
+    {
+      "object": "8ea256440e69142d14deae18960c496d0507a11a",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5221095
+    },
+    {
+      "object": "43206a4624be3555f86a76751effba8b852444fa",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5220939
+    },
+    {
+      "object": "274cab7fa6b799e59261e8bdd358d45b86ab9d8c",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5220137
+    },
+    {
+      "object": "c278384c4530c7931ad445ffe8cc55a7d34095c7",
+      "path": "3rdparty/mysql/lib/Win32/libmysql.dll",
+      "bytes": 5120000
+    },
+    {
+      "object": "70b4a173f50734e217dcfbdb315fe5ea47b71cd2",
+      "path": "db/re/item_db_equip.yml",
+      "bytes": 5076188
+    }
+  ],
+  "tracked_binary_extension_counts": {
+    ".dll": 22,
+    ".png": 4,
+    ".gif": 13,
+    ".jpg": 16,
+    ".exe": 1
+  }
+}

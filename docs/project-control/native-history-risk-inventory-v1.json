@@ -1,0 +1,172 @@
+{
+  "native_head": "de168f566325f140c87b355a1d442dddabf0b8ad",
+  "branch": "integration/p2-openkore-exit-native-v1",
+  "upstream_baseline": "e985006171d2eb320ee512a653f4c83aea3d81b6",
+  "full_reachable_commit_count": 19352,
+  "project_delta_commit_count": 83,
+  "risk_items": [
+    {
+      "path": "log/login.log",
+      "classifications": [
+        "SECRET_RISK",
+        "RUNTIME_ONLY"
+      ],
+      "evidence": "Historical login execution log contains account-related events and a logged default GM password setting; values are deliberately omitted.",
+      "added_by": [
+        "706e785091b4b16b0626289e69fc5ac4ab3bc068"
+      ],
+      "deleted_by": [
+        "ce028642da998cfa9c11bee86c2546c71d89ec5f"
+      ],
+      "reachable_blob_versions": 6,
+      "tracked_at_head": false
+    },
+    {
+      "path": "log/char.log",
+      "classifications": [
+        "SECRET_RISK",
+        "RUNTIME_ONLY"
+      ],
+      "evidence": "Historical character execution log contains account identifiers and character names; values are deliberately omitted.",
+      "added_by": [
+        "706e785091b4b16b0626289e69fc5ac4ab3bc068"
+      ],
+      "deleted_by": [
+        "ce028642da998cfa9c11bee86c2546c71d89ec5f"
+      ],
+      "reachable_blob_versions": 6,
+      "tracked_at_head": false
+    },
+    {
+      "path": "save-tmpl/account.txt",
+      "classifications": [
+        "SECRET_RISK"
+      ],
+      "evidence": "Seven historical account sample versions contain populated account rows and nonreserved email addresses; credential status cannot be safely cleared for publication.",
+      "added_by": [
+        "2178a86317261d23e807400c4b62019ebf8c0094",
+        "91c88689f50e68b8bd97f0b40161d49002d4f456"
+      ],
+      "deleted_by": [
+        "bf1c81839f398c562dbde83b9f87714aae9da70e",
+        "fd99753f8e3286ded16da7a2b8901d97eac68832"
+      ],
+      "reachable_blob_versions": 7,
+      "tracked_at_head": false
+    },
+    {
+      "path": "save/castle.txt",
+      "classifications": [
+        "RUNTIME_ONLY"
+      ],
+      "evidence": "Historical saved world-state data, absent at current HEAD.",
+      "added_by": [],
+      "deleted_by": [],
+      "reachable_blob_versions": 1,
+      "tracked_at_head": false
+    },
+    {
+      "path": "src/webserver/Webserver.exe",
+      "classifications": [
+        "GENERATED_ARTIFACT"
+      ],
+      "evidence": "Compiled executable added in SVN-era history and deleted in the next revision; absent at current HEAD.",
+      "added_by": [
+        "f81cef7396ab74c2b2ce1db1faf2839846e66d47"
+      ],
+      "deleted_by": [
+        "0ba4a793458b3c501b5b214d857b5ab044daaaf1"
+      ],
+      "reachable_blob_versions": 1,
+      "tracked_at_head": false
+    },
+    {
+      "path": "vcproj-6/char/char.ncb",
+      "classifications": [
+        "GENERATED_ARTIFACT"
+      ],
+      "evidence": "Visual Studio browse cache added and later deleted; absent at current HEAD.",
+      "added_by": [
+        "e0ed8401c4fc975a7fbc9598a09be0599e1522fd"
+      ],
+      "deleted_by": [
+        "6907f6ee3ffd3b3140bd8a59d06172892c5158a4"
+      ],
+      "reachable_blob_versions": 1,
+      "tracked_at_head": false
+    },
+    {
+      "path": "vcproj-6/char/char.opt",
+      "classifications": [
+        "GENERATED_ARTIFACT"
+      ],
+      "evidence": "Visual Studio user options cache added and later deleted; absent at current HEAD.",
+      "added_by": [
+        "e0ed8401c4fc975a7fbc9598a09be0599e1522fd"
+      ],
+      "deleted_by": [
+        "d956555b75eb83542a743b63c591fe6770a5e7be"
+      ],
+      "reachable_blob_versions": 1,
+      "tracked_at_head": false
+    },
+    {
+      "path": "vcproj-6/trunk.ncb",
+      "classifications": [
+        "GENERATED_ARTIFACT"
+      ],
+      "evidence": "Visual Studio browse cache added and later deleted; absent at current HEAD.",
+      "added_by": [
+        "e0ed8401c4fc975a7fbc9598a09be0599e1522fd"
+      ],
+      "deleted_by": [
+        "6907f6ee3ffd3b3140bd8a59d06172892c5158a4"
+      ],
+      "reachable_blob_versions": 1,
+      "tracked_at_head": false
+    },
+    {
+      "path": "vcproj-6/trunk.opt",
+      "classifications": [
+        "GENERATED_ARTIFACT"
+      ],
+      "evidence": "Visual Studio user options cache added and later deleted; absent at current HEAD.",
+      "added_by": [
+        "e0ed8401c4fc975a7fbc9598a09be0599e1522fd"
+      ],
+      "deleted_by": [
+        "d956555b75eb83542a743b63c591fe6770a5e7be"
+      ],
+      "reachable_blob_versions": 1,
+      "tracked_at_head": false
+    },
+    {
+      "path": "dbghelp.dll",
+      "classifications": [
+        "LICENSE_PUBLICATION_RISK"
+      ],
+      "evidence": "Historical commit describes it as a Microsoft debugger-package DLL; repository redistribution terms were not established in this audit.",
+      "added_by": [
+        "0beb67030564f9db030ca3405035a396ce734c6a"
+      ],
+      "deleted_by": [
+        "be9b13d0bcd82f8a0709db6681bd36186b14f1ef"
+      ],
+      "reachable_blob_versions": 1,
+      "tracked_at_head": false
+    },
+    {
+      "path": "db/GeoIP.dat",
+      "classifications": [
+        "LICENSE_PUBLICATION_RISK"
+      ],
+      "evidence": "Tracked third-party GeoIP database; redistribution terms for this binary were not established in this audit.",
+      "added_by": [
+        "d1beddaeb1deae9d345ce5fdc719dbc0afee1292"
+      ],
+      "deleted_by": [],
+      "reachable_blob_versions": 3,
+      "tracked_at_head": true
+    }
+  ]
+}
