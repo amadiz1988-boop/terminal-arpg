@@ -1,0 +1,78 @@
+{
+  "repository": "C:\\Users\\Administrator\\.codex\\.chatgpt-projects\\g-p-6a9bcb57afdc8191966436643af8acdf\\terminal-arpg",
+  "range": "origin/main..1d16484b82230b4bf2f6727b3bae8551675a5a41",
+  "object_count": 4090,
+  "blob_count": 2619,
+  "text_blobs_scanned": 1465,
+  "large_text_not_scanned": [],
+  "secret_pattern_counts": {
+    "ASSIGNED_CREDENTIAL": 7
+  },
+  "secret_findings": [
+    {
+      "object": "df1659476c7caa32f6cfa2f462ef6fc73e232d6a",
+      "path": "ops/ro-stack/quest-runtime/rogue-adapter.mjs",
+      "line": 165,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "df1659476c7caa32f6cfa2f462ef6fc73e232d6a",
+      "path": "ops/ro-stack/quest-runtime/rogue-adapter.mjs",
+      "line": 166,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "df1659476c7caa32f6cfa2f462ef6fc73e232d6a",
+      "path": "ops/ro-stack/quest-runtime/rogue-adapter.mjs",
+      "line": 167,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "1ce2885f7e5fc20d532e6792e7ab1d02ade73c21",
+      "path": "scripts/test-discord-oauth-account-linking.mjs",
+      "line": 81,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "b3cbb613204bb1c2b8798083f6dca04a9675ad38",
+      "path": "scripts/test-ops-agent-contract.mjs",
+      "line": 106,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "afa0479952f8faf2a2f22222d704043c97e18eaf",
+      "path": "scripts/test-player-action-trace-foundation.mjs",
+      "line": 18,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    },
+    {
+      "object": "0cab8143ff057442685921bb3535f4e2d27420e9",
+      "path": "scripts/test-rathena-debug-reference.mjs",
+      "line": 40,
+      "pattern": "ASSIGNED_CREDENTIAL"
+    }
+  ],
+  "path_flags": [],
+  "large_blobs_over_5mb": [
+    {
+      "object": "f73ad8b0e46dc25d00b2d77c03ed425ec3e007e6",
+      "path": "public/ro/client/showcase/manifest.json",
+      "bytes": 8424906
+    },
+    {
+      "object": "5b82f57eaaba923d4ff7923be6410c215f267211",
+      "path": "public/ro/client/showcase/manifest.json",
+      "bytes": 8406685
+    },
+    {
+      "object": "62497928f470c0766bb233aa078159258ab78f6b",
+      "path": "docs/openkore-reference/world-map-inventory.json",
+      "bytes": 8218660
+    }
+  ],
+  "tracked_binary_extension_counts": {
+    ".webp": 5,
+    ".png": 1138,
+    ".wav": 1
+  }
+}
