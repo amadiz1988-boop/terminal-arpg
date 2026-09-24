@@ -64,6 +64,7 @@ function Get-Snapshot {
   if ($dashboard.Count -ne 1 -or $db.Count -ne 1 -or $openkore -ne 0) { $pass = $false }
   $capture = $null
   $identity = $null
+  $dumpAccount = $null
   $captureFile = Join-Path $runtime 'procdump-attachment-state.json'
   if (Test-Path -LiteralPath $captureFile) {
     $capture = Read-GovernanceJson $captureFile
@@ -80,11 +81,24 @@ function Get-Snapshot {
       $identity.PROCESS_IDENTITY_MATCH = 'NO'
       $identity.reason = 'PROCDUMP_HASH_MISMATCH'
     }
+    if ($identity.PROCESS_IDENTITY_MATCH -eq 'YES') {
+      $matchedSidecar = @($sidecars | Where-Object { $_.ProcessId -eq [int]$identity.procdump_pid })
+      if ($matchedSidecar.Count -eq 1) {
+        try {
+          $owner = Invoke-CimMethod -InputObject $matchedSidecar[0] -MethodName GetOwner -ErrorAction Stop
+          if ($owner.ReturnValue -eq 0) { $dumpAccount = '{0}\{1}' -f $owner.Domain, $owner.User }
+        } catch { $dumpAccount = $null }
+      }
+      if ($dumpAccount -cne 'NT AUTHORITY\SYSTEM') {
+        $identity.PROCESS_IDENTITY_MATCH = 'NO'
+        $identity.reason = 'PROCDUMP_NOT_SYSTEM'
+      }
+    }
     if ($identity.PROCESS_IDENTITY_MATCH -ne 'YES') { $capture = $null }
   }
   return [pscustomobject]@{pass=$pass; counts=$counts; pids=$pids; processes=$processes; openkore_runtime_count=$openkore;
     dashboard_pid= $(if($dashboard.Count -eq 1){$dashboard[0]}else{0}); database_pid=$(if($db.Count -eq 1){$db[0]}else{0});
-    procdump_receipt=$capture; procdump_process_identity=$identity; measured_at=[DateTime]::UtcNow.ToString('o')}
+    procdump_receipt=$capture; procdump_process_identity=$identity; procdump_account=$dumpAccount; measured_at=[DateTime]::UtcNow.ToString('o')}
 }
 
 # Lease identity is exact: explicit UTF-8 JSON and ordinal comparison. Unicode
