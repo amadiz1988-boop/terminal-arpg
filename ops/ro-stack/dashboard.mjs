@@ -121,7 +121,10 @@ import {
 } from './persistent-agent/map-route.mjs';
 import { kafraContextForPlan } from './persistent-agent/kafra-content.mjs';
 import { worldMapTeleportDecision } from './persistent-agent/world-map-teleport-policy.mjs';
-import { SUPPLY_TOWN_SERVICES } from './persistent-agent/supply-town-services.mjs';
+import { farmMapSupplyPreflight, farmSwitchReachedTarget,
+  mayRetryFarmSwitch, paidFarmSwitchResumeDecision } from './persistent-agent/farm-map-supply-preflight.mjs';
+import { nativeSupplyPolicy } from './persistent-agent/native-supply-policy.mjs';
+import { SUPPLY_TOWN_SERVICES, SUPPLY_TOWN_STORAGE } from './persistent-agent/supply-town-services.mjs';
 import {
   buildWorldMapTeleportCatalog,
   parseBlockedWorldMapFlags,
@@ -144,6 +147,7 @@ import {
   existingCommandsForStep,
 } from './persistent-agent/relocation-command-surface.mjs';
 import {
+  applySupplyCycleSettings,
   canonicalToOpenKorePreview,
   validateCanonicalConfig,
 } from './dashboard/config-schema.mjs';
@@ -291,6 +295,8 @@ const isolatedLatencyTrace =
 // is preserved. RO_RUNTIME_MODE=isolated-test separates cloned fixture DATA
 // from execution INTENT so copied desired_running / state.json never launches
 // OpenKore on its own.
+// Enable only after the matching native command is deployed and accepted.
+const nativeSupplyPolicyCommandEnabled = process.env.PA_NATIVE_SUPPLY_POLICY_ENABLED === '1';
 const runtimeMode = normalizeRuntimeMode(process.env.RO_RUNTIME_MODE);
 const isolatedTestMode = isIsolatedTestMode(runtimeMode);
 const isolatedAutomationAccountAllowlist = parseIdentityAllowlist(
@@ -1271,6 +1277,9 @@ const ownershipActions = new Set([
   'release_agent',
   'start_farm',
   'start_navigation',
+  'prepare_farm_switch',
+  'configure_supply_policy',
+  'resume_paid_farm_switch',
   'world_map_teleport',
   'set_saved_town',
   'equip_item',
@@ -1303,6 +1312,9 @@ const rolloutGatedActions = new Set([
   'claim_agent',
   'start_farm',
   'start_navigation',
+  'prepare_farm_switch',
+  'configure_supply_policy',
+  'resume_paid_farm_switch',
   'world_map_teleport',
   'set_saved_town',
   'talk_to_npc',
@@ -1780,6 +1792,115 @@ async function readPersistentAgentLiveStatusView(charId) {
     maxAgeMs: LIVE_STATUS_MAX_AGE_MS,
   });
 }
+// M1 map-switch admission reads a native decision from the same authoritative
+// live-status exporter. The native stop_farm and teleport commands recheck it;
+// this read only prevents an avoidable stop when service is already required.
+const supplyPreflightWarningChars = new Set();
+async function readFarmMapSupplyPreflight(account, controller) {
+  const charId = Number(account.characterId);
+  let snapshot = null;
+  try {
+    const output = await sql(
+      `SELECT char_id,account_id,revision,resident,COALESCE(map,''),ROUND(TIMESTAMPDIFF(MICROSECOND,updated_at,CURRENT_TIMESTAMP(3))/1000),inventory_slots,inventory_max_slots,weight,max_weight,supply_required,COALESCE(supply_reason,'') FROM persistent_agent_live_status WHERE char_id=${charId} AND account_id=${Number(account.accountId)} LIMIT 1;`,
+    );
+    if (output) {
+      const row = output.split('\t');
+      const integer = (value) => /^\d+$/.test(String(value ?? '')) ? Number(value) : null;
+      snapshot = {
+        charId: integer(row[0]), accountId: integer(row[1]), revision: integer(row[2]),
+        resident: row[3] === '1', map: row[4], ageMs: integer(row[5]),
+        inventorySlots: integer(row[6]), inventoryMaxSlots: integer(row[7]),
+        weight: integer(row[8]), maxWeight: integer(row[9]),
+        supplyRequired: row[10] === '1' ? true : row[10] === '0' ? false : null,
+        supplyReason: row[11] || null,
+      };
+    }
+  } catch (error) {
+    // Older schema and read failures are both an unavailable preflight. They
+    // cannot authorize a destructive map switch.
+    if (!supplyPreflightWarningChars.has(charId)) {
+      supplyPreflightWarningChars.add(charId);
+      console.warn(`FARM_MAP_SUPPLY_PREFLIGHT_UNAVAILABLE char=${charId}: ${error?.message ?? error}`);
+    }
+  }
+  return farmMapSupplyPreflight(snapshot, { accountId: Number(account.accountId),
+    charId, revision: Number(controller.revision),
+    currentMap: controller.liveStatus?.map ?? null,
+    maxAgeMs: LIVE_STATUS_MAX_AGE_MS });
+}
+
+async function loadNativeSupplyPolicy(account) {
+  try {
+    const { config } = await loadCanonicalConfig({ instancesRoot,
+      accountId: Number(account.accountId), characterId: Number(account.characterId),
+      persistMigration: true });
+    return nativeSupplyPolicy(config);
+  } catch (error) {
+    console.warn(`SUPPLY_POLICY_UNAVAILABLE char=${Number(account.characterId)}: ${error?.message ?? error}`);
+    throw new HttpError(503, 'SUPPLY_POLICY_UNAVAILABLE');
+  }
+}
+
+async function buildCanonicalFarmRules(account, base) {
+  const charId = Number(account.characterId);
+  const { config } = await loadCanonicalConfig({ instancesRoot,
+    accountId: Number(account.accountId), characterId: charId,
+    persistMigration: false });
+  const requested = { ...base };
+  if (requested.skillEnabled === undefined)
+    requested.skillEnabled = ['SKILL_CAST', 'HYBRID_DAMAGE'].includes(config.combat.profile);
+  const executionProfile = resolveFarmExecutionProfile(config, requested);
+  if (!executionProfile.ok)
+    throw new HttpError(409, executionProfile.reason);
+  const farmRules = { ...requested, ...executionProfile.payload };
+  if (farmRules.skillEnabled &&
+      (!Number.isSafeInteger(farmRules.skillId) || farmRules.skillId <= 0))
+    throw new HttpError(422, 'invalid_transition');
+  if (nativeSupplyPolicyCommandEnabled) {
+    try { farmRules.supplyPolicy = nativeSupplyPolicy(config); }
+    catch { throw new HttpError(503, 'SUPPLY_POLICY_UNAVAILABLE'); }
+    if (farmRules.supplyPolicy.enabled) {
+      const services = await nativeSupplyServicePlan(account);
+      Object.assign(farmRules, services);
+      // Keep the previous single-shop keys for the existing low-consumable path.
+      farmRules.supplyServiceRoute = services.shopServiceRoute;
+      farmRules.supplyNpcName = services.shopNpcName;
+    }
+  }
+  if (!nativeSupplyPolicyCommandEnabled || !farmRules.supplyPolicy.enabled) {
+    const savePoint = await readCharacterSavePoint(account.accountId, charId);
+    const shop = SUPPLY_TOWN_SERVICES[savePoint?.map];
+    if (shop) {
+      const graph = await serverAgentWarpGraph();
+      const route = buildTerminalRoute(graph, savePoint.map,
+        shop.map, shop.x, shop.y);
+      if (!route) throw new HttpError(409, 'SAVED_TOWN_SERVICE_UNAVAILABLE');
+      farmRules.supplyServiceRoute = route;
+      farmRules.supplyNpcName = shop.npc;
+    }
+  }
+  return farmRules;
+}
+
+async function nativeSupplyServicePlan(account) {
+  const savePoint = await readCharacterSavePoint(account.accountId,
+    account.characterId);
+  const storage = SUPPLY_TOWN_STORAGE[savePoint?.map];
+  const shop = SUPPLY_TOWN_SERVICES[savePoint?.map];
+  if (!storage || !shop || storage.map !== savePoint.map)
+    throw new HttpError(409, 'SUPPLY_HOME_REQUIRED');
+  const graph = await serverAgentWarpGraph();
+  const storageServiceRoute = buildTerminalRoute(graph, savePoint.map,
+    storage.map, storage.x, storage.y);
+  const shopServiceRoute = buildTerminalRoute(graph, savePoint.map,
+    shop.map, shop.x, shop.y);
+  if (!storageServiceRoute || !shopServiceRoute)
+    throw new HttpError(409, 'SUPPLY_SERVICE_UNAVAILABLE');
+  return { storageNpcName: storage.npc, shopNpcName: shop.npc,
+    storageMenuIndex: storage.storageMenuIndex,
+    storageServiceRoute, shopServiceRoute };
+}
+
 
 // True when the character is owned by the native SERVER_AGENT controller. Used
 // by the combat terminal to pick the native Event Ledger source instead of the
@@ -2590,10 +2711,19 @@ function persistedRelocationPath(accountId) {
   );
 }
 
-async function writePersistedRelocation(account, targetMap, kind = 'route-farm') {
+async function writePersistedRelocation(account, targetMap, kind = 'route-farm',
+  { parentFarmMap = null, blockedReason = null, retryAfter = 0,
+    attemptRevision = null, attempts = 0,
+    paidResumeAttempted = false } = {}) {
   await writeJsonAtomic(persistedRelocationPath(account.accountId), {
     targetMap,
     kind,
+    parentFarmMap,
+    blockedReason,
+    retryAfter,
+    attemptRevision,
+    attempts,
+    paidResumeAttempted,
     createdAt: Date.now(),
   });
 }
@@ -2604,7 +2734,14 @@ async function readPersistedRelocation(accountId) {
       await readFile(persistedRelocationPath(accountId), 'utf8'),
     );
     return /^[a-z0-9_]{1,31}$/.test(String(value?.targetMap ?? ''))
-      ? { targetMap: String(value.targetMap), kind: String(value.kind ?? 'route-farm') }
+      ? { targetMap: String(value.targetMap), kind: String(value.kind ?? 'route-farm'),
+        parentFarmMap: String(value.parentFarmMap ?? '') || null,
+        blockedReason: String(value.blockedReason ?? '') || null,
+        retryAfter: Number(value.retryAfter) || 0,
+        attemptRevision: Number.isSafeInteger(value.attemptRevision)
+          ? value.attemptRevision : null,
+        attempts: Number.isSafeInteger(value.attempts) ? value.attempts : 0,
+        paidResumeAttempted: value.paidResumeAttempted === true }
       : null;
   } catch {
     return null;
@@ -2616,6 +2753,42 @@ async function clearPersistedRelocation(account) {
 }
 
 const persistedRelocationRecoveryRunning = new Set();
+async function tryResumePaidFarmSwitch(account, intent, ownership, live) {
+  if (!nativeSupplyPolicyCommandEnabled) return null;
+  if (ownership?.owner !== SERVER_AGENT_OWNER ||
+      ownership.ownershipState !== SERVER_AGENT_OWNER ||
+      ownership.agentEnabled !== true)
+    return null;
+  const receipt = ownership?.targetRules?._pendingFarmSwitch;
+  const original = receipt?.commandId
+    ? await getOwnershipCommand(account, Number(account.characterId),
+      receipt.commandId).catch(() => null) : null;
+  const decision = paidFarmSwitchResumeDecision({ intent, pending: receipt,
+    command: original, live, revision: Number(ownership?.revision) });
+  if (!decision.allowed) return null;
+  // Persist the one-shot attempt before dispatch. A Web restart cannot replay
+  // a paid arrival and Native independently checks the durable receipt.
+  await writePersistedRelocation(account, intent.targetMap, 'world-map-farm', {
+    parentFarmMap: intent.parentFarmMap,
+    blockedReason: 'SUPPLY_PAID_ARRIVAL_RESUME_PENDING',
+    retryAfter: Date.now() + 300_000,
+    attemptRevision: Number(ownership.revision),
+    attempts: intent.attempts,
+    paidResumeAttempted: true,
+  });
+  const command = await queueOwnershipCommand(account, Number(account.characterId),
+    { action: 'resume_paid_farm_switch', expectedRevision: Number(ownership.revision) },
+    { targetMap: intent.targetMap });
+  pendingRelocations.set(Number(account.characterId), {
+    accountId: Number(account.accountId), charId: Number(account.characterId),
+    targetMap: intent.targetMap, parentFarmMap: intent.parentFarmMap,
+    stage: 'WAIT_PAID_FARM_RESUME', commandId: command.commandId,
+    commandRevision: Number(ownership.revision), attempts: 0, busy: false,
+    deadline: Date.now() + 60_000,
+  });
+  return command;
+}
+
 
 // A Dashboard restart must not erase a player-confirmed map change between
 // START_NAVIGATION and the arrival-triggered START_FARM. The intent file is
@@ -2626,7 +2799,7 @@ async function reconcilePersistedRelocations() {
   let rows;
   try {
     rows = await sql(
-      "SELECT char_id,account_id,agent_mode FROM persistent_agent_state WHERE control_owner='SERVER_AGENT' AND ownership_state='SERVER_AGENT' AND agent_enabled=1 AND agent_mode='PERSISTENT_IDLE';",
+        "SELECT char_id,account_id,agent_mode FROM persistent_agent_state WHERE control_owner='SERVER_AGENT' AND ownership_state='SERVER_AGENT' AND agent_enabled=1 AND agent_mode IN ('PERSISTENT_IDLE','AUTO_FARM');",
     );
   } catch (error) {
     if (agentStateSchemaUnavailable(error)) return;
@@ -2655,12 +2828,49 @@ async function reconcilePersistedRelocations() {
       const live = controller.liveStatus ?? null;
       const currentMap = live?.fresh && live.map ? String(live.map) : null;
       if (!currentMap) continue;
+      if (nativeSupplyPolicyCommandEnabled && intent.kind === 'world-map-farm') {
+        const ownership = await getOwnershipStatus(account, charId).catch(() => null);
+        if (!ownership) continue;
+        const receipt = ownership.targetRules?._pendingFarmSwitch;
+        if (currentMap === intent.targetMap && controller.agentMode === 'AUTO_FARM' &&
+            !receipt) {
+          await clearPersistedRelocation(account);
+          continue;
+        }
+        if (receipt?.targetMap === intent.targetMap &&
+            (receipt.stage === 'ARRIVED_PAID' ||
+              receipt.stageBeforeBlock === 'ARRIVED_PAID')) {
+          if (!intent.paidResumeAttempted)
+            await tryResumePaidFarmSwitch(account, intent, ownership, live);
+          continue; // Native owns this paid arrival; never repeat transactions.
+        }
+        if (intent.paidResumeAttempted ||
+            !mayRetryFarmSwitch(intent, Number(controller.revision)))
+          continue;
+      }
+      if (controller.agentMode === 'AUTO_FARM' &&
+          intent.kind !== 'world-map-farm' && intent.kind !== 'world-map-town')
+        continue;
       if (currentMap === intent.targetMap) {
         if (intent.kind === 'world-map-town') {
           await clearPersistedRelocation(account);
           continue;
         }
         if (intent.kind === 'world-map-farm') {
+          if (farmSwitchReachedTarget({ currentMap, targetMap: intent.targetMap,
+            mode: controller.agentMode })) {
+            await clearPersistedRelocation(account);
+            continue;
+          }
+          if (nativeSupplyPolicyCommandEnabled) {
+            const preflight = await readFarmMapSupplyPreflight(account, controller);
+            if (!preflight.allowed) {
+              if (preflight.reason === 'SUPPLY_REQUIRED')
+                await queuePlayerWorldMapTeleport(account, controller,
+                  intent.targetMap, 'farm', { recovering: true });
+              continue;
+            }
+          }
           const row = worldMapTeleportCatalog.get(intent.targetMap);
           if (!row?.farmSelectionAvailable) {
             await clearPersistedRelocation(account);
@@ -2684,11 +2894,26 @@ async function reconcilePersistedRelocations() {
           deadline: Date.now() + coordinatorDeadlineMsForRouteSteps(1),
         });
       } else if (intent.kind === 'world-map-farm' || intent.kind === 'world-map-town') {
+        if (nativeSupplyPolicyCommandEnabled && intent.kind === 'world-map-farm' &&
+            (await readFarmMapSupplyPreflight(account, controller)).reason ===
+              'SUPPLY_PREFLIGHT_UNAVAILABLE')
+          continue;
         await queuePlayerWorldMapTeleport(account, controller, intent.targetMap,
           intent.kind === 'world-map-town' ? 'town' : 'farm', { recovering: true });
       } else {
         await queuePlayerWorldMapTeleport(account, controller, intent.targetMap,
           'farm', { recovering: true });
+      }
+    } catch (error) {
+      console.warn(`WEB_RELOCATION_RECOVERY_BLOCKED char=${charId} reason=${error?.message ?? error}`);
+      if (intent.kind === 'world-map-farm') {
+        const state = await readAgentStateRow(charId).catch(() => null);
+        await writePersistedRelocation({ accountId }, intent.targetMap,
+          'world-map-farm', { parentFarmMap: intent.parentFarmMap,
+            blockedReason: String(error?.message ?? 'SUPPLY_SERVICE_UNAVAILABLE'),
+            retryAfter: Date.now() + 300_000,
+            attemptRevision: Number(state?.revision ?? -1),
+            attempts: intent.attempts + 1 });
       }
     } finally {
       persistedRelocationRecoveryRunning.delete(charId);
@@ -2816,9 +3041,30 @@ async function reconcileDeferredFarmRestores() {
 async function reconcileRelocations() {
   for (const [charId, pending] of [...pendingRelocations]) {
     if (pending.busy) continue;
-    if (Date.now() > pending.deadline) {
-      pendingRelocations.delete(charId);
-      await clearPersistedRelocation(relocationAccount(pending));
+      if (Date.now() > pending.deadline) {
+        pendingRelocations.delete(charId);
+        if (pending.stage === 'WAIT_PREPARED_FARM' ||
+            pending.stage === 'WAIT_PAID_FARM_RESUME') {
+          const account = relocationAccount(pending);
+          const [state, prior] = await Promise.all([
+            readAgentStateRow(charId).catch(() => null),
+            readPersistedRelocation(account.accountId).catch(() => null),
+          ]);
+          await writePersistedRelocation(account, pending.targetMap,
+            'world-map-farm', { parentFarmMap: pending.parentFarmMap,
+              blockedReason: pending.stage === 'WAIT_PAID_FARM_RESUME'
+                ? 'SUPPLY_PAID_ARRIVAL_RECONCILIATION_REQUIRED'
+                : 'SUPPLY_SERVICE_TIMEOUT',
+              retryAfter: Date.now() + 300_000,
+              attemptRevision: Number(state?.revision ?? pending.commandRevision),
+              attempts: Math.min(3, (prior?.attempts ?? 0) + 1),
+              paidResumeAttempted: pending.stage === 'WAIT_PAID_FARM_RESUME' ||
+                prior?.paidResumeAttempted === true })
+            .catch((writeError) => console.warn(
+              `WEB_RELOCATION_INTENT_PERSIST_FAILED char=${charId}: ${writeError?.message ?? writeError}`));
+        } else {
+          await clearPersistedRelocation(relocationAccount(pending));
+        }
       console.warn(`WEB_RELOCATION_TIMEOUT char=${charId} stage=${pending.stage}`);
       continue;
     }
@@ -2828,7 +3074,7 @@ async function reconcileRelocations() {
       const [stateRow, live, savePoint, dialog] = await Promise.all([
         readAgentStateRow(charId),
         readPersistentAgentLiveStatusView(charId),
-        readCharacterSavePoint(account.accountId),
+        readCharacterSavePoint(account.accountId, charId),
         readServerAgentDialog(charId),
       ]);
       if (
@@ -2843,12 +3089,61 @@ async function reconcileRelocations() {
       const currentMap = live?.fresh && live.map ? String(live.map) : null;
       const revision = Number(stateRow.revision);
 
-      if (pending.stage === 'WAIT_WORLD_MAP_IDLE') {
+      if (pending.stage === 'WAIT_PREPARED_FARM') {
+        const prepared = await getOwnershipCommand(account, charId, pending.commandId);
+        if (['REJECTED', 'FAILED'].includes(prepared.status)) {
+          console.warn(`WORLD_MAP_SUPPLY_BLOCKED char=${charId} reason=${prepared.reasonCode}`);
+          if (prepared.reasonCode === 'SUPPLY_RESTART_RETRY_REQUIRED' &&
+              currentMap === pending.targetMap) {
+            const [intent, ownership] = await Promise.all([
+              readPersistedRelocation(account.accountId),
+              getOwnershipStatus(account, charId),
+            ]);
+            if (intent && await tryResumePaidFarmSwitch(account, intent,
+              ownership, live)) continue;
+          }
+          pendingRelocations.delete(charId);
+          const previous = await readPersistedRelocation(account.accountId);
+          await writePersistedRelocation(account, pending.targetMap, 'world-map-farm', {
+            parentFarmMap: pending.parentFarmMap,
+            blockedReason: prepared.reasonCode || 'SUPPLY_SERVICE_UNAVAILABLE',
+            retryAfter: Date.now() + 300_000,
+            attemptRevision: revision,
+            attempts: (previous?.attempts ?? 0) + 1,
+            paidResumeAttempted: previous?.paidResumeAttempted === true,
+          });
+          continue;
+        }
+        if (prepared.status === 'CONFIRMED' && farmSwitchReachedTarget({
+          currentMap, targetMap: pending.targetMap, mode })) {
+          pendingRelocations.delete(charId);
+          await clearPersistedRelocation(account);
+        }
+      } else if (pending.stage === 'WAIT_PAID_FARM_RESUME') {
+        const resumed = await getOwnershipCommand(account, charId, pending.commandId);
+        if (['REJECTED', 'FAILED'].includes(resumed.status)) {
+          pendingRelocations.delete(charId);
+          await writePersistedRelocation(account, pending.targetMap,
+            'world-map-farm', { parentFarmMap: pending.parentFarmMap,
+              blockedReason: resumed.reasonCode ||
+                'SUPPLY_PAID_ARRIVAL_RECONCILIATION_REQUIRED',
+              retryAfter: Date.now() + 300_000,
+              attemptRevision: revision, attempts: 3,
+              paidResumeAttempted: true });
+          continue;
+        }
+        if (resumed.status === 'CONFIRMED' && farmSwitchReachedTarget({
+          currentMap, targetMap: pending.targetMap, mode })) {
+          pendingRelocations.delete(charId);
+          await clearPersistedRelocation(account);
+        }
+      } else if (pending.stage === 'WAIT_WORLD_MAP_IDLE') {
         const stopped = await getOwnershipCommand(account, charId, pending.commandId);
         if (['REJECTED', 'FAILED'].includes(stopped.status)) {
           console.warn(`WORLD_MAP_TELEPORT_BLOCKED char=${charId} reason=${stopped.reasonCode}`);
           pendingRelocations.delete(charId);
-          await clearPersistedRelocation(account);
+          if (stopped.reasonCode !== 'SUPPLY_REQUIRED')
+            await clearPersistedRelocation(account);
           continue;
         }
         if (stopped.status !== 'CONFIRMED' || mode !== 'PERSISTENT_IDLE') continue;
@@ -2864,7 +3159,8 @@ async function reconcileRelocations() {
         if (['REJECTED', 'FAILED'].includes(teleport.status)) {
           console.warn(`WORLD_MAP_TELEPORT_BLOCKED char=${charId} reason=${teleport.reasonCode}`);
           pendingRelocations.delete(charId);
-          await clearPersistedRelocation(account);
+          if (teleport.reasonCode !== 'SUPPLY_REQUIRED')
+            await clearPersistedRelocation(account);
           continue;
         }
         if (teleport.status !== 'CONFIRMED' || currentMap !== pending.targetMap ||
@@ -3024,7 +3320,28 @@ async function reconcileRelocations() {
       );
       if (pending.attempts > 6) {
         pendingRelocations.delete(charId);
-        await clearPersistedRelocation(relocationAccount(pending));
+        if (pending.stage === 'WAIT_PREPARED_FARM' ||
+            pending.stage === 'WAIT_PAID_FARM_RESUME') {
+          const account = relocationAccount(pending);
+          const [state, prior] = await Promise.all([
+            readAgentStateRow(charId).catch(() => null),
+            readPersistedRelocation(account.accountId).catch(() => null),
+          ]);
+          await writePersistedRelocation(account, pending.targetMap,
+            'world-map-farm', { parentFarmMap: pending.parentFarmMap,
+              blockedReason: pending.stage === 'WAIT_PAID_FARM_RESUME'
+                ? 'SUPPLY_PAID_ARRIVAL_RECONCILIATION_REQUIRED'
+                : 'SUPPLY_SERVICE_UNAVAILABLE',
+              retryAfter: Date.now() + 300_000,
+              attemptRevision: Number(state?.revision ?? pending.commandRevision),
+              attempts: Math.min(3, (prior?.attempts ?? 0) + 1),
+              paidResumeAttempted: pending.stage === 'WAIT_PAID_FARM_RESUME' ||
+                prior?.paidResumeAttempted === true })
+            .catch((writeError) => console.warn(
+              `WEB_RELOCATION_INTENT_PERSIST_FAILED char=${charId}: ${writeError?.message ?? writeError}`));
+        } else {
+          await clearPersistedRelocation(relocationAccount(pending));
+        }
       }
     } finally {
       pending.busy = false;
@@ -3063,7 +3380,7 @@ async function queuePlayerWorldMapTeleport(account, controller, requestedMapId,
     if (currentMap === mapId && (kind === 'town' || mode === 'AUTO_FARM'))
       return { reason: 'ALREADY_ON_TARGET_MAP', message: '已經在該地圖',
         targetMap: mapId, grindTarget: await readGrindTarget(account) };
-    if (currentMap === mapId) {
+    if (kind === 'farm' && currentMap === mapId) {
       const grindTarget = {
         mapId, name: row.name ?? mapId,
         levelRange: mapRoutingIndex.maps?.[mapId]?.levelRange ?? null,
@@ -3092,6 +3409,37 @@ async function queuePlayerWorldMapTeleport(account, controller, requestedMapId,
       return { reason: 'WORLD_MAP_FARM_START_QUEUED', targetMap: mapId,
         cost: 0, cooldownSeconds: 0, command };
     }
+    if (nativeSupplyPolicyCommandEnabled && kind === 'farm') {
+      const preflight = await readFarmMapSupplyPreflight(account, controller);
+      if (!preflight.allowed) {
+        if (!recovering)
+          await writePersistedRelocation(account, mapId, 'world-map-farm',
+            { parentFarmMap: controller.targetMap ?? null });
+        if (preflight.reason !== 'SUPPLY_REQUIRED')
+          throw new HttpError(503, preflight.reason);
+        const [services, supplyPolicy] = await Promise.all([
+          nativeSupplyServicePlan(account), loadNativeSupplyPolicy(account),
+        ]);
+        const farmRules = mode === 'PERSISTENT_IDLE'
+          ? await buildCanonicalFarmRules(account, { targetMap: mapId,
+              lootEnabled: true, survivalEnabled: true,
+              deathRecoveryEnabled: true }) : null;
+        const command = await queueOwnershipCommand(account, charId,
+          { action: 'prepare_farm_switch', expectedRevision: Number(controller.revision) },
+          { targetMap: mapId, anchorX: row.landing.x, anchorY: row.landing.y,
+            kind: 'farm', supplyPolicy, ...services,
+            ...(farmRules ? { farmRules } : {}) });
+        pendingRelocations.set(charId, {
+          accountId: Number(account.accountId), charId, targetMap: mapId,
+          parentFarmMap: controller.targetMap ?? null,
+          stage: 'WAIT_PREPARED_FARM', commandId: command.commandId,
+          commandRevision: Number(controller.revision),
+          attempts: 0, busy: false, deadline: Date.now() + 300_000,
+        });
+        return { reason: 'WORLD_MAP_SUPPLY_QUEUED', targetMap: mapId,
+          command, supplyReason: preflight.supplyReason };
+      }
+    }
     const availability = await playerWorldMapAvailability(account);
     const selection = (kind === 'town' ? availability.towns : availability.maps)
       .find((candidate) => candidate.map === mapId);
@@ -3112,7 +3460,9 @@ async function queuePlayerWorldMapTeleport(account, controller, requestedMapId,
     try {
       command = mode === 'AUTO_FARM'
         ? await queueOwnershipCommand(account, charId,
-          { action: 'stop_farm', expectedRevision: Number(controller.revision) })
+          { action: 'stop_farm', expectedRevision: Number(controller.revision) },
+          nativeSupplyPolicyCommandEnabled && kind === 'farm'
+            ? { nextFarmMap: mapId } : null)
         : await queueOwnershipCommand(account, charId,
           { action: 'world_map_teleport', expectedRevision: Number(controller.revision) },
           { targetMap: mapId, kind, anchorX: row.landing.x, anchorY: row.landing.y });
@@ -3440,6 +3790,13 @@ async function queueOwnershipCommand(
       survivalEnabled: body.survivalEnabled === true,
       deathRecoveryEnabled: body.deathRecoveryEnabled === true,
     };
+  } else if (action === 'configure_supply_policy') {
+    if (!nativeSupplyPolicyCommandEnabled)
+      throw new HttpError(501, 'CAPABILITY_NOT_NATIVE');
+    payloadObject = { supplyPolicy: await loadNativeSupplyPolicy(account) };
+  } else if (action === 'resume_paid_farm_switch') {
+    // Only the server-side paid-arrival recovery path may construct this.
+    throw new HttpError(422, 'invalid_transition');
   } else if (action === 'start_navigation') {
     if (!Array.isArray(body.route) || body.route.length < 1 || body.route.length > 16)
       throw new HttpError(422, 'invalid_transition');
@@ -3628,47 +3985,13 @@ async function queueOwnershipCommand(
     }
   }
   if (action === 'start_farm') {
-    // Resolve only from the authenticated character's persisted config. Every
-    // start path, including relocation resume, crosses this same command seam.
-    const { config } = await loadCanonicalConfig({
-      instancesRoot,
-      accountId: account.accountId,
-      characterId: charId,
-      persistMigration: false,
-    });
-    const executionProfile = resolveFarmExecutionProfile(config, payloadObject);
-    if (!executionProfile.ok)
-      throw new HttpError(409, executionProfile.reason);
-    payloadObject = { ...payloadObject, ...executionProfile.payload };
-    if (payloadObject.skillEnabled && (!Number.isSafeInteger(payloadObject.skillId) || payloadObject.skillId <= 0))
-      throw new HttpError(422, 'invalid_transition');
-  }
-  // Supply world movement uses the character's rAthena save point and the
-  // native return teleport. Only the city-local shop leg uses the existing
-  // server-side route planner; no farm-origin/world return route is generated.
-  if (
-    action === 'start_farm' &&
-    payloadObject.targetMap
-  ) {
-    const farmMap = String(payloadObject.targetMap);
-    const graph = await serverAgentWarpGraph();
-    const savePoint = await readCharacterSavePoint(account.accountId);
-    const service = SUPPLY_TOWN_SERVICES[savePoint?.map];
-    const supplyServiceRoute = service
-      ? buildTerminalRoute(
-          graph,
-          savePoint.map,
-          service.map,
-          service.x,
-          service.y,
-        )
-      : null;
-    if (service && !supplyServiceRoute)
-      throw new HttpError(409, 'SAVED_TOWN_SERVICE_UNAVAILABLE');
-    if (supplyServiceRoute) {
-      payloadObject.supplyServiceRoute = supplyServiceRoute;
-      payloadObject.supplyNpcName = service.npc;
-    }
+    // IDLE prepare and ordinary farm start share this exact character policy.
+    payloadObject = await buildCanonicalFarmRules(account, payloadObject);
+  if (nativeSupplyPolicyCommandEnabled &&
+      (action === 'stop_farm' && payloadObject.nextFarmMap ||
+      action === 'world_map_teleport' && payloadObject.kind === 'farm')
+      )
+    payloadObject.supplyPolicy = await loadNativeSupplyPolicy(account);
   }
   const payload = JSON.stringify(payloadObject);
   const payloadHash = createHash('sha256')
@@ -7732,9 +8055,9 @@ async function readGrindTarget(account) {
   }
 }
 
-async function readCharacterSavePoint(accountId) {
+async function readCharacterSavePoint(accountId, charId = null) {
   const output = await sql(
-    `SELECT save_map,save_x,save_y FROM \`char\` WHERE account_id=${Number(accountId)} AND char_num=0 LIMIT 1;`,
+    `SELECT save_map,save_x,save_y FROM \`char\` WHERE account_id=${Number(accountId)} AND ${Number.isSafeInteger(Number(charId)) && Number(charId) > 0 ? `char_id=${Number(charId)}` : 'char_num=0'} LIMIT 1;`,
   );
   if (!output) return null;
   const [map, xText, yText] = output.split('\t'),
@@ -8172,11 +8495,56 @@ async function saveSupplyCycle(account, input) {
   await queueCharacterCommand(account, 'supply_cycle_reload', '1');
   return settings;
 }
-// Player configuration replacement boundary. This adapter persists a
-// character-scoped policy and returns a preview of mature OpenKore keys. It
-// deliberately does not call ensureWorker, write .cmd/.result files, reload a
-// controller, or mutate rAthena. Execution capability remains an explicit
-// response field until a native command contract exists.
+
+const nativeSupplyConfigPaths = [
+  'supply.enabled', 'supply.weightTriggerPercent', 'supply.inventorySlotTrigger',
+  'supply.services.storage.enabled', 'supply.services.sell.enabled',
+  'supply.services.buy.enabled', 'supply.services.buy.rules', 'supply.itemRules',
+];
+const configOnlyExecution = () => ({ applied: false, controller: 'CONFIG_ONLY',
+  reason: 'CONFIG_ONLY_NO_EXECUTOR_COMMAND' });
+
+async function nativeSupplyConfigExecution(account, config) {
+  if (!nativeSupplyPolicyCommandEnabled) return configOnlyExecution();
+  const charId = Number(account.characterId);
+  const controller = await readCharacterControllerStatus(account, charId,
+    { includeFarmTarget: false });
+  if (!controller.available || controller.controller !== SERVER_AGENT_OWNER)
+    return { ...configOnlyExecution(), reason: 'NATIVE_SUPPLY_POLICY_UNAVAILABLE' };
+  const ownership = await getOwnershipStatus(account, charId).catch(() => null);
+  if (!ownership)
+    return { ...configOnlyExecution(), reason: 'SUPPLY_STATE_UNAVAILABLE' };
+  const activePolicy = ownership.agentMode === 'AUTO_FARM'
+    ? ownership.targetRules?.supplyPolicy : null;
+  const applied = activePolicy != null &&
+    JSON.stringify(activePolicy) === JSON.stringify(nativeSupplyPolicy(config));
+  return { applied, editable: true, controller: SERVER_AGENT_OWNER,
+    reason: applied ? null : ownership.agentMode === 'PERSISTENT_IDLE'
+      ? 'SAVED_FOR_NEXT_FARM' : 'POLICY_NOT_YET_CONFIRMED', capabilities: Object.fromEntries(
+      nativeSupplyConfigPaths.map((path) => [path, 'SUPPORTED'])) };
+}
+
+async function configureSavedNativeSupplyPolicy(account, execution) {
+  if (!execution.editable) return execution;
+  try {
+    const charId = Number(account.characterId);
+    const state = await readAgentStateRow(charId);
+    if (!state || state.accountId !== Number(account.accountId))
+      return { ...execution, reason: 'SUPPLY_STATE_UNAVAILABLE' };
+    const command = await queueOwnershipCommand(account, charId,
+      { action: 'configure_supply_policy', expectedRevision: state.revision });
+    const settled = await waitForResetCommand(account, charId, command.commandId);
+    return { ...execution, applied: settled.status === 'CONFIRMED',
+      reason: settled.status === 'CONFIRMED' ? null :
+        settled.reasonCode || `SUPPLY_POLICY_${settled.status}`,
+      command: settled };
+  } catch (error) {
+    return { ...execution, reason: error?.message || 'SUPPLY_POLICY_UNAVAILABLE' };
+  }
+}
+
+// Character-scoped config is the durable source. The native command applies
+// supply policy to a resident agent only after the deployment gate is enabled.
 async function readPlayerConfig(account) {
   if (!account?.characterId) throw new HttpError(409, '請先建立角色');
   const result = await loadCanonicalConfig({
@@ -8191,11 +8559,7 @@ async function readPlayerConfig(account) {
     source: result.source,
     schemaVersion: result.config.version,
     adapter: canonicalToOpenKorePreview(result.config),
-    execution: {
-      applied: false,
-      controller: 'CONFIG_ONLY',
-      reason: 'CONFIG_ONLY_NO_EXECUTOR_COMMAND',
-    },
+    execution: await nativeSupplyConfigExecution(account, result.config),
   };
 }
 
@@ -8208,6 +8572,10 @@ async function savePlayerConfig(account, body) {
     exception.details = errors;
     throw exception;
   }
+  if (nativeSupplyPolicyCommandEnabled) {
+    try { nativeSupplyPolicy(config); }
+    catch { throw new HttpError(422, 'SUPPLY_POLICY_UNAVAILABLE'); }
+  }
   const result = await saveCanonicalConfig({
     instancesRoot,
     accountId: account.accountId,
@@ -8215,17 +8583,15 @@ async function savePlayerConfig(account, body) {
     config,
     expectedRevision: body?.expectedRevision,
   });
+  const execution = await configureSavedNativeSupplyPolicy(account,
+    await nativeSupplyConfigExecution(account, result.config));
   return {
     config: result.config,
     migration: result.migration,
     source: result.source,
     schemaVersion: result.config.version,
     adapter: canonicalToOpenKorePreview(result.config),
-    execution: {
-      applied: false,
-      controller: 'CONFIG_ONLY',
-      reason: 'CONFIG_ONLY_NO_EXECUTOR_COMMAND',
-    },
+    execution,
   };
 }
 
@@ -11020,25 +11386,36 @@ async function handleDashboardRequest(request, response) {
       if (!account.characterId)
         return json(response, 409, { error: '請先建立角色' });
       const body = await requestBody(request);
-      // P2-OPENKORE-EXIT-MAINLINE row 33: supply configuration is persisted to
-      // OpenKore control files and applied via a `supply_cycle_reload` `.cmd`.
-      // The Persistent Agent supply subsystem (P2B) is configured server-side and
-      // exposes no per-account native supply-config command, so production fails
-      // closed instead of writing OpenKore config/.cmd. SERVER_AGENT => capability
-      // gap; legacy OPENKORE => migration required.
+      // The old supply form now updates the same character-scoped policy as
+      // /api/config. The native command remains gated until its deployment is
+      // accepted; the legacy OpenKore control files are never written here.
       if (runtimeMode !== 'isolated-test') {
         const scCharId = Number(account.characterId);
         const scController = await readCharacterControllerStatus(account, scCharId, {
           includeFarmTarget: false,
         });
-        if (
-          scController?.available &&
-          scController.controller === SERVER_AGENT_OWNER
-        )
-          return json(response, 501, {
-            error: 'CAPABILITY_NOT_NATIVE',
-            code: 'CAPABILITY_NOT_NATIVE',
-          });
+        if (scController?.available && scController.controller === SERVER_AGENT_OWNER) {
+          if (!nativeSupplyPolicyCommandEnabled)
+            return json(response, 501, {
+              error: 'CAPABILITY_NOT_NATIVE', code: 'CAPABILITY_NOT_NATIVE',
+            });
+          const settings = normalizeSupplyCycle(body);
+          const current = await loadCanonicalConfig({ instancesRoot,
+            accountId: account.accountId, characterId: scCharId,
+            persistMigration: true });
+          const config = applySupplyCycleSettings(current.config, settings);
+          try {
+            const saved = await savePlayerConfig(account, { config,
+              expectedRevision: current.config.revision });
+            return json(response, saved.execution.applied ? 200 : 202, {
+              supplyCycle: settings, config: saved.config,
+              execution: saved.execution });
+          } catch (error) {
+            if (error?.code === 'CONFIG_REVISION_CONFLICT')
+              return json(response, 409, { error: error.code, config: error.current });
+            throw error;
+          }
+        }
         return json(response, 409, {
           error: 'LEGACY_OPENKORE_MIGRATION_REQUIRED',
           code: 'LEGACY_OPENKORE_MIGRATION_REQUIRED',

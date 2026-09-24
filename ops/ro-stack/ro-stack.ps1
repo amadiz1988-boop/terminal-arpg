@@ -359,6 +359,7 @@ function Start-Stack {
       $previousAgentDeathRecoveryEnabled = $env:PERSISTENT_AGENT_DEATH_RECOVERY_ENABLED
       $previousAgentRespawnDelay = $env:PERSISTENT_AGENT_RESPAWN_DELAY_MS
       $previousAgentRespawnAttempts = $env:PERSISTENT_AGENT_RESPAWN_MAX_ATTEMPTS
+      $previousAgentM1SupplyEnabled = $env:PERSISTENT_AGENT_M1_SUPPLY_ENABLED
       if ($server.name -eq 'map') {
         $env:PERSISTENT_AGENT_ENABLED = if ($config.PersistentAgentEnabled) { '1' } else { '0' }
         $env:PERSISTENT_AGENT_ALLOWLIST = (@($config.PersistentAgentAccountAllowlist) -join ',')
@@ -379,6 +380,7 @@ function Start-Stack {
         $env:PERSISTENT_AGENT_DEATH_RECOVERY_ENABLED = if ($config.PersistentAgentDeathRecoveryEnabled) { '1' } else { '0' }
         $env:PERSISTENT_AGENT_RESPAWN_DELAY_MS = [string]$config.PersistentAgentRespawnDelayMilliseconds
         $env:PERSISTENT_AGENT_RESPAWN_MAX_ATTEMPTS = [string]$config.PersistentAgentRespawnMaxAttempts
+        $env:PERSISTENT_AGENT_M1_SUPPLY_ENABLED = if ($config.PersistentAgentM1SupplyEnabled) { '1' } else { '0' }
       }
       try {
         $process = Start-Process -FilePath $path -WorkingDirectory $rathenaRoot -WindowStyle Hidden -RedirectStandardOutput $out -RedirectStandardError $err -PassThru
@@ -403,6 +405,7 @@ function Start-Stack {
           if ($null -eq $previousAgentDeathRecoveryEnabled) { Remove-Item Env:PERSISTENT_AGENT_DEATH_RECOVERY_ENABLED -ErrorAction SilentlyContinue } else { $env:PERSISTENT_AGENT_DEATH_RECOVERY_ENABLED = $previousAgentDeathRecoveryEnabled }
           if ($null -eq $previousAgentRespawnDelay) { Remove-Item Env:PERSISTENT_AGENT_RESPAWN_DELAY_MS -ErrorAction SilentlyContinue } else { $env:PERSISTENT_AGENT_RESPAWN_DELAY_MS = $previousAgentRespawnDelay }
           if ($null -eq $previousAgentRespawnAttempts) { Remove-Item Env:PERSISTENT_AGENT_RESPAWN_MAX_ATTEMPTS -ErrorAction SilentlyContinue } else { $env:PERSISTENT_AGENT_RESPAWN_MAX_ATTEMPTS = $previousAgentRespawnAttempts }
+          if ($null -eq $previousAgentM1SupplyEnabled) { Remove-Item Env:PERSISTENT_AGENT_M1_SUPPLY_ENABLED -ErrorAction SilentlyContinue } else { $env:PERSISTENT_AGENT_M1_SUPPLY_ENABLED = $previousAgentM1SupplyEnabled }
         }
       }
       $processes += [pscustomobject]@{ name=$server.name; id=$process.Id; path=$path; stdout=$out; stderr=$err }

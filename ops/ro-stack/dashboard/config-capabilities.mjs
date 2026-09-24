@@ -32,7 +32,7 @@ export function configCapability(execution, path) {
   if (path.startsWith('combat.follow.') || path === 'combat.skills.partySkills') return 'UNAVAILABLE';
   const attested = execution?.capabilities?.[path];
   if (attested === 'UNAVAILABLE') return 'UNAVAILABLE';
-  if (attested === 'SUPPORTED' && execution?.applied === true) return 'SUPPORTED';
+  if (attested === 'SUPPORTED' && (execution?.applied === true || execution?.editable === true)) return 'SUPPORTED';
   return 'PARTIAL';
 }
 

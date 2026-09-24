@@ -292,7 +292,9 @@ async function mount(root) {
         state = body.config;
         context.migration = body.migration;
         context.execution = body.execution;
-        context.status = '設定已保存，執行器套用狀態請由後端能力回報確認';
+        context.status = body.execution?.applied
+          ? '補給設定已由遊戲伺服器確認'
+          : `設定已保存；執行器狀態：${body.execution?.reason ?? '待確認'}`;
       } catch (error) {
         context.status = error.message;
       } finally {

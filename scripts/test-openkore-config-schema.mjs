@@ -3,7 +3,7 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
-  COMBAT_PROFILES, CONFIG_FORM_SCHEMA, FIXED_POLICY, applyProfileTemplate, canonicalToOpenKorePreview,
+  COMBAT_PROFILES, CONFIG_FORM_SCHEMA, FIXED_POLICY, applyProfileTemplate, applySupplyCycleSettings, canonicalToOpenKorePreview,
   defaultCanonicalConfig, migrateLegacyConfig, validateCanonicalConfig,
 } from '../ops/ro-stack/dashboard/config-schema.mjs';
 import { loadCanonicalConfig, saveCanonicalConfig } from '../ops/ro-stack/dashboard/config-storage.mjs';
@@ -11,6 +11,8 @@ const expectValid = (config) => assert.deepEqual(validateCanonicalConfig(config)
 const base = defaultCanonicalConfig(0);
 expectValid(base);
 assert.deepEqual(base.supply.loot, FIXED_POLICY.loot);
+assert.equal(base.supply.itemRules.find((row) => row.item === 'all').storage, true);
+assert.equal(base.supply.itemRules.find((row) => row.item === '501').keepAmount, 100);
 assert.deepEqual(base.combat.loot, FIXED_POLICY.loot);
 assert.equal(base.supply.tools.butterflyWing.presenceBased, true);
 assert.equal(base.supply.tools.butterflyWing.nonConsumable, true);
@@ -19,6 +21,17 @@ assert.equal(base.combat.travel.flyWing.enabled, true);
 assert.equal(COMBAT_PROFILES.length, 8);
 assert.equal(CONFIG_FORM_SCHEMA.supply.arrays.find((row) => row.kind === 'buy').path, 'supply.services.buy.rules');
 assert.equal(CONFIG_FORM_SCHEMA.combat.arrays.find((row) => row.kind === 'attackSkill').path, 'combat.skills.attackSlots');
+const supplyForm = applySupplyCycleSettings(base, { enabled: true, returnWeight: 68,
+  store: false, sell: true, buy: false, redPotionMin: 7, redPotionMax: 30,
+  rules: [{ itemId: 909, action: 'sell' }] });
+expectValid(supplyForm);
+assert.deepEqual([supplyForm.supply.enabled, supplyForm.supply.weightTriggerPercent,
+  supplyForm.supply.services.storage.enabled, supplyForm.supply.services.sell.enabled,
+  supplyForm.supply.services.buy.enabled], [true, 68, false, true, false]);
+assert.deepEqual([supplyForm.supply.services.buy.rules[0].minAmount,
+  supplyForm.supply.services.buy.rules[0].maxAmount], [7, 30]);
+assert.deepEqual(supplyForm.supply.itemRules.find((row) => row.item === '909')?.sell, true);
+assert.equal(base.supply.enabled, false);
 const legacyText = [
   'attackAuto 0', 'attackUseWeapon 0', 'attackDistance 2', 'attackMaxDistance 4',
   'itemsMaxNum_sellOrStore 88',
@@ -37,6 +50,7 @@ const migrated = migrateLegacyConfig({
   supplyCycle: { enabled: true, returnWeight: 68, store: true, sell: false, buy: true,
     rules: [{ itemId: 501, action: 'keep' }, { itemId: 909, action: 'sell' }, { itemId: 910, action: 'store' }, { itemId: 911, action: 'ignore' }, { itemId: 912, action: 'discard' }] },
   configText: legacyText,
+  itemsControlText: 'all 0 1 0',
   skillAutomation: { buff: { handle: 'AL_BLESSING', level: 10, minimumSp: 20 } },
 });
 expectValid(migrated.config);
@@ -46,6 +60,7 @@ assert.equal(migrated.config.supply.inventorySlotTrigger, 88);
 assert.equal(migrated.config.supply.services.buy.enabled, true);
 assert.equal(migrated.config.supply.services.sell.enabled, false);
 assert.equal(migrated.config.supply.services.buy.rules[0].minAmount, 5);
+assert.equal(migrated.config.supply.services.buy.rules[0].item, '501');
 assert.equal(migrated.config.supply.services.buy.rules[0].maxAmount, 20);
 assert.equal(migrated.config.supply.services.withdraw.rules[0].item, 'Fly Wing');
 assert.equal(migrated.config.supply.services.withdraw.rules[0].batchSize, 10);
@@ -53,6 +68,8 @@ assert.equal(migrated.config.supply.itemRules.find((x) => x.item === '909').sell
 assert.equal(migrated.config.supply.itemRules.find((x) => x.item === '910').storage, true);
 assert.equal(migrated.config.supply.itemRules.find((x) => x.item === '911').pickup, 0);
 assert.equal(migrated.config.supply.itemRules.find((x) => x.item === '912').pickup, -1);
+assert.equal(migrated.config.supply.itemRules.find((x) => x.item === 'all').storage, true);
+assert.equal(migrated.config.supply.itemRules.find((x) => x.item === '501').storage, false);
 assert.equal(migrated.config.combat.attack.mode, 0);
 assert.equal(migrated.config.combat.attack.useWeapon, false);
 assert.equal(migrated.config.combat.attack.checkLOS, true);
@@ -90,6 +107,7 @@ assert.match(preview.configText, /itemsTakeAuto 2/);
 assert.match(preview.configText, /getAuto Fly Wing/);
 assert.match(preview.pickupitems, /911 0/);
 assert.match(preview.itemsControl, /909 0 0 1 0 0/);
+assert.match(preview.itemsControl, /^all 0 1 0 0 0$/m);
 assert.match(preview.monControl, /^/);
 const invalid = defaultCanonicalConfig(0);
 invalid.combat.attack.mode = 9;

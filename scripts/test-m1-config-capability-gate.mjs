@@ -18,6 +18,7 @@ assert.equal(configControlVisible('combat.attack.routeToLock'), false);
 assert.equal(configCapability(unaccepted, 'combat.skills.attackSlots'), 'PARTIAL');
 assert.equal(configCapability(unaccepted, 'combat.skills.partySkills'), 'UNAVAILABLE');
 assert.equal(configCapability({ applied: false, capabilities: { 'combat.profile': 'SUPPORTED' } }, 'combat.profile'), 'PARTIAL');
+assert.equal(configCapability({ applied: false, editable: true, capabilities: { 'supply.enabled': 'SUPPORTED' } }, 'supply.enabled'), 'SUPPORTED');
 assert.equal(configCapability({ applied: true, capabilities: { 'combat.profile': 'SUPPORTED' } }, 'combat.profile'), 'SUPPORTED');
 assert.equal(configCapability({ applied: true, capabilities: { 'combat.profile': 'PARTIAL' } }, 'combat.profile'), 'PARTIAL');
 assert.equal(configCapability({ applied: true, capabilities: { 'combat.profile': 'UNAVAILABLE' } }, 'combat.profile'), 'UNAVAILABLE');

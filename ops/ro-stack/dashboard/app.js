@@ -6071,6 +6071,12 @@ const farmTargetRouteBlockerMessages = {
   route_unrepresentable: '目前無法自動前往此掛機地圖',
   service_destination_unavailable: '目前無法自動前往此掛機地圖',
   post_service_route_unreachable: '目前無法自動前往此掛機地圖',
+  SUPPLY_REQUIRED: '角色需要先完成補給，所選掛機地圖已保留',
+  SUPPLY_PREFLIGHT_UNAVAILABLE: '補給狀態暫時無法確認，所選掛機地圖已保留',
+  SUPPLY_HOME_REQUIRED: '請先設定有效的儲存主城；所選掛機地圖已保留',
+  SUPPLY_SERVICE_UNAVAILABLE: '城內服務暫時無法使用；所選掛機地圖已保留',
+  SUPPLY_POLICY_UNAVAILABLE: '補給規則暫時無法確認；所選掛機地圖已保留',
+  SUPPLY_NOT_REQUIRED: '補給需求已解除；正在重新確認切圖',
   farm_map_not_released: '此地圖尚未開放自動掛機',
 };
 function farmTargetBlockedMessage(reason) {
@@ -6589,11 +6595,21 @@ async function selectWorldMap(mapId) {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ mapId }),
       });
+      if (result.reason === 'ALREADY_ON_TARGET_MAP') {
+        $('#worldMapStatus').textContent = '已在該地圖掛機';
+        apply.disabled = false;
+        apply.textContent = '設定為掛機地圖';
+        return;
+      }
       $('#worldMapStatus').textContent = result.message ??
-        `已送出 ${map.name} 傳送，等待伺服器確認抵達並啟動掛機`;
+        (result.reason === 'WORLD_MAP_SUPPLY_QUEUED'
+          ? `已保留 ${map.name}，正在完成補給並等待返程掛機`
+          : `已送出 ${map.name} 傳送，等待伺服器確認抵達並啟動掛機`);
       apply.textContent = '等待伺服器確認';
       await waitForWorldMapAuthority((state) =>
-        state.player?.currentMap === mapId && state.player?.phase === 'AUTO_FARM');
+        state.player?.currentMap === mapId && state.player?.phase === 'AUTO_FARM',
+      result.reason === 'WORLD_MAP_SUPPLY_QUEUED' ? 300000 : 30000,
+      result.reason === 'WORLD_MAP_SUPPLY_QUEUED' ? result.command : null);
       if (result.reason === 'WORLD_MAP_FARM_START_QUEUED') {
         $('#worldMapStatus').textContent = '已在目標地圖開始掛機';
       } else {
@@ -7976,9 +7992,19 @@ function renderWorldMapTowns() {
   area.classList.toggle('hidden', other.childElementCount === 0);
 }
 
-async function waitForWorldMapAuthority(predicate, timeoutMs = 30000) {
+async function waitForWorldMapAuthority(predicate, timeoutMs = 30000, command = null) {
+  let nextCommandPollAt = 0;
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
+    if (command?.commandId && command?.charId && Date.now() >= nextCommandPollAt) {
+      const status = await api(`/api/ro/agents/${command.charId}/ownership/commands/${command.commandId}`);
+      if (status.command?.status === 'REJECTED' &&
+          status.command.reasonCode === 'SUPPLY_RESTART_RETRY_REQUIRED') {
+        command = null; // Web recovery now follows the native paid receipt.
+      } else if (['REJECTED', 'FAILED'].includes(status.command?.status))
+        throw new Error(status.command.reasonCode || 'SUPPLY_SERVICE_UNAVAILABLE');
+      nextCommandPollAt = Date.now() + 3000;
+    }
     const response = await fetch('/api/farm-map-availability', { cache: 'no-store' });
     if (response.ok) {
       const state = await response.json();

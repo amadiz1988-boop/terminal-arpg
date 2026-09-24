@@ -44,8 +44,8 @@
   PersistentAgentNpcTimeoutMilliseconds = 15000
   PersistentAgentNpcMaxRetries = 3
   PersistentAgentServiceEnabled = $true
-  PersistentAgentServiceMapAllowlist = @('prt_fild05','prt_in','geffen_in','izlude_in','payon','alberta_in','cmd_in01','aldeba_in')
-  PersistentAgentServiceNpcAllowlist = @('Tool Dealer#Extended_Prt','Tool Dealer#Extended_Prt1','Tool Dealer#Extended_Gef','Tool Dealer#iz','Tool Dealer#pay3','Tool Dealer#Extended_Alb2','Tool Dealer#Extended_Cmd','Tool Dealer#Extended_Alde')
+  PersistentAgentServiceMapAllowlist = @('prt_fild05','prt_in','geffen_in','izlude_in','payon','alberta_in','cmd_in01','aldeba_in','prontera','geffen','izlude','alberta','comodo','aldebaran')
+  PersistentAgentServiceNpcAllowlist = @('Tool Dealer#Extended_Prt','Tool Dealer#Extended_Prt1','Tool Dealer#Extended_Gef','Tool Dealer#iz','Tool Dealer#pay3','Tool Dealer#Extended_Alb2','Tool Dealer#Extended_Cmd','Tool Dealer#Extended_Alde','kaf_prontera2','kaf_geffen','Kafra Employee#iz','kaf_payon','kaf_alberta2','kaf_comodo','kaf_aldebaran')
   PersistentAgentServiceItemAllowlist = @(501)
   PersistentAgentServiceDestinationAllowlist = @()
   PersistentAgentServiceTimeoutMilliseconds = 15000
@@ -65,6 +65,9 @@
   PersistentAgentSupplyNpc = 'Tool Dealer#Extended_Prt'
   PersistentAgentSupplyGraceMilliseconds = 3000
   PersistentAgentSupplyMaxRetries = 3
+  # M1 storage/sell/buy source remains disabled until Web, Native, and SQL deploy together.
+  PersistentAgentM1SupplyEnabled = $false
+  WebNativeSupplyPolicyEnabled = $false
   # Gate3 routes (1:1 projection of PERSISTENT_AGENT_ROUTE_*). Accepted g3 / g3b2 route JSON.
   PersistentAgentRouteDeath = '[{"map":"pay_arche","x":36,"y":131,"portalTo":"pay_dun00"},{"map":"pay_dun00","x":73,"y":78}]'
   PersistentAgentRouteSupplyOut = '{"pay_dun00":[{"map":"pay_dun00","x":21,"y":186,"portalTo":"pay_arche"},{"map":"pay_arche","x":81,"y":18,"portalTo":"payon"},{"map":"payon","x":16,"y":143,"portalTo":"pay_gld"},{"map":"pay_gld","x":16,"y":276,"portalTo":"moc_fild02"},{"map":"moc_fild02","x":67,"y":342,"portalTo":"moc_fild01"},{"map":"moc_fild01","x":22,"y":242,"portalTo":"prt_fild09"},{"map":"prt_fild09","x":224,"y":380,"portalTo":"prt_fild07"},{"map":"prt_fild07","x":132,"y":381,"portalTo":"prt_fild05"},{"map":"prt_fild05","x":289,"y":219}],"prt_fild08":[{"map":"prt_fild08","x":16,"y":187,"portalTo":"prt_fild07"},{"map":"prt_fild07","x":132,"y":381,"portalTo":"prt_fild05"},{"map":"prt_fild05","x":289,"y":219}],"mjolnir_06":[{"map":"mjolnir_06","x":265,"y":29,"portalTo":"gef_fild00"},{"map":"gef_fild00","x":381,"y":137,"portalTo":"prt_fild00"},{"map":"prt_fild00","x":165,"y":18,"portalTo":"prt_fild04"},{"map":"prt_fild04","x":378,"y":72,"portalTo":"prt_fild05"},{"map":"prt_fild05","x":289,"y":219}]}'

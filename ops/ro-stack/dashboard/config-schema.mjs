@@ -117,10 +117,42 @@ export function defaultCanonicalConfig(revision=0) {
   for (const descriptor of allFields) setConfigPath(config,descriptor.path,clone(descriptor.default));
   for (const descriptor of allArrays) setConfigPath(config,descriptor.path,[]);
   config.supply.services.buy.rules.push({...defaultConfigRow('buy'),minAmount:20,maxAmount:100});
+  config.supply.itemRules.push({...defaultConfigRow('itemRule'),item:'all',keepAmount:0,storage:true,sell:false});
+  for(const [item,keepAmount] of [['501',100],['601',1],['602',1]])
+    config.supply.itemRules.push({...defaultConfigRow('itemRule'),item,keepAmount,storage:false,sell:false});
   config.supply.tools.butterflyWing = clone(FIXED_POLICY.butterflyWing);
   config.combat.travel.flyWing = {...clone(FIXED_POLICY.flyWing),enabled:true};
   config.combat.loot = clone(FIXED_POLICY.loot);
   return config;
+}
+// Translate the existing player supply form into the character-scoped policy.
+// Preserve combat and unrelated item rules; Native receives only numeric IDs.
+export function applySupplyCycleSettings(config, settings) {
+  const next=clone(config), supply=next.supply;
+  supply.enabled=settings.enabled;
+  supply.weightTriggerPercent=settings.returnWeight;
+  supply.services.storage.enabled=settings.store;
+  supply.services.sell.enabled=settings.sell;
+  supply.services.buy.enabled=settings.buy;
+  let redPotion=supply.services.buy.rules.find(row=>String(row.item)==='501');
+  if(!redPotion) { redPotion=defaultConfigRow('buy'); redPotion.item='501'; supply.services.buy.rules.push(redPotion); }
+  redPotion.minAmount=settings.redPotionMin;
+  redPotion.maxAmount=settings.redPotionMax;
+  const rules=new Map(supply.itemRules.map(row=>[String(row.item),row]));
+  for(const rule of settings.rules) {
+    const item=String(rule.itemId);
+    if(rule.action==='default') { rules.delete(item); continue; }
+    const row=rules.get(item)??{...defaultConfigRow('itemRule'),item};
+    if(rule.action==='ignore') row.pickup=0;
+    if(rule.action==='discard') row.pickup=-1;
+    if(rule.action==='store') { row.keepAmount=0; row.storage=true; row.sell=false; }
+    if(rule.action==='sell') { row.keepAmount=0; row.storage=false; row.sell=true; }
+    if(rule.action==='keep') { row.keepAmount=30000; row.storage=false; row.sell=false; }
+    rules.set(item,row);
+  }
+  supply.itemRules=[...rules.values()];
+  assertCanonicalConfig(next);
+  return next;
 }
 const isRecord = value => value !== null && typeof value==='object' && !Array.isArray(value);
 function validateField(errors,descriptor,value,path) {
@@ -212,6 +244,9 @@ export function migrateLegacyConfig({supplyCycle={},configText='',skillAutomatio
     retained.blocks.push(block);
     const descriptor=arrayByMature.get(block.kind); const row=defaultConfigRow(descriptor.kind); const consumed=new Set();
     row[descriptor.kind.endsWith('Skill')?'skill':'item']=block.name;
+    if(descriptor.kind==='buy' && block.name.trim().toLowerCase()==='red potion') {
+      row.item='501'; add('buyAuto Red Potion','supply.services.buy.rules[item=501]','ADAPT','rAthena 道具 501');
+    }
     for(const field of CONFIG_ROW_SCHEMAS[descriptor.kind]) {
       const key=field.matureKey??field.path.replace(/^conditions\./,'');
       if(block.values[key]!==undefined) { setConfigPath(row,field.path,decode(field,block.values[key])); consumed.add(key); }
@@ -249,8 +284,10 @@ export function migrateLegacyConfig({supplyCycle={},configText='',skillAutomatio
     if(rule.action!=='default') policyRows.set(row.item,row);
     add(`supply-cycle.json.rules[${rule.itemId}]=${rule.action}`,'supply.itemRules[]','ADAPT');
   }
-  // Global policy suppresses automatic deposit defaults; explicit service rules remain configurable.
-  const allRule=policyRows.get('all'); if(allRule?.storage) { allRule.storage=false; add('items_control all autostore','supply.loot.autoStore','ADAPT','GLOBAL_AUTOSTORE=NO'); }
+  // Service-phase storage and immediate loot autostore are separate policies.
+  if(!policyRows.has('all')) policyRows.set('all',{...defaultConfigRow('itemRule'),item:'all',keepAmount:0,storage:true,sell:false});
+  if(!policyRows.has('501')) policyRows.set('501',{...defaultConfigRow('itemRule'),item:'501',keepAmount:config.supply.services.buy.rules.find(row=>row.item==='501')?.maxAmount??100,storage:false,sell:false});
+  for(const item of ['601','602']) if(!policyRows.has(item)) policyRows.set(item,{...defaultConfigRow('itemRule'),item,keepAmount:1,storage:false,sell:false});
   for(const item of ['601','602']) if(policyRows.has(item)) { Object.assign(policyRows.get(item),{pickup:1,storage:false,sell:false,cartAdd:false,keepAmount:1}); add(`items_control ${item}`,'permanent travel tool policy','ADAPT','永久道具固定保留，原值保留於遷移記錄'); }
   config.supply.itemRules=[...policyRows.values()];
   for(const line of parseControls(monControlText,'monControl')) {
@@ -298,7 +335,7 @@ export function canonicalToOpenKorePreview(config) {
   const all=config.supply.itemRules.find(row=>row.item==='all');
   return {configText:lines.join('\n')+'\n',
     pickupitems:[`all ${all?.pickup??1}`,...items.map(row=>`${row.item} ${row.pickup}`),'601 1','602 1'].join('\n')+'\n',
-    itemsControl:[`all ${all?.keepAmount??0} 0 ${all?.sell?1:0} 0 0`,...items.map(row=>`${row.item} ${row.keepAmount} ${encode(row.storage)} ${encode(row.sell)} ${encode(row.cartAdd)} ${encode(row.cartGet)}`),'601 1 0 0 0 0','602 1 0 0 0 0'].join('\n')+'\n',
+     itemsControl:[`all ${all?.keepAmount??0} ${all?.storage?1:0} ${all?.sell?1:0} 0 0`,...items.map(row=>`${row.item} ${row.keepAmount} ${encode(row.storage)} ${encode(row.sell)} ${encode(row.cartAdd)} ${encode(row.cartGet)}`),'601 1 0 0 0 0','602 1 0 0 0 0'].join('\n')+'\n',
     monControl:config.combat.targets.map(row=>`${row.monster} ${['attack','teleport','search','skillcancel','lv','joblv','hp','sp','weight'].map(key=>encode(row[key])).join(' ')}`).join('\n'),
     policy:{flyWingEnabled:config.combat.travel.flyWing.enabled,butterflyWing:FIXED_POLICY.butterflyWing},
     applied:false,capability:'CONFIG_ONLY_ADAPTER_PREVIEW',
