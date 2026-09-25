@@ -18,6 +18,9 @@ const canonicalProduction = 'C:\\Users\\Administrator\\ghost-island-production\\
 const sha = value => /^[a-f0-9]{40}$/i.test(value || '');
 const digest = file => createHash('sha256').update(fs.readFileSync(file)).digest('hex').toUpperCase();
 const fail = code => { throw Error(code); };
+const approvedAdditivePaths = new Map([
+  ['LOCAL_DEVELOPER_ADMIN_ENTRYPOINT_ADDITIVE_MANIFEST_V1', 'ops/ro-stack/developer-admin-action.mjs'],
+]);
 const run = (cwd, command, args) => {
   const result = spawnSync(command, args, { cwd, encoding:'utf8', windowsHide:true, timeout:120000, maxBuffer:16*1024*1024 });
   if (result.status !== 0) fail(`${command.toUpperCase()}_${args[0]}_FAILED:${(result.stdout || result.stderr).slice(-500)}`);
@@ -69,6 +72,36 @@ export function duplicateAmendmentIsApplied(audit, lease, pending, {leaseId, own
     pending.lease_id===leaseId && pending.owner_task_id===owner;
 }
 
+export function validateManifestDelta(oldManifest, nextManifest, reason, rollbackCovered) {
+  const oldRows=new Map(oldManifest.files.map(row=>[row.path,row]));
+  const nextRows=new Map(nextManifest.files.map(row=>[row.path,row]));
+  if (oldRows.size!==oldManifest.files.length || nextRows.size!==nextManifest.files.length)
+    fail('MANIFEST_DELTA_DUPLICATE_PATH');
+  const delta={unchanged_paths:[],modified_existing_paths:[],added_paths:[],removed_paths:[],
+    absent_preimage_paths:[],rollback_remove_paths:[]};
+  for (const [path,oldRow] of oldRows) {
+    const nextRow=nextRows.get(path);
+    if (!nextRow) { delta.removed_paths.push(path); continue; }
+    if (!equalHash(nextRow.production_preimage_sha256,oldRow.sha256) || nextRow.production_preimage==='ABSENT')
+      fail(`EXISTING_WEB_PREIMAGE_MISMATCH:${path}`);
+    (equalHash(nextRow.sha256,oldRow.sha256) ? delta.unchanged_paths : delta.modified_existing_paths).push(path);
+  }
+  if (delta.removed_paths.length || nextManifest.removed_files?.length) fail('WEB_MANIFEST_REMOVAL_UNAPPROVED');
+  for (const [path,row] of nextRows) {
+    if (oldRows.has(path)) continue;
+    delta.added_paths.push(path);
+    if (row.production_preimage!=='ABSENT' || row.production_preimage_sha256)
+      fail(`ADDED_WEB_PREIMAGE_NOT_ABSENT:${path}`);
+    delta.absent_preimage_paths.push(path);
+    delta.rollback_remove_paths.push(path);
+  }
+  const approved=approvedAdditivePaths.get(reason);
+  if (approved ? delta.added_paths.length!==1 || delta.added_paths[0]!==approved : delta.added_paths.length!==0)
+    fail('WEB_MANIFEST_ADDITION_UNAPPROVED');
+  if (!rollbackCovered) fail('WEB_MANIFEST_ROLLBACK_COVERAGE_MISSING');
+  return delta;
+}
+
 function nativeStageValid(root, state, lease, pending) {
   try {
     const file=inside(root,activeNativeReceiptPath(pending)), receipt=readJson(file);
@@ -104,10 +137,6 @@ export function planActiveWebAmendment({root,owner,leaseId,oldSha,newSha,newMani
   const oldManifestFile=path.resolve(lease.admission_manifest);
   const oldManifest=readManifest(oldManifestFile), nextManifest=readManifest(newManifestFile);
   validateHeader(oldManifest);validateHeader(nextManifest);
-  const oldRows=new Map(oldManifest.files.map(row=>[row.path,row]));
-  if (nextManifest.files.length!==oldManifest.files.length || nextManifest.files.some(row=>
-      !oldRows.has(row.path) || !equalHash(row.production_preimage_sha256,oldRows.get(row.path).sha256)))
-    fail('NEW_MANIFEST_NOT_BASED_ON_DEPLOYED_WEB');
   const oldReceipt=readJson(oldReceiptFile);
   const oldReceiptRelative=path.relative(root,oldReceiptFile).replaceAll('\\','/');
   if (!oldReceiptRelative.startsWith('.local/ro-stack/dashboard/deploy-receipts/') ||
@@ -119,6 +148,14 @@ export function planActiveWebAmendment({root,owner,leaseId,oldSha,newSha,newMani
       !equalHash(digest(path.join(path.dirname(oldReceiptFile),'manifest.json')),lease.admission_manifest_sha256)) fail('OLD_WEB_MANIFEST_INVALID');
   const nativeValid=nativeStageValid(root,state,lease,pending);
   const admitted=admission(newManifestFile,root);
+  const rollbackCovered=admitted.ROLLBACK_UNCOVERED_PATH_COUNT===0 &&
+    admitted.ROLLBACK_COVERAGE_FILE_COUNT===nextManifest.file_count;
+  const classified=validateManifestDelta(oldManifest,nextManifest,reason,rollbackCovered);
+  const delta={unchanged_path_count:classified.unchanged_paths.length,
+    modified_existing_path_count:classified.modified_existing_paths.length,
+    added_paths:classified.added_paths,removed_paths:classified.removed_paths,
+    absent_preimage_paths:classified.absent_preimage_paths,
+    rollback_remove_paths:classified.rollback_remove_paths};
   const remoteCheckout=run(nextManifest.candidate_root,'git',['rev-parse','HEAD'])===newSha &&
     !run(nextManifest.candidate_root,'git',['status','--porcelain=v1','--untracked-files=all']);
   const offline=run(nextManifest.candidate_root,'node',['scripts/test-canonical-web-offline.mjs']);
@@ -131,7 +168,7 @@ export function planActiveWebAmendment({root,owner,leaseId,oldSha,newSha,newMani
     firstPromotionEvidence(evidence,newSha,lease.native_deploy_git_sha);
   const preflight={remoteCheckout,sourceRegression:offline.includes('"failures":0') && migration.includes('LEGACY_ITEM_RULE_MIGRATION_PASS') &&
       (!targeted || targeted.includes('START_FARM_HYBRID_SKILL_DEFAULT_PASS cases=11')),
-    manifestAdmission:admitted.PRESTAGE_COMPLETE===true,rollbackCoverage:admitted.ROLLBACK_UNCOVERED_PATH_COUNT===0 && admitted.ROLLBACK_COVERAGE_FILE_COUNT===nextManifest.file_count,
+    manifestAdmission:admitted.PRESTAGE_COMPLETE===true,rollbackCoverage:rollbackCovered,
     capabilitySuperset:capabilitiesPreserved(nextManifest,lease,state),assetAuthority:admitted.assetPackage?.valid===true,firstEvidence};
   validateActiveWebAmendment({state,lease,pending,oldManifest,nextManifest,oldReceipt,leaseId,owner,oldSha,newSha,nativeValid,preflight});
   if (sourceFixCheckpoint!==newSha || !reason?.trim()) fail('AMENDMENT_REASON_REQUIRED');
@@ -145,7 +182,7 @@ export function planActiveWebAmendment({root,owner,leaseId,oldSha,newSha,newMani
       path:item.previous_web_candidate_receipt,sha256:item.previous_web_candidate_receipt_sha256})),
       {path:oldReceiptRelative,sha256:digest(oldReceiptFile)}],
     old_manifest_sha256:digest(oldManifestFile),new_manifest_sha256:digest(newManifestFile),
-    new_manifest_digest:nextManifest.manifest_digest,
+    new_manifest_digest:nextManifest.manifest_digest,manifest_delta:delta,
     governance_sha:run(governanceRoot,'git',['rev-parse','HEAD']),
     amendment_evidence_digest:createHash('sha256').update(JSON.stringify({preflight,offline,migration,targeted,evidence_sha256:digest(evidenceFile)})).digest('hex').toUpperCase(),
     preflight};
@@ -156,7 +193,7 @@ export function planActiveWebAmendment({root,owner,leaseId,oldSha,newSha,newMani
   const nextPending={...pending,web_git_sha:newSha,web_candidate_amendments:[...(pending.web_candidate_amendments || []),history]};
   return {files,oldHashes:Object.fromEntries(Object.entries(files).map(([key,file])=>[key,digest(file)])),
     oldManifestFile,oldManifestHash:digest(oldManifestFile),newManifestFile,newManifestHash:digest(newManifestFile),
-    oldReceiptFile,oldReceiptHash:digest(oldReceiptFile), audit,auditFile,nextLease,nextPending,history,preflight};
+    oldReceiptFile,oldReceiptHash:digest(oldReceiptFile), audit,auditFile,nextLease,nextPending,history,preflight,delta};
 }
 
 export function applyAmendmentPlan(root,plan) {
@@ -192,10 +229,11 @@ function main() {
   const plan=planActiveWebAmendment({root,owner:args.owner,leaseId:args.lease,oldSha:args['old-web-sha'],
     newSha:args['new-web-sha'],newManifestFile:path.resolve(args.manifest),oldReceiptFile:path.resolve(args['old-web-receipt']),
     sourceFixCheckpoint:args['source-fix-checkpoint'],reason:args.reason});
-  if (args.execute==='false') {console.log(JSON.stringify({eligible:true,dry_run:true,preflight:plan.preflight,audit_receipt:plan.auditFile}));return;}
+  if (args.execute==='false') {console.log(JSON.stringify({eligible:true,dry_run:true,preflight:plan.preflight,manifest_delta:plan.delta,audit_receipt:plan.auditFile}));return;}
   applyAmendmentPlan(root,plan);
   console.log(JSON.stringify({amended:true,idempotent:false,lease_id:args.lease,old_web_git_sha:args['old-web-sha'],
-    new_web_git_sha:args['new-web-sha'],audit_receipt:plan.auditFile,amendment_evidence_digest:plan.audit.amendment_evidence_digest}));
+    new_web_git_sha:args['new-web-sha'],manifest_delta:plan.delta,audit_receipt:plan.auditFile,
+    amendment_evidence_digest:plan.audit.amendment_evidence_digest}));
 }
 if (process.argv[1] && path.resolve(process.argv[1])===fileURLToPath(import.meta.url)) {
   try { main(); } catch(error) {console.log(JSON.stringify({amended:false,error:error.message}));process.exitCode=1;}

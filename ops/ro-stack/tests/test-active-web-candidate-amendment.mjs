@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
-import { validateActiveWebAmendment, duplicateAmendmentIsApplied, applyAmendmentPlan } from '../amend-active-web-candidate.mjs';
+import { validateActiveWebAmendment, validateManifestDelta, duplicateAmendmentIsApplied, applyAmendmentPlan } from '../amend-active-web-candidate.mjs';
 import { webAmendmentHistoryValid } from '../production-deployment-state.mjs';
 
 const oldSha='a'.repeat(40),newSha='b'.repeat(40),native='c'.repeat(40);
@@ -32,6 +32,71 @@ function test(name,change,expected) {
   console.log(`PASS ${++count} ${name}`);
 }
 test('valid staged promotion',()=>{});
+const additiveReason='LOCAL_DEVELOPER_ADMIN_ENTRYPOINT_ADDITIVE_MANIFEST_V1';
+const actionPath='ops/ro-stack/developer-admin-action.mjs';
+function deltaFixture() {
+  const oldManifest={files:[{path:'ops/ro-stack/dashboard.mjs',sha256:'A'.repeat(64)},
+    {path:'public/ro/client/manifest.json',sha256:'E'.repeat(64)}],removed_files:[]};
+  const nextManifest={files:[{path:'ops/ro-stack/dashboard.mjs',sha256:'B'.repeat(64),
+    production_preimage_sha256:'A'.repeat(64)},
+    {path:'public/ro/client/manifest.json',sha256:'E'.repeat(64),
+      production_preimage_sha256:'E'.repeat(64)}],removed_files:[]};
+  return {oldManifest,nextManifest};
+}
+function addAction(x,path=actionPath) {
+  x.nextManifest.files.push({path,sha256:'C'.repeat(64),production_preimage:'ABSENT'});
+}
+{
+  const x=deltaFixture(),delta=validateManifestDelta(x.oldManifest,x.nextManifest,'ORDINARY_WEB_FIX',true);
+  assert.deepEqual(delta.added_paths,[]);
+  assert.deepEqual(delta.modified_existing_paths,['ops/ro-stack/dashboard.mjs']);
+  assert.deepEqual(delta.unchanged_paths,['public/ro/client/manifest.json']);
+  console.log(`PASS ${++count} same-count valid amendment classifies modified existing path`);
+}
+{
+  const x=deltaFixture();addAction(x);
+  const delta=validateManifestDelta(x.oldManifest,x.nextManifest,additiveReason,true);
+  assert.deepEqual(delta.added_paths,[actionPath]);
+  assert.deepEqual(delta.absent_preimage_paths,[actionPath]);
+  assert.deepEqual(delta.rollback_remove_paths,[actionPath]);
+  assert.deepEqual(delta.removed_paths,[]);
+  console.log(`PASS ${++count} approved ABSENT addition has rollback REMOVE semantics`);
+}
+{
+  const x=deltaFixture();addAction(x);
+  assert.throws(()=>validateManifestDelta(x.oldManifest,x.nextManifest,'UNAPPROVED_REASON',true),/WEB_MANIFEST_ADDITION_UNAPPROVED/);
+  console.log(`PASS ${++count} unapproved addition reason rejected`);
+}
+{
+  const x=deltaFixture();addAction(x,'ops/ro-stack/unrelated.mjs');
+  assert.throws(()=>validateManifestDelta(x.oldManifest,x.nextManifest,additiveReason,true),/WEB_MANIFEST_ADDITION_UNAPPROVED/);
+  console.log(`PASS ${++count} unapproved addition path rejected`);
+}
+{
+  const x=deltaFixture();addAction(x);x.nextManifest.files.at(-1).production_preimage='UNKNOWN';
+  assert.throws(()=>validateManifestDelta(x.oldManifest,x.nextManifest,additiveReason,true),/ADDED_WEB_PREIMAGE_NOT_ABSENT/);
+  console.log(`PASS ${++count} addition with unknown preimage rejected`);
+}
+{
+  const x=deltaFixture();addAction(x);
+  assert.throws(()=>validateManifestDelta(x.oldManifest,x.nextManifest,additiveReason,false),/WEB_MANIFEST_ROLLBACK_COVERAGE_MISSING/);
+  console.log(`PASS ${++count} addition without rollback coverage rejected`);
+}
+{
+  const x=deltaFixture();x.nextManifest.files=[];
+  assert.throws(()=>validateManifestDelta(x.oldManifest,x.nextManifest,'ORDINARY_WEB_FIX',true),/WEB_MANIFEST_REMOVAL_UNAPPROVED/);
+  console.log(`PASS ${++count} unexpected removal rejected`);
+}
+{
+  const x=deltaFixture();x.nextManifest.files[0].production_preimage_sha256='D'.repeat(64);
+  assert.throws(()=>validateManifestDelta(x.oldManifest,x.nextManifest,'ORDINARY_WEB_FIX',true),/EXISTING_WEB_PREIMAGE_MISMATCH/);
+  console.log(`PASS ${++count} existing-file preimage mismatch rejected`);
+}
+{
+  const x=deltaFixture();addAction(x);addAction(x,'ops/ro-stack/unrelated.mjs');
+  assert.throws(()=>validateManifestDelta(x.oldManifest,x.nextManifest,additiveReason,true),/WEB_MANIFEST_ADDITION_UNAPPROVED/);
+  console.log(`PASS ${++count} mixed approved and unexplained additions rejected`);
+}
 test('wrong lease ID',x=>{x.leaseId='other';},'ACTIVE_LEASE_IDENTITY_MISMATCH');
 test('wrong Unicode owner',x=>{x.owner='F|M1 最終整合';},'ACTIVE_LEASE_IDENTITY_MISMATCH');
 test('released lease',x=>{x.lease.status='RELEASED';},'ACTIVE_LEASE_IDENTITY_MISMATCH');
