@@ -1,0 +1,143 @@
+{
+  "schema_version": 1,
+  "task_id": "UI_BACKGROUND_THEME_SYSTEM_V1",
+  "asset_root": "ops/ro-stack/dashboard/assets/ui-themes",
+  "source_root_env": "GHOST_ISLAND_UI_THEME_SOURCE_ROOT",
+  "source_class": "USER_PROVIDED_LICENSED_IMAGE",
+  "public_git_binary": false,
+  "outputs": {
+    "wide": {
+      "file": "background-wide.webp",
+      "width": 1920,
+      "height": 1080
+    },
+    "tall": {
+      "file": "background-tall.webp",
+      "max_width": 900,
+      "max_height": 1600
+    },
+    "thumb": {
+      "file": "thumb.webp",
+      "width": 240,
+      "height": 150
+    }
+  },
+  "themes": [
+    {
+      "id": "heroine-roxy",
+      "series": "無職轉生",
+      "heroine": "洛琪希",
+      "source": {
+        "folder": "洛琪希",
+        "file": "c045cdf28e2ca83bbc74fe6be3ff29d1.jpg",
+        "sha256": "b3195a7fa049d05a691b201a2b94214b9b7a837510d245fbf9e6da39d439b293"
+      },
+      "focus": {
+        "x": 0.46,
+        "y": 0.2
+      },
+      "portrait_side": "right",
+      "outputs": {
+        "wide": {
+          "sha256": "7cbdd040924296148953491da173b6c10428304038e30ddd42124450cca26ab4",
+          "size": 45184
+        },
+        "tall": {
+          "sha256": "145f9552b393a199cba8bb92cd540e1c4eb7beb9939e1307b20054c12d75154d",
+          "size": 61382
+        },
+        "thumb": {
+          "sha256": "db2bbb2715c663c4f1ed9d680212e5ebeb81b8ccd5b47d9a0c3bc8348bb1dc95",
+          "size": 5320
+        }
+      }
+    },
+    {
+      "id": "heroine-eris",
+      "series": "無職轉生",
+      "heroine": "艾莉絲",
+      "source": {
+        "folder": "艾莉絲",
+        "file": "ddb7bc2bf6b79fbc82548378758357ad.jpg",
+        "sha256": "eb0da6241ea916a435829cba418cd24f4487a20df8d25b39c35f09abcba7a55b"
+      },
+      "focus": {
+        "x": 0.5,
+        "y": 0.18
+      },
+      "portrait_side": "right",
+      "outputs": {
+        "wide": {
+          "sha256": "7960a6b5ec6c2e7e2f6080bf6dbdcea0aeda577b0c8742364d91ed68480e38fe",
+          "size": 66150
+        },
+        "tall": {
+          "sha256": "4f7a8003ad645e3883d79ec62554dccd0c91f67e5b353ff68af72f67357cb282",
+          "size": 82162
+        },
+        "thumb": {
+          "sha256": "5f7cc4c3b9811befd759f28a31362aa1758b9b1274099883e6fd7e4d5020fada",
+          "size": 8450
+        }
+      }
+    },
+    {
+      "id": "heroine-sylphie",
+      "series": "無職轉生",
+      "heroine": "西露菲",
+      "source": {
+        "folder": "西露菲",
+        "file": "06cc5fe89ada3d9a962a6570437eab07.jpg",
+        "sha256": "b3b27c4db48fffdae7f14bfd24b05e57291e587ff1fb7db15e31ff33eacb0752"
+      },
+      "focus": {
+        "x": 0.5,
+        "y": 0.22
+      },
+      "portrait_side": "right",
+      "outputs": {
+        "wide": {
+          "sha256": "065b80c5c834318a3c196ccb93af92a58c872cea53f7dd981c408318d75914b5",
+          "size": 44528
+        },
+        "tall": {
+          "sha256": "aabc3b2cce7235447235b5d7a7bb4987f5159f698b591236c226f0ba7af99c63",
+          "size": 48756
+        },
+        "thumb": {
+          "sha256": "21cc8d4d465cd10c09d7a962b01415b59ea57a33f81e38d1ed78ab0df9d35ce2",
+          "size": 6326
+        }
+      }
+    },
+    {
+      "id": "heroine-red-dress",
+      "series": "無職轉生",
+      "heroine": "紅衣短髮女",
+      "source": {
+        "folder": "紅衣短髮女",
+        "file": "HS87GmbbIAAHCu_.PNG",
+        "sha256": "7f41f3f0a825ec251873464e90108bbb8ea4e5d5eadd85f6f570b83cfc3e0e00"
+      },
+      "focus": {
+        "x": 0.45,
+        "y": 0.2
+      },
+      "portrait_side": "right",
+      "outputs": {
+        "wide": {
+          "sha256": "76919336f0061d580e249c92e954d280b2c42664779e622f964f0e55af607108",
+          "size": 43652
+        },
+        "tall": {
+          "sha256": "f34ff16010a0167c17cbb0f6ec04c5af23604dc2c74f305395f1267d5a765296",
+          "size": 88532
+        },
+        "thumb": {
+          "sha256": "12914d1ac590f2aa0da6010241db744d4562430b620691dbed1304dbb0364f14",
+          "size": 6746
+        }
+      }
+    }
+  ]
+}

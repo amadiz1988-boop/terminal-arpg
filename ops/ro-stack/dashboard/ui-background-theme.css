@@ -1,0 +1,123 @@
+/* UI background theme layer. Rules: docs/project-control/ui-background-theme-system-v1.md
+   The image only lives behind the page and inside window title bars. Windows,
+   forms, buttons and the RO UI kit keep their own opaque backgrounds. */
+:root {
+  --ui-bg-overlay: rgb(20 28 36 / 34%);
+  --ui-bg-opacity: 0.92;
+  --ui-bg-image: var(--ui-bg-wide);
+  --ui-bg-position: right center;
+}
+
+:root[data-ui-bg-theme]:not([data-ui-bg-theme='default']) {
+  background-color: var(--ui-bg-tint, #414445);
+}
+
+:root[data-ui-bg-theme]:not([data-ui-bg-theme='default']) body,
+:root[data-ui-bg-theme]:not([data-ui-bg-theme='default']) .auth {
+  background: transparent;
+}
+
+:root[data-ui-bg-theme]:not([data-ui-bg-theme='default']) body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--ui-bg-overlay), var(--ui-bg-overlay)),
+    var(--ui-bg-image) var(--ui-bg-position) / cover no-repeat,
+    var(--ui-bg-tint, #414445);
+  opacity: var(--ui-bg-opacity);
+}
+
+:root[data-ui-bg-level='soft'] {
+  --ui-bg-overlay: rgb(20 28 36 / 50%);
+  --ui-bg-opacity: 0.7;
+}
+
+:root[data-ui-bg-level='bar-only'] {
+  --ui-bg-opacity: 0;
+}
+
+@media (orientation: portrait), (max-width: 700px) {
+  :root {
+    --ui-bg-image: var(--ui-bg-tall);
+    --ui-bg-position: center top;
+    --ui-bg-overlay: rgb(20 28 36 / 42%);
+  }
+
+  :root[data-ui-bg-level='soft'] {
+    --ui-bg-overlay: rgb(20 28 36 / 56%);
+  }
+}
+
+/* The blue title bar keeps its RO gradient on top; the theme only shows through. */
+:root[data-ui-bg-theme]:not([data-ui-bg-theme='default']) #game .titlebar {
+  background:
+    linear-gradient(rgb(155 176 201 / 86%), rgb(84 109 139 / 92%)),
+    var(--ui-bg-wide) right 30% / cover no-repeat,
+    #546d8b;
+}
+
+.ui-background-theme-settings {
+  display: grid;
+  gap: 8px;
+  padding: 0 12px 12px;
+}
+
+.ui-background-theme-heading {
+  font-weight: bold;
+}
+
+.ui-background-theme-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  gap: 8px;
+}
+
+.ui-background-theme-card {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  padding: 3px;
+  border: 1px solid #8e9ba8;
+  border-radius: 2px;
+  background: #fff;
+  color: #1d2934;
+  cursor: pointer;
+  text-align: center;
+}
+
+.ui-background-theme-card.is-selected {
+  border-color: #315d89;
+  box-shadow: 0 0 0 1px #315d89;
+}
+
+.ui-background-theme-card:focus-visible {
+  outline: 2px solid #315d89;
+  outline-offset: 1px;
+}
+
+.ui-background-theme-card:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.ui-background-theme-thumb {
+  display: block;
+  width: 100%;
+  aspect-ratio: 8 / 5;
+  object-fit: cover;
+  background: var(--ro-floor-image) 0 0 / var(--ro-floor-size) repeat, #414445;
+}
+
+.ui-background-theme-label {
+  overflow-wrap: anywhere;
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.ui-background-theme-status {
+  color: #7a4b14;
+}
+
