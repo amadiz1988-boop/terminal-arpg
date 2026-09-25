@@ -62,9 +62,21 @@ export const M1_INVENTORY_PROJECTION_CORRECTION = Object.freeze({
     'tools/pa-command-contract/Test-M1CanonicalSource.ps1',
   ]),
 });
+// The live farm-world-teleport path requires the previously omitted Supply
+// policy contract field and must count ordinary dynamic_mobs script spawns.
+export const M1_FARM_WORLD_TELEPORT_SPAWN_CORRECTION = Object.freeze({
+  reason: 'M1_FARM_WORLD_TELEPORT_DYNAMIC_SPAWN_ALIGNMENT_V1',
+  scope: 'M1_FARM_WORLD_TELEPORT_DYNAMIC_SPAWN_ALIGNMENT_V1',
+  sourcePaths: Object.freeze([
+    'conf/persistent_agent_commands.json',
+    'src/map/persistent_agent.cpp',
+    'tools/pa-command-contract/contract-test-matrix.json',
+    'tools/pa-command-contract/Test-M1CanonicalSource.ps1',
+  ]),
+});
 export const APPROVED_NATIVE_AMENDMENTS = Object.freeze([
   M1_SECOND_NATIVE_AMENDMENT, M1_INVENTORY_MAINTENANCE_NATIVE_AMENDMENT,
-  M1_INVENTORY_PROJECTION_CORRECTION,
+  M1_INVENTORY_PROJECTION_CORRECTION, M1_FARM_WORLD_TELEPORT_SPAWN_CORRECTION,
 ]);
 export const approvedNativeAmendment = reason =>
   APPROVED_NATIVE_AMENDMENTS.find(item => item.reason === reason) ?? null;

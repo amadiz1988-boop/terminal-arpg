@@ -6,6 +6,7 @@ import { createHash } from 'node:crypto';
 import { HISTORICAL_NATIVE_AMENDMENT as old, M1_SECOND_NATIVE_AMENDMENT as policy,
   M1_INVENTORY_MAINTENANCE_NATIVE_AMENDMENT as inventory,
   M1_INVENTORY_PROJECTION_CORRECTION as projection,
+  M1_FARM_WORLD_TELEPORT_SPAWN_CORRECTION as farmTeleport,
   validateNativeAmendmentHistory, validateHistoricalNativeAnchor, validateNextNativeAmendment,
   applyNextNativeAmendment, deployedNativeRuntimeMatches } from '../native-amendment-chain.mjs';
 import { retirementDecision } from '../native-candidate-amendment.mjs';
@@ -221,6 +222,16 @@ test('fourth projection correction requires the deployed inventory candidate', x
   pending.native_receipt_sha256 = deployed.sha256;
   fourthInput.previousReceiptSha256 = deployed.sha256;
   assert.equal(validateNextNativeAmendment(x.root, fourthInput).history.length, 3);
+});
+test('farm teleport amendment allows only its exact contract and spawn files', () => {
+  assert.equal(farmTeleport.reason, 'M1_FARM_WORLD_TELEPORT_DYNAMIC_SPAWN_ALIGNMENT_V1');
+  assert.deepEqual(farmTeleport.sourcePaths, [
+    'conf/persistent_agent_commands.json',
+    'src/map/persistent_agent.cpp',
+    'tools/pa-command-contract/contract-test-matrix.json',
+    'tools/pa-command-contract/Test-M1CanonicalSource.ps1',
+  ]);
+  assert.equal(farmTeleport.sourcePaths.includes('src/map/map.cpp'), false);
 });
 {
   const mapHash = 'A'.repeat(64);

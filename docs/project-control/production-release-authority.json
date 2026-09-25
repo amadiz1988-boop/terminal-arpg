@@ -11,7 +11,7 @@
     "repository": "https://github.com/amadiz1988-boop/ghost-island-rathena.git",
     "github_repository": "https://github.com/amadiz1988-boop/ghost-island-rathena.git",
     "release_ref": "refs/heads/main",
-    "accepted_source_sha": "fe57cf945e77e5e4d132e7d3228535adb47420fe",
+    "accepted_source_sha": "27cb8d5ca74eae42fdac250f7c959a703be9b114",
     "private_required": true,
     "candidate_history": [
       {
@@ -44,6 +44,14 @@
       "lease_id": "869f1725-dbd0-452d-b9dd-37ee79cc3f9a",
       "candidate_successor": "fe57cf945e77e5e4d132e7d3228535adb47420fe",
       "reason": "M1_INVENTORY_MAINTENANCE_PROJECTION_CORRECTION_V1",
+      "status": "SOURCE_APPROVED_DEPLOY_PENDING"
+    },
+    {
+      "native_git_sha": "fe57cf945e77e5e4d132e7d3228535adb47420fe",
+      "disposition": "DEPLOYED_NATIVE_PREDECESSOR",
+      "lease_id": "869f1725-dbd0-452d-b9dd-37ee79cc3f9a",
+      "candidate_successor": "27cb8d5ca74eae42fdac250f7c959a703be9b114",
+      "reason": "M1_FARM_WORLD_TELEPORT_DYNAMIC_SPAWN_ALIGNMENT_V1",
       "status": "SOURCE_APPROVED_DEPLOY_PENDING"
     }
     ]
