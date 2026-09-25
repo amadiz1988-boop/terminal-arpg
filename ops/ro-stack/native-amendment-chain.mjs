@@ -101,11 +101,24 @@ export const M1_DORMANT_QUARANTINE_RUNTIME_CORRECTION = Object.freeze({
     'tools/pa-quarantine-idle-recovery/build-and-test.ps1',
   ]),
 });
+// Project Control V15: death preserves the farm parent, evaluates the existing
+// Saved Town service policy, and returns through canonical World Travel.
+export const M1_DEATH_TOWN_MAINTENANCE_AMENDMENT = Object.freeze({
+  reason: 'M1_DEATH_TOWN_MAINTENANCE_V1',
+  scope: 'M1_DEATH_TOWN_MAINTENANCE_V1',
+  sourcePaths: Object.freeze([
+    'src/map/persistent_agent.cpp',
+    'src/map/persistent_agent_m1_supply_policy.hpp',
+    'tools/pa-command-contract/M1DeathMaintenanceReference.md',
+    'tools/pa-command-contract/Test-M1DeathMaintenanceSource.ps1',
+    'tools/pa-command-contract/test-m1-supply-policy.cpp',
+  ]),
+});
 export const APPROVED_NATIVE_AMENDMENTS = Object.freeze([
   M1_SECOND_NATIVE_AMENDMENT, M1_INVENTORY_MAINTENANCE_NATIVE_AMENDMENT,
   M1_INVENTORY_PROJECTION_CORRECTION, M1_FARM_WORLD_TELEPORT_SPAWN_CORRECTION,
   M1_START_FARM_SUPPLY_CONTRACT_CORRECTION, M1_AUTO_FARM_QUARANTINE_RECOVERY_CORRECTION,
-  M1_DORMANT_QUARANTINE_RUNTIME_CORRECTION,
+  M1_DORMANT_QUARANTINE_RUNTIME_CORRECTION, M1_DEATH_TOWN_MAINTENANCE_AMENDMENT,
 ]);
 export const approvedNativeAmendment = reason =>
   APPROVED_NATIVE_AMENDMENTS.find(item => item.reason === reason) ?? null;

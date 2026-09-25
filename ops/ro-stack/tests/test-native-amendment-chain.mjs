@@ -10,6 +10,7 @@ import { HISTORICAL_NATIVE_AMENDMENT as old, M1_SECOND_NATIVE_AMENDMENT as polic
   M1_START_FARM_SUPPLY_CONTRACT_CORRECTION as startFarmSupply,
   M1_AUTO_FARM_QUARANTINE_RECOVERY_CORRECTION as farmRecovery,
   M1_DORMANT_QUARANTINE_RUNTIME_CORRECTION as dormantRecovery,
+  M1_DEATH_TOWN_MAINTENANCE_AMENDMENT as deathMaintenance,
   validateNativeAmendmentHistory, validateHistoricalNativeAnchor, validateNextNativeAmendment,
   applyNextNativeAmendment, deployedNativeRuntimeMatches } from '../native-amendment-chain.mjs';
 import { retirementDecision } from '../native-candidate-amendment.mjs';
@@ -260,6 +261,17 @@ test('dormant quarantine runtime amendment excludes unrelated native source', ()
     'tools/pa-quarantine-idle-recovery/build-and-test.ps1',
   ]);
   assert.equal(dormantRecovery.sourcePaths.includes('src/map/map.cpp'), false);
+});
+test('V15 death maintenance amendment admits only the reviewed source and evidence', () => {
+  assert.equal(deathMaintenance.reason, 'M1_DEATH_TOWN_MAINTENANCE_V1');
+  assert.deepEqual(deathMaintenance.sourcePaths, [
+    'src/map/persistent_agent.cpp',
+    'src/map/persistent_agent_m1_supply_policy.hpp',
+    'tools/pa-command-contract/M1DeathMaintenanceReference.md',
+    'tools/pa-command-contract/Test-M1DeathMaintenanceSource.ps1',
+    'tools/pa-command-contract/test-m1-supply-policy.cpp',
+  ]);
+  assert.equal(deathMaintenance.sourcePaths.includes('src/map/map.cpp'), false);
 });
 {
   const mapHash = 'A'.repeat(64);
