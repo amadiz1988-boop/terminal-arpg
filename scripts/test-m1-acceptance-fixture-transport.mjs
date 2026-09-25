@@ -1,7 +1,22 @@
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
-import { createM1AcceptanceFixtureTransport } from '../ops/ro-stack/test-fixture-command.mjs';
+import { createM1AcceptanceFixtureTransport, fixtureTransportEnabled } from '../ops/ro-stack/test-fixture-command.mjs';
+
+assert.equal(fixtureTransportEnabled('M1_ACCEPTANCE', {}), false);
+assert.equal(fixtureTransportEnabled('GENERIC', {}), false);
+assert.equal(fixtureTransportEnabled('M1_ACCEPTANCE', { RO_M1_ACCEPTANCE_FIXTURE_ENABLED: '1' }), true);
+assert.equal(fixtureTransportEnabled('GENERIC', { RO_M1_ACCEPTANCE_FIXTURE_ENABLED: '1' }), false);
+assert.equal(fixtureTransportEnabled('M1_ACCEPTANCE', { RO_TEST_FIXTURE_COMMANDS_ENABLED: '1' }), false);
+assert.equal(fixtureTransportEnabled('GENERIC', { RO_TEST_FIXTURE_COMMANDS_ENABLED: '1' }), true);
+assert.equal(fixtureTransportEnabled('UNKNOWN', { RO_M1_ACCEPTANCE_FIXTURE_ENABLED: '1', RO_TEST_FIXTURE_COMMANDS_ENABLED: '1' }), false);
+const dashboardSource = await readFile(new URL('../ops/ro-stack/dashboard.mjs', import.meta.url), 'utf8');
+const launcherSource = await readFile(new URL('../ops/ro-stack/dashboard-service.ps1', import.meta.url), 'utf8');
+const configSource = await readFile(new URL('../ops/ro-stack/stack.config.psd1', import.meta.url), 'utf8');
+assert.match(dashboardSource, /fixtureTransportEnabled\(\(isM1Submit \|\| m1ResultMatch\) \? 'M1_ACCEPTANCE' : 'GENERIC'\)/);
+assert.match(configSource, /WebM1AcceptanceFixtureEnabled\s*=\s*\$false/);
+assert.match(launcherSource, /RO_M1_ACCEPTANCE_FIXTURE_ENABLED=if\(\$stackConfig\.WebM1AcceptanceFixtureEnabled\)/);
+assert.match(launcherSource, /RO_M1_ACCEPTANCE_FIXTURE_ENABLED=\$previousM1AcceptanceFixture/);
 
 const registry = JSON.parse(await readFile(new URL('../docs/project-control/canonical-test-fixtures.json', import.meta.url)));
 const local = { context: 'ADMIN_TRANSPORT', actorAdminId: 'developer-admin',
