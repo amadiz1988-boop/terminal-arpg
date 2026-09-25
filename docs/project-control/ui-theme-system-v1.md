@@ -107,5 +107,9 @@ The client never grants entitlements.
 | `heroine-sylphie` | 無職轉生 | 希露菲 | 7 |
 | `heroine-red-dress` | 無職轉生 | 妓神 | 4 |
 
-Source folders keep their original names (紅衣短髮女, 西露菲); only the
-player-visible labels are 妓神 and 希露菲.
+Source folders are named after the player-visible labels (洛琪希, 艾莉絲,
+希露菲, 妓神).
+
+A variant may also set `fade` (default 0.6), the share of the panel width
+that fades in from the left. `eris-02` crops away its vertical title text and
+uses `fade: 0.35` so more of the heroine shows on the right.

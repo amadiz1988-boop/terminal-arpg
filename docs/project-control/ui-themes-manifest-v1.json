@@ -111,18 +111,25 @@
           },
           "focus": {
             "x": 0.5,
-            "y": 0.22
+            "y": 0.3
           },
           "outputs": {
             "panel": {
-              "sha256": "0f94fa2c6baf9d099daf6a07f7dfe3b540b4b11beed1889e543bebbe5a4b4496",
-              "size": 24188
+              "sha256": "1aedb0820e6845400134f2ce6588f80c015e44b9eb5a1ea37c2afcb80e7e6d83",
+              "size": 20750
             },
             "thumb": {
-              "sha256": "5fc915ecdc30320920d70276b3bd44aa9d527fda404bd7ce0ef3790e998bfb59",
-              "size": 7834
+              "sha256": "62559a183807e89215c5de8e8ed8f6f55d5df33d7202dbd95313090b42c3f351",
+              "size": 7336
             }
-          }
+          },
+          "crop": {
+            "left": 0.08,
+            "top": 0,
+            "right": 0.82,
+            "bottom": 0.78
+          },
+          "fade": 0.35
         },
         {
           "key": "eris-03",
@@ -161,7 +168,7 @@
         {
           "key": "sylphie-01",
           "source": {
-            "folder": "西露菲",
+            "folder": "希露菲",
             "file": "06cc5fe89ada3d9a962a6570437eab07.jpg",
             "sha256": "b3b27c4db48fffdae7f14bfd24b05e57291e587ff1fb7db15e31ff33eacb0752"
           },
@@ -183,7 +190,7 @@
         {
           "key": "sylphie-02",
           "source": {
-            "folder": "西露菲",
+            "folder": "希露菲",
             "file": "02ae80f610c331c7a99aed5a08f318ea.jpg",
             "sha256": "c8c3d04981e84394e521014b6ece4e359652d0a4007e8d7a70f85746d5d0c345"
           },
@@ -205,7 +212,7 @@
         {
           "key": "sylphie-03",
           "source": {
-            "folder": "西露菲",
+            "folder": "希露菲",
             "file": "5c6339d5b48509664760f162422530b4.jpg",
             "sha256": "0916953a019576cb8dd5cd03ae26a252ccb96d60a69bbd28e19a228f054a9811"
           },
@@ -227,7 +234,7 @@
         {
           "key": "sylphie-04",
           "source": {
-            "folder": "西露菲",
+            "folder": "希露菲",
             "file": "bd6250666ddfa8c5e8439e880e92543f.jpg",
             "sha256": "4e581a207eb68847d8afddcdd2258d8bb0ff052eff9f1e22845a28be2d7ae019"
           },
@@ -249,7 +256,7 @@
         {
           "key": "sylphie-05",
           "source": {
-            "folder": "西露菲",
+            "folder": "希露菲",
             "file": "bfd47cb9951349d5b5fdd042a679c623.jpg",
             "sha256": "3937fc7592d1d68e184d34d695405ba65710887fb632c043f8f451c859730b37"
           },
@@ -271,7 +278,7 @@
         {
           "key": "sylphie-06",
           "source": {
-            "folder": "西露菲",
+            "folder": "希露菲",
             "file": "e55ab17073ff899da5ee1ab7ba1c85f3.jpg",
             "sha256": "253ac2a5bb4971e1b568406ee85122adf9913bd778dcedbaf74c88e12e5f9b87"
           },
@@ -293,7 +300,7 @@
         {
           "key": "sylphie-07",
           "source": {
-            "folder": "西露菲",
+            "folder": "希露菲",
             "file": "ef8fcd911bbfd5884c72724dff0a5073.jpg",
             "sha256": "52ce94190327548455d4255ad8735d40b36ecc956d30e54826a357d4aff53c9e"
           },
@@ -327,7 +334,7 @@
         {
           "key": "red-01",
           "source": {
-            "folder": "紅衣短髮女",
+            "folder": "妓神",
             "file": "HS87GmbbIAAHCu_.PNG",
             "sha256": "7f41f3f0a825ec251873464e90108bbb8ea4e5d5eadd85f6f570b83cfc3e0e00"
           },
@@ -349,7 +356,7 @@
         {
           "key": "red-02",
           "source": {
-            "folder": "紅衣短髮女",
+            "folder": "妓神",
             "file": "V7hBi9W.jpg",
             "sha256": "f43a9a15b7f3a5d2114babe73475177bce9f78451afbcb9cafa7d8ffce508ab8"
           },
@@ -371,7 +378,7 @@
         {
           "key": "red-03",
           "source": {
-            "folder": "紅衣短髮女",
+            "folder": "妓神",
             "file": "pqdyayrp0frh1.jpg",
             "sha256": "b22f3f8976cefb5dc0526e6bcba410e8243c4a52f7ffdc7a237f9c473cc97a99"
           },
@@ -399,7 +406,7 @@
         {
           "key": "red-04",
           "source": {
-            "folder": "紅衣短髮女",
+            "folder": "妓神",
             "file": "thumbnail.jpg",
             "sha256": "8bd83a3b2c6830996e62505ee46b1c181f3b8ea35bfd3f80c05f24487eb01be1"
           },

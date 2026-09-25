@@ -47,7 +47,7 @@ def build_panel(image, spec, variant):
     panel = crop_to(image, spec['width'], spec['height'], variant['focus'])
     panel = panel.filter(ImageFilter.GaussianBlur(1.4)).convert('RGBA')
     mask = Image.new('L', panel.size, 255)
-    fade = round(panel.width * 0.6)
+    fade = round(panel.width * variant.get('fade', 0.6))
     for x in range(fade):
         mask.paste(round(255 * (x / fade) ** 1.6), (x, 0, x + 1, panel.height))
     panel.putalpha(mask)

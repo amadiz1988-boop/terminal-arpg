@@ -25,7 +25,7 @@
       titleBar: { top: '#d9776a', bottom: '#9a2a24', border: '#6e1a16' },
       variants: [
         { key: 'eris-01', versions: { panel: 'c064c121', thumb: '5f7cc4c3' } },
-        { key: 'eris-02', versions: { panel: '0f94fa2c', thumb: '5fc915ec' } },
+        { key: 'eris-02', versions: { panel: '1aedb082', thumb: '62559a18' } },
         { key: 'eris-03', versions: { panel: 'e4528d29', thumb: '39409adf' } },
       ] },
     { id: 'heroine-sylphie', label: '希露菲', series: '無職轉生', access: 'OPEN', entitlement: null,
