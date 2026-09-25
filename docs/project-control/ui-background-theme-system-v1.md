@@ -40,6 +40,19 @@ missing themes resolve to `default`. The choice is stored per device in
 `localStorage` key `ghost-island.ui-background-theme.v1`, alongside the RO
 floor preference.
 
+## Images Per Theme
+
+Each theme uses every licensed image in its source folder. The settings page
+shows a second row for the chosen theme:
+
+- `輪換` (default): each visit shows the next image of that theme.
+- A numbered image: the player pins that image.
+
+Preferences live in `ghost-island.ui-background-theme-variant.v1`; the last
+rotated image lives in `ghost-island.ui-background-theme-rotation.v1`. The
+image changes only on a new visit or on a player click, never while a page is
+in use.
+
 ## Page Safety
 
 Pages set `data-ui-bg-page` through the global tab hook. `pagePolicy` maps a
@@ -64,17 +77,21 @@ on the content side, and the full character portrait on the right gutter.
    SHA-256 are recorded in the manifest.
 2. Binaries live in `ops/ro-stack/dashboard/assets/ui-themes/<theme-id>/`,
    which is ignored by Git. Public Git never contains the images.
-3. Each theme has `background-wide.webp` (1920x1080), `background-tall.webp`
-   (up to 900x1600) and `thumb.webp` (240x150). The registry version for each
-   file is the first eight characters of its manifest SHA-256.
-4. To add a theme: add the source entry to the manifest, run
+3. Each image variant has `background-wide.webp` (1920x1080),
+   `background-tall.webp` (900x1600) and `thumb.webp` (240x150) under
+   `<theme-id>/<variant-key>/`. Portrait sources become a colour wash plus the
+   portrait on the right; landscape sources are cropped to the frame. An
+   optional `crop` box removes collage panels or subtitles. The registry
+   version for each file is the first eight characters of its manifest SHA-256.
+4. To add a theme or image: add the variant to the manifest, run
    `python scripts/build-ui-background-themes.py --source-root <dir> --write-hashes`,
    add the registry entry with the new versions, and run the regression.
 5. `--verify` checks the private asset directory against the manifest before
    delivery. Production delivery of these files must use the private asset
    package process, not public Git.
-6. If a file is missing at runtime, the theme card is disabled and a saved
-   choice falls back to `default`.
+6. If an image is missing at runtime, it is skipped. If every image of a theme
+   is missing, the theme card is disabled and a saved choice falls back to
+   `default`.
 
 ## Supporter Extension
 
@@ -86,11 +103,10 @@ must come from server authority; the client never grants them.
 
 ## Current Themes
 
-| Theme | Series | Label |
-| --- | --- | --- |
-| `default` | none | 目前主題 |
-| `heroine-roxy` | 無職轉生 | 洛琪希 |
-| `heroine-eris` | 無職轉生 | 艾莉絲 |
-| `heroine-sylphie` | 無職轉生 | 西露菲 |
-| `heroine-red-dress` | 無職轉生 | 紅衣短髮女 |
-
+| Theme | Series | Label | Images |
+| --- | --- | --- | --- |
+| `default` | none | 目前主題 | RO floor |
+| `heroine-roxy` | 無職轉生 | 洛琪希 | 2 |
+| `heroine-eris` | 無職轉生 | 艾莉絲 | 3 |
+| `heroine-sylphie` | 無職轉生 | 西露菲 | 7 |
+| `heroine-red-dress` | 無職轉生 | 紅衣短髮女 | 4 |

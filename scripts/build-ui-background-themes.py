@@ -20,6 +20,7 @@ from PIL import Image, ImageFilter
 
 ROOT = Path(__file__).resolve().parent.parent
 MANIFEST = ROOT / 'docs' / 'project-control' / 'ui-background-themes-manifest-v1.json'
+KINDS = ('wide', 'tall', 'thumb')
 
 
 def sha256(data):
@@ -40,35 +41,49 @@ def crop_to(image, width, height, focus):
     return resized.crop((left, top, left + width, top + height))
 
 
-def build_wide(image, spec, theme):
+def build_wide(image, spec, variant, side):
     width, height = spec['width'], spec['height']
+    if image.width / image.height >= 1.2:
+        # Landscape sources already fit the desktop frame.
+        return crop_to(image, width, height, variant['focus'])
     # A smooth colour wash sampled from the source keeps empty space calm.
     base = image.resize((1, 5), Image.BOX).resize((width, height), Image.BICUBIC)
     base = base.filter(ImageFilter.GaussianBlur(90))
     portrait = image.copy()
     portrait.thumbnail((width, height), Image.LANCZOS)
-    # Fade the portrait edge that faces the content column into the blurred wash.
+    # Fade the portrait edge that faces the content column into the wash.
     mask = Image.new('L', portrait.size, 255)
     fade = max(portrait.width // 3, 1)
     for x in range(fade):
-        value = round(255 * x / fade)
-        column = x if theme['portrait_side'] == 'right' else portrait.width - 1 - x
-        mask.paste(value, (column, 0, column + 1, portrait.height))
-    offset_x = width - portrait.width if theme['portrait_side'] == 'right' else 0
+        column = x if side == 'right' else portrait.width - 1 - x
+        mask.paste(round(255 * x / fade), (column, 0, column + 1, portrait.height))
+    offset_x = width - portrait.width if side == 'right' else 0
     base.paste(portrait, (offset_x, (height - portrait.height) // 2), mask)
     return base
 
 
-def build(theme, source, spec):
+def load(source, variant):
     image = Image.open(source).convert('RGB')
-    tall = image.copy()
-    tall.thumbnail((spec['tall']['max_width'], spec['tall']['max_height']), Image.LANCZOS)
-    thumb = crop_to(image, spec['thumb']['width'], spec['thumb']['height'], theme['focus'])
+    crop = variant.get('crop')
+    if crop:
+        image = image.crop((round(crop['left'] * image.width), round(crop['top'] * image.height),
+                            round(crop['right'] * image.width), round(crop['bottom'] * image.height)))
+    return image
+
+
+def build(theme, variant, source, spec):
+    image = load(source, variant)
+    tall = crop_to(image, spec['tall']['width'], spec['tall']['height'], variant['focus'])
+    thumb = crop_to(image, spec['thumb']['width'], spec['thumb']['height'], variant['focus'])
     return {
-        'wide': encode(build_wide(image, spec['wide'], theme), 72),
+        'wide': encode(build_wide(image, spec['wide'], variant, theme['portrait_side']), 72),
         'tall': encode(tall, 72),
         'thumb': encode(thumb, 80),
     }
+
+
+def variant_dir(asset_root, theme, variant):
+    return asset_root / theme['id'] / variant['key']
 
 
 def main():
@@ -80,39 +95,42 @@ def main():
     manifest = json.loads(MANIFEST.read_text(encoding='utf-8'))
     asset_root = ROOT / manifest['asset_root']
     failures = []
+    variants = [(theme, variant) for theme in manifest['themes'] for variant in theme['variants']]
     if args.verify:
-        for theme in manifest['themes']:
-            for kind, output in theme.get('outputs', {}).items():
-                path = asset_root / theme['id'] / manifest['outputs'][kind]['file']
+        for theme, variant in variants:
+            for kind in KINDS:
+                path = variant_dir(asset_root, theme, variant) / manifest['outputs'][kind]['file']
+                expected = variant.get('outputs', {}).get(kind, {}).get('sha256')
                 if not path.exists():
-                    failures.append(f"missing:{theme['id']}/{kind}")
-                elif sha256(path.read_bytes()) != output['sha256']:
-                    failures.append(f"hash_mismatch:{theme['id']}/{kind}")
-        print(json.dumps({'result': 'FAIL' if failures else 'PASS', 'failures': failures}))
+                    failures.append(f"missing:{variant['key']}/{kind}")
+                elif sha256(path.read_bytes()) != expected:
+                    failures.append(f"hash_mismatch:{variant['key']}/{kind}")
+        print(json.dumps({'result': 'FAIL' if failures else 'PASS', 'variants': len(variants),
+                          'failures': failures}))
         return 1 if failures else 0
     source_root = Path(args.source_root or os.environ.get(manifest['source_root_env'], ''))
     if not source_root.is_dir():
         print(json.dumps({'result': 'FAIL', 'error': 'source_root_missing'}))
         return 1
-    for theme in manifest['themes']:
-        source = source_root / theme['source']['folder'] / theme['source']['file']
-        if not source.exists() or sha256(source.read_bytes()) != theme['source']['sha256']:
-            failures.append(f"source_mismatch:{theme['id']}")
+    for theme, variant in variants:
+        source = source_root / variant['source']['folder'] / variant['source']['file']
+        if not source.exists() or sha256(source.read_bytes()) != variant['source']['sha256']:
+            failures.append(f"source_mismatch:{variant['key']}")
             continue
-        outputs = build(theme, source, manifest['outputs'])
-        target = asset_root / theme['id']
+        outputs = build(theme, variant, source, manifest['outputs'])
+        target = variant_dir(asset_root, theme, variant)
         target.mkdir(parents=True, exist_ok=True)
         recorded = {}
-        for kind, data in outputs.items():
-            (target / manifest['outputs'][kind]['file']).write_bytes(data)
-            recorded[kind] = {'sha256': sha256(data), 'size': len(data)}
+        for kind in KINDS:
+            (target / manifest['outputs'][kind]['file']).write_bytes(outputs[kind])
+            recorded[kind] = {'sha256': sha256(outputs[kind]), 'size': len(outputs[kind])}
         if args.write_hashes:
-            theme['outputs'] = recorded
-        elif theme.get('outputs') != recorded:
-            failures.append(f"output_hash_changed:{theme['id']}")
+            variant['outputs'] = recorded
+        elif variant.get('outputs') != recorded:
+            failures.append(f"output_hash_changed:{variant['key']}")
     if args.write_hashes and not failures:
         MANIFEST.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-    print(json.dumps({'result': 'FAIL' if failures else 'PASS', 'themes': len(manifest['themes']),
+    print(json.dumps({'result': 'FAIL' if failures else 'PASS', 'variants': len(variants),
                       'failures': failures}))
     return 1 if failures else 0
 

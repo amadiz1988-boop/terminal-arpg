@@ -11,8 +11,8 @@ const css = await read('ops/ro-stack/dashboard/ui-background-theme.css');
 const html = await read('ops/ro-stack/dashboard/index.html');
 const manifest = JSON.parse(await read('docs/project-control/ui-background-themes-manifest-v1.json'));
 
-function boot(stored, { imageFails = false } = {}) {
-  const storage = new Map(stored == null ? [] : [['ghost-island.ui-background-theme.v1', stored]]);
+function boot(stored, { imageFails = () => false, storage: shared } = {}) {
+  const storage = shared ?? new Map(stored == null ? [] : [['ghost-island.ui-background-theme.v1', stored]]);
   const style = new Map();
   const probes = [];
   const root = { dataset: {}, style: {
@@ -21,7 +21,7 @@ function boot(stored, { imageFails = false } = {}) {
   class Image {
     set src(value) {
       probes.push(value);
-      if (imageFails) this.onerror?.();
+      if (imageFails(value)) this.onerror?.();
     }
   }
   const window = {};
@@ -46,7 +46,7 @@ test('choosing a heroine theme persists it and applies versioned global variable
   session.api.select('heroine-eris');
   assert.equal(session.storage.get(session.api.storageKey), 'heroine-eris');
   assert.equal(session.root.dataset.uiBgTheme, 'heroine-eris');
-  assert.match(session.style.get('--ui-bg-wide'), /\/assets\/ui-themes\/heroine-eris\/background-wide\.webp\?v=[0-9a-f]{8}/);
+  assert.match(session.style.get('--ui-bg-wide'), /\/assets\/ui-themes\/heroine-eris\/eris-0\d\/background-wide\.webp\?v=[0-9a-f]{8}/);
   const reloaded = boot('heroine-eris');
   assert.equal(reloaded.root.dataset.uiBgTheme, 'heroine-eris');
   reloaded.api.select('default');
@@ -54,10 +54,28 @@ test('choosing a heroine theme persists it and applies versioned global variable
 });
 
 test('missing private assets fall back to the current theme', () => {
-  const session = boot('heroine-roxy', { imageFails: true });
-  assert.equal(session.probes.length, 1);
+  const session = boot('heroine-roxy', { imageFails: () => true });
+  assert.equal(session.probes.length, 2);
   assert.equal(session.root.dataset.uiBgTheme, 'default');
   assert.equal(session.style.size, 0);
+});
+
+test('a missing single image is skipped within the theme', () => {
+  const session = boot('heroine-roxy', { imageFails: (url) => url.includes('/roxy-01/') });
+  assert.equal(session.root.dataset.uiBgTheme, 'heroine-roxy');
+  assert.equal(session.root.dataset.uiBgVariant, 'roxy-02');
+});
+
+test('every visit rotates through all images unless the player pins one', () => {
+  const storage = new Map([['ghost-island.ui-background-theme.v1', 'heroine-sylphie']]);
+  const shown = Array.from({ length: 8 }, () => boot(null, { storage }).root.dataset.uiBgVariant);
+  assert.deepEqual(shown, ['sylphie-01', 'sylphie-02', 'sylphie-03', 'sylphie-04',
+    'sylphie-05', 'sylphie-06', 'sylphie-07', 'sylphie-01']);
+  boot(null, { storage }).api.selectVariant('heroine-sylphie', 'sylphie-05');
+  assert.equal(boot(null, { storage }).root.dataset.uiBgVariant, 'sylphie-05');
+  assert.equal(boot(null, { storage }).root.dataset.uiBgVariant, 'sylphie-05');
+  boot(null, { storage }).api.selectVariant('heroine-sylphie', 'auto');
+  assert.equal(boot(null, { storage }).root.dataset.uiBgVariant, 'sylphie-06');
 });
 
 test('non-open access tiers require an entitlement', () => {
@@ -77,17 +95,26 @@ test('page policy allows safe downgrade through one global hook', () => {
   assert.equal(root.dataset.uiBgLevel, 'soft');
 });
 
-test('registry matches the asset manifest and asset hashes', () => {
+test('registry uses every manifest image with matching asset hashes', () => {
   const { api } = boot(null);
   const heroines = api.themes.filter((theme) => theme.id !== 'default');
   assert.deepEqual([...heroines.map((theme) => theme.id)], manifest.themes.map((theme) => theme.id));
+  let count = 0;
   for (const theme of manifest.themes) {
     const entry = heroines.find((item) => item.id === theme.id);
     assert.equal(entry.label, theme.heroine);
-    for (const kind of ['wide', 'tall', 'thumb'])
-      assert.equal(entry.versions[kind], theme.outputs[kind].sha256.slice(0, 8));
-    assert.match(theme.source.sha256, /^[0-9a-f]{64}$/);
+    assert.deepEqual([...entry.variants.map((variant) => variant.key)], theme.variants.map((variant) => variant.key));
+    for (const variant of theme.variants) {
+      const registered = entry.variants.find((item) => item.key === variant.key);
+      for (const kind of ['wide', 'tall', 'thumb'])
+        assert.equal(registered.versions[kind], variant.outputs[kind].sha256.slice(0, 8));
+      assert.match(variant.source.sha256, /^[0-9a-f]{64}$/);
+      count++;
+    }
   }
+  const sources = new Set(manifest.themes.flatMap((theme) => theme.variants.map((variant) => variant.source.sha256)));
+  assert.equal(sources.size, count);
+  assert.equal(count, 16);
 });
 
 test('image layer stays behind content and never restyles windows or controls', () => {
@@ -104,6 +131,7 @@ test('settings page and every page load the theme hook; private assets stay out 
   assert.match(html, /<script src="\/ui-background-theme\.js/);
   assert.match(html, /<link rel="stylesheet" href="\/ui-background-theme\.css/);
   assert.match(html, /id="uiBackgroundTheme"[^>]*role="radiogroup"/);
+  assert.match(html, /id="uiBackgroundThemeVariants"[^>]*role="radiogroup"/);
   const cwd = new URL('.', root);
   assert.equal(manifest.public_git_binary, false);
   execFileSync('git', ['check-ignore', '-q', 'ops/ro-stack/dashboard/assets/ui-themes/heroine-roxy/thumb.webp'], { cwd });

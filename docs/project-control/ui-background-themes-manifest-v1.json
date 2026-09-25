@@ -13,8 +13,8 @@
     },
     "tall": {
       "file": "background-tall.webp",
-      "max_width": 900,
-      "max_height": 1600
+      "width": 900,
+      "height": 1600
     },
     "thumb": {
       "file": "thumb.webp",
@@ -27,117 +27,456 @@
       "id": "heroine-roxy",
       "series": "無職轉生",
       "heroine": "洛琪希",
-      "source": {
-        "folder": "洛琪希",
-        "file": "c045cdf28e2ca83bbc74fe6be3ff29d1.jpg",
-        "sha256": "b3195a7fa049d05a691b201a2b94214b9b7a837510d245fbf9e6da39d439b293"
-      },
-      "focus": {
-        "x": 0.46,
-        "y": 0.2
-      },
       "portrait_side": "right",
-      "outputs": {
-        "wide": {
-          "sha256": "7cbdd040924296148953491da173b6c10428304038e30ddd42124450cca26ab4",
-          "size": 45184
+      "variants": [
+        {
+          "key": "roxy-01",
+          "source": {
+            "folder": "洛琪希",
+            "file": "c045cdf28e2ca83bbc74fe6be3ff29d1.jpg",
+            "sha256": "b3195a7fa049d05a691b201a2b94214b9b7a837510d245fbf9e6da39d439b293"
+          },
+          "focus": {
+            "x": 0.46,
+            "y": 0.2
+          },
+          "outputs": {
+            "wide": {
+              "sha256": "7cbdd040924296148953491da173b6c10428304038e30ddd42124450cca26ab4",
+              "size": 45184
+            },
+            "tall": {
+              "sha256": "731d7fc9eaca35b7a5d612910e6d079b87dc18daac5795d7338ca6998da0582d",
+              "size": 80850
+            },
+            "thumb": {
+              "sha256": "db2bbb2715c663c4f1ed9d680212e5ebeb81b8ccd5b47d9a0c3bc8348bb1dc95",
+              "size": 5320
+            }
+          }
         },
-        "tall": {
-          "sha256": "145f9552b393a199cba8bb92cd540e1c4eb7beb9939e1307b20054c12d75154d",
-          "size": 61382
-        },
-        "thumb": {
-          "sha256": "db2bbb2715c663c4f1ed9d680212e5ebeb81b8ccd5b47d9a0c3bc8348bb1dc95",
-          "size": 5320
+        {
+          "key": "roxy-02",
+          "source": {
+            "folder": "洛琪希",
+            "file": "9eecfaff37ba2693b7e031b6d799336f.jpg",
+            "sha256": "958d114deabe26c976a679afd8fb12afa5adc3155100ded0fe22046748169916"
+          },
+          "focus": {
+            "x": 0.45,
+            "y": 0.25
+          },
+          "outputs": {
+            "wide": {
+              "sha256": "1bcef72bfce1407c6f9c43ac8db6b2bcbac379fd31e59e3547c601f1ab0ae41e",
+              "size": 52932
+            },
+            "tall": {
+              "sha256": "c6135013c73606bd63cccff570acb512f8f61d81ca108a0dcfa16762dcfed383",
+              "size": 91270
+            },
+            "thumb": {
+              "sha256": "d70b487a0fa09a676f4d53b83ff9b00898b9e1a2f9302b084da4078f7cf1c356",
+              "size": 8460
+            }
+          }
         }
-      }
+      ]
     },
     {
       "id": "heroine-eris",
       "series": "無職轉生",
       "heroine": "艾莉絲",
-      "source": {
-        "folder": "艾莉絲",
-        "file": "ddb7bc2bf6b79fbc82548378758357ad.jpg",
-        "sha256": "eb0da6241ea916a435829cba418cd24f4487a20df8d25b39c35f09abcba7a55b"
-      },
-      "focus": {
-        "x": 0.5,
-        "y": 0.18
-      },
       "portrait_side": "right",
-      "outputs": {
-        "wide": {
-          "sha256": "7960a6b5ec6c2e7e2f6080bf6dbdcea0aeda577b0c8742364d91ed68480e38fe",
-          "size": 66150
+      "variants": [
+        {
+          "key": "eris-01",
+          "source": {
+            "folder": "艾莉絲",
+            "file": "ddb7bc2bf6b79fbc82548378758357ad.jpg",
+            "sha256": "eb0da6241ea916a435829cba418cd24f4487a20df8d25b39c35f09abcba7a55b"
+          },
+          "focus": {
+            "x": 0.5,
+            "y": 0.18
+          },
+          "outputs": {
+            "wide": {
+              "sha256": "7960a6b5ec6c2e7e2f6080bf6dbdcea0aeda577b0c8742364d91ed68480e38fe",
+              "size": 66150
+            },
+            "tall": {
+              "sha256": "addec35e69a46a366ee68e400fe913aedc41067614d21be748c8c11854b4e012",
+              "size": 104308
+            },
+            "thumb": {
+              "sha256": "5f7cc4c3b9811befd759f28a31362aa1758b9b1274099883e6fd7e4d5020fada",
+              "size": 8450
+            }
+          }
         },
-        "tall": {
-          "sha256": "4f7a8003ad645e3883d79ec62554dccd0c91f67e5b353ff68af72f67357cb282",
-          "size": 82162
+        {
+          "key": "eris-02",
+          "source": {
+            "folder": "艾莉絲",
+            "file": "663b54c4f68c7fe1724488ec88ed6234.jpg",
+            "sha256": "48f3016cea03c0b3d12ae588dbb5f333f307a869c7dd13b4e95c3399016037cd"
+          },
+          "focus": {
+            "x": 0.5,
+            "y": 0.22
+          },
+          "outputs": {
+            "wide": {
+              "sha256": "fa9e92296f97bea57838c544f8f916a40b10da51d55e8ef004afdc9012079f42",
+              "size": 40684
+            },
+            "tall": {
+              "sha256": "da978adb0033659eb9587b809f011e11bf3d4cbb92f2dde1c384e5c67a12eaaf",
+              "size": 63750
+            },
+            "thumb": {
+              "sha256": "5fc915ecdc30320920d70276b3bd44aa9d527fda404bd7ce0ef3790e998bfb59",
+              "size": 7834
+            }
+          }
         },
-        "thumb": {
-          "sha256": "5f7cc4c3b9811befd759f28a31362aa1758b9b1274099883e6fd7e4d5020fada",
-          "size": 8450
+        {
+          "key": "eris-03",
+          "source": {
+            "folder": "艾莉絲",
+            "file": "f92c50f303039627552b1ba78d846378.jpg",
+            "sha256": "af7280abb574494cfc02d61429bf1111bd332ef19d6fe75ef7974714ddfcf39b"
+          },
+          "focus": {
+            "x": 0.5,
+            "y": 0.22
+          },
+          "outputs": {
+            "wide": {
+              "sha256": "472c3e4da75837cb732e7c28890c80b5f4e2677779584e762b205c74e22f0df3",
+              "size": 58884
+            },
+            "tall": {
+              "sha256": "98262e3177f79d93febbafcb1740c66666adcd71fe04c0fc93c3d8e2f00172c6",
+              "size": 87376
+            },
+            "thumb": {
+              "sha256": "39409adf01010aac2bdff5ed5c939374938fb43a3f5d6fe17b6ffe03403ac9ba",
+              "size": 8950
+            }
+          }
         }
-      }
+      ]
     },
     {
       "id": "heroine-sylphie",
       "series": "無職轉生",
       "heroine": "西露菲",
-      "source": {
-        "folder": "西露菲",
-        "file": "06cc5fe89ada3d9a962a6570437eab07.jpg",
-        "sha256": "b3b27c4db48fffdae7f14bfd24b05e57291e587ff1fb7db15e31ff33eacb0752"
-      },
-      "focus": {
-        "x": 0.5,
-        "y": 0.22
-      },
       "portrait_side": "right",
-      "outputs": {
-        "wide": {
-          "sha256": "065b80c5c834318a3c196ccb93af92a58c872cea53f7dd981c408318d75914b5",
-          "size": 44528
+      "variants": [
+        {
+          "key": "sylphie-01",
+          "source": {
+            "folder": "西露菲",
+            "file": "06cc5fe89ada3d9a962a6570437eab07.jpg",
+            "sha256": "b3b27c4db48fffdae7f14bfd24b05e57291e587ff1fb7db15e31ff33eacb0752"
+          },
+          "focus": {
+            "x": 0.5,
+            "y": 0.22
+          },
+          "outputs": {
+            "wide": {
+              "sha256": "065b80c5c834318a3c196ccb93af92a58c872cea53f7dd981c408318d75914b5",
+              "size": 44528
+            },
+            "tall": {
+              "sha256": "54a5b0fb316a9baf59cbdb4e76df7b2c63323f4f811e9dc8e2afaf093fbeea26",
+              "size": 58788
+            },
+            "thumb": {
+              "sha256": "21cc8d4d465cd10c09d7a962b01415b59ea57a33f81e38d1ed78ab0df9d35ce2",
+              "size": 6326
+            }
+          }
         },
-        "tall": {
-          "sha256": "aabc3b2cce7235447235b5d7a7bb4987f5159f698b591236c226f0ba7af99c63",
-          "size": 48756
+        {
+          "key": "sylphie-02",
+          "source": {
+            "folder": "西露菲",
+            "file": "02ae80f610c331c7a99aed5a08f318ea.jpg",
+            "sha256": "c8c3d04981e84394e521014b6ece4e359652d0a4007e8d7a70f85746d5d0c345"
+          },
+          "focus": {
+            "x": 0.5,
+            "y": 0.22
+          },
+          "outputs": {
+            "wide": {
+              "sha256": "31f5f0821e885673c26d9b6028ed17ddbb012c28ab3447bf2d69e1bdf58e0017",
+              "size": 44874
+            },
+            "tall": {
+              "sha256": "e2d072815457f4fc06441f2b2a4390ad9c41832bb4bbb37e870831a39abd0dfb",
+              "size": 61592
+            },
+            "thumb": {
+              "sha256": "f735e5a2bea97629ae6d226dc992bd2d123a36d8c8549750e97f0b0c5b9165b9",
+              "size": 5900
+            }
+          }
         },
-        "thumb": {
-          "sha256": "21cc8d4d465cd10c09d7a962b01415b59ea57a33f81e38d1ed78ab0df9d35ce2",
-          "size": 6326
+        {
+          "key": "sylphie-03",
+          "source": {
+            "folder": "西露菲",
+            "file": "5c6339d5b48509664760f162422530b4.jpg",
+            "sha256": "0916953a019576cb8dd5cd03ae26a252ccb96d60a69bbd28e19a228f054a9811"
+          },
+          "focus": {
+            "x": 0.5,
+            "y": 0.22
+          },
+          "outputs": {
+            "wide": {
+              "sha256": "e05cf573dbe5e74bcf5a46c427cea717b621fa9e570f50b8ccc8d958498bb507",
+              "size": 48984
+            },
+            "tall": {
+              "sha256": "89e33b76ee866c2f9baff0d914578411587844710fea568e6e80ccab8bd2b291",
+              "size": 67884
+            },
+            "thumb": {
+              "sha256": "ddb656e5d14fd8febe3232ca3903703db9d84657529059612ea5486209a0b224",
+              "size": 6468
+            }
+          }
+        },
+        {
+          "key": "sylphie-04",
+          "source": {
+            "folder": "西露菲",
+            "file": "bd6250666ddfa8c5e8439e880e92543f.jpg",
+            "sha256": "4e581a207eb68847d8afddcdd2258d8bb0ff052eff9f1e22845a28be2d7ae019"
+          },
+          "focus": {
+            "x": 0.5,
+            "y": 0.22
+          },
+          "outputs": {
+            "wide": {
+              "sha256": "73e1eb791632e5670d39fe3b0fa26dcd7953fe775b4da0bd09bb01f7f3f774b0",
+              "size": 50734
+            },
+            "tall": {
+              "sha256": "4848b1d96078ae77011c8255ee2325bb86e03f20668d1e261f91db8309b5dfc4",
+              "size": 71612
+            },
+            "thumb": {
+              "sha256": "d224e902d6d8ab73b430e46de00fc1daca63b978edcc42769b8bd110e124acc3",
+              "size": 6112
+            }
+          }
+        },
+        {
+          "key": "sylphie-05",
+          "source": {
+            "folder": "西露菲",
+            "file": "bfd47cb9951349d5b5fdd042a679c623.jpg",
+            "sha256": "3937fc7592d1d68e184d34d695405ba65710887fb632c043f8f451c859730b37"
+          },
+          "focus": {
+            "x": 0.5,
+            "y": 0.22
+          },
+          "outputs": {
+            "wide": {
+              "sha256": "80e9877612cc13d5e38c27651931c55723c6a62f2b94521fe5704af6a561c518",
+              "size": 51142
+            },
+            "tall": {
+              "sha256": "75ba65d43ee22c0ee844933dfdba698e3713d893ab477e8c550c909c2b8a3acb",
+              "size": 71894
+            },
+            "thumb": {
+              "sha256": "5e5512277a7912592efa6ca2a98409ca874c570f411252cd5e7bc093c71f7dfa",
+              "size": 6510
+            }
+          }
+        },
+        {
+          "key": "sylphie-06",
+          "source": {
+            "folder": "西露菲",
+            "file": "e55ab17073ff899da5ee1ab7ba1c85f3.jpg",
+            "sha256": "253ac2a5bb4971e1b568406ee85122adf9913bd778dcedbaf74c88e12e5f9b87"
+          },
+          "focus": {
+            "x": 0.5,
+            "y": 0.22
+          },
+          "outputs": {
+            "wide": {
+              "sha256": "0121631e378a6d6ee4fca6bbaa2ea9b85f8c9eff2875c67ea0c25e63fe0545fa",
+              "size": 47732
+            },
+            "tall": {
+              "sha256": "9cab633d2f3303ec63b1a8370f95c14fdf83b5215da8b7a1332cbb299e07de0a",
+              "size": 66014
+            },
+            "thumb": {
+              "sha256": "0c5143977f69c553b36b71e3cf0263b9070b69acca66fafc6e6af0f65ccce308",
+              "size": 5960
+            }
+          }
+        },
+        {
+          "key": "sylphie-07",
+          "source": {
+            "folder": "西露菲",
+            "file": "ef8fcd911bbfd5884c72724dff0a5073.jpg",
+            "sha256": "52ce94190327548455d4255ad8735d40b36ecc956d30e54826a357d4aff53c9e"
+          },
+          "focus": {
+            "x": 0.5,
+            "y": 0.22
+          },
+          "outputs": {
+            "wide": {
+              "sha256": "9fe61c715bae6fcdeffdea440c8b5ae5d4352f4997664ae6ccee481b2446b545",
+              "size": 52714
+            },
+            "tall": {
+              "sha256": "f5d5a9901660d78f3ba52bd7835158323f5e8a9195693b93fa54f7cbe4c26358",
+              "size": 74368
+            },
+            "thumb": {
+              "sha256": "3f629a0fe15906ba07d5a252099fcab5751d27c983377ae31292db6f387ee8dc",
+              "size": 6446
+            }
+          }
         }
-      }
+      ]
     },
     {
       "id": "heroine-red-dress",
       "series": "無職轉生",
       "heroine": "紅衣短髮女",
-      "source": {
-        "folder": "紅衣短髮女",
-        "file": "HS87GmbbIAAHCu_.PNG",
-        "sha256": "7f41f3f0a825ec251873464e90108bbb8ea4e5d5eadd85f6f570b83cfc3e0e00"
-      },
-      "focus": {
-        "x": 0.45,
-        "y": 0.2
-      },
       "portrait_side": "right",
-      "outputs": {
-        "wide": {
-          "sha256": "76919336f0061d580e249c92e954d280b2c42664779e622f964f0e55af607108",
-          "size": 43652
+      "variants": [
+        {
+          "key": "red-01",
+          "source": {
+            "folder": "紅衣短髮女",
+            "file": "HS87GmbbIAAHCu_.PNG",
+            "sha256": "7f41f3f0a825ec251873464e90108bbb8ea4e5d5eadd85f6f570b83cfc3e0e00"
+          },
+          "focus": {
+            "x": 0.45,
+            "y": 0.2
+          },
+          "outputs": {
+            "wide": {
+              "sha256": "76919336f0061d580e249c92e954d280b2c42664779e622f964f0e55af607108",
+              "size": 43652
+            },
+            "tall": {
+              "sha256": "c7c66725e4096f73d89db1cd01460ee2bd0a81c91982ae86d8f0c0155a257dc8",
+              "size": 92492
+            },
+            "thumb": {
+              "sha256": "12914d1ac590f2aa0da6010241db744d4562430b620691dbed1304dbb0364f14",
+              "size": 6746
+            }
+          }
         },
-        "tall": {
-          "sha256": "f34ff16010a0167c17cbb0f6ec04c5af23604dc2c74f305395f1267d5a765296",
-          "size": 88532
+        {
+          "key": "red-02",
+          "source": {
+            "folder": "紅衣短髮女",
+            "file": "V7hBi9W.jpg",
+            "sha256": "f43a9a15b7f3a5d2114babe73475177bce9f78451afbcb9cafa7d8ffce508ab8"
+          },
+          "focus": {
+            "x": 0.5,
+            "y": 0.22
+          },
+          "outputs": {
+            "wide": {
+              "sha256": "f0cf8d0bc3c3d6506d78831f06a422f4b194662e5235d4dd2dbf2e44ce3c2bcf",
+              "size": 37870
+            },
+            "tall": {
+              "sha256": "caf7225a790b1cd07d6a3d864f13492be6ee374d9c8c49adf194e44d4d4bf853",
+              "size": 58018
+            },
+            "thumb": {
+              "sha256": "f89e2c22db0a2b5b6df24da3a14a350876d88d1b59d72a87811671dd10565f46",
+              "size": 5344
+            }
+          }
         },
-        "thumb": {
-          "sha256": "12914d1ac590f2aa0da6010241db744d4562430b620691dbed1304dbb0364f14",
-          "size": 6746
+        {
+          "key": "red-03",
+          "source": {
+            "folder": "紅衣短髮女",
+            "file": "pqdyayrp0frh1.jpg",
+            "sha256": "b22f3f8976cefb5dc0526e6bcba410e8243c4a52f7ffdc7a237f9c473cc97a99"
+          },
+          "focus": {
+            "x": 0.5,
+            "y": 0.4
+          },
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "right": 1,
+            "bottom": 0.335
+          },
+          "outputs": {
+            "wide": {
+              "sha256": "acd9b1f8c5769666b78e0efea44a2d3cbd93f1a938e2af82ed38b7eb3848fabd",
+              "size": 43944
+            },
+            "tall": {
+              "sha256": "6ee0f77dea2dc9ec13498107dacf7b47709624e7edbd8af13e9b93e6d995bcb9",
+              "size": 37688
+            },
+            "thumb": {
+              "sha256": "de749337263017c8c69c4a1bd66ac5e4df885e1313621fdfcb80cb4e39e7a5e6",
+              "size": 4758
+            }
+          }
+        },
+        {
+          "key": "red-04",
+          "source": {
+            "folder": "紅衣短髮女",
+            "file": "thumbnail.jpg",
+            "sha256": "8bd83a3b2c6830996e62505ee46b1c181f3b8ea35bfd3f80c05f24487eb01be1"
+          },
+          "focus": {
+            "x": 0.5,
+            "y": 0.4
+          },
+          "outputs": {
+            "wide": {
+              "sha256": "80f17acb7dc5f926e7b26b084b4b87667b17bc593e08d890f135c36f8c8f8e6c",
+              "size": 73864
+            },
+            "tall": {
+              "sha256": "08ef961721f77120856dbc6a0482c190f3aa50b056c9c86a0f591edcf46eb5ae",
+              "size": 42160
+            },
+            "thumb": {
+              "sha256": "932760c45f337a0b4175033b47b7d464d7782f85ed2a2d8a6e0a67d7040a9176",
+              "size": 8854
+            }
+          }
         }
-      }
+      ]
     }
-  ]
+  ],
+  "asset_layout": "<asset_root>/<theme-id>/<variant-key>/<output-file>"
 }

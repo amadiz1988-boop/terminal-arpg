@@ -103,6 +103,26 @@
   opacity: 0.45;
 }
 
+.ui-background-theme-variants {
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  padding-top: 8px;
+  border-top: 1px solid #c4ccd3;
+}
+
+.ui-background-theme-variants[hidden] {
+  display: none;
+}
+
+.ui-background-theme-variant.is-showing:not(.is-selected) {
+  border-color: #6f8aa6;
+}
+
+.ui-background-theme-thumb.is-rotate {
+  background-color: #eef2f5;
+  background-repeat: no-repeat;
+  background-size: 50% 50%;
+}
+
 .ui-background-theme-thumb {
   display: block;
   width: 100%;
@@ -120,4 +140,3 @@
 .ui-background-theme-status {
   color: #7a4b14;
 }
-
