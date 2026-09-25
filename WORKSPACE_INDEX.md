@@ -15,13 +15,23 @@ UNRELATED_HISTORY_MERGED: NO
 ```
 
 Native source work starts from the private GitHub `main` lineage at the canonical
-working root. A later HEAD is valid only when it descends from the cutover SHA
-and equals the current authenticated GitHub `main`. The legacy archive is
-historical evidence only; use exact-file and exact-symbol evidence before
-porting a missing behavior as a new commit on GitHub `main`. Keep the archive
-and its linked worktrees intact. The archive's working files are read-only by
-policy; its shared Git metadata remains available to those historical
-worktrees. Cutover evidence and F handoff:
+working root. A feature branch may advance from verified canonical ancestry;
+direct edits starting from current `main` additionally require the exact remote
+`main` HEAD. Before any Native source modification, run
+`node ops/ro-stack/native-source-authority-preflight.mjs --root "C:\Users\Administrator\source\ghost-island-rathena"`
+from the canonical Web governance checkout and require
+`NATIVE_SOURCE_AUTHORITY_PREFLIGHT = PASS`. Pass the exact Native worktree being
+modified as `--root`; an omitted root fails closed.
+Use `--start-from-current-main` only when the workline requires that exact start.
+The guard checks the private GitHub repository and current remote lineage without
+modifying the Native tree. A failure is `SOURCE_AUTHORITY_GOVERNANCE_REGRESSION`:
+fix the guard or its root cause in place. `ROUTINE_NATIVE_RECONCILIATION_ALLOWED = NO`;
+only an explicit Project Control source migration authorizes a new cutover.
+The legacy archive is historical evidence only; use exact-file and exact-symbol
+evidence before porting a missing behavior as a new commit on GitHub `main`.
+Keep the archive and its linked worktrees intact. The archive's working files
+are read-only by policy; its shared Git metadata remains available to those
+historical worktrees. Cutover evidence and F handoff:
 `docs/project-control/native-canonical-source-authority-cutover-v1.md`.
 
 ## GitHub canonical authority V6, 2026-09-24

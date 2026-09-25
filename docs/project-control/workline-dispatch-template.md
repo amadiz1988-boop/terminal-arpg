@@ -207,6 +207,16 @@ Do not widen the search scope by yourself.
 
 Reference existing governance. Do not copy policy bodies into the dispatch.
 
+For Native source modification, run the read-only
+`ops/ro-stack/native-source-authority-preflight.mjs --root <exact Native WORKSPACE_ROOT>`
+before editing. The dispatched command must resolve the root to an absolute path. Use
+`--start-from-current-main` only when the workline requires an exact current
+`main` start. Apply `WORKSPACE_INDEX.md` on failure.
+
+```text
+NATIVE_SOURCE_AUTHORITY_PREFLIGHT = PASS / FAIL / N/A
+```
+
 ```text
 Follow PC-DISPATCH-STANDARD.
 ```

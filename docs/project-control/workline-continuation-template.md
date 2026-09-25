@@ -327,6 +327,15 @@ Exactly one minimal action. Opening several new directions at once is forbidden.
 
 ## 9. REFERENCE / POLICY
 
+Before Native source modification, run the read-only
+`ops/ro-stack/native-source-authority-preflight.mjs --root <exact Native source root>`
+using the absolute root selected for this continuation, and apply
+`WORKSPACE_INDEX.md` on failure. Use `N/A` for non-Native worklines.
+
+```text
+NATIVE_SOURCE_AUTHORITY_PREFLIGHT = PASS / FAIL / N/A
+```
+
 Every continuation handoff MUST also carry the long-term product direction:
 
 ```text
