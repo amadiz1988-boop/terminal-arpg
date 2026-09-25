@@ -36,6 +36,8 @@ const additiveReason='LOCAL_DEVELOPER_ADMIN_ENTRYPOINT_ADDITIVE_MANIFEST_V1';
 const actionPath='ops/ro-stack/developer-admin-action.mjs';
 const m1Reason='M1_SETTINGS_EXECUTOR_AND_TEST_FIXTURE_V1';
 const m1Path='ops/ro-stack/dashboard/self-recovery-skill-profile.mjs';
+const launcherReason='M1_V15_FIXED_FIXTURE_AND_DASHBOARD_LAUNCHER_V1';
+const launcherPath='ops/ro-stack/dashboard-service.ps1';
 function deltaFixture() {
   const oldManifest={files:[{path:'ops/ro-stack/dashboard.mjs',sha256:'A'.repeat(64)},
     {path:'public/ro/client/manifest.json',sha256:'E'.repeat(64)}],removed_files:[]};
@@ -70,6 +72,26 @@ function addAction(x,path=actionPath) {
   assert.deepEqual(delta.added_paths,[m1Path]);
   assert.deepEqual(delta.rollback_remove_paths,[m1Path]);
   console.log(`PASS ${++count} V15 executor addition has exact rollback REMOVE semantics`);
+}
+{
+  const x=deltaFixture();x.nextManifest.files.push({path:launcherPath,sha256:'C'.repeat(64),
+    production_preimage_sha256:'D'.repeat(64)});
+  const delta=validateManifestDelta(x.oldManifest,x.nextManifest,launcherReason,true);
+  assert.deepEqual(delta.added_paths,[launcherPath]);
+  assert.deepEqual(delta.absent_preimage_paths,[]);
+  assert.deepEqual(delta.rollback_remove_paths,[]);
+  console.log(`PASS ${++count} launcher addition retains exact existing preimage for rollback`);
+}
+{
+  const x=deltaFixture();addAction(x,launcherPath);
+  assert.throws(()=>validateManifestDelta(x.oldManifest,x.nextManifest,launcherReason,true),/ADDED_WEB_PREIMAGE_NOT_PINNED/);
+  console.log(`PASS ${++count} launcher without pinned Production preimage refused`);
+}
+{
+  const x=deltaFixture();x.nextManifest.files.push({path:launcherPath,sha256:'C'.repeat(64),
+    production_preimage_sha256:'D'.repeat(64)});
+  assert.throws(()=>validateManifestDelta(x.oldManifest,x.nextManifest,m1Reason,true),/ADDED_WEB_PREIMAGE_NOT_ABSENT/);
+  console.log(`PASS ${++count} existing-preimage exception cannot use an earlier reason`);
 }
 {
   const x=deltaFixture();addAction(x,actionPath);

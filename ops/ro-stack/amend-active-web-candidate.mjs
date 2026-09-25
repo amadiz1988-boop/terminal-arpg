@@ -21,7 +21,9 @@ const fail = code => { throw Error(code); };
 const approvedAdditivePaths = new Map([
   ['LOCAL_DEVELOPER_ADMIN_ENTRYPOINT_ADDITIVE_MANIFEST_V1', 'ops/ro-stack/developer-admin-action.mjs'],
   ['M1_SETTINGS_EXECUTOR_AND_TEST_FIXTURE_V1', 'ops/ro-stack/dashboard/self-recovery-skill-profile.mjs'],
+  ['M1_V15_FIXED_FIXTURE_AND_DASHBOARD_LAUNCHER_V1', 'ops/ro-stack/dashboard-service.ps1'],
 ]);
+const approvedExistingPreimageAddition = 'ops/ro-stack/dashboard-service.ps1';
 const run = (cwd, command, args) => {
   const result = spawnSync(command, args, { cwd, encoding:'utf8', windowsHide:true, timeout:120000, maxBuffer:16*1024*1024 });
   if (result.status !== 0) fail(`${command.toUpperCase()}_${args[0]}_FAILED:${(result.stdout || result.stderr).slice(-500)}`);
@@ -91,10 +93,15 @@ export function validateManifestDelta(oldManifest, nextManifest, reason, rollbac
   for (const [path,row] of nextRows) {
     if (oldRows.has(path)) continue;
     delta.added_paths.push(path);
-    if (row.production_preimage!=='ABSENT' || row.production_preimage_sha256)
-      fail(`ADDED_WEB_PREIMAGE_NOT_ABSENT:${path}`);
-    delta.absent_preimage_paths.push(path);
-    delta.rollback_remove_paths.push(path);
+    if (path===approvedExistingPreimageAddition && reason==='M1_V15_FIXED_FIXTURE_AND_DASHBOARD_LAUNCHER_V1') {
+      if (row.production_preimage==='ABSENT' || !/^[a-f0-9]{64}$/i.test(row.production_preimage_sha256 || ''))
+        fail(`ADDED_WEB_PREIMAGE_NOT_PINNED:${path}`);
+    } else {
+      if (row.production_preimage!=='ABSENT' || row.production_preimage_sha256)
+        fail(`ADDED_WEB_PREIMAGE_NOT_ABSENT:${path}`);
+      delta.absent_preimage_paths.push(path);
+      delta.rollback_remove_paths.push(path);
+    }
   }
   const approved=approvedAdditivePaths.get(reason);
   if (approved ? delta.added_paths.length!==1 || delta.added_paths[0]!==approved : delta.added_paths.length!==0)
