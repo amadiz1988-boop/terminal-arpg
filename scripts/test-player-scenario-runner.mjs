@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { createServer } from 'node:http';
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { appendFile, mkdtemp, rm, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { buildWarpGraph, planWebRelocation } from '../ops/ro-stack/persistent-agent/map-route.mjs';
@@ -11,7 +11,10 @@ import {
   firstBrokenTransition,
   extractEventNames,
   eventCheckpoints,
+  renderHuman,
 } from './lib/player-scenario/scenario-core.mjs';
+import { nativeCombatFact, nativeCombatProgress, observeNativeCombat } from './lib/player-scenario/native-combat-observer.mjs';
+import { traceScenarioResult } from './lib/player-scenario/trace-adapter.mjs';
 import {
   modeTransitionResult,
   normalizeState,
@@ -70,6 +73,31 @@ assert.deepEqual(
   eventCheckpoints(eventNames, ['MONSTER_ATTACK', 'MONSTER_HIT']).map((entry) => entry.ok),
   [true, true],
 );
+
+const nativeLines = [
+  '[Status]: PersistentAgent: TEST_FIXTURE_LIFE_EXCLUDED aid=2000163 cid=150105.',
+  '[Status]: PersistentAgent: AUTO_FARM_STARTED aid=2000163 cid=150105 map=prt_fild08.',
+  '[Status]: PersistentAgent: AUTO_FARM_TARGET cid=150105 target=123 mob=1002 distance=3.',
+  '[Status]: PersistentAgent: AUTO_FARM_ATTACK cid=150105 target=123.',
+  '[Status]: PersistentAgent: AUTO_FARM_HIT cid=150105 target=123 hp=40->28 damage=12.',
+];
+assert.equal(nativeCombatProgress(nativeLines, 150105).lifeExcluded, true);
+assert.equal(nativeCombatProgress(nativeLines, 150105).hit?.damage, 12);
+assert.equal(nativeCombatProgress(nativeLines.slice(0, 4), 150105).hit, null,
+  'attack without authoritative damage must fail');
+assert.equal(nativeCombatProgress([...nativeLines.slice(0, 4),
+  '[Status]: PersistentAgent: AUTO_FARM_HIT cid=150105 target=123 hp=40->40 damage=0.'], 150105).hit, null);
+assert.equal(nativeCombatFact(nativeLines[4], 150094), null, 'other character evidence must not count');
+assert.equal(nativeCombatFact(nativeLines[4].replace('cid=150105', 'cid=1501050'), 150105), null,
+  'character id prefix must not match');
+const excludedEvent = { name: 'Authoritative State -> Event Ledger', ok: true,
+  status: 'EXPECTED_EXCLUSION', reason: 'TEST_FIXTURE_LIFE_EXCLUDED' };
+assert.match(renderHuman({ scenario: 'combat-cycle', events: excludedEvent,
+  combatAuthority: 'PASS', persistentLifeLedger: 'EXPECTED_EXCLUSION', result: 'PASS' }),
+  /EVENTS = EXPECTED_EXCLUSION/);
+const excludedTrace = traceScenarioResult({ scenario: 'combat-cycle', traceId: 'fixture-test',
+  result: 'PASS', events: excludedEvent });
+assert.equal(excludedTrace.trace.layers.find(row => row.layer === 'EVENT_LEDGER')?.result, 'NOT_RUN');
 
 function journal(agentMode, revision, owner = 'SERVER_AGENT') {
   return { revision, ownership: { owner, agentMode } };
@@ -187,6 +215,16 @@ const scenarioRun = (scenario, origin) => run(parseCli([
 ]));
 
 try {
+  const nativeLog = join(credentialDir, 'native.log');
+  await writeFile(nativeLog, '');
+  const nativeObservation = observeNativeCombat({ file: nativeLog, offset: 0,
+    started: true, targets: new Set(), attacks: new Set() }, 150105, 1000);
+  await appendFile(nativeLog, `${nativeLines.slice(2).join('\n')}\n`);
+  assert.equal((await nativeObservation).ok, true, 'new Native HP decrease proves a bounded HIT');
+  const negative = await observeNativeCombat({ file: nativeLog, offset: (await stat(nativeLog)).size,
+    started: true, targets: new Set([123]), attacks: new Set([123]) }, 150105, 100);
+  assert.equal(negative.ok, false, 'stale HIT before the window cannot pass');
+
   const start = await withFakeDashboard({ mode: 'PERSISTENT_IDLE', revision: 40 },
     (world) => { world.mode = 'AUTO_FARM'; world.revision += 1; },
     (origin) => scenarioRun('start-farm', origin));
@@ -244,4 +282,4 @@ try {
   await rm(credentialDir, { recursive: true, force: true });
 }
 
-console.log('PLAYER_SCENARIO_RUNNER_TEST_PASS checks=67');
+console.log('PLAYER_SCENARIO_RUNNER_TEST_PASS checks=77');

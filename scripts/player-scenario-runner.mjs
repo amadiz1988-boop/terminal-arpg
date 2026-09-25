@@ -21,6 +21,7 @@ import {
   renderHuman,
 } from './lib/player-scenario/scenario-core.mjs';
 import { traceScenarioResult } from './lib/player-scenario/trace-adapter.mjs';
+import { nativeCombatContext, observeNativeCombat } from './lib/player-scenario/native-combat-observer.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const DEFAULT_RATHENA_ROOT = 'C:\\Users\\Administrator\\source\\ghost-island-rathena';
@@ -602,6 +603,42 @@ async function executeEventScenario(options, traceId, scenario) {
     return blockedResult(scenario, traceId, 'CHARACTER_OWNERSHIP_MISMATCH', `observed=${before.charId}`);
   if (before.mode !== 'AUTO_FARM')
     return blockedResult(scenario, traceId, 'PRECONDITION_NOT_AUTO_FARM', `mode=${before.mode ?? 'UNKNOWN'}`);
+  if (scenario === 'combat-cycle' && options.origin === 'http://127.0.0.1:8788') {
+    const nativeContext = await nativeCombatContext(ROOT, charId);
+    if (nativeContext?.lifeExcluded) {
+      const started = boundedNow();
+      const observation = await observeNativeCombat(nativeContext, charId, options.timeoutMs);
+      const afterResult = await api.state();
+      const after = afterResult.state;
+      const apiStep = transition('HTTP -> Controller', afterResult.ok, afterResult.body?.error,
+        { observationOnly: true });
+      const controllerStep = transition('Controller -> Command', true, null, { observationOnly: true });
+      const commandStep = transition('Command -> Native Receive', true, null, { observationOnly: true });
+      const nativeStep = transition('Native Receive -> Native Result', true, null,
+        { observationOnly: true, source: observation.source });
+      const stateStep = transition('Native Result -> Authoritative State',
+        observation.ok && after.mode === 'AUTO_FARM',
+        observation.reason ?? (after.mode === 'AUTO_FARM' ? null : `mode=${after.mode ?? 'UNKNOWN'}`),
+        { hit: observation.hit, started: observation.started,
+          targetObserved: observation.targetObserved, attackObserved: observation.attackObserved });
+      const eventsStep = { ...transition('Authoritative State -> Event Ledger', true),
+        status: 'EXPECTED_EXCLUSION', reason: 'TEST_FIXTURE_LIFE_EXCLUDED' };
+      const transitions = [apiStep, controllerStep, commandStep, nativeStep, stateStep, eventsStep];
+      return {
+        scenario, traceId, charId,
+        precondition: `mode=${before.mode} map=${before.map ?? 'UNKNOWN'} fixtureLife=EXCLUDED`,
+        action: 'read-only bounded Native authority observation',
+        api: apiStep, controller: controllerStep, command: commandStep, native: nativeStep,
+        state: stateStep, events: eventsStep,
+        combatAuthority: observation.ok ? 'PASS' : 'FAIL',
+        persistentLifeLedger: 'EXPECTED_EXCLUSION',
+        firstBrokenTransition: firstBrokenTransition(transitions),
+        result: resultFromTransitions(transitions),
+        failReason: transitions.find(entry => !entry.ok)?.reason ?? null,
+        durationMs: boundedNow() - started, observed: { before, after },
+      };
+    }
+  }
   const required = scenario === 'combat-cycle'
     ? ['MONSTER_TARGET', 'MONSTER_ATTACK', 'MONSTER_HIT', 'MONSTER_KILL', 'LOOT_ACQUIRED']
     : ['SUPPLY_LOW', 'MAP_CHANGED', 'SUPPLY_RETURN', 'MONSTER_TARGET', 'MONSTER_ATTACK', 'MONSTER_HIT', 'MONSTER_KILL', 'LOOT_ACQUIRED'];

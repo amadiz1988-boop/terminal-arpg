@@ -23,6 +23,7 @@ function stateFrom(result, side) {
 }
 
 function resultForCheckpoint(checkpoint, failureSeen) {
+  if (checkpoint?.status === 'EXPECTED_EXCLUSION') return LAYER_RESULT.NOT_RUN;
   if (failureSeen && !checkpoint?.ok) return LAYER_RESULT.NOT_RUN;
   if (checkpoint?.timedOut) return LAYER_RESULT.TIMEOUT;
   if (checkpoint?.ok === false) return LAYER_RESULT.FAIL;

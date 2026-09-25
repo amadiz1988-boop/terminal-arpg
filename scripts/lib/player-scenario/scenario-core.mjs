@@ -243,6 +243,8 @@ export function renderHuman(result) {
     `NATIVE = ${formatCheckpoint(result.native)}`,
     `STATE = ${formatCheckpoint(result.state)}`,
     `EVENTS = ${formatCheckpoint(result.events)}`,
+    ...(result.combatAuthority ? [`COMBAT_AUTHORITY = ${result.combatAuthority}`] : []),
+    ...(result.persistentLifeLedger ? [`PERSISTENT_LIFE_LEDGER = ${result.persistentLifeLedger}`] : []),
     `FIRST_BROKEN_TRANSITION = ${result.firstBrokenTransition ?? 'NONE'}`,
     `FAIL_LAYER = ${result.failLayer ?? 'NONE'}`,
     `FAIL_ERROR_CODE = ${result.failErrorCode ?? ''}`,
@@ -262,5 +264,6 @@ export function renderHuman(result) {
 function formatCheckpoint(value) {
   if (!value) return 'UNKNOWN';
   if (typeof value === 'string') return value;
+  if (value.status === 'EXPECTED_EXCLUSION') return 'EXPECTED_EXCLUSION';
   return value.ok ? 'PASS' : `FAIL(${value.reason ?? 'unknown'})`;
 }
