@@ -5,7 +5,7 @@ import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { HISTORICAL_NATIVE_AMENDMENT as old, M1_SECOND_NATIVE_AMENDMENT as policy,
   validateNativeAmendmentHistory, validateHistoricalNativeAnchor, validateNextNativeAmendment,
-  applyNextNativeAmendment } from '../native-amendment-chain.mjs';
+  applyNextNativeAmendment, deployedNativeRuntimeMatches } from '../native-amendment-chain.mjs';
 import { retirementDecision } from '../native-candidate-amendment.mjs';
 
 const hash = value => createHash('sha256').update(value).digest('hex').toUpperCase();
@@ -165,4 +165,22 @@ test('third sequential amendment is accepted after exact second deployment', x =
     currentHashes: Object.fromEntries(Object.entries(x.files).map(([k, v]) => [k, hash(fs.readFileSync(v))])) };
   assert.equal(applyNextNativeAmendment(x.root, thirdPlan).chain_length, 3);
 });
+{
+  const mapHash = 'A'.repeat(64);
+  const receipt = { artifacts: [{ path: '.local/ro-stack/rathena/map-server.exe', sha256: mapHash }],
+    procdump_receipt: { mapPid: 2 } };
+  const runtime = { pass: true, openkore_runtime_count: 0,
+    counts: { login: 1, char: 1, map: 1 }, pids: { map: 3 },
+    procdump_receipt: { mapPid: 3, procdumpAttachStatus: 'ATTACHED', mapBinarySha256: mapHash },
+    procdump_account: 'NT AUTHORITY\\SYSTEM',
+    procdump_process_identity: { PROCESS_IDENTITY_MATCH: 'YES' } };
+  assert.equal(deployedNativeRuntimeMatches(runtime, receipt), true);
+  pass('same-binary runtime rebind accepts fresh ProcDump PID without rewriting old receipt');
+  assert.equal(deployedNativeRuntimeMatches({ ...runtime,
+    procdump_receipt: { ...runtime.procdump_receipt, mapBinarySha256: 'B'.repeat(64) } }, receipt), false);
+  assert.equal(deployedNativeRuntimeMatches({ ...runtime,
+    procdump_receipt: { ...runtime.procdump_receipt, mapPid: 4 } }, receipt), false);
+  assert.equal(deployedNativeRuntimeMatches({ ...runtime, procdump_account: 'OTHER' }, receipt), false);
+  pass('runtime rebind rejects wrong binary, PID, and ProcDump account');
+}
 console.log(`NATIVE_AMENDMENT_CHAIN_TESTS=${count}`);

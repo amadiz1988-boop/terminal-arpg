@@ -38,6 +38,21 @@ export const M1_SECOND_NATIVE_AMENDMENT = Object.freeze({
     'tools/pa-command-contract/Test-M1CanonicalSource.ps1',
   ]),
 });
+
+// A service can restart without replacing its approved binary. Preserve the
+// immutable historical deploy receipt, and bind the current PID to its fresh
+// ProcDump identity plus the exact deployed map binary hash.
+export function deployedNativeRuntimeMatches(runtime, deployedReceipt) {
+  const map = deployedReceipt?.artifacts?.find(item => item.path?.endsWith('/map-server.exe'));
+  return runtime?.pass === true && runtime.openkore_runtime_count === 0 &&
+    ['login', 'char', 'map'].every(name => runtime.counts?.[name] === 1) &&
+    Number.isInteger(runtime.pids?.map) && runtime.pids.map > 0 &&
+    runtime.procdump_receipt?.mapPid === runtime.pids.map &&
+    runtime.procdump_receipt?.procdumpAttachStatus === 'ATTACHED' &&
+    runtime.procdump_account === 'NT AUTHORITY\\SYSTEM' &&
+    runtime.procdump_process_identity?.PROCESS_IDENTITY_MATCH === 'YES' &&
+    !!map && equalHash(runtime.procdump_receipt.mapBinarySha256, map.sha256);
+}
 const SHA = /^[a-f0-9]{40}$/i;
 const fail = code => { throw Error(code); };
 const require = (ok, code) => { if (!ok) fail(code); };
