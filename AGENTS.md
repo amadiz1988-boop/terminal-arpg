@@ -541,12 +541,54 @@ STOP at backend/source acceptance and explicitly request browser/live acceptance
 Do not substitute API/log evidence.
 ```
 
+### 16A. Developer Diagnostics / Admin Browser Separation Policy
+
+```text
+DEVELOPER_DIAGNOSTICS_BROWSER_REQUIRED = NO
+LOCAL_CANONICAL_AUTHORITY_FIRST = YES
+CANONICAL_SERVER_SIDE_ACTION_FIRST = YES
+BROWSER_REQUIRED_ONLY_FOR_UI_ACCEPTANCE = YES
+DIRECT_DB_MUTATION_AS_ACTION_SUBSTITUTE = FORBIDDEN
+```
+
+Developer debugging uses local authoritative evidence in this order: rAthena /
+Native / PA logs; runtime process, listener and state; PA / SERVER_AGENT live
+projections; Event Ledger and command state; read-only DB; deployment, runtime,
+lease and receipt evidence; ProcDump / memory dump; Windows process and event
+evidence. Inspect mode, ownership, quarantine reason, command, target, errors,
+logs, health and crash or hang evidence through these channels. Determine
+`FIRST_BROKEN_TRANSITION` without requiring Admin Browser or human login.
+
+For an existing state-changing capability, use an approved local developer
+entry point to the **same** canonical server-side action and its authorization
+and business validation. This includes `recover_quarantined_to_idle`, runtime
+recovery, safe release and controlled stop/start. A CLI, local adapter or
+server-side command is valid only when it invokes that existing action contract.
+Human Admin Web remains protected by Cloudflare Access. Local diagnostics and
+developer actions retain their own authorized boundary. Never substitute direct
+SQL state mutation, forged or copied credentials, disabled authentication or a
+second action authority.
+
+If the Browser is the only executable entry point for an existing backend
+action, report `DEVELOPER_ACTION_ENTRYPOINT_MISSING = YES`. The same owner may
+add a bounded local developer entry point only when it reuses the canonical
+action, preserves authorization and validation, stays local, and parity tests
+pass. A new subsystem or authority boundary requires Project Control review.
+
+Real Browser evidence remains mandatory for visible UI behavior, button
+interaction, responsive layout, map rendering, animation, Browser audio and
+visible state synchronization. Backend evidence does not establish
+`BROWSER_UI_PASS`. Applicable reports include
+`DIAGNOSTIC_AUTHORITY_USED`, `BROWSER_REQUIRED_FOR_TASK`, `BROWSER_USED`,
+`SERVER_SIDE_ACTION_USED`, `DIRECT_DB_MUTATION_USED` and
+`DEVELOPER_ACTION_ENTRYPOINT_MISSING`.
+
 ### 17. Canonical Workline Templates
 
 New worklines MUST use:
 
 ```text
-WORKLINE_DISPATCH_TEMPLATE_V1
+WORKLINE_DISPATCH_TEMPLATE_V1.1
 defined at:
 docs/project-control/workline-dispatch-template.md
 ```
@@ -554,7 +596,7 @@ docs/project-control/workline-dispatch-template.md
 Existing / blocked worklines MUST use:
 
 ```text
-WORKLINE_CONTINUATION_TEMPLATE_V1
+WORKLINE_CONTINUATION_TEMPLATE_V1.1
 defined at:
 docs/project-control/workline-continuation-template.md
 ```
@@ -575,10 +617,10 @@ Short form:
 
 ```text
 For new workline:
-Use WORKLINE_DISPATCH_TEMPLATE_V1.
+Use WORKLINE_DISPATCH_TEMPLATE_V1.1.
 
 For existing workline:
-Use WORKLINE_CONTINUATION_TEMPLATE_V1.
+Use WORKLINE_CONTINUATION_TEMPLATE_V1.1.
 Continue from CURRENT_PHASE.
 Do not restart audit.
 ```
@@ -1701,8 +1743,8 @@ Keep hot paths small.
 Do not let Web presence control PA runtime.
 ```
 
-此 policy 必須相容 `PC-DISPATCH-STANDARD`、`WORKLINE_DISPATCH_TEMPLATE_V1`、
-`WORKLINE_CONTINUATION_TEMPLATE_V1`、`OPENKORE_REFERENCE_POLICY`、
+此 policy 必須相容 `PC-DISPATCH-STANDARD`、`WORKLINE_DISPATCH_TEMPLATE_V1.1`、
+`WORKLINE_CONTINUATION_TEMPLATE_V1.1`、`OPENKORE_REFERENCE_POLICY`、
 `OPENKORE_REFERENCE_GATE_V1.1`、`Single Runtime Policy` 與 Browser Acceptance
 Policy，且不得重定義 PA Runtime Authority。
 

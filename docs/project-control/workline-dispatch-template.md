@@ -1,4 +1,4 @@
-# WORKLINE_DISPATCH_TEMPLATE_V1
+# WORKLINE_DISPATCH_TEMPLATE_V1.1
 
 STATUS: CANONICAL
 
@@ -16,7 +16,7 @@ Fill every section. Do not omit a section because it looks obvious.
 
 ```text
 For new workline:
-Use WORKLINE_DISPATCH_TEMPLATE_V1.
+Use WORKLINE_DISPATCH_TEMPLATE_V1.1.
 ```
 
 If the value of a field is not known:
@@ -33,7 +33,7 @@ This template defines dispatch structure only. Policy authority remains
 Existing / blocked worklines do not use this template:
 
 ```text
-Use WORKLINE_CONTINUATION_TEMPLATE_V1.
+Use WORKLINE_CONTINUATION_TEMPLATE_V1.1.
 Continue from CURRENT_PHASE.
 Do not restart audit.
 ```
@@ -210,6 +210,25 @@ Reference existing governance. Do not copy policy bodies into the dispatch.
 ```text
 Follow PC-DISPATCH-STANDARD.
 ```
+
+For development, diagnostics or admin-action worklines, include this required
+section. Set `BROWSER_REQUIRED_FOR_TASK = YES` when UI acceptance itself is in
+scope; otherwise use local canonical authority. Policy details remain in
+`AGENTS.md`.
+
+```text
+【DEVELOPER_DIAGNOSTICS_POLICY】
+DEVELOPER_DIAGNOSTICS_BROWSER_REQUIRED = NO
+LOCAL_CANONICAL_AUTHORITY_FIRST = YES
+CANONICAL_SERVER_SIDE_ACTION_FIRST = YES
+BROWSER_REQUIRED_ONLY_FOR_UI_ACCEPTANCE = YES
+DIRECT_DB_MUTATION_AS_ACTION_SUBSTITUTE = FORBIDDEN
+DEVELOPER_ACTION_ENTRYPOINT_MISSING = YES / NO / N/A
+```
+
+If the only entry point for an existing backend action is Browser UI, report
+`DEVELOPER_ACTION_ENTRYPOINT_MISSING = YES`; retain the same authorization and
+action contract for any bounded local entry point.
 
 For a Quest-related workline, complete the Atlas lookup in section 10A and then
 `QUEST_FLOW_FIRST_HARD_GATE` in section 10B before filling or evaluating the
@@ -801,7 +820,7 @@ Do not push unless Project Control explicitly requests it.
 ## 17. FINAL_REPORT
 
 ```text
-10-20 lines maximum unless explicitly authorized.
+10-20 lines; up to 26 when the applicable diagnostics fields are included.
 ```
 
 PASS:
@@ -831,6 +850,17 @@ USER_MANUAL_ACTION_REQUIRED = YES / NO
 
 Explain a required manual step by naming why existing authorized automation
 or fixture control cannot lawfully complete it.
+
+For applicable worklines, also report:
+
+```text
+DIAGNOSTIC_AUTHORITY_USED =
+BROWSER_REQUIRED_FOR_TASK = YES / NO
+BROWSER_USED = YES / NO
+SERVER_SIDE_ACTION_USED = YES / NO
+DIRECT_DB_MUTATION_USED = NO
+DEVELOPER_ACTION_ENTRYPOINT_MISSING = YES / NO / N/A
+```
 
 For a runtime or control-flow workline, also report:
 
@@ -901,14 +931,17 @@ CONTEXT_BUDGET_VIOLATION =
 ## 19. VERSIONING
 
 ```text
-TEMPLATE = WORKLINE_DISPATCH_TEMPLATE_V1
+TEMPLATE = WORKLINE_DISPATCH_TEMPLATE_V1.1
 ```
 
 No silent semantic change. Future substantive change:
 
 ```text
-V1.1
+V1.2
 V2
 ```
 
 and the `AGENTS.md` reference must be updated in the same change.
+
+V1.1 supersedes V1 for new dispatches; existing V1 handoffs inherit the
+current `AGENTS.md` policy.

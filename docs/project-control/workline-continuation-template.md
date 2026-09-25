@@ -1,4 +1,4 @@
-# WORKLINE_CONTINUATION_TEMPLATE_V1
+# WORKLINE_CONTINUATION_TEMPLATE_V1.1
 
 STATUS: CANONICAL
 
@@ -34,7 +34,7 @@ Short form:
 
 ```text
 For existing workline:
-Use WORKLINE_CONTINUATION_TEMPLATE_V1.
+Use WORKLINE_CONTINUATION_TEMPLATE_V1.1.
 Continue from CURRENT_PHASE.
 Do not restart audit.
 ```
@@ -146,6 +146,29 @@ USER_MANUAL_ACTION_REQUIRED = YES / NO
 
 If manual action is required, state why existing authorized automation and
 fixtures cannot complete that step.
+
+---
+
+## 0B. DEVELOPER DIAGNOSTICS / ACTION CONTINUATION
+
+Continue from available local authoritative diagnostics for logs, runtime
+state, projections, Event Ledger, read-only DB and receipts. A Browser,
+Cloudflare Access or human-login blocker does not block facts available through
+those channels. For an existing state-changing capability, use its approved
+local developer entry point to the same canonical action and validation.
+Report `DEVELOPER_ACTION_ENTRYPOINT_MISSING = YES` if Browser UI is the only
+executable entry point; use the bounded-entry-point rule in `AGENTS.md`.
+Direct DB mutation remains forbidden as an action substitute. Browser
+acceptance remains required when the target is visible UI or Browser behavior.
+
+```text
+DIAGNOSTIC_AUTHORITY_USED =
+BROWSER_REQUIRED_FOR_TASK = YES / NO
+BROWSER_USED = YES / NO
+SERVER_SIDE_ACTION_USED = YES / NO
+DIRECT_DB_MUTATION_USED = NO
+DEVELOPER_ACTION_ENTRYPOINT_MISSING = YES / NO / N/A
+```
 
 ---
 
@@ -663,7 +686,7 @@ Do not rewrite the whole project history.
 ## 12. FINAL REPORT
 
 ```text
-12-16 lines maximum
+12-16 lines; up to 22 when the applicable diagnostics fields are included
 ```
 
 Report only:
@@ -683,6 +706,17 @@ BOUNDED_BLOCKERS_RESOLVED_IN_PLACE
 PROJECT_CONTROL_STOP_TRIGGERED
 PROJECT_CONTROL_STOP_REASON
 USER_MANUAL_ACTION_REQUIRED
+```
+
+For applicable continuations, also report:
+
+```text
+DIAGNOSTIC_AUTHORITY_USED
+BROWSER_REQUIRED_FOR_TASK
+BROWSER_USED
+SERVER_SIDE_ACTION_USED
+DIRECT_DB_MUTATION_USED
+DEVELOPER_ACTION_ENTRYPOINT_MISSING
 ```
 
 For a runtime or control-flow continuation, also report:
@@ -785,14 +819,17 @@ PLAYER_FLOW_EQUIVALENCE
 ## 13. VERSIONING
 
 ```text
-TEMPLATE = WORKLINE_CONTINUATION_TEMPLATE_V1
+TEMPLATE = WORKLINE_CONTINUATION_TEMPLATE_V1.1
 ```
 
 No silent semantic change. Future substantive change:
 
 ```text
-V1.1
+V1.2
 V2
 ```
 
 and the `AGENTS.md` reference must be updated in the same change.
+
+V1.1 supersedes V1 for new continuations; existing V1 handoffs inherit the
+current `AGENTS.md` policy.
