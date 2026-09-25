@@ -61,7 +61,10 @@ const added = new Set(MIGRATION.columns.map(([name]) => name));
 function contractColumns(schema) {
   return MIGRATION.columns.map(([name, type]) => {
     const row = schema.columns.find(column => column.name === name);
-    return { name, present: !!row, valid: !!row && type.test(row.type) && row.nullable && row.default === '<NULL>' };
+    // MariaDB reports nullable DEFAULT NULL as the literal string "NULL";
+    // some client versions surface a SQL NULL, represented by <NULL> above.
+    return { name, present: !!row, valid: !!row && type.test(row.type) &&
+      row.nullable && (row.default === 'NULL' || row.default === '<NULL>') };
   });
 }
 

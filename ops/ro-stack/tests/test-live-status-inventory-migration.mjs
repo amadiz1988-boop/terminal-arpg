@@ -27,7 +27,7 @@ function fakeDb({ extra = [], rows = 22 } = {}) {
       if (query.startsWith('ALTER TABLE')) {
         for (const [name] of MIGRATION.columns) if (!columns.some(c => c.name === name))
           columns.push({ name, type: name === 'supply_required' ? 'tinyint(1)' :
-            name === 'supply_reason' ? 'varchar(64)' : 'int(10) unsigned', nullable: 'YES', def: '<NULL>' });
+            name === 'supply_reason' ? 'varchar(64)' : 'int(10) unsigned', nullable: 'YES', def: 'NULL' });
         return '';
       }
       throw Error('unexpected ' + query);
