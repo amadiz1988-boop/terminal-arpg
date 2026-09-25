@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { CONFIG_FORM_SCHEMA, clone, defaultCanonicalConfig } from '../ops/ro-stack/dashboard/config-schema.mjs';
+import { CONFIG_FORM_SCHEMA, clone, defaultCanonicalConfig, defaultConfigRow } from '../ops/ro-stack/dashboard/config-schema.mjs';
 import {
   CONFIG_SECTIONS, configCapability, configCapabilityCounts, configControlVisible,
   configRowFieldSupported, configSection, configWriteAdmission,
@@ -25,10 +25,17 @@ assert.equal(configCapability({ applied: true, capabilities: { 'combat.profile':
 assert.equal(configCapability({ applied: true, capabilities: { 'combat.profile': 'PARTIAL' } }, 'combat.profile'), 'PARTIAL');
 assert.equal(configCapability({ applied: true, capabilities: { 'combat.profile': 'UNAVAILABLE' } }, 'combat.profile'), 'UNAVAILABLE');
 assert.equal(configCapability({ applied: true, capabilities: { 'combat.skills.partySkills': 'SUPPORTED' } }, 'combat.skills.partySkills'), 'UNAVAILABLE');
+// M1_INVENTORY_MAINTENANCE_V1: these are now attested executor paths.
 for (const path of [
   'supply.weightTriggerPercent', 'supply.inventorySlotTrigger',
   'supply.services.storage.enabled', 'supply.services.sell.enabled', 'supply.itemRules',
-]) assert.equal(configCapability({ editable: true, capabilities: { [path]: 'SUPPORTED' } }, path), 'UNAVAILABLE');
+]) {
+  assert.equal(configCapability({ editable: true, capabilities: { [path]: 'SUPPORTED' } }, path), 'SUPPORTED');
+  assert.equal(configCapability(unaccepted, path), 'PARTIAL');
+}
+// Storage/sell NPC overrides stay on the canonical Saved Town services.
+assert.notEqual(configCapability({ editable: true, capabilities: m1ConfigExecutionCapabilities(true, true) },
+  'supply.services.storage.npc'), 'SUPPORTED');
 assert.equal(configSection('combat.travel.flyWing.enabled'), '蒼蠅翅膀');
 assert.equal(configSection('supply.tools.butterflyWing.required'), '蝴蝶翅膀 / 回城補給');
 assert.equal(configSection('combat.itemUse'), 'HP / SP');
@@ -59,13 +66,21 @@ assert.equal(configRowFieldSupported('buy', 'maxAmount'), true);
 assert.equal(configRowFieldSupported('buy', 'npc'), false);
 assert.equal(configRowFieldSupported('selfSkill', 'conditions.hp'), true);
 assert.equal(configRowFieldSupported('selfSkill', 'conditions.whenStatusActive'), false);
-assert.equal(M1_EXECUTOR_PATHS.length, 12);
+assert.equal(M1_EXECUTOR_PATHS.length, 17);
 assert.deepEqual(m1ConfigExecutionCapabilities(false, true), {});
 assert.deepEqual(m1ConfigExecutionCapabilities(true, false), {});
-assert.equal(Object.keys(m1ConfigExecutionCapabilities(true, true)).length, 12);
+assert.equal(Object.keys(m1ConfigExecutionCapabilities(true, true)).length, 17);
 assert.equal(configCapability({ editable: true,
   capabilities: m1ConfigExecutionCapabilities(true, true) }, 'combat.skills.selfSkills'), 'SUPPORTED');
 const m1Execution = { editable: true, capabilities: m1ConfigExecutionCapabilities(true, true) };
+assert.deepEqual(changed((config) => { config.supply.weightTriggerPercent = 60; }, m1Execution),
+  { ok: true, unsupportedPaths: [] });
+assert.deepEqual(changed((config) => { config.supply.services.sell.enabled = true; }, m1Execution),
+  { ok: true, unsupportedPaths: [] });
+assert.deepEqual(changed((config) => { config.supply.itemRules.push({ ...defaultConfigRow('itemRule'),
+  item: '909', keepAmount: 0, storage: false, sell: true }); }, m1Execution), { ok: true, unsupportedPaths: [] });
+assert.deepEqual(changed((config) => { config.supply.itemRules[0].cartAdd = true; }, m1Execution),
+  { ok: false, unsupportedPaths: ['supply.itemRules'] });
 assert.deepEqual(changed((config) => { config.combat.attack.mode = 1; }, m1Execution),
   { ok: false, unsupportedPaths: ['combat.attack.mode'] });
 assert.deepEqual(changed((config) => { config.combat.attack.distance = 2.5; }, m1Execution),
