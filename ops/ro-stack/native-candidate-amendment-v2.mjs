@@ -10,7 +10,8 @@ import { git, pinned, equalHash, groups, shutdownContract, verifyNativeRemote,
   inspectNativeCandidate, verifyNativeStage, nativeReceiptValid, activeNativeReceiptPath } from './native-promotion-contract.mjs';
 import { amendmentAdapter, deployAmendedNative, gracefulShutdownCycle } from './native-candidate-amendment.mjs';
 import { M1_SECOND_NATIVE_AMENDMENT as approved, validateHistoricalNativeAnchor,
-  validateNextNativeAmendment, applyNextNativeAmendment } from './native-amendment-chain.mjs';
+  validateNextNativeAmendment, applyNextNativeAmendment,
+  deployedNativeRuntimeMatches } from './native-amendment-chain.mjs';
 
 const governanceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SUITE = 'tools/pa-command-contract/Test-M1V15ExecutorFixture.ps1';
@@ -162,10 +163,8 @@ export function planNextNativeAmendment({ root, owner, leaseId, manifestFile, ma
     ir.artifacts?.length === 3 && ir.artifacts.every(item =>
       equalHash(digest(boundedPath(buildRoot, item.path)), item.sha256) &&
       current.artifacts.some(c => c.path === item.production_path && equalHash(c.sha256, item.sha256)));
-  const runtimeMatchesDeployed = runtime?.pass === true && runtime.openkore_runtime_count === 0 &&
-    ['login', 'char', 'map'].every(name => runtime.counts?.[name] === 1) &&
-    current.artifacts.every(item => equalHash(digest(boundedPath(root, item.path)), item.sha256)) &&
-    current.procdump_receipt?.mapPid === runtime.pids?.map;
+  const runtimeMatchesDeployed = deployedNativeRuntimeMatches(runtime, current) &&
+    current.artifacts.every(item => equalHash(digest(boundedPath(root, item.path)), item.sha256));
   const diff = sourceDiff(build.source_root, lease.native_deploy_git_sha, manifest.native_git_sha);
   need(JSON.stringify(diff) === JSON.stringify(manifest.diff_audit), 'NATIVE_AMENDMENT_DIFF_CHANGED');
   const input = { lease, pending, state, owner, leaseId, previousSha: lease.native_deploy_git_sha,
