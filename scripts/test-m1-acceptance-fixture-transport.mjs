@@ -17,6 +17,10 @@ assert.match(dashboardSource, /fixtureTransportEnabled\(\(isM1Submit \|\| m1Resu
 assert.match(configSource, /WebM1AcceptanceFixtureEnabled\s*=\s*\$false/);
 assert.match(launcherSource, /RO_M1_ACCEPTANCE_FIXTURE_ENABLED=if\(\$stackConfig\.WebM1AcceptanceFixtureEnabled\)/);
 assert.match(launcherSource, /RO_M1_ACCEPTANCE_FIXTURE_ENABLED=\$previousM1AcceptanceFixture/);
+assert.match(launcherSource, /ValidateSet\('start','stop','health','probe'\)/);
+assert.match(launcherSource, /lifecycle-audit\.log/);
+assert.match(launcherSource, /web-experience-canary\.json/);
+assert.match(launcherSource, /RedirectStandardInput \$stdin -RedirectStandardOutput \$stdout -RedirectStandardError \$stderr/);
 
 const registry = JSON.parse(await readFile(new URL('../docs/project-control/canonical-test-fixtures.json', import.meta.url)));
 const local = { context: 'ADMIN_TRANSPORT', actorAdminId: 'developer-admin',
