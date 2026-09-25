@@ -1,8 +1,10 @@
 [CmdletBinding()]
 param(
-  [Parameter(Mandatory=$true)][ValidateSet('snapshot','stop','start')][string]$Action,
+  [Parameter(Mandatory=$true)][ValidateSet('snapshot','stop','start','retire-known-buggy-map','stop-remaining')][string]$Action,
   [Parameter(Mandatory=$true)][string]$ProductionRoot,
-  [string]$Owner, [string]$LeaseId
+  [string]$Owner, [string]$LeaseId,
+  # retire-known-buggy-map only: exact pinned identity of the hung pre-fix map.
+  [int]$TargetPid = 0, [string]$ExpectedSha256, [string]$ExpectedStartUtc
 )
 $ErrorActionPreference = 'Stop'
 $expectedRoot = 'C:\Users\Administrator\ghost-island-production\ro-stack'
@@ -123,7 +125,42 @@ function Assert-NativeLeaseOwned([string]$RuntimeRoot, [string]$Owner, [string]$
 
 if ($Action -eq 'snapshot') { Write-GovernanceJsonStdout (Get-Snapshot); exit 0 }
 Assert-NativeLeaseOwned $runtime $Owner $LeaseId
-if ($Action -eq 'stop') {
+# KNOWN_BUGGY_OLD_RUNTIME_RETIREMENT. The caller (native-candidate-amendment.mjs)
+# decides eligibility; this action re-proves the exact process identity at the
+# termination boundary and terminates that one PID only. It never targets
+# login/char and never starts anything.
+if ($Action -eq 'retire-known-buggy-map') {
+  $mapPath = Join-Path $native 'map-server.exe'
+  $maps = @(Get-CimInstance Win32_Process -Filter "Name='map-server.exe'")
+  if ($TargetPid -le 0 -or $maps.Count -ne 1 -or [int]$maps[0].ProcessId -ne $TargetPid) { throw 'RETIRE_TARGET_PID_MISMATCH' }
+  if ([string]$maps[0].ExecutablePath -ine $mapPath) { throw 'RETIRE_TARGET_PATH_MISMATCH' }
+  $started = ([DateTime]$maps[0].CreationDate).ToUniversalTime()
+  if (-not $ExpectedStartUtc -or [Math]::Abs(($started - ([DateTime]::Parse($ExpectedStartUtc)).ToUniversalTime()).TotalMilliseconds) -gt 1) { throw 'RETIRE_TARGET_START_MISMATCH' }
+  if (-not $ExpectedSha256 -or (Get-FileHash -LiteralPath $mapPath -Algorithm SHA256).Hash -ne $ExpectedSha256.ToUpperInvariant()) { throw 'RETIRE_TARGET_HASH_MISMATCH' }
+  Stop-Process -Id $TargetPid -Force -ErrorAction Stop
+  $deadline = [DateTime]::UtcNow.AddSeconds(15)
+  while ([DateTime]::UtcNow -lt $deadline -and (Get-Process -Id $TargetPid -ErrorAction SilentlyContinue)) { Start-Sleep -Milliseconds 200 }
+  if (Get-Process -Id $TargetPid -ErrorAction SilentlyContinue) { throw 'RETIRE_TARGET_STILL_ALIVE' }
+  $deadline = [DateTime]::UtcNow.AddSeconds(15)
+  while ([DateTime]::UtcNow -lt $deadline -and @(Get-NetTCPConnection -State Listen -LocalPort 5122 -ErrorAction SilentlyContinue).Count) { Start-Sleep -Milliseconds 200 }
+  if (@(Get-NetTCPConnection -State Listen -LocalPort 5122 -ErrorAction SilentlyContinue).Count) { throw 'RETIRE_MAP_PORT_OCCUPIED' }
+  Write-GovernanceJsonStdout ([pscustomobject]@{ retired_pid = $TargetPid; retired_start_utc = $started.ToString('o'); terminated = $true })
+  exit 0
+}
+if ($Action -eq 'stop-remaining') {
+  # After a retired map: login/char are stopped by the existing launcher's
+  # graceful path. The tracked map entry resolves to no process and is skipped.
+  $maps = @(Get-CimInstance Win32_Process -Filter "Name='map-server.exe'")
+  if ($maps.Count -ne 0 -or @(Get-NetTCPConnection -State Listen -LocalPort 5122 -ErrorAction SilentlyContinue).Count) { throw 'MAP_STILL_RUNNING' }
+  $tracked = Read-GovernanceJson (Join-Path $runtime 'state.json')
+  foreach ($name in @('login','char')) {
+    $entry = @($tracked.processes | Where-Object name -eq $name)
+    $live = @(Get-CimInstance Win32_Process -Filter "Name='$name-server.exe'")
+    if ($entry.Count -ne 1 -or $live.Count -ne 1 -or [int]$live[0].ProcessId -ne [int]$entry[0].id -or
+        [string]$live[0].ExecutablePath -ine (Join-Path $native ($name + '-server.exe'))) { throw 'TRACKED_IDENTITY_CHANGED' }
+  }
+  $Action = 'stop'
+} elseif ($Action -eq 'stop') {
   $before = Get-Snapshot
   if (-not $before.pass -or -not $before.procdump_receipt) { throw 'PRESTOP_RUNTIME_INVALID' }
   # Require the tracked state path to prevent the launcher's force-stop fallback.

@@ -125,13 +125,15 @@ export function verifyDeployed(m,root){
 export function receiptIdentity(m){return {web_git_sha:m.web_git_sha,candidate_id:m.candidate_id,manifest_digest:m.manifest_digest,
   manifest_file_count:m.file_count,manifest_total_payload_bytes:m.total_payload_bytes,asset_release:m.asset_release,asset_package_sha256:m.asset_package_sha256,asset_manifest_sha256:m.asset_manifest_sha256};}
 
-export function verifyWebReceipt(receipt,root,lease=null){
+// currentBytes=false verifies a superseded receipt (hash, identity, fileset,
+// rollback) without requiring its files to still be the live Production bytes.
+export function verifyWebReceipt(receipt,root,lease=null,{currentBytes=true}={}){
   const ref=receipt.web_deployment_receipt;
   fail(ref && /^[a-f0-9]{64}$/i.test(ref.sha256||''),'WEB_DEPLOY_RECEIPT_REQUIRED');
   const file=boundedPath(root,safeRelative(ref.path));
   fail(digest(file)===ref.sha256.toUpperCase(),'WEB_DEPLOY_RECEIPT_HASH_MISMATCH');
   const deployed=readJson(file),manifestFile=path.join(path.dirname(file),'manifest.json'),m=readManifest(manifestFile);
-  validateHeader(m);verifyDeployed(m,root);
+  validateHeader(m);if(currentBytes)verifyDeployed(m,root);
   fail(deployed.mode==='DEPLOY' && deployed.result==='CANDIDATE_ACTIVE' && deployed.deployment_result==='COMPLETE_CANDIDATE_ACTIVE' &&
     deployed.PRODUCTION_FILESET_MATCHES_MANIFEST===true && !deployed.rollback_performed && deployed.predeploy_baseline && deployed.rollback_reference,'WEB_DEPLOY_RECEIPT_INCOMPLETE');
   fail(deployed.manifest_sha256===digest(manifestFile) && deployed.owner_task_id===receipt.owner_task_id && deployed.lease_id===receipt.lease_id,'WEB_DEPLOY_RECEIPT_IDENTITY_MISMATCH');

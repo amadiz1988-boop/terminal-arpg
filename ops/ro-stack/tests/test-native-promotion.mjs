@@ -20,8 +20,8 @@ const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'native-promotion-'));
 function fixture(){
   const root=fs.mkdtempSync(path.join(tmp,'case-')),buildRoot=path.join(root,'build'),source=path.join(buildRoot,'source');
   const write=(p,value)=>{const f=path.join(root,p);fs.mkdirSync(path.dirname(f),{recursive:true});fs.writeFileSync(f,typeof value==='string'?value:JSON.stringify(value));return f;};
-  write('build/source/src/map/map.cpp','void MapServer::handle_shutdown(){persistent_agent_prepare_shutdown();persistent_agent_confirm_shutdown();}');
-  write('build/source/src/map/persistent_agent.cpp','persistent_agent_state_mark_shutdown_pending(runtime.record, runtime_instance_id); persistent_agent_state_confirm_clean_shutdown(runtime.record, runtime_instance_id);');
+  write('build/source/src/map/map.cpp','void MapServer::finalize(){if(map_shutdown_handoff().begin()){persistent_agent_prepare_shutdown();persistent_agent_confirm_shutdown();}map_shutdown_handoff().complete();}\nvoid MapServer::handle_shutdown(){map_shutdown_handoff().request();}');
+  write('build/source/src/map/persistent_agent.cpp','bool pa_lifecycle_stopped() {} persistent_agent_state_mark_shutdown_pending(runtime.record, runtime_instance_id); persistent_agent_state_confirm_clean_shutdown(runtime.record, runtime_instance_id);');
   write('build/source/src/map/persistent_agent.hpp','fixture header');
   write('build/source/src/map/persistent_agent_state.cpp',"`runtime_state`='SHUTDOWN_PENDING' `runtime_state`='CLEAN_SHUTDOWN'");
   write('build/source/.gitignore','*-server.exe\n');

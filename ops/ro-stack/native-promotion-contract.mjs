@@ -7,6 +7,18 @@ import { verifyWebReceipt, readManifest, receiptIdentity } from './web-complete-
 
 export const NATIVE_REPOSITORY = 'https://github.com/amadiz1988-boop/ghost-island-rathena.git';
 export const nativeReceiptPath = '.local/ro-stack/native-promotion-receipt.json';
+// A Native candidate amendment deploys under the same lease without rewriting
+// the original stage receipt. The pending promotion names the active receipt;
+// absent a pointer the original canonical path applies.
+export function isNativeReceiptPath(p) {
+  return p === nativeReceiptPath || /^\.local\/ro-stack\/native-promotion-receipt-[a-f0-9]{12}\.json$/.test(p || '');
+}
+export function activeNativeReceiptPath(pending) {
+  const p = pending?.native_receipt_path;
+  if (p === undefined || p === null) return nativeReceiptPath;
+  if (!isNativeReceiptPath(p)) throw Error('NATIVE_RECEIPT_PATH_INVALID');
+  return p;
+}
 export const nativeArtifacts = ['login', 'char', 'map'].map(n => `.local/ro-stack/rathena/${n}-server.exe`);
 export const groups = {
   'PA command contracts': 'tools/pa-command-contract/Test-PaCommandContract.ps1',
@@ -51,14 +63,39 @@ export function verifyNativeRemote(root, sha, authority) {
   return true;
 }
 
-// Additional source contract for graceful shutdown ordering, executed without runtime.
+// Brace-balanced body of the first definition matching signature, or ''.
+export function sourceBody(text, signature) {
+  const start = text.indexOf(signature);
+  if (start < 0) return '';
+  const open = text.indexOf('{', start);
+  if (open < 0) return '';
+  for (let i = open, depth = 0; i < text.length; i++) {
+    if (text[i] === '{') depth++;
+    else if (text[i] === '}' && --depth === 0) return text.slice(open, i + 1);
+  }
+  return '';
+}
+
+// Source contract for graceful shutdown ordering, executed without runtime.
+// NATIVE_PA_GRACEFUL_SHUTDOWN_MYSQL_RACE_V1: on Windows handle_shutdown() runs
+// on the console/CRT signal callback thread. It may only record the request;
+// finalize() on the map main thread performs PA prepare -> confirm once and
+// then completes the handoff. The pre-fix shape (PA work inside the signal
+// handler) no longer satisfies this contract.
 export function shutdownContract(root) {
   const map = fs.readFileSync(boundedPath(root, 'src/map/map.cpp'), 'utf8');
   const pa = fs.readFileSync(boundedPath(root, 'src/map/persistent_agent.cpp'), 'utf8');
   const state = fs.readFileSync(boundedPath(root, 'src/map/persistent_agent_state.cpp'), 'utf8');
-  const body = map.slice(map.indexOf('void MapServer::handle_shutdown()'), map.indexOf('void MapServer::handle_shutdown()') + 2500);
-  return body.indexOf('persistent_agent_prepare_shutdown();') >= 0 &&
-    body.indexOf('persistent_agent_confirm_shutdown();') > body.indexOf('persistent_agent_prepare_shutdown();') &&
+  const handler = sourceBody(map, 'void MapServer::handle_shutdown()');
+  const finalize = sourceBody(map, 'void MapServer::finalize()');
+  const begin = finalize.indexOf('map_shutdown_handoff().begin()');
+  const prepare = finalize.indexOf('persistent_agent_prepare_shutdown()');
+  const confirm = finalize.lastIndexOf('persistent_agent_confirm_shutdown()');
+  const complete = finalize.indexOf('map_shutdown_handoff().complete()');
+  return handler.includes('map_shutdown_handoff().request()') &&
+    ['persistent_agent_', 'clif_', 'flush_fifos', 'chrif_', 'Sql_', 'mapit_', 'map_quit'].every(x => !handler.includes(x)) &&
+    begin >= 0 && prepare > begin && confirm > prepare && complete > confirm &&
+    pa.includes('pa_lifecycle_stopped()') &&
     pa.includes('persistent_agent_state_mark_shutdown_pending(runtime.record, runtime_instance_id)') &&
     pa.includes('persistent_agent_state_confirm_clean_shutdown(runtime.record, runtime_instance_id)') &&
     state.includes("`runtime_state`='SHUTDOWN_PENDING'") && state.includes("`runtime_state`='CLEAN_SHUTDOWN'");
@@ -182,14 +219,33 @@ export function nativeReceiptValid(r, { nativeSha, binaryHash, leaseId, manifest
 
 // An amended Web candidate can follow an already deployed intermediate Web
 // candidate. Its receipt proves current Web bytes and the original rollback.
+// Once the amended candidate itself is deployed, the intermediate receipt is
+// superseded: it keeps its integrity checks and the live bytes must instead
+// match the single lease-bound receipt of the current Web candidate.
+export function currentLeaseWebReceipt(root, lease) {
+  const base = '.local/ro-stack/dashboard/deploy-receipts', dir = boundedPath(root, base);
+  const hits = fs.readdirSync(dir).filter(n => /^manifest-[a-f0-9]{32}$/.test(n)).map(n => `${base}/${n}/deploy-receipt.json`).filter(p => {
+    try { const d = readJson(boundedPath(root, p));
+      return d.lease_id === lease.lease_id && d.owner_task_id === lease.owner_task_id && d.web_git_sha === lease.web_deploy_git_sha &&
+        d.result === 'CANDIDATE_ACTIVE' && equalHash(d.manifest_sha256, lease.admission_manifest_sha256); } catch { return false; }
+  });
+  check(hits.length === 1, 'CURRENT_WEB_RECEIPT_NOT_UNIQUE');
+  return hits[0];
+}
+function leaseWebReceiptArgs(root, lease, receiptPath, sha256) {
+  const m = readManifest(path.join(path.dirname(boundedPath(root, receiptPath)), 'manifest.json'));
+  return { web_deployment_receipt: { path: receiptPath, sha256 }, owner_task_id: lease.owner_task_id, lease_id: lease.lease_id,
+    ...receiptIdentity(m), files: m.files.map(item => ({ path: item.path, sha256: item.sha256 })) };
+}
 export function verifyNativeStage(root, state, lease, webManifestHash) {
   try {
     check(legacyIdentity(state) && state.production_drift === 'OPEN' && state.drift_reason === 'FIRST_PROMOTION_PENDING_FINAL_RECEIPT', 'NOT_NATIVE_STAGE');
     check(lease?.status === 'ACTIVE' && lease.promotion_mode === FIRST_PROMOTION && equalHash(lease.admission_manifest_sha256,webManifestHash), 'LEASE_UNBOUND');
     const pending = readJson(boundedPath(root,pendingPath));
     check(pending.owner_task_id === lease.owner_task_id && pending.lease_id === lease.lease_id && pending.native_git_sha === lease.native_deploy_git_sha && pending.web_git_sha === lease.web_deploy_git_sha, 'PENDING_UNBOUND');
-    const r = readJson(boundedPath(root,nativeReceiptPath));
-    check(equalHash(pending.native_receipt_sha256,digest(boundedPath(root,nativeReceiptPath))) &&
+    const receiptPath = activeNativeReceiptPath(pending);
+    const r = readJson(boundedPath(root,receiptPath));
+    check(equalHash(pending.native_receipt_sha256,digest(boundedPath(root,receiptPath))) &&
       nativeReceiptValid(r,{nativeSha:lease.native_deploy_git_sha,leaseId:lease.lease_id,manifestHash:lease.native_candidate_manifest_sha256}), 'NATIVE_RECEIPT_INVALID');
     const snapshot = structuredClone(state);
     snapshot.native_binaries = r.artifacts;
@@ -205,10 +261,14 @@ export function verifyNativeStage(root, state, lease, webManifestHash) {
       check(audit.lease_id===lease.lease_id && audit.old_web_git_sha===prior.old_web_git_sha &&
         audit.new_web_git_sha===prior.new_web_git_sha,'WEB_AMENDMENT_AUDIT_INVALID');
       const previousReceipt=readJson(boundedPath(root,prior.previous_web_candidate_receipt));
-      const previousManifest=readManifest(path.join(path.dirname(boundedPath(root,prior.previous_web_candidate_receipt)),'manifest.json'));
-      verifyWebReceipt({web_deployment_receipt:{path:prior.previous_web_candidate_receipt,sha256:prior.previous_web_candidate_receipt_sha256},
-        owner_task_id:lease.owner_task_id,lease_id:lease.lease_id,...receiptIdentity(previousManifest),
-        files:previousManifest.files.map(item=>({path:item.path,sha256:item.sha256}))},root);
+      const previousArgs=leaseWebReceiptArgs(root,lease,prior.previous_web_candidate_receipt,prior.previous_web_candidate_receipt_sha256);
+      let previousLive=true;
+      try { verifyWebReceipt(previousArgs,root); } catch { previousLive=false; }
+      if(!previousLive){
+        verifyWebReceipt(previousArgs,root,null,{currentBytes:false});
+        const current=currentLeaseWebReceipt(root,lease);
+        verifyWebReceipt(leaseWebReceiptArgs(root,lease,current,digest(boundedPath(root,current))),root,lease);
+      }
       check(previousReceipt.web_git_sha===prior.old_web_git_sha,'PREVIOUS_WEB_SHA_MISMATCH');
       check(r.artifacts.every(item=>equalHash(digest(boundedPath(root,item.path)),item.sha256)),'NATIVE_STAGE_BYTES_CHANGED');
       const legacyManifest=readJson(boundedPath(root,state.current_web_artifact_manifest));

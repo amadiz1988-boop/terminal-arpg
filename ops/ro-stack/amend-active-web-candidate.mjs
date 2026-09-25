@@ -8,7 +8,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { admission, readManifest, validateHeader } from './web-complete-manifest.mjs';
 import { FIRST_PROMOTION, firstPromotionEvidence, legacyIdentity, pendingPath, consumedPath, readJson } from './legacy-production-baseline.mjs';
-import { nativeReceiptValid, nativeReceiptPath, equalHash } from './native-promotion-contract.mjs';
+import { nativeReceiptValid, activeNativeReceiptPath, equalHash } from './native-promotion-contract.mjs';
 import { capabilityRegistry } from './production-promotion-gate.mjs';
 import { webAmendmentHistoryValid } from './production-deployment-state.mjs';
 
@@ -71,7 +71,7 @@ export function duplicateAmendmentIsApplied(audit, lease, pending, {leaseId, own
 
 function nativeStageValid(root, state, lease, pending) {
   try {
-    const file=inside(root,nativeReceiptPath), receipt=readJson(file);
+    const file=inside(root,activeNativeReceiptPath(pending)), receipt=readJson(file);
     if (!equalHash(digest(file),pending.native_receipt_sha256) ||
         !nativeReceiptValid(receipt,{nativeSha:lease.native_deploy_git_sha,leaseId:lease.lease_id,manifestHash:lease.native_candidate_manifest_sha256})) return false;
     for (const item of receipt.artifacts) if (!equalHash(digest(inside(root,item.path)),item.sha256)) return false;
@@ -95,8 +95,9 @@ function capabilitiesPreserved(manifest, lease, state) {
 
 export function planActiveWebAmendment({root,owner,leaseId,oldSha,newSha,newManifestFile,oldReceiptFile,sourceFixCheckpoint,reason}) {
   const local=path.join(root,'.local/ro-stack');
+  const pendingFile=inside(root,pendingPath);
   const files={state:path.join(local,'production-deployment-state.json'),lease:path.join(local,'production-deployment-lease/lease.json'),
-    pending:inside(root,pendingPath), native:inside(root,nativeReceiptPath)};
+    pending:pendingFile, native:inside(root,activeNativeReceiptPath(readJson(pendingFile)))};
   const state=readJson(files.state),lease=readJson(files.lease),pending=readJson(files.pending);
   if (!webAmendmentHistoryValid(root,lease,pending,{web_git_sha:oldSha,
     web_candidate_amendments:lease.web_candidate_amendments})) fail('PRIOR_WEB_AMENDMENT_HISTORY_INVALID');
@@ -138,7 +139,7 @@ export function planActiveWebAmendment({root,owner,leaseId,oldSha,newSha,newMani
   const auditFile=inside(root,auditRelative);
   const audit={schema_version:'active-first-promotion-web-candidate-amendment-v1', lease_id:leaseId,lease_owner:owner,
     promotion_id:leaseId,old_web_git_sha:oldSha,new_web_git_sha:newSha,reason,source_fix_checkpoint:sourceFixCheckpoint,
-    timestamp:new Date().toISOString(),native_stage_receipt_reference:{path:nativeReceiptPath,sha256:digest(files.native)},
+    timestamp:new Date().toISOString(),native_stage_receipt_reference:{path:activeNativeReceiptPath(pending),sha256:digest(files.native)},
     previous_web_candidate_receipt_reference:{path:oldReceiptRelative,sha256:digest(oldReceiptFile)},
     prior_web_candidate_receipts:[...(lease.web_candidate_amendments || []).map(item=>({
       path:item.previous_web_candidate_receipt,sha256:item.previous_web_candidate_receipt_sha256})),

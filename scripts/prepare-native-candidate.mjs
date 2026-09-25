@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
 import { boundedPath,digest,readJson,verifyLegacyBaseline } from '../ops/ro-stack/legacy-production-baseline.mjs';
 import { groups,shutdownContract,verifyNativeRemote,git,pinned,equalHash } from '../ops/ro-stack/native-promotion-contract.mjs';
+import { prepareAmendedNativeCandidate } from '../ops/ro-stack/native-candidate-amendment.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const argv=process.argv.slice(2),a=Object.fromEntries(argv.flatMap((x,i)=>x.startsWith('--')?[[x.slice(2),argv[i+1]]]:[]));
 const need=(ok,code)=>{if(!ok)throw Error(code);};
@@ -12,6 +13,12 @@ try {
   need(a['build-root'] && a['production-root'],'ARGUMENTS_REQUIRED');
   const buildRoot=fs.realpathSync(a['build-root']),prod=fs.realpathSync(a['production-root']);
   need(buildRoot.toLowerCase()!==prod.toLowerCase() && !buildRoot.toLowerCase().startsWith(prod.toLowerCase()+path.sep),'OUTPUT_IN_PRODUCTION_FORBIDDEN');
+  // Active first promotion: amended descendant candidate under the same lease.
+  if(a['amend-active']==='true'){
+    const authority=readJson(path.join(root,'docs/project-control/production-release-authority.json')).native;
+    console.log(JSON.stringify({...prepareAmendedNativeCandidate({buildRoot,prod,authority}),lease_acquired:false,production_mutated:false}));
+    process.exit(0);
+  }
   const b=readJson(path.join(buildRoot,'build-receipt.json'));
   const authority=readJson(path.join(root,'docs/project-control/production-release-authority.json')).native;
   verifyNativeRemote(b.source_root,b.native_git_sha,authority);

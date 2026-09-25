@@ -7,7 +7,8 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 import { verifyWebReceipt, safeRelative, readManifest } from './web-complete-manifest.mjs';
-import { nativeReceiptValid, nativeReceiptPath, equalHash } from './native-promotion-contract.mjs';
+import { nativeReceiptValid, isNativeReceiptPath, activeNativeReceiptPath, equalHash } from './native-promotion-contract.mjs';
+import { gracefulShutdownLiveSatisfied } from './native-candidate-amendment.mjs';
 import { FIRST_PROMOTION, legacyIdentity, verifyLegacyBaseline, transitionedState, consumedPath, pendingPath, readJson } from './legacy-production-baseline.mjs';
 
 const sha = value => /^[0-9a-f]{40}$/i.test(String(value || ''));
@@ -58,7 +59,7 @@ export function receiptComplete(receipt, root) {
   if (receipt.first_github_first_gates || receipt.native_deployment_receipt) {
     try {
       const ref=receipt.native_deployment_receipt;
-      if (ref?.path !== nativeReceiptPath || !equalHash(hash(safePath(root,ref.path)),ref.sha256)) return false;
+      if (!isNativeReceiptPath(ref?.path) || !equalHash(hash(safePath(root,ref.path)),ref.sha256)) return false;
       const native=read(safePath(root,ref.path));
       if (!nativeReceiptValid(native,{nativeSha:receipt.native_git_sha,binaryHash:receipt.native_build_sha256,leaseId:receipt.lease_id}) ||
           !native.artifacts.every(x=>equalHash(hash(safePath(root,x.path)),x.sha256))) return false;
@@ -120,7 +121,13 @@ export function commitAcceptedBaseline(root, state, lease, receipt) {
       (!lease.emergency && (receipt.web_git_sha !== lease.web_deploy_git_sha || receipt.native_git_sha !== lease.native_deploy_git_sha)))
     fail('POSTDEPLOY_RECEIPT_INCOMPLETE');
   if (first && (!receipt.native_deployment_receipt || !receipt.lease_id || receipt.lease_id !== lease.lease_id ||
-      !nativeReceiptValid(read(safePath(root,nativeReceiptPath)),{nativeSha:lease.native_deploy_git_sha,leaseId:lease.lease_id,manifestHash:lease.native_candidate_manifest_sha256}))) fail('NATIVE_POSTDEPLOY_RECEIPT_REQUIRED');
+      !fs.existsSync(safePath(root, pendingPath)) ||
+      receipt.native_deployment_receipt.path !== activeNativeReceiptPath(read(safePath(root, pendingPath))) ||
+      !nativeReceiptValid(read(safePath(root,receipt.native_deployment_receipt.path)),{nativeSha:lease.native_deploy_git_sha,leaseId:lease.lease_id,manifestHash:lease.native_candidate_manifest_sha256}))) fail('NATIVE_POSTDEPLOY_RECEIPT_REQUIRED');
+  // An amended Native candidate closes the shutdown race only with a real
+  // graceful stop/restart cycle of the new binary; forced retirement of the
+  // pre-fix runtime never satisfies it.
+  if (first && !gracefulShutdownLiveSatisfied(root, lease, read(safePath(root, pendingPath)))) fail('NEW_NATIVE_GRACEFUL_SHUTDOWN_LIVE_REQUIRED');
   if (first && (!legacyIdentity(state) || state.production_drift !== 'OPEN' ||
       !fs.existsSync(safePath(root, pendingPath)) || fs.existsSync(safePath(root, consumedPath)))) fail('LEGACY_BOOTSTRAP_UNAVAILABLE');
   if (first) {
