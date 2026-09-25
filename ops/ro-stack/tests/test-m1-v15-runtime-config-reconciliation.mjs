@@ -3,10 +3,11 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
-import { exactM1ConfigPatch, reconcileActiveRuntimeConfig } from '../reconcile-active-runtime-config.mjs';
+import { exactM1ConfigPatch, reconcileActiveRuntimeConfig, m1Policy } from '../reconcile-active-runtime-config.mjs';
 
 const hash = bytes => createHash('sha256').update(bytes).digest('hex').toUpperCase();
 const leaseId = '869f1725-dbd0-452d-b9dd-37ee79cc3f9a', owner = 'F｜M1 最終整合';
+assert.equal(m1Policy.web_sha,'5a31570a861e1665841e62245c7caa105a796b3a');
 const nativeSha = 'a'.repeat(40), webSha = 'b'.repeat(40);
 const oldConfig = Buffer.from('@{\n  Preserved = 123\n}\n');
 const sourceConfig = Buffer.from('@{\n  Preserved = 123\n  PersistentAgentM1SupplyEnabled = $false\n  WebNativeSupplyPolicyEnabled = $false\n  WebM1AcceptanceFixtureEnabled = $false\n}\n');
