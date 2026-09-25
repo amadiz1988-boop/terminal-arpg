@@ -105,7 +105,8 @@ export function verifyLifecyclePins(root, pins, stagedWebManifest, runtimeConfig
         equalHash(row.production_preimage_sha256, digest(boundedPath(root, item.path))),
         'STAGED_WEB_LIFECYCLE_PREIMAGE_CHANGED');
     } else if (runtimeConfigPin?.path === item.path) {
-      check(equalHash(runtimeConfigPin.oldSha256,item.sha256) &&
+      check((equalHash(runtimeConfigPin.oldSha256,item.sha256) ||
+        equalHash(runtimeConfigPin.sha256,item.sha256)) &&
         equalHash(runtimeConfigPin.sha256,digest(boundedPath(root,item.path))),
         'STAGED_RUNTIME_CONFIG_CHANGED');
     } else pinned(root,item);

@@ -114,6 +114,8 @@ try {
      const state={...f.state,runtime_config_reconciliation:ref,runtime_config_reconciliation_sha256:sha};
      const pin=stagedRuntimeConfigPin(f.root,state,f.lease),manifest={files:[]};
      verifyLifecyclePins(f.root,f.m.lifecycle_files,manifest,pin);
+     verifyLifecyclePins(f.root,f.m.lifecycle_files.map(item=>item.path===p
+       ? {...item,sha256:pin.sha256} : item),manifest,pin);
      assert.throws(()=>verifyLifecyclePins(f.root,f.m.lifecycle_files,manifest,{...pin,sha256:'0'.repeat(64)}),/STAGED_RUNTIME_CONFIG_CHANGED/);
      assert.throws(()=>verifyLifecyclePins(f.root,f.m.lifecycle_files,manifest,{...pin,oldSha256:'0'.repeat(64)}),/STAGED_RUNTIME_CONFIG_CHANGED/);
      assert.throws(()=>stagedRuntimeConfigPin(f.root,{...state,runtime_config_reconciliation_sha256:'0'.repeat(64)},f.lease),/RUNTIME_CONFIG_RECEIPT_REFERENCE_MISMATCH/);
