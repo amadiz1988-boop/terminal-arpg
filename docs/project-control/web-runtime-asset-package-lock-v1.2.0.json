@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "package_id": "ghost-island-web-runtime-assets-v1",
+  "package_version": "1.2.0",
+  "asset_count": 5139,
+  "manifest_sha256": "17744c6acf75363d819b4b5b4e996da874fde87569559b45e7d7e6696f3eb787",
+  "created_from_web_head": "be2254139ba41856ebd58f78aa5bd83203985e3a",
+  "package_sha256": "3d756f09a31bd0f254b6a1296b6850848bf96918fe1c416c48cd63b1aadf3f34"
+}

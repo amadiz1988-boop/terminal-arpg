@@ -86,7 +86,8 @@ change it. The last shown image per theme lives in
    `python scripts/build-ui-themes.py --source-root <dir> --write-hashes`,
    update the registry versions, and run the regression.
 5. `--verify` checks the private asset directory before delivery. Production
-   delivery must use the private asset package process.
+   delivery uses the private release `web-runtime-assets-v1.2.0`; see
+   `docs/project-control/web-ui-theme-private-asset-release-v1.2.0.md`.
 6. A missing image is skipped. If every image of a theme is missing, its card
    is disabled and a saved choice falls back to `default`.
 

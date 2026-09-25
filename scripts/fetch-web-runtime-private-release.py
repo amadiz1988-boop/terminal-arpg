@@ -12,6 +12,10 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import zipfile
+import re
+
+UI_THEME_ASSET_PATH = re.compile(
+    r'^ops/ro-stack/dashboard/assets/ui-themes/heroine-[a-z0-9-]+/[a-z]+-\d{2}/(?:panel|thumb)\.webp$')
 
 
 def require(ok, message):
@@ -34,9 +38,17 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
 
 def execute(args):
     root = Path(args.checkout).resolve(strict=True)
-    config = read(root / 'docs/project-control/web-runtime-private-release-v1.json')
-    lock = read(root / 'docs/project-control/web-runtime-asset-package-lock-v1.json')
-    manifest = read(root / 'docs/project-control/web-runtime-assets-manifest-v1.json')
+    # Defaults are the Production-pinned files; a prepared next release can be
+    # verified by naming its versioned files under docs/project-control.
+    control = root / 'docs/project-control'
+    config_path = control / (args.release_config or 'web-runtime-private-release-v1.json')
+    lock_path = control / (args.lock or 'web-runtime-asset-package-lock-v1.json')
+    manifest_path = control / (args.manifest or 'web-runtime-assets-manifest-v1.json')
+    for path in (config_path, lock_path, manifest_path):
+        require(path.resolve().parent == control.resolve(), 'release_file_outside_control')
+    config = read(config_path)
+    lock = read(lock_path)
+    manifest = read(manifest_path)
     production = Path(manifest['production_evidence_root']).resolve()
     require(not root.is_relative_to(production), 'production_checkout_forbidden')
     repo = 'amadiz1988-boop/ghost-island-assets'
@@ -137,7 +149,8 @@ def execute(args):
     tree_rows = ''
     for asset in remote['assets']:
         path = asset['relative_path']
-        approved = path.startswith(('public/ro/client/', 'ops/ro-stack/dashboard/assets/pets/')) or path == 'ops/ro-stack/dashboard/skill-ui-assets.json'
+        approved = (path.startswith(('public/ro/client/', 'ops/ro-stack/dashboard/assets/pets/')) or
+                    path == 'ops/ro-stack/dashboard/skill-ui-assets.json' or UI_THEME_ASSET_PATH.match(path))
         require(approved and ':' not in path and '\\' not in path and all(p not in ('', '.', '..') for p in path.split('/')), 'unsafe_package_path')
         name = 'assets/' + path
         require(name not in expected, 'duplicate_manifest_path')
@@ -170,7 +183,8 @@ def execute(args):
             with output.open('xb') as stream:
                 stream.write(package.read(name))
     command = ['node', str(root / 'scripts/materialize-web-runtime-assets.mjs'), '--mode',
-        'materialize' if args.materialize else 'verify-package', '--checkout', str(root), '--asset-package', str(package_root)]
+        'materialize' if args.materialize else 'verify-package', '--checkout', str(root), '--asset-package', str(package_root),
+        '--manifest', str(manifest_path), '--lock', str(lock_path)]
     result = subprocess.run(command, cwd=root, capture_output=True, text=True, timeout=120)
     require(result.returncode == 0, 'materializer_verification_failed')
     proof.update({'package_sha256': package_hash, 'package_root': str(package_root), 'verification': json.loads(result.stdout)})
@@ -184,6 +198,9 @@ if __name__ == '__main__':
     parser.add_argument('--destination')
     parser.add_argument('--materialize', action='store_true')
     parser.add_argument('--verify-release-only', action='store_true')
+    parser.add_argument('--release-config')
+    parser.add_argument('--lock')
+    parser.add_argument('--manifest')
     try:
         print(json.dumps(execute(parser.parse_args())))
     except Exception as error:

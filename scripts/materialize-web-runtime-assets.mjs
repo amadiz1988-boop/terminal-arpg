@@ -15,7 +15,13 @@ const SOURCE_KINDS = new Set([
   'ACCEPTED_MANIFEST_CLIENT_ARCHIVE_MAPPING',
   'ACCEPTED_RUNTIME_MANIFEST_WITH_CLIENT_HASHES',
   'TRACKED_SHOWCASE_MANIFEST_REFERENCE',
+  'USER_PROVIDED_LICENSED_UI_THEME_DERIVATIVE',
 ]);
+// UI theme runtime art is admitted only at its exact registry layout:
+// ops/ro-stack/dashboard/assets/ui-themes/<heroine-theme>/<variant>/{panel,thumb}.webp
+export const UI_THEME_ASSET_PATH =
+  /^ops\/ro-stack\/dashboard\/assets\/ui-themes\/heroine-[a-z0-9-]+\/[a-z]+-\d{2}\/(?:panel|thumb)\.webp$/;
+const UI_THEME_ROOT = 'ops/ro-stack/dashboard/assets/ui-themes';
 const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
 export const canonicalManifestBytes = (bytes) =>
   Buffer.from(bytes.toString('utf8').replaceAll('\r\n', '\n'));
@@ -34,7 +40,8 @@ export function validateManifest(manifest) {
     const path = asset.relative_path;
     const approvedRoot = typeof path === 'string' && (path.startsWith('public/ro/client/') ||
       path.startsWith('ops/ro-stack/dashboard/assets/pets/') ||
-      path === 'ops/ro-stack/dashboard/skill-ui-assets.json');
+      path === 'ops/ro-stack/dashboard/skill-ui-assets.json' ||
+      UI_THEME_ASSET_PATH.test(path));
     if (!approvedRoot || path.includes(':') || path.includes('\\') ||
         path.split('/').some(part => !part || part === '.' || part === '..') || isAbsolute(path) ||
         path <= previous || seen.has(path.toLowerCase())) throw new Error('invalid_manifest_path');
@@ -106,6 +113,7 @@ export function inspectAssets(root, manifest, { packageRoot = false, tracked = n
   const inspected = packageRoot ? filesBelow(join(root, 'assets')) : [
     ...filesBelow(join(root, 'public/ro/client')),
     ...filesBelow(join(root, 'ops/ro-stack/dashboard/assets/pets')),
+    ...filesBelow(join(root, UI_THEME_ROOT)),
   ];
   for (const file of inspected) {
     const path = relative(base, file).replaceAll('\\', '/');
@@ -118,7 +126,7 @@ export function inspectAssets(root, manifest, { packageRoot = false, tracked = n
 }
 
 function trackedClientPaths(checkout) {
-  const output = execFileSync('git', ['ls-files', '-z', '--', 'public/ro/client', 'ops/ro-stack/dashboard/assets/pets'],
+  const output = execFileSync('git', ['ls-files', '-z', '--', 'public/ro/client', 'ops/ro-stack/dashboard/assets/pets', UI_THEME_ROOT],
     { cwd: checkout });
   return new Set(output.toString('utf8').split('\0').filter(Boolean));
 }
@@ -126,7 +134,7 @@ function trackedClientPaths(checkout) {
 export function validatePackage(root, manifest, tree, lock) {
   if (!lock || lock.schema_version !== 1 ||
       lock.package_id !== 'ghost-island-web-runtime-assets-v1' ||
-      !['1.0.0', '1.1.0'].includes(lock.package_version) ||
+      !['1.0.0', '1.1.0', '1.2.0'].includes(lock.package_version) ||
       lock.asset_count !== manifest.asset_count ||
       !/^[0-9a-f]{64}$/.test(lock.manifest_sha256) ||
       !/^[0-9a-f]{64}$/.test(lock.package_sha256))

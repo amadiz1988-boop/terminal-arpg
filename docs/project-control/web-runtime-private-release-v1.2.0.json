@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "remote_model": "GITHUB_PRIVATE_RELEASE",
+  "repository": "amadiz1988-boop/ghost-island-assets",
+  "release_id": 396406644,
+  "release_tag": "web-runtime-assets-v1.2.0",
+  "immutable_required": true,
+  "package_id": "ghost-island-web-runtime-assets-v1",
+  "package_version": "1.2.0",
+  "asset_count": 5139,
+  "manifest_sha256": "17744c6acf75363d819b4b5b4e996da874fde87569559b45e7d7e6696f3eb787",
+  "created_from_web_head": "be2254139ba41856ebd58f78aa5bd83203985e3a",
+  "package_sha256": "3d756f09a31bd0f254b6a1296b6850848bf96918fe1c416c48cd63b1aadf3f34",
+  "archive": {
+    "id": 587821374,
+    "name": "ghost-island-web-runtime-assets-v1.2.0.zip",
+    "size": 96116049,
+    "sha256": "13ed604b844b152d8c3c749bc104f12f81030e59b7042598a8d0a13b594a61b3"
+  },
+  "manifest": {
+    "id": 587821583,
+    "name": "manifest.json",
+    "size": 3003073,
+    "sha256": "17744c6acf75363d819b4b5b4e996da874fde87569559b45e7d7e6696f3eb787"
+  },
+  "release_status": "READY_FOR_NEXT_UI_THEME_PROMOTION",
+  "production_authority": false,
+  "production_pin": "web-runtime-assets-v1.1.0",
+  "base_release": "web-runtime-assets-v1.1.0",
+  "approval_reference": "WEB_UI_THEME_PRIVATE_ASSET_RELEASE_V1_2_0"
+}
