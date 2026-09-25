@@ -4,6 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { HISTORICAL_NATIVE_AMENDMENT as old, M1_SECOND_NATIVE_AMENDMENT as policy,
+  M1_INVENTORY_MAINTENANCE_NATIVE_AMENDMENT as inventory,
   validateNativeAmendmentHistory, validateHistoricalNativeAnchor, validateNextNativeAmendment,
   applyNextNativeAmendment, deployedNativeRuntimeMatches } from '../native-amendment-chain.mjs';
 import { retirementDecision } from '../native-candidate-amendment.mjs';
@@ -140,7 +141,7 @@ test('third amendment can only follow deployed second candidate', x => {
   x.input.lease = lease; x.input.pending = pending; x.input.previousSha = next; x.input.newSha = third;
   assert.throws(() => validateNextNativeAmendment(x.root, x.input), /PREVIOUS_NATIVE_CANDIDATE_MISMATCH/);
 });
-test('third sequential amendment is accepted after exact second deployment', x => {
+function deployedSecond(x) {
   applyNextNativeAmendment(x.root, x.plan);
   const lease = JSON.parse(fs.readFileSync(x.files.lease)), pending = JSON.parse(fs.readFileSync(x.files.pending));
   const second = x.nativeReceipt(next, next.slice(0, 12), 'second', x.input.candidateManifestSha256);
@@ -153,17 +154,40 @@ test('third sequential amendment is accepted after exact second deployment', x =
   pending.native_receipt_sha256 = second.sha256;
   x.put('.local/ro-stack/production-deployment-lease/lease.json', lease);
   x.put('.local/ro-stack/first-github-first-promotion.pending.json', pending);
+  return { lease, pending, second };
+}
+function thirdInputFor(x, reason, files) {
+  const { lease, pending, second } = deployedSecond(x);
+  const selected = reason === inventory.reason ? inventory : policy;
   const thirdManifest = { native_git_sha: third, amendment_of: { native_git_sha: next,
-    reason: policy.reason, candidate_manifest_sha256: x.input.candidateManifestSha256 },
+    reason, candidate_manifest_sha256: x.input.candidateManifestSha256 },
     rollback_reference: { intermediate_rollback: { native_git_sha: next } }, binary_sha256: 'E'.repeat(64) };
   const thirdFile = x.put('build/third.json', thirdManifest);
   const thirdInput = { ...x.input, lease, pending, previousSha: next, newSha: third,
+    reason, scope: selected.scope, sourceDiff: { scope: selected.scope, files },
     candidateManifest: thirdManifest, candidateManifestSha256: hash(fs.readFileSync(thirdFile)),
     previousReceiptSha256: second.sha256 };
+  return { thirdInput, thirdFile };
+}
+test('third inventory-maintenance amendment is accepted after exact second deployment', x => {
+  const { thirdInput, thirdFile } = thirdInputFor(x, inventory.reason,
+    ['src/map/persistent_agent.cpp', 'src/map/persistent_agent_m1_supply_policy.hpp',
+      'tools/pa-command-contract/test-m1-supply-policy.cpp']);
   assert.equal(validateNextNativeAmendment(x.root, thirdInput).history.length, 2);
   const thirdPlan = { input: thirdInput, candidateManifestPath: thirdFile,
     currentHashes: Object.fromEntries(Object.entries(x.files).map(([k, v]) => [k, hash(fs.readFileSync(v))])) };
   assert.equal(applyNextNativeAmendment(x.root, thirdPlan).chain_length, 3);
+  const lease = JSON.parse(fs.readFileSync(x.files.lease)), pending = JSON.parse(fs.readFileSync(x.files.pending));
+  assert.equal(validateNativeAmendmentHistory(x.root, lease, pending).length, 3);
+});
+test('repeating an applied amendment reason is rejected', x => {
+  const { thirdInput } = thirdInputFor(x, policy.reason, ['src/map/persistent_agent.cpp']);
+  assert.throws(() => validateNextNativeAmendment(x.root, thirdInput), /NATIVE_AMENDMENT_REASON_UNAPPROVED/);
+});
+test('inventory-maintenance amendment rejects files outside its scope', x => {
+  const { thirdInput } = thirdInputFor(x, inventory.reason,
+    ['src/map/persistent_agent.cpp', 'conf/persistent_agent_commands.json']);
+  assert.throws(() => validateNextNativeAmendment(x.root, thirdInput), /NATIVE_AMENDMENT_DIFF_OUT_OF_SCOPE/);
 });
 {
   const mapHash = 'A'.repeat(64);
