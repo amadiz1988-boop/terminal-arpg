@@ -2,8 +2,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { randomUUID, createHash } from 'node:crypto';
+import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { boundedPath, digest, readJson, legacyIdentity, pendingPath, FIRST_PROMOTION } from './legacy-production-baseline.mjs';
+import { boundedPath, digest, readJson, legacyIdentity, pendingPath, FIRST_PROMOTION, windowsPowerShellEnv } from './legacy-production-baseline.mjs';
 import { nativeReceiptPath, nativeReceiptValid, equalHash, git } from './native-promotion-contract.mjs';
 import { runtimeAdapter, NATIVE_STAGE_PHASE } from './deploy-native-candidate.mjs';
 
@@ -22,6 +23,17 @@ const expected = Object.freeze({
   out_of_scope_source_variance: Object.freeze(['PersistentAgentServiceNpcAllowlist', 'PersistentAgentServiceMapAllowlist',
     'PersistentAgentM1SupplyEnabled', 'WebNativeSupplyPolicyEnabled'])
 });
+export const m1Policy = Object.freeze({
+  mode: 'M1_V15', operation_suffix: '-m1-v15',
+  lease_id: '869f1725-dbd0-452d-b9dd-37ee79cc3f9a', owner: 'F｜M1 最終整合',
+  native_sha: '18523076a6034ca3731aefb73bf41993f4a0ef06',
+  web_sha: '6e68685440df108cf603ea0ac6154e8c1e6b059f',
+  old_config_sha256: 'CC4E1158991D54833D7E44A583DA8C7D7248A6AE205F87475F55BD81416E4B45',
+  source_config_sha256: '42B406C3724E4B55FF7E03065A09007F4EAF6CF2E2F854A32CB3FF45F0756F95',
+  dashboard_launcher_sha256: '521660AE778959BCCCCE55EF7FD109638D32816ECE0AF19E2FE7C4624449A205',
+  changes: Object.freeze(['PersistentAgentM1SupplyEnabled', 'WebNativeSupplyPolicyEnabled', 'WebM1AcceptanceFixtureEnabled']),
+  out_of_scope_source_variance: Object.freeze(['PersistentAgentServiceMapAllowlist', 'PersistentAgentServiceNpcAllowlist'])
+});
 const check = (ok, code) => { if (!ok) throw Error(code); };
 const hashBytes = b => createHash('sha256').update(b).digest('hex').toUpperCase();
 const writeNew = (file, data) => fs.writeFileSync(file, typeof data === 'string' || Buffer.isBuffer(data) ? data : JSON.stringify(data, null, 2) + '\n', { flag: 'wx' });
@@ -31,9 +43,30 @@ const filesFor = (root, policy = expected) => {
   const dir = runtimeDir(root);
   return { dir, lease: path.join(dir, 'production-deployment-lease/lease.json'), state: path.join(dir, 'production-deployment-state.json'),
     pending: boundedPath(root, pendingPath), native: boundedPath(root, nativeReceiptPath),
-    config: boundedPath(root, configRelative), lock: path.join(dir, 'runtime-config-reconcile.lock'),
-    receipt: path.join(dir, `runtime-config-reconciliation-${policy.lease_id}.json`) };
+    config: boundedPath(root, configRelative), lock: path.join(dir, `runtime-config-reconcile${policy.operation_suffix || ''}.lock`),
+    receipt: path.join(dir, `runtime-config-reconciliation-${policy.lease_id}${policy.operation_suffix || ''}.json`) };
 };
+
+export function exactM1ConfigPatch(oldBytes, sourceBytes, spec = m1Policy) {
+  check(spec.mode === 'M1_V15' && equalHash(hashBytes(oldBytes), spec.old_config_sha256) &&
+    equalHash(hashBytes(sourceBytes), spec.source_config_sha256), 'M1_CONFIG_DIGEST_CHANGED');
+  const variance = sourceVarianceKeys(oldBytes, sourceBytes);
+  check(JSON.stringify(variance) === JSON.stringify([...spec.changes, ...spec.out_of_scope_source_variance].sort()),
+    'UNCLASSIFIED_SOURCE_CONFIG_VARIANCE');
+  const oldText = new TextDecoder('utf-8', { fatal: true }).decode(oldBytes);
+  const sourceText = new TextDecoder('utf-8', { fatal: true }).decode(sourceBytes);
+  for (const key of spec.changes) {
+    check(!new RegExp(`^\\s*${key}\\s*=`, 'm').test(oldText), `M1_KEY_NOT_ABSENT:${key}`);
+    check(new RegExp(`^\\s*${key}\\s*=\\s*\\$false\\s*$`, 'm').test(sourceText), `M1_SOURCE_DEFAULT_NOT_FALSE:${key}`);
+  }
+  check(oldText.endsWith('\n}\n') && !oldText.includes('\r'), 'M1_CONFIG_FORMAT_CHANGED');
+  const inserted = spec.changes.map(key => `  ${key} = $true\n`).join('');
+  const nextText = oldText.slice(0, -2) + inserted + '}\n';
+  const bytes = Buffer.from(nextText, 'utf8');
+  check(nextText.replace(inserted, '') === oldText, 'M1_ROLLBACK_REMOVE_INVALID');
+  return { bytes, sha256: hashBytes(bytes), changes: spec.changes.map(key => ({key,old_value:'ABSENT',new_value:true,rollback:'REMOVE'})),
+    unrelated_config_change_count:0, source_variance_keys:variance };
+}
 
 export function configValue(bytes, key) {
   const text = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
@@ -141,10 +174,10 @@ function verifySourceAuthority(sourceGitSha, sourceBytes, { verifyGit = true, po
 }
 
 export async function reconcileActiveRuntimeConfig({ root, leaseId, owner, sourceBytes, sourceGitSha,
-  adapter, execute = false, verifyGit = true, nativeValid, policy = expected,
+  adapter, webAdapter, execute = false, verifyGit = true, nativeValid, policy = expected,
   beforeStop = () => {}, pollAttempts = 24, pollDelayMs = 2500 }) {
   const f = filesFor(root, policy);
-  const rollback = path.join(f.dir, `runtime-config-rollback-${leaseId}.psd1`);
+  const rollback = path.join(f.dir, `runtime-config-rollback-${leaseId}${policy.operation_suffix || ''}.psd1`);
   const lease = readJson(f.lease), state = readJson(f.state), pending = readJson(f.pending), native = readJson(f.native);
   pending.native_receipt_actual_sha256 = digest(f.native);
   validateAuthority({ lease, state, pending, native, leaseId, owner, nativeValid, policy });
@@ -159,7 +192,8 @@ export async function reconcileActiveRuntimeConfig({ root, leaseId, owner, sourc
     return { eligible: true, already_reconciled: true, receipt_path: path.relative(root, f.receipt) };
   }
   check(!fs.existsSync(f.lock), 'RECONCILIATION_OPERATION_IN_PROGRESS');
-  const oldBytes = fs.readFileSync(f.config), plan = exactConfigPatch(oldBytes, sourceBytes, policy);
+  const oldBytes = fs.readFileSync(f.config), plan = policy.mode === 'M1_V15'
+    ? exactM1ConfigPatch(oldBytes, sourceBytes, policy) : exactConfigPatch(oldBytes, sourceBytes, policy);
   const artifacts = verifyBinaries(root, native);
   const before = await adapter('snapshot');
   validateRuntime(before, native, { oldPids: native.new_pids });
@@ -167,10 +201,21 @@ export async function reconcileActiveRuntimeConfig({ root, leaseId, owner, sourc
   const launcherBytes = fs.readFileSync(launcher);
   const launcherText = launcherBytes.toString('utf8');
   check(/\$config\s*=\s*Invoke-Expression\s*\(Get-Content\s*\(Join-Path\s+\$scriptRoot\s+'stack\.config\.psd1'\)\s*-Raw\)/.test(launcherText) &&
-    /PERSISTENT_AGENT_SP_THRESHOLD_PCT\s*=\s*\[string\]\$config\.PersistentAgentSpThresholdPercent/.test(launcherText) &&
-    /PERSISTENT_AGENT_SP_SAFE_PCT\s*=\s*\[string\]\$config\.PersistentAgentSpSafePercent/.test(launcherText) &&
-    /Start-Process\s+-FilePath\s+\$path/.test(launcherText),
+    /Start-Process\s+-FilePath\s+\$path/.test(launcherText) &&
+    (policy.mode === 'M1_V15'
+      ? /PERSISTENT_AGENT_M1_SUPPLY_ENABLED\s*=\s*if\s*\(\$config\.PersistentAgentM1SupplyEnabled\)/.test(launcherText)
+      : /PERSISTENT_AGENT_SP_THRESHOLD_PCT\s*=\s*\[string\]\$config\.PersistentAgentSpThresholdPercent/.test(launcherText) &&
+        /PERSISTENT_AGENT_SP_SAFE_PCT\s*=\s*\[string\]\$config\.PersistentAgentSpSafePercent/.test(launcherText)),
   'STARTUP_CONFIG_BINDING_UNVERIFIED');
+  const dashboardLauncher = policy.mode === 'M1_V15' ? boundedPath(root, 'ops/ro-stack/dashboard-service.ps1') : null;
+  if (dashboardLauncher) {
+    const text = fs.readFileSync(dashboardLauncher, 'utf8');
+    check(equalHash(digest(dashboardLauncher), policy.dashboard_launcher_sha256) &&
+      /PA_NATIVE_SUPPLY_POLICY_ENABLED=if\(\$stackConfig\.WebNativeSupplyPolicyEnabled\)/.test(text) &&
+      /RO_M1_ACCEPTANCE_FIXTURE_ENABLED=if\(\$stackConfig\.WebM1AcceptanceFixtureEnabled\)/.test(text),
+    'DASHBOARD_CONFIG_BINDING_UNVERIFIED');
+    check(typeof webAdapter === 'function', 'DASHBOARD_ADAPTER_REQUIRED');
+  }
   const oldHashes = Object.fromEntries(['lease', 'state', 'pending', 'native'].map(k => [k, digest(f[k])]));
   const report = { eligible: true, action: execute ? 'APPLY' : 'DRY_RUN', lease_id: leaseId, lease_owner: owner,
     promotion_id: `${FIRST_PROMOTION}:${pending.started_at}`, native_git_sha: policy.native_sha,
@@ -185,7 +230,8 @@ export async function reconcileActiveRuntimeConfig({ root, leaseId, owner, sourc
     current_runtime_pids: before.pids, current_procdump_receipt: before.procdump_receipt,
     current_procdump_process_identity: before.procdump_process_identity,
     current_procdump_account: before.procdump_account,
-    launcher_sha256: hashBytes(launcherBytes), first_promotion_complete: false };
+    launcher_sha256: hashBytes(launcherBytes), dashboard_launcher_sha256: dashboardLauncher ? digest(dashboardLauncher) : undefined,
+    first_promotion_complete: false };
   if (!execute) return report;
   check(!fs.existsSync(rollback), 'ROLLBACK_SNAPSHOT_CONFLICT');
   fs.mkdirSync(f.lock);
@@ -203,7 +249,9 @@ export async function reconcileActiveRuntimeConfig({ root, leaseId, owner, sourc
     const configTmp = f.config + '.' + randomUUID() + '.tmp';
     writeNew(configTmp, plan.bytes); fs.renameSync(configTmp, f.config);
     check(equalHash(digest(f.config), plan.sha256) && plan.changes.every(x =>
-      configValue(fs.readFileSync(f.config), x.key) === x.new_value), 'APPLIED_CONFIG_INVALID');
+      policy.mode === 'M1_V15'
+        ? new RegExp(`^\\s*${x.key}\\s*=\\s*\\$true\\s*$`, 'm').test(fs.readFileSync(f.config, 'utf8'))
+        : configValue(fs.readFileSync(f.config), x.key) === x.new_value), 'APPLIED_CONFIG_INVALID');
     await beforeStop();
     stopAttempted = true;
     replaceJson(operation, { ...readJson(operation), phase: 'RESTART_IN_PROGRESS' });
@@ -221,19 +269,31 @@ export async function reconcileActiveRuntimeConfig({ root, leaseId, owner, sourc
     'PROCDUMP_NOT_REATTACHED');
     check(before.dashboard_pid === after.dashboard_pid && before.database_pid === after.database_pid,
       'NON_NATIVE_RUNTIME_CHANGED');
+    if (dashboardLauncher) {
+      await webAdapter('stop');
+      await webAdapter('start');
+      const webAfter = await adapter('snapshot');
+      validateRuntime(webAfter, native, { oldPids: after.pids });
+      check(webAfter.dashboard_pid !== before.dashboard_pid && webAfter.database_pid === before.database_pid &&
+        equalHash(digest(dashboardLauncher), report.dashboard_launcher_sha256), 'DASHBOARD_RESTART_NOT_ATTESTED');
+      after = webAfter;
+    }
     check(equalHash(digest(f.config), plan.sha256) && equalHash(digest(launcher), report.launcher_sha256),
       'STARTUP_CONFIG_CHANGED_DURING_RESTART');
     verifyBinaries(root, native);
     check(Object.entries(oldHashes).every(([k, v]) => equalHash(digest(f[k]), v)), 'PROMOTION_IDENTITY_CHANGED');
-    const archive = path.join(f.dir, `runtime-config-reconciled-${leaseId}`);
+    const archive = path.join(f.dir, `runtime-config-reconciled-${leaseId}${policy.operation_suffix || ''}`);
     check(!fs.existsSync(archive), 'RECONCILIATION_ARCHIVE_EXISTS');
     const receiptRollback = path.relative(root, rollback).replaceAll('\\', '/');
     const receipt = { ...report, schema_version: 'runtime-config-reconciliation-v1', classification: 'RUNTIME_CONFIG_RECONCILED',
       native_binary_hashes: artifacts, old_runtime_pids: before.pids, new_runtime_pids: after.pids,
-      runtime_health: after, startup_runtime_attestation: { method: 'PINNED_LAUNCHER_CONFIG_AND_NEW_MAP_PROCESS',
+      runtime_health: after, startup_runtime_attestation: { method: policy.mode === 'M1_V15' ? 'PINNED_NATIVE_AND_WEB_LAUNCHERS_NEW_PROCESSES' : 'PINNED_LAUNCHER_CONFIG_AND_NEW_MAP_PROCESS',
         launcher_sha256: report.launcher_sha256, config_sha256: plan.sha256,
         map_pid: after.pids.map, map_started_at: after.processes?.map?.started_at,
-        sp_threshold_percent: 0, sp_safe_percent: 0 },
+        ...(policy.mode === 'M1_V15' ? {dashboard_pid: after.dashboard_pid,
+          dashboard_launcher_sha256: report.dashboard_launcher_sha256,
+          m1_supply_enabled: true, web_native_supply_policy_enabled: true,
+          web_m1_acceptance_fixture_enabled: true} : {sp_threshold_percent: 0, sp_safe_percent: 0}) },
       old_procdump_reference: before.procdump_receipt, new_procdump_receipt: after.procdump_receipt,
       new_procdump_process_identity: after.procdump_process_identity,
       new_procdump_account: after.procdump_account, openkore_runtime_count: 0,
@@ -274,16 +334,38 @@ export async function reconcileActiveRuntimeConfig({ root, leaseId, owner, sourc
   }
 }
 
+export function dashboardServiceAdapter(root, policy = m1Policy) {
+  const launcher = boundedPath(root, 'ops/ro-stack/dashboard-service.ps1');
+  return async action => {
+    check(['stop', 'start'].includes(action) && equalHash(digest(launcher), policy.dashboard_launcher_sha256),
+      'DASHBOARD_LAUNCHER_CHANGED');
+    const logs = boundedPath(root, '.local/ro-stack/logs');
+    fs.mkdirSync(logs, { recursive: true });
+    const base = path.join(logs, `m1-config-dashboard-${action}-${randomUUID()}`);
+    const out = fs.openSync(base + '.out.log', 'wx'), err = fs.openSync(base + '.err.log', 'wx');
+    let result;
+    try {
+      result = spawnSync('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', launcher, '-Action', action],
+        { windowsHide:true, timeout:30000, env:windowsPowerShellEnv(), stdio:['ignore',out,err] });
+    } finally { fs.closeSync(out); fs.closeSync(err); }
+    check(result.status === 0 && !result.error, `DASHBOARD_${action.toUpperCase()}_FAILED`);
+  };
+}
+
 async function main() {
   const argv = process.argv.slice(2), a = Object.fromEntries(argv.flatMap((x, i) => x.startsWith('--') ? [[x.slice(2), argv[i + 1]]] : []));
   const root = path.resolve(a['production-root'] || '');
   check(root.toLowerCase() === 'c:\\users\\administrator\\ghost-island-production\\ro-stack', 'CANONICAL_ROOT_REQUIRED');
   check(a.lease && a.owner && ['dry-run', 'apply'].includes(a.action), 'ARGUMENTS_REQUIRED');
   check(a.action !== 'apply' || a.execute === 'true', 'EXPLICIT_EXECUTE_REQUIRED');
+  check(!a.profile || a.profile === 'M1_V15', 'PROFILE_NOT_ALLOWED');
+  const policy = a.profile === 'M1_V15' ? m1Policy : expected;
   const sourceGitSha = git(sourceRoot, 'rev-parse', 'HEAD');
   const result = await reconcileActiveRuntimeConfig({ root, leaseId: a.lease, owner: a.owner,
     sourceBytes: fs.readFileSync(path.join(sourceRoot, configRelative)), sourceGitSha,
-    adapter: runtimeAdapter(root, a.owner, a.lease), execute: a.action === 'apply' });
+    adapter: runtimeAdapter(root, a.owner, a.lease),
+    webAdapter: policy.mode === 'M1_V15' ? dashboardServiceAdapter(root, policy) : undefined,
+    policy, execute: a.action === 'apply' });
   console.log(JSON.stringify(result, null, 2));
 }
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url))
