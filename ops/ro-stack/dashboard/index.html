@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="/ro-ui-kit.css?v=r014-lost-ui-restoration" />
     <link rel="stylesheet" href="/ro-floor-theme.css?v=r108-m1-full-superset" />
     <link rel="stylesheet" href="/ui-theme.css?v=ui-theme-v1" />
+    <link rel="stylesheet" href="/town-service.css?v=town-service-v1" />
   </head>
   <body>
     <section id="auth" class="auth">
@@ -1277,6 +1278,10 @@
             </label>
           </div>
         </div>
+        <div class="window town-service-gated" id="kafraThemeSettings" data-subtab-group="interface" hidden>
+          <div class="titlebar"><span>卡普拉主題</span><span>此裝置</span></div>
+          <div id="kafraTheme" class="kafra-theme-options" role="radiogroup" aria-label="卡普拉主題"></div>
+        </div>
         <div class="window" data-subtab-group="server" hidden>
           <div class="titlebar">
             <span>伺服器狀態</span><span id="onlinePlayers">0 人在線</span>
@@ -1446,6 +1451,7 @@
     <script src="/original-minimap.js?v=ro-original-minimap-v1" defer></script>
     <script src="/minimap-presence.js?v=ui5-1" defer></script>
     <script type="module" src="/config-editor.js?v=config-v1"></script>
+    <script type="module" src="/town-service-ui.js?v=town-service-v1"></script>
     <script src="/panel-subtabs.js?v=ia-v1" defer></script>
     <script
       src="/app.js?v=r108-m1-full-superset"

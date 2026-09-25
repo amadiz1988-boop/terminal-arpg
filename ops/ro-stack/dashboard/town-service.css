@@ -1,0 +1,393 @@
+/* Town service prototype: minimap markers and service surfaces.
+   Enabled only in town-service preview (html.town-service-enabled). */
+.town-service-gated:not(.town-service-live) { display: none !important; }
+.map-window .minimap-wrap { position: relative; }
+
+.town-service-markers { position: absolute; inset: 0; pointer-events: none; }
+.town-service-marker {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  /* Centre with margins: the global button:active style overrides transform. */
+  margin: -22px 0 0 -22px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  transform: none !important;
+  pointer-events: auto;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  z-index: 2;
+}
+.town-service-marker img {
+  width: 24px;
+  height: 24px;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 0 1px #000) drop-shadow(0 0 1px #000);
+}
+.town-service-marker:focus-visible { outline: 2px solid #ffe066; outline-offset: -8px; }
+/* Name-only marks sit below services and hit only on their own icon, so an
+   adjacent service (Kafra next to a guide) always wins the tap. */
+.town-service-marker.info-only {
+  width: 24px;
+  height: 24px;
+  margin: -12px 0 0 -12px;
+  z-index: 1;
+  cursor: default;
+}
+.town-service-marker.targeted img { filter: drop-shadow(0 0 1px #000) drop-shadow(0 0 3px #ffe066); }
+.town-service-tooltip {
+  position: absolute;
+  bottom: calc(100% - 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 2px 6px;
+  border: 1px solid #2f6ea5;
+  background: #04121fe6;
+  color: #dff0ff;
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+}
+.town-service-marker:hover .town-service-tooltip,
+.town-service-marker:focus-visible .town-service-tooltip,
+.town-service-marker.targeted .town-service-tooltip { opacity: 1; }
+
+.town-service-status {
+  position: absolute;
+  bottom: 36px;
+  left: 8px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 4px 3px 8px;
+  border: 1px solid #2f6ea5;
+  background: #04121fe6;
+  color: #ffe9a6;
+  font-size: 12px;
+  font-weight: bold;
+}
+.town-service-status[hidden] { display: none; }
+.town-service-cancel,
+.town-service-close {
+  min-width: 24px;
+  height: 22px;
+  border: 1px solid #405b79;
+  background: linear-gradient(#fff, #cbd4dc);
+  color: #1f3954;
+  font-weight: bold;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.minimap-wrap.town-service-open { height: clamp(460px, 60vh, 720px); overflow: hidden; }
+.minimap-wrap.town-service-open > canvas,
+.minimap-wrap.town-service-open > .map-legend,
+.minimap-wrap.town-service-open > .town-service-markers { display: none; }
+.town-service-surface {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background: #0b100c;
+  overflow: hidden;
+}
+.town-service-scene { position: relative; width: 100%; height: 100%; }
+.shop-scene { background: #d7dcda; }
+.kafra-scene { background: #5d7067; }
+.town-service-window {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: min(440px, 58%);
+  max-height: calc(100% - 24px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 1;
+}
+.town-service-window > .titlebar { align-items: center; }
+.town-service-window > .titlebar > .town-service-close { margin-left: 8px; }
+.town-service-preview-tag { font-weight: normal; font-size: 12px; }
+.town-service-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px;
+  border-top: 1px solid #a0a9ad;
+  font-size: 12px;
+}
+.town-service-notice { margin: 0; padding: 0 8px 6px; font-size: 12px; color: #8a3b12; }
+.town-service-notice:empty { display: none; }
+.town-service-item-icon { display: inline-grid; place-items: center; width: 24px; height: 24px; flex: 0 0 24px; }
+.town-service-item-icon img { max-width: 24px; max-height: 24px; image-rendering: pixelated; }
+
+/* Kafra storage */
+.kafra-backdrop {
+  position: absolute;
+  inset: -18px;
+  width: calc(100% + 36px);
+  height: calc(100% + 36px);
+  object-fit: cover;
+  object-position: right center;
+  filter: blur(12px) brightness(.75);
+}
+.kafra-art {
+  position: absolute;
+  right: -3%;
+  bottom: -10%;
+  height: 125%;
+  max-width: 78%;
+  object-fit: contain;
+  object-position: right bottom;
+}
+.kafra-scene .town-service-storage-window {
+  width: 260px;
+  height: calc(100% - 24px);
+}
+.town-service-storage-body { display: flex; flex: 1; min-height: 0; background: #fff; }
+.town-service-storage-tabs {
+  position: relative;
+  flex: 0 0 24px;
+  width: 24px;
+  height: 282px;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+.town-service-storage-tabs button {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 12.5%;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.town-service-storage-tabs button:focus-visible { outline: 2px solid #2861a0; outline-offset: -2px; }
+.town-service-storage-list {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  background: #fff;
+}
+.town-service-storage-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 36px;
+  gap: 5px;
+  padding: 2px 5px;
+  border: 0;
+  border-bottom: 1px solid #e9edf0;
+  background: #fff;
+  color: #293a4c;
+  text-align: left;
+  font-size: 12px;
+  cursor: pointer;
+}
+.town-service-storage-row:hover,
+.town-service-storage-row:focus-visible { background: #e8f1fb; }
+.town-service-storage-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.town-service-storage-row b { font-size: 11px; }
+.town-service-empty { display: block; padding: 12px 8px; color: #677381; font-size: 12px; }
+.town-service-bag-window {
+  left: 278px;
+  top: 12px;
+  width: min(356px, calc(100% - 290px));
+  min-width: 218px;
+  height: 232px;
+}
+.town-service-bag-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 40px);
+  align-content: start;
+  gap: 3px;
+  padding: 8px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  background: #f4f5f1;
+}
+.town-service-slot {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #b7bfc3;
+  background: #fff;
+  padding: 0;
+  cursor: pointer;
+}
+.town-service-slot:hover,
+.town-service-slot:focus-visible { border-color: #2f6ea5; background: #e8f1fb; }
+.town-service-slot b {
+  position: absolute;
+  right: 2px;
+  bottom: 0;
+  font-size: 11px;
+  color: #1f3954;
+  text-shadow: 0 0 2px #fff, 0 0 2px #fff;
+}
+
+/* Shop */
+.shop-scene > .town-service-window:not(.town-service-bag-window) { width: min(355px, 54%); }
+.shop-scene .town-service-bag-window { left: 375px; width: min(356px, calc(100% - 387px)); }
+.town-service-trade-list { overflow-y: auto; background: #f4f5f1; }
+.town-service-trade-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-bottom: 1px solid #dde1e3;
+  font-size: 13px;
+}
+.town-service-trade-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.town-service-trade-row small { color: #5f6870; }
+.town-service-price { color: #234765; white-space: nowrap; }
+.town-service-trade-row input { width: 56px; min-height: 26px; }
+.town-service-total b { color: #234765; }
+
+.town-service-quantity {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  background: #14223699;
+}
+.town-service-quantity-window { width: min(270px, calc(100% - 32px)); background: #fff; }
+.town-service-quantity-body { display: flex; align-items: center; gap: 8px; padding: 14px 10px; font-size: 13px; }
+.town-service-quantity-body span:nth-child(2) { flex: 1; }
+.town-service-quantity-body input { width: 66px; min-height: 30px; }
+.town-service-quantity-actions { display: flex; justify-content: flex-end; gap: 8px; padding: 0 10px 10px; }
+
+/* Refine: original 262x301 refine window, overlays in its own coordinates. */
+.refine-scene .town-service-window { width: min(640px, calc(100% - 24px)); }
+.town-service-refine { display: flex; gap: 10px; padding: 8px; background: #f4f5f1; overflow-y: auto; }
+.town-service-refine-list { display: flex; flex-direction: column; gap: 2px; flex: 1 1 200px; min-width: 0; }
+.town-service-refine-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 2px 8px;
+  border: 1px solid #b7bfc3;
+  background: #fff;
+  text-align: left;
+  font-size: 13px;
+  cursor: pointer;
+}
+.town-service-refine-row.selected { border-color: #356da3; background: #e5f0fb; font-weight: bold; }
+.town-service-refine-board {
+  position: relative;
+  flex: 0 0 auto;
+  width: min(314px, 100%);
+  aspect-ratio: 262 / 301;
+}
+.refine-bg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.refine-plate {
+  position: absolute;
+  left: 23.7%;
+  top: 3%;
+  width: 52.7%;
+  height: 6.6%;
+  display: grid;
+  place-items: center;
+  color: #2a3d56;
+  font-size: 12px;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.refine-slot,
+.refine-material { position: absolute; display: grid; place-items: center; }
+.refine-slot { left: 42.4%; top: 61.8%; width: 15.3%; height: 13.3%; }
+.refine-material { left: 30.2%; top: 43.2%; width: 13.7%; height: 12%; }
+.refine-button {
+  position: absolute;
+  left: 31.7%;
+  top: 81.1%;
+  width: 36.6%;
+  height: 15.9%;
+  /* The value sits in the button's dark field, right of the Zeny coin. */
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 10% 12% 0 30%;
+  border: 0;
+  background: url('/ro/client/town-service/bt_refining_normal.png') center / 100% 100% no-repeat;
+  color: #fff;
+  font-size: 13px;
+  font-weight: bold;
+  text-align: right;
+  cursor: pointer;
+}
+.refine-button[data-state='press'] { background-image: url('/ro/client/town-service/bt_refining_press.png'); }
+.refine-button[data-state='disable'] { background-image: url('/ro/client/town-service/bt_refining_disable.png'); cursor: default; }
+
+/* 系統設定 → 介面／主題 → 卡普拉主題 */
+.kafra-theme-options { display: grid; grid-template-columns: repeat(auto-fill, minmax(116px, 1fr)); gap: 8px; padding: 8px; }
+.kafra-theme-option {
+  display: grid;
+  gap: 2px;
+  justify-items: center;
+  padding: 6px;
+  border: 1px solid #b7bfc3;
+  background: #fff;
+  cursor: pointer;
+}
+.kafra-theme-option.selected { border: 2px solid #356da3; padding: 5px; background: #e5f0fb; }
+.kafra-theme-thumb { display: grid; place-items: center; width: 100%; height: 132px; background: #eef1f2; overflow: hidden; }
+.kafra-theme-thumb img { max-width: 100%; max-height: 132px; object-fit: contain; }
+.kafra-theme-label { font-size: 13px; font-weight: bold; color: #1f3954; }
+.kafra-theme-count { font-size: 11px; color: #5f6870; }
+
+@media (max-width: 520px) {
+  .town-service-surface { scroll-margin-bottom: 76px; }
+  .minimap-wrap.town-service-open { height: 520px; }
+  .kafra-art { top: -4%; right: -12%; bottom: auto; height: 104%; max-width: 104%; object-position: right top; }
+  .town-service-window,
+  .refine-scene .town-service-window { top: auto; bottom: 8px; left: 8px; width: calc(100% - 16px); max-height: 60%; }
+  .kafra-scene .town-service-storage-window {
+    top: 8px;
+    bottom: auto;
+    left: 8px;
+    width: min(206px, 54%);
+    height: 344px;
+    max-height: none;
+  }
+  .town-service-storage-tabs { flex-basis: 22px; width: 22px; height: 259px; }
+  .kafra-scene .town-service-bag-window {
+    top: auto;
+    bottom: 8px;
+    left: 8px;
+    width: calc(100% - 16px);
+    height: 152px;
+    max-height: none;
+  }
+  .shop-scene .town-service-window,
+  .refine-scene .town-service-window { top: 8px; max-height: calc(100% - 16px); }
+  .shop-scene > .town-service-window:not(.town-service-bag-window) {
+    top: 8px;
+    bottom: auto;
+    width: calc(100% - 16px);
+    height: 344px;
+  }
+  .shop-scene .town-service-bag-window {
+    top: auto;
+    bottom: 8px;
+    left: 8px;
+    width: calc(100% - 16px);
+    height: 152px;
+  }
+  .town-service-refine { flex-direction: column-reverse; align-items: stretch; }
+  .town-service-refine-board { width: min(262px, 100%); align-self: center; }
+  .town-service-refine-list { flex: none; }
+  .kafra-theme-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

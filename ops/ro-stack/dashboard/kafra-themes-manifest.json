@@ -1,0 +1,308 @@
+{
+  "schemaVersion": 1,
+  "kind": "KAFRA_SERVICE_ART_THEMES",
+  "distribution": "PRIVATE_LOCAL_ONLY",
+  "publicGitBinaryCount": 0,
+  "defaultTheme": "ORIGINAL",
+  "webRoot": "/assets/kafra-themes",
+  "source": {
+    "type": "USER_AUTHORIZED_LOCAL_DIRECTORY",
+    "root": "Pictures/ROIMG/kafra",
+    "rule": "kafra_*.bmp per theme directory; other files are not Kafra art"
+  },
+  "conversion": "BMP to PNG via scripts/convert-bmp-transparent.ps1 (magenta key transparent)",
+  "themes": [
+    {
+      "id": "ORIGINAL",
+      "label": "ORIGINAL",
+      "originalClient": {
+        "archive": "data.grf",
+        "directory": "data/texture/userinterface/illust",
+        "byteIdenticalSamples": [
+          "kafra_01.bmp",
+          "kafra_08.bmp",
+          "kafra_do01.bmp"
+        ]
+      },
+      "images": [
+        {
+          "file": "kafra_01.png",
+          "sourceFile": "kafra_01.bmp",
+          "sourceSha256": "fe17a23ae4d00e08d527f25f0dd956597f5cd65ab58b104b09e74d24cce35b9e",
+          "width": 320,
+          "height": 480
+        },
+        {
+          "file": "kafra_02.png",
+          "sourceFile": "kafra_02.bmp",
+          "sourceSha256": "8b117b27811a3dccf5d9323270e1fdc42a04dfa087e597ca6a2938155721881d",
+          "width": 320,
+          "height": 480
+        },
+        {
+          "file": "kafra_03.png",
+          "sourceFile": "kafra_03.bmp",
+          "sourceSha256": "208bcb0f7d94bfa9db6ee00bab4a63024d358f73f72bf78be734d0938cd4497d",
+          "width": 320,
+          "height": 480
+        },
+        {
+          "file": "kafra_04.png",
+          "sourceFile": "kafra_04.bmp",
+          "sourceSha256": "c610c969d03755b51d93abb2a9b05c9771db894aef3820818db8666da7573382",
+          "width": 320,
+          "height": 480
+        },
+        {
+          "file": "kafra_05.png",
+          "sourceFile": "kafra_05.bmp",
+          "sourceSha256": "272d6f1a17cd01fbd56d7ae4ebfce48edc0dcc59179083c23090e0e1c1203e63",
+          "width": 320,
+          "height": 480
+        },
+        {
+          "file": "kafra_06.png",
+          "sourceFile": "kafra_06.bmp",
+          "sourceSha256": "c9cd1473c35cef7098f4747e4f099e420f304f0d9bbf11640ea3058a4903e892",
+          "width": 390,
+          "height": 480
+        },
+        {
+          "file": "kafra_07.png",
+          "sourceFile": "kafra_07.bmp",
+          "sourceSha256": "1a8ac4666ad16ff1e64a8efb5c6415a419d0eef2841811d9406983e4cdbb0e12",
+          "width": 320,
+          "height": 480
+        },
+        {
+          "file": "kafra_08.png",
+          "sourceFile": "kafra_08.bmp",
+          "sourceSha256": "459b7d7941eca5e34f2d393949451165a2c3c4dbc0889689b12c85becfec9840",
+          "width": 323,
+          "height": 482
+        },
+        {
+          "file": "kafra_09.png",
+          "sourceFile": "kafra_09.bmp",
+          "sourceSha256": "4989e93e6796c40f780430aabe5a52b84f6e874fcd285e1fc0baf1f88e6a3391",
+          "width": 323,
+          "height": 482
+        },
+        {
+          "file": "kafra_do01.png",
+          "sourceFile": "kafra_do01.bmp",
+          "sourceSha256": "5b15d7077a7236c4dc22f4c6983d20ddd4a4e0977c2ff6bb83d2c71efe374156",
+          "width": 480,
+          "height": 720
+        }
+      ]
+    },
+    {
+      "id": "COMIC",
+      "label": "COMIC",
+      "images": [
+        {
+          "file": "kafra_01.png",
+          "sourceFile": "kafra_01.bmp",
+          "sourceSha256": "8c0082e93220ea90411d7fcb700700ec3a1552e393530f360de11e78bdac9e97",
+          "width": 384,
+          "height": 512
+        },
+        {
+          "file": "kafra_02.png",
+          "sourceFile": "kafra_02.bmp",
+          "sourceSha256": "c8107cff1c8b779552ad05fec2636dcd752389dd9f0013dbaf0cac0a859356b3",
+          "width": 384,
+          "height": 512
+        },
+        {
+          "file": "kafra_03.png",
+          "sourceFile": "kafra_03.bmp",
+          "sourceSha256": "e9d9cb5e14bef5f8e10bad3a9529becd66053b8b8514caed4f3c762082da84cf",
+          "width": 384,
+          "height": 512
+        },
+        {
+          "file": "kafra_04.png",
+          "sourceFile": "kafra_04.bmp",
+          "sourceSha256": "d580cb8d541be8e0407679f171701a0a6613727b57c82db7e3ef6d4fe0520337",
+          "width": 384,
+          "height": 512
+        },
+        {
+          "file": "kafra_05.png",
+          "sourceFile": "kafra_05.bmp",
+          "sourceSha256": "16a9b02deb53b686ac2e2c3e40ba8728ae9eda3528ad25a4b2e30d3dbcc608bd",
+          "width": 384,
+          "height": 512
+        },
+        {
+          "file": "kafra_06.png",
+          "sourceFile": "kafra_06.bmp",
+          "sourceSha256": "e61c219580899cea6a42e5773b34899fdb88d9de53f7e2d3f32d79c7f9532b20",
+          "width": 384,
+          "height": 512
+        },
+        {
+          "file": "kafra_07.png",
+          "sourceFile": "kafra_07.bmp",
+          "sourceSha256": "7a386767b28de23254a240f3639c04bcc5669b9c4255df6aeab05b49bcd0001a",
+          "width": 384,
+          "height": 512
+        },
+        {
+          "file": "kafra_08.png",
+          "sourceFile": "kafra_08.bmp",
+          "sourceSha256": "b3a33413115ab3bb39a3d3c3271fb128eb444649fc243fb973e7b71419fef35a",
+          "width": 384,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "id": "KID",
+      "label": "KID",
+      "images": [
+        {
+          "file": "kafra_01.png",
+          "sourceFile": "kafra_01.bmp",
+          "sourceSha256": "1eadb18e77a9ab484ef135a5017508f7ae36cb370866b05c583bac61edd31fd2",
+          "width": 400,
+          "height": 600
+        },
+        {
+          "file": "kafra_02.png",
+          "sourceFile": "kafra_02.bmp",
+          "sourceSha256": "4ef84566d7fe124a8d7304aca6d367a338e3fa6b26e8870df00d7fc93eb64a7e",
+          "width": 400,
+          "height": 600
+        },
+        {
+          "file": "kafra_03.png",
+          "sourceFile": "kafra_03.bmp",
+          "sourceSha256": "16b23c001cd538799971246f9fda77b4bb830e4503084545791f03572aefbaa1",
+          "width": 410,
+          "height": 600
+        },
+        {
+          "file": "kafra_04.png",
+          "sourceFile": "kafra_04.bmp",
+          "sourceSha256": "6fcc27afeff08af48d037ed1ffc291fb4e48a29f5fdcfdf3ccd514d81b7dae49",
+          "width": 400,
+          "height": 600
+        },
+        {
+          "file": "kafra_05.png",
+          "sourceFile": "kafra_05.bmp",
+          "sourceSha256": "e9178be65d27df0e82b7c8258ac70b80a9141226a2443b953a6af1dc5b8ce367",
+          "width": 400,
+          "height": 600
+        },
+        {
+          "file": "kafra_06.png",
+          "sourceFile": "kafra_06.bmp",
+          "sourceSha256": "0122dd4414225b09e2d05d27f9f1b19a0805ed78e0d8aa4997c6fc741f9ba52d",
+          "width": 560,
+          "height": 600
+        },
+        {
+          "file": "kafra_07.png",
+          "sourceFile": "kafra_07.bmp",
+          "sourceSha256": "7e110c33a6ae8801756d33f7b8b2e4a5812331105dadcf54ca6d262c8a8392d6",
+          "width": 410,
+          "height": 600
+        },
+        {
+          "file": "kafra_08.png",
+          "sourceFile": "kafra_08.bmp",
+          "sourceSha256": "fac27027649826c0a4418ce001fec0b0f6d53b738280bf998b80b5191322a29d",
+          "width": 420,
+          "height": 600
+        },
+        {
+          "file": "kafra_09.png",
+          "sourceFile": "kafra_09.bmp",
+          "sourceSha256": "8d59cfed44c1c972ee7f885e2a6ff8bfa43e55fa7f93cf1abea0d1f35890c745",
+          "width": 405,
+          "height": 600
+        },
+        {
+          "file": "kafra_do01.png",
+          "sourceFile": "kafra_do01.bmp",
+          "sourceSha256": "4fb73ef39a5d3826ec54bacf0973b97d0eda9f5fa8cf2bc3a0173dda67349f67",
+          "width": 400,
+          "height": 600
+        }
+      ]
+    },
+    {
+      "id": "MLF",
+      "label": "MLF",
+      "images": [
+        {
+          "file": "kafra_01.png",
+          "sourceFile": "kafra_01.bmp",
+          "sourceSha256": "1b00847a8dee1cd657e2d35bb349d8934aec86a47c4b3db07d18b5ddb8cded1d",
+          "width": 520,
+          "height": 650
+        },
+        {
+          "file": "kafra_02.png",
+          "sourceFile": "kafra_02.bmp",
+          "sourceSha256": "a008b84aa68462eb1e65975ca706045ef6d731969987811536c75f9fcb3df2cd",
+          "width": 520,
+          "height": 650
+        },
+        {
+          "file": "kafra_03.png",
+          "sourceFile": "kafra_03.bmp",
+          "sourceSha256": "a203db0df54dfad6d8804b7b5351dab1c6b955fcee64413a4c08db12d0a0ce5e",
+          "width": 520,
+          "height": 650
+        },
+        {
+          "file": "kafra_04.png",
+          "sourceFile": "kafra_04.bmp",
+          "sourceSha256": "69899d4a2510195c83b42022c59adc2f3fde92596eb846c2b2b6aafd0d152ac6",
+          "width": 520,
+          "height": 650
+        },
+        {
+          "file": "kafra_05.png",
+          "sourceFile": "kafra_05.bmp",
+          "sourceSha256": "36b9920096b1282e32672a98255c6a9a336d9a7027085b2be5b9f027d0c1af7d",
+          "width": 520,
+          "height": 650
+        },
+        {
+          "file": "kafra_06.png",
+          "sourceFile": "kafra_06.bmp",
+          "sourceSha256": "048bfb29d8eada86b65402fe3efcf235fe066f57f8a1bbe6ff73291c4c76658d",
+          "width": 520,
+          "height": 650
+        },
+        {
+          "file": "kafra_07.png",
+          "sourceFile": "kafra_07.bmp",
+          "sourceSha256": "18b1d144d3e292b07f89187305058965b4f5ebf96111e7e015fc3dc9efe737e6",
+          "width": 520,
+          "height": 650
+        },
+        {
+          "file": "kafra_08.png",
+          "sourceFile": "kafra_08.bmp",
+          "sourceSha256": "e10b591b891ae38c20cf6a9032130bbc2a8197702a5d6597d79a0252565778fc",
+          "width": 520,
+          "height": 650
+        },
+        {
+          "file": "kafra_09.png",
+          "sourceFile": "kafra_09.bmp",
+          "sourceSha256": "f72f35776fe0c5158979f80f4bcecfe447e87cb7441524eb07197784a6cf636d",
+          "width": 520,
+          "height": 650
+        }
+      ]
+    }
+  ]
+}

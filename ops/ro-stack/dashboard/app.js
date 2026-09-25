@@ -4841,11 +4841,16 @@ function paintMinimap(now) {
       performance.now() < damageFlashUntil ? 9 : 6,
       performance.now() < damageFlashUntil ? '#ff354a' : '#50ffb1',
     );
+    // Town service markers share this minimap projection (no second map engine).
+    window.GhostIslandTownService?.paintMinimap?.({ map: mapFieldName, projected, canvas, self });
   }
   const moving = [...minimapTracks.values()].some((track) => now < track.until);
   if (moving || now < damageFlashUntil)
     minimapFrame = requestAnimationFrame(paintMinimap);
 }
+window.requestMinimapPaint = () => {
+  if (minimapLive && !minimapFrame) minimapFrame = requestAnimationFrame(paintMinimap);
+};
 window.addEventListener('resize', () => {
   minimapTerrain = null;
   minimapTerrainKey = '';

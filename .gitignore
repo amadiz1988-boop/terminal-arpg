@@ -60,6 +60,8 @@ next-env.d.ts
 /ops/ro-stack/dashboard/assets/pets/**/*.wav
 /ops/ro-stack/dashboard/assets/pets/**/*.mp3
 /ops/ro-stack/dashboard/assets/ui-themes/
+# Kafra service art (user-licensed / Gravity client illust): private delivery only.
+/ops/ro-stack/dashboard/assets/kafra-themes/
 /public/ro/client/monsters/manifest.json
 /public/ro/client/npcs/manifest.json
 /ops/ro-stack/dashboard/skill-ui-assets.json
