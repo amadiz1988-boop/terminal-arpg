@@ -1,8 +1,11 @@
 import assert from 'node:assert/strict';
-import { CONTRACT, inspectSupplyCommandDelta } from '../native-supply-command-contract.mjs';
+import { CONTRACT, START_FARM_SERVICE_CONTRACT, inspectSupplyCommandDelta,
+  inspectStartFarmServiceDelta } from '../native-supply-command-contract.mjs';
 
 const before = { contractKind: 'persistent_agent_command_contract', contractVersion: 1,
-  commands: Array.from({ length: 47 }, (_, i) => ({ action: `existing_${i}` })) };
+  commands: Array.from({ length: 47 }, (_, i) => i === 0
+    ? { action: 'start_farm', strictUnknownFields: true, payload: { optional: {} } }
+    : { action: `existing_${i}` }) };
 const after = structuredClone(before);
 after.commands.push(
   { action: 'configure_supply_policy', category: 'supply', dispatcher: 'process_configure_supply_policy',
@@ -27,4 +30,18 @@ assert.throws(() => inspectSupplyCommandDelta(before, notAdmitted), /SUPPLY_COMM
 const wrongShape = structuredClone(after);
 wrongShape.commands.find(row => row.action === 'resume_paid_farm_switch').payload.required.targetMap = 'integer';
 assert.throws(() => inspectSupplyCommandDelta(before, wrongShape), /SUPPLY_COMMAND_SHAPE_CHANGED/);
-console.log('NATIVE_SUPPLY_COMMAND_CONTRACT_TESTS=6 PASS');
+const withServices = structuredClone(after);
+Object.assign(withServices.commands[0].payload.optional, {
+  storageNpcName: 'string', shopNpcName: 'string', storageMenuIndex: 'integer',
+  storageServiceRoute: { type: 'array' }, shopServiceRoute: { type: 'array' },
+});
+assert.deepEqual(inspectStartFarmServiceDelta(after, withServices), {
+  changedAction: 'start_farm', addedOptionalFields: [...START_FARM_SERVICE_CONTRACT.addedFields],
+  removedActions: 0, otherChanges: 0,
+});
+assert.throws(() => inspectStartFarmServiceDelta(after, structuredClone(after)),
+  /START_FARM_SERVICE_PREIMAGE_INVALID/);
+const changedService = structuredClone(withServices);
+changedService.commands.at(-1).unapproved = true;
+assert.throws(() => inspectStartFarmServiceDelta(after, changedService), /UNRELATED_CONTRACT_DELTA/);
+console.log('NATIVE_SUPPLY_COMMAND_CONTRACT_TESTS=9 PASS');

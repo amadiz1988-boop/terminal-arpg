@@ -137,6 +137,15 @@ export const M1_SUPPLY_COMMAND_ADMISSION_CORRECTION = Object.freeze({
     'tools/pa-command-contract/contract-test-matrix.json',
   ]),
 });
+export const M1_START_FARM_SERVICE_FIELDS_CORRECTION = Object.freeze({
+  reason: 'M1_START_FARM_SERVICE_FIELDS_V1',
+  scope: 'M1_START_FARM_SERVICE_FIELDS_V1',
+  sourcePaths: Object.freeze([
+    'conf/persistent_agent_commands.json',
+    'tools/pa-command-contract/Test-M1V15ExecutorFixture.ps1',
+    'tools/pa-command-contract/contract-test-matrix.json',
+  ]),
+});
 export const APPROVED_NATIVE_AMENDMENTS = Object.freeze([
   M1_SECOND_NATIVE_AMENDMENT, M1_INVENTORY_MAINTENANCE_NATIVE_AMENDMENT,
   M1_INVENTORY_PROJECTION_CORRECTION, M1_FARM_WORLD_TELEPORT_SPAWN_CORRECTION,
@@ -144,6 +153,7 @@ export const APPROVED_NATIVE_AMENDMENTS = Object.freeze([
   M1_DORMANT_QUARANTINE_RUNTIME_CORRECTION, M1_DEATH_TOWN_MAINTENANCE_AMENDMENT,
   M1_PLAYER_FLY_WING_EFFECT_CORRECTION,
   M1_SUPPLY_COMMAND_ADMISSION_CORRECTION,
+  M1_START_FARM_SERVICE_FIELDS_CORRECTION,
 ]);
 export const approvedNativeAmendment = reason =>
   APPROVED_NATIVE_AMENDMENTS.find(item => item.reason === reason) ?? null;
