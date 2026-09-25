@@ -68,6 +68,12 @@ assert.match(dashboard, /savedTownSetupRequired: !savedTown/);
 assert.match(app, /worldMapSavedTownHint'\)\.classList\.toggle\('hidden',[\s\S]*?savedTownSetupRequired !== true/);
 const worldQueue = dashboard.slice(dashboard.indexOf('async function queuePlayerWorldMapTeleport('),
   dashboard.indexOf('async function queueServerAgentRelocation('));
+const worldCoordinator = dashboard.slice(dashboard.indexOf('async function reconcileRelocations('),
+  dashboard.indexOf('async function queuePlayerWorldMapTeleport('));
+assert.match(worldQueue, /action: 'world_map_teleport'[\s\S]*?kind === 'farm'[\s\S]*?supplyPolicy: await loadNativeSupplyPolicy\(account\)/,
+  'direct farm teleport carries the policy required by Native preflight');
+assert.match(worldCoordinator, /action: 'world_map_teleport'[\s\S]*?pending\.kind === 'farm'[\s\S]*?supplyPolicy: await loadNativeSupplyPolicy\(account\)/,
+  'stop-then-teleport farm transition carries the same policy');
 assert.doesNotMatch(worldQueue, /SAVED_TOWN_REQUIRED/);
 assert.match(dashboard, /async function buildCanonicalFarmRules\([\s\S]*?Object\.assign\(farmRules, services\)[\s\S]*?farmRules\.supplyServiceRoute/);
 assert.match(worldQueue, /if \(kind === 'farm' && currentMap === mapId\) \{[\s\S]*?action: 'start_farm'[\s\S]*?stage: 'WAIT_FARM'[\s\S]*?cost: 0, cooldownSeconds: 0/);
@@ -77,4 +83,4 @@ assert.ok(worldQueue.indexOf("if (kind === 'farm' && currentMap === mapId)") <
 assert.match(dashboard, /sameMapIdleFarmStart[\s\S]*?live\?\.agentMode === 'PERSISTENT_IDLE'/);
 assert.match(app, /if \(result.reason !== 'WORLD_MAP_FARM_START_QUEUED'\)\s*worldMapTravelPresentation\.preflightAccepted/);
 assert.match(app, /if \(result.reason === 'WORLD_MAP_FARM_START_QUEUED'\) \{[\s\S]*?worldMapTravelPresentation\.preflightRejected/);
-console.log(`WORLD_MAP_SUPPLY_CUTOVER_SOURCE_PASS towns=${towns.length} routes=${towns.length} tests=70`);
+console.log(`WORLD_MAP_SUPPLY_CUTOVER_SOURCE_PASS towns=${towns.length} routes=${towns.length} tests=72`);
