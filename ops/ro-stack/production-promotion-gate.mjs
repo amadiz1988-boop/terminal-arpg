@@ -6,7 +6,7 @@ import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { FIRST_PROMOTION, legacyIdentity, verifyLegacyBaseline, firstPromotionEvidence, consumedPath, pendingPath, readJson } from './legacy-production-baseline.mjs';
-import { inspectNativeCandidate, verifyNativeStage } from './native-promotion-contract.mjs';
+import { inspectNativeCandidate, verifyNativeStage, stagedRuntimeConfigPin } from './native-promotion-contract.mjs';
 import { admission, assertLeaseManifest, safeRelative, readManifest } from './web-complete-manifest.mjs';
 import { receiptComplete } from './production-deployment-state.mjs';
 import { assetReleaseErrors } from './private-asset-release-gate.mjs';
@@ -99,7 +99,7 @@ export function evaluatePromotion({ authority, state, candidate, currentHashes, 
     candidate_missing: accepted.filter(id => !preserved.has(id) && !(removed.has(id) && decisions.has(id))).length };
 }
 
-function facts(manifest, authority, state, owner, productionRoot, promotionMode, currentHashes, admitted) {
+function facts(manifest, authority, state, owner, productionRoot, promotionMode, currentHashes, admitted, lease) {
   const root = path.resolve(manifest.candidate_root);
   const commit = String(manifest.candidate_commit || '').toLowerCase();
   const remote = run(root, 'remote', 'get-url', 'origin');
@@ -150,7 +150,8 @@ function facts(manifest, authority, state, owner, productionRoot, promotionMode,
     const admittedState = currentHashes?.nativeStage ? {...state, production_drift:'CLOSED'} : state;
     const inspected = inspectNativeCandidate({file:nativeFile,sha256:manifest.native_candidate_manifest.sha256,
       root:productionRoot,state:admittedState,authority:authority.native,webCapabilities:capabilities,webRoot:root,webSha:commit,
-      stagedWebManifest:currentHashes?.nativeStage ? manifest : undefined});
+      stagedWebManifest:currentHashes?.nativeStage ? manifest : undefined,
+      runtimeConfigPin:currentHashes?.nativeStage ? stagedRuntimeConfigPin(productionRoot,state,lease) : undefined});
     nativeCandidatePass = inspected.eligible && inspected.manifest.native_git_sha === nativeSha;
     if(nativeCandidatePass) for(const row of inspected.capability_rows) if(row.classification==='INTENTIONALLY_SUPERSEDED' && !capabilities.includes(row.id)) capabilities.push(row.id);
   }
@@ -194,7 +195,7 @@ function main() {
   if (lease?.status === 'ACTIVE') assertLeaseManifest(lease,fileHash(args.manifest),manifest);
   const admitted = admission(args.manifest,productionRoot);
   const currentHashes = productionHashes(productionRoot,state,promotionMode,lease,fileHash(args.manifest));
-  const result = evaluatePromotion({ authority,state,candidate:facts(manifest,authority,state,args.owner,productionRoot,promotionMode,currentHashes,admitted),
+  const result = evaluatePromotion({ authority,state,candidate:facts(manifest,authority,state,args.owner,productionRoot,promotionMode,currentHashes,admitted,lease),
     currentHashes,lease,mode,promotionMode });
   if(fileHash(args.manifest)!==inputHash)fail('ADMISSION_MANIFEST_CHANGED');
   result.admission_manifest_sha256=inputHash;

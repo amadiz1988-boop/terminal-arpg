@@ -11,12 +11,15 @@ an earlier approved Web candidate had changed them.
 The Native first-admission path retains those original pins. In an already
 verified Native/Web stage, `verifyNativeStage` checks the same lease, Native
 receipt, current or prior Web receipt, live bytes, and rollback. The subsequent
-complete Web manifest also pins every deployed lifecycle file as a Production
-preimage. Only in that staged case, the Native candidate inspector now checks
-the lifecycle files against those admitted Web preimage hashes. A missing
-lifecycle path or mismatched preimage fails closed.
+complete Web manifest pins the deployed launcher as a Production preimage.
+The Production runtime config is governed separately by the same-lease
+reconciliation receipt, sealed in both pending and state records. Only in
+that staged case, the Native candidate inspector checks the launcher against
+the admitted Web preimage, the config against its sealed receipt and original
+Native pin, and all remaining lifecycle files against their original pins.
+A missing receipt, path or matching hash fails closed.
 
 The source regression `node ops/ro-stack/tests/test-native-promotion.mjs`
-passed 44 cases, including original-pin rejection and staged-Web positive,
-missing-path, and wrong-hash checks. No Native source, Native binary, runtime
+passed 45 cases, including original-pin rejection, staged-Web preimage,
+and sealed runtime-config positive and wrong-hash checks. No Native source, Native binary, runtime
 contract, or player state was changed by this governance patch.

@@ -5,7 +5,7 @@ import path from 'node:path';
 import os from 'node:os';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { evaluateNative,inspectNativeCandidate,nativeReceiptValid,nativeReceiptPath,nativeArtifacts,NATIVE_REPOSITORY,groups,verifyNativeStage,verifyLifecyclePins } from '../native-promotion-contract.mjs';
+import { evaluateNative,inspectNativeCandidate,nativeReceiptValid,nativeReceiptPath,nativeArtifacts,NATIVE_REPOSITORY,groups,verifyNativeStage,verifyLifecyclePins,stagedRuntimeConfigPin } from '../native-promotion-contract.mjs';
 import { evaluatePromotion,capabilityRegistry } from '../production-promotion-gate.mjs';
 import { receiptComplete,commitAcceptedBaseline } from '../production-deployment-state.mjs';
 import { executeNative, finalizeRunningNativeStage, NATIVE_STAGE_PHASE, reconciledPrefix } from '../deploy-native-candidate.mjs';
@@ -94,9 +94,30 @@ try {
        path:item.path,production_preimage_sha256:digest(path.join(f.root,item.path))
      }))};
      assert.equal(f.inspect({stagedWebManifest:manifest}).eligible,true);
-     assert.throws(()=>verifyLifecyclePins(f.root,f.m.lifecycle_files,{files:manifest.files.filter(row=>row.path!==p)}),/STAGED_WEB_LIFECYCLE_PREIMAGE_CHANGED/);
+     assert.throws(()=>verifyLifecyclePins(f.root,f.m.lifecycle_files,{files:manifest.files.filter(row=>row.path!==p)}),/PINNED_CONTENT_CHANGED/);
      assert.throws(()=>verifyLifecyclePins(f.root,f.m.lifecycle_files,{files:manifest.files.map(row=>row.path===p?{...row,production_preimage_sha256:'0'.repeat(64)}:row)}),/STAGED_WEB_LIFECYCLE_PREIMAGE_CHANGED/);
      rejected(f,{},/PINNED_CONTENT_CHANGED/);
+   } finally { fs.writeFileSync(file,old); }
+ });
+ await test('sealed same-lease runtime config receipt admits only its pinned config',()=>{
+   const p='ops/ro-stack/stack.config.psd1',file=path.join(f.root,p),old=fs.readFileSync(file);
+   fs.writeFileSync(file,'approved runtime config');
+   try {
+     const ref='.local/ro-stack/runtime-config-reconciliation-fixture.json';
+     const receipt={schema_version:'runtime-config-reconciliation-v1',classification:'RUNTIME_CONFIG_RECONCILED',
+       lease_id:f.lease.lease_id,lease_owner:f.lease.owner_task_id,native_git_sha:f.sha,
+       config_source_path:p,old_config_digest:f.m.lifecycle_files.find(item=>item.path===p).sha256,
+       new_config_digest:digest(file),unrelated_config_change_count:0};
+     f.write(ref,receipt);
+     const sha=digest(path.join(f.root,ref));
+     f.write(pendingPath,{runtime_config_reconciliation:ref,runtime_config_reconciliation_sha256:sha});
+     const state={...f.state,runtime_config_reconciliation:ref,runtime_config_reconciliation_sha256:sha};
+     const pin=stagedRuntimeConfigPin(f.root,state,f.lease),manifest={files:[]};
+     verifyLifecyclePins(f.root,f.m.lifecycle_files,manifest,pin);
+     assert.throws(()=>verifyLifecyclePins(f.root,f.m.lifecycle_files,manifest,{...pin,sha256:'0'.repeat(64)}),/STAGED_RUNTIME_CONFIG_CHANGED/);
+     assert.throws(()=>verifyLifecyclePins(f.root,f.m.lifecycle_files,manifest,{...pin,oldSha256:'0'.repeat(64)}),/STAGED_RUNTIME_CONFIG_CHANGED/);
+     assert.throws(()=>stagedRuntimeConfigPin(f.root,{...state,runtime_config_reconciliation_sha256:'0'.repeat(64)},f.lease),/RUNTIME_CONFIG_RECEIPT_REFERENCE_MISMATCH/);
+     assert.throws(()=>verifyLifecyclePins(f.root,f.m.lifecycle_files,manifest),/PINNED_CONTENT_CHANGED/);
    } finally { fs.writeFileSync(file,old); }
  });
  await test('unapproved supersession blocks',()=>{f.comparison.capabilities[0].classification='INTENTIONALLY_SUPERSEDED';f.write('build/capability-comparison.json',f.comparison);f.m.capability_comparison=f.pin('capability-comparison.json');f.rewrite();rejected(f,{},/SUPERSET/);});

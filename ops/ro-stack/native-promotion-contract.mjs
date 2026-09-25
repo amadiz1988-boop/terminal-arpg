@@ -47,7 +47,25 @@ export function pinned(base, ref) {
   check(fs.existsSync(file) && equalHash(digest(file), ref.sha256), 'PINNED_CONTENT_CHANGED');
   return file;
 }
-export function verifyLifecyclePins(root, pins, stagedWebManifest) {
+export function stagedRuntimeConfigPin(root, state, lease) {
+  const ref = state.runtime_config_reconciliation;
+  if (!ref) return null;
+  const pending = readJson(boundedPath(root, pendingPath));
+  check(ref === pending.runtime_config_reconciliation &&
+    equalHash(state.runtime_config_reconciliation_sha256, pending.runtime_config_reconciliation_sha256),
+    'RUNTIME_CONFIG_RECEIPT_REFERENCE_MISMATCH');
+  const receipt = readJson(pinned(root, {path:ref,sha256:state.runtime_config_reconciliation_sha256}));
+  check(receipt.schema_version === 'runtime-config-reconciliation-v1' &&
+    receipt.classification === 'RUNTIME_CONFIG_RECONCILED' &&
+    receipt.lease_id === lease.lease_id && receipt.lease_owner === lease.owner_task_id &&
+    receipt.native_git_sha === lease.native_deploy_git_sha &&
+    receipt.config_source_path === 'ops/ro-stack/stack.config.psd1' &&
+    receipt.unrelated_config_change_count === 0 &&
+    equalHash(receipt.new_config_digest, digest(boundedPath(root,receipt.config_source_path))),
+    'RUNTIME_CONFIG_RECEIPT_INVALID');
+  return {path:receipt.config_source_path,sha256:receipt.new_config_digest,oldSha256:receipt.old_config_digest};
+}
+export function verifyLifecyclePins(root, pins, stagedWebManifest, runtimeConfigPin) {
   if (!stagedWebManifest) {
     for (const item of pins) pinned(root, item);
     return;
@@ -55,9 +73,15 @@ export function verifyLifecyclePins(root, pins, stagedWebManifest) {
   const rows = new Map(stagedWebManifest.files.map(row => [row.path, row]));
   for (const item of pins) {
     const row = rows.get(item.path);
-    check(row?.production_preimage !== 'ABSENT' &&
-      equalHash(row?.production_preimage_sha256, digest(boundedPath(root, item.path))),
-      'STAGED_WEB_LIFECYCLE_PREIMAGE_CHANGED');
+    if (row) {
+      check(row.production_preimage !== 'ABSENT' &&
+        equalHash(row.production_preimage_sha256, digest(boundedPath(root, item.path))),
+        'STAGED_WEB_LIFECYCLE_PREIMAGE_CHANGED');
+    } else if (runtimeConfigPin?.path === item.path) {
+      check(equalHash(runtimeConfigPin.oldSha256,item.sha256) &&
+        equalHash(runtimeConfigPin.sha256,digest(boundedPath(root,item.path))),
+        'STAGED_RUNTIME_CONFIG_CHANGED');
+    } else pinned(root,item);
   }
 }
 export function git(root, ...args) {
@@ -146,7 +170,7 @@ export function evaluateNative({ manifest: m, build: b, authority, reachable, so
   return { eligible: !errors.length, errors };
 }
 
-export function inspectNativeCandidate({ file, sha256, root, state, authority, mode = 'precheck', lease, owner, leaseId, runtime, webCapabilities = [], webRoot, webSha, stagedWebManifest, remoteVerifier = verifyNativeRemote }) {
+export function inspectNativeCandidate({ file, sha256, root, state, authority, mode = 'precheck', lease, owner, leaseId, runtime, webCapabilities = [], webRoot, webSha, stagedWebManifest, runtimeConfigPin, remoteVerifier = verifyNativeRemote }) {
   check(equalHash(digest(file), sha256), 'NATIVE_MANIFEST_TAMPERED');
   const m = readJson(file), base = path.dirname(file);
   const buildFile = pinned(base, m.build_receipt), build = readJson(buildFile), buildBase = path.dirname(buildFile);
@@ -208,7 +232,7 @@ export function inspectNativeCandidate({ file, sha256, root, state, authority, m
     'ops/ro-stack/runtime-guard.ps1','ops/ro-stack/runtime-guard.lib.ps1','ops/ro-stack/graceful-console-signal.ps1'].every(p => m.lifecycle_files.some(x => x.path === p)), 'LIFECYCLE_PINS_REQUIRED');
   // After a verified Web stage, the next complete manifest pins current Web
   // preimages. Initial Native admission still uses its original lifecycle pins.
-  verifyLifecyclePins(root, m.lifecycle_files, stagedWebManifest);
+  verifyLifecyclePins(root, m.lifecycle_files, stagedWebManifest, runtimeConfigPin);
   const result = evaluateNative({ manifest:m,build,authority,reachable,sourceClean,artifactsValid,regressionValid,
     capabilities:{pass:capsPass},rollbackValid,state,lease,owner,leaseId,manifestHash:sha256,mode,runtime });
   return { ...result, manifest:m, build, source, capability_rows:rows, regression_groups:Object.keys(groups),
