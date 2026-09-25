@@ -151,6 +151,12 @@ fixtures cannot complete that step.
 
 ## 0B. DEVELOPER DIAGNOSTICS / ACTION CONTINUATION
 
+Check `node ops/ro-stack/ghost-island-dev.mjs capabilities <domain> --json`
+before creating a diagnostic script or handing off a bounded blocker. Use an
+existing console diagnostic or approved action in this window. Record the
+registry gap when the console lacks the capability, and use direct authority
+when its lower-level evidence is required. Keep Browser UI acceptance separate.
+
 Continue from available local authoritative diagnostics for logs, runtime
 state, projections, Event Ledger, read-only DB and receipts. A Browser,
 Cloudflare Access or human-login blocker does not block facts available through
@@ -163,6 +169,10 @@ acceptance remains required when the target is visible UI or Browser behavior.
 
 ```text
 DIAGNOSTIC_AUTHORITY_USED =
+DEVELOPER_CONSOLE_CAPABILITY_CHECK =
+DEVELOPER_CONSOLE_USED = YES / NO
+DEVELOPER_CONSOLE_COMMANDS =
+DEVELOPER_CONSOLE_GAP =
 BROWSER_REQUIRED_FOR_TASK = YES / NO
 BROWSER_USED = YES / NO
 SERVER_SIDE_ACTION_USED = YES / NO
@@ -712,6 +722,10 @@ For applicable continuations, also report:
 
 ```text
 DIAGNOSTIC_AUTHORITY_USED
+DEVELOPER_CONSOLE_CAPABILITY_CHECK
+DEVELOPER_CONSOLE_USED
+DEVELOPER_CONSOLE_COMMANDS
+DEVELOPER_CONSOLE_GAP
 BROWSER_REQUIRED_FOR_TASK
 BROWSER_USED
 SERVER_SIDE_ACTION_USED

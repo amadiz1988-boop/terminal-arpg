@@ -543,6 +543,18 @@ Do not substitute API/log evidence.
 
 ### 16A. Developer Diagnostics / Admin Browser Separation Policy
 
+Before writing a new diagnostic or handing off a same-owner blocker, inspect
+`node ops/ro-stack/ghost-island-dev.mjs capabilities <domain> --json` and use
+the registered local command when it supplies the required evidence. The
+canonical guide is `docs/project-control/developer-diagnostics-console.md`.
+Use the lower-level authority when the registry has a gap or the task needs
+evidence the console does not expose. A local action is permitted only through
+the existing canonical action contract and its approval, audit and admission
+gates. Report `DEVELOPER_CONSOLE_CAPABILITY_CHECK`,
+`DEVELOPER_CONSOLE_USED`, `DEVELOPER_CONSOLE_COMMANDS`, and
+`DEVELOPER_CONSOLE_GAP`; if a relevant command exists but is unused, explain why.
+The same owner continues bounded diagnosis or maintenance in place.
+
 ```text
 DEVELOPER_DIAGNOSTICS_BROWSER_REQUIRED = NO
 LOCAL_CANONICAL_AUTHORITY_FIRST = YES
