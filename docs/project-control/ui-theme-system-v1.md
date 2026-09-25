@@ -27,7 +27,7 @@ RO floor tile chosen in 背景設定; the two settings are independent.
    | 預設 | `#9bb0c9` | `#546d8b` |
    | 洛琪希 | `#7d86c8` | `#3a3f86` |
    | 艾莉絲 | `#d9776a` | `#9a2a24` |
-   | 西露菲 | `#9cb77a` | `#4f6d33` |
+   | 希露菲 | `#9cb77a` | `#4f6d33` |
    | 妓神 | `#c77a8a` | `#7c2438` |
 
 2. Window bodies of these surfaces show soft art on the right:
@@ -104,8 +104,8 @@ The client never grants entitlements.
 | `default` | none | 預設 | none |
 | `heroine-roxy` | 無職轉生 | 洛琪希 | 2 |
 | `heroine-eris` | 無職轉生 | 艾莉絲 | 3 |
-| `heroine-sylphie` | 無職轉生 | 西露菲 | 7 |
+| `heroine-sylphie` | 無職轉生 | 希露菲 | 7 |
 | `heroine-red-dress` | 無職轉生 | 妓神 | 4 |
 
-The `heroine-red-dress` source folder is still named 紅衣短髮女; only the
-player-visible label is 妓神.
+Source folders keep their original names (紅衣短髮女, 西露菲); only the
+player-visible labels are 妓神 and 希露菲.

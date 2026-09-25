@@ -94,9 +94,10 @@ test('every page switch shows the next image; reopening the same tab does not', 
   assert.equal(plain.probes.length, 0);
 });
 
-test('the red dress theme is labelled 妓神 and no image picker is shown', () => {
+test('player-visible names are 妓神 and 希露菲, and no image picker is shown', () => {
   const { api } = boot(null);
   assert.equal(api.themes.find((theme) => theme.id === 'heroine-red-dress').label, '妓神');
+  assert.equal(api.themes.find((theme) => theme.id === 'heroine-sylphie').label, '希露菲');
   assert.doesNotMatch(html, /uiThemeVariants/);
   assert.doesNotMatch(source, /selectVariant|ui-theme-variant\.v1/);
 });
