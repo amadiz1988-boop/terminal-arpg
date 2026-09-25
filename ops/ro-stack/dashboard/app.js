@@ -6408,13 +6408,10 @@ async function loadFarmMapAvailability() {
     }).then(async (response) => {
       if (!response.ok) throw new Error('掛機地圖開放資料讀取失敗');
       const data = await response.json();
-      if (!Array.isArray(data?.maps))
+      if (!Array.isArray(data?.maps) || !Array.isArray(data?.towns) ||
+          !Array.isArray(data?.worldMap?.regions) || !data?.worldMap?.maps)
         throw new Error('掛機地圖開放資料格式錯誤');
       farmMapAvailabilityData = data;
-      if (mapInfoData?.maps)
-        for (const row of data.maps)
-          if (row.summary && !mapInfoData.maps[row.map])
-            mapInfoData.maps[row.map] = row.summary;
       return data;
     });
   }
@@ -6425,10 +6422,11 @@ function farmMapAvailabilityFor(mapId) {
     farmMapAvailabilityData?.maps?.find((row) => row.map === mapId) ?? null
   );
 }
-function farmMapSelectionAvailable(mapId, summary = mapInfoData?.maps?.[mapId]) {
+function farmMapSelectionAvailable(mapId,
+  summary = farmMapAvailabilityData?.worldMap?.maps?.[mapId]) {
   return (
     Boolean(summary) &&
-    isFarmableMapSummary(summary) &&
+    Number(summary.normalMonsterCount) > 0 &&
     farmMapAvailabilityFor(mapId)?.farmSelectionAvailable === true
   );
 }
@@ -6658,9 +6656,8 @@ async function loadMapInfo(mapId = currentMapInfoId()) {
 function levelRangeText(range) {
   return range ? `Lv. ${range.min}～${range.max}` : '無一般怪物等級資料';
 }
-// MOB_SELECTION_REMOVED: farm-selectable is decided by spawn presence, not by
-// town name, region unlock, fog or a rollout/static allowlist. Every canonical
-// map stays visible; only maps with at least one monster spawn are selectable.
+// Other screens retain the complete map catalog; the Player World Map receives
+// only destinations admitted by the server-side player projection.
 function isFarmableMapSummary(summary) {
   if (!summary) return false;
   return (
@@ -6705,8 +6702,9 @@ async function reconcileFarmTargetAfterNonJsonResponse(mapId, timeoutMs = 4000) 
   return null;
 }
 function renderWorldMapNodes() {
-  const regions = mapInfoData?.worldMap?.regions ?? [],
-    mapSummaries = mapInfoData?.maps ?? {},
+  const view = farmMapAvailabilityData?.worldMap,
+    regions = view?.regions ?? [],
+    mapSummaries = view?.maps ?? {},
     selectableMapCount = farmMapAvailabilityData?.maps?.filter(
       (row) => row.farmSelectionAvailable === true && mapSummaries[row.map],
     ).length ?? 0;
@@ -6735,10 +6733,10 @@ function renderWorldMapNodes() {
         region.mapIds.includes(selectedWorldMapId),
       );
       hitArea.setAttribute('aria-disabled', 'false');
-      hitArea.style.left = `${(position.x1 / mapInfoData.worldMap.width) * 100}%`;
-      hitArea.style.top = `${(position.y1 / mapInfoData.worldMap.height) * 100}%`;
-      hitArea.style.width = `${((position.x2 - position.x1) / mapInfoData.worldMap.width) * 100}%`;
-      hitArea.style.height = `${((position.y2 - position.y1) / mapInfoData.worldMap.height) * 100}%`;
+      hitArea.style.left = `${(position.x1 / view.width) * 100}%`;
+      hitArea.style.top = `${(position.y1 / view.height) * 100}%`;
+      hitArea.style.width = `${((position.x2 - position.x1) / view.width) * 100}%`;
+      hitArea.style.height = `${((position.y2 - position.y1) / view.height) * 100}%`;
       const hitAreaSize = (position.x2 - position.x1) * (position.y2 - position.y1);
       hitArea.style.zIndex = String(region.labelKind === 'red'
         ? 1000 : Math.max(1, 900 - Math.ceil(hitAreaSize / 50)));
@@ -6751,7 +6749,7 @@ function renderWorldMapNodes() {
       const primarySummary = mapSummaries[selectableMapIds[0] ?? region.mapId];
       hitArea.title = selectable
         ? `${region.name}（${region.mapId}） ${levelRangeText(primarySummary?.levelRange ?? region.levelRange)}`
-        : `${region.name}（${region.mapId}） 點選查看地圖與限制`;
+        : `${region.name}（${region.mapId}）`;
       hitArea.setAttribute('aria-label', hitArea.title);
       const crop = document.createElement('span'),
         preview = document.createElement('img'),
@@ -6759,14 +6757,14 @@ function renderWorldMapNodes() {
         regionHeight = position.y2 - position.y1;
       crop.className = 'world-map-region-crop';
       preview.className = 'world-map-region-preview';
-      preview.src = mapInfoData.worldMap.image;
+      preview.src = view.image;
       preview.alt = '';
       preview.draggable = false;
       preview.setAttribute('aria-hidden', 'true');
       preview.style.left = `${(-position.x1 / regionWidth) * 100}%`;
       preview.style.top = `${(-position.y1 / regionHeight) * 100}%`;
-      preview.style.width = `${(mapInfoData.worldMap.width / regionWidth) * 100}%`;
-      preview.style.height = `${(mapInfoData.worldMap.height / regionHeight) * 100}%`;
+      preview.style.width = `${(view.width / regionWidth) * 100}%`;
+      preview.style.height = `${(view.height / regionHeight) * 100}%`;
       crop.append(preview);
       hitArea.append(crop);
       return hitArea;
@@ -6782,10 +6780,11 @@ function renderWorldMapNodes() {
 }
 function worldMapRegionsAtPoint(event, regions) {
   const bounds = $('#worldMapNodes').getBoundingClientRect();
+  const view = farmMapAvailabilityData?.worldMap;
   const x = bounds.width > 0
-    ? (event.clientX - bounds.left) / bounds.width * mapInfoData.worldMap.width : -1;
+    ? (event.clientX - bounds.left) / bounds.width * view.width : -1;
   const y = bounds.height > 0
-    ? (event.clientY - bounds.top) / bounds.height * mapInfoData.worldMap.height : -1;
+    ? (event.clientY - bounds.top) / bounds.height * view.height : -1;
   return regions.filter((candidate) => x >= candidate.position.x1 &&
     x <= candidate.position.x2 && y >= candidate.position.y1 &&
     y <= candidate.position.y2);
@@ -6827,54 +6826,31 @@ function setSelectedWorldMap(mapId) {
     region.dataset.mapSelected = String(selected);
   });
 }
-function selectLockedWorldMap(region) {
-  setSelectedWorldMap(region.mapId);
-  const detail = $('#worldMapDetail');
-  const title = document.createElement('h3');
-  title.textContent = region.name;
-  const status = document.createElement('p');
-  status.className = 'world-map-meta locked';
-  status.textContent =
-    `Map ID：${region.mapId}\n此地圖尚未開放\n解鎖條件：${region.unlockCondition ?? '尚未公布'}`;
-  status.style.whiteSpace = 'pre-line';
-  const note = document.createElement('p');
-  note.textContent = '未開放地圖無法設為掛機地圖。';
-  detail.replaceChildren(title, status, note);
-}
 async function selectWorldMap(mapId) {
-  const summary = mapInfoData?.maps?.[mapId];
-  if (!summary) {
-    const region = mapInfoData?.worldMap?.regions?.find((candidate) =>
-      candidate.mapIds?.includes(mapId));
-    if (region) selectLockedWorldMap({ ...region,
-      unlockCondition: '地圖詳細資料未收錄' });
+  const summary = farmMapAvailabilityData?.worldMap?.maps?.[mapId];
+  if (!summary) return;
+  if (farmMapAvailabilityData.towns.some((town) => town.map === mapId)) {
+    setSelectedWorldMap(mapId);
+    selectTownWorldMap(mapId);
     return;
   }
   setSelectedWorldMap(mapId);
-  let map = mapInfoCache.get(mapId);
-  if (!map) {
-    if (summary.detail) {
-      const response = await fetch(summary.detail, { cache: 'no-store' });
-      if (!response.ok) throw new Error('地圖詳細情報讀取失敗');
-      map = await response.json();
-    } else map = summary;
-    mapInfoCache.set(mapId, map);
-  }
+  const map = summary;
   if (selectedWorldMapId !== mapId) return;
   const detail = $('#worldMapDetail');
   const title = document.createElement('h3');
   title.textContent = map.name;
   const floorPicker = document.createElement('section');
   floorPicker.className = 'world-map-floor-picker';
-  const region = mapInfoData.worldMap?.regions?.find((candidate) =>
+  const region = farmMapAvailabilityData.worldMap.regions.find((candidate) =>
     candidate.mapIds?.includes(mapId),
   );
   const relatedMaps = (summary.dungeon
-    ? Object.values(mapInfoData.maps).filter(
+    ? Object.values(farmMapAvailabilityData.worldMap.maps).filter(
         (candidate) => candidate.dungeon?.id === summary.dungeon.id,
       )
     : (region?.mapIds ?? [])
-        .map((candidateMapId) => mapInfoData.maps[candidateMapId])
+        .map((candidateMapId) => farmMapAvailabilityData.worldMap.maps[candidateMapId])
         .filter(Boolean)
   ).sort(
     (a, b) =>
@@ -6896,8 +6872,7 @@ async function selectWorldMap(mapId) {
       button.dataset.mapId = floor.id;
       button.classList.toggle('selected', floor.id === mapId);
       button.setAttribute('aria-pressed', String(floor.id === mapId));
-      const available = farmMapSelectionAvailable(floor.id, floor);
-      button.textContent = `${floor.dungeon?.floorLabel ?? floor.name}　${levelRangeText(floor.levelRange)}${available ? '' : '　可檢視'}`;
+      button.textContent = `${floor.dungeon?.floorLabel ?? floor.name}　${levelRangeText(floor.levelRange)}`;
       button.onclick = () => void selectWorldMap(floor.id);
       floorButtons.append(button);
     }
@@ -6915,24 +6890,13 @@ async function selectWorldMap(mapId) {
     row.textContent = `${monster.name}　Lv.${monster.level}　${monster.count} 隻`;
     monsters.append(row);
   }
-  const boss = document.createElement('p');
-  boss.textContent = map.bossMonsters?.length
-    ? `Boss／MVP：${map.bossMonsters.map((monster) => `${monster.name} Lv.${monster.level}${monster.isMvp ? '（MVP）' : ''}`).join('、')}`
-    : 'Boss／MVP：無固定出生資料';
-  const resources = document.createElement('p');
-  resources.textContent = map.resourceMonsters?.length
-    ? `未計入等級區間的資源型怪物：${map.resourceMonsters.map((monster) => `${monster.name} ${monster.count} 隻`).join('、')}`
-    : '資源型怪物：無';
   const controls = document.createElement('div');
   controls.className = 'controls';
   const routeNote = document.createElement('p');
   routeNote.className = 'world-map-route-note';
   routeNote.textContent = '移動方式：伺服器核准後直達地圖安全落點。';
   const availability = farmMapAvailabilityFor(mapId);
-  const spawnFarmable = isFarmableMapSummary(summary);
-  const farmable = spawnFarmable && Boolean(availability?.farmable);
-  const farmSelectionAvailable =
-    farmable && availability?.farmSelectionAvailable === true;
+  const farmSelectionAvailable = farmMapSelectionAvailable(mapId, summary);
   const buttonState = availability?.buttonState ?? 'UNAVAILABLE_MAP';
   const teleportInfo = document.createElement('p');
   teleportInfo.className = 'world-map-teleport-info';
@@ -6940,15 +6904,7 @@ async function selectWorldMap(mapId) {
   const apply = document.createElement('button');
   apply.type = 'button';
   apply.className = 'primary';
-  if (!spawnFarmable) {
-    apply.textContent = '此地圖沒有可掛機怪物';
-    apply.disabled = true;
-    apply.title = '此地圖沒有可掛機怪物';
-  } else if (!farmable || !farmSelectionAvailable) {
-    apply.textContent = '尚未開放';
-    apply.disabled = true;
-    apply.title = availability?.availabilityReason ?? '地圖尚未開放';
-  } else {
+  if (farmSelectionAvailable) {
     apply.textContent = buttonState === 'ALREADY_ON_TARGET_MAP' ? '已經在該地圖'
       : buttonState === 'LEVEL_TOO_LOW' ? `需要 Base Lv.${availability.minLevel}`
         : buttonState === 'WORLD_MAP_TELEPORT_COOLDOWN'
@@ -7031,13 +6987,6 @@ async function selectWorldMap(mapId) {
     submit.focus();
   };
   controls.append(apply);
-  const farmNote = document.createElement('p');
-  farmNote.className = 'world-map-farm-note';
-  farmNote.textContent = !spawnFarmable
-    ? '此地圖沒有可掛機怪物，無法設為掛機地圖。'
-    : !farmable || !farmSelectionAvailable
-      ? `此地圖尚未開放：${availability?.availabilityReason ?? '資料不足'}。`
-      : '';
   detail.replaceChildren(
     title,
     controls,
@@ -7046,10 +6995,7 @@ async function selectWorldMap(mapId) {
     mapIdLine,
     monsterTitle,
     monsters,
-    boss,
-    resources,
     routeNote,
-    farmNote,
   );
 }
 function renderWorldMapRegionIndex(regions) {
@@ -7127,19 +7073,13 @@ async function openWorldMap() {
   farmMapAvailabilityData = null;
   farmMapAvailabilityPromise = null;
   try {
-    await Promise.all([
-      mapInfoData ? Promise.resolve() : loadMapInfo(currentMapInfoId()),
-      loadFarmMapAvailability(),
-    ]);
+    await loadFarmMapAvailability();
   } catch (error) {
     closeWorldMap();
     throw error;
   }
   if (generation !== worldMapOpenGeneration ||
       presentation.state !== 'MAP_PORTAL_OPEN') return;
-  for (const row of farmMapAvailabilityData?.maps ?? [])
-    if (row.summary && !mapInfoData.maps[row.map])
-      mapInfoData.maps[row.map] = row.summary;
   renderWorldMapNodes();
   syncGrindTargetSummary();
   void reportWebPresence();
@@ -8417,16 +8357,16 @@ function renderWorldMapTowns() {
       event.stopPropagation();
       selectTownWorldMap(town.map);
       const overlapping = worldMapRegionsAtPoint(event,
-        mapInfoData?.worldMap?.regions ?? []);
+        farmMapAvailabilityData?.worldMap?.regions ?? []);
       const choices = [{ mapId: town.map, name: town.name ?? town.map,
         kind: 'town' }, ...overlapping.filter((region) => region.mapId !== town.map)];
       renderWorldMapOverlapChoices(choices, town.map);
     };
-    const position = mapInfoData?.worldMap?.regions?.find((region) =>
+    const position = farmMapAvailabilityData?.worldMap?.regions?.find((region) =>
       region.mapIds?.includes(town.map))?.position;
     if (position) {
-      button.style.left = `${((position.x1 + position.x2) / 2 / mapInfoData.worldMap.width) * 100}%`;
-      button.style.top = `${((position.y1 + position.y2) / 2 / mapInfoData.worldMap.height) * 100}%`;
+      button.style.left = `${((position.x1 + position.x2) / 2 / farmMapAvailabilityData.worldMap.width) * 100}%`;
+      button.style.top = `${((position.y1 + position.y2) / 2 / farmMapAvailabilityData.worldMap.height) * 100}%`;
       overlayButtons.push(button);
       positioned.add(town.map);
     } else {
@@ -8478,13 +8418,13 @@ function selectTownWorldMap(mapId) {
   title.textContent = town.name ?? town.map;
   const info = document.createElement('p');
   info.className = 'world-map-meta';
-  info.textContent = `Map ID：${town.map}\n類型：主城\n傳送費：免費\n傳送冷卻：田野回城無、主城互傳 30 秒\n目前儲存主城：${farmMapAvailabilityData?.player?.savedTown?.name ?? '尚未設定'}`;
+  info.textContent = `Map ID：${town.map}\n類型：主城\n儲存點：${town.savedPoint.x},${town.savedPoint.y}\n傳送費：免費\n傳送冷卻：田野回城無、主城互傳 30 秒\n目前儲存主城：${farmMapAvailabilityData?.player?.savedTown?.name ?? '尚未設定'}`;
   info.style.whiteSpace = 'pre-line';
   const action = document.createElement('button');
   action.type = 'button';
   action.className = 'primary';
   action.textContent = town.buttonState === 'ALREADY_ON_TARGET_MAP'
-    ? '已經在該地圖'
+    ? '已在此城鎮'
     : town.buttonState === 'WORLD_MAP_TELEPORT_COOLDOWN'
       ? `${town.cooldownRemaining} 秒後可再次傳送`
       : `傳送至${town.name ?? town.map}`;
@@ -8509,7 +8449,7 @@ function selectTownWorldMap(mapId) {
         if (result.reason === 'ALREADY_ON_TARGET_MAP') {
           worldMapTravelPresentation.preflightRejected();
           confirm.classList.add('hidden');
-          $('#worldMapStatus').textContent = '已在該地圖';
+          $('#worldMapStatus').textContent = '已在此城鎮';
           return;
         }
         confirm.classList.add('hidden');
@@ -8530,11 +8470,15 @@ function selectTownWorldMap(mapId) {
     $('#worldMapConfirmSubmit').focus();
   };
   const saved = farmMapAvailabilityData?.player?.savedTown?.map === mapId;
-  const physicallyHere = farmMapAvailabilityData?.player?.currentMap === mapId;
+  const physicallyHere = farmMapAvailabilityData?.player?.currentMap === mapId &&
+    farmMapAvailabilityData.player.currentX === town.savedPoint.x &&
+    farmMapAvailabilityData.player.currentY === town.savedPoint.y;
   const save = document.createElement('button');
   save.type = 'button';
   save.textContent = saved ? '目前儲存主城' : '設為儲存主城';
   save.disabled = saved || !physicallyHere;
+  if (!saved && !physicallyHere)
+    save.title = '請先抵達此城鎮儲存點';
   save.onclick = async () => {
     save.disabled = true;
     try {

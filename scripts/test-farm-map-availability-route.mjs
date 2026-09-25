@@ -104,6 +104,8 @@ const child = spawn(process.execPath, ['--import', pathToFileURL(hooks).href, da
     RO_INSTANCE_ROOT: join(work, 'instances'),
     RO_DB_NAME: 'test_farm_map_route',
     RO_DB_PASSWORD: 'fake',
+    RO_RATHENA_ROOT: process.env.RO_RATHENA_ROOT ??
+      'C:/Users/Administrator/source/ghost-island-rathena',
   },
   stdio: ['ignore', 'pipe', 'pipe'],
 });
@@ -140,11 +142,25 @@ try {
   const ok = await get('/api/farm-map-availability?accountId=1&characterId=2', session);
   assert.equal(ok.status, 200, JSON.stringify(ok.body));
   assert.equal(ok.headers.get('cache-control'), 'private, no-store');
-  assert.deepEqual(Object.keys(ok.body).sort(), ['cooldownSeconds', 'maps', 'player', 'towns']);
-  assert.ok(Array.isArray(ok.body.maps) && ok.body.maps.length > 0, 'farm maps listed');
+  assert.deepEqual(Object.keys(ok.body).sort(),
+    ['cooldownSeconds', 'maps', 'player', 'towns', 'worldMap']);
+  assert.ok(Array.isArray(ok.body.maps) && ok.body.maps.length > 0,
+    `farm maps listed: ${JSON.stringify({ player: ok.body.player,
+      regions: ok.body.worldMap?.regions?.length, maps: ok.body.maps?.length })}`);
   assert.ok(Array.isArray(ok.body.towns));
   assert.ok(ok.body.maps.every((row) => row.kind === 'farm'));
   assert.ok(ok.body.towns.every((row) => row.kind === 'town'));
+  const visibleIds = new Set(ok.body.worldMap.regions.flatMap((row) => row.mapIds));
+  assert.equal(visibleIds.size, ok.body.maps.length + ok.body.towns.length);
+  assert.ok(ok.body.maps.every((row) => visibleIds.has(row.map)));
+  assert.ok(ok.body.towns.every((row) => visibleIds.has(row.map) &&
+    row.savedPoint?.x > 0 && row.savedPoint?.y > 0));
+  assert.deepEqual(ok.body.towns.find((row) => row.map === 'prontera')?.savedPoint,
+    { map: 'prontera', x: 116, y: 73 });
+  for (const hidden of ['geffen', 'alberta', 'yuno', 'einbroch', 'morocc'])
+    assert.equal(visibleIds.has(hidden), false, hidden);
+  assert.doesNotMatch(JSON.stringify(ok.body),
+    /NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE|availabilityReason|unlockCondition|bossMonsters|resourceMonsters/);
   assert.equal(ok.body.player.baseLevel, 50);
   assert.equal(ok.body.player.zeny, 120000);
   assert.equal(ok.body.cooldownSeconds, 60);
