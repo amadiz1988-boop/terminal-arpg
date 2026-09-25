@@ -113,7 +113,7 @@ try {
   assert.deepEqual(Object.keys(hybridPayload).sort(), [
     'targetMap', 'lootEnabled', 'skillEnabled', 'skillId', 'survivalEnabled',
     'deathRecoveryEnabled', 'combatProfile', 'attackMode', 'attackUseWeapon',
-    'huntRelocationEnabled', 'attackSkillSlots',
+    'huntRelocationEnabled', 'attackDistance', 'attackMaxDistance', 'attackSkillSlots',
   ].sort());
   await rejects(hybrid, { skillEnabled: false }, 409, 'PROFILE_HYBRID_REQUIRES_BOTH');
   assert.equal((await start(hybrid, { skillEnabled: true })).skillEnabled, true);

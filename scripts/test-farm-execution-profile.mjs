@@ -6,7 +6,8 @@ const config = defaultCanonicalConfig();
 const farm = { skillEnabled: false };
 assert.deepEqual(resolveFarmExecutionProfile(config, farm), {
   ok: true,
-  payload: { combatProfile: 'MELEE_DAMAGE', attackMode: 2, attackUseWeapon: true, huntRelocationEnabled: true },
+  payload: { combatProfile: 'MELEE_DAMAGE', attackMode: 2, attackUseWeapon: true,
+    huntRelocationEnabled: true, attackDistance: 1, attackMaxDistance: 1 },
 });
 config.combat.travel.flyWing.enabled = false;
 assert.equal(resolveFarmExecutionProfile(config, farm).payload.huntRelocationEnabled, false);
@@ -28,4 +29,10 @@ assert.equal(resolveFarmExecutionProfile(config, farm).reason, 'UNKNOWN_COMBAT_P
 config.combat.profile = 'MELEE_DAMAGE';
 config.combat.attack.mode = 1;
 assert.equal(resolveFarmExecutionProfile(config, farm).reason, 'PROFILE_ATTACK_MODE_UNSUPPORTED');
+config.combat.attack.mode = 2;
+config.combat.attack.distance = 2;
+config.combat.attack.maxDistance = 3;
+assert.equal(resolveFarmExecutionProfile(config, farm).payload.attackMaxDistance, 3);
+config.combat.attack.maxDistance = 1;
+assert.equal(resolveFarmExecutionProfile(config, farm).reason, 'ATTACK_DISTANCE_CONTRACT_INVALID');
 console.log('farm execution profile: PASS');

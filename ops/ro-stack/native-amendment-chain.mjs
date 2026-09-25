@@ -23,14 +23,18 @@ export const M1_SECOND_NATIVE_AMENDMENT = Object.freeze({
   sourcePaths: Object.freeze([
     'conf/persistent_agent_commands.json',
     'src/map/persistent_agent.cpp',
+    'src/map/persistent_agent_state.cpp',
+    'src/map/persistent_agent_state.hpp',
     'src/map/persistent_agent.hpp',
     'src/map/persistent_agent_attack_skill_condition.hpp',
     'src/map/persistent_agent_farm_profile.hpp',
     'src/map/persistent_agent_m1_supply_policy.hpp',
     'src/map/test_fixture_atcommand.hpp',
     'src/map/m1_acceptance_fixture.hpp',
+    'src/map/m1_weapon_distance.hpp',
     'tools/pa-command-contract/test_pa_contract.cpp',
     'tools/pa-command-contract/Test-PaCommandContract.ps1',
+    'tools/pa-command-contract/Test-M1V15ExecutorFixture.ps1',
     'tools/pa-command-contract/Test-M1CanonicalSource.ps1',
   ]),
 });

@@ -10,7 +10,8 @@ import {
   defaultCanonicalConfig,
   validateCanonicalConfig,
 } from './config-schema.mjs';
-import { CONFIG_SECTIONS, configCapability, configCapabilityCounts, configControlVisible, configSection } from './config-capabilities.mjs';
+import { CONFIG_SECTIONS, configCapability, configCapabilityCounts, configControlVisible,
+  configRowFieldSupported, configSection } from './config-capabilities.mjs';
 
 const $ = (root, selector) => root.querySelector(selector);
 const text = (value) => String(value ?? '');
@@ -34,7 +35,17 @@ function setPath(value, path, next) {
 function fieldInput(field, value) {
   if (field.type === 'select') {
     const select = document.createElement('select');
-    for (const optionValue of field.options ?? []) {
+    const m1Options = field.path === 'combat.profile'
+      ? ['MELEE_DAMAGE', 'SKILL_CAST', 'HYBRID_DAMAGE']
+      : field.path === 'combat.attack.mode' ? [2] : field.options ?? [];
+    if (!m1Options.includes(value)) {
+      const historical = document.createElement('option');
+      historical.value = String(value);
+      historical.textContent = `${String(value)}（歷史設定）`;
+      historical.disabled = true;
+      select.append(historical);
+    }
+    for (const optionValue of m1Options) {
       const option = document.createElement('option');
       option.value = String(optionValue);
       option.textContent = field.labels?.[field.options.indexOf(optionValue)] ?? PROFILE_DEFINITIONS[optionValue]?.label ?? String(optionValue);
@@ -49,6 +60,10 @@ function fieldInput(field, value) {
   else input.value = text(value);
   if (field.min !== undefined) input.min = String(field.min);
   if (field.max !== undefined) input.max = String(field.max);
+  if (field.path === 'combat.attack.distance' || field.path === 'combat.attack.maxDistance') {
+    input.min = '1';
+    input.step = '1';
+  }
   return input;
 }
 
@@ -144,7 +159,7 @@ function makeArrayEditor(root, state, descriptor, render, capability) {
       if (descriptorField.min !== undefined) input.min = String(descriptorField.min);
       if (descriptorField.max !== undefined) input.max = String(descriptorField.max);
       if (type === 'number') input.inputMode = 'numeric';
-      input.disabled = capability !== 'SUPPORTED';
+      input.disabled = capability !== 'SUPPORTED' || !configRowFieldSupported(descriptor.kind, key);
       const update = () => {
         const next = type === 'checkbox' ? input.checked : type === 'number' ? Number(input.value) : type === 'select' && typeof descriptorField.default === 'number' ? Number(input.value) : input.value;
         setPath(item, key, next);
