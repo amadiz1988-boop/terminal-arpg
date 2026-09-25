@@ -149,7 +149,8 @@ function facts(manifest, authority, state, owner, productionRoot, promotionMode,
     const nativeFile = path.resolve(path.dirname(manifest._manifestPath), manifest.native_candidate_manifest.path);
     const admittedState = currentHashes?.nativeStage ? {...state, production_drift:'CLOSED'} : state;
     const inspected = inspectNativeCandidate({file:nativeFile,sha256:manifest.native_candidate_manifest.sha256,
-      root:productionRoot,state:admittedState,authority:authority.native,webCapabilities:capabilities,webRoot:root,webSha:commit});
+      root:productionRoot,state:admittedState,authority:authority.native,webCapabilities:capabilities,webRoot:root,webSha:commit,
+      stagedWebManifest:currentHashes?.nativeStage ? manifest : undefined});
     nativeCandidatePass = inspected.eligible && inspected.manifest.native_git_sha === nativeSha;
     if(nativeCandidatePass) for(const row of inspected.capability_rows) if(row.classification==='INTENTIONALLY_SUPERSEDED' && !capabilities.includes(row.id)) capabilities.push(row.id);
   }

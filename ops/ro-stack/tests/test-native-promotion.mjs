@@ -5,7 +5,7 @@ import path from 'node:path';
 import os from 'node:os';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { evaluateNative,inspectNativeCandidate,nativeReceiptValid,nativeReceiptPath,nativeArtifacts,NATIVE_REPOSITORY,groups,verifyNativeStage } from '../native-promotion-contract.mjs';
+import { evaluateNative,inspectNativeCandidate,nativeReceiptValid,nativeReceiptPath,nativeArtifacts,NATIVE_REPOSITORY,groups,verifyNativeStage,verifyLifecyclePins } from '../native-promotion-contract.mjs';
 import { evaluatePromotion,capabilityRegistry } from '../production-promotion-gate.mjs';
 import { receiptComplete,commitAcceptedBaseline } from '../production-deployment-state.mjs';
 import { executeNative, finalizeRunningNativeStage, NATIVE_STAGE_PHASE, reconciledPrefix } from '../deploy-native-candidate.mjs';
@@ -86,6 +86,19 @@ try {
  await test('suite log mutation invalidates receipt',()=>{const p=path.join(f.buildRoot,f.build.tests_run[0].receipt.path);const old=fs.readFileSync(p);fs.writeFileSync(p,'changed');rejected(f,{},/PINNED_CONTENT_CHANGED/);fs.writeFileSync(p,old);});
  await test('untracked source file invalidates clean build',()=>{const p=f.write('build/source/untracked.txt','unapproved');rejected(f,{},/SOURCE_DIRTY/);fs.unlinkSync(p);});
  await test('lifecycle pin mutation blocks',()=>{const p=path.join(f.root,'ops/ro-stack/ro-stack.ps1');const old=fs.readFileSync(p);fs.writeFileSync(p,'changed lifecycle');rejected(f,{},/PINNED_CONTENT_CHANGED/);fs.writeFileSync(p,old);});
+ await test('verified staged Web preimage admits changed lifecycle bytes',()=>{
+   const p='ops/ro-stack/ro-stack.ps1',file=path.join(f.root,p),old=fs.readFileSync(file);
+   fs.writeFileSync(file,'approved Web lifecycle');
+   try {
+     const manifest={files:f.m.lifecycle_files.map(item=>({
+       path:item.path,production_preimage_sha256:digest(path.join(f.root,item.path))
+     }))};
+     assert.equal(f.inspect({stagedWebManifest:manifest}).eligible,true);
+     assert.throws(()=>verifyLifecyclePins(f.root,f.m.lifecycle_files,{files:manifest.files.filter(row=>row.path!==p)}),/STAGED_WEB_LIFECYCLE_PREIMAGE_CHANGED/);
+     assert.throws(()=>verifyLifecyclePins(f.root,f.m.lifecycle_files,{files:manifest.files.map(row=>row.path===p?{...row,production_preimage_sha256:'0'.repeat(64)}:row)}),/STAGED_WEB_LIFECYCLE_PREIMAGE_CHANGED/);
+     rejected(f,{},/PINNED_CONTENT_CHANGED/);
+   } finally { fs.writeFileSync(file,old); }
+ });
  await test('unapproved supersession blocks',()=>{f.comparison.capabilities[0].classification='INTENTIONALLY_SUPERSEDED';f.write('build/capability-comparison.json',f.comparison);f.m.capability_comparison=f.pin('capability-comparison.json');f.rewrite();rejected(f,{},/SUPERSET/);});
  await test('isolated Native replacement to Web continuation and final receipt',async()=>{
    const x=fixture(),actions=[];let running=true;

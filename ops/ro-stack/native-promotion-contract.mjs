@@ -47,6 +47,19 @@ export function pinned(base, ref) {
   check(fs.existsSync(file) && equalHash(digest(file), ref.sha256), 'PINNED_CONTENT_CHANGED');
   return file;
 }
+export function verifyLifecyclePins(root, pins, stagedWebManifest) {
+  if (!stagedWebManifest) {
+    for (const item of pins) pinned(root, item);
+    return;
+  }
+  const rows = new Map(stagedWebManifest.files.map(row => [row.path, row]));
+  for (const item of pins) {
+    const row = rows.get(item.path);
+    check(row?.production_preimage !== 'ABSENT' &&
+      equalHash(row?.production_preimage_sha256, digest(boundedPath(root, item.path))),
+      'STAGED_WEB_LIFECYCLE_PREIMAGE_CHANGED');
+  }
+}
 export function git(root, ...args) {
   const r = spawnSync('git', args, { cwd: root, encoding: 'utf8', windowsHide: true, timeout: 30000 });
   check(r.status === 0, `GIT_${args[0]}_FAILED`); return r.stdout.trim();
@@ -133,7 +146,7 @@ export function evaluateNative({ manifest: m, build: b, authority, reachable, so
   return { eligible: !errors.length, errors };
 }
 
-export function inspectNativeCandidate({ file, sha256, root, state, authority, mode = 'precheck', lease, owner, leaseId, runtime, webCapabilities = [], webRoot, webSha, remoteVerifier = verifyNativeRemote }) {
+export function inspectNativeCandidate({ file, sha256, root, state, authority, mode = 'precheck', lease, owner, leaseId, runtime, webCapabilities = [], webRoot, webSha, stagedWebManifest, remoteVerifier = verifyNativeRemote }) {
   check(equalHash(digest(file), sha256), 'NATIVE_MANIFEST_TAMPERED');
   const m = readJson(file), base = path.dirname(file);
   const buildFile = pinned(base, m.build_receipt), build = readJson(buildFile), buildBase = path.dirname(buildFile);
@@ -193,7 +206,9 @@ export function inspectNativeCandidate({ file, sha256, root, state, authority, m
   // Pin all existing lifecycle inputs. No launcher/config reconstruction at deploy time.
   check(m.lifecycle_files?.length >= 5 && ['ops/ro-stack/ro-stack.ps1','ops/ro-stack/stack.config.psd1',
     'ops/ro-stack/runtime-guard.ps1','ops/ro-stack/runtime-guard.lib.ps1','ops/ro-stack/graceful-console-signal.ps1'].every(p => m.lifecycle_files.some(x => x.path === p)), 'LIFECYCLE_PINS_REQUIRED');
-  for (const item of m.lifecycle_files) pinned(root, item);
+  // After a verified Web stage, the next complete manifest pins current Web
+  // preimages. Initial Native admission still uses its original lifecycle pins.
+  verifyLifecyclePins(root, m.lifecycle_files, stagedWebManifest);
   const result = evaluateNative({ manifest:m,build,authority,reachable,sourceClean,artifactsValid,regressionValid,
     capabilities:{pass:capsPass},rollbackValid,state,lease,owner,leaseId,manifestHash:sha256,mode,runtime });
   return { ...result, manifest:m, build, source, capability_rows:rows, regression_groups:Object.keys(groups),
