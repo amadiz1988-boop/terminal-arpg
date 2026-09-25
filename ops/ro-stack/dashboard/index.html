@@ -506,17 +506,21 @@
         ><button data-tab="system">系統</button>
       </nav>
       <section id="hunt" class="panel active" data-pet-anchor="automation">
-        <div class="ro-subtabs" role="tablist" aria-label="掛機" data-subtabs="hunt">
-          <button type="button" role="tab" class="active" data-subtab="monitor">監控</button
-          ><button type="button" role="tab" data-subtab="settings">設定</button>
+        <div class="hunt-toolbar">
+          <div class="ro-subtabs" role="tablist" aria-label="掛機" data-subtabs="hunt">
+            <button type="button" role="tab" class="active" data-subtab="monitor">監控</button
+            ><button type="button" role="tab" data-subtab="settings">設定</button>
+          </div>
+          <div class="hunt-actions">
+            <button id="start" type="button" class="hunt-action primary">玩家狩獵</button
+            ><button id="stop" type="button" class="hunt-action">角色自主</button
+            ><button id="openWorldMap" type="button" class="hunt-action">彩虹橋</button>
+          </div>
         </div>
         <section class="window combat-window" data-pet-anchor="combat-log" data-subtab-group="monitor">
-          <div class="titlebar log-action-bar">
-            <span>LOG</span
-            ><button id="start" type="button" class="log-action primary">玩家狩獵</button
-            ><button id="stop" type="button" class="log-action">角色自主</button
-            ><button id="openWorldMap" type="button" class="log-action">彩虹橋</button
-            ><span id="logLatency" class="log-latency">即時</span>
+          <div class="titlebar log-titlebar">
+            <span>LOG</span><span id="logMapPosition" class="log-map-position">等待角色位置</span
+            ><span id="logLatency">即時</span>
           </div>
           <div class="console" id="log">正在連接真實戰鬥紀錄...</div>
           <div

@@ -35,11 +35,17 @@ test('monitor order is LOG, merged statistics, minimap last', () => {
   assert.ok(log > 0 && log < stats && stats < map && map < settings);
 });
 
-test('LOG header carries the three existing actions under new labels', () => {
-  const bar = hunt.slice(hunt.indexOf('log-action-bar'), hunt.indexOf('id="log"'));
-  const labels = [...bar.matchAll(/<button id="(start|stop|openWorldMap)"[^>]*>([^<]+)</g)]
+test('hunt toolbar carries the three existing actions; LOG header shows map and latency', () => {
+  const toolbar = hunt.slice(hunt.indexOf('hunt-toolbar'), hunt.indexOf('data-subtab-group="monitor"'));
+  assert.match(toolbar, /data-subtabs="hunt"/);
+  const labels = [...toolbar.matchAll(/<button id="(start|stop|openWorldMap)"[^>]*>([^<]+)</g)]
     .map((match) => [match[1], match[2]]);
   assert.deepEqual(labels, [['start', '玩家狩獵'], ['stop', '角色自主'], ['openWorldMap', '彩虹橋']]);
+  const logBar = hunt.slice(hunt.indexOf('log-titlebar'), hunt.indexOf('id="log"'));
+  assert.match(logBar, /id="logMapPosition"/);
+  assert.match(logBar, /id="logLatency"/);
+  assert.doesNotMatch(logBar, /<button/);
+  assert.match(app, /\$\('#logMapPosition'\)\.textContent =/);
   assert.match(app, /\$\('#start'\)\.textContent = '玩家狩獵'/);
   assert.match(app, /\$\('#stop'\)\.textContent = '角色自主'/);
   for (const old of ['自動戰鬥控制', '開始指定掛機', '停止掛機', '更換掛機地圖', '本次掛機拾取統計'])

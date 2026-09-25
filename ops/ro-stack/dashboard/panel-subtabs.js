@@ -1,8 +1,8 @@
 (() => {
   // Second-level tabs inside a main panel (掛機 監控/設定, 系統設定 categories).
-  // A bar [data-subtabs] switches its sibling [data-subtab-group] elements.
+  // A bar [data-subtabs] switches the [data-subtab-group] children of its panel.
   function select(bar, name) {
-    const panel = bar.parentElement;
+    const panel = bar.closest('.panel') ?? bar.parentElement;
     for (const button of bar.querySelectorAll('[data-subtab]')) {
       const active = button.dataset.subtab === name;
       button.classList.toggle('active', active);

@@ -4641,6 +4641,9 @@ function updateMinimapTargets(live, options = {}) {
     : compactMinimapViewport()
       ? `${mapNames[live.map] ?? live.map} (${live.playerX}, ${live.playerY})`
       : `${mapNames[live.map] ?? live.map} (${live.playerX}, ${live.playerY}) · 視野怪物 ${retainStale ? (minimapLive?.monsters?.length ?? monsters.length) : monsters.length}${retainStale ? ' · 狀態更新延遲' : ''}`;
+  $('#logMapPosition').textContent = mapFieldError
+    ? `${mapNames[live.map] ?? live.map} · ${mapFieldError}`
+    : `${mapNames[live.map] ?? live.map} (${live.playerX}, ${live.playerY})`;
   noteMinimapFreshness(live);
   startMinimapFreshnessClock();
   renderMinimapFreshness();
