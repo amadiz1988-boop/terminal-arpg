@@ -3181,7 +3181,9 @@ async function reconcileRelocations() {
         const queued = await queueOwnershipCommand(account, charId,
           { action: 'world_map_teleport', expectedRevision: revision },
           { targetMap: pending.targetMap, kind: pending.kind,
-            anchorX: pending.landing.x, anchorY: pending.landing.y });
+            anchorX: pending.landing.x, anchorY: pending.landing.y,
+            ...(nativeSupplyPolicyCommandEnabled && pending.kind === 'farm'
+              ? { supplyPolicy: await loadNativeSupplyPolicy(account) } : {}) });
         pending.commandId = queued.commandId;
         pending.stage = 'WAIT_WORLD_MAP_ARRIVAL';
         pending.attempts = 0;
@@ -3509,7 +3511,9 @@ async function queuePlayerWorldMapTeleport(account, controller, requestedMapId,
             ? { nextFarmMap: mapId } : null)
         : await queueOwnershipCommand(account, charId,
           { action: 'world_map_teleport', expectedRevision: Number(controller.revision) },
-          { targetMap: mapId, kind, anchorX: row.landing.x, anchorY: row.landing.y });
+          { targetMap: mapId, kind, anchorX: row.landing.x, anchorY: row.landing.y,
+            ...(nativeSupplyPolicyCommandEnabled && kind === 'farm'
+              ? { supplyPolicy: await loadNativeSupplyPolicy(account) } : {}) });
     } catch (error) {
       if (!recovering) await clearPersistedRelocation(account);
       throw error;
