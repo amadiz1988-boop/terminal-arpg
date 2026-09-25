@@ -77,12 +77,29 @@ const patch=exactM1ConfigPatch(oldConfig,sourceConfig,policy);
 assert.deepEqual(patch.changes.map(x=>x.rollback),['REMOVE','REMOVE','REMOVE']);pass('exact three-key ABSENT to true and REMOVE rollback contract');
 assert.equal(patch.bytes.toString().replace(policy.changes.map(k=>`  ${k} = $true\n`).join(''),''),oldConfig.toString());pass('rollback removes only three inserted lines');
 assert.throws(()=>exactM1ConfigPatch(Buffer.from(oldConfig.toString().replace('123','124')),sourceConfig,policy),/M1_CONFIG_DIGEST_CHANGED/);pass('old config hash drift blocked');
+assert.throws(()=>exactM1ConfigPatch(oldConfig,sourceConfig,{...policy,changes:policy.changes.slice(0,2)}),/UNCLASSIFIED_SOURCE_CONFIG_VARIANCE/);pass('two of three keys refused');
+const extraSource=Buffer.from(sourceConfig.toString().replace('}\n','  RO_TEST_FIXTURE_COMMANDS_ENABLED = $false\n}\n'));
+assert.throws(()=>exactM1ConfigPatch(oldConfig,extraSource,{...policy,source_config_sha256:hash(extraSource)}),/UNCLASSIFIED_SOURCE_CONFIG_VARIANCE/);pass('generic fixture switch refused as fourth key');
 assert.throws(()=>exactM1ConfigPatch(oldConfig,Buffer.from(sourceConfig.toString().replace('Preserved = 123','Preserved = 124')),{...policy,source_config_sha256:hash(Buffer.from(sourceConfig.toString().replace('Preserved = 123','Preserved = 124')))}),/UNCLASSIFIED_SOURCE_CONFIG_VARIANCE/);pass('unclassified source variance blocked');
 {
   const x=fixture();try{
     const before=hash(fs.readFileSync(x.config));const report=await run(x);
     assert.equal(report.action,'DRY_RUN');assert.equal(hash(fs.readFileSync(x.config)),before);
     assert.deepEqual(x.actions,['native:snapshot']);pass('dry-run is read-only and bounded');
+  }finally{x.cleanup();}
+}
+{
+  const x=fixture();try{
+    const lease=path.join(x.root,'.local/ro-stack/production-deployment-lease/lease.json');
+    const value=JSON.parse(fs.readFileSync(lease));value.lease_id='wrong';fs.writeFileSync(lease,JSON.stringify(value));
+    await assert.rejects(run(x),/ACTIVE_LEASE_IDENTITY_MISMATCH/);pass('wrong lease blocked');
+  }finally{x.cleanup();}
+}
+{
+  const x=fixture();try{
+    put(x.root,`.local/ro-stack/runtime-config-rollback-${leaseId}-m1-v15.psd1`,oldConfig);
+    await assert.rejects(run(x,{execute:true}),/ROLLBACK_SNAPSHOT_CONFLICT/);
+    assert.deepEqual(fs.readFileSync(x.config),oldConfig);pass('existing rollback snapshot blocks apply');
   }finally{x.cleanup();}
 }
 {
