@@ -47,6 +47,33 @@ export function pinned(base, ref) {
   check(fs.existsSync(file) && equalHash(digest(file), ref.sha256), 'PINNED_CONTENT_CHANGED');
   return file;
 }
+// A runtime config reconciliation remains valid through a same-lease Native
+// amendment when its config bytes are unchanged and every intervening Native
+// amendment has an intact audit receipt. The original receipt is immutable.
+export function runtimeConfigNativeLineageValid(root, lease, pending, receiptNativeSha) {
+  if (receiptNativeSha === lease.native_deploy_git_sha) return true;
+  const history = lease.native_candidate_amendments;
+  if (!Array.isArray(history) || !Array.isArray(pending.native_candidate_amendments) ||
+      JSON.stringify(history) !== JSON.stringify(pending.native_candidate_amendments) ||
+      lease.active_native_candidate?.deployed !== true ||
+      lease.active_native_candidate.native_git_sha !== lease.native_deploy_git_sha)
+    return false;
+  const start = history.findIndex(entry => entry.old_native_git_sha === receiptNativeSha);
+  if (start < 0) return false;
+  let previous = receiptNativeSha;
+  for (const entry of history.slice(start)) {
+    if (entry.old_native_git_sha !== previous) return false;
+    try {
+      const audit = readJson(pinned(root, { path: entry.audit_receipt, sha256: entry.audit_sha256 }));
+      if (audit.lease_id !== lease.lease_id || audit.lease_owner !== lease.owner_task_id ||
+          audit.old_native_git_sha !== entry.old_native_git_sha ||
+          audit.new_native_git_sha !== entry.new_native_git_sha || audit.reason !== entry.reason)
+        return false;
+    } catch { return false; }
+    previous = entry.new_native_git_sha;
+  }
+  return previous === lease.native_deploy_git_sha;
+}
 export function stagedRuntimeConfigPin(root, state, lease) {
   const ref = state.runtime_config_reconciliation;
   if (!ref) return null;
@@ -58,7 +85,7 @@ export function stagedRuntimeConfigPin(root, state, lease) {
   check(receipt.schema_version === 'runtime-config-reconciliation-v1' &&
     receipt.classification === 'RUNTIME_CONFIG_RECONCILED' &&
     receipt.lease_id === lease.lease_id && receipt.lease_owner === lease.owner_task_id &&
-    receipt.native_git_sha === lease.native_deploy_git_sha &&
+    runtimeConfigNativeLineageValid(root, lease, pending, receipt.native_git_sha) &&
     receipt.config_source_path === 'ops/ro-stack/stack.config.psd1' &&
     receipt.unrelated_config_change_count === 0 &&
     equalHash(receipt.new_config_digest, digest(boundedPath(root,receipt.config_source_path))),

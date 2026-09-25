@@ -5,7 +5,7 @@ import path from 'node:path';
 import os from 'node:os';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { evaluateNative,inspectNativeCandidate,nativeReceiptValid,nativeReceiptPath,nativeArtifacts,NATIVE_REPOSITORY,groups,verifyNativeStage,verifyLifecyclePins,stagedRuntimeConfigPin } from '../native-promotion-contract.mjs';
+import { evaluateNative,inspectNativeCandidate,nativeReceiptValid,nativeReceiptPath,nativeArtifacts,NATIVE_REPOSITORY,groups,verifyNativeStage,verifyLifecyclePins,stagedRuntimeConfigPin,runtimeConfigNativeLineageValid } from '../native-promotion-contract.mjs';
 import { evaluatePromotion,capabilityRegistry } from '../production-promotion-gate.mjs';
 import { receiptComplete,commitAcceptedBaseline } from '../production-deployment-state.mjs';
 import { executeNative, finalizeRunningNativeStage, NATIVE_STAGE_PHASE, reconciledPrefix } from '../deploy-native-candidate.mjs';
@@ -119,6 +119,23 @@ try {
      assert.throws(()=>stagedRuntimeConfigPin(f.root,{...state,runtime_config_reconciliation_sha256:'0'.repeat(64)},f.lease),/RUNTIME_CONFIG_RECEIPT_REFERENCE_MISMATCH/);
      assert.throws(()=>verifyLifecyclePins(f.root,f.m.lifecycle_files,manifest),/PINNED_CONTENT_CHANGED/);
    } finally { fs.writeFileSync(file,old); }
+ });
+ await test('runtime config pin follows only an intact same-lease Native amendment chain',()=>{
+   const x=fixture(),next='b'.repeat(40),auditPath='.local/ro-stack/native-amendment-audit.json';
+   const audit={lease_id:x.lease.lease_id,lease_owner:x.lease.owner_task_id,
+     old_native_git_sha:x.sha,new_native_git_sha:next,reason:'M1_INVENTORY_MAINTENANCE_V1'};
+   x.write(auditPath,audit);
+   const entry={old_native_git_sha:x.sha,new_native_git_sha:next,reason:audit.reason,
+     audit_receipt:auditPath,audit_sha256:digest(path.join(x.root,auditPath))};
+   const lease={...x.lease,native_deploy_git_sha:next,native_candidate_amendments:[entry],
+     active_native_candidate:{native_git_sha:next,deployed:true}};
+   const pending={native_candidate_amendments:[entry]};
+   assert.equal(runtimeConfigNativeLineageValid(x.root,lease,pending,x.sha),true);
+   assert.equal(runtimeConfigNativeLineageValid(x.root,lease,pending,'c'.repeat(40)),false);
+   assert.equal(runtimeConfigNativeLineageValid(x.root,lease,
+     {native_candidate_amendments:[]},x.sha),false);
+   x.write(auditPath,{...audit,reason:'UNAPPROVED'});
+   assert.equal(runtimeConfigNativeLineageValid(x.root,lease,pending,x.sha),false);
  });
  await test('unapproved supersession blocks',()=>{f.comparison.capabilities[0].classification='INTENTIONALLY_SUPERSEDED';f.write('build/capability-comparison.json',f.comparison);f.m.capability_comparison=f.pin('capability-comparison.json');f.rewrite();rejected(f,{},/SUPERSET/);});
  await test('isolated Native replacement to Web continuation and final receipt',async()=>{
