@@ -6,7 +6,7 @@ import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { admission, readManifest, validateHeader } from './web-complete-manifest.mjs';
+import { admission, readManifest, validateHeader, legacyLauncherPath, legacyLauncherPreimageSha } from './web-complete-manifest.mjs';
 import { FIRST_PROMOTION, firstPromotionEvidence, legacyIdentity, pendingPath, consumedPath, readJson } from './legacy-production-baseline.mjs';
 import { nativeReceiptValid, activeNativeReceiptPath, equalHash } from './native-promotion-contract.mjs';
 import { capabilityRegistry } from './production-promotion-gate.mjs';
@@ -20,6 +20,12 @@ const digest = file => createHash('sha256').update(fs.readFileSync(file)).digest
 const fail = code => { throw Error(code); };
 const approvedAdditivePaths = new Map([
   ['LOCAL_DEVELOPER_ADMIN_ENTRYPOINT_ADDITIVE_MANIFEST_V1', 'ops/ro-stack/developer-admin-action.mjs'],
+]);
+const approvedLegacyAdoption = new Map([
+  ['M1_LEGACY_LAUNCHER_GITHUB_FIRST_RECONCILIATION_V1', {
+    path:legacyLauncherPath,
+    preimage:legacyLauncherPreimageSha,
+  }],
 ]);
 const run = (cwd, command, args) => {
   const result = spawnSync(command, args, { cwd, encoding:'utf8', windowsHide:true, timeout:120000, maxBuffer:16*1024*1024 });
@@ -78,7 +84,7 @@ export function validateManifestDelta(oldManifest, nextManifest, reason, rollbac
   if (oldRows.size!==oldManifest.files.length || nextRows.size!==nextManifest.files.length)
     fail('MANIFEST_DELTA_DUPLICATE_PATH');
   const delta={unchanged_paths:[],modified_existing_paths:[],added_paths:[],removed_paths:[],
-    absent_preimage_paths:[],rollback_remove_paths:[]};
+    absent_preimage_paths:[],rollback_remove_paths:[],rollback_restore_paths:[]};
   for (const [path,oldRow] of oldRows) {
     const nextRow=nextRows.get(path);
     if (!nextRow) { delta.removed_paths.push(path); continue; }
@@ -90,13 +96,22 @@ export function validateManifestDelta(oldManifest, nextManifest, reason, rollbac
   for (const [path,row] of nextRows) {
     if (oldRows.has(path)) continue;
     delta.added_paths.push(path);
-    if (row.production_preimage!=='ABSENT' || row.production_preimage_sha256)
-      fail(`ADDED_WEB_PREIMAGE_NOT_ABSENT:${path}`);
-    delta.absent_preimage_paths.push(path);
-    delta.rollback_remove_paths.push(path);
+    const legacy=approvedLegacyAdoption.get(reason);
+    if (legacy && path===legacy.path && row.production_preimage_class==='EXISTING_LEGACY_PRODUCTION_PREIMAGE' &&
+        row.production_preimage!=='ABSENT' && equalHash(row.production_preimage_sha256,legacy.preimage)) {
+      delta.rollback_restore_paths.push(path);
+    } else {
+      if (row.production_preimage!=='ABSENT' || row.production_preimage_sha256)
+        fail(`ADDED_WEB_PREIMAGE_NOT_ABSENT:${path}`);
+      delta.absent_preimage_paths.push(path);
+      delta.rollback_remove_paths.push(path);
+    }
   }
   const approved=approvedAdditivePaths.get(reason);
-  if (approved ? delta.added_paths.length!==1 || delta.added_paths[0]!==approved : delta.added_paths.length!==0)
+  const legacy=approvedLegacyAdoption.get(reason);
+  if (approved ? delta.added_paths.length!==1 || delta.added_paths[0]!==approved :
+      legacy ? delta.added_paths.length!==1 || delta.added_paths[0]!==legacy.path || delta.rollback_restore_paths.length!==1 :
+      delta.added_paths.length!==0)
     fail('WEB_MANIFEST_ADDITION_UNAPPROVED');
   if (!rollbackCovered) fail('WEB_MANIFEST_ROLLBACK_COVERAGE_MISSING');
   return delta;
@@ -155,7 +170,8 @@ export function planActiveWebAmendment({root,owner,leaseId,oldSha,newSha,newMani
     modified_existing_path_count:classified.modified_existing_paths.length,
     added_paths:classified.added_paths,removed_paths:classified.removed_paths,
     absent_preimage_paths:classified.absent_preimage_paths,
-    rollback_remove_paths:classified.rollback_remove_paths};
+    rollback_remove_paths:classified.rollback_remove_paths,
+    rollback_restore_paths:classified.rollback_restore_paths};
   const remoteCheckout=run(nextManifest.candidate_root,'git',['rev-parse','HEAD'])===newSha &&
     !run(nextManifest.candidate_root,'git',['status','--porcelain=v1','--untracked-files=all']);
   const offline=run(nextManifest.candidate_root,'node',['scripts/test-canonical-web-offline.mjs']);
