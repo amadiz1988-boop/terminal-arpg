@@ -72,7 +72,7 @@ export function expectedPayload(candidateRoot,sha,assetManifest,{audit=false}={}
   const tracked=new Set(git(candidateRoot,'ls-tree','-r','--name-only',sha,'--','ops/ro-stack','public/ro','docs').split('\n').filter(Boolean));
   const assets=new Map(assetManifest.assets.map(x=>[x.relative_path,x]));
   const wanted=new Set([...tracked].filter(p=>!/(?:^|\/)(?:tests?|poc)(?:[-./]|$)/i.test(p)).filter(p=>/^(ops\/ro-stack\/(dashboard\/)|public\/ro\/|docs\/ro-asset-index\/)/.test(p) ||
-    ['ops/ro-stack/dashboard.mjs','docs/ro-floor-theme-asset-index.json','docs/project-control/canonical-test-fixtures.json'].includes(p)));
+    ['ops/ro-stack/dashboard.mjs','ops/ro-stack/developer-admin-action.mjs','docs/ro-floor-theme-asset-index.json','docs/project-control/canonical-test-fixtures.json'].includes(p)));
   for(const p of assets.keys())wanted.add(p);
   // Closure discovery reads only the canonical candidate, never Production.
   const closure=runtimeClosure({files:[...wanted].map(path=>({path}))},candidateRoot,candidateRoot,true);

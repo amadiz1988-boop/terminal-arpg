@@ -4,7 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
-import {schema,policy,manifestDigest,validateHeader,validateFiles,validateAuthority,assertLeaseManifest,verifyWebReceipt,receiptIdentity,verifyDeployed} from '../web-complete-manifest.mjs';
+import {schema,policy,manifestDigest,validateHeader,validateFiles,validateAuthority,assertLeaseManifest,verifyWebReceipt,receiptIdentity,verifyDeployed,expectedPayload,git} from '../web-complete-manifest.mjs';
 import {digest} from '../legacy-production-baseline.mjs';
 import {commitAcceptedBaseline} from '../production-deployment-state.mjs';
 import {runtimeClosure} from '../manifest-runtime-closure.mjs';
@@ -29,6 +29,22 @@ function fixture(n){
 function invoke(f,...args){const r=spawnSync('pwsh',['-NoProfile','-File',tool,'-Manifest',f.file,'-ProductionRoot',f.production,'-OwnerTaskId','fixture','-TestMode',...args],{encoding:'utf8',windowsHide:true,maxBuffer:16*1024*1024});assert.ok(r.stdout, r.stderr);return {...r,json:JSON.parse(r.stdout)};}
 const mutated=(f,fn)=>{const m=structuredClone(f.m);fn(m);seal(m);return m;};
 try{
+ const sourceRoot=fileURLToPath(new URL('../../../',import.meta.url));
+ const sourceAssets=JSON.parse(fs.readFileSync(path.join(sourceRoot,'docs/project-control/web-runtime-assets-manifest-v1.json'),'utf8'));
+ const sourceSet=expectedPayload(sourceRoot,git(sourceRoot,'rev-parse','HEAD'),sourceAssets,{audit:true});
+ test('developer Admin action exact path is required',()=>assert.ok(sourceSet.paths.includes('ops/ro-stack/developer-admin-action.mjs')));
+ test('unrelated ops script is not automatically admitted',()=>assert.ok(!sourceSet.paths.includes('ops/ro-stack/amend-active-web-candidate.mjs')));
+ const action=fixture(2),actionPath='ops/ro-stack/developer-admin-action.mjs';
+ const actionSource=write(path.join(action.candidate,actionPath),'export const action=true;');
+ action.m.files.push({path:actionPath,relative_path:actionPath,sha256:digest(actionSource),candidate_sha256:digest(actionSource),size:fs.statSync(actionSource).size,source_class:'GIT_SOURCE',production_preimage:'ABSENT'});
+ seal(action.m);action.expected.paths.push(actionPath);action.expected.tracked.add(actionPath);
+ test('developer Admin action preimage and rollback coverage pass',()=>{
+  const result=validateFiles(action.m,{candidateRoot:action.candidate,productionRoot:action.production,expected:action.expected});
+  assert.equal(result.ROLLBACK_COVERAGE_FILE_COUNT,action.m.files.length);
+  assert.equal(result.ROLLBACK_UNCOVERED_PATH_COUNT,0);
+ });
+ test('missing developer Admin action fails exact-set admission',()=>assert.throws(()=>validateFiles(mutated(action,m=>m.files.pop()),{candidateRoot:action.candidate,productionRoot:action.production,expected:action.expected}),/COMPLETE_PAYLOAD_SET_MISMATCH/));
+ test('unrelated extra ops script fails exact-set admission',()=>assert.throws(()=>validateFiles(mutated(action,m=>m.files.push({...m.files.at(-1),path:'ops/ro-stack/amend-active-web-candidate.mjs',relative_path:'ops/ro-stack/amend-active-web-candidate.mjs'})),{candidateRoot:action.candidate,productionRoot:action.production,expected:action.expected}),/COMPLETE_PAYLOAD_SET_MISMATCH/));
  const fixtures=[255,256,394,5108].map(fixture);
  for(const f of fixtures)test(`${f.m.file_count} files complete preflight`,()=>{const r=validateFiles(f.m,{candidateRoot:f.candidate,productionRoot:f.production,expected:f.expected});assert.equal(r.PRESTAGE_FILE_COUNT,f.m.file_count);assert.equal(r.ROLLBACK_UNCOVERED_PATH_COUNT,0);});
  const f=fixtures[0],options={candidateRoot:f.candidate,productionRoot:f.production,expected:f.expected};
