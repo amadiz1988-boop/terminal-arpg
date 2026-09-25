@@ -9210,7 +9210,7 @@ function playerAutomationStatus(status) {
 function playerAutomationBlockedReason(status) {
   const blockers = status?.actionBlockers ?? {};
   if (blockers.startFarm === 'farm_target_unresolved')
-    return '此角色尚未設定伺服器可受理的掛機地圖，請先更換掛機地圖。';
+    return '此角色尚未設定伺服器可受理的掛機地圖，請先使用彩虹橋選擇地圖。';
   if (blockers.startFarm === 'task_already_active') return '掛機正在進行中。';
   if (blockers.startFarm === 'rollout_not_allowlisted')
     return '此角色目前尚未開放自動掛機。';
@@ -9256,8 +9256,8 @@ function applyControllerUi(status) {
   badge.dataset.liveReason = live?.reason ?? '';
   badge.dataset.supplyItemAmount = live ? String(live.supplyItemAmount ?? '') : '';
   claim.hidden = !(canaryView && status.actions?.claim === true);
-  $('#start').textContent = '開始指定掛機';
-  $('#stop').textContent = '停止掛機';
+  $('#start').textContent = '玩家狩獵';
+  $('#stop').textContent = '角色自主';
   if (!canaryView) {
     notice.textContent = '';
     return;

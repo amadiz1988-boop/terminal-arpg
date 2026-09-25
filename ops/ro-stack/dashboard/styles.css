@@ -4847,3 +4847,96 @@ html {
   padding: 0.55rem 0.8rem;
 }
 .support-debug-banner button { margin-left: auto; }
+
+/* Second-level tabs (掛機 監控/設定, 掛機設定 categories, 系統設定).
+   Same RO look as the chat channel strip; scrolls horizontally on phones. */
+.ro-subtabs {
+  display: flex;
+  overflow-x: auto;
+  /* Size from the parent so eight tabs scroll instead of widening the page. */
+  contain: inline-size;
+  min-width: 0;
+  scrollbar-width: thin;
+  border: 1px solid #748394;
+  background: #cbd2d6;
+}
+.ro-subtabs button {
+  flex: 0 0 auto;
+  min-width: 64px;
+  min-height: 32px;
+  padding: 4px 14px;
+  border: 0;
+  border-right: 1px solid #91a0aa;
+  border-bottom: 2px solid transparent;
+  background: linear-gradient(#eef1f2, #c4ccd1);
+  color: #24394d;
+  font-size: 13px;
+  cursor: pointer;
+}
+.ro-subtabs button.active {
+  border-bottom-color: #356da3;
+  background: #fff;
+  color: #173f70;
+  font-weight: bold;
+}
+[data-subtab-group][hidden],
+.config-panel[hidden] {
+  display: none !important;
+}
+.config-setting-tabs {
+  margin-top: 8px;
+}
+/* LOG header doubles as the hunting action bar. */
+#game .log-action-bar {
+  align-items: center;
+  gap: 4px;
+}
+#game .log-action-bar > :first-child {
+  margin-right: 4px;
+}
+#game .log-action-bar > .log-action {
+  margin-left: 0;
+}
+.log-action {
+  min-height: 21px;
+  padding: 1px 10px;
+  border: 1px solid #405b79;
+  background: linear-gradient(#fff, #cbd4dc);
+  color: #1f3954;
+  font-size: 12px;
+  font-weight: bold;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.log-action.primary {
+  background: linear-gradient(#e9fff2, #9fd8b7);
+}
+.log-action:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+#game .log-action-bar > .log-latency {
+  margin-left: auto;
+  font-weight: normal;
+  font-size: 12px;
+}
+.hunt-stats-window .session-grid {
+  border-top: 0;
+}
+.hunt-stats-window .loot-summary {
+  border-top: 1px solid #a0a9ad;
+}
+@media (max-width: 520px) {
+  .log-action {
+    min-height: 32px;
+    padding: 2px 9px;
+    font-size: 13px;
+  }
+  #game .log-action-bar {
+    min-height: 40px;
+  }
+  .ro-subtabs button {
+    min-width: 56px;
+    padding: 4px 10px;
+  }
+}

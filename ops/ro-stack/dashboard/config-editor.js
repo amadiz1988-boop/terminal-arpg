@@ -12,6 +12,7 @@ import {
 } from './config-schema.mjs';
 import { CONFIG_SECTIONS, configCapability, configCapabilityCounts, configControlVisible,
   configRowFieldSupported, configSection } from './config-capabilities.mjs';
+import { CONFIG_SETTING_TABS, settingTabForSection } from './config-setting-tabs.mjs';
 
 const $ = (root, selector) => root.querySelector(selector);
 const text = (value) => String(value ?? '');
@@ -201,12 +202,44 @@ function render(root, state, context) {
   capabilityNote.className = 'config-editor-status';
   capabilityNote.textContent = `可設定 ${counts.SUPPORTED} 項；待支援 ${counts.PARTIAL} 項；尚未開放 ${counts.UNAVAILABLE} 項。停用欄位不會送出變更。`;
   root.append(capabilityNote);
+  // One tab per setting category; all panels stay in the DOM so values and
+  // unsaved edits survive switching.
+  const activeTab = CONFIG_SETTING_TABS.some((tab) => tab.id === root.dataset.settingTab)
+    ? root.dataset.settingTab : CONFIG_SETTING_TABS[0].id;
+  const tabBar = document.createElement('div');
+  tabBar.className = 'ro-subtabs config-setting-tabs';
+  tabBar.setAttribute('role', 'tablist');
+  tabBar.setAttribute('aria-label', '掛機設定分類');
+  for (const tab of CONFIG_SETTING_TABS) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.setAttribute('role', 'tab');
+    button.dataset.settingTab = tab.id;
+    button.textContent = tab.label;
+    button.classList.toggle('active', tab.id === activeTab);
+    button.setAttribute('aria-selected', String(tab.id === activeTab));
+    button.addEventListener('click', () => {
+      root.dataset.settingTab = tab.id;
+      for (const other of tabBar.children) {
+        const selected = other === button;
+        other.classList.toggle('active', selected);
+        other.setAttribute('aria-selected', String(selected));
+      }
+      for (const panel of root.querySelectorAll('.config-panel'))
+        panel.hidden = panel.dataset.settingTab !== tab.id;
+    });
+    tabBar.append(button);
+  }
+  root.append(tabBar);
   const tabs = document.createElement('div');
   tabs.className = 'config-tabs';
   const descriptors = Object.values(CONFIG_FORM_SCHEMA);
   for (const sectionName of CONFIG_SECTIONS) {
     const panel = document.createElement('section');
     panel.className = 'config-panel';
+    panel.dataset.settingTab = settingTabForSection(sectionName);
+    panel.dataset.configSection = sectionName;
+    panel.hidden = panel.dataset.settingTab !== activeTab;
     const title = document.createElement('h4');
     title.textContent = sectionName;
     panel.append(title);

@@ -506,14 +506,28 @@
         ><button data-tab="system">系統</button>
       </nav>
       <section id="hunt" class="panel active" data-pet-anchor="automation">
-        <div class="window">
-          <div class="titlebar">
-            <span>自動戰鬥控制</span><span id="status">讀取中</span>
+        <div class="ro-subtabs" role="tablist" aria-label="掛機" data-subtabs="hunt">
+          <button type="button" role="tab" class="active" data-subtab="monitor">監控</button
+          ><button type="button" role="tab" data-subtab="settings">設定</button>
+        </div>
+        <section class="window combat-window" data-pet-anchor="combat-log" data-subtab-group="monitor">
+          <div class="titlebar log-action-bar">
+            <span>LOG</span
+            ><button id="start" type="button" class="log-action primary">玩家狩獵</button
+            ><button id="stop" type="button" class="log-action">角色自主</button
+            ><button id="openWorldMap" type="button" class="log-action">彩虹橋</button
+            ><span id="logLatency" class="log-latency">即時</span>
           </div>
-          <div class="controls">
-            <button id="start" class="primary">開始指定掛機</button
-            ><button id="stop">停止掛機</button
-            ><button id="openWorldMap" type="button">更換掛機地圖</button>
+          <div class="console" id="log">正在連接真實戰鬥紀錄...</div>
+          <div
+            id="damageFloatLayer"
+            class="damage-float-layer"
+            aria-hidden="true"
+          ></div>
+        </section>
+        <div class="window hunt-stats-window" data-subtab-group="monitor">
+          <div class="titlebar">
+            <span>本次掛機統計</span><span id="status">讀取中</span>
           </div>
           <p id="grindTargetSummary" class="notice">掛機目標：尚未設定</p>
           <p id="automationNotice" class="notice"></p>
@@ -530,10 +544,13 @@
             <div><span>人物 EXP</span><b id="baseExpGained">0</b></div>
             <div><span>職業 EXP</span><b id="jobExpGained">0</b></div>
             <div><span>撿取種類</span><b id="itemKinds">0</b></div>
+            <div><span>撿取件數</span><b id="lootTotal">0 件</b></div>
             <div><span>死亡次數</span><b id="deaths">0</b></div>
+            <div><span>補給狀態</span><b id="supplyStage">尚未啟用</b></div>
           </div>
+          <div id="lootSummary" class="loot-summary"><p>尚未撿取物品</p></div>
         </div>
-        <div class="window map-window" data-pet-anchor="map">
+        <div class="window map-window" data-pet-anchor="map" data-subtab-group="monitor">
           <div class="titlebar">
             <span>即時小地圖</span><span id="mapPosition">等待角色位置</span
             ><span
@@ -560,31 +577,14 @@
             </div>
           </div>
         </div>
-        <div class="window">
+        <div class="window supply-window" data-subtab-group="settings" hidden>
           <div class="titlebar">
-            <span>本次掛機拾取統計</span><span id="lootTotal">0 件</span>
-          </div>
-          <div id="lootSummary" class="loot-summary"><p>尚未撿取物品</p></div>
-        </div>
-        <div class="window supply-window">
-          <div class="titlebar">
-            <span>回城補給循環</span><span id="supplyStage">尚未啟用</span>
+            <span>掛機設定</span>
           </div>
           <div id="configEditor" class="config-editor" aria-live="polite">
             <p class="notice">正在讀取角色設定契約…</p>
           </div>
         </div>
-        <section class="window combat-window" data-pet-anchor="combat-log">
-          <div class="titlebar">
-            <span>戰鬥終端</span><span id="logLatency">即時</span>
-          </div>
-          <div class="console" id="log">正在連接真實戰鬥紀錄...</div>
-          <div
-            id="damageFloatLayer"
-            class="damage-float-layer"
-            aria-hidden="true"
-          ></div>
-        </section>
       </section>
       <section id="quests" class="panel" data-pet-anchor="quests">
         <div class="window quest-window">
@@ -1008,7 +1008,15 @@
         </div>
       </section>
       <section id="system" class="panel" data-pet-anchor="system">
-        <div class="window" id="accountSettings">
+        <div class="ro-subtabs" role="tablist" aria-label="系統設定" data-subtabs="system">
+          <button type="button" role="tab" class="active" data-subtab="sound">聲音</button
+          ><button type="button" role="tab" data-subtab="combat-display">戰鬥顯示</button
+          ><button type="button" role="tab" data-subtab="interface">介面／主題</button
+          ><button type="button" role="tab" data-subtab="pet">寵物</button
+          ><button type="button" role="tab" data-subtab="account">帳號</button
+          ><button type="button" role="tab" data-subtab="server">伺服器</button>
+        </div>
+        <div class="window" id="accountSettings" data-subtab-group="account" hidden>
           <div class="titlebar"><span>帳號設定</span><span>登入方式</span></div>
           <div class="discord-account-settings" aria-live="polite">
             <strong>Discord</strong>
@@ -1020,7 +1028,7 @@
             <small id="discordSettingsNotice">Discord 名稱與頭像只用於顯示。</small>
           </div>
         </div>
-        <div class="window">
+        <div class="window" data-subtab-group="sound">
           <div class="titlebar"><span>聲音設定</span><span>帳號共用</span></div>
           <div class="audio-settings">
             <label
@@ -1050,7 +1058,7 @@
             >
           </div>
         </div>
-        <div class="window">
+        <div class="window" data-subtab-group="combat-display" hidden>
           <div class="titlebar"><span>戰鬥顯示</span><span>帳號共用</span></div>
           <div class="audio-settings combat-visual-settings">
             <label
@@ -1175,13 +1183,13 @@
               <span class="damage-preview critical">99</span>
             </div>
             <p>
-              小黑窗即為戰鬥終端可見範圍；拖曳灰色數字可改變位置，拖曳右下角把手可改變大小，滑軌會同步更新。圓點依序標示起點、最高點與終點。原廠素材啟用時，數字不是系統字型，而是直接使用
+              小黑窗即為 LOG 可見範圍；拖曳灰色數字可改變位置，拖曳右下角把手可改變大小，滑軌會同步更新。圓點依序標示起點、最高點與終點。原廠素材啟用時，數字不是系統字型，而是直接使用
               RO 的逐字元 Sprite；暴擊同步使用原廠底圖與白色 EF_HIT2
               放射動畫。<span id="damageAssetStatus">正在檢查原廠傷害素材</span>
             </p>
           </div>
         </div>
-        <div class="window">
+        <div class="window" data-subtab-group="pet" hidden>
           <div class="titlebar"><span>桌面寵物</span><span>帳號共用</span></div>
           <div class="audio-settings pet-settings">
             <label class="audio-check pet-setting-toggle"
@@ -1245,14 +1253,14 @@
             </p>
           </div>
         </div>
-        <div class="window">
+        <div class="window" data-subtab-group="interface" hidden>
           <div class="titlebar"><span>UI 主題</span><span>此裝置</span></div>
           <div class="ui-theme-settings">
             <div id="uiTheme" class="ui-theme-options" role="radiogroup" aria-label="UI 主題"></div>
             <small id="uiThemeStatus" class="ui-theme-status" aria-live="polite" hidden></small>
           </div>
         </div>
-        <div class="window">
+        <div class="window" data-subtab-group="interface" hidden>
           <div class="titlebar"><span>背景設定</span><span>此裝置</span></div>
           <div class="audio-settings floor-theme-settings">
             <label>背景樣式
@@ -1265,7 +1273,7 @@
             </label>
           </div>
         </div>
-        <div class="window">
+        <div class="window" data-subtab-group="server" hidden>
           <div class="titlebar">
             <span>伺服器狀態</span><span id="onlinePlayers">0 人在線</span>
           </div>
@@ -1434,6 +1442,7 @@
     <script src="/original-minimap.js?v=ro-original-minimap-v1" defer></script>
     <script src="/minimap-presence.js?v=ui5-1" defer></script>
     <script type="module" src="/config-editor.js?v=config-v1"></script>
+    <script src="/panel-subtabs.js?v=ia-v1" defer></script>
     <script
       src="/app.js?v=r108-m1-full-superset"
       defer
