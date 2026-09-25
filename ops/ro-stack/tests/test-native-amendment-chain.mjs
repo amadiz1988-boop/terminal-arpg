@@ -12,6 +12,7 @@ import { HISTORICAL_NATIVE_AMENDMENT as old, M1_SECOND_NATIVE_AMENDMENT as polic
   M1_DORMANT_QUARANTINE_RUNTIME_CORRECTION as dormantRecovery,
   M1_DEATH_TOWN_MAINTENANCE_AMENDMENT as deathMaintenance,
   M1_PLAYER_FLY_WING_EFFECT_CORRECTION as playerFlyWing,
+  M1_SUPPLY_COMMAND_ADMISSION_CORRECTION as supplyCommands,
   validateNativeAmendmentHistory, validateHistoricalNativeAnchor, validateNextNativeAmendment,
   applyNextNativeAmendment, deployedNativeRuntimeMatches } from '../native-amendment-chain.mjs';
 import { retirementDecision } from '../native-candidate-amendment.mjs';
@@ -281,6 +282,16 @@ test('player Fly Wing effect correction admits only the item adapter and guard',
     'tools/pa-command-contract/Test-M1V15ExecutorFixture.ps1',
   ]);
   assert.equal(playerFlyWing.sourcePaths.includes('src/map/pc.cpp'), false);
+});
+test('supply command correction admits only contract and its tests', () => {
+  assert.equal(supplyCommands.reason, 'M1_SUPPLY_COMMAND_ADMISSION_V1');
+  assert.deepEqual(supplyCommands.sourcePaths, [
+    'conf/persistent_agent_commands.json',
+    'tools/pa-command-contract/Test-M1V15ExecutorFixture.ps1',
+    'tools/pa-command-contract/Test-PaCommandContract.ps1',
+    'tools/pa-command-contract/contract-test-matrix.json',
+  ]);
+  assert.equal(supplyCommands.sourcePaths.includes('src/map/persistent_agent.cpp'), false);
 });
 {
   const mapHash = 'A'.repeat(64);
