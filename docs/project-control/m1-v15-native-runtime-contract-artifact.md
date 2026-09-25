@@ -1,6 +1,6 @@
 # M1 V15 Native runtime contract artifact gate
 
-Status: source and dry-run proof. This record does not claim Production runtime load or Player acceptance.
+Status: contract deployed and loaded; final Player acceptance blocked at the Web availability endpoint. This record does not claim full promotion.
 
 ## Exact provenance
 
@@ -23,3 +23,12 @@ The production 46-action contract and candidate 47-action contract both passed t
 Use `ops/ro-stack/native-runtime-contract-artifact.mjs` for one-artifact prepare, dry-run, and explicit `--execute true` deploy. It verifies the lease, prior Native receipt, candidate manifest, GitHub tracked blob, exact source bytes, old preimage, allowlist and semantic delta. A deploy keeps a verified exact preimage and immutable receipt under `.local/ro-stack/native-runtime-contract-artifact-<lease>-<native-prefix>/`; failed replacement restores the exact preimage. The tool never restarts a process. Map-server loads this registry at char-server-ready, so runtime adoption requires a controlled canonical Native lifecycle restart with fresh health and ProcDump evidence. The existing queued fixture command has an expired Local Admin session and must be observed as rejected before one newly authenticated command is submitted. Do not claim the old command as confirmed.
 
 Before live continuation, rerun dry-run and the artifact tests. Final acceptance must separately prove runtime load, valid fixture command, 12 settings, 42 gate, Fly/HIT, Supply/HIT, 38 capabilities, Browser desktop/mobile/audio, final release receipt and lease release. A source or dry-run PASS alone leaves Production promotion incomplete.
+
+## Live continuation on 2026-09-25
+
+- `CONTRACT_DEPLOY=PASS`: one allowlisted artifact was installed with receipt SHA-256 `E53A88E003DA68E9C371AC0CDE6D701E668CEE7D15B49AD32CE74CEE254132DB`; installed image `3AF34756EB4DC067167261BD3C25EF8D3AB1FA41C7AAC11E3F567DF5C0D46306` and rollback preimage `9CD430EA279CD93817A0C1501BE7AA3314966C9BF3C204F356B9F8ADC7673FC0` were verified afterward. Lease and pending record point to the same immutable receipt.
+- `RUNTIME_LOAD=PASS`: the existing launcher gracefully stopped map, char, and login, then started one replacement set without replacing binaries. Map startup logged `command contract v1 loaded ... (47 actions)`; new map PID `22988` has SYSTEM ProcDump attached to that same PID. Dashboard and DB stayed running; `/api/health` returned 200 and OpenKore count remained zero.
+- `EXISTING_QUEUED_COMMAND_SAFE_TO_RESUME=NO`: command `e361025c-87de-4f76-aa67-c0473fb43117` was rejected by Native with `m1_fixture_authority_denied` because its Local Admin session had expired. It was not reclassified as success. One fresh authenticated local Admin request created command `e5c46b98-f433-40bf-b819-d58fc92a7db8`, which reached `CONFIRMED` with Native event `PREREQUISITES_READY` for TEST_PLAYER `150105`.
+- `12_SETTINGS_TRANSPORT=SUPPORTED`: authenticated `/api/config` lists all twelve executor paths as `SUPPORTED`, with `controller=SERVER_AGENT` and `reason=SAVED_FOR_NEXT_FARM`. `execution.applied=false`, so no live effect is attested yet.
+- `FIRST_BROKEN_TRANSITION=GET /api/farm-map-availability -> Dashboard handler`: the authenticated endpoint returned a server operation error. Dashboard stderr recorded `ReferenceError: Cannot access 'account' before initialization` at `ops/ro-stack/dashboard.mjs:10510:67`. The handler invokes `playerWorldMapAvailability(account)` before `const account = await resolveRequestAccount()` at line 10754 in the deployed Web candidate. Dashboard/API/Controller ownership routes this fix to workline A; F stopped before altering its Web source or attempting farm destination movement.
+- Promotion remains `LEGACY_PRE_GITHUB_FIRST`, drift `OPEN`, phase `FIRST_PROMOTION_NATIVE_STAGE_COMPLETE`, same ACTIVE F lease. Final receipt, 42-row live gate, Fly/HIT, Supply/HIT, 38-capability product closure and Browser acceptance remain unproven. No finalization or lease release was attempted.
