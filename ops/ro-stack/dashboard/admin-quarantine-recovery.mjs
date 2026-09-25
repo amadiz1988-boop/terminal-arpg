@@ -29,6 +29,14 @@ export function parseRecoveryCharId(value) {
   return id;
 }
 
+export function parseRecoveryRequestId(value) {
+  if (value == null) return randomUUID();
+  if (!COMMAND_PATTERN.test(String(value))) {
+    throw new AdminRecoveryError(422, 'invalid_request_id');
+  }
+  return String(value).toLowerCase();
+}
+
 function parseState(output) {
   if (!output) return null;
   const row = output.split('\t');
@@ -55,14 +63,19 @@ export function createAdminQuarantineRecoveryTransport({ sql, audit, issueGrant 
       WHERE s.char_id=${charId} LIMIT 1;`));
   }
 
-  async function submit({ charId: rawCharId, adminContext, originAllowed, supportSession }) {
+  async function submit({ charId: rawCharId, adminContext, originAllowed, supportSession,
+    requestId: rawRequestId }) {
     const timestamp = Date.now();
     let charId = 0;
     let beforeState = null;
     let commandId = null;
+    let requestId = randomUUID();
     const actor = adminContext?.actorAdminId ?? null;
+    const source = adminContext?.authMethod === 'LOCAL_ADMIN_TOKEN'
+      ? 'LOCAL_DEVELOPER_ACTION' : 'ADMIN_BROWSER';
     try {
       authorizeAdminRecovery({ adminContext, originAllowed, supportSession });
+      if (rawRequestId != null) requestId = parseRecoveryRequestId(rawRequestId);
       charId = parseRecoveryCharId(rawCharId);
       beforeState = await readState(charId);
       if (!beforeState) throw new AdminRecoveryError(404, 'character_not_found');
@@ -76,7 +89,7 @@ export function createAdminQuarantineRecoveryTransport({ sql, audit, issueGrant 
           !Number.isSafeInteger(beforeState.revision)) {
         throw new AdminRecoveryError(409, 'RECOVERY_PRECONDITION_BLOCKED');
       }
-      await audit({ adminIdentity: actor, charId, commandId: null,
+      await audit({ adminIdentity: actor, source, requestId, charId, commandId: null,
         action: ADMIN_RECOVERY_ACTION, beforeState, result: 'ADMITTED', afterState: null, timestamp });
       const sessionId = adminContext.sessionId || randomUUID();
       if (!COMMAND_PATTERN.test(sessionId)) throw new AdminRecoveryError(403, 'admin_auth_required');
@@ -106,22 +119,26 @@ export function createAdminQuarantineRecoveryTransport({ sql, audit, issueGrant 
               AND p.command_status IN ('QUEUED','ACCEPTED'));
         SELECT ROW_COUNT();`);
       if (inserted !== '1') throw new AdminRecoveryError(409, 'COMMAND_ADMISSION_FAILED');
-      await audit({ adminIdentity: actor, charId, commandId,
+      await audit({ adminIdentity: actor, source, requestId, charId, commandId,
         action: ADMIN_RECOVERY_ACTION, beforeState, result: 'QUEUED', afterState: null, timestamp });
-      return { status: 202, body: { ok: true, charId, commandId, state: 'QUEUED' } };
+      return { status: 202, body: { ok: true, charId, commandId, requestId, state: 'QUEUED' } };
     } catch (error) {
-      await audit({ adminIdentity: actor, charId, commandId,
+      await audit({ adminIdentity: actor, source, requestId, charId, commandId,
         action: ADMIN_RECOVERY_ACTION, beforeState, result: error.code ?? 'FAILED',
         afterState: null, timestamp });
       if (error instanceof AdminRecoveryError) {
-        return { status: error.status, body: { ok: false, error: error.code } };
+        return { status: error.status, body: { ok: false, error: error.code, requestId } };
       }
       throw error;
     }
   }
 
-  async function result({ charId: rawCharId, commandId, adminContext, originAllowed, supportSession }) {
+  async function result({ charId: rawCharId, commandId, adminContext, originAllowed, supportSession,
+    requestId: rawRequestId }) {
     authorizeAdminRecovery({ adminContext, originAllowed, supportSession });
+    const requestId = parseRecoveryRequestId(rawRequestId);
+    const source = adminContext.authMethod === 'LOCAL_ADMIN_TOKEN'
+      ? 'LOCAL_DEVELOPER_ACTION' : 'ADMIN_BROWSER';
     const charId = parseRecoveryCharId(rawCharId);
     if (!COMMAND_PATTERN.test(String(commandId ?? ''))) {
       throw new AdminRecoveryError(422, 'invalid_command_id');
@@ -140,11 +157,11 @@ export function createAdminQuarantineRecoveryTransport({ sql, audit, issueGrant 
       !afterState.taskType && !afterState.targetMap && afterState.pendingRecovery === 0;
     const state = recovered ? 'RECOVERED' : commandStatus === 'REJECTED' ? 'FAILED' : 'PENDING';
     if (state !== 'PENDING') {
-      await audit({ adminIdentity: adminContext.actorAdminId, charId, commandId,
+      await audit({ adminIdentity: adminContext.actorAdminId, source, requestId, charId, commandId,
         action: ADMIN_RECOVERY_ACTION, beforeState: null, result: state,
         afterState, timestamp: Date.now() });
     }
-    return { status: 200, body: { ok: recovered, charId, commandId, state,
+    return { status: 200, body: { ok: recovered, charId, commandId, requestId, state,
       commandStatus, reasonCode, afterState } };
   }
 

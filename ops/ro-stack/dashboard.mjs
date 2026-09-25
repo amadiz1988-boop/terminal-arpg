@@ -10265,10 +10265,7 @@ async function revokeSupportSessionByHolder(request, context) {
 }
 
 function adminRecoveryTransportContext(request) {
-  if (isAdminSurfaceHost(request))
-    return { actorAdminId: 'CLOUDFLARE_ACCESS_EDGE',
-      authMethod: 'CLOUDFLARE_ACCESS_EDGE' };
-  return null;
+  return adminTestFixtureTransportContext(request);
 }
 
 async function grantNativeQuarantineRecovery({ sessionId, actorAdminId, authMethod }) {
@@ -10293,10 +10290,14 @@ async function grantNativeQuarantineRecovery({ sessionId, actorAdminId, authMeth
       '${escapeSql(authMethod)}','QUARANTINE_RECOVERY',${createdAt},${createdAt + 300000},NULL);`);
 }
 
-async function auditAdminQuarantineRecovery(event) {
-  await sql(`CREATE TABLE IF NOT EXISTS web_admin_quarantine_recovery_events (
+let adminRecoveryAuditSchemaPromise;
+function ensureAdminRecoveryAuditSchema() {
+  adminRecoveryAuditSchemaPromise ??= (async () => {
+    await sql(`CREATE TABLE IF NOT EXISTS web_admin_quarantine_recovery_events (
     event_id CHAR(36) NOT NULL PRIMARY KEY,
     actor_admin_id VARCHAR(128) NULL,
+    source VARCHAR(32) NOT NULL DEFAULT 'ADMIN_BROWSER',
+    request_id CHAR(36) NULL,
     char_id INT UNSIGNED NOT NULL,
     command_id CHAR(36) NULL,
     action VARCHAR(48) NOT NULL,
@@ -10307,10 +10308,23 @@ async function auditAdminQuarantineRecovery(event) {
     INDEX recovery_char_time_idx (char_id,occurred_at),
     INDEX recovery_command_idx (command_id)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`);
+    await sql(`ALTER TABLE web_admin_quarantine_recovery_events
+      ADD COLUMN IF NOT EXISTS source VARCHAR(32) NOT NULL DEFAULT 'ADMIN_BROWSER',
+      ADD COLUMN IF NOT EXISTS request_id CHAR(36) NULL;`);
+  })().catch((error) => {
+    adminRecoveryAuditSchemaPromise = null;
+    throw error;
+  });
+  return adminRecoveryAuditSchemaPromise;
+}
+
+async function auditAdminQuarantineRecovery(event) {
+  await ensureAdminRecoveryAuditSchema();
   const nullable = (value) => value == null ? 'NULL' : `'${escapeSql(value)}'`;
   await sql(`INSERT INTO web_admin_quarantine_recovery_events
-    (event_id,actor_admin_id,char_id,command_id,action,result,before_state_json,after_state_json,occurred_at)
-    VALUES ('${randomUUID()}',${nullable(event.adminIdentity)},${Number(event.charId) || 0},
+    (event_id,actor_admin_id,source,request_id,char_id,command_id,action,result,before_state_json,after_state_json,occurred_at)
+    VALUES ('${randomUUID()}',${nullable(event.adminIdentity)},'${escapeSql(event.source)}',
+      ${nullable(event.requestId)},${Number(event.charId) || 0},
       ${nullable(event.commandId)},'${escapeSql(event.action)}','${escapeSql(event.result)}',
       ${nullable(event.beforeState && JSON.stringify(event.beforeState))},
       ${nullable(event.afterState && JSON.stringify(event.afterState))},${Number(event.timestamp)});`);
@@ -10620,6 +10634,7 @@ async function handleDashboardRequest(request, response) {
           adminContext: adminRecoveryTransportContext(request),
           originAllowed: mutationOriginAllowed(request),
           supportSession: false,
+          requestId: request.headers['x-ro-developer-request-id'] ?? null,
         };
         const result = isResult
           ? await adminQuarantineRecoveryTransport.result({
