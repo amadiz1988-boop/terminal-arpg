@@ -3,10 +3,8 @@
   // right of window bodies). The page floor background is a separate setting.
   // Canonical rules: docs/project-control/ui-theme-system-v1.md
   const storageKey = 'ghost-island.ui-theme.v1';
-  const variantKey = 'ghost-island.ui-theme-variant.v1';
   const rotationKey = 'ghost-island.ui-theme-rotation.v1';
   const DEFAULT_THEME = 'default';
-  const AUTO = 'auto';
   const ASSET_ROOT = '/assets/ui-themes';
   const FILES = { panel: 'panel.webp', thumb: 'thumb.webp' };
   const CSS_VARS = ['--ui-theme-panel', '--ui-theme-bar-top', '--ui-theme-bar-bottom',
@@ -41,7 +39,7 @@
         { key: 'sylphie-06', versions: { panel: 'fb662d03', thumb: '0c514397' } },
         { key: 'sylphie-07', versions: { panel: 'd213c0a0', thumb: '3f629a0f' } },
       ] },
-    { id: 'heroine-red-dress', label: '紅衣短髮女', series: '無職轉生', access: 'OPEN', entitlement: null,
+    { id: 'heroine-red-dress', label: '妓神', series: '無職轉生', access: 'OPEN', entitlement: null,
       titleBar: { top: '#c77a8a', bottom: '#7c2438', border: '#5a1627' },
       variants: [
         { key: 'red-01', versions: { panel: 'e043b4bb', thumb: '12914d1a' } },
@@ -80,16 +78,10 @@
     return theme && accessible(theme, owned) &&
       (theme.id === DEFAULT_THEME || usableVariants(theme).length > 0) ? theme.id : DEFAULT_THEME;
   };
-  const variantPreference = (themeId) => {
-    const preference = readJson(variantKey)[themeId];
-    const theme = byId.get(themeId);
-    return theme?.variants.some((variant) => variant.key === preference) ? preference : AUTO;
-  };
-  // AUTO shows the next image of the theme on every visit; a pinned key stays fixed.
+  // Themes with several images show the next one on every visit and every
+  // page (tab) switch; the last shown image is remembered per theme.
   const pickVariant = (theme, advance) => {
     const usable = usableVariants(theme);
-    const pinned = usable.find((variant) => variant.key === variantPreference(theme.id));
-    if (pinned) return pinned;
     const rotation = readJson(rotationKey);
     const last = usable.findIndex((variant) => variant.key === rotation[theme.id]);
     const next = usable[advance ? (last + 1) % usable.length : Math.max(last, 0)];
@@ -149,16 +141,12 @@
     return apply(id);
   }
 
-  function selectVariant(themeId, key) {
-    const preferences = readJson(variantKey);
-    preferences[themeId] = key;
-    writeJson(variantKey, preferences);
-    if (key !== AUTO) {
-      const rotation = readJson(rotationKey);
-      rotation[themeId] = key;
-      writeJson(rotationKey, rotation);
-    }
-    return select(themeId);
+  let activePage = null;
+  function switchPage(page) {
+    if (!page || page === activePage) return;
+    const first = activePage === null;
+    activePage = page;
+    if (!first && applied.theme !== DEFAULT_THEME) apply(selected, true);
   }
 
   try {
@@ -192,7 +180,6 @@
   function renderSelector() {
     const container = document.getElementById('uiTheme');
     if (!container) return;
-    const variantsContainer = document.getElementById('uiThemeVariants');
     const status = document.getElementById('uiThemeStatus');
     const themeCards = themes.filter((theme) => accessible(theme)).map((theme) => {
       const element = card('ui-theme-card', theme.label,
@@ -211,39 +198,6 @@
       return element;
     });
     container.replaceChildren(...themeCards);
-    let renderedVariantsFor = null;
-    function renderVariants() {
-      if (!variantsContainer || renderedVariantsFor === applied.theme) return;
-      renderedVariantsFor = applied.theme;
-      const theme = byId.get(applied.theme);
-      variantsContainer.hidden = !theme || theme.id === DEFAULT_THEME;
-      if (variantsContainer.hidden) {
-        variantsContainer.replaceChildren();
-        return;
-      }
-      const auto = card('ui-theme-card ui-theme-variant', '輪換', '每次進入遊戲換一張', null, null,
-        () => selectVariant(theme.id, AUTO));
-      auto.dataset.variantKey = AUTO;
-      const mosaic = theme.variants.slice(0, 4);
-      const tiles = auto.querySelector('.ui-theme-thumb');
-      tiles.classList.add('is-rotate');
-      tiles.style.backgroundImage = mosaic
-        .map((variant) => `url('${assetUrl(theme, variant, 'thumb')}')`).join(',');
-      tiles.style.backgroundPosition = ['0 0', '100% 0', '0 100%', '100% 100%']
-        .slice(0, mosaic.length).join(',');
-      const variantCards = theme.variants.map((variant, index) => {
-        const element = card('ui-theme-card ui-theme-variant', String(index + 1),
-          `${theme.label} ${index + 1}`, assetUrl(theme, variant, 'thumb'),
-          () => {
-            unavailable.add(`${theme.id}/${variant.key}`);
-            sync();
-          },
-          () => selectVariant(theme.id, variant.key));
-        element.dataset.variantKey = variant.key;
-        return element;
-      });
-      variantsContainer.replaceChildren(auto, ...variantCards);
-    }
     function sync() {
       for (const element of themeCards) {
         const theme = byId.get(element.dataset.themeId);
@@ -251,16 +205,6 @@
         element.disabled = theme.id !== DEFAULT_THEME && usableVariants(theme).length === 0;
         element.setAttribute('aria-checked', String(checked));
         element.classList.toggle('is-selected', checked);
-      }
-      renderVariants();
-      const preference = variantPreference(applied.theme);
-      for (const element of variantsContainer?.children ?? []) {
-        const key = element.dataset.variantKey;
-        const checked = key === preference;
-        element.disabled = key !== AUTO && unavailable.has(`${applied.theme}/${key}`);
-        element.setAttribute('aria-checked', String(checked));
-        element.classList.toggle('is-selected', checked);
-        element.classList.toggle('is-showing', key === applied.variant);
       }
       if (status) {
         const missing = selected !== DEFAULT_THEME && applied.theme === DEFAULT_THEME;
@@ -272,11 +216,22 @@
     sync();
   }
 
-  document.addEventListener('DOMContentLoaded', renderSelector);
+  function trackPages() {
+    switchPage(document.querySelector('[data-tab].active')?.dataset.tab ?? 'hunt');
+  }
+
+  document.addEventListener('click', (event) => {
+    const tab = event.target?.closest?.('[data-tab]');
+    if (tab) switchPage(tab.dataset.tab);
+  });
+  document.addEventListener('DOMContentLoaded', () => {
+    renderSelector();
+    trackPages();
+  });
 
   window.GhostIslandUiTheme = Object.freeze({
-    storageKey, variantKey, rotationKey, DEFAULT_THEME, AUTO, themes,
-    resolveTheme, accessible, assetUrl, select, selectVariant,
+    storageKey, rotationKey, DEFAULT_THEME, themes,
+    resolveTheme, accessible, assetUrl, select, switchPage,
     current: () => ({ ...applied }),
     setEntitlements(list) {
       entitlements = new Set(list ?? []);

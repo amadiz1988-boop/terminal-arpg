@@ -55,16 +55,16 @@
     :is(#game > .window[data-pet-anchor='character-summary'], #game > .social-window,
       #hunt > .window:not(.map-window, .combat-window), #system > .window) {
     background-image:
-      linear-gradient(90deg, rgb(255 255 255 / 95%) 0%, rgb(255 255 255 / 90%) 50%,
-        rgb(255 255 255 / 62%) 100%),
+      linear-gradient(90deg, rgb(255 255 255 / 94%) 0%, rgb(255 255 255 / 90%) 30%,
+        rgb(255 255 255 / 28%) 100%),
       var(--ui-theme-panel),
       url('/ro/client/skin/default/sysbox_bg.png');
-    background-size: 100% 100%, auto max(100%, 260px), auto;
+    background-size: 100% 100%, auto max(100%, 320px), auto;
   }
 
   :root[data-ui-theme]:not([data-ui-theme='default']) .combat-window .console {
     background-image:
-      linear-gradient(90deg, rgb(3 6 3 / 97%) 0%, rgb(3 6 3 / 94%) 55%, rgb(3 6 3 / 70%) 100%),
+      linear-gradient(90deg, rgb(3 6 3 / 97%) 0%, rgb(3 6 3 / 90%) 35%, rgb(3 6 3 / 45%) 100%),
       var(--ui-theme-panel);
   }
 }
@@ -82,16 +82,6 @@
   gap: 8px;
 }
 
-.ui-theme-variants {
-  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
-  padding-top: 8px;
-  border-top: 1px solid #c4ccd3;
-}
-
-.ui-theme-variants[hidden] {
-  display: none;
-}
-
 .ui-theme-card {
   display: grid;
   gap: 4px;
@@ -104,10 +94,6 @@
   color: #1d2934;
   cursor: pointer;
   text-align: center;
-}
-
-.ui-theme-variant {
-  border-top-width: 1px;
 }
 
 .ui-theme-card.is-selected {
@@ -125,10 +111,6 @@
   opacity: 0.45;
 }
 
-.ui-theme-variant.is-showing:not(.is-selected) {
-  border-color: #6f8aa6;
-}
-
 .ui-theme-thumb {
   display: block;
   width: 100%;
@@ -142,12 +124,6 @@
     url('/ro/client/skin/default/sysbox_bg.png') 0 0 / auto repeat,
     #fff;
   box-shadow: inset 0 0 0 1px #273a51;
-}
-
-.ui-theme-thumb.is-rotate {
-  background-color: #eef2f5;
-  background-repeat: no-repeat;
-  background-size: 50% 50%;
 }
 
 .ui-theme-label {

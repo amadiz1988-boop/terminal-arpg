@@ -28,7 +28,7 @@ RO floor tile chosen in 背景設定; the two settings are independent.
    | 洛琪希 | `#7d86c8` | `#3a3f86` |
    | 艾莉絲 | `#d9776a` | `#9a2a24` |
    | 西露菲 | `#9cb77a` | `#4f6d33` |
-   | 紅衣短髮女 | `#c77a8a` | `#7c2438` |
+   | 妓神 | `#c77a8a` | `#7c2438` |
 
 2. Window bodies of these surfaces show soft art on the right:
 
@@ -42,7 +42,9 @@ RO floor tile chosen in 背景設定; the two settings are independent.
 
    Light: white veil at 94% on the left, 90% at 42%, 50% on the right edge.
    Log: the terminal stays black; a 97%/93%/60% dark veil keeps the art dim on
-   the right, and log lines get a dark text shadow. Mobile uses stronger veils.
+   the right, and log lines get a dark text shadow. Phones (≤700px) use larger
+   art (at least 320px tall) and a lighter right edge (28% light, 45% log) so
+   the heroine stays visible in narrow windows; the left 30% keeps a 90% veil.
 
 To add or remove a surface, edit that single selector list in `ui-theme.css`.
 Do not add page-specific image rules elsewhere.
@@ -64,15 +66,11 @@ choosing it in `UI 主題`. Unknown, inaccessible or missing themes resolve to
 
 ## Images Per Theme
 
-Each theme uses every licensed image in its source folder. The second row of
-`UI 主題` offers:
-
-- `輪換` (default): each visit shows the next image of that theme.
-- A numbered image: the player pins it.
-
-Preferences live in `ghost-island.ui-theme-variant.v1`; the last rotated image
-lives in `ghost-island.ui-theme-rotation.v1`. The image changes only on a new
-visit or a player click.
+Each theme uses every licensed image in its source folder. There is no image
+picker: the next image of the chosen theme appears on every visit and every
+page (tab) switch, in manifest order. Clicking the already open tab does not
+change it. The last shown image per theme lives in
+`ghost-island.ui-theme-rotation.v1`, so rotation continues across visits.
 
 ## Asset Rules
 
@@ -107,4 +105,7 @@ The client never grants entitlements.
 | `heroine-roxy` | 無職轉生 | 洛琪希 | 2 |
 | `heroine-eris` | 無職轉生 | 艾莉絲 | 3 |
 | `heroine-sylphie` | 無職轉生 | 西露菲 | 7 |
-| `heroine-red-dress` | 無職轉生 | 紅衣短髮女 | 4 |
+| `heroine-red-dress` | 無職轉生 | 妓神 | 4 |
+
+The `heroine-red-dress` source folder is still named 紅衣短髮女; only the
+player-visible label is 妓神.
