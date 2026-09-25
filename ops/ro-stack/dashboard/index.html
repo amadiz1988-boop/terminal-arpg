@@ -10,11 +10,11 @@
     <title>鬼島傳說｜冒險掛機</title>
     <link rel="icon" href="/ro/client/paperdoll/novice-male.png" />
     <script src="/ro-floor-theme.js?v=r108-m1-full-superset"></script>
-    <script src="/ui-background-theme.js?v=ui-bg-v1"></script>
+    <script src="/ui-theme.js?v=ui-theme-v1"></script>
     <link rel="stylesheet" href="/styles.css?v=r108-m1-full-superset" />
     <link rel="stylesheet" href="/ro-ui-kit.css?v=r014-lost-ui-restoration" />
     <link rel="stylesheet" href="/ro-floor-theme.css?v=r108-m1-full-superset" />
-    <link rel="stylesheet" href="/ui-background-theme.css?v=ui-bg-v1" />
+    <link rel="stylesheet" href="/ui-theme.css?v=ui-theme-v1" />
   </head>
   <body>
     <section id="auth" class="auth">
@@ -1246,6 +1246,14 @@
           </div>
         </div>
         <div class="window">
+          <div class="titlebar"><span>UI 主題</span><span>此裝置</span></div>
+          <div class="ui-theme-settings">
+            <div id="uiTheme" class="ui-theme-options" role="radiogroup" aria-label="UI 主題"></div>
+            <div id="uiThemeVariants" class="ui-theme-options ui-theme-variants" role="radiogroup" aria-label="主題圖片" hidden></div>
+            <small id="uiThemeStatus" class="ui-theme-status" aria-live="polite" hidden></small>
+          </div>
+        </div>
+        <div class="window">
           <div class="titlebar"><span>背景設定</span><span>此裝置</span></div>
           <div class="audio-settings floor-theme-settings">
             <label>背景樣式
@@ -1256,12 +1264,6 @@
                 <option value="legacy-green">綠色經典</option>
               </select>
             </label>
-          </div>
-          <div class="ui-background-theme-settings">
-            <span id="uiBackgroundThemeHeading" class="ui-background-theme-heading">UI 背景主題</span>
-            <div id="uiBackgroundTheme" class="ui-background-theme-options" role="radiogroup" aria-labelledby="uiBackgroundThemeHeading"></div>
-            <div id="uiBackgroundThemeVariants" class="ui-background-theme-options ui-background-theme-variants" role="radiogroup" aria-label="主題圖片" hidden></div>
-            <small id="uiBackgroundThemeStatus" class="ui-background-theme-status" aria-live="polite" hidden></small>
           </div>
         </div>
         <div class="window">

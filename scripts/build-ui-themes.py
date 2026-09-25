@@ -1,12 +1,12 @@
-"""Build UI background theme assets from user-provided licensed images.
+"""Build UI theme window assets from user-provided licensed images.
 
 Source images stay outside Git. Outputs go to the git-ignored asset root and
 the manifest records every source and output SHA-256 so a clean checkout can
 verify the private assets before delivery.
 
 Usage:
-  python scripts/build-ui-background-themes.py --source-root <dir> [--write-hashes]
-  python scripts/build-ui-background-themes.py --verify
+  python scripts/build-ui-themes.py --source-root <dir> [--write-hashes]
+  python scripts/build-ui-themes.py --verify
 """
 import argparse
 import hashlib
@@ -19,8 +19,8 @@ from pathlib import Path
 from PIL import Image, ImageFilter
 
 ROOT = Path(__file__).resolve().parent.parent
-MANIFEST = ROOT / 'docs' / 'project-control' / 'ui-background-themes-manifest-v1.json'
-KINDS = ('wide', 'tall', 'thumb')
+MANIFEST = ROOT / 'docs' / 'project-control' / 'ui-themes-manifest-v1.json'
+KINDS = ('panel', 'thumb')
 
 
 def sha256(data):
@@ -41,25 +41,17 @@ def crop_to(image, width, height, focus):
     return resized.crop((left, top, left + width, top + height))
 
 
-def build_wide(image, spec, variant, side):
-    width, height = spec['width'], spec['height']
-    if image.width / image.height >= 1.2:
-        # Landscape sources already fit the desktop frame.
-        return crop_to(image, width, height, variant['focus'])
-    # A smooth colour wash sampled from the source keeps empty space calm.
-    base = image.resize((1, 5), Image.BOX).resize((width, height), Image.BICUBIC)
-    base = base.filter(ImageFilter.GaussianBlur(90))
-    portrait = image.copy()
-    portrait.thumbnail((width, height), Image.LANCZOS)
-    # Fade the portrait edge that faces the content column into the wash.
-    mask = Image.new('L', portrait.size, 255)
-    fade = max(portrait.width // 3, 1)
+def build_panel(image, spec, variant):
+    # Soft focus, and an alpha fade on the left so the art sits on the right of
+    # a window without a hard edge behind text.
+    panel = crop_to(image, spec['width'], spec['height'], variant['focus'])
+    panel = panel.filter(ImageFilter.GaussianBlur(1.4)).convert('RGBA')
+    mask = Image.new('L', panel.size, 255)
+    fade = round(panel.width * 0.6)
     for x in range(fade):
-        column = x if side == 'right' else portrait.width - 1 - x
-        mask.paste(round(255 * x / fade), (column, 0, column + 1, portrait.height))
-    offset_x = width - portrait.width if side == 'right' else 0
-    base.paste(portrait, (offset_x, (height - portrait.height) // 2), mask)
-    return base
+        mask.paste(round(255 * (x / fade) ** 1.6), (x, 0, x + 1, panel.height))
+    panel.putalpha(mask)
+    return panel
 
 
 def load(source, variant):
@@ -73,11 +65,9 @@ def load(source, variant):
 
 def build(theme, variant, source, spec):
     image = load(source, variant)
-    tall = crop_to(image, spec['tall']['width'], spec['tall']['height'], variant['focus'])
     thumb = crop_to(image, spec['thumb']['width'], spec['thumb']['height'], variant['focus'])
     return {
-        'wide': encode(build_wide(image, spec['wide'], variant, theme['portrait_side']), 72),
-        'tall': encode(tall, 72),
+        'panel': encode(build_panel(image, spec['panel'], variant), 74),
         'thumb': encode(thumb, 80),
     }
 

@@ -1,49 +1,53 @@
 (() => {
-  // UI background themes are an atmosphere layer behind the existing RO UI.
-  // Canonical rules: docs/project-control/ui-background-theme-system-v1.md
-  const storageKey = 'ghost-island.ui-background-theme.v1';
-  const variantKey = 'ghost-island.ui-background-theme-variant.v1';
-  const rotationKey = 'ghost-island.ui-background-theme-rotation.v1';
+  // UI themes restyle the RO windows (title bar colour and soft art on the
+  // right of window bodies). The page floor background is a separate setting.
+  // Canonical rules: docs/project-control/ui-theme-system-v1.md
+  const storageKey = 'ghost-island.ui-theme.v1';
+  const variantKey = 'ghost-island.ui-theme-variant.v1';
+  const rotationKey = 'ghost-island.ui-theme-rotation.v1';
   const DEFAULT_THEME = 'default';
   const AUTO = 'auto';
   const ASSET_ROOT = '/assets/ui-themes';
-  const FILES = { wide: 'background-wide.webp', tall: 'background-tall.webp', thumb: 'thumb.webp' };
-  const LEVELS = ['full', 'soft', 'bar-only'];
-  // Per-page safe downgrade. Pages not listed use the default level.
-  const pagePolicy = Object.freeze({ default: 'full', hunt: 'soft', 'world-map': 'bar-only' });
+  const FILES = { panel: 'panel.webp', thumb: 'thumb.webp' };
+  const CSS_VARS = ['--ui-theme-panel', '--ui-theme-bar-top', '--ui-theme-bar-bottom',
+    '--ui-theme-bar-border'];
   const deepFreeze = (value) => {
     Object.values(value).forEach((child) => child && typeof child === 'object' && deepFreeze(child));
     return Object.freeze(value);
   };
   const themes = deepFreeze([
-    { id: DEFAULT_THEME, label: '目前主題', access: 'OPEN', entitlement: null, variants: [] },
+    { id: DEFAULT_THEME, label: '預設', access: 'OPEN', entitlement: null, variants: [] },
     { id: 'heroine-roxy', label: '洛琪希', series: '無職轉生', access: 'OPEN', entitlement: null,
-      tint: '#3f4f5e', variants: [
-        { key: 'roxy-01', versions: { wide: '7cbdd040', tall: '731d7fc9', thumb: 'db2bbb27' } },
-        { key: 'roxy-02', versions: { wide: '1bcef72b', tall: 'c6135013', thumb: 'd70b487a' } },
+      titleBar: { top: '#7d86c8', bottom: '#3a3f86', border: '#2b2f66' },
+      variants: [
+        { key: 'roxy-01', versions: { panel: 'd3f87e81', thumb: 'db2bbb27' } },
+        { key: 'roxy-02', versions: { panel: '0c772bd7', thumb: 'd70b487a' } },
       ] },
     { id: 'heroine-eris', label: '艾莉絲', series: '無職轉生', access: 'OPEN', entitlement: null,
-      tint: '#4a3a36', variants: [
-        { key: 'eris-01', versions: { wide: '7960a6b5', tall: 'addec35e', thumb: '5f7cc4c3' } },
-        { key: 'eris-02', versions: { wide: 'fa9e9229', tall: 'da978adb', thumb: '5fc915ec' } },
-        { key: 'eris-03', versions: { wide: '472c3e4d', tall: '98262e31', thumb: '39409adf' } },
+      titleBar: { top: '#d9776a', bottom: '#9a2a24', border: '#6e1a16' },
+      variants: [
+        { key: 'eris-01', versions: { panel: 'c064c121', thumb: '5f7cc4c3' } },
+        { key: 'eris-02', versions: { panel: '0f94fa2c', thumb: '5fc915ec' } },
+        { key: 'eris-03', versions: { panel: 'e4528d29', thumb: '39409adf' } },
       ] },
     { id: 'heroine-sylphie', label: '西露菲', series: '無職轉生', access: 'OPEN', entitlement: null,
-      tint: '#5d7250', variants: [
-        { key: 'sylphie-01', versions: { wide: '065b80c5', tall: '54a5b0fb', thumb: '21cc8d4d' } },
-        { key: 'sylphie-02', versions: { wide: '31f5f082', tall: 'e2d07281', thumb: 'f735e5a2' } },
-        { key: 'sylphie-03', versions: { wide: 'e05cf573', tall: '89e33b76', thumb: 'ddb656e5' } },
-        { key: 'sylphie-04', versions: { wide: '73e1eb79', tall: '4848b1d9', thumb: 'd224e902' } },
-        { key: 'sylphie-05', versions: { wide: '80e98776', tall: '75ba65d4', thumb: '5e551227' } },
-        { key: 'sylphie-06', versions: { wide: '0121631e', tall: '9cab633d', thumb: '0c514397' } },
-        { key: 'sylphie-07', versions: { wide: '9fe61c71', tall: 'f5d5a990', thumb: '3f629a0f' } },
+      titleBar: { top: '#9cb77a', bottom: '#4f6d33', border: '#3a5224' },
+      variants: [
+        { key: 'sylphie-01', versions: { panel: '1d98f7c5', thumb: '21cc8d4d' } },
+        { key: 'sylphie-02', versions: { panel: '71b58d12', thumb: 'f735e5a2' } },
+        { key: 'sylphie-03', versions: { panel: '77a7ef4f', thumb: 'ddb656e5' } },
+        { key: 'sylphie-04', versions: { panel: 'f47b41f1', thumb: 'd224e902' } },
+        { key: 'sylphie-05', versions: { panel: '17afd1fb', thumb: '5e551227' } },
+        { key: 'sylphie-06', versions: { panel: 'fb662d03', thumb: '0c514397' } },
+        { key: 'sylphie-07', versions: { panel: 'd213c0a0', thumb: '3f629a0f' } },
       ] },
     { id: 'heroine-red-dress', label: '紅衣短髮女', series: '無職轉生', access: 'OPEN', entitlement: null,
-      tint: '#6d4a4f', variants: [
-        { key: 'red-01', versions: { wide: '76919336', tall: 'c7c66725', thumb: '12914d1a' } },
-        { key: 'red-02', versions: { wide: 'f0cf8d0b', tall: 'caf7225a', thumb: 'f89e2c22' } },
-        { key: 'red-03', versions: { wide: 'acd9b1f8', tall: '6ee0f77d', thumb: 'de749337' } },
-        { key: 'red-04', versions: { wide: '80f17acb', tall: '08ef9617', thumb: '932760c4' } },
+      titleBar: { top: '#c77a8a', bottom: '#7c2438', border: '#5a1627' },
+      variants: [
+        { key: 'red-01', versions: { panel: 'e043b4bb', thumb: '12914d1a' } },
+        { key: 'red-02', versions: { panel: '84505ec5', thumb: 'f89e2c22' } },
+        { key: 'red-03', versions: { panel: '18c5f636', thumb: 'de749337' } },
+        { key: 'red-04', versions: { panel: '1a06e35c', thumb: '932760c4' } },
       ] },
   ]);
   const byId = new Map(themes.map((theme) => [theme.id, theme]));
@@ -93,10 +97,6 @@
     writeJson(rotationKey, rotation);
     return next;
   };
-  const pageLevel = (page) => {
-    const level = pagePolicy[page] ?? pagePolicy.default;
-    return LEVELS.includes(level) ? level : 'full';
-  };
 
   const root = document.documentElement;
   let selected = DEFAULT_THEME;
@@ -106,16 +106,16 @@
   function paint(themeId, variant) {
     const theme = byId.get(themeId);
     applied = { theme: themeId, variant: variant?.key ?? null };
-    root.dataset.uiBgTheme = themeId;
+    root.dataset.uiTheme = themeId;
     if (!variant) {
-      delete root.dataset.uiBgVariant;
-      for (const name of ['--ui-bg-wide', '--ui-bg-tall', '--ui-bg-tint'])
-        root.style.removeProperty(name);
+      delete root.dataset.uiThemeVariant;
+      CSS_VARS.forEach((name) => root.style.removeProperty(name));
     } else {
-      root.dataset.uiBgVariant = variant.key;
-      root.style.setProperty('--ui-bg-wide', `url('${assetUrl(theme, variant, 'wide')}')`);
-      root.style.setProperty('--ui-bg-tall', `url('${assetUrl(theme, variant, 'tall')}')`);
-      root.style.setProperty('--ui-bg-tint', theme.tint);
+      root.dataset.uiThemeVariant = variant.key;
+      root.style.setProperty('--ui-theme-panel', `url('${assetUrl(theme, variant, 'panel')}')`);
+      root.style.setProperty('--ui-theme-bar-top', theme.titleBar.top);
+      root.style.setProperty('--ui-theme-bar-bottom', theme.titleBar.bottom);
+      root.style.setProperty('--ui-theme-bar-border', theme.titleBar.border);
     }
     listeners.forEach((listener) => listener());
   }
@@ -130,13 +130,13 @@
     const variant = pickVariant(theme, advance);
     paint(id, variant);
     if (typeof Image !== 'function') return id;
-    // Missing private assets skip to another image, then to the current theme.
+    // Missing private assets skip to another image, then to the default UI.
     const probe = new Image();
     probe.onerror = () => {
       unavailable.add(`${id}/${variant.key}`);
       if (applied.theme === id && applied.variant === variant.key) apply(selected);
     };
-    probe.src = assetUrl(theme, variant, 'wide');
+    probe.src = assetUrl(theme, variant, 'panel');
     return id;
   }
 
@@ -161,16 +161,10 @@
     return select(themeId);
   }
 
-  function setPage(page) {
-    root.dataset.uiBgPage = page;
-    root.dataset.uiBgLevel = pageLevel(page);
-  }
-
   try {
     selected = localStorage.getItem(storageKey) ?? DEFAULT_THEME;
   } catch {}
   apply(selected, true);
-  setPage('default');
 
   function card(className, label, title, thumb, onError, onClick) {
     const element = document.createElement('button');
@@ -179,7 +173,7 @@
     element.setAttribute('role', 'radio');
     element.title = title;
     const preview = document.createElement(thumb ? 'img' : 'span');
-    preview.className = 'ui-background-theme-thumb';
+    preview.className = 'ui-theme-thumb';
     if (thumb) {
       preview.alt = '';
       preview.loading = 'lazy';
@@ -188,7 +182,7 @@
       preview.addEventListener('error', onError);
     }
     const text = document.createElement('span');
-    text.className = 'ui-background-theme-label';
+    text.className = 'ui-theme-label';
     text.textContent = label;
     element.append(preview, text);
     element.addEventListener('click', onClick);
@@ -196,13 +190,13 @@
   }
 
   function renderSelector() {
-    const container = document.getElementById('uiBackgroundTheme');
+    const container = document.getElementById('uiTheme');
     if (!container) return;
-    const variantsContainer = document.getElementById('uiBackgroundThemeVariants');
-    const status = document.getElementById('uiBackgroundThemeStatus');
+    const variantsContainer = document.getElementById('uiThemeVariants');
+    const status = document.getElementById('uiThemeStatus');
     const themeCards = themes.filter((theme) => accessible(theme)).map((theme) => {
-      const element = card('ui-background-theme-card', theme.label,
-        theme.series ? `${theme.series}・${theme.label}` : theme.label,
+      const element = card('ui-theme-card', theme.label,
+        theme.series ? `${theme.series}・${theme.label}` : '原本的 RO 視窗',
         theme.variants[0] && assetUrl(theme, theme.variants[0], 'thumb'),
         () => {
           theme.variants.forEach((variant) => unavailable.add(`${theme.id}/${variant.key}`));
@@ -210,6 +204,10 @@
         },
         () => select(theme.id));
       element.dataset.themeId = theme.id;
+      if (theme.titleBar) {
+        element.style.setProperty('--ui-theme-card-top', theme.titleBar.top);
+        element.style.setProperty('--ui-theme-card-bottom', theme.titleBar.bottom);
+      }
       return element;
     });
     container.replaceChildren(...themeCards);
@@ -223,19 +221,19 @@
         variantsContainer.replaceChildren();
         return;
       }
-      const auto = card('ui-background-theme-card ui-background-theme-variant', '輪換',
-        '每次進入遊戲換一張', null, null, () => selectVariant(theme.id, AUTO));
+      const auto = card('ui-theme-card ui-theme-variant', '輪換', '每次進入遊戲換一張', null, null,
+        () => selectVariant(theme.id, AUTO));
       auto.dataset.variantKey = AUTO;
       const mosaic = theme.variants.slice(0, 4);
-      const tiles = auto.querySelector('.ui-background-theme-thumb');
+      const tiles = auto.querySelector('.ui-theme-thumb');
       tiles.classList.add('is-rotate');
       tiles.style.backgroundImage = mosaic
         .map((variant) => `url('${assetUrl(theme, variant, 'thumb')}')`).join(',');
       tiles.style.backgroundPosition = ['0 0', '100% 0', '0 100%', '100% 100%']
         .slice(0, mosaic.length).join(',');
       const variantCards = theme.variants.map((variant, index) => {
-        const element = card('ui-background-theme-card ui-background-theme-variant',
-          String(index + 1), `${theme.label} ${index + 1}`, assetUrl(theme, variant, 'thumb'),
+        const element = card('ui-theme-card ui-theme-variant', String(index + 1),
+          `${theme.label} ${index + 1}`, assetUrl(theme, variant, 'thumb'),
           () => {
             unavailable.add(`${theme.id}/${variant.key}`);
             sync();
@@ -267,37 +265,18 @@
       if (status) {
         const missing = selected !== DEFAULT_THEME && applied.theme === DEFAULT_THEME;
         status.hidden = !missing;
-        status.textContent = missing ? '此主題素材尚未安裝，已使用目前主題。' : '';
+        status.textContent = missing ? '此主題素材尚未安裝，已使用預設 UI。' : '';
       }
     }
     listeners.add(sync);
     sync();
   }
 
-  function trackPages() {
-    const activeTab = document.querySelector('[data-tab].active');
-    if (activeTab) setPage(activeTab.dataset.tab);
-    document.addEventListener('click', (event) => {
-      const tab = event.target?.closest?.('[data-tab]');
-      if (tab) setPage(tab.dataset.tab);
-    });
-    if (typeof MutationObserver === 'function' && document.body) {
-      new MutationObserver(() => {
-        if (document.body.classList.contains('world-map-open')) setPage('world-map');
-        else if (root.dataset.uiBgPage === 'world-map')
-          setPage(document.querySelector('[data-tab].active')?.dataset.tab ?? 'default');
-      }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
-    }
-  }
+  document.addEventListener('DOMContentLoaded', renderSelector);
 
-  document.addEventListener('DOMContentLoaded', () => {
-    renderSelector();
-    trackPages();
-  });
-
-  window.GhostIslandUiBackgroundTheme = Object.freeze({
-    storageKey, variantKey, rotationKey, DEFAULT_THEME, AUTO, themes, pagePolicy,
-    resolveTheme, pageLevel, accessible, assetUrl, select, selectVariant, setPage,
+  window.GhostIslandUiTheme = Object.freeze({
+    storageKey, variantKey, rotationKey, DEFAULT_THEME, AUTO, themes,
+    resolveTheme, accessible, assetUrl, select, selectVariant,
     current: () => ({ ...applied }),
     setEntitlements(list) {
       entitlements = new Set(list ?? []);

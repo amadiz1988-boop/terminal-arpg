@@ -1,20 +1,16 @@
 {
   "schema_version": 1,
-  "task_id": "UI_BACKGROUND_THEME_SYSTEM_V1",
+  "task_id": "UI_THEME_SYSTEM_V1",
   "asset_root": "ops/ro-stack/dashboard/assets/ui-themes",
   "source_root_env": "GHOST_ISLAND_UI_THEME_SOURCE_ROOT",
   "source_class": "USER_PROVIDED_LICENSED_IMAGE",
   "public_git_binary": false,
   "outputs": {
-    "wide": {
-      "file": "background-wide.webp",
-      "width": 1920,
-      "height": 1080
-    },
-    "tall": {
-      "file": "background-tall.webp",
-      "width": 900,
-      "height": 1600
+    "panel": {
+      "file": "panel.webp",
+      "width": 608,
+      "height": 760,
+      "alpha": "left_fade"
     },
     "thumb": {
       "file": "thumb.webp",
@@ -27,7 +23,6 @@
       "id": "heroine-roxy",
       "series": "無職轉生",
       "heroine": "洛琪希",
-      "portrait_side": "right",
       "variants": [
         {
           "key": "roxy-01",
@@ -41,13 +36,9 @@
             "y": 0.2
           },
           "outputs": {
-            "wide": {
-              "sha256": "7cbdd040924296148953491da173b6c10428304038e30ddd42124450cca26ab4",
-              "size": 45184
-            },
-            "tall": {
-              "sha256": "731d7fc9eaca35b7a5d612910e6d079b87dc18daac5795d7338ca6998da0582d",
-              "size": 80850
+            "panel": {
+              "sha256": "d3f87e8172e296f8d41f79a3d7e719fef994b5e49b8d19cdff5a9777aafd2c4f",
+              "size": 19520
             },
             "thumb": {
               "sha256": "db2bbb2715c663c4f1ed9d680212e5ebeb81b8ccd5b47d9a0c3bc8348bb1dc95",
@@ -67,13 +58,9 @@
             "y": 0.25
           },
           "outputs": {
-            "wide": {
-              "sha256": "1bcef72bfce1407c6f9c43ac8db6b2bcbac379fd31e59e3547c601f1ab0ae41e",
-              "size": 52932
-            },
-            "tall": {
-              "sha256": "c6135013c73606bd63cccff570acb512f8f61d81ca108a0dcfa16762dcfed383",
-              "size": 91270
+            "panel": {
+              "sha256": "0c772bd78776f76842a619884e5d6dae60f956da5e89bb4fc4ab4b9cf4f1fec8",
+              "size": 24928
             },
             "thumb": {
               "sha256": "d70b487a0fa09a676f4d53b83ff9b00898b9e1a2f9302b084da4078f7cf1c356",
@@ -81,13 +68,17 @@
             }
           }
         }
-      ]
+      ],
+      "title_bar": {
+        "top": "#7d86c8",
+        "bottom": "#3a3f86",
+        "border": "#2b2f66"
+      }
     },
     {
       "id": "heroine-eris",
       "series": "無職轉生",
       "heroine": "艾莉絲",
-      "portrait_side": "right",
       "variants": [
         {
           "key": "eris-01",
@@ -101,13 +92,9 @@
             "y": 0.18
           },
           "outputs": {
-            "wide": {
-              "sha256": "7960a6b5ec6c2e7e2f6080bf6dbdcea0aeda577b0c8742364d91ed68480e38fe",
-              "size": 66150
-            },
-            "tall": {
-              "sha256": "addec35e69a46a366ee68e400fe913aedc41067614d21be748c8c11854b4e012",
-              "size": 104308
+            "panel": {
+              "sha256": "c064c121b1af4f45239b049921918d038962dfe2c68c7fd4def79730fd32aa22",
+              "size": 27888
             },
             "thumb": {
               "sha256": "5f7cc4c3b9811befd759f28a31362aa1758b9b1274099883e6fd7e4d5020fada",
@@ -127,13 +114,9 @@
             "y": 0.22
           },
           "outputs": {
-            "wide": {
-              "sha256": "fa9e92296f97bea57838c544f8f916a40b10da51d55e8ef004afdc9012079f42",
-              "size": 40684
-            },
-            "tall": {
-              "sha256": "da978adb0033659eb9587b809f011e11bf3d4cbb92f2dde1c384e5c67a12eaaf",
-              "size": 63750
+            "panel": {
+              "sha256": "0f94fa2c6baf9d099daf6a07f7dfe3b540b4b11beed1889e543bebbe5a4b4496",
+              "size": 24188
             },
             "thumb": {
               "sha256": "5fc915ecdc30320920d70276b3bd44aa9d527fda404bd7ce0ef3790e998bfb59",
@@ -153,13 +136,9 @@
             "y": 0.22
           },
           "outputs": {
-            "wide": {
-              "sha256": "472c3e4da75837cb732e7c28890c80b5f4e2677779584e762b205c74e22f0df3",
-              "size": 58884
-            },
-            "tall": {
-              "sha256": "98262e3177f79d93febbafcb1740c66666adcd71fe04c0fc93c3d8e2f00172c6",
-              "size": 87376
+            "panel": {
+              "sha256": "e4528d29f5ad245a71a85c9caee01f3c042ae3d9427fcee926218845bf42c459",
+              "size": 21492
             },
             "thumb": {
               "sha256": "39409adf01010aac2bdff5ed5c939374938fb43a3f5d6fe17b6ffe03403ac9ba",
@@ -167,13 +146,17 @@
             }
           }
         }
-      ]
+      ],
+      "title_bar": {
+        "top": "#d9776a",
+        "bottom": "#9a2a24",
+        "border": "#6e1a16"
+      }
     },
     {
       "id": "heroine-sylphie",
       "series": "無職轉生",
       "heroine": "西露菲",
-      "portrait_side": "right",
       "variants": [
         {
           "key": "sylphie-01",
@@ -187,13 +170,9 @@
             "y": 0.22
           },
           "outputs": {
-            "wide": {
-              "sha256": "065b80c5c834318a3c196ccb93af92a58c872cea53f7dd981c408318d75914b5",
-              "size": 44528
-            },
-            "tall": {
-              "sha256": "54a5b0fb316a9baf59cbdb4e76df7b2c63323f4f811e9dc8e2afaf093fbeea26",
-              "size": 58788
+            "panel": {
+              "sha256": "1d98f7c53a6e2e7798218f2ee0f0cf779947c3078ecae943da67c35b75a765f8",
+              "size": 22666
             },
             "thumb": {
               "sha256": "21cc8d4d465cd10c09d7a962b01415b59ea57a33f81e38d1ed78ab0df9d35ce2",
@@ -213,13 +192,9 @@
             "y": 0.22
           },
           "outputs": {
-            "wide": {
-              "sha256": "31f5f0821e885673c26d9b6028ed17ddbb012c28ab3447bf2d69e1bdf58e0017",
-              "size": 44874
-            },
-            "tall": {
-              "sha256": "e2d072815457f4fc06441f2b2a4390ad9c41832bb4bbb37e870831a39abd0dfb",
-              "size": 61592
+            "panel": {
+              "sha256": "71b58d12ba551d2b7c1c10b796aa8c1a4329f454786b20f319a51f339c8c0fef",
+              "size": 20522
             },
             "thumb": {
               "sha256": "f735e5a2bea97629ae6d226dc992bd2d123a36d8c8549750e97f0b0c5b9165b9",
@@ -239,13 +214,9 @@
             "y": 0.22
           },
           "outputs": {
-            "wide": {
-              "sha256": "e05cf573dbe5e74bcf5a46c427cea717b621fa9e570f50b8ccc8d958498bb507",
-              "size": 48984
-            },
-            "tall": {
-              "sha256": "89e33b76ee866c2f9baff0d914578411587844710fea568e6e80ccab8bd2b291",
-              "size": 67884
+            "panel": {
+              "sha256": "77a7ef4fcab6a2fdea49edfafde936e57f9b86ff807038d03de5cc1776e7a62a",
+              "size": 23324
             },
             "thumb": {
               "sha256": "ddb656e5d14fd8febe3232ca3903703db9d84657529059612ea5486209a0b224",
@@ -265,13 +236,9 @@
             "y": 0.22
           },
           "outputs": {
-            "wide": {
-              "sha256": "73e1eb791632e5670d39fe3b0fa26dcd7953fe775b4da0bd09bb01f7f3f774b0",
-              "size": 50734
-            },
-            "tall": {
-              "sha256": "4848b1d96078ae77011c8255ee2325bb86e03f20668d1e261f91db8309b5dfc4",
-              "size": 71612
+            "panel": {
+              "sha256": "f47b41f1164c152fc2d25a90a7bd5bda7b39fd1b2c6c5f6806668c81f574214f",
+              "size": 22010
             },
             "thumb": {
               "sha256": "d224e902d6d8ab73b430e46de00fc1daca63b978edcc42769b8bd110e124acc3",
@@ -291,13 +258,9 @@
             "y": 0.22
           },
           "outputs": {
-            "wide": {
-              "sha256": "80e9877612cc13d5e38c27651931c55723c6a62f2b94521fe5704af6a561c518",
-              "size": 51142
-            },
-            "tall": {
-              "sha256": "75ba65d43ee22c0ee844933dfdba698e3713d893ab477e8c550c909c2b8a3acb",
-              "size": 71894
+            "panel": {
+              "sha256": "17afd1fb9acb9b243dfe60465547d146a9f023e1a078c3ebf6b9aee1c6d7b877",
+              "size": 22334
             },
             "thumb": {
               "sha256": "5e5512277a7912592efa6ca2a98409ca874c570f411252cd5e7bc093c71f7dfa",
@@ -317,13 +280,9 @@
             "y": 0.22
           },
           "outputs": {
-            "wide": {
-              "sha256": "0121631e378a6d6ee4fca6bbaa2ea9b85f8c9eff2875c67ea0c25e63fe0545fa",
-              "size": 47732
-            },
-            "tall": {
-              "sha256": "9cab633d2f3303ec63b1a8370f95c14fdf83b5215da8b7a1332cbb299e07de0a",
-              "size": 66014
+            "panel": {
+              "sha256": "fb662d037b3264f0d8f4ba99e37de5b5f20e17842d6450eaf08519ed2b8966b3",
+              "size": 22316
             },
             "thumb": {
               "sha256": "0c5143977f69c553b36b71e3cf0263b9070b69acca66fafc6e6af0f65ccce308",
@@ -343,13 +302,9 @@
             "y": 0.22
           },
           "outputs": {
-            "wide": {
-              "sha256": "9fe61c715bae6fcdeffdea440c8b5ae5d4352f4997664ae6ccee481b2446b545",
-              "size": 52714
-            },
-            "tall": {
-              "sha256": "f5d5a9901660d78f3ba52bd7835158323f5e8a9195693b93fa54f7cbe4c26358",
-              "size": 74368
+            "panel": {
+              "sha256": "d213c0a0cd58ea7784e2a8484545e74729e8bef1c501a729ae0b1f1e925318c8",
+              "size": 23202
             },
             "thumb": {
               "sha256": "3f629a0fe15906ba07d5a252099fcab5751d27c983377ae31292db6f387ee8dc",
@@ -357,13 +312,17 @@
             }
           }
         }
-      ]
+      ],
+      "title_bar": {
+        "top": "#9cb77a",
+        "bottom": "#4f6d33",
+        "border": "#3a5224"
+      }
     },
     {
       "id": "heroine-red-dress",
       "series": "無職轉生",
       "heroine": "紅衣短髮女",
-      "portrait_side": "right",
       "variants": [
         {
           "key": "red-01",
@@ -377,13 +336,9 @@
             "y": 0.2
           },
           "outputs": {
-            "wide": {
-              "sha256": "76919336f0061d580e249c92e954d280b2c42664779e622f964f0e55af607108",
-              "size": 43652
-            },
-            "tall": {
-              "sha256": "c7c66725e4096f73d89db1cd01460ee2bd0a81c91982ae86d8f0c0155a257dc8",
-              "size": 92492
+            "panel": {
+              "sha256": "e043b4bb357e0fedfd8ae526116bf5068c877f1f06b6cd5c57aed738dd4d91c8",
+              "size": 18626
             },
             "thumb": {
               "sha256": "12914d1ac590f2aa0da6010241db744d4562430b620691dbed1304dbb0364f14",
@@ -403,13 +358,9 @@
             "y": 0.22
           },
           "outputs": {
-            "wide": {
-              "sha256": "f0cf8d0bc3c3d6506d78831f06a422f4b194662e5235d4dd2dbf2e44ce3c2bcf",
-              "size": 37870
-            },
-            "tall": {
-              "sha256": "caf7225a790b1cd07d6a3d864f13492be6ee374d9c8c49adf194e44d4d4bf853",
-              "size": 58018
+            "panel": {
+              "sha256": "84505ec5fe9628a0ecf27c47b7459fa81a8950aa1ba5e57e4e5661262c0d10a1",
+              "size": 13282
             },
             "thumb": {
               "sha256": "f89e2c22db0a2b5b6df24da3a14a350876d88d1b59d72a87811671dd10565f46",
@@ -435,13 +386,9 @@
             "bottom": 0.335
           },
           "outputs": {
-            "wide": {
-              "sha256": "acd9b1f8c5769666b78e0efea44a2d3cbd93f1a938e2af82ed38b7eb3848fabd",
-              "size": 43944
-            },
-            "tall": {
-              "sha256": "6ee0f77dea2dc9ec13498107dacf7b47709624e7edbd8af13e9b93e6d995bcb9",
-              "size": 37688
+            "panel": {
+              "sha256": "18c5f6367d07576f7b5c4047e2011eadcbf585ae736152815bec61e725b8c48b",
+              "size": 14384
             },
             "thumb": {
               "sha256": "de749337263017c8c69c4a1bd66ac5e4df885e1313621fdfcb80cb4e39e7a5e6",
@@ -457,17 +404,13 @@
             "sha256": "8bd83a3b2c6830996e62505ee46b1c181f3b8ea35bfd3f80c05f24487eb01be1"
           },
           "focus": {
-            "x": 0.5,
+            "x": 0.2,
             "y": 0.4
           },
           "outputs": {
-            "wide": {
-              "sha256": "80f17acb7dc5f926e7b26b084b4b87667b17bc593e08d890f135c36f8c8f8e6c",
-              "size": 73864
-            },
-            "tall": {
-              "sha256": "08ef961721f77120856dbc6a0482c190f3aa50b056c9c86a0f591edcf46eb5ae",
-              "size": 42160
+            "panel": {
+              "sha256": "1a06e35c609be20e69b659aaa8203c73264f3694872fcf9ee2c9c70525e11310",
+              "size": 18386
             },
             "thumb": {
               "sha256": "932760c45f337a0b4175033b47b7d464d7782f85ed2a2d8a6e0a67d7040a9176",
@@ -475,7 +418,12 @@
             }
           }
         }
-      ]
+      ],
+      "title_bar": {
+        "top": "#c77a8a",
+        "bottom": "#7c2438",
+        "border": "#5a1627"
+      }
     }
   ],
   "asset_layout": "<asset_root>/<theme-id>/<variant-key>/<output-file>"
