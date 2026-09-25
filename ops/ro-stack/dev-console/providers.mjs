@@ -221,6 +221,16 @@ function mariadbClient() {
   return file;
 }
 
+export function parseLiveInventoryRow(row) {
+  const numeric = value => /^\d+$/.test(value ?? '') ? Number(value) : null;
+  return { charId: numeric(row[0]), accountId: numeric(row[1]), revision: numeric(row[2]),
+    resident: row[3] === '1', map: row[4], ageMs: numeric(row[5]),
+    inventorySlots: numeric(row[6]), inventoryMaxSlots: numeric(row[7]),
+    weight: numeric(row[8]), maxWeight: numeric(row[9]),
+    supplyRequired: row[10] === '1' ? true : row[10] === '0' ? false : null,
+    supplyReason: row[11] || null };
+}
+
 export function fixedDbRead(kind, id, { root = PRODUCTION_ROOT, env = process.env } = {}) {
   const charId = safeId(id);
   const secrets = readJson(path.join(runtime(root), 'secrets.json'));
@@ -228,6 +238,7 @@ export function fixedDbRead(kind, id, { root = PRODUCTION_ROOT, env = process.en
   const queries = {
     events: `SELECT event_id,UNIX_TIMESTAMP(occurred_at),event_type,COALESCE(map,''),COALESCE(source,'') FROM persistent_life_event WHERE char_id=${charId} ORDER BY occurred_at DESC,event_id DESC LIMIT 20`,
     commands: `SELECT command_id,action,command_status,COALESCE(reason_code,''),UNIX_TIMESTAMP(requested_at) FROM persistent_agent_command WHERE char_id=${charId} ORDER BY requested_at DESC LIMIT 20`,
+    liveInventory: `SELECT char_id,account_id,revision,resident,COALESCE(map,''),ROUND(TIMESTAMPDIFF(MICROSECOND,updated_at,CURRENT_TIMESTAMP(3))/1000),inventory_slots,inventory_max_slots,weight,max_weight,supply_required,COALESCE(supply_reason,'') FROM persistent_agent_live_status WHERE char_id=${charId} LIMIT 1`,
   };
   if (!queries[kind]) fail('NOT_ELIGIBLE', 'unsupported_db_read');
   const executable = mariadbClient();
@@ -238,12 +249,15 @@ export function fixedDbRead(kind, id, { root = PRODUCTION_ROOT, env = process.en
   if (result.error || result.status !== 0) fail('AUTHORITY_UNAVAILABLE', 'bounded_read_only_query_failed');
   const records = result.stdout.trim().split(/\r?\n/).filter(Boolean).map(line => {
     const row = line.split('\t');
+    if (kind === 'liveInventory') return parseLiveInventoryRow(row);
     return kind === 'events'
       ? { eventId: row[0], occurredAtUnix: Number(row[1]), type: row[2], map: row[3], source: row[4] }
       : { commandId: row[0], action: row[1], status: row[2], reasonCode: row[3], requestedAtUnix: Number(row[4]) };
   });
-  return { charId, records, limit: 20,
-  source: kind === 'events' ? 'Event Ledger read-only bounded query' : 'Native command ledger read-only bounded query' };
+  return { charId, records, limit: kind === 'liveInventory' ? 1 : 20,
+  source: kind === 'events' ? 'Event Ledger read-only bounded query'
+    : kind === 'liveInventory' ? 'Native live-status read-only bounded query'
+      : 'Native command ledger read-only bounded query' };
 }
 
 export function runtimeLogs(service, { root = PRODUCTION_ROOT, charId = null } = {}) {

@@ -114,11 +114,23 @@ export const M1_DEATH_TOWN_MAINTENANCE_AMENDMENT = Object.freeze({
     'tools/pa-command-contract/test-m1-supply-policy.cpp',
   ]),
 });
+// Live player command acceptance exposed a Fly Wing ACK without a position
+// change. Only the existing Native item-effect adapter and its source guard
+// may advance under the current F lease.
+export const M1_PLAYER_FLY_WING_EFFECT_CORRECTION = Object.freeze({
+  reason: 'M1_PLAYER_FLY_WING_EFFECT_CONFIRMATION_V1',
+  scope: 'M1_PLAYER_FLY_WING_EFFECT_CONFIRMATION_V1',
+  sourcePaths: Object.freeze([
+    'src/map/persistent_agent.cpp',
+    'tools/pa-command-contract/Test-M1V15ExecutorFixture.ps1',
+  ]),
+});
 export const APPROVED_NATIVE_AMENDMENTS = Object.freeze([
   M1_SECOND_NATIVE_AMENDMENT, M1_INVENTORY_MAINTENANCE_NATIVE_AMENDMENT,
   M1_INVENTORY_PROJECTION_CORRECTION, M1_FARM_WORLD_TELEPORT_SPAWN_CORRECTION,
   M1_START_FARM_SUPPLY_CONTRACT_CORRECTION, M1_AUTO_FARM_QUARANTINE_RECOVERY_CORRECTION,
   M1_DORMANT_QUARANTINE_RUNTIME_CORRECTION, M1_DEATH_TOWN_MAINTENANCE_AMENDMENT,
+  M1_PLAYER_FLY_WING_EFFECT_CORRECTION,
 ]);
 export const approvedNativeAmendment = reason =>
   APPROVED_NATIVE_AMENDMENTS.find(item => item.reason === reason) ?? null;

@@ -11,6 +11,7 @@ import { HISTORICAL_NATIVE_AMENDMENT as old, M1_SECOND_NATIVE_AMENDMENT as polic
   M1_AUTO_FARM_QUARANTINE_RECOVERY_CORRECTION as farmRecovery,
   M1_DORMANT_QUARANTINE_RUNTIME_CORRECTION as dormantRecovery,
   M1_DEATH_TOWN_MAINTENANCE_AMENDMENT as deathMaintenance,
+  M1_PLAYER_FLY_WING_EFFECT_CORRECTION as playerFlyWing,
   validateNativeAmendmentHistory, validateHistoricalNativeAnchor, validateNextNativeAmendment,
   applyNextNativeAmendment, deployedNativeRuntimeMatches } from '../native-amendment-chain.mjs';
 import { retirementDecision } from '../native-candidate-amendment.mjs';
@@ -272,6 +273,14 @@ test('V15 death maintenance amendment admits only the reviewed source and eviden
     'tools/pa-command-contract/test-m1-supply-policy.cpp',
   ]);
   assert.equal(deathMaintenance.sourcePaths.includes('src/map/map.cpp'), false);
+});
+test('player Fly Wing effect correction admits only the item adapter and guard', () => {
+  assert.equal(playerFlyWing.reason, 'M1_PLAYER_FLY_WING_EFFECT_CONFIRMATION_V1');
+  assert.deepEqual(playerFlyWing.sourcePaths, [
+    'src/map/persistent_agent.cpp',
+    'tools/pa-command-contract/Test-M1V15ExecutorFixture.ps1',
+  ]);
+  assert.equal(playerFlyWing.sourcePaths.includes('src/map/pc.cpp'), false);
 });
 {
   const mapHash = 'A'.repeat(64);

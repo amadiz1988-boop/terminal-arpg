@@ -12,7 +12,7 @@ const help = () => ({
   usage: 'node ops/ro-stack/ghost-island-dev.mjs <command> [--json]',
   discovery: ['help', 'capabilities [domain]'],
   diagnostics: ['runtime health|processes|identity|logs <login|char|map|dashboard> [--char <id>]',
-    'deployment state|receipt', 'player inspect <charId>|fleet|quarantine|commands <charId>',
+    'deployment state|receipt', 'player inspect <charId>|fleet|quarantine|commands <charId>|live-inventory <charId>',
     'events recent <charId>', 'incident procdump|latest', 'config diff'],
   action: ['action recover-quarantined <charId> --preflight',
     'action recover-quarantined <charId> --execute'],
@@ -73,6 +73,8 @@ export async function runConsole(raw, deps = {}) {
       if (!result.complete) return envelope('STALE', authority, 'quarantine', result.source, result, { freshness: 'PARTIAL_ROSTER_200' });
     } else if (domain === 'player' && command === 'commands' && accepted(args, 3)) {
       result = provider.fixedDbRead('commands', target, options); authority = 'Native command ledger';
+    } else if (domain === 'player' && command === 'live-inventory' && accepted(args, 3)) {
+      result = provider.fixedDbRead('liveInventory', target, options); authority = 'Native PA live-status read model';
     } else if (domain === 'events' && command === 'recent' && accepted(args, 3)) {
       result = provider.fixedDbRead('events', target, options); authority = 'Event Ledger';
     } else if (domain === 'incident' && command === 'procdump' && accepted(args, 2)) {

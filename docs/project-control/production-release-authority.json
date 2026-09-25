@@ -11,7 +11,7 @@
     "repository": "https://github.com/amadiz1988-boop/ghost-island-rathena.git",
     "github_repository": "https://github.com/amadiz1988-boop/ghost-island-rathena.git",
     "release_ref": "refs/heads/main",
-    "accepted_source_sha": "fe1477b841ee091ddb13e790dd300e9b713d8380",
+    "accepted_source_sha": "71e3f1c42e053d869e108b00d6933f16252abf54",
     "private_required": true,
     "candidate_history": [
       {
@@ -84,6 +84,14 @@
       "lease_id": "869f1725-dbd0-452d-b9dd-37ee79cc3f9a",
       "candidate_successor": "fe1477b841ee091ddb13e790dd300e9b713d8380",
       "reason": "M1_DEATH_TOWN_MAINTENANCE_V1",
+      "status": "SOURCE_APPROVED_DEPLOY_PENDING"
+    },
+    {
+      "native_git_sha": "fe1477b841ee091ddb13e790dd300e9b713d8380",
+      "disposition": "DEPLOYED_NATIVE_PREDECESSOR",
+      "lease_id": "869f1725-dbd0-452d-b9dd-37ee79cc3f9a",
+      "candidate_successor": "71e3f1c42e053d869e108b00d6933f16252abf54",
+      "reason": "M1_PLAYER_FLY_WING_EFFECT_CONFIRMATION_V1",
       "status": "SOURCE_APPROVED_DEPLOY_PENDING"
     }
     ]

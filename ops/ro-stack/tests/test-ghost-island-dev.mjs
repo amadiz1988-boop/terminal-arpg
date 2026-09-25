@@ -4,6 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { runConsole } from '../ghost-island-dev.mjs';
 import { capabilities } from '../dev-console/registry.mjs';
+import { parseLiveInventoryRow } from '../dev-console/providers.mjs';
 
 const root = fs.mkdtempSync(path.join(os.tmpdir(), 'ro-dev-console-'));
 const dir = path.join(root, '.local', 'ro-stack');
@@ -46,6 +47,20 @@ try {
   assert.equal(player.RESULT.hp, 5);
   assert.equal((await runConsole(['player', 'quarantine'], { providers })).RESULT.count, 1);
   assert.equal(fetched, 2);
+  assert.equal(capabilities.find(row => row.id === 'player.live_inventory').command,
+    'player live-inventory <charId>');
+  assert.deepEqual(parseLiveInventoryRow(['17', '19', '21', '1', 'izlude', '24',
+    '6', '100', '500', '20300', '0', '']), {
+    charId: 17, accountId: 19, revision: 21, resident: true, map: 'izlude',
+    ageMs: 24, inventorySlots: 6, inventoryMaxSlots: 100, weight: 500,
+    maxWeight: 20300, supplyRequired: false, supplyReason: null,
+  });
+  assert.equal(parseLiveInventoryRow(['17', '19', '21', '1', 'izlude', '24',
+    '6', '100', '500', '20300', '1', 'HP_LOW']).supplyRequired, true);
+  assert.equal(parseLiveInventoryRow(['17', '19', '21', '1', 'izlude', '24',
+    '6', '100', '500', '20300', 'NULL', '']).supplyRequired, null);
+  assert.equal((await runConsole(['player', 'live-inventory', '17', '--sql', 'DELETE'])).STATUS,
+    'NOT_ELIGIBLE');
   assert.equal((await runConsole(['player', 'fleet'], { providers: { env: {}, fetchImpl } })).STATUS, 'NOT_AUTHORIZED');
   assert.equal(fetched, 2);
 
@@ -66,7 +81,7 @@ try {
   assert.equal(rejected.STATUS, 'ACTION_REJECTED');
   assert.equal((await runConsole(['events', 'recent', '17', '--sql', 'DELETE'])).STATUS, 'NOT_ELIGIBLE');
   assert.equal((await runConsole(['runtime', 'logs', 'powershell'])).STATUS, 'NOT_ELIGIBLE');
-  console.log('developer console: 15 assertions groups PASS');
+  console.log('developer console: 19 assertions groups PASS');
 } finally {
   assert(path.resolve(root).toLowerCase().startsWith(path.resolve(os.tmpdir()).toLowerCase() + path.sep));
   assert(path.basename(root).startsWith('ro-dev-console-'));
