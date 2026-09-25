@@ -10506,11 +10506,6 @@ async function handleDashboardRequest(request, response) {
         'cache-control': 'private, max-age=60, must-revalidate',
       });
     }
-    if (url.pathname === '/api/farm-map-availability' && request.method === 'GET') {
-      return json(response, 200, await playerWorldMapAvailability(account), {
-        'cache-control': 'private, no-store',
-      });
-    }
     if (url.pathname === '/api/internal/probe') {
       if (!loopbackRequest(request))
         return json(response, 404, { error: 'not_found' });
@@ -10806,6 +10801,11 @@ async function handleDashboardRequest(request, response) {
     if (supportMutationDecision && supportMutationDecision.actionKey !== 'support_session_revoke') {
       await assertSupportSessionDispatchActive(request, supportRequestContext);
       supportActionAuditForResponse(response, request, supportRequestContext, supportMutationDecision);
+    }
+    if (url.pathname === '/api/farm-map-availability' && request.method === 'GET') {
+      return json(response, 200, await playerWorldMapAvailability(account), {
+        'cache-control': 'private, no-store',
+      });
     }
     if (url.pathname === '/api/config' && request.method === 'GET')
       return json(response, 200, await readPlayerConfig(account));
