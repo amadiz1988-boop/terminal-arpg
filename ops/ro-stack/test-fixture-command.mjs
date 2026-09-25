@@ -180,3 +180,94 @@ export function createTestFixtureCommandTransport({ sql, escapeSql, audit, nativ
 
   return { submit, result };
 }
+
+// One local-Admin-only, fixed-profile prerequisite setup. This shares the
+// authenticated test transport and command ledger; no generic target, item,
+// Zeny, map or state parameter is admitted.
+export function createM1AcceptanceFixtureTransport({ sql, escapeSql, audit, nativeGrant, registry }) {
+  const action = 'prepare_m1_acceptance_fixture';
+  const profile = 'M1_FLY_SUPPLY_V1';
+  const targetCharId = 150105;
+  const targetAccountId = 2000163;
+  const fixture = resolveCanonicalTestFixture(registry, 'TEST_PLAYER');
+
+  async function eligible() {
+    if (!fixture.ok || fixture.charId !== targetCharId || fixture.accountId !== targetAccountId)
+      return false;
+    const row = await sql(`SELECT c.account_id,COALESCE(f.is_test,0),s.revision FROM \`char\` c
+      JOIN persistent_agent_state s ON s.char_id=c.char_id
+      LEFT JOIN web_account_flags f ON f.account_id=c.account_id
+      WHERE c.char_id=${targetCharId} LIMIT 1;`);
+    const [accountId, testFlag, revision] = String(row ?? '').split('\t');
+    return Number(accountId) === targetAccountId && Number(testFlag) === 1 &&
+      Number.isSafeInteger(Number(revision)) && Number(revision) >= 0 ? Number(revision) : false;
+  }
+
+  async function readCommand(requestId) {
+    const output = await sql(`SELECT c.command_id,c.char_id,c.action,c.expected_revision,c.command_status,
+      COALESCE(c.reason_code,''),COALESCE(c.resulting_revision,''),COALESCE(c.accepted_at,''),
+      COALESCE(c.confirmed_at,''),c.payload_hash FROM persistent_agent_command c
+      WHERE c.command_id='${escapeSql(requestId)}' AND c.char_id=${targetCharId} LIMIT 1;`);
+    return commandRow(output);
+  }
+
+  const localAdmin = context => context?.context === 'ADMIN_TRANSPORT' &&
+    context.authMethod === 'LOCAL_ADMIN_TOKEN' && !!context.actorAdminId;
+
+  async function submit(body, context) {
+    if (!localAdmin(context) || !sessionIdPattern.test(String(context.sessionId ?? '')))
+      return { status: 403, body: { state: 'DENIED', error: 'local_admin_required' } };
+    if (!body || typeof body !== 'object' || Array.isArray(body) ||
+        Object.keys(body).some(key => !['profile', 'requestId'].includes(key)) ||
+        body.profile !== profile)
+      return { status: 422, body: { state: 'DENIED', error: 'invalid_m1_fixture_profile' } };
+    const requestId = String(body.requestId ?? randomUUID()).toLowerCase();
+    if (!commandIdPattern.test(requestId))
+      return { status: 422, body: { state: 'DENIED', error: 'invalid_request_id' } };
+    const revision = await eligible();
+    if (revision === false)
+      return { status: 403, body: { requestId, state: 'DENIED', error: 'fixture_identity_rejected' } };
+    const payload = JSON.stringify({ adminSessionId: context.sessionId, targetCharId, profile });
+    const payloadHash = createHash('sha256')
+      .update(`${action}\0${targetCharId}\0${revision}\0${payload}`).digest('hex');
+    await audit({ accountId: targetAccountId, charId: targetCharId,
+      eventType: 'M1_FIXTURE_REQUEST', errorCode: 'admission_checked', commandId: requestId });
+    await nativeGrant({ adminSessionId: context.sessionId, adminActorId: context.actorAdminId,
+      adminAuthMethod: context.authMethod, createdFrom: profile });
+    await sql(`INSERT IGNORE INTO persistent_agent_command
+      (command_id,char_id,action,payload,payload_hash,expected_revision,command_status,requested_at)
+      VALUES ('${escapeSql(requestId)}',${targetCharId},'${action}',
+      '${escapeSql(payload)}','${payloadHash}',${revision},'QUEUED',CURRENT_TIMESTAMP(3));`);
+    const command = await readCommand(requestId);
+    if (!command || command.action !== action || command.expectedRevision !== revision ||
+        command.payloadHash !== payloadHash)
+      return { status: 409, body: { requestId, state: 'FAILED', error: 'idempotency_conflict' } };
+    return { status: 202, body: { requestId, fixtureRole: 'TEST_PLAYER',
+      targetCharId, profile, state: 'QUEUED' } };
+  }
+
+  async function result(requestId, context) {
+    if (!localAdmin(context)) return { status: 403, body: { error: 'local_admin_required' } };
+    if (!commandIdPattern.test(String(requestId ?? '')))
+      return { status: 422, body: { error: 'invalid_request_id' } };
+    if (await eligible() === false)
+      return { status: 403, body: { error: 'fixture_identity_rejected' } };
+    const command = await readCommand(requestId);
+    if (!command || command.action !== action)
+      return { status: 404, body: { error: 'command_not_found' } };
+    const output = await sql(`SELECT COALESCE(error_code,''),created_at FROM persistent_agent_rollout_event
+      WHERE command_id='${escapeSql(requestId)}' AND event_type='M1_ACCEPTANCE_FIXTURE'
+      ORDER BY event_id DESC LIMIT 1;`);
+    const [nativeEvent = '', nativeResultAt = ''] = String(output ?? '').split('\t');
+    const confirmed = command.status === 'CONFIRMED' && nativeEvent === 'PREREQUISITES_READY';
+    return { status: 200, body: { requestId, fixtureRole: 'TEST_PLAYER', targetCharId, profile,
+      state: confirmed ? 'CONFIRMED' : command.status === 'REJECTED' ? 'REJECTED'
+        : command.status === 'CONFIRMED' ? 'FAILED' : 'QUEUED',
+      reason: command.status === 'CONFIRMED' && !confirmed
+        ? 'NATIVE_RESULT_MISSING' : command.reasonCode,
+      nativeEvent, nativeResultAt: nativeResultAt || null,
+      acceptedAt: command.acceptedAt, confirmedAt: command.confirmedAt } };
+  }
+
+  return { submit, result };
+}

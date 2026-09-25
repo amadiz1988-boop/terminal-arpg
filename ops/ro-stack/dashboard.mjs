@@ -10,7 +10,7 @@ import {
 import { execFile } from 'node:child_process';
 import { createOpsControlPlane } from './ops-control-plane.mjs';
 import { createDashboardDatabase } from './dashboard-db.mjs';
-import { createTestFixtureCommandTransport } from './test-fixture-command.mjs';
+import { createTestFixtureCommandTransport, createM1AcceptanceFixtureTransport } from './test-fixture-command.mjs';
 import { createAdminQuarantineRecoveryTransport, AdminRecoveryError } from './dashboard/admin-quarantine-recovery.mjs';
 import { createExternalIdentityStore } from './account-external-identity.mjs';
 import {
@@ -172,6 +172,7 @@ import {
   saveCanonicalConfig,
 } from './dashboard/config-storage.mjs';
 import { resolveFarmExecutionProfile } from './dashboard/farm-execution-profile.mjs';
+import { configWriteAdmission, m1ConfigExecutionCapabilities } from './dashboard/config-capabilities.mjs';
 import {
   CharacterProjectionCache,
   CharacterViewerRegistry,
@@ -8774,9 +8775,6 @@ async function saveSupplyCycle(account, input) {
   return settings;
 }
 
-const nativeSupplyConfigPaths = [
-  'supply.enabled', 'supply.services.buy.enabled', 'supply.services.buy.rules',
-];
 const configOnlyExecution = () => ({ applied: false, controller: 'CONFIG_ONLY',
   reason: 'CONFIG_ONLY_NO_EXECUTOR_COMMAND' });
 
@@ -8796,8 +8794,8 @@ async function nativeSupplyConfigExecution(account, config) {
     JSON.stringify(activePolicy) === JSON.stringify(nativeSupplyPolicy(config));
   return { applied, editable: true, controller: SERVER_AGENT_OWNER,
     reason: applied ? null : ownership.agentMode === 'PERSISTENT_IDLE'
-      ? 'SAVED_FOR_NEXT_FARM' : 'POLICY_NOT_YET_CONFIRMED', capabilities: Object.fromEntries(
-      nativeSupplyConfigPaths.map((path) => [path, 'SUPPORTED'])) };
+      ? 'SAVED_FOR_NEXT_FARM' : 'POLICY_NOT_YET_CONFIRMED',
+    capabilities: m1ConfigExecutionCapabilities(nativeSupplyPolicyCommandEnabled, true) };
 }
 
 async function configureSavedNativeSupplyPolicy(account, execution) {
@@ -8846,6 +8844,18 @@ async function savePlayerConfig(account, body) {
   if (errors.length) {
     const exception = new HttpError(422, '設定驗證失敗');
     exception.details = errors;
+    throw exception;
+  }
+  const current = await loadCanonicalConfig({
+    instancesRoot, accountId: account.accountId,
+    characterId: account.characterId, persistMigration: false,
+  });
+  const admission = configWriteAdmission(current.config, config,
+    await nativeSupplyConfigExecution(account, current.config));
+  if (!admission.ok) {
+    const exception = new HttpError(422, 'CONFIG_EXECUTOR_UNAVAILABLE');
+    exception.details = admission.unsupportedPaths.map((path) => ({ path,
+      message: 'CONFIG_EXECUTOR_UNAVAILABLE' }));
     throw exception;
   }
   if (nativeSupplyPolicyCommandEnabled) {
@@ -10112,42 +10122,50 @@ async function grantNativeTestFixtureCommand(normalized) {
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`);
   const createdAt = Date.now();
   const sessionHash = createHash('sha256').update(normalized.adminSessionId).digest('hex');
+  const createdFrom = normalized.createdFrom === 'M1_FLY_SUPPLY_V1'
+    ? 'M1_FLY_SUPPLY_V1' : 'TEST_FIXTURE_COMMAND';
   await sql(`INSERT INTO web_admin_sessions
     (session_hash,session_id,actor_admin_id,auth_method,created_from,created_at,expires_at,revoked_at)
     VALUES ('${sessionHash}','${escapeSql(normalized.adminSessionId)}',
     '${escapeSql(normalized.adminActorId)}','${escapeSql(normalized.adminAuthMethod)}',
-    'TEST_FIXTURE_COMMAND',${createdAt},${createdAt + 300000},NULL);`);
+    '${createdFrom}',${createdAt},${createdAt + 300000},NULL);`);
 }
 
 async function handleAdminTestFixtureCommand(url, request, response) {
   const isSubmit = url.pathname === '/api/admin/test-fixture/command';
   const resultMatch = url.pathname.match(/^\/api\/admin\/test-fixture\/command\/([0-9a-f-]{36})$/i);
-  if (!isSubmit && !resultMatch) return false;
+  const isM1Submit = url.pathname === '/api/admin/test-fixture/m1-acceptance';
+  const m1ResultMatch = url.pathname.match(/^\/api\/admin\/test-fixture\/m1-acceptance\/([0-9a-f-]{36})$/i);
+  if (!isSubmit && !resultMatch && !isM1Submit && !m1ResultMatch) return false;
   const adminContext = adminTestFixtureTransportContext(request);
-  if (!adminContext) {
+  if (!adminContext || ((isM1Submit || m1ResultMatch) && adminContext.authMethod !== 'LOCAL_ADMIN_TOKEN')) {
     json(response, 403, { error: 'admin_auth_required' });
     return true;
   }
-  if ((isSubmit && request.method !== 'POST') || (resultMatch && request.method !== 'GET')) {
+  if (((isSubmit || isM1Submit) && request.method !== 'POST') ||
+      ((resultMatch || m1ResultMatch) && request.method !== 'GET')) {
     json(response, 405, { error: 'method_not_allowed' });
     return true;
   }
-  if (isSubmit && process.env.RO_TEST_FIXTURE_COMMANDS_ENABLED !== '1') {
+  if ((isSubmit || isM1Submit) && process.env.RO_TEST_FIXTURE_COMMANDS_ENABLED !== '1') {
     json(response, 503, { error: 'fixture_transport_disabled' });
     return true;
   }
   try {
     const registry = JSON.parse(await readFile(
       new URL('../../docs/project-control/canonical-test-fixtures.json', import.meta.url), 'utf8'));
-    const transport = createTestFixtureCommandTransport({
+    const transport = (isM1Submit || m1ResultMatch
+      ? createM1AcceptanceFixtureTransport : createTestFixtureCommandTransport)({
       sql, escapeSql, registry,
       audit: (event) => recordRolloutEvent(sql, event),
       nativeGrant: grantNativeTestFixtureCommand,
     });
-    const result = isSubmit
+    const result = (isSubmit || isM1Submit)
       ? await transport.submit(await requestBody(request),
         { ...adminContext, sessionId: randomUUID() })
-      : await transport.result(resultMatch[1], url.searchParams.get('fixtureRole'), adminContext);
+      : m1ResultMatch
+        ? await transport.result(m1ResultMatch[1], adminContext)
+        : await transport.result(resultMatch[1], url.searchParams.get('fixtureRole'), adminContext);
     json(response, result.status, result.body);
   } catch {
     console.error('Admin test fixture command unavailable.');

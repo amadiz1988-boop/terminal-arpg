@@ -152,7 +152,7 @@ assert.equal('adminSessionId' in result.body, false);
 
 const dashboard = await readFile(new URL('../ops/ro-stack/dashboard.mjs', import.meta.url), 'utf8');
 assert.match(dashboard, /function adminTestFixtureTransportContext\(request\)/);
-assert.match(dashboard, /if \(!adminContext\)/);
+assert.match(dashboard, /if \(!adminContext \|\| \(\(isM1Submit \|\| m1ResultMatch\)/);
 assert.match(dashboard, /if \(await handleAdminTestFixtureCommand\(url, request, response\)\) return/);
 assert.match(dashboard, /RO_TEST_FIXTURE_COMMANDS_ENABLED !== '1'/);
 assert.ok(dashboard.indexOf("supportRequestContext && url.pathname.startsWith('/api/admin/')") <
@@ -160,7 +160,8 @@ assert.ok(dashboard.indexOf("supportRequestContext && url.pathname.startsWith('/
 assert.ok(dashboard.indexOf("if (url.pathname.startsWith('/api/admin/')") <
   dashboard.indexOf('if (await handleAdminTestFixtureCommand(url, request, response)) return'));
 assert.match(dashboard, /CREATE TABLE IF NOT EXISTS web_admin_sessions/);
-assert.match(dashboard, /'TEST_FIXTURE_COMMAND',\$\{createdAt\}/);
+assert.match(dashboard, /const createdFrom = normalized\.createdFrom === 'M1_FLY_SUPPLY_V1'/);
+assert.match(dashboard, /'\$\{createdFrom\}',\$\{createdAt\}/);
 const contextStart = dashboard.indexOf('function adminTestFixtureTransportContext(request) {');
 const contextEnd = dashboard.indexOf('\n}', contextStart);
 assert.ok(contextStart > 0 && contextEnd > contextStart);

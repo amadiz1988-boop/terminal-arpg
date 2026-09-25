@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
-import { CONFIG_FORM_SCHEMA } from '../ops/ro-stack/dashboard/config-schema.mjs';
+import { CONFIG_FORM_SCHEMA, clone, defaultCanonicalConfig } from '../ops/ro-stack/dashboard/config-schema.mjs';
 import {
-  CONFIG_SECTIONS, configCapability, configCapabilityCounts, configControlVisible, configSection,
+  CONFIG_SECTIONS, configCapability, configCapabilityCounts, configControlVisible,
+  configRowFieldSupported, configSection, configWriteAdmission,
+  M1_EXECUTOR_PATHS, m1ConfigExecutionCapabilities,
 } from '../ops/ro-stack/dashboard/config-capabilities.mjs';
 
 const all = Object.values(CONFIG_FORM_SCHEMA).flatMap((schema) => [...schema.fields, ...(schema.arrays ?? [])]);
@@ -30,4 +32,47 @@ for (const path of [
 assert.equal(configSection('combat.travel.flyWing.enabled'), '蒼蠅翅膀');
 assert.equal(configSection('supply.tools.butterflyWing.required'), '蝴蝶翅膀 / 回城補給');
 assert.equal(configSection('combat.itemUse'), 'HP / SP');
+const before = defaultCanonicalConfig();
+const editableSupply = { editable: true, capabilities: Object.fromEntries([
+  'supply.enabled', 'supply.services.buy.enabled', 'supply.services.buy.rules',
+].map((path) => [path, 'SUPPORTED'])) };
+const changed = (mutate, execution = editableSupply) => {
+  const after = clone(before);
+  mutate(after);
+  return configWriteAdmission(before, after, execution);
+};
+assert.deepEqual(changed((config) => { config.supply.enabled = true; }),
+  { ok: true, unsupportedPaths: [] });
+assert.deepEqual(changed((config) => { config.supply.enabled = true; }, unaccepted),
+  { ok: false, unsupportedPaths: ['supply.enabled'] });
+assert.deepEqual(changed((config) => { config.supply.weightTriggerPercent = 80; }),
+  { ok: false, unsupportedPaths: ['supply.weightTriggerPercent'] });
+assert.deepEqual(changed((config) => { config.combat.profile = 'SKILL_CAST'; }),
+  { ok: false, unsupportedPaths: ['combat.profile'] });
+assert.deepEqual(changed((config) => { config.supply.services.buy.rules[0].maxAmount = 30; }),
+  { ok: true, unsupportedPaths: [] });
+assert.deepEqual(changed((config) => { config.supply.services.buy.rules[0].npc = 'prontera'; }),
+  { ok: false, unsupportedPaths: ['supply.services.buy.rules'] });
+assert.deepEqual(changed((config) => { config.unknownField = true; }),
+  { ok: false, unsupportedPaths: ['unknownField'] });
+assert.equal(configRowFieldSupported('buy', 'maxAmount'), true);
+assert.equal(configRowFieldSupported('buy', 'npc'), false);
+assert.equal(configRowFieldSupported('selfSkill', 'conditions.hp'), true);
+assert.equal(configRowFieldSupported('selfSkill', 'conditions.whenStatusActive'), false);
+assert.equal(M1_EXECUTOR_PATHS.length, 12);
+assert.deepEqual(m1ConfigExecutionCapabilities(false, true), {});
+assert.deepEqual(m1ConfigExecutionCapabilities(true, false), {});
+assert.equal(Object.keys(m1ConfigExecutionCapabilities(true, true)).length, 12);
+assert.equal(configCapability({ editable: true,
+  capabilities: m1ConfigExecutionCapabilities(true, true) }, 'combat.skills.selfSkills'), 'SUPPORTED');
+const m1Execution = { editable: true, capabilities: m1ConfigExecutionCapabilities(true, true) };
+assert.deepEqual(changed((config) => { config.combat.attack.mode = 1; }, m1Execution),
+  { ok: false, unsupportedPaths: ['combat.attack.mode'] });
+assert.deepEqual(changed((config) => { config.combat.attack.distance = 2.5; }, m1Execution),
+  { ok: false, unsupportedPaths: ['combat.attack.distance'] });
+assert.deepEqual(changed((config) => { config.combat.profile = 'HEAL_SUPPORT'; }, m1Execution),
+  { ok: false, unsupportedPaths: ['combat.profile'] });
+assert.deepEqual(changed((config) => { config.combat.skills.selfSkills.push({
+  skill: '28', level: 1, conditions: { hp: '< 60%' }, smartEncore: true,
+}); }, m1Execution), { ok: false, unsupportedPaths: ['combat.skills.selfSkills'] });
 console.log(`M1_CONFIG_CAPABILITY_GATE_PASS fields=${all.length} sections=${CONFIG_SECTIONS.length}`);
