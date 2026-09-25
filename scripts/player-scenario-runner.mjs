@@ -40,14 +40,39 @@ function itemAmount(item) {
   return numberOrNull(item?.amount ?? item?.count ?? item?.quantity) ?? 0;
 }
 
+// The deployed /api/state carries the authoritative persistent_agent_state row
+// (agent_mode, revision) only through questJournal.ownership. liveStatus is the
+// live-position view and has no mode field. When the ownership row is absent
+// the journal contract fills owner=OPENKORE / agentMode=PERSISTENT_IDLE, so any
+// non SERVER_AGENT owner is a missing projection and must stay UNKNOWN.
+const AGENT_MODE_SOURCE = 'questJournal.ownership.agentMode';
+
+function observeAgentMode(body) {
+  const journal = body?.questJournal;
+  const ownership = journal?.ownership;
+  const missing = (reason) => ({ mode: null, modeRevision: null, modeSource: null, modeReason: reason });
+  if (!ownership || typeof ownership !== 'object') return missing('MODE_PROJECTION_MISSING');
+  if (ownership.owner !== 'SERVER_AGENT') return missing('MODE_PROJECTION_NOT_SERVER_AGENT');
+  const mode = typeof ownership.agentMode === 'string' && ownership.agentMode ? ownership.agentMode : null;
+  if (!mode) return missing('MODE_PROJECTION_EMPTY');
+  return { mode, modeRevision: numberOrNull(journal.revision), modeSource: AGENT_MODE_SOURCE, modeReason: null };
+}
+
+// A target mode counts only when the authoritative ownership revision moved
+// past the pre-command observation; an unchanged revision is a stale read.
+function modeTransitionResult(before, after, expectedMode) {
+  if (!after?.mode) return { ok: false, reason: after?.modeReason ?? 'MODE_PROJECTION_MISSING' };
+  if (after.mode !== expectedMode) return { ok: false, reason: `mode=${after.mode}` };
+  if (before?.modeRevision == null || after.modeRevision == null || after.modeRevision <= before.modeRevision)
+    return { ok: false, reason: `mode_projection_stale revision=${after.modeRevision ?? 'UNKNOWN'} before=${before?.modeRevision ?? 'UNKNOWN'}` };
+  return { ok: true, reason: null };
+}
+
 function normalizeState(body) {
   const character = body?.character ?? {};
   const live = body?.liveStatus ?? body?.live ?? {};
   const derived = body?.derived ?? {};
-  const automation = body?.automation ?? {};
-  const mode =
-    live.agentMode ?? live.mode ?? derived.agentMode ?? automation.mode ??
-    body?.persistentAgentRollout?.agentMode ?? null;
+  const agentMode = observeAgentMode(body);
   const map = live.map ?? character.map ?? derived.map ?? null;
   const x = numberOrNull(live.x ?? live.playerX ?? character.x ?? derived.playerX);
   const y = numberOrNull(live.y ?? live.playerY ?? character.y ?? derived.playerY);
@@ -66,7 +91,7 @@ function normalizeState(body) {
     map: map == null ? null : String(map),
     x,
     y,
-    mode: mode == null ? null : String(mode),
+    ...agentMode,
     farmTarget: body?.grindTarget?.mapId ?? body?.grindTarget?.targetMap ??
       live.targetMap ?? derived.targetMap ?? null,
     runtimePhase: live.runtimePhase ?? live.phase ?? derived.runtimePhase ?? null,
@@ -359,6 +384,9 @@ async function executeAutomation(options, traceId, scenario) {
   const isStart = scenario === 'start-farm';
   const isStop = scenario === 'stop-farm';
   const action = isStart ? 'start' : 'stop';
+  const targetMode = isStart ? 'AUTO_FARM' : 'PERSISTENT_IDLE';
+  if (!before.mode)
+    return blockedResult(scenario, traceId, before.modeReason ?? 'MODE_PROJECTION_MISSING', 'mode=UNKNOWN');
   if (isStart && before.mode === 'AUTO_FARM')
     return blockedResult(scenario, traceId, 'PRECONDITION_ALREADY_AUTO_FARM', `mode=${before.mode}`);
   if (isStop && before.mode !== 'AUTO_FARM')
@@ -390,17 +418,17 @@ async function executeAutomation(options, traceId, scenario) {
     charId,
     command?.commandId ?? null,
     options,
-    (state) => (isStart ? state.mode === 'AUTO_FARM' : state.mode === 'PERSISTENT_IDLE'),
+    (state) => modeTransitionResult(before, state, targetMode).ok,
   );
   const commandAccepted = command ? commandStatusAccepted(observation.command) : false;
   const commandStep = transition('Command -> Native Receive', Boolean(command), command ? null : 'command_pending_coordinator');
   const nativeStep = transition('Native Receive -> Native Result', commandAccepted,
     commandAccepted ? null : observation.command?.reasonCode ?? observation.command?.status ?? 'native_result_timeout',
     { status: observation.command?.status ?? null, reasonCode: observation.command?.reasonCode ?? null });
-  const stateOk = isStart ? observation.stateResult.state.mode === 'AUTO_FARM' : observation.stateResult.state.mode === 'PERSISTENT_IDLE';
-  const stateStep = transition('Native Result -> Authoritative State', stateOk,
-    stateOk ? null : `mode=${observation.stateResult.state.mode ?? 'UNKNOWN'}`,
-    { mode: observation.stateResult.state.mode });
+  const after = observation.stateResult.state;
+  const modeResult = modeTransitionResult(before, after, targetMode);
+  const stateStep = transition('Native Result -> Authoritative State', modeResult.ok, modeResult.reason,
+    { mode: after.mode, modeSource: after.modeSource, modeRevision: after.modeRevision, beforeModeRevision: before.modeRevision });
   const eventsStep = transition('Authoritative State -> Event Ledger', !observation.lastError,
     observation.lastError);
   const transitions = [apiStep, controllerStep, commandStep, nativeStep, stateStep, eventsStep];
@@ -648,7 +676,7 @@ async function run(options) {
   return result;
 }
 
-export { mapFeasibility, normalizeState, positionChanged, run };
+export { mapFeasibility, modeTransitionResult, normalizeState, observeAgentMode, positionChanged, run };
 
 const invokedPath = process.argv[1] ? resolve(process.argv[1]) : null;
 const modulePath = fileURLToPath(import.meta.url);
