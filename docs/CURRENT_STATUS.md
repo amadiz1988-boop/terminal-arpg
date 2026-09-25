@@ -1,5 +1,10 @@
 # 目前狀態
 
+## 2026-09-25 M1 legacy launcher GitHub-first 來源重建
+
+- 已在隔離的 V15 Web 候選中以 Production `ro-stack.ps1` 精確 preimage 重建 launcher，保留現行生命週期、PA/Service/Supply 投影與 single-runtime 行為，加入明確的 M1 Supply 啟動環境投影。來源對帳及能力矩陣見 [M1 launcher reconciliation](project-control/m1-legacy-launcher-reconciliation-v1.md)。
+- 舊有 PA 投影測試原有 36 項失敗已在重建來源通過；M1 值域及 exact preimage-subsequence 測試通過。完整 Web manifest 已加入此既有 Production 檔案的精確採納與回復契約。此來源候選尚未部署，Production 設定及 Native runtime 尚未變更。
+
 ## 2026-09-25 M1 首次推廣 Native 候選鏈來源治理
 
 - 同一份首次推廣 lease 的 Native 第二次修訂已建立鏈式准入工具與隔離測試。歷史 shutdown-race 修訂以原收據雜湊固定；後續修訂驗證目前部署候選、GitHub 來源、核准原因、受限差異、直接測試、前一候選 rollback 與單一 runtime。第二次修訂的候選來源、部署與最終驗收仍未完成。

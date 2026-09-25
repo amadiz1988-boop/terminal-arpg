@@ -10,6 +10,8 @@ import {inspectPrivatePackage,assetReleaseErrors} from './private-asset-release-
 const here=path.dirname(fileURLToPath(import.meta.url));
 export const policy=readJson(path.resolve(here,'../../docs/project-control/web-manifest-safety-policy.json'));
 export const schema='web-complete-v1';
+export const legacyLauncherPath='ops/ro-stack/ro-stack.ps1';
+export const legacyLauncherPreimageSha='58DDC2E101F64B47B586CE9C74E9C75D2E3221EEFEC439DA7621DF31262F3CAF';
 export const fail=(ok,code)=>{if(!ok)throw Error(code);};
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex').toUpperCase();
 export function canonical(value){
@@ -25,7 +27,7 @@ export function safeRelative(p){
 }
 export function webPath(p){
   safeRelative(p);
-  fail(/^(?:ops\/ro-stack\/(?:[A-Za-z0-9_-]+\.mjs|dashboard-service\.ps1|dashboard\/assets\/.+\.(?:png|jpg|jpeg|gif|webp|svg|wav|mp3|ogg|bmp|bin|gz|woff2?)|(?:dashboard|persistent-agent|web-experience|quest-runtime)\/.+\.(?:mjs|js|json|css|html))|public\/ro\/.+\.(?:json|png|jpg|jpeg|gif|webp|svg|wav|mp3|ogg|bmp|bin|gz|woff2?)|docs\/ro-asset-index\/.+\.json|docs\/ro-floor-theme-asset-index\.json|docs\/project-control\/canonical-test-fixtures\.json)$/.test(p),'UNAUTHORIZED_WEB_PATH');
+  fail(/^(?:ops\/ro-stack\/(?:[A-Za-z0-9_-]+\.mjs|dashboard-service\.ps1|ro-stack\.ps1|dashboard\/assets\/.+\.(?:png|jpg|jpeg|gif|webp|svg|wav|mp3|ogg|bmp|bin|gz|woff2?)|(?:dashboard|persistent-agent|web-experience|quest-runtime)\/.+\.(?:mjs|js|json|css|html))|public\/ro\/.+\.(?:json|png|jpg|jpeg|gif|webp|svg|wav|mp3|ogg|bmp|bin|gz|woff2?)|docs\/ro-asset-index\/.+\.json|docs\/ro-floor-theme-asset-index\.json|docs\/project-control\/canonical-test-fixtures\.json)$/.test(p),'UNAUTHORIZED_WEB_PATH');
   return p;
 }
 export function validateAuthority(m,authority){
@@ -59,6 +61,10 @@ export function validateHeader(m, limits=policy){
     fail(['GIT_SOURCE','PRIVATE_ASSET_RELEASE'].includes(f.source_class),'UNAPPROVED_SOURCE_CLASS');
     total+=f.size;fail(total<=limits.max_payload_bytes,'PAYLOAD_BYTES_EXCEED_POLICY');
     fail(f.production_preimage==='ABSENT' ? !f.production_preimage_sha256 : /^[a-f0-9]{64}$/i.test(f.production_preimage_sha256||''),'ROLLBACK_COVERAGE_MISSING');
+    if(f.production_preimage_class!==undefined)fail(f.path===legacyLauncherPath &&
+      f.production_preimage_class==='EXISTING_LEGACY_PRODUCTION_PREIMAGE' &&
+      f.production_preimage!=='ABSENT' && f.production_preimage_sha256?.toUpperCase()===legacyLauncherPreimageSha,
+      'UNAPPROVED_LEGACY_PREIMAGE_CLASS');
   }
   fail(m.required_assets===undefined || (Array.isArray(m.required_assets) && m.required_assets.every(p=>seen.has(p))),'UNMANIFESTED_REQUIRED_ASSET');
   fail(Number.isSafeInteger(m.total_payload_bytes) && m.total_payload_bytes===total,'PAYLOAD_SIZE_MISMATCH');
@@ -72,7 +78,7 @@ export function expectedPayload(candidateRoot,sha,assetManifest,{audit=false}={}
   const tracked=new Set(git(candidateRoot,'ls-tree','-r','--name-only',sha,'--','ops/ro-stack','public/ro','docs').split('\n').filter(Boolean));
   const assets=new Map(assetManifest.assets.map(x=>[x.relative_path,x]));
   const wanted=new Set([...tracked].filter(p=>!/(?:^|\/)(?:tests?|poc)(?:[-./]|$)/i.test(p)).filter(p=>/^(ops\/ro-stack\/(dashboard\/)|public\/ro\/|docs\/ro-asset-index\/)/.test(p) ||
-    ['ops/ro-stack/dashboard.mjs','ops/ro-stack/dashboard-service.ps1','ops/ro-stack/developer-admin-action.mjs','docs/ro-floor-theme-asset-index.json','docs/project-control/canonical-test-fixtures.json'].includes(p)));
+    ['ops/ro-stack/dashboard.mjs','ops/ro-stack/dashboard-service.ps1','ops/ro-stack/ro-stack.ps1','ops/ro-stack/developer-admin-action.mjs','docs/ro-floor-theme-asset-index.json','docs/project-control/canonical-test-fixtures.json'].includes(p)));
   for(const p of assets.keys())wanted.add(p);
   // Closure discovery reads only the canonical candidate, never Production.
   const closure=runtimeClosure({files:[...wanted].map(path=>({path}))},candidateRoot,candidateRoot,true);

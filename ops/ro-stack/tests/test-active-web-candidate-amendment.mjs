@@ -38,6 +38,9 @@ const m1Reason='M1_SETTINGS_EXECUTOR_AND_TEST_FIXTURE_V1';
 const m1Path='ops/ro-stack/dashboard/self-recovery-skill-profile.mjs';
 const launcherReason='M1_V15_FIXED_FIXTURE_AND_DASHBOARD_LAUNCHER_V1';
 const launcherPath='ops/ro-stack/dashboard-service.ps1';
+const legacyReason='M1_LEGACY_LAUNCHER_GITHUB_FIRST_RECONCILIATION_V1';
+const legacyLauncherPathFixture='ops/ro-stack/ro-stack.ps1';
+const launcherPreimage='58DDC2E101F64B47B586CE9C74E9C75D2E3221EEFEC439DA7621DF31262F3CAF';
 function deltaFixture() {
   const oldManifest={files:[{path:'ops/ro-stack/dashboard.mjs',sha256:'A'.repeat(64)},
     {path:'public/ro/client/manifest.json',sha256:'E'.repeat(64)}],removed_files:[]};
@@ -49,6 +52,48 @@ function deltaFixture() {
 }
 function addAction(x,path=actionPath) {
   x.nextManifest.files.push({path,sha256:'C'.repeat(64),production_preimage:'ABSENT'});
+}
+function adoptLauncher(x,path=legacyLauncherPathFixture,hash=launcherPreimage) {
+  x.nextManifest.files.push({path,sha256:'C'.repeat(64),production_preimage_sha256:hash,
+    production_preimage_class:'EXISTING_LEGACY_PRODUCTION_PREIMAGE'});
+}
+{
+  const x=deltaFixture();adoptLauncher(x);
+  const delta=validateManifestDelta(x.oldManifest,x.nextManifest,legacyReason,true);
+  assert.deepEqual(delta.added_paths,[legacyLauncherPathFixture]);
+  assert.deepEqual(delta.rollback_restore_paths,[legacyLauncherPathFixture]);
+  assert.deepEqual(delta.rollback_remove_paths,[]);
+  console.log(`PASS ${++count} exact legacy launcher adopted with RESTORE preimage`);
+}
+{
+  const x=deltaFixture();adoptLauncher(x,'ops/ro-stack/unrelated.ps1');
+  assert.throws(()=>validateManifestDelta(x.oldManifest,x.nextManifest,legacyReason,true),/ADDED_WEB_PREIMAGE_NOT_ABSENT|WEB_MANIFEST_ADDITION_UNAPPROVED/);
+  console.log(`PASS ${++count} unknown existing Production path refused`);
+}
+{
+  const x=deltaFixture();adoptLauncher(x,legacyLauncherPathFixture,'0'.repeat(64));
+  assert.throws(()=>validateManifestDelta(x.oldManifest,x.nextManifest,legacyReason,true),/ADDED_WEB_PREIMAGE_NOT_ABSENT/);
+  console.log(`PASS ${++count} wrong legacy launcher preimage refused`);
+}
+{
+  const x=deltaFixture();adoptLauncher(x);delete x.nextManifest.files.at(-1).production_preimage_sha256;
+  assert.throws(()=>validateManifestDelta(x.oldManifest,x.nextManifest,legacyReason,true),/ADDED_WEB_PREIMAGE_NOT_ABSENT|WEB_MANIFEST_ADDITION_UNAPPROVED/);
+  console.log(`PASS ${++count} missing legacy rollback preimage refused`);
+}
+{
+  const x=deltaFixture();adoptLauncher(x);x.nextManifest.files.pop();
+  assert.throws(()=>validateManifestDelta(x.oldManifest,x.nextManifest,legacyReason,true),/WEB_MANIFEST_ADDITION_UNAPPROVED/);
+  console.log(`PASS ${++count} legacy adoption cannot omit launcher`);
+}
+{
+  const x=deltaFixture();adoptLauncher(x);addAction(x);
+  assert.throws(()=>validateManifestDelta(x.oldManifest,x.nextManifest,legacyReason,true),/WEB_MANIFEST_ADDITION_UNAPPROVED/);
+  console.log(`PASS ${++count} unrelated addition refused during legacy adoption`);
+}
+{
+  const x=deltaFixture();adoptLauncher(x);x.nextManifest.files.shift();
+  assert.throws(()=>validateManifestDelta(x.oldManifest,x.nextManifest,legacyReason,true),/WEB_MANIFEST_REMOVAL_UNAPPROVED/);
+  console.log(`PASS ${++count} existing manifest path removal refused`);
 }
 {
   const x=deltaFixture(),delta=validateManifestDelta(x.oldManifest,x.nextManifest,'ORDINARY_WEB_FIX',true);

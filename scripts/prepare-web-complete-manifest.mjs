@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {boundedPath,digest,readJson} from '../ops/ro-stack/legacy-production-baseline.mjs';
-import {schema,expectedPayload,manifestDigest,admission,git,fail,validateHeader} from '../ops/ro-stack/web-complete-manifest.mjs';
+import {schema,expectedPayload,manifestDigest,admission,git,fail,validateHeader,legacyLauncherPath,legacyLauncherPreimageSha} from '../ops/ro-stack/web-complete-manifest.mjs';
 const args=process.argv.slice(2),a=Object.fromEntries(args.flatMap((x,i)=>x.startsWith('--')?[[x.slice(2),args[i+1]]]:[]));
 try{
   const root=fs.realpathSync(a['candidate-root']),prod=fs.realpathSync(a['production-root']),out=path.resolve(a.output);
@@ -27,9 +27,10 @@ try{
   const files=expected.paths.map(p=>{
     const candidate=boundedPath(root,p),target=boundedPath(prod,p);fail(fs.existsSync(candidate),`PRESTAGE_MISSING:${p}`);
     const hash=digest(candidate),exists=fs.existsSync(target);
+    if(p===legacyLauncherPath)fail(exists,'LEGACY_LAUNCHER_PREIMAGE_MISSING');
     return {relative_path:p,path:p,sha256:hash,candidate_sha256:hash,size:fs.statSync(candidate).size,
       source_class:expected.assets.has(p)?'PRIVATE_ASSET_RELEASE':'GIT_SOURCE',
-      ...(exists?{production_preimage_sha256:digest(target)}:{production_preimage:'ABSENT'})};
+      ...(exists?{production_preimage_sha256:digest(target),...(p===legacyLauncherPath && digest(target)===legacyLauncherPreimageSha?{production_preimage_class:'EXISTING_LEGACY_PRODUCTION_PREIMAGE'}:{})}:{production_preimage:'ABSENT'})};
   });
   const m={schema_version:schema,candidate_id:'web-'+sha,web_git_sha:sha,candidate_commit:sha,canonical_repository:authority.web.repository,canonical_branch:'main',
     candidate_root:root,production_root:prod,asset_release:authority.assets.release_tag,asset_package_sha256:authority.assets.package_sha256,
