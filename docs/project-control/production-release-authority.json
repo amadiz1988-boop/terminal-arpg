@@ -11,7 +11,7 @@
     "repository": "https://github.com/amadiz1988-boop/ghost-island-rathena.git",
     "github_repository": "https://github.com/amadiz1988-boop/ghost-island-rathena.git",
     "release_ref": "refs/heads/main",
-    "accepted_source_sha": "4d805113dca409e57b768962966e7f8c92d6fbc0",
+    "accepted_source_sha": "0914b85501d04bd9fb9f2656efe753b4285a1229",
     "private_required": true,
     "candidate_history": [
       {
@@ -34,7 +34,7 @@
       "native_git_sha": "18523076a6034ca3731aefb73bf41993f4a0ef06",
       "disposition": "DEPLOYED_NATIVE_PREDECESSOR",
       "lease_id": "869f1725-dbd0-452d-b9dd-37ee79cc3f9a",
-      "candidate_successor": "4d805113dca409e57b768962966e7f8c92d6fbc0",
+      "candidate_successor": "0914b85501d04bd9fb9f2656efe753b4285a1229",
       "reason": "M1_INVENTORY_MAINTENANCE_V1",
       "status": "SOURCE_APPROVED_DEPLOY_PENDING"
     }

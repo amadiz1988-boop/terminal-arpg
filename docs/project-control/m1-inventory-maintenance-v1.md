@@ -22,8 +22,13 @@ Source provenance: Production materialized checkout
 | Storage full | `processAutoStorage` "still overweight after storageAuto" | - | `INVENTORY_MAINTENANCE_UNRESOLVED` bounded block |
 
 GI overrides: travel wings 601/602 and Supply buy targets are never moved by
-the implicit `all` row; rAthena `SC_WEIGHT90` (major_overweight_rate 90)
-forbids attacks, so PA issues none while it is active.
+the implicit `all` row; favorite and equipment-switch items are kept in
+inventory. Explicit Sell requires a standard merchant, an unbound non-rental
+non-pet item, positive rAthena sale value and room for the full Zeny credit.
+This preflight follows `npc_selllist`'s item-removal-before-credit order and
+prevents a failed post-sale check from losing protected property. rAthena
+`SC_WEIGHT90` (major_overweight_rate 90) forbids attacks, so PA issues none
+while it is active.
 
 ## Layers
 
@@ -45,9 +50,10 @@ Capacity reasons are projected as `INVENTORY_MAINTENANCE`,
 
 ## Source checkpoints
 
-Native `4d805113dca409e57b768962966e7f8c92d6fbc0` on GitHub main: full
-Release x64 build and 13-program offline regression passed, including the
-C++ policy cases for maintenance triggers, wing protection and stop-pickup.
+Native `0914b85501d04bd9fb9f2656efe753b4285a1229` on GitHub main includes
+the sale preflight fix after `4d805113`; the earlier checkpoint passed full
+Release x64 build and 13-program offline regression. The new checkpoint's
+13-program offline regression passed, including zero-price and Zeny-cap cases.
 Web candidate adds the five attested settings paths and phase labels. The
 schema step uses `ops/ro-stack/apply-live-status-inventory-migration.mjs`
 (dry run, explicit apply, tracked-statement exactness, receipt, rollback
