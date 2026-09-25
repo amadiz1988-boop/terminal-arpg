@@ -4931,6 +4931,93 @@ html {
 .hunt-stats-window .session-grid {
   border-top: 0;
 }
+/* 本次掛機統計: target lives in the titlebar; eight stats in two rows of four. */
+.hunt-stats-window .notice:empty {
+  display: none;
+}
+#game .hunt-stats-window .titlebar > .hunt-target {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: normal;
+  font-size: 12px;
+}
+#game .hunt-stats-window .session-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+#game .hunt-stats-window .session-grid div {
+  padding: 4px 8px;
+  min-width: 0;
+}
+#game .hunt-stats-window .session-grid span {
+  font-size: 11px;
+  color: #5f6870;
+}
+#game .hunt-stats-window .session-grid b {
+  display: block;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Loot cells: long names truncate before the amount. Phones use three
+   columns; wide screens use eight, aligned with the stat row above. */
+#game .hunt-stats-window .loot-summary div {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  min-width: 0;
+  font-size: 12px;
+  border-bottom: 1px solid #dde1e3;
+}
+#game .hunt-stats-window .loot-summary {
+  gap: 0;
+  background: #f4f5f1;
+}
+#game .hunt-stats-window .loot-summary span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#game .hunt-stats-window .loot-summary b {
+  float: none;
+  white-space: nowrap;
+}
+#game .hunt-stats-window .loot-summary p {
+  grid-column: 1 / -1;
+}
+@media (max-width: 720px) {
+  #game .hunt-stats-window .loot-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  #game .hunt-stats-window .loot-summary div {
+    padding: 5px 6px;
+  }
+  #game .hunt-stats-window .loot-summary div:not(:nth-child(3n + 1)) {
+    border-left: 1px solid #dde1e3;
+  }
+}
+@media (min-width: 721px) {
+  #game .hunt-stats-window .session-grid {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+  }
+  #game .hunt-stats-window .session-grid div + div {
+    border-left: 1px solid #dde1e3;
+  }
+  #game .hunt-stats-window .loot-summary {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+  }
+  #game .hunt-stats-window .loot-summary div,
+  #game .hunt-stats-window .loot-summary p {
+    padding: 3px 8px;
+  }
+  #game .hunt-stats-window .loot-summary div:not(:nth-child(8n + 1)) {
+    border-left: 1px solid #dde1e3;
+  }
+}
 .hunt-stats-window .loot-summary {
   border-top: 1px solid #a0a9ad;
 }

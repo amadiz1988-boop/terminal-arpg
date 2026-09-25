@@ -6678,8 +6678,8 @@ function syncGrindTargetSummary(target = lastState?.grindTarget) {
   }
   const summary = target?.mapId ? mapInfoData?.maps?.[target.mapId] : null;
   $('#grindTargetSummary').textContent = target?.mapId
-    ? `掛機目標：${summary?.name ?? target.name ?? target.mapId}（${target.mapId}）`
-    : '掛機目標：尚未設定';
+    ? `目標：${summary?.name ?? target.name ?? target.mapId}`
+    : '目標：尚未設定';
 }
 // The persisted grind target is the player's last selection and is the only
 // farm target: there is no silent fallback or normalization. Always render the
@@ -6690,7 +6690,7 @@ function syncAuthoritativeFarmTarget(status) {
   const summary = mapInfoData?.maps?.[targetMap];
   const name =
     summary?.name ?? lastState?.grindTarget?.name ?? targetMap;
-  $('#grindTargetSummary').textContent = `掛機目標：${name}（${targetMap}）`;
+  $('#grindTargetSummary').textContent = `目標：${name}`;
 }
 async function reconcileFarmTargetAfterNonJsonResponse(mapId, timeoutMs = 4000) {
   const targetMap = String(mapId ?? ''),
