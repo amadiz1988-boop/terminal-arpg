@@ -38,6 +38,77 @@ export const M1_SECOND_NATIVE_AMENDMENT = Object.freeze({
     'tools/pa-command-contract/Test-M1CanonicalSource.ps1',
   ]),
 });
+// Project Control 2026-09-25: M1_INVENTORY_MAINTENANCE_V1 restores the
+// six-field live status, weight/slot maintenance, storage/sell and resume.
+export const M1_INVENTORY_MAINTENANCE_NATIVE_AMENDMENT = Object.freeze({
+  reason: 'M1_INVENTORY_MAINTENANCE_V1',
+  scope: 'M1_INVENTORY_MAINTENANCE_V1',
+  sourcePaths: Object.freeze([
+    'src/map/persistent_agent.cpp',
+    'src/map/persistent_agent_state.cpp',
+    'src/map/persistent_agent_state.hpp',
+    'src/map/persistent_agent_m1_supply_policy.hpp',
+    'tools/pa-command-contract/test-m1-supply-policy.cpp',
+    'tools/pa-command-contract/Test-M1CanonicalSource.ps1',
+  ]),
+});
+// Live six-field acceptance found a non-shortage reason in idle rows. Correct
+// only the projection under the same lease and immutable amendment chain.
+export const M1_INVENTORY_PROJECTION_CORRECTION = Object.freeze({
+  reason: 'M1_INVENTORY_MAINTENANCE_PROJECTION_CORRECTION_V1',
+  scope: 'M1_INVENTORY_MAINTENANCE_PROJECTION_CORRECTION_V1',
+  sourcePaths: Object.freeze([
+    'src/map/persistent_agent.cpp',
+    'tools/pa-command-contract/Test-M1CanonicalSource.ps1',
+  ]),
+});
+// The live farm-world-teleport path requires the previously omitted Supply
+// policy contract field and must count ordinary dynamic_mobs script spawns.
+export const M1_FARM_WORLD_TELEPORT_SPAWN_CORRECTION = Object.freeze({
+  reason: 'M1_FARM_WORLD_TELEPORT_DYNAMIC_SPAWN_ALIGNMENT_V1',
+  scope: 'M1_FARM_WORLD_TELEPORT_DYNAMIC_SPAWN_ALIGNMENT_V1',
+  sourcePaths: Object.freeze([
+    'conf/persistent_agent_commands.json',
+    'src/map/persistent_agent.cpp',
+    'tools/pa-command-contract/contract-test-matrix.json',
+    'tools/pa-command-contract/Test-M1CanonicalSource.ps1',
+  ]),
+});
+export const M1_START_FARM_SUPPLY_CONTRACT_CORRECTION = Object.freeze({
+  reason: 'M1_START_FARM_SUPPLY_POLICY_CONTRACT_ALIGNMENT_V1',
+  scope: 'M1_START_FARM_SUPPLY_POLICY_CONTRACT_ALIGNMENT_V1',
+  sourcePaths: Object.freeze([
+    'conf/persistent_agent_commands.json',
+    'tools/pa-command-contract/contract-test-matrix.json',
+  ]),
+});
+// Live TEST_PLAYER acceptance exposed an ACCEPTED start_farm left behind by
+// the exact AUTO_FARM_START_CONFIRM_FAILED quarantine, blocking official recovery.
+export const M1_AUTO_FARM_QUARANTINE_RECOVERY_CORRECTION = Object.freeze({
+  reason: 'M1_AUTO_FARM_QUARANTINE_RECOVERY_V1',
+  scope: 'M1_AUTO_FARM_QUARANTINE_RECOVERY_V1',
+  sourcePaths: Object.freeze([
+    'src/map/persistent_agent.cpp',
+    'src/map/persistent_agent_state.cpp',
+    'tools/pa-quarantine-idle-recovery/build-and-test.ps1',
+  ]),
+});
+export const M1_DORMANT_QUARANTINE_RUNTIME_CORRECTION = Object.freeze({
+  reason: 'M1_DORMANT_QUARANTINE_RUNTIME_RELEASE_V1',
+  scope: 'M1_DORMANT_QUARANTINE_RUNTIME_RELEASE_V1',
+  sourcePaths: Object.freeze([
+    'src/map/persistent_agent.cpp',
+    'tools/pa-quarantine-idle-recovery/build-and-test.ps1',
+  ]),
+});
+export const APPROVED_NATIVE_AMENDMENTS = Object.freeze([
+  M1_SECOND_NATIVE_AMENDMENT, M1_INVENTORY_MAINTENANCE_NATIVE_AMENDMENT,
+  M1_INVENTORY_PROJECTION_CORRECTION, M1_FARM_WORLD_TELEPORT_SPAWN_CORRECTION,
+  M1_START_FARM_SUPPLY_CONTRACT_CORRECTION, M1_AUTO_FARM_QUARANTINE_RECOVERY_CORRECTION,
+  M1_DORMANT_QUARANTINE_RUNTIME_CORRECTION,
+]);
+export const approvedNativeAmendment = reason =>
+  APPROVED_NATIVE_AMENDMENTS.find(item => item.reason === reason) ?? null;
 
 // A service can restart without replacing its approved binary. Preserve the
 // immutable historical deploy receipt, and bind the current PID to its fresh
@@ -105,10 +176,11 @@ export function validateNativeAmendmentHistory(root, lease, pending) {
         audit.schema_version === 'native-candidate-amendment-v1',
       'HISTORICAL_NATIVE_AMENDMENT_CHANGED');
     } else {
+      const approvedEntry = approvedNativeAmendment(entry.reason);
       require(audit.schema_version === 'native-candidate-amendment-v2' &&
-        audit.approved_scope === M1_SECOND_NATIVE_AMENDMENT.scope &&
+        !!approvedEntry && audit.approved_scope === approvedEntry.scope &&
         audit.rollback_target === entry.old_native_git_sha &&
-        entry.reason === M1_SECOND_NATIVE_AMENDMENT.reason &&
+        history.slice(1, index).every(prior => prior.reason !== entry.reason) &&
         audit.promotion_id === `${FIRST_PROMOTION}:${pending.started_at}`,
       'NATIVE_AMENDMENT_SCOPE_INVALID');
     }
@@ -178,11 +250,12 @@ export function validateNextNativeAmendment(root, input) {
     !history.some(entry => entry.new_native_git_sha === newSha) &&
     githubReachable === true && descendant === true,
   'NEW_NATIVE_CANDIDATE_NOT_REACHABLE');
-  require(reason === M1_SECOND_NATIVE_AMENDMENT.reason &&
-    scope === M1_SECOND_NATIVE_AMENDMENT.scope, 'NATIVE_AMENDMENT_REASON_UNAPPROVED');
+  const approved = approvedNativeAmendment(reason);
+  require(!!approved && scope === approved.scope &&
+    !history.some(entry => entry.reason === reason), 'NATIVE_AMENDMENT_REASON_UNAPPROVED');
   require(sourceDiff?.scope === scope && Array.isArray(sourceDiff.files) &&
     sourceDiff.files.length > 0 && new Set(sourceDiff.files).size === sourceDiff.files.length &&
-    sourceDiff.files.every(file => M1_SECOND_NATIVE_AMENDMENT.sourcePaths.includes(file)),
+    sourceDiff.files.every(file => approved.sourcePaths.includes(file)),
   'NATIVE_AMENDMENT_DIFF_OUT_OF_SCOPE');
   require(regressionPassed === true && rollbackReady === true && runtimeMatchesDeployed === true,
     'NATIVE_AMENDMENT_EVIDENCE_INCOMPLETE');

@@ -119,7 +119,8 @@ function commandFromBody(body) {
 }
 
 function commandStatusAccepted(command) {
-  return ['QUEUED', 'ACCEPTED', 'CONFIRMED'].includes(String(command?.status ?? '').toUpperCase());
+  // A queued or accepted command has not completed Native state confirmation.
+  return String(command?.status ?? '').toUpperCase() === 'CONFIRMED';
 }
 
 function commandStatusRejected(command) {
@@ -356,7 +357,7 @@ async function waitForCommandAndState(api, charId, commandId, options, predicate
     if (!eventResult.ok) lastError = eventResult.body?.error ?? `events_http_${eventResult.status}`;
     cursor = eventResult.cursor ?? cursor;
     for (const name of eventResult.names) names.add(name);
-    if (predicate(stateResult.state, names)) break;
+    if (predicate(stateResult.state, names) && (!commandId || commandStatusAccepted(command))) break;
     await sleep(Math.min(500, Math.max(100, options.timeoutMs / 40)));
   }
   const events = eventCheckpoints([...names], requiredEvents);
@@ -611,8 +612,8 @@ async function executeEventScenario(options, traceId, scenario) {
     api, charId, null, options,
     (state, names) => {
       const expected = scenario === 'combat-cycle'
-        ? names.includes('MONSTER_HIT') && names.includes('MONSTER_KILL') && names.includes('LOOT_ACQUIRED')
-        : names.includes('SUPPLY_RETURN') && state.mode === 'AUTO_FARM' && names.includes('MONSTER_HIT');
+        ? names.has('MONSTER_HIT') && names.has('MONSTER_KILL') && names.has('LOOT_ACQUIRED')
+        : names.has('SUPPLY_RETURN') && state.mode === 'AUTO_FARM' && names.has('MONSTER_HIT');
       return expected;
     },
     required,

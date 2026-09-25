@@ -1722,6 +1722,85 @@ OpenKore `MapRoute`/`CalcMapRoute`/`Route` 與成熟 map/portal/NPC/weight/recov
 First、兩個 Reference Atlas、Single Runtime、Synthetic First、nearest legal state、
 Browser acceptance 與 Git hygiene。
 
+### 13C. OPENKORE_CAPABILITY_LAYERING_POLICY_V1
+
+```text
+OPENKORE_CAPABILITY_LAYERING_POLICY_V1 = ACTIVE
+DISABLED_AUTOMATION != DISABLED_OBSERVABILITY
+DISABLED_AUTOMATION != DISABLED_TRIGGER_POLICY
+DISABLED_AUTOMATION != DISABLED_MAINTENANCE
+UNCLASSIFIED_LAYER = 0
+NEW_MANUAL_APPROVAL_GATE = NO
+```
+
+每個成熟 OpenKore／reference capability family 必須逐層獨立分類：
+
+| Layer | 問題 | 例子 |
+|---|---|---|
+| `STATE`（Observability） | 需要哪些 authoritative state | weight、max_weight、inventory_slots、inventory_max_slots、HP、SP、ammo legality、current target、route state |
+| `TRIGGER`（Policy） | 哪些條件需要介入 | HP／SP 消耗品不足、overweight、inventory full、death、lost target、route stall |
+| `ACTION`（Automation） | 授權哪些自動動作 | Supply、AutoStore、AutoSell、Recovery、Fly、Return to town |
+| `MAINTENANCE` | 如何回到可運作狀態 | store、sell、purchase、repair／recover |
+| `RESUME` | 如何回到原任務 | return to farm、resume parent intent |
+
+每一層的分類只能是 `ALIGNED`、`PARTIAL`、`MISSING`、`GI_EXPLICIT_OVERRIDE`、
+`NOT_APPLICABLE` 或 `NOT_IMPLEMENTED_PRODUCT`，並回報：
+
+```text
+STATE_AVAILABLE =
+TRIGGER_POLICY_AVAILABLE =
+ACTION_AVAILABLE =
+MAINTENANCE_AVAILABLE =
+RESUME_AVAILABLE =
+```
+
+禁止下列推論：`ACTION_DISABLED → STATE_NOT_NEEDED`、
+`AUTOMATION_DISABLED → TRIGGER_NOT_NEEDED`、
+`AUTOMATION_DISABLED → MAINTENANCE_NOT_NEEDED`。整個 family 只有在每一層都各自
+成立時才可標 `NOT_APPLICABLE`。
+
+GI explicit override 只作用於它明文指名的 semantic layer。`GLOBAL_AUTOSTORE = NO`
+表示 `AUTOSTORE_ACTION = GI_EXPLICIT_OVERRIDE`；weight state、inventory slot state、
+overweight trigger、inventory maintenance 與 return／resume 仍逐層分類。
+`FLY_WING_CONSUMPTION = NO`、`BUTTERFLY_WING_CONSUMPTION = NO` 只覆寫消耗語意，
+Fly state／trigger／action／resume 仍存在。`BULLET_CONSUMPTION = NO` 只覆寫消耗語意：
+ammo legality 仍存在，缺少相容彈藥仍可阻擋戰鬥，消耗不足不自動成為 Supply trigger。
+Project Control 要停用多個 layer 時，必須逐層寫明。
+
+長時間運作的 capability 以 lifecycle chain 評估，例如
+`Loot → Inventory state → Weight／slot threshold → Maintenance decision →
+Store／Sell／Supply → Return → Resume`。任一 transition 缺失即
+`CAPABILITY_LIFECYCLE_GAP = YES`；單一 action 存在不足以宣告 family `ALIGNED`。
+
+既有 GI override、停用功能或歷史決策可能隱藏依附 layer 時，設
+`DEPENDENCY_REAUDIT_REQUIRED = YES`，只做該 family 的 targeted re-audit，不自動重跑
+全專案 census。此時 `SINGLE_FIELD_PATCH_WITHOUT_FAMILY_AUDIT = FORBIDDEN`，優先
+`CAPABILITY_FAMILY_FIX`。本規則源自 `GLOBAL_AUTOSTORE = NO` 曾被擴大解讀為不需
+weight／slot monitoring 與 maintenance，已分類為 `REPEATED_FRICTION = YES`。
+
+下一輪 Weight／Inventory／Maintenance targeted re-audit 的最低範圍：
+
+```text
+WEIGHT / INVENTORY  current/max weight, current/max slots, overweight and inventory-full thresholds
+ITEM POLICY         keep, sell, store, ignore, equipment protection, rare/valuable protection
+AUTOSTORE           trigger, route, storage interaction, deposit policy, failure handling, return/resume
+AUTOSELL            trigger, merchant selection, sell policy, unsellable handling, failure handling, return/resume
+SUPPLY              HP/SP/required skill consumables, trigger, return, resume
+LOOT                acquired item, inventory capacity, weight, maintenance escalation
+AMMO / REQUIRED     legality, depletion, required consumable, nonconsumable GI overrides
+RECOVERY            death, HP/SP recovery, maintenance ownership, resume
+NAVIGATION          maintenance interrupt, parent intent preservation, return to origin/farm, resume
+FLY / BUTTERFLY     state, trigger, action, GI nonconsumable override, resume
+```
+
+Maintenance capability 必須可被未來 `Life Director / Social Director → intent →
+Persistent Agent → maintenance capability → rAthena authority → Event Ledger` 重用，
+不得建立第二套 runtime engine。
+
+成熟語意已知、authority 與 security boundary 不變、沒有新 gameplay engine，且目前
+workline 已擁有該 capability family 時，Worker 在原視窗完成逐層分類與修正，不新增
+Project Control 核准。只有真正的產品語意不明確才回 Project Control。
+
 ## PLAYER WEB RESPONSE EXPERIENCE POLICY 鐵律
 
 Policy name：`PLAYER_WEB_RESPONSE_EXPERIENCE_POLICY`

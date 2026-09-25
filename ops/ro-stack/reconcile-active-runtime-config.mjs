@@ -5,7 +5,7 @@ import { randomUUID, createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { boundedPath, digest, readJson, legacyIdentity, pendingPath, FIRST_PROMOTION, windowsPowerShellEnv } from './legacy-production-baseline.mjs';
-import { nativeReceiptPath, nativeReceiptValid, equalHash, git } from './native-promotion-contract.mjs';
+import { nativeReceiptPath, activeNativeReceiptPath, nativeReceiptValid, equalHash, git } from './native-promotion-contract.mjs';
 import { runtimeAdapter, NATIVE_STAGE_PHASE } from './deploy-native-candidate.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -27,7 +27,7 @@ export const m1Policy = Object.freeze({
   mode: 'M1_V15', operation_suffix: '-m1-v15',
   lease_id: '869f1725-dbd0-452d-b9dd-37ee79cc3f9a', owner: 'F｜M1 最終整合',
   native_sha: '18523076a6034ca3731aefb73bf41993f4a0ef06',
-  web_sha: 'f90287a35c454dcae38f7d91b14d8658856c9093',
+  web_sha: '5a31570a861e1665841e62245c7caa105a796b3a',
   old_config_sha256: 'CC4E1158991D54833D7E44A583DA8C7D7248A6AE205F87475F55BD81416E4B45',
   source_config_sha256: '42B406C3724E4B55FF7E03065A09007F4EAF6CF2E2F854A32CB3FF45F0756F95',
   dashboard_launcher_sha256: 'DC63578870F8B3245AC1A3FC1DB9D38C2EF30FE7912FE212676EF80F5F7A34B3',
@@ -42,7 +42,8 @@ const runtimeDir = root => boundedPath(root, '.local/ro-stack');
 const filesFor = (root, policy = expected) => {
   const dir = runtimeDir(root);
   return { dir, lease: path.join(dir, 'production-deployment-lease/lease.json'), state: path.join(dir, 'production-deployment-state.json'),
-    pending: boundedPath(root, pendingPath), native: boundedPath(root, nativeReceiptPath),
+    pending: boundedPath(root, pendingPath), native: boundedPath(root,
+      policy.mode === 'M1_V15' ? activeNativeReceiptPath(readJson(boundedPath(root, pendingPath))) : nativeReceiptPath),
     config: boundedPath(root, configRelative), lock: path.join(dir, `runtime-config-reconcile${policy.operation_suffix || ''}.lock`),
     receipt: path.join(dir, `runtime-config-reconciliation-${policy.lease_id}${policy.operation_suffix || ''}.json`) };
 };
@@ -196,10 +197,16 @@ export async function reconcileActiveRuntimeConfig({ root, leaseId, owner, sourc
     ? exactM1ConfigPatch(oldBytes, sourceBytes, policy) : exactConfigPatch(oldBytes, sourceBytes, policy);
   const artifacts = verifyBinaries(root, native);
   const before = await adapter('snapshot');
-  validateRuntime(before, native, { oldPids: native.new_pids });
+  // Later same-binary graceful cycles retain the active Native candidate but
+  // legitimately change PIDs. The live binary, singleton and ProcDump gates
+  // remain mandatory; only the original receipt PID equality is historical.
+  validateRuntime(before, native, policy.mode === 'M1_V15' ? {} : { oldPids: native.new_pids });
   const launcher = boundedPath(root, 'ops/ro-stack/ro-stack.ps1');
   const launcherBytes = fs.readFileSync(launcher);
   const launcherText = launcherBytes.toString('utf8');
+  if (policy.mode === 'M1_V15')
+    check(/PERSISTENT_AGENT_M1_SUPPLY_ENABLED\s*=\s*if\s*\(\$config\.PersistentAgentM1SupplyEnabled\)/.test(launcherText),
+      'NATIVE_LAUNCHER_M1_PROJECTION_MISSING');
   check(/\$config\s*=\s*Invoke-Expression\s*\(Get-Content\s*\(Join-Path\s+\$scriptRoot\s+'stack\.config\.psd1'\)\s*-Raw\)/.test(launcherText) &&
     /Start-Process\s+-FilePath\s+\$path/.test(launcherText) &&
     (policy.mode === 'M1_V15'
@@ -219,7 +226,8 @@ export async function reconcileActiveRuntimeConfig({ root, leaseId, owner, sourc
   const oldHashes = Object.fromEntries(['lease', 'state', 'pending', 'native'].map(k => [k, digest(f[k])]));
   const report = { eligible: true, action: execute ? 'APPLY' : 'DRY_RUN', lease_id: leaseId, lease_owner: owner,
     promotion_id: `${FIRST_PROMOTION}:${pending.started_at}`, native_git_sha: policy.native_sha,
-    native_stage_receipt: nativeReceiptPath, native_stage_receipt_sha256: oldHashes.native,
+    native_stage_receipt: policy.mode === 'M1_V15' ? activeNativeReceiptPath(pending) : nativeReceiptPath,
+    native_stage_receipt_sha256: oldHashes.native,
     config_source_git_sha: sourceGitSha, config_source_path: configRelative,
     config_source_digest: hashBytes(sourceBytes), old_config_digest: hashBytes(oldBytes), new_config_digest: plan.sha256,
     changed_keys: plan.changes, unrelated_config_change_count: 0,

@@ -34,6 +34,7 @@ try{
  const sourceSet=expectedPayload(sourceRoot,git(sourceRoot,'rev-parse','HEAD'),sourceAssets,{audit:true});
  test('developer Admin action exact path is required',()=>assert.ok(sourceSet.paths.includes('ops/ro-stack/developer-admin-action.mjs')));
  test('Dashboard launcher exact path is required',()=>assert.ok(sourceSet.paths.includes('ops/ro-stack/dashboard-service.ps1')));
+ test('Native launcher exact path is required',()=>assert.ok(sourceSet.paths.includes('ops/ro-stack/ro-stack.ps1')));
  test('unrelated ops script is not automatically admitted',()=>assert.ok(!sourceSet.paths.includes('ops/ro-stack/amend-active-web-candidate.mjs')));
  const action=fixture(2),actionPath='ops/ro-stack/developer-admin-action.mjs';
  const actionSource=write(path.join(action.candidate,actionPath),'export const action=true;');
@@ -66,6 +67,13 @@ try{
  test('wrong asset manifest SHA blocked',()=>assert.throws(()=>validateAuthority({...f.m,asset_manifest_sha256:'3'.repeat(64)},authority),/ASSET_MANIFEST_HASH_MISMATCH/));
  test('rollback absent proof rejected',()=>assert.throws(()=>validateHeader(mutated(f,m=>delete m.files[0].production_preimage_sha256)),/ROLLBACK_COVERAGE_MISSING/));
  test('rollback changed preimage rejected',()=>assert.throws(()=>validateFiles(mutated(f,m=>m.files[0].production_preimage_sha256='0'.repeat(64)),options),/ROLLBACK_PREIMAGE_MISMATCH/));
+ test('legacy preimage class on unrelated path refused',()=>assert.throws(()=>validateHeader(mutated(f,m=>m.files[0].production_preimage_class='EXISTING_LEGACY_PRODUCTION_PREIMAGE')),/UNAPPROVED_LEGACY_PREIMAGE_CLASS/));
+ test('exact launcher legacy preimage class admitted',()=>{
+  const m=mutated(f,m=>m.files.push({...m.files[0],path:'ops/ro-stack/ro-stack.ps1',relative_path:'ops/ro-stack/ro-stack.ps1',
+    production_preimage_sha256:'58DDC2E101F64B47B586CE9C74E9C75D2E3221EEFEC439DA7621DF31262F3CAF',
+    production_preimage_class:'EXISTING_LEGACY_PRODUCTION_PREIMAGE'}));
+  assert.equal(validateHeader(m).file_count,f.m.file_count+1);
+ });
  test('unreviewed removal refused',()=>assert.throws(()=>validateHeader(mutated(f,m=>m.removed_files=['old.json'])),/REMOVALS_REQUIRE_SEPARATE_REVIEW/));
  test('omitted required file blocks complete set',()=>assert.throws(()=>validateFiles(mutated(f,m=>m.files.pop()),options),/COMPLETE_PAYLOAD_SET_MISMATCH/));
  test('digest tamper blocked',()=>assert.throws(()=>validateHeader({...f.m,candidate_id:'tampered'}),/MANIFEST_DIGEST_MISMATCH/));

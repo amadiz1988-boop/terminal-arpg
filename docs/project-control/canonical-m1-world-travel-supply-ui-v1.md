@@ -114,7 +114,9 @@ ARROW_CONSUMPTION = NO
 
 四類非消耗資源均不適用數量耗盡補給門檻，不以其數量下降觸發 Supply，也不顯示補貨或耗盡閾值設定。此條款只凍結四類資源的非消耗性及其補給排除；其他補給、重量、格數與服務政策依本文件各自的現行決策處理。
 
-### 現行 M1 補給觸發與背包安全決策
+### 歷史：M1 補給觸發與背包安全決策（戰鬥延續物品限定）
+
+此段 2026-09-24 決策的補給觸發部分仍有效；其中 `GLOBAL_AUTOSTORE = NO`、`AUTO_SELL = OUTSIDE_M1`、`AUTO_STORAGE = OUTSIDE_M1` 與「不得自動觸發 M1 存倉或販售」自 2026-09-25 起由下方 `M1_INVENTORY_MAINTENANCE_V1` 取代。狀態：`PARTIALLY_SUPERSEDED_BY = M1_INVENTORY_MAINTENANCE_V1`。
 
 ```text
 M1_NONCONSUMABLE_TRAVEL_AND_AMMO_OVERRIDE_V1 = CANONICAL / ACTIVE
@@ -127,6 +129,33 @@ AUTO_STORAGE = OUTSIDE_M1
 ```
 
 補給耗盡觸發只涵蓋實際消耗的 HP／SP 物品及現行 M1 runtime 已支援的技能必需消耗物；蒼蠅翅膀、蝴蝶翅膀、箭矢、子彈均排除。缺少必要相容彈藥屬於合法性／可用性阻擋，不建立彈藥耗盡補貨循環。背包滿格或重量阻擋保持安全、可恢復、無隔離與有界重試；不得自動觸發 M1 存倉或販售。切換掛機地圖的權威補給預檢保留，僅檢查現行 M1 支援的戰鬥延續消耗物與安全條件。
+
+### 現行 M1 背包維護決策（M1_INVENTORY_MAINTENANCE_V1）
+
+```text
+M1_INVENTORY_MAINTENANCE_V1 = CANONICAL / ACTIVE（2026-09-25 Project Control）
+SUPERSEDES = GLOBAL_AUTOSTORE = NO；AUTO_SELL = OUTSIDE_M1；AUTO_STORAGE = OUTSIDE_M1
+M1_INVENTORY_MAINTENANCE = ENABLED
+WEIGHT_STATE_MONITORING = YES
+SLOT_STATE_MONITORING = YES
+WEIGHT_TRIGGER_INVENTORY_MAINTENANCE = YES
+SLOT_TRIGGER_INVENTORY_MAINTENANCE = YES
+WEIGHT_TRIGGER_SUPPLY_CONSUMABLE_SHORTAGE = NO
+SLOT_TRIGGER_SUPPLY_CONSUMABLE_SHORTAGE = NO
+AUTOSTORE = YES / OPENKORE_DERIVED
+AUTOSELL = YES / OPENKORE_DERIVED
+ITEM_POLICY = OPENKORE_DERIVED（items_control）
+RETURN_RESUME_AFTER_INVENTORY_MAINTENANCE = REQUIRED
+OPENKORE_REFERENCE = 51de1ddfc4449ae5217f6886de702f87ca934030
+```
+
+角色維護分兩個平行原因：補給只處理 HP／SP 消耗品與支援技能必需消耗物不足；背包維護處理重量與格數門檻。重量或格數條件不得寫成補給不足，但兩者可共用同一趟回城維護旅程。
+
+觸發依鎖定 OpenKore `src/AI.pm` 的 `shouldStartAutoStorage`／`shouldStartAutoSell`：重量百分比達 `itemsMaxWeight_sellOrStore`（玩家設定 `supply.weightTriggerPercent`）或已用格數達 `itemsMaxNum_sellOrStore`（`supply.inventorySlotTrigger`），且背包有可存倉（`ai_storageAutoCheck`）或可販售（`ai_sellAutoCheck`）物品時才啟動。順序依 `processAutoStorage`／`processAutoSell`／`processAutoBuy`：存倉、販售、購買，由同一個 Persistent Agent 維護旅程依序執行並驗證權威結果。
+
+物品處置沿用 `items_control`：逐項保留量、存倉、販售；未列物品依 `all` 規則（預設 `all 0 1 0`，存倉不販售）。販售只依明確逐項規則。裝備中與不可販售物品不得處置。GI 覆寫：蒼蠅翅膀與蝴蝶翅膀屬非消耗旅行工具，只接受明確逐項規則，不因 `all` 規則被存倉或販售；補給購買目標不被隱含存倉。
+
+`itemsMaxWeight`（預設 89%）為停止撿物的安全門檻；rAthena 90% 超重禁止攻擊，此時不得重發攻擊。停止撿物只作維護停用、服務不可用或重試耗盡時的有界後備，正常長時間掛機路徑必須經背包維護恢復撿物。維護完成後依現行補給返程規則回原掛機地圖、清除舊目標並恢復 `AUTO_FARM`。
 
 ## M1 設定與 Fly Wing 拒絕
 

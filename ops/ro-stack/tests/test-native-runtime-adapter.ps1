@@ -33,6 +33,7 @@ function Read-GovernanceJson([string]$Path) {
   ConvertFrom-GovernanceJsonBytes (ConvertTo-GovernanceJsonBytes @{mapPid=$(if($script:wrongMap){99}else{13});procdumpAttachedPid=13;procdumpAttachStatus='ATTACHED';procdumpProcessId=20;mapProcessStartTime=$script:receiptStarted.ToString('o');mapBinaryPath=(Join-Path $native 'map-server.exe')})
 }
 function Get-FileHash {[pscustomobject]@{Hash='D1FC99AE304BD1D2BF28ABEB62531DA959E2431916194981B88C958FD713A8E6'}}
+function Invoke-CimMethod {[pscustomobject]@{ReturnValue=0;Domain='NT AUTHORITY';User='SYSTEM'}}
 function Get-Process {[pscustomobject]@{Id=13;StartTime=$script:started;HasExited=$false}}
 $snapshot=Get-Snapshot
 if(-not $snapshot.pass -or $snapshot.counts.map -ne 1 -or -not $snapshot.procdump_receipt -or

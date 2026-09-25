@@ -3,10 +3,11 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
-import { exactM1ConfigPatch, reconcileActiveRuntimeConfig } from '../reconcile-active-runtime-config.mjs';
+import { exactM1ConfigPatch, reconcileActiveRuntimeConfig, m1Policy } from '../reconcile-active-runtime-config.mjs';
 
 const hash = bytes => createHash('sha256').update(bytes).digest('hex').toUpperCase();
 const leaseId = '869f1725-dbd0-452d-b9dd-37ee79cc3f9a', owner = 'F｜M1 最終整合';
+assert.equal(m1Policy.web_sha,'5a31570a861e1665841e62245c7caa105a796b3a');
 const nativeSha = 'a'.repeat(40), webSha = 'b'.repeat(40);
 const oldConfig = Buffer.from('@{\n  Preserved = 123\n}\n');
 const sourceConfig = Buffer.from('@{\n  Preserved = 123\n  PersistentAgentM1SupplyEnabled = $false\n  WebNativeSupplyPolicyEnabled = $false\n  WebM1AcceptanceFixtureEnabled = $false\n}\n');
@@ -27,8 +28,9 @@ function fixture() {
     return {path:path.relative(root,artifact).replaceAll('\\','/'),sha256:hash(fs.readFileSync(artifact))};
   });
   const native={native_git_sha:nativeSha,owner_task_id:owner,new_binary_sha256:artifacts[2].sha256,
-    new_pids:{login:10,char:11,map:12},artifacts};
-  put(root,'.local/ro-stack/native-promotion-receipt.json',native);
+    new_pids:{login:5,char:6,map:7},artifacts};
+  const activeNativeReceipt='.local/ro-stack/native-promotion-receipt-aaaaaaaaaaaa.json';
+  put(root,activeNativeReceipt,native);
   const lease={lease_id:leaseId,owner_task_id:owner,status:'ACTIVE',promotion_mode:'FIRST_GITHUB_FIRST_PROMOTION',
     native_deploy_git_sha:nativeSha,web_deploy_git_sha:webSha,native_candidate_manifest_sha256:'C'.repeat(64)};
   put(root,'.local/ro-stack/production-deployment-lease/lease.json',lease);
@@ -39,7 +41,8 @@ function fixture() {
   put(root,'.local/ro-stack/production-deployment-state.json',state);
   const pending={lease_id:leaseId,owner_task_id:owner,native_git_sha:nativeSha,web_git_sha:webSha,
     native_stage:'NATIVE_STAGE_COMPLETE',native_stage_reconciled:true,started_at:'2026-09-24T14:57:15Z',
-    native_receipt_sha256:hash(fs.readFileSync(path.join(root,'.local/ro-stack/native-promotion-receipt.json')))};
+    native_receipt_path:activeNativeReceipt,
+    native_receipt_sha256:hash(fs.readFileSync(path.join(root,activeNativeReceipt)))};
   put(root,'.local/ro-stack/first-github-first-promotion.pending.json',pending);
   const config=put(root,'ops/ro-stack/stack.config.psd1',oldConfig);
   put(root,'ops/ro-stack/ro-stack.ps1',
@@ -50,7 +53,7 @@ function fixture() {
   let nativeRunning=false,webRestarted=false;
   const actions=[];
   const snapshot=()=>{
-    const pids=nativeRunning?{login:30,char:31,map:32}:native.new_pids;
+    const pids=nativeRunning?{login:30,char:31,map:32}:{login:10,char:11,map:12};
     return {pass:true,counts:{login:1,char:1,map:1},pids,openkore_runtime_count:0,
       processes:{map:{started_at:nativeRunning?'2026-09-24T15:05:00Z':'2026-09-24T15:00:00Z'}},
       dashboard_pid:webRestarted?41:21,database_pid:22,
@@ -75,6 +78,9 @@ const patch=exactM1ConfigPatch(oldConfig,sourceConfig,policy);
 assert.deepEqual(patch.changes.map(x=>x.rollback),['REMOVE','REMOVE','REMOVE']);pass('exact three-key ABSENT to true and REMOVE rollback contract');
 assert.equal(patch.bytes.toString().replace(policy.changes.map(k=>`  ${k} = $true\n`).join(''),''),oldConfig.toString());pass('rollback removes only three inserted lines');
 assert.throws(()=>exactM1ConfigPatch(Buffer.from(oldConfig.toString().replace('123','124')),sourceConfig,policy),/M1_CONFIG_DIGEST_CHANGED/);pass('old config hash drift blocked');
+assert.throws(()=>exactM1ConfigPatch(oldConfig,sourceConfig,{...policy,changes:policy.changes.slice(0,2)}),/UNCLASSIFIED_SOURCE_CONFIG_VARIANCE/);pass('two of three keys refused');
+const extraSource=Buffer.from(sourceConfig.toString().replace('}\n','  RO_TEST_FIXTURE_COMMANDS_ENABLED = $false\n}\n'));
+assert.throws(()=>exactM1ConfigPatch(oldConfig,extraSource,{...policy,source_config_sha256:hash(extraSource)}),/UNCLASSIFIED_SOURCE_CONFIG_VARIANCE/);pass('generic fixture switch refused as fourth key');
 assert.throws(()=>exactM1ConfigPatch(oldConfig,Buffer.from(sourceConfig.toString().replace('Preserved = 123','Preserved = 124')),{...policy,source_config_sha256:hash(Buffer.from(sourceConfig.toString().replace('Preserved = 123','Preserved = 124')))}),/UNCLASSIFIED_SOURCE_CONFIG_VARIANCE/);pass('unclassified source variance blocked');
 {
   const x=fixture();try{
@@ -85,12 +91,35 @@ assert.throws(()=>exactM1ConfigPatch(oldConfig,Buffer.from(sourceConfig.toString
 }
 {
   const x=fixture();try{
+    const lease=path.join(x.root,'.local/ro-stack/production-deployment-lease/lease.json');
+    const value=JSON.parse(fs.readFileSync(lease));value.lease_id='wrong';fs.writeFileSync(lease,JSON.stringify(value));
+    await assert.rejects(run(x),/ACTIVE_LEASE_IDENTITY_MISMATCH/);pass('wrong lease blocked');
+  }finally{x.cleanup();}
+}
+{
+  const x=fixture();try{
+    put(x.root,`.local/ro-stack/runtime-config-rollback-${leaseId}-m1-v15.psd1`,oldConfig);
+    await assert.rejects(run(x,{execute:true}),/ROLLBACK_SNAPSHOT_CONFLICT/);
+    assert.deepEqual(fs.readFileSync(x.config),oldConfig);pass('existing rollback snapshot blocks apply');
+  }finally{x.cleanup();}
+}
+{
+  const x=fixture();try{
+    fs.writeFileSync(path.join(x.root,'ops/ro-stack/ro-stack.ps1'),
+      "$config = Invoke-Expression (Get-Content (Join-Path $scriptRoot 'stack.config.psd1') -Raw)\nStart-Process -FilePath $path\n");
+    await assert.rejects(run(x),/NATIVE_LAUNCHER_M1_PROJECTION_MISSING/);
+    assert.deepEqual(fs.readFileSync(x.config),oldConfig);pass('deployed Native launcher without M1 projection blocks before mutation');
+  }finally{x.cleanup();}
+}
+{
+  const x=fixture();try{
     const report=await run(x,{execute:true});
     assert.equal(report.classification,'RUNTIME_CONFIG_RECONCILED');
     assert.deepEqual(fs.readFileSync(x.config),patch.bytes);
     assert.deepEqual(x.actions,['native:snapshot','native:stop','native:start','native:snapshot',
       'web:stop','web:start','native:snapshot']);pass('only Native and Dashboard consumers restart');
     const receipt=JSON.parse(fs.readFileSync(path.join(x.root,report.receipt_path)));
+    assert.equal(receipt.native_stage_receipt,'.local/ro-stack/native-promotion-receipt-aaaaaaaaaaaa.json');
     assert.equal(receipt.startup_runtime_attestation.dashboard_pid,41);
     assert.equal(receipt.rollback_digest,hash(oldConfig));pass('receipt pins new runtimes and exact rollback bytes');
     const again=await run(x,{execute:true});assert.equal(again.already_reconciled,true);pass('duplicate invocation is idempotent');

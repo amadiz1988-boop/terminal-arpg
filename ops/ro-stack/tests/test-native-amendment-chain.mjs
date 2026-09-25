@@ -4,6 +4,12 @@ import os from 'node:os';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { HISTORICAL_NATIVE_AMENDMENT as old, M1_SECOND_NATIVE_AMENDMENT as policy,
+  M1_INVENTORY_MAINTENANCE_NATIVE_AMENDMENT as inventory,
+  M1_INVENTORY_PROJECTION_CORRECTION as projection,
+  M1_FARM_WORLD_TELEPORT_SPAWN_CORRECTION as farmTeleport,
+  M1_START_FARM_SUPPLY_CONTRACT_CORRECTION as startFarmSupply,
+  M1_AUTO_FARM_QUARANTINE_RECOVERY_CORRECTION as farmRecovery,
+  M1_DORMANT_QUARANTINE_RUNTIME_CORRECTION as dormantRecovery,
   validateNativeAmendmentHistory, validateHistoricalNativeAnchor, validateNextNativeAmendment,
   applyNextNativeAmendment, deployedNativeRuntimeMatches } from '../native-amendment-chain.mjs';
 import { retirementDecision } from '../native-candidate-amendment.mjs';
@@ -140,7 +146,7 @@ test('third amendment can only follow deployed second candidate', x => {
   x.input.lease = lease; x.input.pending = pending; x.input.previousSha = next; x.input.newSha = third;
   assert.throws(() => validateNextNativeAmendment(x.root, x.input), /PREVIOUS_NATIVE_CANDIDATE_MISMATCH/);
 });
-test('third sequential amendment is accepted after exact second deployment', x => {
+function deployedSecond(x) {
   applyNextNativeAmendment(x.root, x.plan);
   const lease = JSON.parse(fs.readFileSync(x.files.lease)), pending = JSON.parse(fs.readFileSync(x.files.pending));
   const second = x.nativeReceipt(next, next.slice(0, 12), 'second', x.input.candidateManifestSha256);
@@ -153,17 +159,107 @@ test('third sequential amendment is accepted after exact second deployment', x =
   pending.native_receipt_sha256 = second.sha256;
   x.put('.local/ro-stack/production-deployment-lease/lease.json', lease);
   x.put('.local/ro-stack/first-github-first-promotion.pending.json', pending);
+  return { lease, pending, second };
+}
+function thirdInputFor(x, reason, files) {
+  const { lease, pending, second } = deployedSecond(x);
+  const selected = reason === inventory.reason ? inventory : policy;
   const thirdManifest = { native_git_sha: third, amendment_of: { native_git_sha: next,
-    reason: policy.reason, candidate_manifest_sha256: x.input.candidateManifestSha256 },
+    reason, candidate_manifest_sha256: x.input.candidateManifestSha256 },
     rollback_reference: { intermediate_rollback: { native_git_sha: next } }, binary_sha256: 'E'.repeat(64) };
   const thirdFile = x.put('build/third.json', thirdManifest);
   const thirdInput = { ...x.input, lease, pending, previousSha: next, newSha: third,
+    reason, scope: selected.scope, sourceDiff: { scope: selected.scope, files },
     candidateManifest: thirdManifest, candidateManifestSha256: hash(fs.readFileSync(thirdFile)),
     previousReceiptSha256: second.sha256 };
+  return { thirdInput, thirdFile };
+}
+test('third inventory-maintenance amendment is accepted after exact second deployment', x => {
+  const { thirdInput, thirdFile } = thirdInputFor(x, inventory.reason,
+    ['src/map/persistent_agent.cpp', 'src/map/persistent_agent_m1_supply_policy.hpp',
+      'tools/pa-command-contract/test-m1-supply-policy.cpp']);
   assert.equal(validateNextNativeAmendment(x.root, thirdInput).history.length, 2);
   const thirdPlan = { input: thirdInput, candidateManifestPath: thirdFile,
     currentHashes: Object.fromEntries(Object.entries(x.files).map(([k, v]) => [k, hash(fs.readFileSync(v))])) };
   assert.equal(applyNextNativeAmendment(x.root, thirdPlan).chain_length, 3);
+  const lease = JSON.parse(fs.readFileSync(x.files.lease)), pending = JSON.parse(fs.readFileSync(x.files.pending));
+  assert.equal(validateNativeAmendmentHistory(x.root, lease, pending).length, 3);
+});
+test('repeating an applied amendment reason is rejected', x => {
+  const { thirdInput } = thirdInputFor(x, policy.reason, ['src/map/persistent_agent.cpp']);
+  assert.throws(() => validateNextNativeAmendment(x.root, thirdInput), /NATIVE_AMENDMENT_REASON_UNAPPROVED/);
+});
+test('inventory-maintenance amendment rejects files outside its scope', x => {
+  const { thirdInput } = thirdInputFor(x, inventory.reason,
+    ['src/map/persistent_agent.cpp', 'conf/persistent_agent_commands.json']);
+  assert.throws(() => validateNextNativeAmendment(x.root, thirdInput), /NATIVE_AMENDMENT_DIFF_OUT_OF_SCOPE/);
+});
+test('fourth projection correction requires the deployed inventory candidate', x => {
+  const { thirdInput, thirdFile } = thirdInputFor(x, inventory.reason,
+    ['src/map/persistent_agent.cpp']);
+  const thirdPlan = { input: thirdInput, candidateManifestPath: thirdFile,
+    currentHashes: Object.fromEntries(Object.entries(x.files).map(([k, v]) => [k, hash(fs.readFileSync(v))])) };
+  applyNextNativeAmendment(x.root, thirdPlan);
+  const lease = JSON.parse(fs.readFileSync(x.files.lease));
+  const pending = JSON.parse(fs.readFileSync(x.files.pending));
+  const manifest = { native_git_sha: '5'.repeat(40), amendment_of: {
+    native_git_sha: third, reason: projection.reason,
+    candidate_manifest_sha256: thirdInput.candidateManifestSha256 },
+    rollback_reference: { intermediate_rollback: { native_git_sha: third } } };
+  const fourthFile = x.put('build/fourth.json', manifest);
+  const fourthInput = { ...thirdInput, lease, pending, previousSha: third,
+    newSha: manifest.native_git_sha, reason: projection.reason, scope: projection.scope,
+    sourceDiff: { scope: projection.scope, files: projection.sourcePaths },
+    candidateManifest: manifest, candidateManifestSha256: hash(fs.readFileSync(fourthFile)) };
+  assert.throws(() => validateNextNativeAmendment(x.root, fourthInput),
+    /PREVIOUS_NATIVE_CANDIDATE_MISMATCH/);
+  const deployed = x.nativeReceipt(third, third.slice(0, 12), 'third',
+    thirdInput.candidateManifestSha256);
+  lease.active_native_candidate = { ...lease.active_native_candidate, deployed: true,
+    deploy_receipt: deployed.path };
+  pending.active_native_candidate = lease.active_native_candidate;
+  lease.native_deploy_git_sha = third;
+  lease.native_candidate_manifest_sha256 = thirdInput.candidateManifestSha256;
+  pending.native_git_sha = third;
+  pending.native_receipt_path = deployed.path;
+  pending.native_receipt_sha256 = deployed.sha256;
+  fourthInput.previousReceiptSha256 = deployed.sha256;
+  assert.equal(validateNextNativeAmendment(x.root, fourthInput).history.length, 3);
+});
+test('farm teleport amendment allows only its exact contract and spawn files', () => {
+  assert.equal(farmTeleport.reason, 'M1_FARM_WORLD_TELEPORT_DYNAMIC_SPAWN_ALIGNMENT_V1');
+  assert.deepEqual(farmTeleport.sourcePaths, [
+    'conf/persistent_agent_commands.json',
+    'src/map/persistent_agent.cpp',
+    'tools/pa-command-contract/contract-test-matrix.json',
+    'tools/pa-command-contract/Test-M1CanonicalSource.ps1',
+  ]);
+  assert.equal(farmTeleport.sourcePaths.includes('src/map/map.cpp'), false);
+});
+test('start farm supply contract amendment allows only schema and matrix', () => {
+  assert.equal(startFarmSupply.reason, 'M1_START_FARM_SUPPLY_POLICY_CONTRACT_ALIGNMENT_V1');
+  assert.deepEqual(startFarmSupply.sourcePaths, [
+    'conf/persistent_agent_commands.json',
+    'tools/pa-command-contract/contract-test-matrix.json',
+  ]);
+  assert.equal(startFarmSupply.sourcePaths.includes('src/map/persistent_agent.cpp'), false);
+});
+test('farm quarantine recovery amendment allows only failure and recovery source', () => {
+  assert.equal(farmRecovery.reason, 'M1_AUTO_FARM_QUARANTINE_RECOVERY_V1');
+  assert.deepEqual(farmRecovery.sourcePaths, [
+    'src/map/persistent_agent.cpp',
+    'src/map/persistent_agent_state.cpp',
+    'tools/pa-quarantine-idle-recovery/build-and-test.ps1',
+  ]);
+  assert.equal(farmRecovery.sourcePaths.includes('src/map/map.cpp'), false);
+});
+test('dormant quarantine runtime amendment excludes unrelated native source', () => {
+  assert.equal(dormantRecovery.reason, 'M1_DORMANT_QUARANTINE_RUNTIME_RELEASE_V1');
+  assert.deepEqual(dormantRecovery.sourcePaths, [
+    'src/map/persistent_agent.cpp',
+    'tools/pa-quarantine-idle-recovery/build-and-test.ps1',
+  ]);
+  assert.equal(dormantRecovery.sourcePaths.includes('src/map/map.cpp'), false);
 });
 {
   const mapHash = 'A'.repeat(64);

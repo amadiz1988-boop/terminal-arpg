@@ -144,7 +144,8 @@ assert.equal(matrixResult.matrix[0].reason, 'RUNTIME_WARP_GRAPH_UNAVAILABLE');
 // Live-flow observation against a local fake Dashboard; no Production access.
 async function withFakeDashboard(initial, onCommand, body) {
   const world = { mode: initial.mode, revision: initial.revision, owner: initial.owner ?? 'SERVER_AGENT',
-    projection: initial.projection ?? true, posts: 0 };
+    commandStatus: initial.commandStatus ?? 'CONFIRMED',
+    projection: initial.projection ?? true, events: initial.events ?? [], posts: 0 };
   const server = createServer(async (request, response) => {
     const send = (status, payload, headers = {}) => {
       response.writeHead(status, { 'content-type': 'application/json', ...headers });
@@ -160,13 +161,13 @@ async function withFakeDashboard(initial, onCommand, body) {
         ...(world.projection ? { questJournal: journal(world.mode, world.revision, world.owner) } : {}),
       });
     }
-    if (path === '/api/events') return send(200, { cursor: 0, lines: [] });
+    if (path === '/api/events') return send(200, { cursor: 0, lines: world.events });
     if (path === '/api/automation') {
       world.posts += 1;
       setTimeout(() => onCommand(world), 150);
       return send(202, { executor: 'SERVER_AGENT', command: { commandId: 'fake-1', status: 'QUEUED' } });
     }
-    if (path.endsWith('/ownership/commands/fake-1')) return send(200, { command: { commandId: 'fake-1', status: 'CONFIRMED' } });
+    if (path.endsWith('/ownership/commands/fake-1')) return send(200, { command: { commandId: 'fake-1', status: world.commandStatus } });
     return send(404, { error: 'not_found' });
   });
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
@@ -192,6 +193,14 @@ try {
   assert.equal(start.result, RESULT.PASS, `START_FARM_SCENARIO_OBSERVATION ${start.failReason}`);
   assert.equal(start.observed.after.mode, 'AUTO_FARM');
 
+  const acceptedOnly = await withFakeDashboard({ mode: 'PERSISTENT_IDLE', revision: 40,
+    commandStatus: 'ACCEPTED' },
+    (world) => { world.mode = 'AUTO_FARM'; world.revision += 1; },
+    (origin) => scenarioRun('start-farm', origin));
+  assert.equal(acceptedOnly.result, RESULT.FAIL, 'accepted command without Native confirmation must fail');
+  assert.equal(acceptedOnly.native.ok, false);
+  assert.equal(acceptedOnly.native.reason, 'ACCEPTED');
+
   const stop = await withFakeDashboard({ mode: 'AUTO_FARM', revision: 41 },
     (world) => { world.mode = 'PERSISTENT_IDLE'; world.revision += 1; },
     (origin) => scenarioRun('stop-farm', origin));
@@ -210,6 +219,19 @@ try {
   assert.equal(unknown.result, RESULT.FAIL);
   assert.equal(unknown.failReason, 'mode=WEIRD_MODE');
 
+  const combat = await withFakeDashboard({ mode: 'AUTO_FARM', revision: 42,
+    events: ['MONSTER_TARGET', 'MONSTER_ATTACK', 'MONSTER_HIT', 'MONSTER_KILL', 'LOOT_ACQUIRED'] },
+    () => {}, (origin) => scenarioRun('combat-cycle', origin));
+  assert.equal(combat.result, RESULT.PASS, `COMBAT_EVENT_SET_OBSERVATION ${combat.failReason}`);
+  assert.equal(combat.events.ok, true);
+
+  const attackOnly = await withFakeDashboard({ mode: 'AUTO_FARM', revision: 42,
+    events: ['MONSTER_TARGET', 'MONSTER_ATTACK'] },
+    () => {}, (origin) => scenarioRun('combat-cycle', origin));
+  assert.equal(attackOnly.result, RESULT.FAIL, 'attack without authoritative hit must fail');
+  assert.equal(attackOnly.events.ok, false);
+  assert.equal(attackOnly.events.checkpoints.find(row => row.name === 'MONSTER_HIT')?.ok, false);
+
   for (const initial of [{ projection: false }, { owner: 'OPENKORE', mode: 'PERSISTENT_IDLE', revision: 0 }]) {
     let posted = 0;
     const missing = await withFakeDashboard({ mode: 'AUTO_FARM', revision: 1, ...initial },
@@ -222,4 +244,4 @@ try {
   await rm(credentialDir, { recursive: true, force: true });
 }
 
-console.log('PLAYER_SCENARIO_RUNNER_TEST_PASS checks=59');
+console.log('PLAYER_SCENARIO_RUNNER_TEST_PASS checks=67');

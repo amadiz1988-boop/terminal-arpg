@@ -9,9 +9,19 @@ import { boundedPath, digest, readJson, FIRST_PROMOTION, windowsPowerShellEnv } 
 import { git, pinned, equalHash, groups, shutdownContract, verifyNativeRemote,
   inspectNativeCandidate, verifyNativeStage, nativeReceiptValid, activeNativeReceiptPath } from './native-promotion-contract.mjs';
 import { amendmentAdapter, deployAmendedNative, gracefulShutdownCycle } from './native-candidate-amendment.mjs';
-import { M1_SECOND_NATIVE_AMENDMENT as approved, validateHistoricalNativeAnchor,
+import { M1_SECOND_NATIVE_AMENDMENT, approvedNativeAmendment, validateHistoricalNativeAnchor,
   validateNextNativeAmendment, applyNextNativeAmendment,
   deployedNativeRuntimeMatches } from './native-amendment-chain.mjs';
+
+// The approved reason selects the exact source scope; default keeps the
+// historical second amendment invocation unchanged.
+let approved = M1_SECOND_NATIVE_AMENDMENT;
+export function selectNativeAmendmentReason(reason) {
+  const selected = reason ? approvedNativeAmendment(reason) : M1_SECOND_NATIVE_AMENDMENT;
+  if (!selected) throw Error('NATIVE_AMENDMENT_REASON_UNAPPROVED');
+  approved = selected;
+  return selected;
+}
 
 const governanceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SUITE = 'tools/pa-command-contract/Test-M1V15ExecutorFixture.ps1';
@@ -194,6 +204,7 @@ async function main() {
   need(['prepare', 'plan', 'amend', 'deploy', 'graceful-cycle'].includes(args.action) &&
     args.owner && args.lease, 'ARGUMENTS_REQUIRED');
   need(['prepare', 'plan'].includes(args.action) || args.execute === 'true', 'EXPLICIT_EXECUTE_REQUIRED');
+  selectNativeAmendmentReason(args.reason);
   need(git(governanceRoot, 'status', '--porcelain=v1', '--untracked-files=all') === '', 'GOVERNANCE_SOURCE_DIRTY');
   const governanceSha = git(governanceRoot, 'rev-parse', 'HEAD');
   const mainTip = git(governanceRoot, 'ls-remote', '--exit-code', 'origin', 'refs/heads/main').split(/\s/)[0];
