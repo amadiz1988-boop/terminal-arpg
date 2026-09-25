@@ -37,13 +37,18 @@
           },
           "outputs": {
             "panel": {
-              "sha256": "d3f87e8172e296f8d41f79a3d7e719fef994b5e49b8d19cdff5a9777aafd2c4f",
-              "size": 19520
+              "sha256": "21d5f584eba1a2757275f7948d79761f1e0e58c2aa2a5da92f212bc2962a3c8e",
+              "size": 18140
             },
             "thumb": {
               "sha256": "db2bbb2715c663c4f1ed9d680212e5ebeb81b8ccd5b47d9a0c3bc8348bb1dc95",
               "size": 5320
             }
+          },
+          "panel": {
+            "zoom": 1.4,
+            "x": 0.58,
+            "y": 0.3
           }
         },
         {
@@ -54,18 +59,23 @@
             "sha256": "958d114deabe26c976a679afd8fb12afa5adc3155100ded0fe22046748169916"
           },
           "focus": {
-            "x": 0.45,
-            "y": 0.25
+            "x": 0.42,
+            "y": 0.24
           },
           "outputs": {
             "panel": {
-              "sha256": "0c772bd78776f76842a619884e5d6dae60f956da5e89bb4fc4ab4b9cf4f1fec8",
-              "size": 24928
+              "sha256": "b60c6229537346ce6e6263e8f08e87a74a2a0805731f8e87e13b0b5185b8043b",
+              "size": 20604
             },
             "thumb": {
-              "sha256": "d70b487a0fa09a676f4d53b83ff9b00898b9e1a2f9302b084da4078f7cf1c356",
-              "size": 8460
+              "sha256": "233d6d51b11f67ccd3b7381891bf80d104755a0d54e3a09f158c1bfc1c7d567a",
+              "size": 8278
             }
+          },
+          "panel": {
+            "zoom": 1.6,
+            "x": 0.66,
+            "y": 0.3
           }
         }
       ],
@@ -93,13 +103,17 @@
           },
           "outputs": {
             "panel": {
-              "sha256": "c064c121b1af4f45239b049921918d038962dfe2c68c7fd4def79730fd32aa22",
-              "size": 27888
+              "sha256": "3b1c2571d4426f8ce3f66566181aa382918a5440db209ddb61f474a346ed1355",
+              "size": 25050
             },
             "thumb": {
               "sha256": "5f7cc4c3b9811befd759f28a31362aa1758b9b1274099883e6fd7e4d5020fada",
               "size": 8450
             }
+          },
+          "panel": {
+            "zoom": 1.4,
+            "x": 0.72
           }
         },
         {
@@ -115,8 +129,8 @@
           },
           "outputs": {
             "panel": {
-              "sha256": "1aedb0820e6845400134f2ce6588f80c015e44b9eb5a1ea37c2afcb80e7e6d83",
-              "size": 20750
+              "sha256": "dcb3ad31b0be720b637aa3ff0486ab85c609fb231c42e23af78ec527ba1255ff",
+              "size": 20248
             },
             "thumb": {
               "sha256": "62559a183807e89215c5de8e8ed8f6f55d5df33d7202dbd95313090b42c3f351",
@@ -144,8 +158,8 @@
           },
           "outputs": {
             "panel": {
-              "sha256": "e4528d29f5ad245a71a85c9caee01f3c042ae3d9427fcee926218845bf42c459",
-              "size": 21492
+              "sha256": "9b880d26cd13a56d42b3eff75711cf9507bf2886cd53d1ccc8d59c19b6df5697",
+              "size": 22852
             },
             "thumb": {
               "sha256": "39409adf01010aac2bdff5ed5c939374938fb43a3f5d6fe17b6ffe03403ac9ba",
@@ -178,8 +192,8 @@
           },
           "outputs": {
             "panel": {
-              "sha256": "1d98f7c53a6e2e7798218f2ee0f0cf779947c3078ecae943da67c35b75a765f8",
-              "size": 22666
+              "sha256": "2b81746d0fa14da74fdcdeff0cf1d612e792bceb377cc6f34726fdcf6236a561",
+              "size": 19390
             },
             "thumb": {
               "sha256": "21cc8d4d465cd10c09d7a962b01415b59ea57a33f81e38d1ed78ab0df9d35ce2",
@@ -195,18 +209,23 @@
             "sha256": "c8c3d04981e84394e521014b6ece4e359652d0a4007e8d7a70f85746d5d0c345"
           },
           "focus": {
-            "x": 0.5,
+            "x": 0.6,
             "y": 0.22
           },
           "outputs": {
             "panel": {
-              "sha256": "71b58d12ba551d2b7c1c10b796aa8c1a4329f454786b20f319a51f339c8c0fef",
-              "size": 20522
+              "sha256": "34ccf86a5f12009df3eaf4b47c36eaeee08b46ebff27a2628482a889bf22fb3d",
+              "size": 19740
             },
             "thumb": {
               "sha256": "f735e5a2bea97629ae6d226dc992bd2d123a36d8c8549750e97f0b0c5b9165b9",
               "size": 5900
             }
+          },
+          "panel": {
+            "zoom": 1.15,
+            "x": 0.55,
+            "y": 0.3
           }
         },
         {
@@ -222,8 +241,8 @@
           },
           "outputs": {
             "panel": {
-              "sha256": "77a7ef4fcab6a2fdea49edfafde936e57f9b86ff807038d03de5cc1776e7a62a",
-              "size": 23324
+              "sha256": "7425834f115d7a8218223b51d08ce84e23970f75c8d5143162d049bfe5e6ef42",
+              "size": 20710
             },
             "thumb": {
               "sha256": "ddb656e5d14fd8febe3232ca3903703db9d84657529059612ea5486209a0b224",
@@ -244,8 +263,8 @@
           },
           "outputs": {
             "panel": {
-              "sha256": "f47b41f1164c152fc2d25a90a7bd5bda7b39fd1b2c6c5f6806668c81f574214f",
-              "size": 22010
+              "sha256": "f67a5f02cd430494d12d0338bfe2880fc54e01810e3bcf7171e33c4c68caad70",
+              "size": 20810
             },
             "thumb": {
               "sha256": "d224e902d6d8ab73b430e46de00fc1daca63b978edcc42769b8bd110e124acc3",
@@ -266,8 +285,8 @@
           },
           "outputs": {
             "panel": {
-              "sha256": "17afd1fb9acb9b243dfe60465547d146a9f023e1a078c3ebf6b9aee1c6d7b877",
-              "size": 22334
+              "sha256": "842f6c89310c1ab6c404a9b12ea2d201444c82a8307b8aa91e026cef411b7492",
+              "size": 21240
             },
             "thumb": {
               "sha256": "5e5512277a7912592efa6ca2a98409ca874c570f411252cd5e7bc093c71f7dfa",
@@ -288,8 +307,8 @@
           },
           "outputs": {
             "panel": {
-              "sha256": "fb662d037b3264f0d8f4ba99e37de5b5f20e17842d6450eaf08519ed2b8966b3",
-              "size": 22316
+              "sha256": "39292cc839b890c0f910f28fc4922b3d66733307034383fb00c90dd448e00b83",
+              "size": 19358
             },
             "thumb": {
               "sha256": "0c5143977f69c553b36b71e3cf0263b9070b69acca66fafc6e6af0f65ccce308",
@@ -317,6 +336,10 @@
               "sha256": "3f629a0fe15906ba07d5a252099fcab5751d27c983377ae31292db6f387ee8dc",
               "size": 6446
             }
+          },
+          "panel": {
+            "zoom": 1.0,
+            "x": 0.5
           }
         }
       ],
@@ -351,6 +374,10 @@
               "sha256": "12914d1ac590f2aa0da6010241db744d4562430b620691dbed1304dbb0364f14",
               "size": 6746
             }
+          },
+          "panel": {
+            "zoom": 1.0,
+            "x": 0.55
           }
         },
         {
@@ -366,8 +393,8 @@
           },
           "outputs": {
             "panel": {
-              "sha256": "84505ec5fe9628a0ecf27c47b7459fa81a8950aa1ba5e57e4e5661262c0d10a1",
-              "size": 13282
+              "sha256": "6c622a222e7ee16a6ffcbb14f06853af2d7ea3d1224834dfd928dc1337fc43e1",
+              "size": 14468
             },
             "thumb": {
               "sha256": "f89e2c22db0a2b5b6df24da3a14a350876d88d1b59d72a87811671dd10565f46",
@@ -394,8 +421,8 @@
           },
           "outputs": {
             "panel": {
-              "sha256": "18c5f6367d07576f7b5c4047e2011eadcbf585ae736152815bec61e725b8c48b",
-              "size": 14384
+              "sha256": "940282f057c24c5974fec7e0ed0dc927da9b50719c4d3641a7efed986ad80fa1",
+              "size": 13476
             },
             "thumb": {
               "sha256": "de749337263017c8c69c4a1bd66ac5e4df885e1313621fdfcb80cb4e39e7a5e6",
@@ -416,8 +443,8 @@
           },
           "outputs": {
             "panel": {
-              "sha256": "1a06e35c609be20e69b659aaa8203c73264f3694872fcf9ee2c9c70525e11310",
-              "size": 18386
+              "sha256": "0b8785e2ce5f132b9ece5af04c4e13cd3a1fdb716b5f44370c430d081f6c6ade",
+              "size": 15152
             },
             "thumb": {
               "sha256": "932760c45f337a0b4175033b47b7d464d7782f85ed2a2d8a6e0a67d7040a9176",
@@ -433,5 +460,10 @@
       }
     }
   ],
-  "asset_layout": "<asset_root>/<theme-id>/<variant-key>/<output-file>"
+  "asset_layout": "<asset_root>/<theme-id>/<variant-key>/<output-file>",
+  "panel_layout_default": {
+    "zoom": 1.3,
+    "x": 0.66,
+    "y": 0.32
+  }
 }

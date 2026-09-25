@@ -113,3 +113,10 @@ Source folders are named after the player-visible labels (洛琪希, 艾莉絲,
 A variant may also set `fade` (default 0.6), the share of the panel width
 that fades in from the left. `eris-02` crops away its vertical title text and
 uses `fade: 0.35` so more of the heroine shows on the right.
+
+Panel framing keeps the heroine at the right edge so text rarely covers her:
+the source is zoomed (`panel.zoom`, default 1.3) and the subject centre
+(`focus`) is placed at `panel.x` (default 0.66) of the panel width and
+`panel.y` (default 0.32) of its height. Scenery right of the heroine is
+cropped. Close-ups use a lower zoom so the face is never cut; every panel is
+reviewed visually for a complete face before commit.

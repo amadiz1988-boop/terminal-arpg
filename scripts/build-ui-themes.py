@@ -44,7 +44,7 @@ def crop_to(image, width, height, focus):
 def build_panel(image, spec, variant):
     # Soft focus, and an alpha fade on the left so the art sits on the right of
     # a window without a hard edge behind text.
-    panel = crop_to(image, spec['width'], spec['height'], variant['focus'])
+    panel = frame_subject(image, spec['width'], spec['height'], variant)
     panel = panel.filter(ImageFilter.GaussianBlur(1.4)).convert('RGBA')
     mask = Image.new('L', panel.size, 255)
     fade = round(panel.width * variant.get('fade', 0.6))
@@ -52,6 +52,21 @@ def build_panel(image, spec, variant):
         mask.paste(round(255 * (x / fade) ** 1.6), (x, 0, x + 1, panel.height))
     panel.putalpha(mask)
     return panel
+
+
+def frame_subject(image, width, height, variant):
+    # Zoom in and place the subject centre (focus) toward the right edge so
+    # scenery right of the heroine is cropped and text rarely covers her.
+    layout = variant.get('panel', {})
+    zoom = layout.get('zoom', 1.3)
+    anchor_x = layout.get('x', 0.66)
+    anchor_y = layout.get('y', 0.32)
+    scale = max(width / image.width, height / image.height) * zoom
+    resized = image.resize((round(image.width * scale), round(image.height * scale)), Image.LANCZOS)
+    focus = variant['focus']
+    left = min(max(round(resized.width * focus['x'] - width * anchor_x), 0), resized.width - width)
+    top = min(max(round(resized.height * focus['y'] - height * anchor_y), 0), resized.height - height)
+    return resized.crop((left, top, left + width, top + height))
 
 
 def load(source, variant):
