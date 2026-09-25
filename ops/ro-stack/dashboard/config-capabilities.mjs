@@ -15,6 +15,11 @@ export const CONFIG_SECTIONS = Object.freeze([
 // effective on the next start_farm; it is not an immediate combat mutation.
 export const M1_EXECUTOR_PATHS = Object.freeze([
   'supply.enabled', 'supply.services.buy.enabled', 'supply.services.buy.rules',
+  // M1_INVENTORY_MAINTENANCE_V1: OpenKore itemsMaxWeight_sellOrStore,
+  // itemsMaxNum_sellOrStore, storageAuto, sellAuto and items_control rows.
+  'supply.weightTriggerPercent', 'supply.inventorySlotTrigger',
+  'supply.services.storage.enabled', 'supply.services.sell.enabled',
+  'supply.itemRules',
   'combat.profile', 'combat.attack.mode', 'combat.attack.useWeapon',
   'combat.attack.distance', 'combat.attack.maxDistance',
   'combat.travel.flyWing.enabled', 'combat.skills.attackSlots',
@@ -25,14 +30,6 @@ export function m1ConfigExecutionCapabilities(rolloutEnabled, controllerReady) {
   if (!rolloutEnabled || !controllerReady) return {};
   return Object.fromEntries(M1_EXECUTOR_PATHS.map((path) => [path, 'SUPPORTED']));
 }
-
-// c0450b1c excludes storage/sell, weight/slot-triggered Supply, and the
-// associated item-disposal rows from the M1 executor contract.
-const outsideM1SupplyPaths = new Set([
-  'supply.weightTriggerPercent', 'supply.inventorySlotTrigger',
-  'supply.services.storage.enabled', 'supply.services.sell.enabled',
-  'supply.itemRules',
-]);
 
 export function configControlVisible(path) {
   // Cross-map travel is controlled by the World Map action, not Player
@@ -56,8 +53,7 @@ export function configSection(path) {
 export function configCapability(execution, path) {
   // These are outside the authorized first M1 core loop. The existing stored
   // values are preserved but the controls cannot send a new policy.
-  if (path.startsWith('combat.follow.') || path === 'combat.skills.partySkills' ||
-      outsideM1SupplyPaths.has(path)) return 'UNAVAILABLE';
+  if (path.startsWith('combat.follow.') || path === 'combat.skills.partySkills') return 'UNAVAILABLE';
   const attested = execution?.capabilities?.[path];
   if (attested === 'UNAVAILABLE') return 'UNAVAILABLE';
   if (attested === 'SUPPORTED' && (execution?.applied === true || execution?.editable === true)) return 'SUPPORTED';
@@ -84,6 +80,8 @@ const supportedRowPaths = Object.freeze({
   selfSkill: new Set(['skill', 'level', 'disabled', 'conditions.hp',
     'conditions.sp', 'conditions.timeout']),
   itemUse: new Set(['item', 'disabled', 'conditions.hp', 'conditions.timeout']),
+  // Native parse_m1_supply_policy consumes exactly these items_control fields.
+  itemRule: new Set(['item', 'keepAmount', 'storage', 'sell']),
 });
 
 export function configRowFieldSupported(kind, path) {
