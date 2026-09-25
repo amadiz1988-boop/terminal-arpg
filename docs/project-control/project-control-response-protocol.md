@@ -581,7 +581,7 @@ LAST_GOOD
 → GIT_CHECKPOINT
 ```
 
-Use `WORKLINE_CONTINUATION_TEMPLATE_V1`, continue from `CURRENT_PHASE`, and do
+Use `WORKLINE_CONTINUATION_TEMPLATE_V1.2`, continue from `CURRENT_PHASE`, and do
 not restart an audit. Historical PASS, runtime proof, Browser evidence, and
 checkpoints are preserved evidence and are not re-audited without an explicit
 Project Control order.

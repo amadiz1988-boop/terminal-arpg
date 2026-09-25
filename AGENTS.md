@@ -600,7 +600,7 @@ visible state synchronization. Backend evidence does not establish
 New worklines MUST use:
 
 ```text
-WORKLINE_DISPATCH_TEMPLATE_V1.1
+WORKLINE_DISPATCH_TEMPLATE_V1.2
 defined at:
 docs/project-control/workline-dispatch-template.md
 ```
@@ -608,7 +608,7 @@ docs/project-control/workline-dispatch-template.md
 Existing / blocked worklines MUST use:
 
 ```text
-WORKLINE_CONTINUATION_TEMPLATE_V1.1
+WORKLINE_CONTINUATION_TEMPLATE_V1.2
 defined at:
 docs/project-control/workline-continuation-template.md
 ```
@@ -629,10 +629,10 @@ Short form:
 
 ```text
 For new workline:
-Use WORKLINE_DISPATCH_TEMPLATE_V1.1.
+Use WORKLINE_DISPATCH_TEMPLATE_V1.2.
 
 For existing workline:
-Use WORKLINE_CONTINUATION_TEMPLATE_V1.1.
+Use WORKLINE_CONTINUATION_TEMPLATE_V1.2.
 Continue from CURRENT_PHASE.
 Do not restart audit.
 ```
@@ -654,6 +654,64 @@ WORKER_MUST_EXECUTE_TO_COMPLETION_WITHIN_SCOPE = YES
 優先使用已授權的 headless fixture／test control，並保留正式 Browser 驗收要求。
 完整執行與停止條件見 `docs/project-control/workline-continuation-template.md`；
 既有 routing、security、Single Runtime 與 no-progress 安全閥仍有效。
+
+### DEVELOPMENT_FLOW_EFFICIENCY_POLICY_V1
+
+```text
+DEVELOPMENT_FLOW_EFFICIENCY_IS_ARCHITECTURE_QUALITY = YES
+CONTINUE_IN_PLACE_FIRST = YES
+END_TO_END_PREFLIGHT_FIRST = YES
+CAPABILITY_FIRST = YES
+OBSERVABILITY_BY_DESIGN = YES
+ACCEPTANCE_DEFINED_BEFORE_BUILD = YES
+REPEATED_FRICTION_ESCALATION = YES
+AUTONOMY_TRACEABILITY = YES
+NEW_DAILY_MANUAL_APPROVAL_GATE = NO
+```
+
+正式能力的工程完成度涵蓋適用的 SOURCE、TEST、RUNTIME、OBSERVABILITY、
+DIAGNOSTICS、MAINTENANCE、DEPLOYMENT、ROLLBACK 與 ACCEPTANCE。新正式能力或重大
+能力變更開工前，在既有工作脈絡中做 bounded `END_TO_END_PREFLIGHT_FIRST`：
+`SOURCE → TEST → RUNTIME → DIAGNOSTICS → DEPLOYMENT → ROLLBACK → ACCEPTANCE`。
+依工作範圍標記適用項；明確缺口記為 `DEVELOPMENT_PATH_GAP = <環節／證據／owner>`，
+在大量施工前處理。純文件、局部樣式與普通 bounded source bug 可將不適用項標 `N/A`。
+此預檢沿用派工與工作紀錄，不另產生日常文件或人工核准。
+
+`CONTINUE_IN_PLACE_FIRST` 適用於同一 authority、security、architecture、
+workline objective 與既定 owner 內的 bounded blocker。檔案類型或 tooling 層不同，
+不構成換線理由。原視窗沿既有 `FIRST_BROKEN_TRANSITION → MINIMAL_FIX →
+BOUNDED_TEST → CHECKPOINT → RESUME` 執行；真正跨越 authority、security、
+ownership、runtime engine、product decision 或 canonical `PC_STOP_*` 時依既有
+owner routing 停止並交接。
+
+診斷及維護採 `CAPABILITY_FIRST`：先查現有 Developer Console 與 capability
+registry（`docs/project-control/developer-console-capability-matrix.json`）。已有命令就
+`REUSE`；有 canonical capability 但缺統一入口，就在原 action／authority 上
+`EXTEND_ENTRYPOINT`；真正缺能力則記 `DEVELOPER_CONSOLE_GAP`，沿既有 owner 與
+authorization 處理。保留底層權威的直接診斷通道，避免一次性 script 或第二套
+business logic 取代正式入口。
+
+新增正式能力時採 `OBSERVABILITY_BY_DESIGN`，在既有設計或工作紀錄回答
+`AUTHORITY / STATE / SUCCESS_SIGNAL / FAILURE_SIGNAL / EVENT / LOG /
+CORRELATION / DIAGNOSTIC_ENTRYPOINT`。source change 前定義適用的
+`HOW_TO_PROVE_SUCCESS / HOW_TO_PROVE_FAILURE / LIVE_ACCEPTANCE /
+ROLLBACK_ACCEPTANCE`。缺診斷或驗收路徑時，以 `DEVELOPMENT_PATH_GAP` 處理，
+避免功能完成後才尋找驗收方法。
+
+Governance 應降低合法操作的反覆摩擦，同時維持 fail-closed、GitHub-first、
+authority、可重建性、部署安全、rollback 與 Browser UI 驗收。既有 gate 對同一合法
+操作造成反覆人工往返時，在原工作線評估 `AUTOMATE_GATE / GENERALIZE_TOOL /
+REMOVE_REDUNDANT_STEP`，保留真正的安全 invariant。同類摩擦第二次出現，記
+`REPEATED_FRICTION = YES`，評估 `PLATFORM_CAPABILITY_FIX / DEVELOPER_TOOLING_FIX /
+DEPLOYMENT_TOOLING_FIX / GOVERNANCE_SIMPLIFICATION`，優先處理根因；跨越既定
+scope 或安全邊界仍依 `PC_STOP_*`。普通 source bug 不新增 Project Control 核准。
+
+未來 PA／Character Autonomy 架構須以 correlation identity 追查
+`Life Director intent → Social Director（適用時）→ Persistent Agent action →
+rAthena authoritative result → Event Ledger factual record`，並能回答
+`WHY_DECISION / INTENT / ACTION / EXECUTION_RESULT / FIRST_BROKEN_TRANSITION /
+EVENT_EVIDENCE`。這是架構相容性要求；`NORTH_STAR != IMPLEMENTATION_AUTHORIZATION`，
+不授權實作尚未核准的 Director 或 autonomous runtime。
 
 ## Short-Term Product North Star
 
@@ -1755,8 +1813,8 @@ Keep hot paths small.
 Do not let Web presence control PA runtime.
 ```
 
-此 policy 必須相容 `PC-DISPATCH-STANDARD`、`WORKLINE_DISPATCH_TEMPLATE_V1.1`、
-`WORKLINE_CONTINUATION_TEMPLATE_V1.1`、`OPENKORE_REFERENCE_POLICY`、
+此 policy 必須相容 `PC-DISPATCH-STANDARD`、`WORKLINE_DISPATCH_TEMPLATE_V1.2`、
+`WORKLINE_CONTINUATION_TEMPLATE_V1.2`、`OPENKORE_REFERENCE_POLICY`、
 `OPENKORE_REFERENCE_GATE_V1.1`、`Single Runtime Policy` 與 Browser Acceptance
 Policy，且不得重定義 PA Runtime Authority。
 

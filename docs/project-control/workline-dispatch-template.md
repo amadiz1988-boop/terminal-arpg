@@ -1,4 +1,4 @@
-# WORKLINE_DISPATCH_TEMPLATE_V1.1
+# WORKLINE_DISPATCH_TEMPLATE_V1.2
 
 STATUS: CANONICAL
 
@@ -16,7 +16,7 @@ Fill every section. Do not omit a section because it looks obvious.
 
 ```text
 For new workline:
-Use WORKLINE_DISPATCH_TEMPLATE_V1.1.
+Use WORKLINE_DISPATCH_TEMPLATE_V1.2.
 ```
 
 If the value of a field is not known:
@@ -33,7 +33,7 @@ This template defines dispatch structure only. Policy authority remains
 Existing / blocked worklines do not use this template:
 
 ```text
-Use WORKLINE_CONTINUATION_TEMPLATE_V1.1.
+Use WORKLINE_CONTINUATION_TEMPLATE_V1.2.
 Continue from CURRENT_PHASE.
 Do not restart audit.
 ```
@@ -224,7 +224,6 @@ CANONICAL_SERVER_SIDE_ACTION_FIRST = YES
 BROWSER_REQUIRED_ONLY_FOR_UI_ACCEPTANCE = YES
 DIRECT_DB_MUTATION_AS_ACTION_SUBSTITUTE = FORBIDDEN
 DEVELOPER_ACTION_ENTRYPOINT_MISSING = YES / NO / N/A
-DEVELOPER_CONSOLE_CAPABILITY_CHECK = <domain and registry result>
 DEVELOPER_CONSOLE_USED = YES / NO
 DEVELOPER_CONSOLE_COMMANDS = <exact commands or N/A>
 DEVELOPER_CONSOLE_GAP = <capability ID or NONE>
@@ -712,6 +711,25 @@ Project Last-Good or Single Runtime gates.
 
 ---
 
+## 10F. DEVELOPMENT_FLOW_EFFICIENCY_TRIGGER
+
+For a new formal capability or substantial change, record the applicable
+development path in this workline. Reuse existing evidence. For a routine
+bounded bug, mark irrelevant fields `N/A`. This is a planning and execution
+prompt, not a new document or Project Control approval gate. The policy is in
+`AGENTS.md`.
+
+```text
+END_TO_END_PREFLIGHT = PASS / GAP:<link and owner> / N/A
+DEVELOPER_CONSOLE_CAPABILITY_CHECK = <domain and registry result> / N/A
+OBSERVABILITY_READY = YES / GAP:<signal or entrypoint> / N/A
+ACCEPTANCE_DEFINED = YES / GAP:<proof path> / N/A
+CONTINUE_IN_PLACE_ELIGIBLE = YES / NO:<boundary> / N/A
+REPEATED_FRICTION = YES:<fix category> / NO
+```
+
+---
+
 ## 11. LAST_GOOD / CURRENT / FIRST_BROKEN_TRANSITION
 
 Regression / restore workline:
@@ -939,17 +957,17 @@ CONTEXT_BUDGET_VIOLATION =
 ## 19. VERSIONING
 
 ```text
-TEMPLATE = WORKLINE_DISPATCH_TEMPLATE_V1.1
+TEMPLATE = WORKLINE_DISPATCH_TEMPLATE_V1.2
 ```
 
 No silent semantic change. Future substantive change:
 
 ```text
-V1.2
+V1.3
 V2
 ```
 
 and the `AGENTS.md` reference must be updated in the same change.
 
-V1.1 supersedes V1 for new dispatches; existing V1 handoffs inherit the
+V1.2 supersedes V1.1 for new dispatches; existing handoffs inherit the
 current `AGENTS.md` policy.

@@ -1,4 +1,4 @@
-# WORKLINE_CONTINUATION_TEMPLATE_V1.1
+# WORKLINE_CONTINUATION_TEMPLATE_V1.2
 
 STATUS: CANONICAL
 
@@ -34,7 +34,7 @@ Short form:
 
 ```text
 For existing workline:
-Use WORKLINE_CONTINUATION_TEMPLATE_V1.1.
+Use WORKLINE_CONTINUATION_TEMPLATE_V1.2.
 Continue from CURRENT_PHASE.
 Do not restart audit.
 ```
@@ -169,7 +169,6 @@ acceptance remains required when the target is visible UI or Browser behavior.
 
 ```text
 DIAGNOSTIC_AUTHORITY_USED =
-DEVELOPER_CONSOLE_CAPABILITY_CHECK =
 DEVELOPER_CONSOLE_USED = YES / NO
 DEVELOPER_CONSOLE_COMMANDS =
 DEVELOPER_CONSOLE_GAP =
@@ -178,6 +177,24 @@ BROWSER_USED = YES / NO
 SERVER_SIDE_ACTION_USED = YES / NO
 DIRECT_DB_MUTATION_USED = NO
 DEVELOPER_ACTION_ENTRYPOINT_MISSING = YES / NO / N/A
+```
+
+---
+
+## 0C. DEVELOPMENT_FLOW_EFFICIENCY_CONTINUATION
+
+Inherit the original capability path and accepted evidence. Fill only the
+changed or missing links; a routine same-scope blocker continues in this
+window. Record `N/A` for unrelated links. Use the existing work context; this
+adds no document or approval. `AGENTS.md` remains policy authority.
+
+```text
+END_TO_END_PREFLIGHT = PASS / GAP:<link and owner> / N/A
+DEVELOPER_CONSOLE_CAPABILITY_CHECK = <domain and registry result> / N/A
+OBSERVABILITY_READY = YES / GAP:<signal or entrypoint> / N/A
+ACCEPTANCE_DEFINED = YES / GAP:<proof path> / N/A
+CONTINUE_IN_PLACE_ELIGIBLE = YES / NO:<boundary> / N/A
+REPEATED_FRICTION = YES:<fix category> / NO
 ```
 
 ---
@@ -833,17 +850,17 @@ PLAYER_FLOW_EQUIVALENCE
 ## 13. VERSIONING
 
 ```text
-TEMPLATE = WORKLINE_CONTINUATION_TEMPLATE_V1.1
+TEMPLATE = WORKLINE_CONTINUATION_TEMPLATE_V1.2
 ```
 
 No silent semantic change. Future substantive change:
 
 ```text
-V1.2
+V1.3
 V2
 ```
 
 and the `AGENTS.md` reference must be updated in the same change.
 
-V1.1 supersedes V1 for new continuations; existing V1 handoffs inherit the
+V1.2 supersedes V1.1 for new continuations; existing handoffs inherit the
 current `AGENTS.md` policy.
