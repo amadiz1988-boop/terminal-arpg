@@ -20,6 +20,7 @@ const digest = file => createHash('sha256').update(fs.readFileSync(file)).digest
 const fail = code => { throw Error(code); };
 const approvedAdditivePaths = new Map([
   ['LOCAL_DEVELOPER_ADMIN_ENTRYPOINT_ADDITIVE_MANIFEST_V1', 'ops/ro-stack/developer-admin-action.mjs'],
+  ['M1_SETTINGS_EXECUTOR_AND_TEST_FIXTURE_V1', 'ops/ro-stack/dashboard/self-recovery-skill-profile.mjs'],
 ]);
 const run = (cwd, command, args) => {
   const result = spawnSync(command, args, { cwd, encoding:'utf8', windowsHide:true, timeout:120000, maxBuffer:16*1024*1024 });

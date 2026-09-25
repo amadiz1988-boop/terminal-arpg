@@ -34,6 +34,8 @@ function test(name,change,expected) {
 test('valid staged promotion',()=>{});
 const additiveReason='LOCAL_DEVELOPER_ADMIN_ENTRYPOINT_ADDITIVE_MANIFEST_V1';
 const actionPath='ops/ro-stack/developer-admin-action.mjs';
+const m1Reason='M1_SETTINGS_EXECUTOR_AND_TEST_FIXTURE_V1';
+const m1Path='ops/ro-stack/dashboard/self-recovery-skill-profile.mjs';
 function deltaFixture() {
   const oldManifest={files:[{path:'ops/ro-stack/dashboard.mjs',sha256:'A'.repeat(64)},
     {path:'public/ro/client/manifest.json',sha256:'E'.repeat(64)}],removed_files:[]};
@@ -61,6 +63,23 @@ function addAction(x,path=actionPath) {
   assert.deepEqual(delta.rollback_remove_paths,[actionPath]);
   assert.deepEqual(delta.removed_paths,[]);
   console.log(`PASS ${++count} approved ABSENT addition has rollback REMOVE semantics`);
+}
+{
+  const x=deltaFixture();addAction(x,m1Path);
+  const delta=validateManifestDelta(x.oldManifest,x.nextManifest,m1Reason,true);
+  assert.deepEqual(delta.added_paths,[m1Path]);
+  assert.deepEqual(delta.rollback_remove_paths,[m1Path]);
+  console.log(`PASS ${++count} V15 executor addition has exact rollback REMOVE semantics`);
+}
+{
+  const x=deltaFixture();addAction(x,actionPath);
+  assert.throws(()=>validateManifestDelta(x.oldManifest,x.nextManifest,m1Reason,true),/WEB_MANIFEST_ADDITION_UNAPPROVED/);
+  console.log(`PASS ${++count} V15 reason rejects a different additive path`);
+}
+{
+  const x=deltaFixture();addAction(x,m1Path);addAction(x,'ops/ro-stack/dashboard/unrelated.mjs');
+  assert.throws(()=>validateManifestDelta(x.oldManifest,x.nextManifest,m1Reason,true),/WEB_MANIFEST_ADDITION_UNAPPROVED/);
+  console.log(`PASS ${++count} V15 reason rejects multiple additive paths`);
 }
 {
   const x=deltaFixture();addAction(x);
