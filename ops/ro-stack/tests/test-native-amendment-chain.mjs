@@ -8,6 +8,7 @@ import { HISTORICAL_NATIVE_AMENDMENT as old, M1_SECOND_NATIVE_AMENDMENT as polic
   M1_INVENTORY_PROJECTION_CORRECTION as projection,
   M1_FARM_WORLD_TELEPORT_SPAWN_CORRECTION as farmTeleport,
   M1_START_FARM_SUPPLY_CONTRACT_CORRECTION as startFarmSupply,
+  M1_AUTO_FARM_QUARANTINE_RECOVERY_CORRECTION as farmRecovery,
   validateNativeAmendmentHistory, validateHistoricalNativeAnchor, validateNextNativeAmendment,
   applyNextNativeAmendment, deployedNativeRuntimeMatches } from '../native-amendment-chain.mjs';
 import { retirementDecision } from '../native-candidate-amendment.mjs';
@@ -241,6 +242,15 @@ test('start farm supply contract amendment allows only schema and matrix', () =>
     'tools/pa-command-contract/contract-test-matrix.json',
   ]);
   assert.equal(startFarmSupply.sourcePaths.includes('src/map/persistent_agent.cpp'), false);
+});
+test('farm quarantine recovery amendment allows only failure and recovery source', () => {
+  assert.equal(farmRecovery.reason, 'M1_AUTO_FARM_QUARANTINE_RECOVERY_V1');
+  assert.deepEqual(farmRecovery.sourcePaths, [
+    'src/map/persistent_agent.cpp',
+    'src/map/persistent_agent_state.cpp',
+    'tools/pa-quarantine-idle-recovery/build-and-test.ps1',
+  ]);
+  assert.equal(farmRecovery.sourcePaths.includes('src/map/map.cpp'), false);
 });
 {
   const mapHash = 'A'.repeat(64);

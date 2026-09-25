@@ -82,10 +82,21 @@ export const M1_START_FARM_SUPPLY_CONTRACT_CORRECTION = Object.freeze({
     'tools/pa-command-contract/contract-test-matrix.json',
   ]),
 });
+// Live TEST_PLAYER acceptance exposed an ACCEPTED start_farm left behind by
+// the exact AUTO_FARM_START_CONFIRM_FAILED quarantine, blocking official recovery.
+export const M1_AUTO_FARM_QUARANTINE_RECOVERY_CORRECTION = Object.freeze({
+  reason: 'M1_AUTO_FARM_QUARANTINE_RECOVERY_V1',
+  scope: 'M1_AUTO_FARM_QUARANTINE_RECOVERY_V1',
+  sourcePaths: Object.freeze([
+    'src/map/persistent_agent.cpp',
+    'src/map/persistent_agent_state.cpp',
+    'tools/pa-quarantine-idle-recovery/build-and-test.ps1',
+  ]),
+});
 export const APPROVED_NATIVE_AMENDMENTS = Object.freeze([
   M1_SECOND_NATIVE_AMENDMENT, M1_INVENTORY_MAINTENANCE_NATIVE_AMENDMENT,
   M1_INVENTORY_PROJECTION_CORRECTION, M1_FARM_WORLD_TELEPORT_SPAWN_CORRECTION,
-  M1_START_FARM_SUPPLY_CONTRACT_CORRECTION,
+  M1_START_FARM_SUPPLY_CONTRACT_CORRECTION, M1_AUTO_FARM_QUARANTINE_RECOVERY_CORRECTION,
 ]);
 export const approvedNativeAmendment = reason =>
   APPROVED_NATIVE_AMENDMENTS.find(item => item.reason === reason) ?? null;
