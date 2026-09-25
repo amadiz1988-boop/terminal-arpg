@@ -1,3 +1,29 @@
+## Native canonical source authority cutover, 2026-09-26
+
+```text
+NATIVE_SOURCE_AUTHORITY: PRIVATE_GITHUB_MAIN
+CANONICAL_NATIVE_WORKING_ROOT: C:\Users\Administrator\source\ghost-island-rathena
+CANONICAL_NATIVE_BRANCH: main
+CANONICAL_NATIVE_HEAD_AT_CUTOVER: 1a2aa5532f9ec23ce9c976eac23fd1bfa6031cca
+CANONICAL_NATIVE_REMOTE: https://github.com/amadiz1988-boop/ghost-island-rathena.git
+LEGACY_NATIVE_ARCHIVE: C:\Users\Administrator\source\ghost-island-rathena-legacy-931cd598
+LEGACY_NATIVE_HEAD: 931cd598160e426908a733e389c3d20c6e7b25c6
+LEGACY_NATIVE_SOURCE_AUTHORITY: NO
+LEGACY_NATIVE_CLASSIFICATION: HISTORICAL_EVIDENCE / READ_ONLY
+CUTOVER_METHOD: PRESERVE_AND_RECLONE
+UNRELATED_HISTORY_MERGED: NO
+```
+
+Native source work starts from the private GitHub `main` lineage at the canonical
+working root. A later HEAD is valid only when it descends from the cutover SHA
+and equals the current authenticated GitHub `main`. The legacy archive is
+historical evidence only; use exact-file and exact-symbol evidence before
+porting a missing behavior as a new commit on GitHub `main`. Keep the archive
+and its linked worktrees intact. The archive's working files are read-only by
+policy; its shared Git metadata remains available to those historical
+worktrees. Cutover evidence and F handoff:
+`docs/project-control/native-canonical-source-authority-cutover-v1.md`.
+
 ## GitHub canonical authority V6, 2026-09-24
 
 SAFE_CANONICAL_GITHUB_RECONSTRUCTION_V6 supersedes older local source-authority
@@ -145,8 +171,9 @@ HISTORICAL_TMP_WORKTREE_IMPLEMENTATION: FORBIDDEN
 CANONICAL_NATIVE_SOURCE:
 C:\Users\Administrator\source\ghost-island-rathena
 
-The Persistent Agent native implementation is owned by that canonical rAthena
-source tree. No `.tmp-*` worktree is source authority for native PA code.
+The Persistent Agent native implementation is owned by the private GitHub
+`main` lineage checked out at that canonical rAthena source tree. No `.tmp-*`
+worktree or archived local bundle history is source authority for native PA code.
 
 The `.tmp-p2d-pa-equipment-action-v1` lineage below is retained ONLY as
 `HISTORICAL_EVIDENCE` / `LAST_GOOD_LINEAGE`; it is NOT `SOURCE_OF_TRUTH`, NOT
