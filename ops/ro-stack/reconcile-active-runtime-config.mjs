@@ -30,7 +30,7 @@ export const m1Policy = Object.freeze({
   web_sha: 'f90287a35c454dcae38f7d91b14d8658856c9093',
   old_config_sha256: 'CC4E1158991D54833D7E44A583DA8C7D7248A6AE205F87475F55BD81416E4B45',
   source_config_sha256: '42B406C3724E4B55FF7E03065A09007F4EAF6CF2E2F854A32CB3FF45F0756F95',
-  dashboard_launcher_sha256: '4B4210C60BDEED8AE64A54E714AF582296FA0F3D3FBD9EA3A014C4C7C6C54E2C',
+  dashboard_launcher_sha256: 'DC63578870F8B3245AC1A3FC1DB9D38C2EF30FE7912FE212676EF80F5F7A34B3',
   changes: Object.freeze(['PersistentAgentM1SupplyEnabled', 'WebNativeSupplyPolicyEnabled', 'WebM1AcceptanceFixtureEnabled']),
   out_of_scope_source_variance: Object.freeze(['PersistentAgentServiceMapAllowlist', 'PersistentAgentServiceNpcAllowlist'])
 });
