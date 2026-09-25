@@ -33,6 +33,7 @@ try{
  const sourceAssets=JSON.parse(fs.readFileSync(path.join(sourceRoot,'docs/project-control/web-runtime-assets-manifest-v1.json'),'utf8'));
  const sourceSet=expectedPayload(sourceRoot,git(sourceRoot,'rev-parse','HEAD'),sourceAssets,{audit:true});
  test('developer Admin action exact path is required',()=>assert.ok(sourceSet.paths.includes('ops/ro-stack/developer-admin-action.mjs')));
+ test('Dashboard launcher exact path is required',()=>assert.ok(sourceSet.paths.includes('ops/ro-stack/dashboard-service.ps1')));
  test('unrelated ops script is not automatically admitted',()=>assert.ok(!sourceSet.paths.includes('ops/ro-stack/amend-active-web-candidate.mjs')));
  const action=fixture(2),actionPath='ops/ro-stack/developer-admin-action.mjs';
  const actionSource=write(path.join(action.candidate,actionPath),'export const action=true;');

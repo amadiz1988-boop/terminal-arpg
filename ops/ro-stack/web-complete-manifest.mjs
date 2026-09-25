@@ -25,7 +25,7 @@ export function safeRelative(p){
 }
 export function webPath(p){
   safeRelative(p);
-  fail(/^(?:ops\/ro-stack\/(?:[A-Za-z0-9_-]+\.mjs|dashboard\/assets\/.+\.(?:png|jpg|jpeg|gif|webp|svg|wav|mp3|ogg|bmp|bin|gz|woff2?)|(?:dashboard|persistent-agent|web-experience|quest-runtime)\/.+\.(?:mjs|js|json|css|html))|public\/ro\/.+\.(?:json|png|jpg|jpeg|gif|webp|svg|wav|mp3|ogg|bmp|bin|gz|woff2?)|docs\/ro-asset-index\/.+\.json|docs\/ro-floor-theme-asset-index\.json|docs\/project-control\/canonical-test-fixtures\.json)$/.test(p),'UNAUTHORIZED_WEB_PATH');
+  fail(/^(?:ops\/ro-stack\/(?:[A-Za-z0-9_-]+\.mjs|dashboard-service\.ps1|dashboard\/assets\/.+\.(?:png|jpg|jpeg|gif|webp|svg|wav|mp3|ogg|bmp|bin|gz|woff2?)|(?:dashboard|persistent-agent|web-experience|quest-runtime)\/.+\.(?:mjs|js|json|css|html))|public\/ro\/.+\.(?:json|png|jpg|jpeg|gif|webp|svg|wav|mp3|ogg|bmp|bin|gz|woff2?)|docs\/ro-asset-index\/.+\.json|docs\/ro-floor-theme-asset-index\.json|docs\/project-control\/canonical-test-fixtures\.json)$/.test(p),'UNAUTHORIZED_WEB_PATH');
   return p;
 }
 export function validateAuthority(m,authority){
@@ -72,7 +72,7 @@ export function expectedPayload(candidateRoot,sha,assetManifest,{audit=false}={}
   const tracked=new Set(git(candidateRoot,'ls-tree','-r','--name-only',sha,'--','ops/ro-stack','public/ro','docs').split('\n').filter(Boolean));
   const assets=new Map(assetManifest.assets.map(x=>[x.relative_path,x]));
   const wanted=new Set([...tracked].filter(p=>!/(?:^|\/)(?:tests?|poc)(?:[-./]|$)/i.test(p)).filter(p=>/^(ops\/ro-stack\/(dashboard\/)|public\/ro\/|docs\/ro-asset-index\/)/.test(p) ||
-    ['ops/ro-stack/dashboard.mjs','ops/ro-stack/developer-admin-action.mjs','docs/ro-floor-theme-asset-index.json','docs/project-control/canonical-test-fixtures.json'].includes(p)));
+    ['ops/ro-stack/dashboard.mjs','ops/ro-stack/dashboard-service.ps1','ops/ro-stack/developer-admin-action.mjs','docs/ro-floor-theme-asset-index.json','docs/project-control/canonical-test-fixtures.json'].includes(p)));
   for(const p of assets.keys())wanted.add(p);
   // Closure discovery reads only the canonical candidate, never Production.
   const closure=runtimeClosure({files:[...wanted].map(path=>({path}))},candidateRoot,candidateRoot,true);

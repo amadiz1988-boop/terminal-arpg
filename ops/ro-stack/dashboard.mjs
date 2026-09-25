@@ -10,7 +10,7 @@ import {
 import { execFile } from 'node:child_process';
 import { createOpsControlPlane } from './ops-control-plane.mjs';
 import { createDashboardDatabase } from './dashboard-db.mjs';
-import { createTestFixtureCommandTransport, createM1AcceptanceFixtureTransport } from './test-fixture-command.mjs';
+import { createTestFixtureCommandTransport, createM1AcceptanceFixtureTransport, fixtureTransportEnabled } from './test-fixture-command.mjs';
 import { createAdminQuarantineRecoveryTransport, AdminRecoveryError } from './dashboard/admin-quarantine-recovery.mjs';
 import { createExternalIdentityStore } from './account-external-identity.mjs';
 import {
@@ -10147,7 +10147,7 @@ async function handleAdminTestFixtureCommand(url, request, response) {
     json(response, 405, { error: 'method_not_allowed' });
     return true;
   }
-  if ((isSubmit || isM1Submit) && process.env.RO_TEST_FIXTURE_COMMANDS_ENABLED !== '1') {
+  if (!fixtureTransportEnabled((isM1Submit || m1ResultMatch) ? 'M1_ACCEPTANCE' : 'GENERIC')) {
     json(response, 503, { error: 'fixture_transport_disabled' });
     return true;
   }

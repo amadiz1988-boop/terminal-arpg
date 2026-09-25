@@ -7,6 +7,12 @@ const commandIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-
 const requestFields = new Set(['fixtureRole', 'command', 'arguments', 'requestId']);
 const fixtureRoles = new Set(['TEST_SUPERUSER', 'TEST_PLAYER']);
 
+export function fixtureTransportEnabled(kind, environment = process.env) {
+  if (kind === 'M1_ACCEPTANCE') return environment.RO_M1_ACCEPTANCE_FIXTURE_ENABLED === '1';
+  if (kind === 'GENERIC') return environment.RO_TEST_FIXTURE_COMMANDS_ENABLED === '1';
+  return false;
+}
+
 export function resolveCanonicalTestFixture(registry, role) {
   if (!fixtureRoles.has(role))
     return { ok: false, status: 403, error: 'fixture_identity_rejected' };
