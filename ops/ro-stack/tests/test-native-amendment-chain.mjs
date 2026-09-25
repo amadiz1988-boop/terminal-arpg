@@ -7,6 +7,7 @@ import { HISTORICAL_NATIVE_AMENDMENT as old, M1_SECOND_NATIVE_AMENDMENT as polic
   M1_INVENTORY_MAINTENANCE_NATIVE_AMENDMENT as inventory,
   M1_INVENTORY_PROJECTION_CORRECTION as projection,
   M1_FARM_WORLD_TELEPORT_SPAWN_CORRECTION as farmTeleport,
+  M1_START_FARM_SUPPLY_CONTRACT_CORRECTION as startFarmSupply,
   validateNativeAmendmentHistory, validateHistoricalNativeAnchor, validateNextNativeAmendment,
   applyNextNativeAmendment, deployedNativeRuntimeMatches } from '../native-amendment-chain.mjs';
 import { retirementDecision } from '../native-candidate-amendment.mjs';
@@ -232,6 +233,14 @@ test('farm teleport amendment allows only its exact contract and spawn files', (
     'tools/pa-command-contract/Test-M1CanonicalSource.ps1',
   ]);
   assert.equal(farmTeleport.sourcePaths.includes('src/map/map.cpp'), false);
+});
+test('start farm supply contract amendment allows only schema and matrix', () => {
+  assert.equal(startFarmSupply.reason, 'M1_START_FARM_SUPPLY_POLICY_CONTRACT_ALIGNMENT_V1');
+  assert.deepEqual(startFarmSupply.sourcePaths, [
+    'conf/persistent_agent_commands.json',
+    'tools/pa-command-contract/contract-test-matrix.json',
+  ]);
+  assert.equal(startFarmSupply.sourcePaths.includes('src/map/persistent_agent.cpp'), false);
 });
 {
   const mapHash = 'A'.repeat(64);
