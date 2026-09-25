@@ -311,6 +311,7 @@ export function applyNativeAmendment(plan, { governanceSha, now = new Date(), po
 // PHASES 6/7: the only forced termination path. Eligible solely for the
 // known-buggy pre-fix map that is still alive in its known hang state.
 export function retirementDecision(x, policy = AMENDMENT) {
+  if (policy.no_force_retirement === true) return { eligible: false, reason: 'NATIVE_V2_FORCE_RETIREMENT_FORBIDDEN' };
   if (!x.leaseOk) return { eligible: false, reason: 'FORCE_RETIRE_LEASE_MISMATCH' };
   if (x.deployedNativeSha === policy.new_sha) return { eligible: false, reason: 'FORCE_RETIRE_HEALTHY_NEW_NATIVE' };
   if (x.deployedNativeSha !== policy.old_sha || !equalHash(x.liveMapSha256, x.expectedOldMapSha256)) return { eligible: false, reason: 'FORCE_RETIRE_WRONG_SHA' };

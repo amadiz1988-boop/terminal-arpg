@@ -1,5 +1,10 @@
 # 目前狀態
 
+## 2026-09-25 M1 首次推廣 Native 候選鏈來源治理
+
+- 同一份首次推廣 lease 的 Native 第二次修訂已建立鏈式准入工具與隔離測試。歷史 shutdown-race 修訂以原收據雜湊固定；後續修訂驗證目前部署候選、GitHub 來源、核准原因、受限差異、直接測試、前一候選 rollback 與單一 runtime。第二次修訂的候選來源、部署與最終驗收仍未完成。
+- Production 僅接受唯讀歷史鏈檢查，沒有因本項來源治理而變更檔案、角色狀態或重啟服務。
+
 ## 2026-09-24 Web Runtime 私有素材套件
 
 - 已建立本機私有套件 `ghost-island-web-runtime-assets-v1`，其 3,267 個必要素材均通過大小與 SHA-256 驗證；套件與清單雜湊固定於 `docs/project-control/web-runtime-asset-package-lock-v1.json`。來源與限制見 `docs/project-control/web-runtime-private-asset-package-v1.md`。
