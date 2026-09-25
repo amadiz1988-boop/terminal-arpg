@@ -59,3 +59,10 @@ schema step uses `ops/ro-stack/apply-live-status-inventory-migration.mjs`
 (dry run, explicit apply, tracked-statement exactness, receipt, rollback
 statement). Native amendment reason `M1_INVENTORY_MAINTENANCE_V1` is an
 approved chain entry limited to six Native files.
+
+Live six-field inspection after deploying `0914b855` found all 22 idle rows
+had `supply_required=0` with `supply_reason=SUPPLY_POLICY_UNAVAILABLE`.
+The pinned contract requires an empty reason when no consumable shortage exists.
+Native `fe57cf945e77e5e4d132e7d3228535adb47420fe` changes only that
+projection and its source contract test. The correction uses the same lease,
+an appended immutable amendment and the deployed `0914b855` rollback receipt.

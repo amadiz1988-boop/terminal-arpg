@@ -5,6 +5,7 @@ import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { HISTORICAL_NATIVE_AMENDMENT as old, M1_SECOND_NATIVE_AMENDMENT as policy,
   M1_INVENTORY_MAINTENANCE_NATIVE_AMENDMENT as inventory,
+  M1_INVENTORY_PROJECTION_CORRECTION as projection,
   validateNativeAmendmentHistory, validateHistoricalNativeAnchor, validateNextNativeAmendment,
   applyNextNativeAmendment, deployedNativeRuntimeMatches } from '../native-amendment-chain.mjs';
 import { retirementDecision } from '../native-candidate-amendment.mjs';
@@ -188,6 +189,38 @@ test('inventory-maintenance amendment rejects files outside its scope', x => {
   const { thirdInput } = thirdInputFor(x, inventory.reason,
     ['src/map/persistent_agent.cpp', 'conf/persistent_agent_commands.json']);
   assert.throws(() => validateNextNativeAmendment(x.root, thirdInput), /NATIVE_AMENDMENT_DIFF_OUT_OF_SCOPE/);
+});
+test('fourth projection correction requires the deployed inventory candidate', x => {
+  const { thirdInput, thirdFile } = thirdInputFor(x, inventory.reason,
+    ['src/map/persistent_agent.cpp']);
+  const thirdPlan = { input: thirdInput, candidateManifestPath: thirdFile,
+    currentHashes: Object.fromEntries(Object.entries(x.files).map(([k, v]) => [k, hash(fs.readFileSync(v))])) };
+  applyNextNativeAmendment(x.root, thirdPlan);
+  const lease = JSON.parse(fs.readFileSync(x.files.lease));
+  const pending = JSON.parse(fs.readFileSync(x.files.pending));
+  const manifest = { native_git_sha: '5'.repeat(40), amendment_of: {
+    native_git_sha: third, reason: projection.reason,
+    candidate_manifest_sha256: thirdInput.candidateManifestSha256 },
+    rollback_reference: { intermediate_rollback: { native_git_sha: third } } };
+  const fourthFile = x.put('build/fourth.json', manifest);
+  const fourthInput = { ...thirdInput, lease, pending, previousSha: third,
+    newSha: manifest.native_git_sha, reason: projection.reason, scope: projection.scope,
+    sourceDiff: { scope: projection.scope, files: projection.sourcePaths },
+    candidateManifest: manifest, candidateManifestSha256: hash(fs.readFileSync(fourthFile)) };
+  assert.throws(() => validateNextNativeAmendment(x.root, fourthInput),
+    /PREVIOUS_NATIVE_CANDIDATE_MISMATCH/);
+  const deployed = x.nativeReceipt(third, third.slice(0, 12), 'third',
+    thirdInput.candidateManifestSha256);
+  lease.active_native_candidate = { ...lease.active_native_candidate, deployed: true,
+    deploy_receipt: deployed.path };
+  pending.active_native_candidate = lease.active_native_candidate;
+  lease.native_deploy_git_sha = third;
+  lease.native_candidate_manifest_sha256 = thirdInput.candidateManifestSha256;
+  pending.native_git_sha = third;
+  pending.native_receipt_path = deployed.path;
+  pending.native_receipt_sha256 = deployed.sha256;
+  fourthInput.previousReceiptSha256 = deployed.sha256;
+  assert.equal(validateNextNativeAmendment(x.root, fourthInput).history.length, 3);
 });
 {
   const mapHash = 'A'.repeat(64);

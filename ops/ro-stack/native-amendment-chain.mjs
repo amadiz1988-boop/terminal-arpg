@@ -52,8 +52,19 @@ export const M1_INVENTORY_MAINTENANCE_NATIVE_AMENDMENT = Object.freeze({
     'tools/pa-command-contract/Test-M1CanonicalSource.ps1',
   ]),
 });
+// Live six-field acceptance found a non-shortage reason in idle rows. Correct
+// only the projection under the same lease and immutable amendment chain.
+export const M1_INVENTORY_PROJECTION_CORRECTION = Object.freeze({
+  reason: 'M1_INVENTORY_MAINTENANCE_PROJECTION_CORRECTION_V1',
+  scope: 'M1_INVENTORY_MAINTENANCE_PROJECTION_CORRECTION_V1',
+  sourcePaths: Object.freeze([
+    'src/map/persistent_agent.cpp',
+    'tools/pa-command-contract/Test-M1CanonicalSource.ps1',
+  ]),
+});
 export const APPROVED_NATIVE_AMENDMENTS = Object.freeze([
   M1_SECOND_NATIVE_AMENDMENT, M1_INVENTORY_MAINTENANCE_NATIVE_AMENDMENT,
+  M1_INVENTORY_PROJECTION_CORRECTION,
 ]);
 export const approvedNativeAmendment = reason =>
   APPROVED_NATIVE_AMENDMENTS.find(item => item.reason === reason) ?? null;
