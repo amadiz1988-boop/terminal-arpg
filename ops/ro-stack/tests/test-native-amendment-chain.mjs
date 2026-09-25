@@ -9,6 +9,7 @@ import { HISTORICAL_NATIVE_AMENDMENT as old, M1_SECOND_NATIVE_AMENDMENT as polic
   M1_FARM_WORLD_TELEPORT_SPAWN_CORRECTION as farmTeleport,
   M1_START_FARM_SUPPLY_CONTRACT_CORRECTION as startFarmSupply,
   M1_AUTO_FARM_QUARANTINE_RECOVERY_CORRECTION as farmRecovery,
+  M1_DORMANT_QUARANTINE_RUNTIME_CORRECTION as dormantRecovery,
   validateNativeAmendmentHistory, validateHistoricalNativeAnchor, validateNextNativeAmendment,
   applyNextNativeAmendment, deployedNativeRuntimeMatches } from '../native-amendment-chain.mjs';
 import { retirementDecision } from '../native-candidate-amendment.mjs';
@@ -251,6 +252,14 @@ test('farm quarantine recovery amendment allows only failure and recovery source
     'tools/pa-quarantine-idle-recovery/build-and-test.ps1',
   ]);
   assert.equal(farmRecovery.sourcePaths.includes('src/map/map.cpp'), false);
+});
+test('dormant quarantine runtime amendment excludes unrelated native source', () => {
+  assert.equal(dormantRecovery.reason, 'M1_DORMANT_QUARANTINE_RUNTIME_RELEASE_V1');
+  assert.deepEqual(dormantRecovery.sourcePaths, [
+    'src/map/persistent_agent.cpp',
+    'tools/pa-quarantine-idle-recovery/build-and-test.ps1',
+  ]);
+  assert.equal(dormantRecovery.sourcePaths.includes('src/map/map.cpp'), false);
 });
 {
   const mapHash = 'A'.repeat(64);
