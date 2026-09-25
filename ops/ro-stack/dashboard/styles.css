@@ -3314,26 +3314,20 @@ html {
 .config-editor {
   padding: 8px;
 }
-.config-editor-header,
 .config-editor-actions {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
 }
-.config-editor-header h3,
 .config-panel h4,
 .config-group h5 {
   margin: 0;
 }
-.config-editor-header h3 {
-  color: #234765;
-  font-size: 16px;
-}
 .config-editor-status {
   color: #53616b;
   font-size: 12px;
-  text-align: right;
+  text-align: left;
 }
 .config-tabs {
   display: grid;
@@ -4884,7 +4878,7 @@ html {
   display: none !important;
 }
 .config-setting-tabs {
-  margin-top: 8px;
+  margin-top: 0;
 }
 /* 掛機 toolbar: 監控/設定 on the left, hunting actions on the right. */
 .hunt-toolbar {
@@ -4948,5 +4942,18 @@ html {
   .ro-subtabs button {
     min-width: 48px;
     padding: 4px 6px;
+  }
+  /* Eight setting categories as a 4x2 grid: no sideways scrolling. */
+  .config-setting-tabs {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    overflow: visible;
+  }
+  .config-setting-tabs button {
+    min-width: 0;
+    padding: 4px 2px;
+  }
+  .config-setting-tabs button:nth-child(n + 5) {
+    border-top: 1px solid #91a0aa;
   }
 }

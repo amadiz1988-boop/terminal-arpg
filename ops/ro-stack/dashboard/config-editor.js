@@ -188,20 +188,7 @@ function makeArrayEditor(root, state, descriptor, render, capability) {
 
 function render(root, state, context) {
   root.replaceChildren();
-  const header = document.createElement('div');
-  header.className = 'config-editor-header';
-  const heading = document.createElement('h3');
-  heading.textContent = '角色設定中心';
-  const status = document.createElement('span');
-  status.className = 'config-editor-status';
-  status.textContent = context.status;
-  header.append(heading, status);
-  root.append(header);
   const counts = configCapabilityCounts(context.execution);
-  const capabilityNote = document.createElement('p');
-  capabilityNote.className = 'config-editor-status';
-  capabilityNote.textContent = `可設定 ${counts.SUPPORTED} 項；待支援 ${counts.PARTIAL} 項；尚未開放 ${counts.UNAVAILABLE} 項。停用欄位不會送出變更。`;
-  root.append(capabilityNote);
   // One tab per setting category; all panels stay in the DOM so values and
   // unsaved edits survive switching.
   const activeTab = CONFIG_SETTING_TABS.some((tab) => tab.id === root.dataset.settingTab)
@@ -303,15 +290,22 @@ function render(root, state, context) {
   }
   const actions = document.createElement('div');
   actions.className = 'controls config-editor-actions';
+  // Load/save feedback sits beside the save button; the idle "loaded" state is silent.
+  const status = document.createElement('span');
+  status.className = 'config-editor-status';
+  status.setAttribute('aria-live', 'polite');
+  status.textContent = context.status === CONFIG_LOADED_STATUS ? '' : context.status;
   const save = document.createElement('button');
   save.type = 'button';
   save.className = 'primary';
   save.textContent = context.saving ? '保存中…' : '保存角色設定';
   save.disabled = context.saving || counts.SUPPORTED === 0;
   save.addEventListener('click', () => { if (counts.SUPPORTED > 0) context.save(state); });
-  actions.append(save);
+  actions.append(status, save);
   root.append(actions);
 }
+
+const CONFIG_LOADED_STATUS = '設定已讀取';
 
 async function mount(root) {
   if (!root || root.dataset.configEditorMounted === '1') return;
@@ -326,7 +320,7 @@ async function mount(root) {
     state = payload.config;
     context.migration = payload.migration;
     context.execution = payload.execution;
-    context.status = payload.source === 'migrated' ? '已完成舊設定遷移，請檢查後保存' : '設定已讀取';
+    context.status = payload.source === 'migrated' ? '已完成舊設定遷移，請檢查後保存' : CONFIG_LOADED_STATUS;
     context.save = async () => {
       const errors = validateCanonicalConfig(state);
       if (errors.length) { context.status = `設定錯誤：${errors[0].message}`; render(root, state, context); return; }
