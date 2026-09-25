@@ -635,6 +635,29 @@ reproducible state, Browser final acceptance or Git hygiene.
 
 ---
 
+## 10C.2. OPENKORE_CAPABILITY_LAYER_TRIGGER
+
+When a workline touches a mature OpenKore or reference capability family, or
+relies on a GI override or disabled feature, classify each layer separately.
+Each value is `ALIGNED / PARTIAL / MISSING / GI_EXPLICIT_OVERRIDE /
+NOT_APPLICABLE / NOT_IMPLEMENTED_PRODUCT`. A disabled action never disables
+state, trigger or maintenance by inference. Mark `N/A` when no capability
+family is involved. This adds no approval step; the policy is
+`OPENKORE_CAPABILITY_LAYERING_POLICY_V1` in `AGENTS.md`.
+
+```text
+CAPABILITY_LAYER_CHECK = PASS / GAP:<layer> / N/A
+STATE_LAYER =
+TRIGGER_LAYER =
+ACTION_LAYER =
+MAINTENANCE_LAYER =
+RESUME_LAYER =
+DEPENDENCY_REAUDIT_REQUIRED = YES / NO
+CAPABILITY_LIFECYCLE_GAP = YES:<transition> / NO / N/A
+```
+
+---
+
 ## 10D. SYNTHETIC_FIRST_DEBUGGING_GATE_V1
 
 For a runtime or control-flow workline involving Web, Dashboard API, Auth,
@@ -921,10 +944,19 @@ MATURE_UI_CONFIG_REVIEWED
 DELTA_REFERENCE_AUDIT_REQUIRED
 MATURE_CAPABILITY_LOSS
 RESULT_EQUIVALENT_OR_BETTER
+CAPABILITY_LAYER_CHECK
+STATE_LAYER
+TRIGGER_LAYER
+ACTION_LAYER
+MAINTENANCE_LAYER
+RESUME_LAYER
+DEPENDENCY_REAUDIT_REQUIRED
+CAPABILITY_LIFECYCLE_GAP
 ```
 
 PASS requires `MATURE_CAPABILITY_LOSS = NONE`,
-`RESULT_EQUIVALENT_OR_BETTER = PASS` and no `UNKNOWN` applicable value.
+`RESULT_EQUIVALENT_OR_BETTER = PASS`, no `UNKNOWN` applicable value and no
+unclassified capability layer.
 
 No chat-style retrospective.
 
@@ -971,3 +1003,6 @@ and the `AGENTS.md` reference must be updated in the same change.
 
 V1.2 supersedes V1.1 for new dispatches; existing handoffs inherit the
 current `AGENTS.md` policy.
+
+V1.2 amendment 2026-09-25 adds section 10C.2 and its report fields for
+`OPENKORE_CAPABILITY_LAYERING_POLICY_V1`.
