@@ -11,7 +11,7 @@
     "repository": "https://github.com/amadiz1988-boop/ghost-island-rathena.git",
     "github_repository": "https://github.com/amadiz1988-boop/ghost-island-rathena.git",
     "release_ref": "refs/heads/main",
-    "accepted_source_sha": "f77df6251c1b5793a85ae2b313228f1e36a609a9",
+    "accepted_source_sha": "3678ed862a6562ed17d24557ff0a55b297b57740",
     "private_required": true,
     "candidate_history": [
       {
@@ -164,6 +164,14 @@
       "lease_id": "869f1725-dbd0-452d-b9dd-37ee79cc3f9a",
       "candidate_successor": "f77df6251c1b5793a85ae2b313228f1e36a609a9",
       "reason": "M1_DEATH_RETURN_SESSION_LIFETIME_RECOVERY_V1",
+      "status": "SOURCE_APPROVED_DEPLOY_PENDING"
+    },
+    {
+      "native_git_sha": "f77df6251c1b5793a85ae2b313228f1e36a609a9",
+      "disposition": "DEPLOYED_NATIVE_PREDECESSOR",
+      "lease_id": "869f1725-dbd0-452d-b9dd-37ee79cc3f9a",
+      "candidate_successor": "3678ed862a6562ed17d24557ff0a55b297b57740",
+      "reason": "M1_MOROCC_NOOP_DEATH_MAINTENANCE_V1",
       "status": "SOURCE_APPROVED_DEPLOY_PENDING"
     }
     ]

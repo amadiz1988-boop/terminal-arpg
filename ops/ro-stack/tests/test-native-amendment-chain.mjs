@@ -21,6 +21,7 @@ import { HISTORICAL_NATIVE_AMENDMENT as old, M1_SECOND_NATIVE_AMENDMENT as polic
   KAFRA_SAVE_NATIVE_TOWN_TRAVEL_AMENDMENT as kafraSave,
   ORIGINAL_HUNTING_LABEL_NATIVE_ADMISSION_AMENDMENT as huntingAdmission,
   M1_DEATH_RETURN_SESSION_LIFETIME_RECOVERY_AMENDMENT as incidentRecovery,
+  M1_MOROCC_NOOP_DEATH_MAINTENANCE_AMENDMENT as moroccNoop,
   validateNativeAmendmentHistory, validateHistoricalNativeAnchor, validateNextNativeAmendment,
   applyNextNativeAmendment, deployedNativeRuntimeMatches } from '../native-amendment-chain.mjs';
 import { retirementDecision } from '../native-candidate-amendment.mjs';
@@ -385,6 +386,16 @@ test('incident recovery amendment admits only the f77 five-file diff', () => {
     'tools/pa-reconnect-live-status/test-reconnect-live-status.ps1',
   ]);
   assert.equal(incidentRecovery.sourcePaths.includes('src/map/pc.cpp'), false);
+});
+test('Morocc no-op death maintenance admits only the reviewed four-file diff', () => {
+  assert.equal(moroccNoop.reason, 'M1_MOROCC_NOOP_DEATH_MAINTENANCE_V1');
+  assert.deepEqual(moroccNoop.sourcePaths, [
+    'src/map/persistent_agent.cpp',
+    'src/map/persistent_agent_m1_supply_policy.hpp',
+    'tools/pa-command-contract/Test-M1DeathMaintenanceSource.ps1',
+    'tools/pa-command-contract/test-m1-supply-policy.cpp',
+  ]);
+  assert.equal(moroccNoop.sourcePaths.includes('conf/persistent_agent_commands.json'), false);
 });
 {
   const mapHash = 'A'.repeat(64);
