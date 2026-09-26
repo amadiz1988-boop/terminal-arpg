@@ -370,7 +370,9 @@ SHA amendment chain, the deployed receipt and all current Production bytes. The
 new manifest uses that deployed receipt's file hashes as rollback preimages;
 the superseded candidate's un-deployed bytes cannot stand in for Production.
 The old and new candidate path sets must be preserved apart from an explicitly
-approved, absent-preimage additive pair. This does not start or replace Native.
+approved, absent-preimage additive pair. Later pending revisions must retain
+ABSENT preimages and rollback removal for those still un-deployed files. This
+does not start or replace Native.
 
 The action keeps the lease ID and Native stage, advances the lease and pending
 Web SHA together, and writes an immutable amendment audit receipt. The old Web

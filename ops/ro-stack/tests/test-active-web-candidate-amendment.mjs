@@ -141,6 +141,22 @@ function adoptLauncher(x,path=legacyLauncherPathFixture,hash=launcherPreimage) {
   console.log(`PASS ${++count} superseded candidate bytes cannot stand in for deployed preimages`);
 }
 {
+  const x=deltaFixture();for(const path of worldMapPaths)addAction(x,path);
+  const pending=structuredClone(x.nextManifest);
+  const delta=validateManifestDelta(pending,x.nextManifest,'WEB_PENDING_CHAIN_CLOSURE',true,x.oldManifest);
+  assert.deepEqual(delta.added_paths,[]);
+  assert.deepEqual(delta.absent_preimage_paths,worldMapPaths);
+  assert.deepEqual(delta.rollback_remove_paths,worldMapPaths);
+  console.log(`PASS ${++count} inherited un-deployed files retain ABSENT rollback preimages`);
+}
+{
+  const x=deltaFixture();for(const path of worldMapPaths)addAction(x,path);
+  const pending=structuredClone(x.nextManifest);
+  x.nextManifest.files.at(-1).production_preimage_sha256='F'.repeat(64);
+  assert.throws(()=>validateManifestDelta(pending,x.nextManifest,'WEB_PENDING_CHAIN_CLOSURE',true,x.oldManifest),/UNDEPLOYED_WEB_PATH_PREIMAGE_MISMATCH/);
+  console.log(`PASS ${++count} un-deployed file cannot claim an existing Production preimage`);
+}
+{
   const x=deltaFixture();addAction(x,worldMapPaths[0]);
   assert.throws(()=>validateManifestDelta(x.oldManifest,x.nextManifest,worldMapReason,true),/WEB_MANIFEST_ADDITION_UNAPPROVED/);
   console.log(`PASS ${++count} incomplete World Map source pair rejected`);

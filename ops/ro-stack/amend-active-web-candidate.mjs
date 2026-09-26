@@ -96,15 +96,23 @@ export function validateManifestDelta(oldManifest, nextManifest, reason, rollbac
   const deployedRows=new Map(deployedManifest.files.map(row=>[row.path,row]));
   if (oldRows.size!==oldManifest.files.length || nextRows.size!==nextManifest.files.length)
     fail('MANIFEST_DELTA_DUPLICATE_PATH');
-  if (deployedRows.size!==oldRows.size || [...oldRows.keys()].some(path=>!deployedRows.has(path)))
+  if (deployedRows.size>oldRows.size || [...deployedRows.keys()].some(path=>!oldRows.has(path)))
     fail('PRODUCTION_BASELINE_PATH_MISMATCH');
   const delta={unchanged_paths:[],modified_existing_paths:[],added_paths:[],removed_paths:[],
     absent_preimage_paths:[],rollback_remove_paths:[],rollback_restore_paths:[]};
   for (const [path,oldRow] of oldRows) {
     const nextRow=nextRows.get(path);
     if (!nextRow) { delta.removed_paths.push(path); continue; }
-    if (!equalHash(nextRow.production_preimage_sha256,deployedRows.get(path).sha256) || nextRow.production_preimage==='ABSENT')
-      fail(`EXISTING_WEB_PREIMAGE_MISMATCH:${path}`);
+    const deployed=deployedRows.get(path);
+    if (deployed) {
+      if (!equalHash(nextRow.production_preimage_sha256,deployed.sha256) || nextRow.production_preimage==='ABSENT')
+        fail(`EXISTING_WEB_PREIMAGE_MISMATCH:${path}`);
+    } else {
+      if (nextRow.production_preimage!=='ABSENT' || nextRow.production_preimage_sha256)
+        fail(`UNDEPLOYED_WEB_PATH_PREIMAGE_MISMATCH:${path}`);
+      delta.absent_preimage_paths.push(path);
+      delta.rollback_remove_paths.push(path);
+    }
     (equalHash(nextRow.sha256,oldRow.sha256) ? delta.unchanged_paths : delta.modified_existing_paths).push(path);
   }
   if (delta.removed_paths.length || nextManifest.removed_files?.length) fail('WEB_MANIFEST_REMOVAL_UNAPPROVED');
@@ -184,12 +192,22 @@ export function planActiveWebAmendment({root,owner,leaseId,oldSha,newSha,newMani
       !fs.existsSync(deployedManifestFile) ||
       !equalHash(digest(deployedManifestFile),oldReceipt.manifest_sha256)) fail('OLD_WEB_MANIFEST_INVALID');
   const pendingCandidateAfterAmendment=oldReceipt.web_git_sha!==oldSha;
-  const previous=lease.web_candidate_amendments?.at(-1);
-  if (pendingCandidateAfterAmendment &&
-      (previous?.new_web_git_sha!==oldSha || previous.old_web_git_sha!==oldReceipt.web_git_sha ||
-       previous.previous_web_candidate_receipt!==oldReceiptRelative ||
-       !equalHash(previous.previous_web_candidate_receipt_sha256,digest(oldReceiptFile))))
-    fail('UNDEPLOYED_CANDIDATE_CHAIN_INVALID');
+  if (pendingCandidateAfterAmendment) {
+    let superseded=oldSha,bridged=false;
+    for (let index=(lease.web_candidate_amendments?.length || 0)-1;index>=0;index--) {
+      const item=lease.web_candidate_amendments[index];
+      if (item.new_web_git_sha!==superseded ||
+          item.previous_web_candidate_receipt!==oldReceiptRelative ||
+          !equalHash(item.previous_web_candidate_receipt_sha256,digest(oldReceiptFile)) ||
+          !equalHash(item.audit_sha256,digest(inside(root,item.audit_receipt))))
+        fail('UNDEPLOYED_CANDIDATE_CHAIN_INVALID');
+      if (item.old_web_git_sha===oldReceipt.web_git_sha) {bridged=true;break;}
+      if (readJson(inside(root,item.audit_receipt)).superseded_candidate_was_deployed!==false)
+        fail('UNDEPLOYED_CANDIDATE_CHAIN_INVALID');
+      superseded=item.old_web_git_sha;
+    }
+    if (!bridged) fail('UNDEPLOYED_CANDIDATE_CHAIN_INVALID');
+  }
   if (!pendingCandidateAfterAmendment &&
       !equalHash(oldReceipt.manifest_sha256,lease.admission_manifest_sha256)) fail('OLD_WEB_MANIFEST_INVALID');
   const deployedManifest=readManifest(deployedManifestFile);
