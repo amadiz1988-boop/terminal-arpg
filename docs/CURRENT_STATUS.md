@@ -796,3 +796,10 @@
 
 - 五個 Native 忽略的舊 Supply 設定已從 Web 的 `SUPPORTED` 能力宣告移除；它們依 `c0450b1c` 歸為 M1 排除或明確產品覆寫，並保持停用。AUTO_FARM 未追蹤測試的隔離角色可啟動預期已更正，來源測試通過。
 - 目前 Production map binary 缺少可連到 canonical Native checkpoint 的部署收據；ProcDump 雖有對應 sidecar，map 的 debugger 查核為未附掛，正式 attachment 收據仍是 `FAILED`。因此受控部署、Fly／Supply 實機閉環與 Browser 驗收均延期，Production 和 runtime 未更動。詳見 `docs/openkore-reference/m1-predeploy-gate-v3-2026-09-24.md`。
+
+## 2026-09-26 M1 V15 Native Kafra 修訂與待完成驗收
+
+- 同一份 F first-promotion lease 已完成精確 Native `4cc2744 → f7e4097` 修訂，來源只有八個 Kafra Save 相關檔案。Release x64、13 組 canonical offline tests 與獨立 Kafra catalog tests 通過。Production 受控替換後 login/char/map/Dashboard 各一個 listener，DB healthy，ProcDump attached，OpenKore 0，quarantine 0；Web 尚維持 `055d3427`。證據與二進位雜湊見 `docs/project-control/m1-v15-kafra-native-f7-admission.md`。
+- 目前 Production Player World Map 只提供 7 個 town rows，Morocc 與指定 field hub 缺席。f7 Native 的 Kafra Player live acceptance 需等待已整合 27 town nodes 的最終 Web 來源在 Settings 與原始 hunting-label Native 阻擋點關閉後受控部署。未把 Admin/原始 Native 指令算作 Player PASS。
+- Settings source contract 共 46 欄、9 節；17 欄有來源執行映射可編輯，20 欄待支援及 5 欄未開放均停用，3 欄固定唯讀，1 欄隱藏。`SETTINGS_SOURCE_CONTRACT_GATE=PASS`；Production Browser 儲存／重載及 Supply/Store/Sell 設定效果仍未驗收。詳見 `docs/project-control/m1-v15-settings-and-capability-recalculation.md`。
+- 40 項當前 M1 必要能力逐項重算為 4 PASS、36 PARTIAL、0 MISSING、0 UNCLASSIFIED；每個 PARTIAL 的第一個缺少驗收點見 `docs/project-control/m1-v15-capability-reconciliation-2026-09-26.md`。原始 hunting-label 盤點尚有 5 個 Native-owned 不可接受阻擋點。`CAPABILITY_FINAL_GATE` 與最終 Web/Browser/音效個人聆聽/Promotion receipt 仍為 BLOCKED 或 NOT_MEASURED。

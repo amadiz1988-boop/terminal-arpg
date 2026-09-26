@@ -1,0 +1,23 @@
+# M1 V15 Kafra Native f7 admission and live gate
+
+Date: 2026-09-26. Workline F, active first-promotion lease `869f1725-dbd0-452d-b9dd-37ee79cc3f9a`. This records the bounded Native amendment only. The final Web candidate has not been deployed.
+
+## Source and admission
+
+- Deployed predecessor: `4cc274466642703be1e3a66e43690eb5bd06f581`; authorized successor: `f7e4097ea2a26c7b204004bfeb5a605324cf2a79`. Git ancestry and GitHub main fast-forward were verified. Canonical Native source preflight returned `PASS`, clean, with no unrelated history.
+- The exact diff has eight files: `conf/persistent_agent_commands.json`, `src/map/persistent_agent.cpp`, `src/map/persistent_agent_kafra_save_catalog.hpp`, `tools/pa-command-contract/contract-test-matrix.json`, and four files under `tools/pa-kafra-save/` (`.gitignore`, `build-and-test.ps1`, `generate-catalog.mjs`, `test_catalog.cpp`). No unrelated Native file was included.
+- The pinned OpenKore Kafra reference is `docs/openkore-reference/reference-index.yml` topic 20 (`TalkNPC::run`, `processNPC`, `sendTalkResponse`, `saveMap`, `saveMap_warp`, `saveMap_warpToBuyOrSell`) and topic 23 death/respawn. The current product authority is `canonical-m1-world-travel-supply-ui-v1.md`. GI's direct town action is an explicit product override; Kafra Save position and respawn remain rAthena authority. No OpenKore runtime was started.
+- Release x64 build receipt SHA-256: `01BCA5F73AEFDED49F2086AC283C0CABB22AB6F9E917477DEA1801D18A8CB3D1`. Thirteen canonical offline groups passed. The separate Kafra catalog test passed with 39 authored destinations on 26 maps, including two Morocc destinations and two field-hub destinations.
+- Candidate manifest SHA-256: `3911A804B3E6FDF6AB1A4A89BCE904CFDD9114E83B99F8CE38364E889AD21324`. The dry-run plan was eligible and identified only the eight authorized files. The amendment audit SHA-256 is `458048209846E12F9B2E6A880C804F9099FEE4E2D53954736CD58ABA141E8052`.
+
+## Rollback preimage and controlled deployment
+
+Before replacement, the prepared `intermediate-rollback` folder held all three exact 4cc binaries. SHA-256: login `617E7C7CCAA821C969359D28ABBD0C9CBE1D6DADF9A649BC4CA26DA8985A57F5`, char `2474F16E4C6AA80ED4C50B1550C801F976DFBFB10F999DAEA6ABED934A1AA5F2`, map `369EDF17CF2CE0300AC248CCA17A042E7B6F6CC8B3E5C38D029C1FFA34DFB124`. Each matched the predecessor Native receipt. Recovery would require the existing bounded Native lifecycle adapter to stop the candidate, hash-check and restore these three files, then start and verify the same runtime. No rollback was needed or exercised.
+
+The governed same-lease deploy completed. Old runtime retirement was `GRACEFUL`, `forced=false`. The new receipt is `.local/ro-stack/native-promotion-receipt-f7e4097ea2a2.json`, SHA-256 `1F7CE2ABEB5F7F3BEA16D24363A944898AC870A79D2C35DB7B2C8E94869F5EBF`. Its map binary SHA-256 is `1983C52CD52A56390E89667EA72DB75845B2B8918C93323CD1C73078B3146406` and map PID is 28960. Login, char, map and Dashboard each had one listener; runtime health and database were healthy; `/api/health` returned 200; ProcDump was attached to the new map PID as SYSTEM; OpenKore count was 0. An authenticated Admin roster returned complete quarantine count 0.
+
+## First live acceptance boundary
+
+Normal TEST_PLAYER 150105 was observed read-only in `PERSISTENT_IDLE` at `prt_fild08` (50,171), saved at `izlude` (94,103), with 9000 Zeny. No test-character gameplay mutation was performed in this gate. The currently deployed Web SHA `055d3427241bed668d379215a401183417309abf` returned seven town rows through the authenticated `/api/farm-map-availability`; Morocc, `prt_fild05` and `cmd_fild07` were absent. The source Web candidate test at `27f9002e` passed with 27 town nodes, 39 Kafra Save destinations and 274 farm maps, but it has not been deployed. A legitimate Player intent for Morocc or either field hub therefore cannot enter the current Web controller. `FIRST_BROKEN_TRANSITION = deployed Web town projection -> Player intent`; `LIVE_NATIVE_TOWN_TRAVEL`, `LIVE_NATIVE_SAVED_TOWN`, death/respawn and field-hub live results remain `NOT_MEASURED`. The user explicitly forbids an intermediate final Web deployment before Settings and hunting-label source closure, so these live tests are deferred to that controlled deploy. An Admin or raw Native command would not substitute for the required normal Player path.
+
+The old Store, Sell, Supply, death-maintenance, inventory-maintenance and Fly-to-HIT last-good results were not rerun. Native production changed once; Dashboard, MariaDB and Web binaries were not restarted or replaced by this gate.
