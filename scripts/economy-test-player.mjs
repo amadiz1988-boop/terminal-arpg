@@ -17,7 +17,7 @@ const withoutRevision = value => { const copy = structuredClone(value); delete c
 export async function runEconomyTestPlayer(args, io = {}) {
   const options = parseEconomyCli(args);
   const startedAt = Date.now();
-  const deadline = startedAt + options.timeoutMs;
+  let deadline = startedAt + options.timeoutMs;
   const traceId = `economy-test-player-${randomUUID()}`;
   const origin = io.origin ?? process.env.SYNTHETIC_PLAYER_ORIGIN ?? 'http://127.0.0.1:8788';
   const token = io.token ?? process.env.RO_LOCAL_ADMIN_TOKEN;
@@ -114,6 +114,7 @@ export async function runEconomyTestPlayer(args, io = {}) {
     const started = await request('/api/automation', { method: 'POST', body: { action: 'start' } });
     mark('START_FARM_DISPATCHED', { commandId: started?.command?.commandId,
       executor: started?.executor });
+    mark('AWAIT_AUTHORITATIVE_STORE_SELL');
     const after = await bounded(() => {
       const state = record('economyState');
       const delta = economyDeltas(prepared, state);
@@ -131,8 +132,20 @@ export async function runEconomyTestPlayer(args, io = {}) {
     result.reason = String(error?.message ?? error);
     result.firstBrokenTransition = result.checkpoints.at(-1)?.name ?? 'PRECONDITION';
     result.status = result.checkpoints.some(entry => entry.name === 'PRECONDITION_VALID') ? 'FAIL' : 'BLOCKED';
+    if (fixturePrepared) {
+      result.postimage = record('economyState');
+      const delta = economyDeltas({ inventory: { 502: 1, 503: 1 }, storage: { 502: 0 },
+        zeny: result.preimage.economy.zeny }, result.postimage);
+      result.store = { result: delta.store ? 'PASS' : 'FAIL', inventoryDelta: delta.storeQuantity,
+        storageDelta: delta.storageQuantity };
+      result.sell = { result: delta.sell ? 'PASS' : 'FAIL', inventoryDelta: delta.sellQuantity,
+        zenyDelta: delta.zenyGain };
+    }
   } finally {
     if (options.execute && (farmStarted || fixturePrepared || appliedConfig)) {
+      // A timed-out observation must never consume the time reserved for
+      // stopping the player and restoring its exact fixture preimage.
+      deadline = Date.now() + 90000;
       result.cleanup = { result: 'PENDING' };
       try {
         if (farmStarted && await mode() !== 'PERSISTENT_IDLE') {
