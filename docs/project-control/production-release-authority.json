@@ -11,7 +11,7 @@
     "repository": "https://github.com/amadiz1988-boop/ghost-island-rathena.git",
     "github_repository": "https://github.com/amadiz1988-boop/ghost-island-rathena.git",
     "release_ref": "refs/heads/main",
-    "accepted_source_sha": "4cc274466642703be1e3a66e43690eb5bd06f581",
+    "accepted_source_sha": "f7e4097ea2a26c7b204004bfeb5a605324cf2a79",
     "private_required": true,
     "candidate_history": [
       {
@@ -140,6 +140,14 @@
       "lease_id": "869f1725-dbd0-452d-b9dd-37ee79cc3f9a",
       "candidate_successor": "4cc274466642703be1e3a66e43690eb5bd06f581",
       "reason": "M1_ECONOMY_STORAGE_MENU_STATE_V1",
+      "status": "SOURCE_APPROVED_DEPLOY_PENDING"
+    },
+    {
+      "native_git_sha": "4cc274466642703be1e3a66e43690eb5bd06f581",
+      "disposition": "DEPLOYED_NATIVE_PREDECESSOR",
+      "lease_id": "869f1725-dbd0-452d-b9dd-37ee79cc3f9a",
+      "candidate_successor": "f7e4097ea2a26c7b204004bfeb5a605324cf2a79",
+      "reason": "KAFRA_SAVE_NATIVE_TOWN_TRAVEL_ELIGIBILITY_V1",
       "status": "SOURCE_APPROVED_DEPLOY_PENDING"
     }
     ]

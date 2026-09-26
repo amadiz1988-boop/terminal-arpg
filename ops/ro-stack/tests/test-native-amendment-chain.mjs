@@ -18,6 +18,7 @@ import { HISTORICAL_NATIVE_AMENDMENT as old, M1_SECOND_NATIVE_AMENDMENT as polic
   M1_ECONOMY_STORAGE_FIXTURE_AMENDMENT as economyStorageFixture,
   M1_ECONOMY_ZERO_LEVEL_FIXTURE_AMENDMENT as economyZeroLevelFixture,
   M1_ECONOMY_STORAGE_MENU_STATE_AMENDMENT as economyStorageMenuState,
+  KAFRA_SAVE_NATIVE_TOWN_TRAVEL_AMENDMENT as kafraSave,
   validateNativeAmendmentHistory, validateHistoricalNativeAnchor, validateNextNativeAmendment,
   applyNextNativeAmendment, deployedNativeRuntimeMatches } from '../native-amendment-chain.mjs';
 import { retirementDecision } from '../native-candidate-amendment.mjs';
@@ -347,6 +348,20 @@ test('economy storage menu and bounded state amendment admits only reviewed Nati
     'src/map/persistent_agent.cpp',
     'tools/pa-command-contract/Test-M1V15ExecutorFixture.ps1',
   ]);
+});
+test('Kafra Save amendment admits only its exact eight-file Native diff', () => {
+  assert.equal(kafraSave.reason, 'KAFRA_SAVE_NATIVE_TOWN_TRAVEL_ELIGIBILITY_V1');
+  assert.deepEqual(kafraSave.sourcePaths, [
+    'conf/persistent_agent_commands.json',
+    'src/map/persistent_agent.cpp',
+    'src/map/persistent_agent_kafra_save_catalog.hpp',
+    'tools/pa-command-contract/contract-test-matrix.json',
+    'tools/pa-kafra-save/.gitignore',
+    'tools/pa-kafra-save/build-and-test.ps1',
+    'tools/pa-kafra-save/generate-catalog.mjs',
+    'tools/pa-kafra-save/test_catalog.cpp',
+  ]);
+  assert.equal(kafraSave.sourcePaths.includes('src/map/pc.cpp'), false);
 });
 {
   const mapHash = 'A'.repeat(64);

@@ -191,6 +191,22 @@ export const M1_ECONOMY_STORAGE_MENU_STATE_AMENDMENT = Object.freeze({
     'tools/pa-command-contract/Test-M1V15ExecutorFixture.ps1',
   ]),
 });
+// Project Control authorizes one exact Kafra Save destination amendment from
+// the deployed 4cc2744 Native candidate under the active F promotion lease.
+export const KAFRA_SAVE_NATIVE_TOWN_TRAVEL_AMENDMENT = Object.freeze({
+  reason: 'KAFRA_SAVE_NATIVE_TOWN_TRAVEL_ELIGIBILITY_V1',
+  scope: 'KAFRA_SAVE_NATIVE_TOWN_TRAVEL_ELIGIBILITY_V1',
+  sourcePaths: Object.freeze([
+    'conf/persistent_agent_commands.json',
+    'src/map/persistent_agent.cpp',
+    'src/map/persistent_agent_kafra_save_catalog.hpp',
+    'tools/pa-command-contract/contract-test-matrix.json',
+    'tools/pa-kafra-save/.gitignore',
+    'tools/pa-kafra-save/build-and-test.ps1',
+    'tools/pa-kafra-save/generate-catalog.mjs',
+    'tools/pa-kafra-save/test_catalog.cpp',
+  ]),
+});
 export const APPROVED_NATIVE_AMENDMENTS = Object.freeze([
   M1_SECOND_NATIVE_AMENDMENT, M1_INVENTORY_MAINTENANCE_NATIVE_AMENDMENT,
   M1_INVENTORY_PROJECTION_CORRECTION, M1_FARM_WORLD_TELEPORT_SPAWN_CORRECTION,
@@ -202,6 +218,7 @@ export const APPROVED_NATIVE_AMENDMENTS = Object.freeze([
   M1_ECONOMY_TEST_PLAYER_AMENDMENT, M1_ECONOMY_STORAGE_FIXTURE_AMENDMENT,
   M1_ECONOMY_ZERO_LEVEL_FIXTURE_AMENDMENT,
   M1_ECONOMY_STORAGE_MENU_STATE_AMENDMENT,
+  KAFRA_SAVE_NATIVE_TOWN_TRAVEL_AMENDMENT,
 ]);
 export const approvedNativeAmendment = reason =>
   APPROVED_NATIVE_AMENDMENTS.find(item => item.reason === reason) ?? null;
