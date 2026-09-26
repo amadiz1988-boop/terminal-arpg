@@ -364,12 +364,13 @@ test('Kafra Save amendment admits only its exact eight-file Native diff', () => 
   ]);
   assert.equal(kafraSave.sourcePaths.includes('src/map/pc.cpp'), false);
 });
-test('original hunting map amendment admits only the reviewed three Native files', () => {
+test('original hunting map amendment admits only the reviewed four Native files', () => {
   assert.equal(huntingAdmission.reason, 'ORIGINAL_HUNTING_LABEL_NATIVE_ADMISSION_CLOSURE_V1');
   assert.deepEqual(huntingAdmission.sourcePaths, [
     'src/map/persistent_agent.cpp',
     'tools/pa-command-contract/Test-WorldMapFarmAdmissionSource.ps1',
     'tools/pa-command-contract/contract-test-matrix.json',
+    'tools/pa-command-contract/Test-M1CanonicalSource.ps1',
   ]);
   assert.equal(huntingAdmission.sourcePaths.includes('src/map/pc.cpp'), false);
 });

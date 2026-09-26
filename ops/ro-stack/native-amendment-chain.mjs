@@ -207,7 +207,7 @@ export const KAFRA_SAVE_NATIVE_TOWN_TRAVEL_AMENDMENT = Object.freeze({
     'tools/pa-kafra-save/test_catalog.cpp',
   ]),
 });
-// Project Control authorizes the three-file original hunting map admission
+// Project Control authorizes the four-file original hunting map admission
 // correction from the deployed f7e4097 candidate under the same F lease.
 export const ORIGINAL_HUNTING_LABEL_NATIVE_ADMISSION_AMENDMENT = Object.freeze({
   reason: 'ORIGINAL_HUNTING_LABEL_NATIVE_ADMISSION_CLOSURE_V1',
@@ -216,6 +216,7 @@ export const ORIGINAL_HUNTING_LABEL_NATIVE_ADMISSION_AMENDMENT = Object.freeze({
     'src/map/persistent_agent.cpp',
     'tools/pa-command-contract/Test-WorldMapFarmAdmissionSource.ps1',
     'tools/pa-command-contract/contract-test-matrix.json',
+    'tools/pa-command-contract/Test-M1CanonicalSource.ps1',
   ]),
 });
 export const APPROVED_NATIVE_AMENDMENTS = Object.freeze([
