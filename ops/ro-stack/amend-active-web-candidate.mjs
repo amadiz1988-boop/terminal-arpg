@@ -26,6 +26,10 @@ const approvedAdditivePaths = new Map([
     'ops/ro-stack/dashboard/ui-theme.css',
     'ops/ro-stack/dashboard/ui-theme.js',
   ]],
+  ['M1_WORLD_MAP_FARM_ADMISSION_SOURCE_SUPERSET_V1', [
+    'ops/ro-stack/persistent-agent/player-world-map-projection.mjs',
+    'ops/ro-stack/persistent-agent/world-map-destination-list.mjs',
+  ]],
 ]);
 const approvedExistingPreimageAddition = 'ops/ro-stack/dashboard-service.ps1';
 const approvedLegacyAdoption = new Map([
