@@ -82,15 +82,41 @@ export function stagedRuntimeConfigPin(root, state, lease) {
     equalHash(state.runtime_config_reconciliation_sha256, pending.runtime_config_reconciliation_sha256),
     'RUNTIME_CONFIG_RECEIPT_REFERENCE_MISMATCH');
   const receipt = readJson(pinned(root, {path:ref,sha256:state.runtime_config_reconciliation_sha256}));
+  const configPath = boundedPath(root, receipt.config_source_path);
+  const currentHash = digest(configPath);
   check(receipt.schema_version === 'runtime-config-reconciliation-v1' &&
     receipt.classification === 'RUNTIME_CONFIG_RECONCILED' &&
     receipt.lease_id === lease.lease_id && receipt.lease_owner === lease.owner_task_id &&
     runtimeConfigNativeLineageValid(root, lease, pending, receipt.native_git_sha) &&
     receipt.config_source_path === 'ops/ro-stack/stack.config.psd1' &&
-    receipt.unrelated_config_change_count === 0 &&
-    equalHash(receipt.new_config_digest, digest(boundedPath(root,receipt.config_source_path))),
+    receipt.unrelated_config_change_count === 0,
     'RUNTIME_CONFIG_RECEIPT_INVALID');
-  return {path:receipt.config_source_path,sha256:receipt.new_config_digest,oldSha256:receipt.old_config_digest};
+  if (!equalHash(receipt.new_config_digest, currentHash)) {
+    const allowlistRef = lease.native_service_allowlist_config;
+    check(allowlistRef?.receipt && allowlistRef?.sha256 &&
+      JSON.stringify(allowlistRef) === JSON.stringify(pending.native_service_allowlist_config),
+    'RUNTIME_CONFIG_ALLOWLIST_RECEIPT_MISSING');
+    const allowlist = readJson(pinned(root, {path:allowlistRef.receipt,sha256:allowlistRef.sha256}));
+    const priorWebSha = allowlist.web_git_sha === lease.web_deploy_git_sha ||
+      lease.web_candidate_amendments?.some(entry => entry.old_web_git_sha === allowlist.web_git_sha ||
+        entry.new_web_git_sha === allowlist.web_git_sha);
+    check(allowlist.schema_version === 'native-service-allowlist-config-v1' &&
+      allowlist.lease_id === lease.lease_id && allowlist.owner_task_id === lease.owner_task_id &&
+      runtimeConfigNativeLineageValid(root, lease, pending, allowlist.native_git_sha) && priorWebSha &&
+      allowlist.source_path === receipt.config_source_path &&
+      allowlist.destination_path === receipt.config_source_path &&
+      equalHash(allowlist.preimage_sha256, receipt.new_config_digest) &&
+      equalHash(allowlist.image_sha256, currentHash) &&
+      equalHash(allowlist.source_sha256, receipt.config_source_digest) &&
+      allowlist.unrelated_changes === 0 &&
+      JSON.stringify(allowlist.changes?.map(row => row.key)) ===
+        JSON.stringify(['PersistentAgentServiceMapAllowlist', 'PersistentAgentServiceNpcAllowlist']) &&
+      JSON.stringify(allowlist.preserved_overrides) ===
+        JSON.stringify(['PersistentAgentM1SupplyEnabled', 'WebM1AcceptanceFixtureEnabled',
+          'WebNativeSupplyPolicyEnabled']),
+    'RUNTIME_CONFIG_ALLOWLIST_RECEIPT_INVALID');
+  }
+  return {path:receipt.config_source_path,sha256:currentHash,oldSha256:receipt.old_config_digest};
 }
 export function verifyLifecyclePins(root, pins, stagedWebManifest, runtimeConfigPin) {
   if (!stagedWebManifest) {

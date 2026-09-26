@@ -122,6 +122,40 @@ try {
      assert.throws(()=>verifyLifecyclePins(f.root,f.m.lifecycle_files,manifest),/PINNED_CONTENT_CHANGED/);
    } finally { fs.writeFileSync(file,old); }
  });
+ await test('sealed service allowlist receipt extends the staged runtime config pin',()=>{
+   const x=fixture(),p='ops/ro-stack/stack.config.psd1',file=path.join(x.root,p);
+   fs.writeFileSync(file,'approved runtime config');
+   const baseHash=digest(file),baseRef='.local/ro-stack/runtime-config-reconciliation-chain.json';
+   x.write(baseRef,{schema_version:'runtime-config-reconciliation-v1',
+     classification:'RUNTIME_CONFIG_RECONCILED',lease_id:x.lease.lease_id,
+     lease_owner:x.lease.owner_task_id,native_git_sha:x.sha,config_source_path:p,
+     config_source_digest:'B'.repeat(64),old_config_digest:x.m.lifecycle_files.find(item=>item.path===p).sha256,
+     new_config_digest:baseHash,unrelated_config_change_count:0});
+   fs.writeFileSync(file,'approved runtime config with service allowlists');
+   const allowRef='.local/ro-stack/native-service-allowlist-chain.json';
+   x.write(allowRef,{schema_version:'native-service-allowlist-config-v1',
+     lease_id:x.lease.lease_id,owner_task_id:x.lease.owner_task_id,
+     native_git_sha:x.sha,web_git_sha:x.lease.web_deploy_git_sha,
+     source_path:p,destination_path:p,preimage_sha256:baseHash,image_sha256:digest(file),
+     source_sha256:'B'.repeat(64),unrelated_changes:0,
+     changes:[{key:'PersistentAgentServiceMapAllowlist'},{key:'PersistentAgentServiceNpcAllowlist'}],
+     preserved_overrides:['PersistentAgentM1SupplyEnabled','WebM1AcceptanceFixtureEnabled',
+       'WebNativeSupplyPolicyEnabled']});
+   const allowlist={receipt:allowRef,sha256:digest(path.join(x.root,allowRef))};
+   const lease={...x.lease,native_service_allowlist_config:allowlist};
+   const refSha=digest(path.join(x.root,baseRef));
+   x.write(pendingPath,{runtime_config_reconciliation:baseRef,
+     runtime_config_reconciliation_sha256:refSha,native_service_allowlist_config:allowlist});
+   const state={...x.state,runtime_config_reconciliation:baseRef,
+     runtime_config_reconciliation_sha256:refSha};
+   const pin=stagedRuntimeConfigPin(x.root,state,lease);
+   assert.equal(pin.sha256,digest(file));
+   verifyLifecyclePins(x.root,x.m.lifecycle_files,{files:[]},pin);
+   assert.throws(()=>stagedRuntimeConfigPin(x.root,state,
+     {...lease,native_service_allowlist_config:undefined}),/RUNTIME_CONFIG_ALLOWLIST_RECEIPT_MISSING/);
+   x.write(allowRef,{tampered:true});
+   assert.throws(()=>stagedRuntimeConfigPin(x.root,state,lease),/PINNED_CONTENT_CHANGED/);
+ });
  await test('runtime config pin follows only an intact same-lease Native amendment chain',()=>{
    const x=fixture(),next='b'.repeat(40),auditPath='.local/ro-stack/native-amendment-audit.json';
    const audit={lease_id:x.lease.lease_id,lease_owner:x.lease.owner_task_id,
