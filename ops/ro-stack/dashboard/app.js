@@ -742,6 +742,8 @@ let audioPrefs = (() => {
 let worldMapTravelPresentation = null;
 let worldMapTravelModulePromise = null;
 let worldMapOpenGeneration = 0;
+let worldMapDetailTrigger = null;
+let worldMapSavePending = false;
 let accountPreferences = null;
 let availableItemIcons = null;
 let itemIconManifestPromise = null;
@@ -6826,17 +6828,51 @@ function setSelectedWorldMap(mapId) {
     region.dataset.mapSelected = String(selected);
   });
 }
+function closeWorldMapDetail({ restoreFocus = true } = {}) {
+  const detail = $('#worldMapDetail');
+  detail.classList.add('hidden');
+  $('#worldMapDetailBackdrop').classList.add('hidden');
+  $('#worldMapOverlay .world-map-stage').inert = false;
+  $('#worldMapOverlay .world-map-destinations').inert = false;
+  setSelectedWorldMap('');
+  if (restoreFocus && !$('#worldMapOverlay').classList.contains('hidden'))
+    (worldMapDetailTrigger?.isConnected ? worldMapDetailTrigger : $('#closeWorldMap')).focus();
+  worldMapDetailTrigger = null;
+}
+function showWorldMapDetail() {
+  $('#worldMapDetailBackdrop').classList.remove('hidden');
+  $('#worldMapDetail').classList.remove('hidden');
+  $('#worldMapOverlay .world-map-stage').inert = true;
+  $('#worldMapOverlay .world-map-destinations').inert = true;
+  $('#worldMapDetail').querySelector('button')?.focus();
+}
 async function selectWorldMap(mapId) {
   const summary = farmMapAvailabilityData?.worldMap?.maps?.[mapId];
   if (!summary || !farmMapAvailabilityData?.maps?.some((row) =>
     row.map === mapId && row.farmSelectionAvailable)) return;
+  $('#worldMapNotice').classList.add('hidden');
+  const category = farmMapAvailabilityData.destinationList?.wild?.some((row) => row.map === mapId)
+    ? 'wild' : 'caves';
+  if (selectedWorldMapCategory !== category) {
+    $('#worldMapRegionSearch').value = '';
+    selectedWorldMapCategory = category;
+    renderWorldMapDestinationList();
+  }
   setSelectedWorldMap(mapId);
   const map = summary;
   if (selectedWorldMapId !== mapId) return;
   const detail = $('#worldMapDetail');
-  detail.dataset.selected = 'true';
+  if (detail.classList.contains('hidden')) worldMapDetailTrigger = document.activeElement;
   const title = document.createElement('h3');
+  title.id = 'worldMapDetailTitle';
   title.textContent = map.name;
+  const heading = document.createElement('div');
+  heading.className = 'world-map-detail-heading';
+  const close = document.createElement('button');
+  close.type = 'button';
+  close.textContent = '關閉';
+  close.onclick = () => closeWorldMapDetail();
+  heading.append(title, close);
   const floorPicker = document.createElement('section');
   floorPicker.className = 'world-map-floor-picker';
   const region = farmMapAvailabilityData.worldMap.regions.find((candidate) =>
@@ -6875,10 +6911,6 @@ async function selectWorldMap(mapId) {
     }
     floorPicker.append(floorTitle, floorButtons);
   }
-  const mapIdLine = document.createElement('p');
-  mapIdLine.className = 'world-map-meta';
-  mapIdLine.textContent = `Map ID：${map.id}\n主要掛機怪物：${levelRangeText(map.levelRange)}\n完整可戰鬥怪物：${levelRangeText(map.fullLevelRange)}\n非 Boss 出生數：${map.normalMonsterCount} 隻`;
-  mapIdLine.style.whiteSpace = 'pre-line';
   const monsterTitle = document.createElement('b');
   monsterTitle.textContent = '主要怪物';
   const monsters = document.createElement('ul');
@@ -6889,9 +6921,6 @@ async function selectWorldMap(mapId) {
   }
   const controls = document.createElement('div');
   controls.className = 'controls';
-  const routeNote = document.createElement('p');
-  routeNote.className = 'world-map-route-note';
-  routeNote.textContent = '移動方式：伺服器核准後直達地圖安全落點。';
   const availability = farmMapAvailabilityFor(mapId);
   const farmSelectionAvailable = farmMapSelectionAvailable(mapId, summary);
   const buttonState = availability?.buttonState ?? 'UNAVAILABLE_MAP';
@@ -6921,7 +6950,10 @@ async function selectWorldMap(mapId) {
     submit.textContent = '確定更換';
     submit.disabled = false;
     confirm.classList.remove('hidden');
-    $('#worldMapConfirmCancel').onclick = () => closeWorldMap();
+    $('#worldMapConfirmCancel').onclick = () => {
+      confirm.classList.add('hidden');
+      apply.focus();
+    };
     submit.onclick = async () => {
       if (!worldMapTravelPresentation?.beginSubmission()) return;
       submit.disabled = true;
@@ -6985,15 +7017,14 @@ async function selectWorldMap(mapId) {
   };
   controls.append(apply);
   detail.replaceChildren(
-    title,
-    controls,
+    heading,
     teleportInfo,
     floorPicker,
-    mapIdLine,
     monsterTitle,
     monsters,
-    routeNote,
+    controls,
   );
+  showWorldMapDetail();
 }
 function renderWorldMapDestinationList() {
   const input = $('#worldMapRegionSearch');
@@ -7009,6 +7040,14 @@ function renderWorldMapDestinationList() {
   $('#worldMapSavedTownHint').classList.toggle('hidden',
     farmMapAvailabilityData?.player?.savedTownSetupRequired !== true);
   const render = () => {
+    const currentTown = farmMapAvailabilityData?.towns?.find((town) =>
+      town.map === farmMapAvailabilityData?.player?.currentMap);
+    const saveCurrent = $('#worldMapSaveCurrentTown');
+    saveCurrent.classList.toggle('hidden', selectedWorldMapCategory !== 'towns' ||
+      !currentTown || farmMapAvailabilityData?.player?.savedTown?.map === currentTown.map);
+    saveCurrent.disabled = worldMapSavePending;
+    saveCurrent.onclick = currentTown
+      ? () => void saveCurrentWorldMapTown(currentTown.map) : null;
     tabs.replaceChildren(...categories.map((category) => {
       const button = document.createElement('button');
       button.type = 'button';
@@ -7021,6 +7060,8 @@ function renderWorldMapDestinationList() {
       button.tabIndex = selectedWorldMapCategory === category.id ? 0 : -1;
       button.onclick = () => {
         if (selectedWorldMapCategory !== category.id) input.value = '';
+        $('#worldMapNotice').classList.add('hidden');
+        closeWorldMapDetail({ restoreFocus: false });
         selectedWorldMapCategory = category.id;
         render();
       };
@@ -7030,6 +7071,8 @@ function renderWorldMapDestinationList() {
         event.preventDefault();
         const index = categories.findIndex((entry) => entry.id === category.id);
         input.value = '';
+        $('#worldMapNotice').classList.add('hidden');
+        closeWorldMapDetail({ restoreFocus: false });
         selectedWorldMapCategory = categories[(index + offset + categories.length) % categories.length].id;
         render();
         tabs.querySelector(`[data-category="${selectedWorldMapCategory}"]`)?.focus();
@@ -7037,6 +7080,7 @@ function renderWorldMapDestinationList() {
       return button;
     }));
     list.setAttribute('aria-labelledby', `worldMapTab-${selectedWorldMapCategory}`);
+    list.dataset.category = selectedWorldMapCategory;
     const query = input.value.trim().toLocaleLowerCase();
     const rows = farmMapAvailabilityData?.destinationList?.[selectedWorldMapCategory] ?? [];
     list.replaceChildren(...rows.filter((row) =>
@@ -7047,20 +7091,11 @@ function renderWorldMapDestinationList() {
         button.className = 'world-map-destination';
         button.dataset.mapId = row.map;
         button.dataset.category = selectedWorldMapCategory;
+        button.title = row.name;
         const name = document.createElement('span');
         name.textContent = row.name;
         button.append(name);
-        if (selectedWorldMapCategory === 'towns') {
-          if (row.locationClass !== 'ACTUAL_TOWN') {
-            const hint = document.createElement('small');
-            hint.textContent = '儲存據點';
-            button.append(hint);
-          }
-        } else {
-          const level = document.createElement('small');
-          level.textContent = `平均 Lv. ${(Math.round(row.averageLevel * 10) / 10).toFixed(1)}`;
-          button.append(level);
-        }
+        button.classList.toggle('long-name', [...row.name.replace(/\s/g, '')].length > 12);
         button.onclick = () => {
           if (selectedWorldMapCategory === 'towns') selectTownWorldMap(row.map);
           else void selectWorldMap(row.map);
@@ -7125,11 +7160,7 @@ async function openWorldMap() {
   const generation = ++worldMapOpenGeneration;
   $('#worldMapNotice').classList.add('hidden');
   selectedWorldMapCategory = 'towns';
-  const detail = $('#worldMapDetail');
-  delete detail.dataset.selected;
-  const title = document.createElement('h3');
-  title.textContent = '尚未選擇地圖';
-  detail.replaceChildren(title);
+  closeWorldMapDetail({ restoreFocus: false });
   $('#worldMapOverlay').classList.remove('hidden');
   document.body.classList.add('world-map-open');
   activateDeferredGameImages();
@@ -7154,6 +7185,7 @@ function closeWorldMap() {
   if (worldMapTravelPresentation?.isTransitionActive()) return;
   worldMapOpenGeneration += 1;
   worldMapTravelPresentation?.cancel();
+  closeWorldMapDetail({ restoreFocus: false });
   $('#worldMapConfirm').classList.add('hidden');
   $('#worldMapOverlay').classList.add('hidden');
   document.body.classList.remove('world-map-open');
@@ -8399,13 +8431,6 @@ function syncAdminSurfaceLink(adminSurface) {
   else headerRow.append(link);
 }
 
-function worldMapLocationType(town) {
-  return {
-    ACTUAL_TOWN: '城鎮', SERVICE_HUB: '服務據點',
-    FIELD_SAVE_HUB: '原野儲存據點',
-  }[town.locationClass] ?? '儲存據點';
-}
-
 async function waitForWorldMapAuthority(predicate, timeoutMs = 30000, command = null) {
   let nextCommandPollAt = 0;
   const deadline = Date.now() + timeoutMs;
@@ -8440,95 +8465,79 @@ function showWorldMapArrival(name) {
 function selectTownWorldMap(mapId) {
   const town = farmMapAvailabilityData?.towns?.find((row) => row.map === mapId);
   if (!town) return;
-  const detail = $('#worldMapDetail');
-  detail.dataset.selected = 'true';
-  const title = document.createElement('h3');
-  title.textContent = town.name ?? town.map;
-  const info = document.createElement('p');
-  info.className = 'world-map-meta';
-  info.textContent = `Map ID：${town.map}\n類型：${worldMapLocationType(town)}\n儲存點：${town.savedPoint.x},${town.savedPoint.y}\n傳送費：免費\n傳送冷卻：原野前往據點無、據點互傳 30 秒\n目前儲存據點：${farmMapAvailabilityData?.player?.savedTown?.name ?? '尚未設定'}`;
-  info.style.whiteSpace = 'pre-line';
-  const action = document.createElement('button');
-  action.type = 'button';
-  action.className = 'primary';
-  action.textContent = town.buttonState === 'ALREADY_ON_TARGET_MAP'
-    ? '已在此城鎮'
-    : town.buttonState === 'WORLD_MAP_TELEPORT_COOLDOWN'
-      ? `${town.cooldownRemaining} 秒後可再次傳送`
-      : `傳送至${town.name ?? town.map}`;
-  action.disabled = town.buttonState !== 'AVAILABLE';
-  action.onclick = () => {
-    if (worldMapTravelPresentation?.state !== 'MAP_PORTAL_OPEN') return;
-    const confirm = $('#worldMapConfirm');
-    $('#worldMapConfirmTitle').textContent = `是否傳送至${town.name ?? town.map}？`;
-    $('#worldMapConfirmCost').textContent = '傳送費用：免費';
-    $('#worldMapConfirmSubmit').textContent = '確定傳送';
-    confirm.classList.remove('hidden');
-    $('#worldMapConfirmCancel').onclick = () => closeWorldMap();
-    $('#worldMapConfirmSubmit').onclick = async () => {
-      const submit = $('#worldMapConfirmSubmit');
-      if (!worldMapTravelPresentation?.beginSubmission()) return;
-      submit.disabled = true;
-      try {
-        const result = await api('/api/world-map-teleport', {
-          method: 'POST', headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ mapId }),
-        });
-        if (result.reason === 'ALREADY_ON_TARGET_MAP') {
-          worldMapTravelPresentation.preflightRejected();
-          confirm.classList.add('hidden');
-          showWorldMapNotice('已在此城鎮');
-          return;
-        }
-        confirm.classList.add('hidden');
-        worldMapTravelPresentation.preflightAccepted({
-          mapId, name: town.name ?? town.map,
-        });
-        await waitForWorldMapAuthority((state) =>
-          state.player?.currentMap === mapId);
-        await refresh({ full: false });
-        worldMapTravelPresentation.authoritativeArrival(mapId);
-      } catch (error) {
-        if (!worldMapTravelPresentation.failed(error))
-          worldMapTravelPresentation.preflightRejected();
-        showWorldMapNotice(farmTargetBlockedMessage(error.message));
-        confirm.classList.add('hidden');
-      } finally { submit.disabled = false; }
-    };
-    $('#worldMapConfirmSubmit').focus();
-  };
-  const saved = farmMapAvailabilityData?.player?.savedTown?.map === mapId;
-  const physicallyHere = farmMapAvailabilityData?.player?.currentMap === mapId;
-  const save = document.createElement('button');
-  save.type = 'button';
-  save.textContent = saved ? '目前儲存據點' : '設為儲存據點';
-  save.disabled = saved || !physicallyHere;
-  if (!saved && !physicallyHere)
-    save.title = '請先抵達此儲存據點';
-  save.onclick = async () => {
-    save.disabled = true;
-    try {
-      await api('/api/saved-town', { method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ mapId }) });
-      await waitForWorldMapAuthority((state) => state.player?.savedTown?.map === mapId);
-      renderWorldMapDestinationList();
-      selectTownWorldMap(mapId);
-    } catch (error) {
-      showWorldMapNotice(farmTargetBlockedMessage(error.message));
-      save.disabled = false;
-    }
-  };
-  const controls = [title, info, action, save];
-  if (farmMapAvailabilityData?.maps?.some((row) =>
-    row.map === mapId && row.farmSelectionAvailable)) {
-    const farmView = document.createElement('button');
-    farmView.type = 'button';
-    farmView.textContent = '查看此地掛機';
-    farmView.onclick = () => void selectWorldMap(mapId);
-    controls.push(farmView);
+  $('#worldMapNotice').classList.add('hidden');
+  if (worldMapTravelPresentation?.state !== 'MAP_PORTAL_OPEN') return;
+  if (town.buttonState !== 'AVAILABLE') {
+    showWorldMapNotice(town.buttonState === 'ALREADY_ON_TARGET_MAP'
+      ? '已在此城鎮'
+      : town.buttonState === 'WORLD_MAP_TELEPORT_COOLDOWN'
+        ? `${town.cooldownRemaining} 秒後可再次傳送`
+        : '目前無法傳送至此地');
+    return;
   }
-  detail.replaceChildren(...controls);
+  const trigger = document.activeElement;
+  const confirm = $('#worldMapConfirm');
+  $('#worldMapConfirmTitle').textContent = `是否傳送至${town.name ?? town.map}？`;
+  $('#worldMapConfirmCost').textContent = '傳送費用：免費';
+  const submit = $('#worldMapConfirmSubmit');
+  submit.textContent = '確定傳送';
+  submit.disabled = false;
+  confirm.classList.remove('hidden');
+  $('#worldMapConfirmCancel').onclick = () => {
+    confirm.classList.add('hidden');
+    trigger?.focus();
+  };
+  submit.onclick = async () => {
+    if (!worldMapTravelPresentation?.beginSubmission()) return;
+    submit.disabled = true;
+    try {
+      const result = await api('/api/world-map-teleport', {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ mapId }),
+      });
+      if (result.reason === 'ALREADY_ON_TARGET_MAP') {
+        worldMapTravelPresentation.preflightRejected();
+        confirm.classList.add('hidden');
+        showWorldMapNotice('已在此城鎮');
+        return;
+      }
+      confirm.classList.add('hidden');
+      worldMapTravelPresentation.preflightAccepted({
+        mapId, name: town.name ?? town.map,
+      });
+      await waitForWorldMapAuthority((state) =>
+        state.player?.currentMap === mapId);
+      await refresh({ full: false });
+      worldMapTravelPresentation.authoritativeArrival(mapId);
+    } catch (error) {
+      if (!worldMapTravelPresentation.failed(error))
+        worldMapTravelPresentation.preflightRejected();
+      showWorldMapNotice(farmTargetBlockedMessage(error.message));
+      confirm.classList.add('hidden');
+    } finally { submit.disabled = false; }
+  };
+  submit.focus();
+}
+async function saveCurrentWorldMapTown(mapId) {
+  if (worldMapSavePending || farmMapAvailabilityData?.player?.currentMap !== mapId ||
+      !farmMapAvailabilityData?.towns?.some((town) => town.map === mapId) ||
+      farmMapAvailabilityData?.player?.savedTown?.map === mapId) return;
+  const save = $('#worldMapSaveCurrentTown');
+  worldMapSavePending = true;
+  save.disabled = true;
+  try {
+    await api('/api/saved-town', { method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ mapId }) });
+    await waitForWorldMapAuthority((state) => state.player?.savedTown?.map === mapId);
+    renderWorldMapDestinationList();
+    $('#worldMapStatus').textContent = '已設為儲存據點';
+  } catch (error) {
+    showWorldMapNotice(farmTargetBlockedMessage(error.message));
+  } finally {
+    worldMapSavePending = false;
+    save.disabled = false;
+  }
 }
 
 function syncDiscordUi(discord, { required = false } = {}) {
@@ -10825,6 +10834,7 @@ $('#openWorldMap').onclick = () =>
     $('#grindTargetSummary').textContent = error.message;
   });
 $('#closeWorldMap').onclick = closeWorldMap;
+$('#worldMapDetailBackdrop').onclick = () => closeWorldMapDetail();
 $('#persistentLifeTimelineToggle')?.addEventListener('click', () => {
   persistentLifeState.timelineOpen = !persistentLifeState.timelineOpen;
   renderPersistentLife();
@@ -10835,8 +10845,12 @@ $('#worldMapOverlay').addEventListener('click', (event) => {
 });
 addEventListener('keydown', (event) => {
   if (event.key !== 'Escape') return;
-  if (!$('#worldMapConfirm').classList.contains('hidden') ||
-      !$('#worldMapOverlay').classList.contains('hidden')) closeWorldMap();
+  if (!$('#worldMapConfirm').classList.contains('hidden')) {
+    const cancel = $('#worldMapConfirmCancel');
+    if (!cancel.disabled) cancel.click();
+  } else if (!$('#worldMapDetail').classList.contains('hidden')) {
+    closeWorldMapDetail();
+  } else if (!$('#worldMapOverlay').classList.contains('hidden')) closeWorldMap();
 });
 addEventListener('pagehide', () => worldMapTravelPresentation?.dispose());
 setInterval(() => {

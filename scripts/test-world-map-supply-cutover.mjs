@@ -57,6 +57,7 @@ const app = await readFile(join(root, 'ops/ro-stack/dashboard/app.js'), 'utf8');
 const dashboard = await readFile(join(root, 'ops/ro-stack/dashboard.mjs'), 'utf8');
 for (const id of ['worldMapCategoryTabs', 'worldMapRegionIndex',
   'worldMapSavedTown', 'worldMapSavedTownHint', 'worldMapConfirm',
+  'worldMapSaveCurrentTown', 'worldMapDetailBackdrop',
   'worldMapConfirmCancel', 'worldMapConfirmSubmit', 'worldMapArrivalToast'])
   assert.ok(html.includes(`id="${id}"`), id);
 assert.doesNotMatch(html, /worldMapTownLabels|world-map-town-labels/);
@@ -64,7 +65,8 @@ assert.match(app, /selectedWorldMapCategory === 'towns'\) selectTownWorldMap\(ro
 assert.match(app, /await waitForWorldMapAuthority\(\(state\) =>\s*state\.player\?\.currentMap === mapId\)/);
 assert.match(app, /worldMapTravelPresentation\.preflightAccepted\(/);
 assert.match(app, /playCue: playTravelCue/);
-assert.match(app, /detail\.replaceChildren\(\s*title,\s*controls,\s*teleportInfo/);
+assert.match(app, /detail\.replaceChildren\(\s*heading,\s*teleportInfo,\s*floorPicker/);
+assert.match(app, /saveCurrentWorldMapTown\(currentTown\.map\)/);
 assert.match(dashboard, /'SAVED_TOWN_REQUIRES_PRESENCE'/);
 assert.match(dashboard, /savedTownSetupRequired: !savedTown/);
 assert.match(app, /worldMapSavedTownHint'\)\.classList\.toggle\('hidden',[\s\S]*?savedTownSetupRequired !== true/);

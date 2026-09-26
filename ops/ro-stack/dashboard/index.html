@@ -1301,11 +1301,13 @@
                 <div id="worldMapNodes" class="world-map-regions"></div>
               </div>
             </div>
-            <aside id="worldMapDetail" class="world-map-detail">
-              <h3>尚未選擇地圖</h3>
-            </aside>
+            <div id="worldMapDetailBackdrop" class="world-map-detail-backdrop hidden" aria-hidden="true"></div>
+            <aside id="worldMapDetail" class="world-map-detail hidden" role="dialog" aria-modal="true" aria-labelledby="worldMapDetailTitle"></aside>
             <section class="world-map-destinations" aria-labelledby="worldMapListHeading">
-              <h3 id="worldMapListHeading">地圖清單</h3>
+              <div class="world-map-list-heading">
+                <h3 id="worldMapListHeading">地圖清單</h3>
+                <button id="worldMapSaveCurrentTown" type="button" class="hidden">設為儲存據點</button>
+              </div>
               <div id="worldMapCategoryTabs" class="world-map-category-tabs" role="tablist" aria-label="地圖分類"></div>
               <input id="worldMapRegionSearch" type="search" placeholder="搜尋地圖名稱" aria-label="搜尋地圖清單" />
               <div id="worldMapRegionIndex" class="world-map-region-index-list" role="tabpanel"></div>

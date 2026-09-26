@@ -1954,12 +1954,10 @@ button {
 .world-map-layout {
   display: grid;
   min-height: 0;
-  grid-template-columns: minmax(0, 1fr) minmax(270px, 340px);
-  grid-template-rows: minmax(0, 1fr) minmax(170px, 190px);
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) 220px;
 }
 .world-map-stage {
-  grid-column: 1;
-  grid-row: 1;
   min-height: 0;
   overflow: auto;
   padding: 8px;
@@ -2106,8 +2104,6 @@ button {
 }
 .world-map-destinations {
   display: grid;
-  grid-column: 1 / -1;
-  grid-row: 2;
   grid-template-rows: auto auto auto minmax(0, 1fr);
   gap: 4px;
   min-height: 0;
@@ -2121,9 +2117,19 @@ button {
   border-color: var(--ui-theme-bar-border);
   background: color-mix(in srgb, var(--ui-theme-bar-top) 14%, #f6f8f9);
 }
-.world-map-destinations h3 {
-  margin: 0 0 7px;
+.world-map-list-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.world-map-list-heading h3 {
+  margin: 0;
   font-size: 15px;
+}
+.world-map-list-heading button {
+  min-height: 32px;
+  padding: 4px 9px;
 }
 .world-map-category-tabs {
   display: flex;
@@ -2152,47 +2158,71 @@ button {
 }
 .world-map-region-index-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-content: start;
   gap: 5px;
   min-height: 0;
   overflow: auto;
 }
 .world-map-destination {
   display: grid;
-  gap: 2px;
+  align-content: center;
+  gap: 3px;
   min-width: 0;
-  min-height: 46px;
+  min-height: 52px;
   padding: 5px 8px;
-  text-align: left;
+  text-align: center;
 }
 .world-map-destination[data-category="towns"] {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 40px;
+  min-height: 48px;
 }
 .world-map-destination span {
   min-width: 0;
   overflow-wrap: anywhere;
+  line-height: 1.2;
 }
-.world-map-destination small {
-  color: #496174;
-}
-.world-map-destination[data-category="towns"] small {
-  flex: none;
-  margin-left: auto;
+.world-map-detail-backdrop {
+  position: fixed;
+  z-index: 1100;
+  inset: 0;
+  background: rgb(0 0 0 / 58%);
 }
 .world-map-detail {
-  grid-column: 2;
-  grid-row: 1;
-  min-height: 0;
+  position: fixed;
+  z-index: 1101;
+  top: 50%;
+  left: 50%;
+  width: min(560px, calc(100vw - 24px));
+  max-height: min(720px, calc(100dvh - 32px));
   overflow: auto;
-  padding: 16px;
-  border-left: 1px solid #99a8b4;
+  padding: 0 16px 16px;
+  transform: translate(-50%, -50%);
+  border: 1px solid #91a8bf;
   background: #f6f8f9;
+  box-shadow: 0 14px 46px #0008;
+}
+.world-map-detail-heading {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 -16px 12px;
+  padding: 7px 12px;
+  background: linear-gradient(#7e9cbb, #536f8b);
+  color: #fff;
+}
+:root[data-ui-theme]:not([data-ui-theme='default']) .world-map-detail-heading {
+  background: linear-gradient(var(--ui-theme-bar-top), var(--ui-theme-bar-bottom));
+}
+.world-map-detail-heading button {
+  flex: none;
+  min-height: 36px;
 }
 .world-map-detail h3 {
-  margin: 0 0 4px;
+  margin: 0;
+  font-size: 16px;
 }
 .world-map-floor-picker:empty {
   display: none;
@@ -2245,15 +2275,6 @@ button {
   background: #527b98;
   box-shadow: inset 0 0 0 1px #c8e0ef;
 }
-.world-map-detail .world-map-meta {
-  margin: 8px 0;
-  padding: 8px;
-  background: #e5ebef;
-}
-.world-map-detail .world-map-meta.locked {
-  color: #dfe8ed;
-  background: #536069;
-}
 .world-map-detail ul {
   padding-left: 20px;
 }
@@ -2264,14 +2285,6 @@ button {
   margin: 6px 0 10px;
   font-size: 12px;
   overflow-wrap: anywhere;
-}
-.world-map-route-note {
-  margin: 10px 0 0;
-  padding: 8px;
-  color: #263d4c;
-  background: #e9f2f6;
-  border-left: 3px solid #527b98;
-  font-size: 12px;
 }
 body.world-map-open {
   overflow: hidden;
@@ -2286,10 +2299,7 @@ body.world-map-open {
   }
   .world-map-layout {
     grid-template-columns: 1fr;
-    grid-template-rows: minmax(250px, 1fr) 210px minmax(150px, 30vh);
-  }
-  .world-map-layout:has(.world-map-detail:not([data-selected])) {
-    grid-template-rows: minmax(320px, 1fr) minmax(260px, 1fr) 105px;
+    grid-template-rows: minmax(250px, 1fr) minmax(320px, 1.25fr);
   }
   .world-map-stage {
     padding: 4px;
@@ -2303,20 +2313,16 @@ body.world-map-open {
     width: max(100%, 38px);
     height: max(100%, 38px);
   }
-  .world-map-detail {
-    grid-column: 1;
-    grid-row: 3;
-    border-top: 1px solid #99a8b4;
-    border-left: 0;
-  }
   .world-map-detail button {
     min-height: 44px;
     white-space: normal;
     touch-action: manipulation;
   }
-  .world-map-destinations {
-    grid-column: 1;
-    grid-row: 2;
+  .world-map-destination {
+    font-size: 12px;
+  }
+  .world-map-destination.long-name {
+    font-size: 11px;
   }
 }
 .auth {
