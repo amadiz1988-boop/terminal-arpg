@@ -31,7 +31,7 @@ for (const [town, service] of Object.entries(SUPPLY_TOWN_STORAGE)) {
   assert.equal(service.map, town);
   assert.deepEqual(buildTerminalRoute(graph, town, service.map, service.x, service.y),
     [{ map: town, x: service.x, y: service.y }]);
-  assert.equal(service.storageMenuIndex, town === 'izlude' ? 1 : 2);
+  assert.equal(service.storageMenuIndex, 2);
 }
 assert.match(dashboard, /storageServiceRoute, shopServiceRoute/);
 

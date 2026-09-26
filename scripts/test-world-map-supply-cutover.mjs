@@ -37,7 +37,7 @@ assert.equal(decision('farm', false, 1001).reason, 'WORLD_MAP_TELEPORT_COOLDOWN'
 const nativeSource = await readFile(join(native, 'src/map/persistent_agent.cpp'), 'utf8');
 assert.match(nativeSource, /void process_set_saved_town\(/);
 assert.match(nativeSource, /target_map != mapindex_id2name\(sd->mapindex\)/);
-assert.match(nativeSource, /pc_setsavepoint\(sd, sd->mapindex, sd->x, sd->y\)/);
+assert.match(nativeSource, /pc_setsavepoint\(sd, sd->mapindex, save_x, save_y\)/);
 assert.match(nativeSource, /SUPPLY_RETURN_FUNDS_BLOCKED/);
 assert.match(nativeSource, /supply_shop_purchase_cost\(sd, nd, supply_item_id, quantity\)/);
 assert.match(nativeSource, /SUPPLY_RETURN_TELEPORT_CONFIRMED/);
