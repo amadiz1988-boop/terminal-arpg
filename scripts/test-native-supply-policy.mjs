@@ -1,21 +1,23 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import { configCapability } from '../ops/ro-stack/dashboard/config-capabilities.mjs';
+import { configCapability, M1_EXECUTOR_PATHS, m1ConfigExecutionCapabilities } from '../ops/ro-stack/dashboard/config-capabilities.mjs';
 import { defaultCanonicalConfig } from '../ops/ro-stack/dashboard/config-schema.mjs';
 import { nativeSupplyPolicy } from '../ops/ro-stack/persistent-agent/native-supply-policy.mjs';
 
-const dashboardSource = readFileSync(new URL('../ops/ro-stack/dashboard.mjs', import.meta.url), 'utf8');
-const attestedPaths = dashboardSource.match(/const nativeSupplyConfigPaths = \[([\s\S]*?)\];/)?.[1]
-  ?.match(/'supply\.[^']+'/g)?.map((path) => path.slice(1, -1));
+const attestedPaths = M1_EXECUTOR_PATHS.filter((path) => path.startsWith('supply.'));
 assert.deepEqual(attestedPaths, [
   'supply.enabled', 'supply.services.buy.enabled', 'supply.services.buy.rules',
+  'supply.weightTriggerPercent', 'supply.inventorySlotTrigger',
+  'supply.services.storage.enabled', 'supply.services.sell.enabled', 'supply.itemRules',
 ]);
-const attestation = { editable: true, capabilities: Object.fromEntries(
-  attestedPaths.map((path) => [path, 'SUPPORTED'])) };
+const attestation = { editable: true, capabilities: m1ConfigExecutionCapabilities(true, true) };
 for (const path of [
   'supply.weightTriggerPercent', 'supply.inventorySlotTrigger',
   'supply.services.storage.enabled', 'supply.services.sell.enabled', 'supply.itemRules',
-]) assert.equal(configCapability(attestation, path), 'UNAVAILABLE', path);
+]) assert.equal(configCapability(attestation, path), 'SUPPORTED', path);
+for (const path of [
+  'supply.services.storage.npc', 'supply.services.sell.npc',
+  'supply.services.withdraw.enabled', 'supply.services.withdraw.rules',
+]) assert.equal(configCapability(attestation, path), 'PARTIAL', path);
 
 const config = defaultCanonicalConfig();
 const policy = nativeSupplyPolicy(config);
