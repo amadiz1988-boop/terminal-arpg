@@ -125,6 +125,22 @@ function adoptLauncher(x,path=legacyLauncherPathFixture,hash=launcherPreimage) {
   console.log(`PASS ${++count} exact World Map source pair has rollback REMOVE semantics`);
 }
 {
+  const x=deltaFixture();for(const path of worldMapPaths)addAction(x,path);
+  const deployed={files:x.oldManifest.files.map(row=>({...row,sha256:'D'.repeat(64)}))};
+  for(const row of x.nextManifest.files)if(deployed.files.some(old=>old.path===row.path))
+    row.production_preimage_sha256='D'.repeat(64);
+  const delta=validateManifestDelta(x.oldManifest,x.nextManifest,worldMapReason,true,deployed);
+  assert.deepEqual(delta.added_paths,worldMapPaths);
+  assert.deepEqual(delta.rollback_remove_paths,worldMapPaths);
+  console.log(`PASS ${++count} superseded un-deployed candidate uses deployed Web preimages`);
+}
+{
+  const x=deltaFixture();for(const path of worldMapPaths)addAction(x,path);
+  const deployed={files:x.oldManifest.files.map(row=>({...row,sha256:'D'.repeat(64)}))};
+  assert.throws(()=>validateManifestDelta(x.oldManifest,x.nextManifest,worldMapReason,true,deployed),/EXISTING_WEB_PREIMAGE_MISMATCH/);
+  console.log(`PASS ${++count} superseded candidate bytes cannot stand in for deployed preimages`);
+}
+{
   const x=deltaFixture();addAction(x,worldMapPaths[0]);
   assert.throws(()=>validateManifestDelta(x.oldManifest,x.nextManifest,worldMapReason,true),/WEB_MANIFEST_ADDITION_UNAPPROVED/);
   console.log(`PASS ${++count} incomplete World Map source pair rejected`);
@@ -236,6 +252,10 @@ test('Native stage receipt missing',x=>{x.nativeValid=false;},'NATIVE_STAGE_RECE
 test('baseline already GitHub First',x=>{x.state.legacy_bootstrap_available=false;},'FIRST_PROMOTION_NOT_STAGED');
 test('Web source preflight failed',x=>{x.preflight.sourceRegression=false;},'WEB_AMENDMENT_PREFLIGHT_FAILED');
 test('old Web SHA mismatch',x=>{x.oldSha='e'.repeat(40);},'PENDING_PROMOTION_IDENTITY_MISMATCH|WEB_SHA_IDENTITY_MISMATCH');
+test('un-deployed candidate requires explicit verified chain',x=>{x.oldReceipt.web_git_sha='d'.repeat(40);},'OLD_WEB_RECEIPT_INVALID');
+test('verified un-deployed candidate accepts earlier live receipt',x=>{
+  x.oldReceipt.web_git_sha='d'.repeat(40);x.pendingCandidateAfterAmendment=true;
+});
 test('new manifest admission failed',x=>{x.preflight.manifestAdmission=false;},'WEB_AMENDMENT_PREFLIGHT_FAILED');
 test('rollback coverage failed',x=>{x.preflight.rollbackCoverage=false;},'WEB_AMENDMENT_PREFLIGHT_FAILED');
 test('capability loss',x=>{x.preflight.capabilitySuperset=false;},'WEB_AMENDMENT_PREFLIGHT_FAILED');

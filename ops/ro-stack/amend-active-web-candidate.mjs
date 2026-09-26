@@ -6,7 +6,7 @@ import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { admission, readManifest, validateHeader, legacyLauncherPath, legacyLauncherPreimageSha } from './web-complete-manifest.mjs';
+import { admission, readManifest, validateHeader, verifyDeployed, legacyLauncherPath, legacyLauncherPreimageSha } from './web-complete-manifest.mjs';
 import { FIRST_PROMOTION, firstPromotionEvidence, legacyIdentity, pendingPath, consumedPath, readJson } from './legacy-production-baseline.mjs';
 import { nativeReceiptValid, activeNativeReceiptPath, equalHash } from './native-promotion-contract.mjs';
 import { capabilityRegistry } from './production-promotion-gate.mjs';
@@ -61,7 +61,7 @@ const atomic = (file, value) => {
 };
 
 export function validateActiveWebAmendment({ state, lease, pending, oldManifest, nextManifest, oldReceipt,
-  leaseId, owner, oldSha, newSha, nativeValid, preflight }) {
+  leaseId, owner, oldSha, newSha, nativeValid, preflight, pendingCandidateAfterAmendment=false }) {
   if (!legacyIdentity(state) || state.baseline_mode !== 'LEGACY_PRE_GITHUB_FIRST' ||
       state.production_drift !== 'OPEN' || state.first_promotion_phase !== 'FIRST_PROMOTION_NATIVE_STAGE_COMPLETE') fail('FIRST_PROMOTION_NOT_STAGED');
   if (lease?.status !== 'ACTIVE' || lease.promotion_mode !== FIRST_PROMOTION || lease.emergency ||
@@ -71,7 +71,8 @@ export function validateActiveWebAmendment({ state, lease, pending, oldManifest,
       !pending.native_stage_reconciled || pending.native_stage !== 'NATIVE_STAGE_COMPLETE') fail('PENDING_PROMOTION_IDENTITY_MISMATCH');
   if (!sha(oldSha) || !sha(newSha) || oldSha === newSha || lease.web_deploy_git_sha !== oldSha ||
       oldManifest.web_git_sha !== oldSha || nextManifest.web_git_sha !== newSha) fail('WEB_SHA_IDENTITY_MISMATCH');
-  if (oldReceipt?.result !== 'CANDIDATE_ACTIVE' || oldReceipt.web_git_sha !== oldSha ||
+  if (oldReceipt?.result !== 'CANDIDATE_ACTIVE' ||
+      !(oldReceipt.web_git_sha === oldSha || pendingCandidateAfterAmendment === true) ||
       oldReceipt.lease_id !== leaseId || oldReceipt.owner_task_id !== owner) fail('OLD_WEB_RECEIPT_INVALID');
   if (lease.native_deploy_git_sha !== pending.native_git_sha ||
       nextManifest.candidate_native_commit !== lease.native_deploy_git_sha ||
@@ -89,17 +90,20 @@ export function duplicateAmendmentIsApplied(audit, lease, pending, {leaseId, own
     pending.lease_id===leaseId && pending.owner_task_id===owner;
 }
 
-export function validateManifestDelta(oldManifest, nextManifest, reason, rollbackCovered) {
+export function validateManifestDelta(oldManifest, nextManifest, reason, rollbackCovered, deployedManifest=oldManifest) {
   const oldRows=new Map(oldManifest.files.map(row=>[row.path,row]));
   const nextRows=new Map(nextManifest.files.map(row=>[row.path,row]));
+  const deployedRows=new Map(deployedManifest.files.map(row=>[row.path,row]));
   if (oldRows.size!==oldManifest.files.length || nextRows.size!==nextManifest.files.length)
     fail('MANIFEST_DELTA_DUPLICATE_PATH');
+  if (deployedRows.size!==oldRows.size || [...oldRows.keys()].some(path=>!deployedRows.has(path)))
+    fail('PRODUCTION_BASELINE_PATH_MISMATCH');
   const delta={unchanged_paths:[],modified_existing_paths:[],added_paths:[],removed_paths:[],
     absent_preimage_paths:[],rollback_remove_paths:[],rollback_restore_paths:[]};
   for (const [path,oldRow] of oldRows) {
     const nextRow=nextRows.get(path);
     if (!nextRow) { delta.removed_paths.push(path); continue; }
-    if (!equalHash(nextRow.production_preimage_sha256,oldRow.sha256) || nextRow.production_preimage==='ABSENT')
+    if (!equalHash(nextRow.production_preimage_sha256,deployedRows.get(path).sha256) || nextRow.production_preimage==='ABSENT')
       fail(`EXISTING_WEB_PREIMAGE_MISMATCH:${path}`);
     (equalHash(nextRow.sha256,oldRow.sha256) ? delta.unchanged_paths : delta.modified_existing_paths).push(path);
   }
@@ -174,16 +178,32 @@ export function planActiveWebAmendment({root,owner,leaseId,oldSha,newSha,newMani
   const oldReceiptRelative=path.relative(root,oldReceiptFile).replaceAll('\\','/');
   if (!oldReceiptRelative.startsWith('.local/ro-stack/dashboard/deploy-receipts/') ||
       inside(root,oldReceiptRelative) !== path.resolve(oldReceiptFile)) fail('OLD_WEB_RECEIPT_PATH_INVALID');
+  const deployedManifestFile=path.join(path.dirname(oldReceiptFile),'manifest.json');
   if (!equalHash(digest(oldManifestFile),lease.admission_manifest_sha256) ||
       oldManifest.manifest_digest!==lease.manifest_digest ||
-      !equalHash(oldReceipt.manifest_sha256,lease.admission_manifest_sha256) ||
-      !fs.existsSync(path.join(path.dirname(oldReceiptFile),'manifest.json')) ||
-      !equalHash(digest(path.join(path.dirname(oldReceiptFile),'manifest.json')),lease.admission_manifest_sha256)) fail('OLD_WEB_MANIFEST_INVALID');
+      !fs.existsSync(deployedManifestFile) ||
+      !equalHash(digest(deployedManifestFile),oldReceipt.manifest_sha256)) fail('OLD_WEB_MANIFEST_INVALID');
+  const pendingCandidateAfterAmendment=oldReceipt.web_git_sha!==oldSha;
+  const previous=lease.web_candidate_amendments?.at(-1);
+  if (pendingCandidateAfterAmendment &&
+      (previous?.new_web_git_sha!==oldSha || previous.old_web_git_sha!==oldReceipt.web_git_sha ||
+       previous.previous_web_candidate_receipt!==oldReceiptRelative ||
+       !equalHash(previous.previous_web_candidate_receipt_sha256,digest(oldReceiptFile))))
+    fail('UNDEPLOYED_CANDIDATE_CHAIN_INVALID');
+  if (!pendingCandidateAfterAmendment &&
+      !equalHash(oldReceipt.manifest_sha256,lease.admission_manifest_sha256)) fail('OLD_WEB_MANIFEST_INVALID');
+  const deployedManifest=readManifest(deployedManifestFile);
+  validateHeader(deployedManifest);
+  if (deployedManifest.web_git_sha!==oldReceipt.web_git_sha ||
+      oldReceipt.deployment_result!=='COMPLETE_CANDIDATE_ACTIVE' ||
+      oldReceipt.PRODUCTION_FILESET_MATCHES_MANIFEST!==true || oldReceipt.rollback_performed ||
+      !oldReceipt.rollback_reference) fail('OLD_WEB_RECEIPT_INVALID');
+  verifyDeployed(deployedManifest,root);
   const nativeValid=nativeStageValid(root,state,lease,pending);
   const admitted=admission(newManifestFile,root);
   const rollbackCovered=admitted.ROLLBACK_UNCOVERED_PATH_COUNT===0 &&
     admitted.ROLLBACK_COVERAGE_FILE_COUNT===nextManifest.file_count;
-  const classified=validateManifestDelta(oldManifest,nextManifest,reason,rollbackCovered);
+  const classified=validateManifestDelta(oldManifest,nextManifest,reason,rollbackCovered,deployedManifest);
   const delta={unchanged_path_count:classified.unchanged_paths.length,
     modified_existing_path_count:classified.modified_existing_paths.length,
     added_paths:classified.added_paths,removed_paths:classified.removed_paths,
@@ -204,7 +224,7 @@ export function planActiveWebAmendment({root,owner,leaseId,oldSha,newSha,newMani
       (!targeted || targeted.includes('START_FARM_HYBRID_SKILL_DEFAULT_PASS cases=11')),
     manifestAdmission:admitted.PRESTAGE_COMPLETE===true,rollbackCoverage:rollbackCovered,
     capabilitySuperset:capabilitiesPreserved(nextManifest,lease,state),assetAuthority:admitted.assetPackage?.valid===true,firstEvidence};
-  validateActiveWebAmendment({state,lease,pending,oldManifest,nextManifest,oldReceipt,leaseId,owner,oldSha,newSha,nativeValid,preflight});
+  validateActiveWebAmendment({state,lease,pending,oldManifest,nextManifest,oldReceipt,leaseId,owner,oldSha,newSha,nativeValid,preflight,pendingCandidateAfterAmendment});
   if (sourceFixCheckpoint!==newSha || !reason?.trim()) fail('AMENDMENT_REASON_REQUIRED');
   const auditRelative=`.local/ro-stack/web-candidate-amendment-${leaseId}-${newSha.slice(0,12)}.json`;
   const auditFile=inside(root,auditRelative);
@@ -215,7 +235,8 @@ export function planActiveWebAmendment({root,owner,leaseId,oldSha,newSha,newMani
     prior_web_candidate_receipts:[...(lease.web_candidate_amendments || []).map(item=>({
       path:item.previous_web_candidate_receipt,sha256:item.previous_web_candidate_receipt_sha256})),
       {path:oldReceiptRelative,sha256:digest(oldReceiptFile)}],
-    old_manifest_sha256:digest(oldManifestFile),new_manifest_sha256:digest(newManifestFile),
+    old_manifest_sha256:digest(oldManifestFile),deployed_preimage_manifest_sha256:digest(deployedManifestFile),
+    superseded_candidate_was_deployed:!pendingCandidateAfterAmendment,new_manifest_sha256:digest(newManifestFile),
     new_manifest_digest:nextManifest.manifest_digest,manifest_delta:delta,
     governance_sha:run(governanceRoot,'git',['rev-parse','HEAD']),
     amendment_evidence_digest:createHash('sha256').update(JSON.stringify({preflight,offline,migration,targeted,evidence_sha256:digest(evidenceFile)})).digest('hex').toUpperCase(),

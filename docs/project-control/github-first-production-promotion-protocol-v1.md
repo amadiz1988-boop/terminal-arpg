@@ -363,6 +363,15 @@ governance code is on GitHub `main`. Supply `--production-root`, `--owner`,
 `--lease`, `--old-web-sha`, `--new-web-sha`, `--manifest`, `--old-web-receipt`,
 `--source-fix-checkpoint`, and `--reason`.
 
+If the lease's latest Web SHA was amended but never deployed, the same tool may
+replace that pending candidate. Its `--old-web-receipt` must be the last deployed
+Web receipt named by the final amendment audit. Admission verifies the entire
+SHA amendment chain, the deployed receipt and all current Production bytes. The
+new manifest uses that deployed receipt's file hashes as rollback preimages;
+the superseded candidate's un-deployed bytes cannot stand in for Production.
+The old and new candidate path sets must be preserved apart from an explicitly
+approved, absent-preimage additive pair. This does not start or replace Native.
+
 The action keeps the lease ID and Native stage, advances the lease and pending
 Web SHA together, and writes an immutable amendment audit receipt. The old Web
 deployment receipt remains in place. The audit pins the new manifest digest,
