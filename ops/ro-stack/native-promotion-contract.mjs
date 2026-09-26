@@ -362,7 +362,24 @@ export function verifyNativeStage(root, state, lease, webManifestHash) {
         const current=currentLeaseWebReceipt(root,lease);
         verifyWebReceipt(leaseWebReceiptArgs(root,lease,current,digest(boundedPath(root,current))),root,lease);
       }
-      check(previousReceipt.web_git_sha===prior.old_web_git_sha,'PREVIOUS_WEB_SHA_MISMATCH');
+      if (previousReceipt.web_git_sha!==prior.old_web_git_sha) {
+        check(audit.superseded_candidate_was_deployed===false,'PREVIOUS_WEB_SHA_MISMATCH');
+        let superseded=prior.old_web_git_sha,bridged=false;
+        for (let index=history.length-2;index>=0;index--) {
+          const item=history[index];
+          check(item.new_web_git_sha===superseded &&
+            item.previous_web_candidate_receipt===prior.previous_web_candidate_receipt &&
+            equalHash(item.previous_web_candidate_receipt_sha256,prior.previous_web_candidate_receipt_sha256) &&
+            equalHash(digest(boundedPath(root,item.audit_receipt)),item.audit_sha256),
+            'UNDEPLOYED_WEB_AMENDMENT_CHAIN_INVALID');
+          const earlier=readJson(boundedPath(root,item.audit_receipt));
+          check(earlier.lease_id===lease.lease_id && earlier.old_web_git_sha===item.old_web_git_sha &&
+            earlier.new_web_git_sha===item.new_web_git_sha,'UNDEPLOYED_WEB_AMENDMENT_AUDIT_INVALID');
+          superseded=item.old_web_git_sha;
+          if (superseded===previousReceipt.web_git_sha) { bridged=true;break; }
+        }
+        check(bridged,'PREVIOUS_WEB_SHA_MISMATCH');
+      }
       check(r.artifacts.every(item=>equalHash(digest(boundedPath(root,item.path)),item.sha256)),'NATIVE_STAGE_BYTES_CHANGED');
       const legacyManifest=readJson(boundedPath(root,state.current_web_artifact_manifest));
       check(equalHash(digest(boundedPath(root,state.current_web_artifact_manifest)),state.current_web_manifest_sha256),'LEGACY_MANIFEST_CHANGED');
