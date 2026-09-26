@@ -292,5 +292,30 @@ assert.ok(deployed);
     pass('25 altered candidate config blocks before runtime stop');
   } finally { x.cleanup(); }
 }
-assert.equal(count, 25);
+{
+  const x = fixture();
+  try {
+    applyNativeAmendment(plan(x));
+    const rt = runtime(x);
+    await assert.rejects(deployAmendedNative({ root: x.root, owner: OWNER, leaseId: LEASE,
+      adapter: rt.adapter, now: rt.now, timing: rt.timing,
+      policy: { ...AMENDMENT, reason: 'M1_SAVED_TOWN_NOOP_VALIDATOR_V1' } }),
+    /NATIVE_CONFIG_DEPLOYMENT_REQUIRED/);
+    pass('26 Saved Town amendment requires a frozen config package');
+  } finally { x.cleanup(); }
+}
+{
+  const x = fixture();
+  try {
+    const cfg = withConfigDeployment(x);
+    cfg.policy.reason = 'M1_SAVED_TOWN_NOOP_VALIDATOR_V1';
+    applyNativeAmendment(plan(x));
+    const rt = runtime(x);
+    await deployAmendedNative({ root: x.root, owner: OWNER, leaseId: LEASE,
+      adapter: rt.adapter, now: rt.now, timing: rt.timing, policy: cfg.policy });
+    assert.deepEqual(fs.readFileSync(path.join(x.root, cfg.productionPath)), cfg.next);
+    pass('27 Saved Town amendment deploys exact frozen config bytes');
+  } finally { x.cleanup(); }
+}
+assert.equal(count, 27);
 console.log(`NATIVE_CANDIDATE_AMENDMENT_TESTS=PASS COUNT=${count}`);

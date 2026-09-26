@@ -431,7 +431,7 @@ export async function deployAmendedNative({ root, owner, leaseId, adapter, now =
       equalHash(digest(boundedPath(base, saved.path)), item.sha256))),
   'INTERMEDIATE_ROLLBACK_NOT_READY');
   const config = m.config_deployment;
-  check(policy.reason !== 'M1_MOROCC_NOOP_DEATH_MAINTENANCE_V1' || config,
+  check(!['M1_MOROCC_NOOP_DEATH_MAINTENANCE_V1', 'M1_SAVED_TOWN_NOOP_VALIDATOR_V1'].includes(policy.reason) || config,
     'NATIVE_CONFIG_DEPLOYMENT_REQUIRED');
   if (config) check(config.text_transform === 'NONE' &&
     config.source_path === 'conf/persistent_agent_commands.json' &&

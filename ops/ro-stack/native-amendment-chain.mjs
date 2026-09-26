@@ -244,6 +244,15 @@ export const M1_MOROCC_NOOP_DEATH_MAINTENANCE_AMENDMENT = Object.freeze({
     'tools/pa-command-contract/test-m1-supply-policy.cpp',
   ]),
 });
+export const M1_SAVED_TOWN_NOOP_VALIDATOR_AMENDMENT = Object.freeze({
+  reason: 'M1_SAVED_TOWN_NOOP_VALIDATOR_V1',
+  scope: 'M1_SAVED_TOWN_NOOP_VALIDATOR_V1',
+  sourcePaths: Object.freeze([
+    'src/map/persistent_agent.cpp',
+    'tools/pa-command-contract/Test-M1DeathMaintenanceSource.ps1',
+    'tools/pa-kafra-save/build-and-test.ps1',
+  ]),
+});
 export const APPROVED_NATIVE_AMENDMENTS = Object.freeze([
   M1_SECOND_NATIVE_AMENDMENT, M1_INVENTORY_MAINTENANCE_NATIVE_AMENDMENT,
   M1_INVENTORY_PROJECTION_CORRECTION, M1_FARM_WORLD_TELEPORT_SPAWN_CORRECTION,
@@ -259,6 +268,7 @@ export const APPROVED_NATIVE_AMENDMENTS = Object.freeze([
   ORIGINAL_HUNTING_LABEL_NATIVE_ADMISSION_AMENDMENT,
   M1_DEATH_RETURN_SESSION_LIFETIME_RECOVERY_AMENDMENT,
   M1_MOROCC_NOOP_DEATH_MAINTENANCE_AMENDMENT,
+  M1_SAVED_TOWN_NOOP_VALIDATOR_AMENDMENT,
 ]);
 export const approvedNativeAmendment = reason =>
   APPROVED_NATIVE_AMENDMENTS.find(item => item.reason === reason) ?? null;

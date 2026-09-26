@@ -38,10 +38,11 @@ const sourceDiff = (src, previous, next) => {
   return { scope: approved.scope, files: names };
 };
 const configDeployment = (buildRoot, prod, authority, build) => {
-  if (approved.reason !== 'M1_MOROCC_NOOP_DEATH_MAINTENANCE_V1') return null;
+  if (!['M1_MOROCC_NOOP_DEATH_MAINTENANCE_V1', 'M1_SAVED_TOWN_NOOP_VALIDATOR_V1'].includes(approved.reason)) return null;
   const pin = authority.deployment_provenance, item = build.config_artifacts?.[0];
   const receipt = path.join(buildRoot, 'build-receipt.json');
-  need(pin?.model === 'GIT_BLOB_PLUS_DEPLOYMENT_BYTES' && pin.text_transform === 'NONE' &&
+  need(['GIT_BLOB_PLUS_DEPLOYMENT_BYTES', 'SOURCE_SHA_LOCKED_REBUILD'].includes(pin?.model) &&
+    pin.text_transform === 'NONE' &&
     pin.native_git_sha === build.native_git_sha && equalHash(digest(receipt), pin.build_receipt_sha256) &&
     equalHash(build.binary_sha256, pin.map_binary_sha256) &&
     item?.source_path === pin.config_source_path && item.source_git_sha === build.native_git_sha &&
@@ -212,7 +213,7 @@ export function planNextNativeAmendment({ root, owner, leaseId, manifestFile, ma
       output.includes('M1_ECONOMY_TEST_PLAYER_SOURCE_PASS'));
   const ir = manifest.rollback_reference?.intermediate_rollback;
   const config = manifest.config_deployment;
-  const configReady = approved.reason !== 'M1_MOROCC_NOOP_DEATH_MAINTENANCE_V1' ||
+  const configReady = !['M1_MOROCC_NOOP_DEATH_MAINTENANCE_V1', 'M1_SAVED_TOWN_NOOP_VALIDATOR_V1'].includes(approved.reason) ||
     (config?.text_transform === 'NONE' && config.source_git_sha === build.native_git_sha &&
       config.source_blob_oid === build.config_artifacts?.[0]?.source_blob_oid &&
       equalHash(config.sha256, build.config_artifacts?.[0]?.sha256) &&

@@ -22,6 +22,7 @@ import { HISTORICAL_NATIVE_AMENDMENT as old, M1_SECOND_NATIVE_AMENDMENT as polic
   ORIGINAL_HUNTING_LABEL_NATIVE_ADMISSION_AMENDMENT as huntingAdmission,
   M1_DEATH_RETURN_SESSION_LIFETIME_RECOVERY_AMENDMENT as incidentRecovery,
   M1_MOROCC_NOOP_DEATH_MAINTENANCE_AMENDMENT as moroccNoop,
+  M1_SAVED_TOWN_NOOP_VALIDATOR_AMENDMENT as savedTownNoop,
   validateNativeAmendmentHistory, validateHistoricalNativeAnchor, validateNextNativeAmendment,
   applyNextNativeAmendment, deployedNativeRuntimeMatches } from '../native-amendment-chain.mjs';
 import { retirementDecision } from '../native-candidate-amendment.mjs';
@@ -396,6 +397,15 @@ test('Morocc no-op death maintenance admits only the reviewed four-file diff', (
     'tools/pa-command-contract/test-m1-supply-policy.cpp',
   ]);
   assert.equal(moroccNoop.sourcePaths.includes('conf/persistent_agent_commands.json'), false);
+});
+test('Saved Town no-op validator admits only the reviewed three-file diff', () => {
+  assert.equal(savedTownNoop.reason, 'M1_SAVED_TOWN_NOOP_VALIDATOR_V1');
+  assert.deepEqual(savedTownNoop.sourcePaths, [
+    'src/map/persistent_agent.cpp',
+    'tools/pa-command-contract/Test-M1DeathMaintenanceSource.ps1',
+    'tools/pa-kafra-save/build-and-test.ps1',
+  ]);
+  assert.equal(savedTownNoop.sourcePaths.includes('conf/persistent_agent_commands.json'), false);
 });
 {
   const mapHash = 'A'.repeat(64);
