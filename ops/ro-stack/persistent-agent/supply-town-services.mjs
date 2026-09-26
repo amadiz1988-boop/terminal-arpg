@@ -13,12 +13,12 @@ export const SUPPLY_TOWN_SERVICES = Object.freeze({
 
 // Canonical rAthena npc/kafras/kafras.txt and npc/re/kafras/kafras.txt.
 // F_Kafra in npc/kafras/functions_kafras.txt displays Storage at index 2
-// for menu 0; Izlude's duplicated menu 2 displays it at index 1. Native
+// for menu 0; Izlude calls F_Kafra with menu 0 and also uses index 2. Native
 // verifies the observed dialog before selecting an option.
 export const SUPPLY_TOWN_STORAGE = Object.freeze({
   prontera: { map: 'prontera', x: 151, y: 29, npc: 'kaf_prontera2', storageMenuIndex: 2 },
   geffen: { map: 'geffen', x: 120, y: 62, npc: 'kaf_geffen', storageMenuIndex: 2 },
-  izlude: { map: 'izlude', x: 128, y: 148, npc: 'Kafra Employee#iz', storageMenuIndex: 1 },
+  izlude: { map: 'izlude', x: 128, y: 148, npc: 'Kafra Employee#iz', storageMenuIndex: 2 },
   payon: { map: 'payon', x: 181, y: 104, npc: 'kaf_payon', storageMenuIndex: 2 },
   alberta: { map: 'alberta', x: 113, y: 60, npc: 'kaf_alberta2', storageMenuIndex: 2 },
   comodo: { map: 'comodo', x: 195, y: 150, npc: 'kaf_comodo', storageMenuIndex: 2 },

@@ -6313,6 +6313,7 @@ const supplyPhaseLabels = Object.freeze({
   RETURN_TO_FARM: '返回練功地圖',
   // M1_INVENTORY_MAINTENANCE_V1 authoritative Native phases.
   INVENTORY_MAINTENANCE: '背包整理中（存倉／販售）',
+  INV_MAINT_BLOCKED: '背包整理受阻，已安全暫停',
   INVENTORY_MAINTENANCE_BLOCKED: '背包整理受阻，已安全暫停',
   INVENTORY_CAPACITY_BLOCKED: '負重過高，暫停攻擊',
 });

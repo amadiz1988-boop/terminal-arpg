@@ -86,7 +86,8 @@ export function prepareNextNativeCandidate({ buildRoot, prod, authority,
   need(r.status === 0 && output.includes('M1_SETTINGS_EXECUTOR_TEST_PASS') &&
     output.includes('M1_FIXTURE_SECURITY_TEST_PASS') &&
     (!['M1_ECONOMY_TEST_PLAYER_V1', 'M1_ECONOMY_STORAGE_SKILL_FIXTURE_V1',
-      'M1_ECONOMY_ZERO_LEVEL_SKILL_FIXTURE_V1'].includes(approved.reason) ||
+      'M1_ECONOMY_ZERO_LEVEL_SKILL_FIXTURE_V1',
+      'M1_ECONOMY_STORAGE_MENU_STATE_V1'].includes(approved.reason) ||
       output.includes('M1_ECONOMY_TEST_PLAYER_SOURCE_PASS')) &&
     git(src, 'status', '--porcelain=v1', '--untracked-files=all') === '',
   'M1_V15_DIRECT_SUITE_FAILED');

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { KAFRA_CONTENT, resolveKafraDestination, kafraContextForPlan }
   from './kafra-content.mjs';
 import { planRelocation } from './relocation-policy.mjs';
+import { SUPPLY_TOWN_STORAGE } from './supply-town-services.mjs';
 
 let executed = 0; let failures = 0;
 function check(id, fn) {
@@ -36,6 +37,10 @@ check('case_02_npc_identity_source_proven', () => {
     assert.ok(KAFRA_CONTENT[id].npcNameSource);
     assert.ok(KAFRA_CONTENT[id].npcQuery);
   }
+});
+
+check('case_02b_izlude_storage_menu_matches_f_kafra_menu_zero', () => {
+  assert.equal(SUPPLY_TOWN_STORAGE.izlude.storageMenuIndex, 2);
 });
 
 check('case_03_save_point_exact', () => {

@@ -17,6 +17,7 @@ import { HISTORICAL_NATIVE_AMENDMENT as old, M1_SECOND_NATIVE_AMENDMENT as polic
   M1_ECONOMY_TEST_PLAYER_AMENDMENT as economyTestPlayer,
   M1_ECONOMY_STORAGE_FIXTURE_AMENDMENT as economyStorageFixture,
   M1_ECONOMY_ZERO_LEVEL_FIXTURE_AMENDMENT as economyZeroLevelFixture,
+  M1_ECONOMY_STORAGE_MENU_STATE_AMENDMENT as economyStorageMenuState,
   validateNativeAmendmentHistory, validateHistoricalNativeAnchor, validateNextNativeAmendment,
   applyNextNativeAmendment, deployedNativeRuntimeMatches } from '../native-amendment-chain.mjs';
 import { retirementDecision } from '../native-candidate-amendment.mjs';
@@ -338,6 +339,14 @@ test('zero-level skill fixture has a new reason and preserves exact source scope
   assert.equal(economyZeroLevelFixture.reason, 'M1_ECONOMY_ZERO_LEVEL_SKILL_FIXTURE_V1');
   assert.equal(economyZeroLevelFixture.scope, economyStorageFixture.scope);
   assert.deepEqual(economyZeroLevelFixture.sourcePaths, economyStorageFixture.sourcePaths);
+});
+test('economy storage menu and bounded state amendment admits only reviewed Native files', () => {
+  assert.equal(economyStorageMenuState.reason, 'M1_ECONOMY_STORAGE_MENU_STATE_V1');
+  assert.equal(economyStorageMenuState.scope, economyTestPlayer.scope);
+  assert.deepEqual(economyStorageMenuState.sourcePaths, [
+    'src/map/persistent_agent.cpp',
+    'tools/pa-command-contract/Test-M1V15ExecutorFixture.ps1',
+  ]);
 });
 {
   const mapHash = 'A'.repeat(64);
