@@ -160,8 +160,14 @@ async function main() {
       return;
     }
     ensure(args.execute === 'true', 'EXPLICIT_EXECUTE_REQUIRED');
-    const evidenceDir = path.join(ROOT, '.local/ro-stack/fixture-evidence', `m1-level-${CHAR}-${LEASE}`);
+    const priorEvidenceDir = path.join(ROOT, '.local/ro-stack/fixture-evidence',
+      `m1-level-${CHAR}-${LEASE}`);
+    const evidenceDir = path.join(ROOT, '.local/ro-stack/fixture-evidence',
+      `m1-level-${CHAR}-${LEASE}-${EXPECTED_NATIVE.slice(0, 12)}`);
     if (action === 'prepare') {
+      ensure(!fs.existsSync(path.join(priorEvidenceDir, 'prepared.json')) ||
+        fs.existsSync(path.join(priorEvidenceDir, 'restored.json')),
+      'PRIOR_LEVEL_FIXTURE_NOT_RESTORED');
       validateLevelFixtureIdentity(current, preimage, { matchHistoricalCharacter: false });
       const beforeLive = await playerState(args.credentials);
       ensure(beforeLive?.charId === CHAR && beforeLive.liveFresh === true &&
