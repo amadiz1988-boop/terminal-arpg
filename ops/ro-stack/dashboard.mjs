@@ -10126,8 +10126,9 @@ async function grantNativeTestFixtureCommand(normalized) {
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`);
   const createdAt = Date.now();
   const sessionHash = createHash('sha256').update(normalized.adminSessionId).digest('hex');
-  const createdFrom = normalized.createdFrom === 'M1_FLY_SUPPLY_V1'
-    ? 'M1_FLY_SUPPLY_V1' : 'TEST_FIXTURE_COMMAND';
+  const createdFrom = ['M1_FLY_SUPPLY_V1', 'M1_ECONOMY_SETUP_V1',
+    'M1_ECONOMY_CLEANUP_V1'].includes(normalized.createdFrom)
+    ? normalized.createdFrom : 'TEST_FIXTURE_COMMAND';
   await sql(`INSERT INTO web_admin_sessions
     (session_hash,session_id,actor_admin_id,auth_method,created_from,created_at,expires_at,revoked_at)
     VALUES ('${sessionHash}','${escapeSql(normalized.adminSessionId)}',

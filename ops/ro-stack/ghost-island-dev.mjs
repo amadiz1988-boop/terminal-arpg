@@ -12,7 +12,7 @@ const help = () => ({
   usage: 'node ops/ro-stack/ghost-island-dev.mjs <command> [--json]',
   discovery: ['help', 'capabilities [domain]'],
   diagnostics: ['runtime health|processes|identity|logs <login|char|map|dashboard> [--char <id>]',
-    'deployment state|receipt', 'player inspect <charId>|fleet|quarantine|commands <charId>|live-inventory <charId>|economy-eligibility <charId>|economy-candidates',
+    'deployment state|receipt', 'player inspect <charId>|fleet|quarantine|commands <charId>|live-inventory <charId>|economy-eligibility <charId>|economy-state <charId>|economy-candidates',
     'events recent <charId>', 'incident procdump|latest', 'config diff'],
   action: ['action recover-quarantined <charId> --preflight',
     'action recover-quarantined <charId> --execute'],
@@ -77,6 +77,8 @@ export async function runConsole(raw, deps = {}) {
       result = provider.fixedDbRead('liveInventory', target, options); authority = 'Native PA live-status read model';
     } else if (domain === 'player' && command === 'economy-eligibility' && accepted(args, 3)) {
       result = provider.fixedDbRead('economyEligibility', target, options); authority = 'Login and Native read-only eligibility';
+    } else if (domain === 'player' && command === 'economy-state' && accepted(args, 3)) {
+      result = provider.fixedDbRead('economyState', target, options); authority = 'Native and rAthena economy read-only state';
     } else if (domain === 'player' && command === 'economy-candidates' && accepted(args, 2)) {
       result = provider.economyCandidateCensus(options); authority = 'Login and Native read-only eligibility';
     } else if (domain === 'events' && command === 'recent' && accepted(args, 3)) {

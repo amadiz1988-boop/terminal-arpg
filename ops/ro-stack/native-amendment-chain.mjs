@@ -153,11 +153,16 @@ export const M1_ECONOMY_TEST_PLAYER_AMENDMENT = Object.freeze({
   scope: 'M1_ECONOMY_TEST_PLAYER_V1',
   sourcePaths: Object.freeze([
     'src/map/economy_test_player_policy.hpp',
+    'src/map/m1_acceptance_fixture.hpp',
     'src/map/pc.cpp',
+    'src/map/persistent_agent.cpp',
+    'src/map/persistent_agent_state.cpp',
+    'src/map/persistent_agent_state.hpp',
     'src/map/storage.cpp',
     'src/map/test_fixture_economy.hpp',
     'tools/pa-command-contract/Test-M1V15ExecutorFixture.ps1',
     'tools/pa-command-contract/test-economy-test-player.cpp',
+    'tools/pa-command-contract/test_pa_contract.cpp',
   ]),
 });
 export const APPROVED_NATIVE_AMENDMENTS = Object.freeze([

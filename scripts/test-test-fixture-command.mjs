@@ -154,13 +154,13 @@ const dashboard = await readFile(new URL('../ops/ro-stack/dashboard.mjs', import
 assert.match(dashboard, /function adminTestFixtureTransportContext\(request\)/);
 assert.match(dashboard, /if \(!adminContext \|\| \(\(isM1Submit \|\| m1ResultMatch\)/);
 assert.match(dashboard, /if \(await handleAdminTestFixtureCommand\(url, request, response\)\) return/);
-assert.match(dashboard, /RO_TEST_FIXTURE_COMMANDS_ENABLED !== '1'/);
+assert.match(dashboard, /fixtureTransportEnabled\(\(isM1Submit \|\| m1ResultMatch\) \? 'M1_ACCEPTANCE' : 'GENERIC'\)/);
 assert.ok(dashboard.indexOf("supportRequestContext && url.pathname.startsWith('/api/admin/')") <
   dashboard.indexOf('if (await handleAdminTestFixtureCommand(url, request, response)) return'));
 assert.ok(dashboard.indexOf("if (url.pathname.startsWith('/api/admin/')") <
   dashboard.indexOf('if (await handleAdminTestFixtureCommand(url, request, response)) return'));
 assert.match(dashboard, /CREATE TABLE IF NOT EXISTS web_admin_sessions/);
-assert.match(dashboard, /const createdFrom = normalized\.createdFrom === 'M1_FLY_SUPPLY_V1'/);
+assert.match(dashboard, /const createdFrom = \['M1_FLY_SUPPLY_V1', 'M1_ECONOMY_SETUP_V1'/);
 assert.match(dashboard, /'\$\{createdFrom\}',\$\{createdAt\}/);
 const contextStart = dashboard.indexOf('function adminTestFixtureTransportContext(request) {');
 const contextEnd = dashboard.indexOf('\n}', contextStart);
@@ -191,6 +191,8 @@ assert.match(grantSql[0], /CREATE TABLE IF NOT EXISTS web_admin_sessions/);
 assert.match(grantSql[1], /INSERT INTO web_admin_sessions/);
 assert.ok(grantSql[1].includes(admitted.adminSessionId));
 assert.ok(grantSql[1].includes("'CLOUDFLARE_ACCESS_EDGE'"));
+await grant({ ...admitted, createdFrom: 'M1_ECONOMY_SETUP_V1' });
+assert.ok(grantSql.at(-1).includes("'M1_ECONOMY_SETUP_V1'"));
 assert.doesNotMatch(grantSql.join('\n'), /password|ro_session|cookie/i);
 const playerActions = dashboard.match(/const ownershipActions = new Set\(\[([\s\S]*?)\]\);/)?.[1] ?? '';
 assert.doesNotMatch(playerActions, /test_fixture_atcommand/);

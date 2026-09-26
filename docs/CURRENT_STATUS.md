@@ -3,8 +3,8 @@
 ## 2026-09-26 M1 V15 Economy Test Player 來源候選
 
 - Project Control 已改用固定 TEST_PLAYER 2000163／150105、`group_id=0`、`is_test=1` 執行 Store／Sell 驗收。先前要求借用一般非測試帳號的預檢結論已被取代。
-- Native `18d7e546` 已在 personal storage 與 NPC sell 的入口加入精確測試身分准入，仍檢查 group-0 交易權限，其他交易、丟棄、擺攤、郵件與公會倉庫維持原封鎖。原生 Release x64 編譯、M1 V15 來源測試與 13 組離線回歸通過。此為來源證據，尚未完成 Store／Sell live mutation 驗收。
-- 01:04 UTC 事故證據已封存，原因仍為 `UNKNOWN`。同一 Production runtime 經一次受控重啟後於 01:38 UTC 健康。Native 新候選尚未部署，首次 GitHub-first 推廣仍未完成。
+- Native `06da93f1` 在 personal storage 與 NPC sell 入口加入固定 TEST_PLAYER 的 group-0 准入，並於既有本機 Admin fixture transport 加入固定 502／503 物品的準備與清理；一般交換、丟棄、擺攤、郵件與公會倉庫仍受原限制。原生 Release x64 編譯與離線回歸已通過；本次增補的倉庫載入前置檢查通過 M1 V15 來源測試。Store／Sell live mutation 尚未驗收。
+- 01:04 UTC 事故證據已封存，原因仍為 `UNKNOWN`。同一 Production runtime 經一次受控重啟後於 02:01 UTC 健康。Native 新候選尚未部署，首次 GitHub-first 推廣仍未完成。
 
 ## 2026-09-26 M1 V15 經濟驗收資格預檢
 

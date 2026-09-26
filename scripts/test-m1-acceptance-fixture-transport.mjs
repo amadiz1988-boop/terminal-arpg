@@ -45,7 +45,7 @@ function fixture({ testFlag = 1, accountId = 2000163, event = 'PREREQUISITES_REA
       return '';
     }
     if (statement.includes('FROM persistent_agent_command c'))
-      return queued ? `${queued.id}\t150105\tprepare_m1_acceptance_fixture\t7\t${commandStatus}\t\t\t\t\t${queued.hash}` : '';
+      return queued ? `${queued.id}\t150105\tprepare_m1_acceptance_fixture\t7\t${commandStatus}\t\t\t\t\t${queued.hash}\t${JSON.stringify(queued.payload)}` : '';
     if (statement.includes('FROM persistent_agent_rollout_event'))
       return `${event}\t2026-09-25 12:00:00.000`;
     throw Error('unexpected fixture SQL');
@@ -90,6 +90,7 @@ assert.equal(noAudit.grants.length, 0);
 assert.equal(noAudit.queued, null);
 valid.commandStatus = 'CONFIRMED';
 assert.equal((await valid.transport.result(valid.queued.id, local)).body.state, 'CONFIRMED');
+assert.equal((await valid.transport.result(valid.queued.id, local)).body.profile, 'M1_FLY_SUPPLY_V1');
 assert.equal((await valid.transport.result(valid.queued.id, cloud)).status, 403);
 const noNativeEvent = fixture({ event: 'PENDING' });
 await noNativeEvent.transport.submit(request, local);
@@ -97,4 +98,17 @@ noNativeEvent.commandStatus = 'CONFIRMED';
 const inconsistent = await noNativeEvent.transport.result(noNativeEvent.queued.id, local);
 assert.equal(inconsistent.body.state, 'FAILED');
 assert.equal(inconsistent.body.reason, 'NATIVE_RESULT_MISSING');
+for (const profile of ['M1_ECONOMY_SETUP_V1', 'M1_ECONOMY_CLEANUP_V1']) {
+  const sample = fixture({ event: profile.endsWith('CLEANUP_V1') ? 'CLEANED' : 'PREREQUISITES_READY' });
+  const response = await sample.transport.submit({ profile }, local);
+  assert.equal(response.status, 202);
+  assert.equal(sample.grants[0].createdFrom, profile);
+  assert.equal(sample.queued.payload.profile, profile);
+  sample.commandStatus = 'CONFIRMED';
+  const result = await sample.transport.result(sample.queued.id, local);
+  assert.equal(result.body.state, 'CONFIRMED');
+  assert.equal(result.body.profile, profile);
+  assert.equal((await sample.transport.submit({ profile, itemId: 999 }, local)).status, 422);
+  assert.equal((await sample.transport.submit({ profile, zeny: 999 }, local)).status, 422);
+}
 console.log('M1_ACCEPTANCE_FIXTURE_TRANSPORT_TEST_PASS');

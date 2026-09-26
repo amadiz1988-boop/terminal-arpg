@@ -192,7 +192,7 @@ export function createTestFixtureCommandTransport({ sql, escapeSql, audit, nativ
 // Zeny, map or state parameter is admitted.
 export function createM1AcceptanceFixtureTransport({ sql, escapeSql, audit, nativeGrant, registry }) {
   const action = 'prepare_m1_acceptance_fixture';
-  const profile = 'M1_FLY_SUPPLY_V1';
+  const profiles = new Set(['M1_FLY_SUPPLY_V1', 'M1_ECONOMY_SETUP_V1', 'M1_ECONOMY_CLEANUP_V1']);
   const targetCharId = 150105;
   const targetAccountId = 2000163;
   const fixture = resolveCanonicalTestFixture(registry, 'TEST_PLAYER');
@@ -212,9 +212,12 @@ export function createM1AcceptanceFixtureTransport({ sql, escapeSql, audit, nati
   async function readCommand(requestId) {
     const output = await sql(`SELECT c.command_id,c.char_id,c.action,c.expected_revision,c.command_status,
       COALESCE(c.reason_code,''),COALESCE(c.resulting_revision,''),COALESCE(c.accepted_at,''),
-      COALESCE(c.confirmed_at,''),c.payload_hash FROM persistent_agent_command c
+      COALESCE(c.confirmed_at,''),c.payload_hash,c.payload FROM persistent_agent_command c
       WHERE c.command_id='${escapeSql(requestId)}' AND c.char_id=${targetCharId} LIMIT 1;`);
-    return commandRow(output);
+    if (!output) return null;
+    const command = commandRow(output);
+    try { return { ...command, profile: JSON.parse(output.split('\t')[10]).profile }; }
+    catch { return { ...command, profile: null }; }
   }
 
   const localAdmin = context => context?.context === 'ADMIN_TRANSPORT' &&
@@ -225,8 +228,9 @@ export function createM1AcceptanceFixtureTransport({ sql, escapeSql, audit, nati
       return { status: 403, body: { state: 'DENIED', error: 'local_admin_required' } };
     if (!body || typeof body !== 'object' || Array.isArray(body) ||
         Object.keys(body).some(key => !['profile', 'requestId'].includes(key)) ||
-        body.profile !== profile)
+        !profiles.has(body.profile))
       return { status: 422, body: { state: 'DENIED', error: 'invalid_m1_fixture_profile' } };
+    const profile = body.profile;
     const requestId = String(body.requestId ?? randomUUID()).toLowerCase();
     if (!commandIdPattern.test(requestId))
       return { status: 422, body: { state: 'DENIED', error: 'invalid_request_id' } };
@@ -259,14 +263,16 @@ export function createM1AcceptanceFixtureTransport({ sql, escapeSql, audit, nati
     if (await eligible() === false)
       return { status: 403, body: { error: 'fixture_identity_rejected' } };
     const command = await readCommand(requestId);
-    if (!command || command.action !== action)
+    if (!command || command.action !== action || !profiles.has(command.profile))
       return { status: 404, body: { error: 'command_not_found' } };
     const output = await sql(`SELECT COALESCE(error_code,''),created_at FROM persistent_agent_rollout_event
       WHERE command_id='${escapeSql(requestId)}' AND event_type='M1_ACCEPTANCE_FIXTURE'
       ORDER BY event_id DESC LIMIT 1;`);
     const [nativeEvent = '', nativeResultAt = ''] = String(output ?? '').split('\t');
-    const confirmed = command.status === 'CONFIRMED' && nativeEvent === 'PREREQUISITES_READY';
-    return { status: 200, body: { requestId, fixtureRole: 'TEST_PLAYER', targetCharId, profile,
+    const expectedEvent = command.profile === 'M1_ECONOMY_CLEANUP_V1' ? 'CLEANED' : 'PREREQUISITES_READY';
+    const confirmed = command.status === 'CONFIRMED' && nativeEvent === expectedEvent;
+    return { status: 200, body: { requestId, fixtureRole: 'TEST_PLAYER', targetCharId,
+      profile: command.profile,
       state: confirmed ? 'CONFIRMED' : command.status === 'REJECTED' ? 'REJECTED'
         : command.status === 'CONFIRMED' ? 'FAILED' : 'QUEUED',
       reason: command.status === 'CONFIRMED' && !confirmed

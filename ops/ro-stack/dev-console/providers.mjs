@@ -278,19 +278,31 @@ export function fixedDbRead(kind, id, { root = PRODUCTION_ROOT, env = process.en
     commands: `SELECT command_id,action,command_status,COALESCE(reason_code,''),UNIX_TIMESTAMP(requested_at) FROM persistent_agent_command WHERE char_id=${charId} ORDER BY requested_at DESC LIMIT 20`,
     liveInventory: `SELECT char_id,account_id,revision,resident,COALESCE(map,''),ROUND(TIMESTAMPDIFF(MICROSECOND,updated_at,CURRENT_TIMESTAMP(3))/1000),inventory_slots,inventory_max_slots,weight,max_weight,supply_required,COALESCE(supply_reason,'') FROM persistent_agent_live_status WHERE char_id=${charId} LIMIT 1`,
     economyEligibility: `SELECT c.char_id,c.account_id,l.group_id,l.state,COALESCE(f.is_test,0),c.online,COALESCE(s.agent_mode,''),COALESCE(s.ownership_state,''),COALESCE(s.runtime_state,''),COALESCE(st.task_type,''),COALESCE(st.task_phase,''),(SELECT COUNT(*) FROM persistent_agent_command pc WHERE pc.char_id=c.char_id AND pc.command_status IN ('QUEUED','CLAIMED','RUNNING')),c.zeny FROM \`char\` c JOIN login l ON l.account_id=c.account_id LEFT JOIN web_account_flags f ON f.account_id=c.account_id LEFT JOIN persistent_agent_live_status s ON s.char_id=c.char_id LEFT JOIN persistent_agent_state st ON st.char_id=c.char_id WHERE c.char_id=${charId} LIMIT 1`,
+    economyState: `SELECT c.char_id,c.account_id,c.zeny,COALESCE(s.revision,0),COALESCE(s.resident,0),` +
+      `(SELECT COALESCE(SUM(amount),0) FROM persistent_agent_live_inventory WHERE char_id=c.char_id AND item_id=502),` +
+      `(SELECT COALESCE(SUM(amount),0) FROM persistent_agent_live_inventory WHERE char_id=c.char_id AND item_id=503),` +
+      `(SELECT COALESCE(SUM(amount),0) FROM storage WHERE account_id=c.account_id AND nameid=502),` +
+      `(SELECT COALESCE(SUM(amount),0) FROM storage WHERE account_id=c.account_id AND nameid=503) ` +
+      `FROM \`char\` c LEFT JOIN persistent_agent_live_status s ON s.char_id=c.char_id ` +
+      `WHERE c.char_id=${charId} AND c.account_id=2000163 LIMIT 1`,
   };
   if (!queries[kind]) fail('NOT_ELIGIBLE', 'unsupported_db_read');
   const records = boundedSqlRead(queries[kind], { root, env }).map(row => {
     if (kind === 'liveInventory') return parseLiveInventoryRow(row);
     if (kind === 'economyEligibility') return parseEconomyEligibilityRow(row);
+    if (kind === 'economyState') return { charId: Number(row[0]), accountId: Number(row[1]),
+      zeny: Number(row[2]), revision: Number(row[3]), resident: Number(row[4]) === 1,
+      inventory: { 502: Number(row[5]), 503: Number(row[6]) },
+      storage: { 502: Number(row[7]), 503: Number(row[8]) } };
     return kind === 'events'
       ? { eventId: row[0], occurredAtUnix: Number(row[1]), type: row[2], map: row[3], source: row[4] }
       : { commandId: row[0], action: row[1], status: row[2], reasonCode: row[3], requestedAtUnix: Number(row[4]) };
   });
-  return { charId, records, limit: ['liveInventory', 'economyEligibility'].includes(kind) ? 1 : 20,
+  return { charId, records, limit: ['liveInventory', 'economyEligibility', 'economyState'].includes(kind) ? 1 : 20,
   source: kind === 'events' ? 'Event Ledger read-only bounded query'
     : kind === 'liveInventory' ? 'Native live-status read-only bounded query'
       : kind === 'economyEligibility' ? 'Login and Native eligibility read-only bounded query'
+      : kind === 'economyState' ? 'Native live inventory and rAthena storage/Zeny read-only bounded query'
       : 'Native command ledger read-only bounded query' };
 }
 
