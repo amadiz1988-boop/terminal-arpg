@@ -22,6 +22,10 @@ const approvedAdditivePaths = new Map([
   ['LOCAL_DEVELOPER_ADMIN_ENTRYPOINT_ADDITIVE_MANIFEST_V1', 'ops/ro-stack/developer-admin-action.mjs'],
   ['M1_SETTINGS_EXECUTOR_AND_TEST_FIXTURE_V1', 'ops/ro-stack/dashboard/self-recovery-skill-profile.mjs'],
   ['M1_V15_FIXED_FIXTURE_AND_DASHBOARD_LAUNCHER_V1', 'ops/ro-stack/dashboard-service.ps1'],
+  ['M1_V15_ECONOMY_FIXTURE_UI_THEME_SUPERSET_V1', [
+    'ops/ro-stack/dashboard/ui-theme.css',
+    'ops/ro-stack/dashboard/ui-theme.js',
+  ]],
 ]);
 const approvedExistingPreimageAddition = 'ops/ro-stack/dashboard-service.ps1';
 const approvedLegacyAdoption = new Map([
@@ -117,7 +121,9 @@ export function validateManifestDelta(oldManifest, nextManifest, reason, rollbac
   }
   const approved=approvedAdditivePaths.get(reason);
   const legacy=approvedLegacyAdoption.get(reason);
-  if (approved ? delta.added_paths.length!==1 || delta.added_paths[0]!==approved :
+  const approvedPaths=Array.isArray(approved)?approved:approved?[approved]:[];
+  if (approved ? delta.added_paths.length!==approvedPaths.length ||
+      delta.added_paths.some((path,index)=>path!==approvedPaths[index]) :
       legacy ? delta.added_paths.length!==1 || delta.added_paths[0]!==legacy.path || delta.rollback_restore_paths.length!==1 :
       delta.added_paths.length!==0)
     fail('WEB_MANIFEST_ADDITION_UNAPPROVED');

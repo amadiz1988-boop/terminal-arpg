@@ -41,6 +41,8 @@ const launcherPath='ops/ro-stack/dashboard-service.ps1';
 const legacyReason='M1_LEGACY_LAUNCHER_GITHUB_FIRST_RECONCILIATION_V1';
 const legacyLauncherPathFixture='ops/ro-stack/ro-stack.ps1';
 const launcherPreimage='58DDC2E101F64B47B586CE9C74E9C75D2E3221EEFEC439DA7621DF31262F3CAF';
+const uiThemeReason='M1_V15_ECONOMY_FIXTURE_UI_THEME_SUPERSET_V1';
+const uiThemePaths=['ops/ro-stack/dashboard/ui-theme.css','ops/ro-stack/dashboard/ui-theme.js'];
 function deltaFixture() {
   const oldManifest={files:[{path:'ops/ro-stack/dashboard.mjs',sha256:'A'.repeat(64)},
     {path:'public/ro/client/manifest.json',sha256:'E'.repeat(64)}],removed_files:[]};
@@ -101,6 +103,24 @@ function adoptLauncher(x,path=legacyLauncherPathFixture,hash=launcherPreimage) {
   assert.deepEqual(delta.modified_existing_paths,['ops/ro-stack/dashboard.mjs']);
   assert.deepEqual(delta.unchanged_paths,['public/ro/client/manifest.json']);
   console.log(`PASS ${++count} same-count valid amendment classifies modified existing path`);
+}
+{
+  const x=deltaFixture();for(const path of uiThemePaths)addAction(x,path);
+  const delta=validateManifestDelta(x.oldManifest,x.nextManifest,uiThemeReason,true);
+  assert.deepEqual(delta.added_paths,uiThemePaths);
+  assert.deepEqual(delta.rollback_remove_paths,uiThemePaths);
+  console.log(`PASS ${++count} exact UI theme pair has rollback REMOVE semantics`);
+}
+{
+  const x=deltaFixture();addAction(x,uiThemePaths[0]);
+  assert.throws(()=>validateManifestDelta(x.oldManifest,x.nextManifest,uiThemeReason,true),/WEB_MANIFEST_ADDITION_UNAPPROVED/);
+  console.log(`PASS ${++count} incomplete UI theme pair rejected`);
+}
+{
+  const x=deltaFixture();for(const path of uiThemePaths)addAction(x,path);
+  addAction(x,'ops/ro-stack/dashboard/unrelated.css');
+  assert.throws(()=>validateManifestDelta(x.oldManifest,x.nextManifest,uiThemeReason,true),/WEB_MANIFEST_ADDITION_UNAPPROVED/);
+  console.log(`PASS ${++count} unexplained third UI file rejected`);
 }
 {
   const x=deltaFixture();addAction(x);
