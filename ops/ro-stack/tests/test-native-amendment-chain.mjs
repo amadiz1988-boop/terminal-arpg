@@ -16,6 +16,7 @@ import { HISTORICAL_NATIVE_AMENDMENT as old, M1_SECOND_NATIVE_AMENDMENT as polic
   M1_START_FARM_SERVICE_FIELDS_CORRECTION as farmServiceFields,
   M1_ECONOMY_TEST_PLAYER_AMENDMENT as economyTestPlayer,
   M1_ECONOMY_STORAGE_FIXTURE_AMENDMENT as economyStorageFixture,
+  M1_ECONOMY_ZERO_LEVEL_FIXTURE_AMENDMENT as economyZeroLevelFixture,
   validateNativeAmendmentHistory, validateHistoricalNativeAnchor, validateNextNativeAmendment,
   applyNextNativeAmendment, deployedNativeRuntimeMatches } from '../native-amendment-chain.mjs';
 import { retirementDecision } from '../native-candidate-amendment.mjs';
@@ -332,6 +333,11 @@ test('economy storage skill fixture has a unique reason and exact three-file sco
     'tools/pa-command-contract/test_pa_contract.cpp',
   ]);
   assert.equal(economyStorageFixture.sourcePaths.includes('src/map/pc.cpp'), false);
+});
+test('zero-level skill fixture has a new reason and preserves exact source scope', () => {
+  assert.equal(economyZeroLevelFixture.reason, 'M1_ECONOMY_ZERO_LEVEL_SKILL_FIXTURE_V1');
+  assert.equal(economyZeroLevelFixture.scope, economyStorageFixture.scope);
+  assert.deepEqual(economyZeroLevelFixture.sourcePaths, economyStorageFixture.sourcePaths);
 });
 {
   const mapHash = 'A'.repeat(64);
