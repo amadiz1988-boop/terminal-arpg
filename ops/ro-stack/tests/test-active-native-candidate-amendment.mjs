@@ -24,6 +24,11 @@ function fixture() {
   const names = ['login', 'char', 'map'];
   const oldArtifacts = names.map(n => ({ path: `.local/ro-stack/rathena/${n}-server.exe`, sha256: h(put(`.local/ro-stack/rathena/${n}-server.exe`, 'old-' + n) && Buffer.from('old-' + n)) }));
   const build = path.join(root, 'build'), src = path.join(build, 'source');
+  const intermediate = oldArtifacts.map(item => {
+    const name = path.basename(item.path), saved = `intermediate-rollback/${name}`;
+    put(`build/${saved}`, fs.readFileSync(path.join(root, item.path)));
+    return { path: saved, production_path: item.path, sha256: item.sha256 };
+  });
   const newArtifacts = names.map(n => ({ path: `${n}-server.exe`, sha256: h(put(`build/source/${n}-server.exe`, 'new-' + n) && Buffer.from('new-' + n)) }));
   const lifecycle = ['ro-stack.ps1', 'stack.config.psd1'].map(n => ({ path: 'ops/ro-stack/' + n, sha256: h(fs.readFileSync(put('ops/ro-stack/' + n, 'fixture ' + n))) }));
   const buildReceipt = put('build/build-receipt.json', { schema_version: 'native-build-v1', native_git_sha: NEW, binary_sha256: newArtifacts[2].sha256,
@@ -31,7 +36,7 @@ function fixture() {
   const manifest = { schema_version: 'native-candidate-v1', native_git_sha: NEW, binary_sha256: newArtifacts[2].sha256,
     build_receipt: { path: 'build-receipt.json', sha256: h(fs.readFileSync(buildReceipt)) }, lifecycle_files: lifecycle,
     amendment_of: { native_git_sha: OLD, candidate_manifest_sha256: 'D'.repeat(64) }, diff_audit: { scope: AMENDMENT.scope },
-    rollback_reference: { root: '.local/ro-stack/legacy-baseline/x/rollback', intermediate_rollback: { native_git_sha: OLD } } };
+    rollback_reference: { root: '.local/ro-stack/legacy-baseline/x/rollback', intermediate_rollback: { native_git_sha: OLD, artifacts: intermediate } } };
   const manifestFile = put('build/candidate-manifest.json', manifest);
   const lease = { lease_id: LEASE, owner_task_id: OWNER, status: 'ACTIVE', promotion_mode: 'FIRST_GITHUB_FIRST_PROMOTION', emergency: false,
     native_deploy_git_sha: OLD, web_deploy_git_sha: WEB, native_candidate_manifest_sha256: 'D'.repeat(64), candidate_capabilities: [] };
@@ -70,7 +75,7 @@ function blocked(name, mutate, code) {
 }
 
 // Snapshot fake. Phases: old -> (hung) -> down -> new -> down2 -> new2.
-function runtime(x, { hang = false, cycleStopFails = false } = {}) {
+function runtime(x, { hang = false, cycleStopFails = false, deployHealthFail = false } = {}) {
   const s = { phase: 'old', actions: [], clock: 0 };
   const snap = (pids, gen, sha) => ({ pass: true, counts: { login: 1, char: 1, map: 1 }, pids, processes: { map: { started_at: '2026-09-25T01:18:21.000Z' } },
     openkore_runtime_count: 0, dashboard_pid: 9, database_pid: 10, procdump_account: SYSTEM,
@@ -83,7 +88,8 @@ function runtime(x, { hang = false, cycleStopFails = false } = {}) {
       if (s.phase === 'hung') return { pass: false, counts: { login: 1, char: 1, map: 1 }, pids: { login: 1, char: 2, map: 3 } };
       if (s.phase === 'map-retired') return { pass: false, counts: { login: 1, char: 1, map: 0 }, pids: { login: 1, char: 2 } };
       if (s.phase === 'down' || s.phase === 'down2') return { pass: false, counts: { login: 0, char: 0, map: 0 }, pids: {} };
-      if (s.phase === 'new') return snap({ login: 11, char: 12, map: 13 }, 'g2', x.newArtifacts[2].sha256);
+      if (s.phase === 'new') return { ...snap({ login: 11, char: 12, map: 13 }, 'g2', x.newArtifacts[2].sha256), pass: !deployHealthFail };
+      if (deployHealthFail && s.phase === 'new2') return snap({ login: 21, char: 22, map: 23 }, 'g3', x.oldArtifacts[2].sha256);
       return snap({ login: 21, char: 22, map: 23 }, 'g3', x.newArtifacts[2].sha256);
     }
     if (action === 'stop') {
@@ -211,5 +217,19 @@ let deployed;
   } finally { x.cleanup(); }
 }
 assert.ok(deployed);
-assert.equal(count, 21);
+{
+  const x = fixture();
+  try {
+    applyNativeAmendment(plan(x));
+    const rt = runtime(x, { deployHealthFail: true });
+    await assert.rejects(deployAmendedNative({ root: x.root, owner: OWNER, leaseId: LEASE,
+      adapter: rt.adapter, now: rt.now, timing: rt.timing }), /POSTDEPLOY_HEALTH_FAILED:ROLLBACK_F7_PASS/);
+    for (const item of x.oldArtifacts)
+      assert.equal(h(fs.readFileSync(path.join(x.root, item.path))), item.sha256);
+    assert.equal(x.read('lease').native_deploy_git_sha, OLD);
+    assert.equal(x.read('pending').native_git_sha, OLD);
+    pass('22 failed postdeploy health automatically restores exact predecessor and keeps lease');
+  } finally { x.cleanup(); }
+}
+assert.equal(count, 22);
 console.log(`NATIVE_CANDIDATE_AMENDMENT_TESTS=PASS COUNT=${count}`);

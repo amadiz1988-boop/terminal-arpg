@@ -359,6 +359,44 @@ async function pollStarted(adapter, before, native, { attempts = 60, delayMs = 1
 
 function nativeGone(s) { return ['login', 'char', 'map'].every(n => !s?.counts?.[n]); }
 
+// Restore the exact deployed predecessor after a post-replacement health
+// failure. The receipt and lease still name that predecessor at this point.
+export async function restoreIntermediateNative({ root, buildRoot, leaseId, reference,
+  oldArtifacts, candidateArtifacts, adapter, before, timing = {} }) {
+  check(reference?.artifacts?.length === 3 && oldArtifacts?.length === 3 &&
+    candidateArtifacts?.length === 3, 'INTERMEDIATE_ROLLBACK_INCOMPLETE');
+  const rows = oldArtifacts.map(old => {
+    const name = path.basename(old.path);
+    const saved = reference.artifacts.find(x => x.production_path === old.path &&
+      path.basename(x.path) === name && equalHash(x.sha256, old.sha256));
+    const candidate = candidateArtifacts.find(x => x.path === name);
+    check(saved && candidate, 'INTERMEDIATE_ROLLBACK_IDENTITY_INVALID');
+    const source = boundedPath(buildRoot, saved.path);
+    const target = boundedPath(root, old.path);
+    check(equalHash(digest(source), old.sha256), 'INTERMEDIATE_ROLLBACK_CHANGED');
+    return { source, target, old, candidate };
+  });
+  await adapter('stop');
+  check(nativeGone(await adapter('snapshot')), 'ROLLBACK_RUNTIME_NOT_STOPPED');
+  for (const row of rows) {
+    const current = digest(row.target);
+    check(equalHash(current, row.old.sha256) || equalHash(current, row.candidate.sha256),
+      'ROLLBACK_PREIMAGE_CHANGED');
+  }
+  for (const row of rows) {
+    const temporary = row.target + '.rollback-' + leaseId;
+    fs.copyFileSync(row.source, temporary, fs.constants.COPYFILE_EXCL);
+    check(equalHash(digest(temporary), row.old.sha256), 'ROLLBACK_COPY_CHANGED');
+    fs.renameSync(temporary, row.target);
+  }
+  check(rows.every(row => equalHash(digest(row.target), row.old.sha256)), 'ROLLBACK_BINARY_CHANGED');
+  await adapter('start');
+  const oldMap = rows.find(row => row.target.endsWith('map-server.exe'));
+  const after = await pollStarted(adapter, before, oldMap.old.sha256, timing);
+  check(healthyAfterStart(after, before, oldMap.old.sha256), 'ROLLBACK_HEALTH_FAILED');
+  return { restored: true, native_sha256: oldMap.old.sha256, runtime: after };
+}
+
 // Owner deploy of the amended candidate. First retirement of the pre-fix map
 // tries the existing graceful stop and falls back only under retirementDecision.
 export async function deployAmendedNative({ root, owner, leaseId, adapter, now = () => Date.now(), timing = {}, policy = AMENDMENT }) {
@@ -376,6 +414,12 @@ export async function deployAmendedNative({ root, owner, leaseId, adapter, now =
   for (const item of m.lifecycle_files) pinned(root, item);
   const current = currentNativeStage(root, lease, pending, policy.old_sha);
   check(current.valid, 'PREVIOUS_NATIVE_RECEIPT_INVALID');
+  const rollback = m.rollback_reference?.intermediate_rollback;
+  check(rollback?.native_git_sha === policy.old_sha && rollback.artifacts?.length === 3 &&
+    current.receipt.artifacts.every(item => rollback.artifacts.some(saved =>
+      saved.production_path === item.path && equalHash(saved.sha256, item.sha256) &&
+      equalHash(digest(boundedPath(base, saved.path)), item.sha256))),
+  'INTERMEDIATE_ROLLBACK_NOT_READY');
   const oldMap = current.receipt.artifacts.find(x => x.path.endsWith('/map-server.exe'));
   const lock = path.join(f.dir, 'native-amendment-deploy.lock');
   const archive = path.join(f.dir, `native-amendment-deployed-${leaseId}-${short(policy.new_sha)}`);
@@ -394,7 +438,7 @@ export async function deployAmendedNative({ root, owner, leaseId, adapter, now =
   const stage = path.join(lock, 'stage'); fs.mkdirSync(stage);
   for (const x of b.artifacts) { const d = path.join(stage, x.path); fs.copyFileSync(boundedPath(b.source_root, x.path), d, fs.constants.COPYFILE_EXCL);
     check(equalHash(digest(d), x.sha256), 'STAGED_BINARY_CHANGED'); }
-  let retirement;
+  let retirement, replacementStarted = false, receiptWritten = false;
   try {
     phase('RETIRE_OLD_RUNTIME');
     const t0 = now();
@@ -426,6 +470,7 @@ export async function deployAmendedNative({ root, owner, leaseId, adapter, now =
     }
     check(nativeGone(await adapter('snapshot')), 'OLD_RUNTIME_NOT_STOPPED');
     phase('REPLACE_BINARIES');
+    replacementStarted = true;
     for (const x of b.artifacts) {
       const target = boundedPath(root, '.local/ro-stack/rathena/' + x.path);
       check(equalHash(digest(target), current.receipt.artifacts.find(y => y.path.endsWith('/' + x.path)).sha256), 'NATIVE_PREIMAGE_CHANGED');
@@ -451,6 +496,7 @@ export async function deployAmendedNative({ root, owner, leaseId, adapter, now =
       old_runtime_retirement: retirement, graceful_shutdown_live: 'PENDING', first_promotion_complete: false };
     check(nativeReceiptValid(receipt, { nativeSha: policy.new_sha, leaseId, manifestHash: a.candidate_manifest_sha256 }), 'NATIVE_POSTDEPLOY_RECEIPT_INVALID');
     writeNew(boundedPath(root, receiptRel), receipt);
+    receiptWritten = true;
     const deployed = { ...a, deployed: true, deploy_receipt: receiptRel };
     const p2 = readJson(f.pending), l2 = readJson(f.lease);
     atomic(f.pending, { ...p2, native_git_sha: policy.new_sha, native_receipt_path: receiptRel,
@@ -461,10 +507,20 @@ export async function deployAmendedNative({ root, owner, leaseId, adapter, now =
     fs.renameSync(lock, archive);
     return { deployed: true, receipt_path: receiptRel, retirement, new_pids: after.pids, NEW_NATIVE_GRACEFUL_SHUTDOWN_LIVE: 'PENDING' };
   } catch (error) {
-    // Journal, stage and evidence stay for owner recovery; lease and drift unchanged.
+    // A failed health gate precedes receipt/lease advancement. Restore exact
+    // predecessor bytes and health before reporting failure; retain the journal.
+    let restored = null, rollbackError = null;
+    if (replacementStarted && !receiptWritten) {
+      try {
+        restored = await restoreIntermediateNative({ root, buildRoot: base, leaseId,
+          reference: rollback, oldArtifacts: current.receipt.artifacts,
+          candidateArtifacts: b.artifacts, adapter, before, timing });
+      } catch (failure) { rollbackError = failure.message; }
+    }
     writeNew(path.join(lock, 'failure-' + Date.now() + '.json'), { error: error.message, retirement: retirement || null,
+      rollback_restored: restored?.restored === true, rollback_error: rollbackError,
       lease_held: true, production_drift: 'OPEN', forced_fallback_used: retirement?.forced === true, failed_at: new Date().toISOString() });
-    throw error;
+    throw Error(error.message + (restored ? ':ROLLBACK_F7_PASS' : rollbackError ? ':ROLLBACK_F7_FAILED:' + rollbackError : ''));
   }
 }
 
