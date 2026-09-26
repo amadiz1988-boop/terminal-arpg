@@ -20,6 +20,7 @@ import { HISTORICAL_NATIVE_AMENDMENT as old, M1_SECOND_NATIVE_AMENDMENT as polic
   M1_ECONOMY_STORAGE_MENU_STATE_AMENDMENT as economyStorageMenuState,
   KAFRA_SAVE_NATIVE_TOWN_TRAVEL_AMENDMENT as kafraSave,
   ORIGINAL_HUNTING_LABEL_NATIVE_ADMISSION_AMENDMENT as huntingAdmission,
+  M1_DEATH_RETURN_SESSION_LIFETIME_RECOVERY_AMENDMENT as incidentRecovery,
   validateNativeAmendmentHistory, validateHistoricalNativeAnchor, validateNextNativeAmendment,
   applyNextNativeAmendment, deployedNativeRuntimeMatches } from '../native-amendment-chain.mjs';
 import { retirementDecision } from '../native-candidate-amendment.mjs';
@@ -373,6 +374,17 @@ test('original hunting map amendment admits only the reviewed four Native files'
     'tools/pa-command-contract/Test-M1CanonicalSource.ps1',
   ]);
   assert.equal(huntingAdmission.sourcePaths.includes('src/map/pc.cpp'), false);
+});
+test('incident recovery amendment admits only the f77 five-file diff', () => {
+  assert.equal(incidentRecovery.reason, 'M1_DEATH_RETURN_SESSION_LIFETIME_RECOVERY_V1');
+  assert.deepEqual(incidentRecovery.sourcePaths, [
+    'src/map/chrif.cpp',
+    'src/map/persistent_agent.cpp',
+    'src/map/persistent_agent.hpp',
+    'tools/pa-command-contract/Test-M1DeathMaintenanceSource.ps1',
+    'tools/pa-command-contract/test-reconnect-live-status.ps1',
+  ]);
+  assert.equal(incidentRecovery.sourcePaths.includes('src/map/pc.cpp'), false);
 });
 {
   const mapHash = 'A'.repeat(64);

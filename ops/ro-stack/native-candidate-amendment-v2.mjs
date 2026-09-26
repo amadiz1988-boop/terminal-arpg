@@ -12,6 +12,7 @@ import { amendmentAdapter, deployAmendedNative, gracefulShutdownCycle } from './
 import { M1_SECOND_NATIVE_AMENDMENT, approvedNativeAmendment, validateHistoricalNativeAnchor,
   validateNextNativeAmendment, applyNextNativeAmendment,
   deployedNativeRuntimeMatches } from './native-amendment-chain.mjs';
+import { INCIDENT, validateIncidentRecovery } from './native-incident-recovery-gate.mjs';
 
 // The approved reason selects the exact source scope; default keeps the
 // historical second amendment invocation unchanged.
@@ -58,6 +59,15 @@ export function prepareNextNativeCandidate({ buildRoot, prod, authority,
     b.artifacts?.length === 3 &&
     b.artifacts.every(item => equalHash(digest(boundedPath(src, item.path)), item.sha256)),
   'NATIVE_BUILD_INVALID');
+  if (approved.reason === INCIDENT.reason) need(b.config_artifacts?.length === 1 &&
+    b.config_artifacts[0].source_path === 'conf/persistent_agent_commands.json' &&
+    b.config_artifacts[0].source_git_sha === b.native_git_sha &&
+    equalHash(b.config_artifacts[0].sha256, INCIDENT.candidateConfigSha256) &&
+    equalHash(digest(boundedPath(src, b.config_artifacts[0].source_path)),
+      b.config_artifacts[0].sha256) &&
+    git(src, 'rev-parse', `HEAD:${b.config_artifacts[0].source_path}`) ===
+      b.config_artifacts[0].source_blob_oid,
+  'NATIVE_COMMAND_CONTRACT_PROVENANCE_INVALID');
   for (const row of b.tests_run || []) pinned(buildRoot, row.receipt);
   const regressionGroups = Object.entries(groups).map(([group, suite]) => {
     const row = b.tests_run.find(item => item.test_suite === suite);
@@ -143,7 +153,7 @@ export function prepareNextNativeCandidate({ buildRoot, prod, authority,
     amendment_of: { native_git_sha: previous,
       candidate_manifest_sha256: lease.native_candidate_manifest_sha256,
       native_receipt_sha256: digest(currentFile), reason: approved.reason },
-    diff_audit: diff, lifecycle_files: lifecycle };
+    diff_audit: diff, config_artifacts: b.config_artifacts, lifecycle_files: lifecycle };
   write('candidate-manifest.json', manifest);
   const manifestFile = path.join(buildRoot, 'candidate-manifest.json');
   return { manifest: manifestFile, sha256: digest(manifestFile), previous,
@@ -152,7 +162,7 @@ export function prepareNextNativeCandidate({ buildRoot, prod, authority,
 }
 
 export function planNextNativeAmendment({ root, owner, leaseId, manifestFile, manifestSha,
-  authority, runtime }) {
+  authority, runtime, incidentRecovery = false }) {
   const f = files(root), lease = readJson(f.lease), pending = readJson(f.pending), state = readJson(f.state);
   validateHistoricalNativeAnchor(root, lease, pending);
   need(equalHash(digest(manifestFile), manifestSha), 'NATIVE_MANIFEST_CHANGED');
@@ -179,7 +189,13 @@ export function planNextNativeAmendment({ root, owner, leaseId, manifestFile, ma
     ir.artifacts?.length === 3 && ir.artifacts.every(item =>
       equalHash(digest(boundedPath(buildRoot, item.path)), item.sha256) &&
       current.artifacts.some(c => c.path === item.production_path && equalHash(c.sha256, item.sha256)));
-  const runtimeMatchesDeployed = deployedNativeRuntimeMatches(runtime, current) &&
+  const incidentEvidence = incidentRecovery ? validateIncidentRecovery({ root, runtime,
+    receipt: current, leaseId, previousSha: lease.native_deploy_git_sha,
+    candidateSha: manifest.native_git_sha, reason: approved.reason,
+    expectedConfigSha: build.config_artifacts?.[0]?.sha256,
+    candidateConfigFile: path.join(build.source_root, 'conf/persistent_agent_commands.json') }) : null;
+  const runtimeMatchesDeployed = (incidentRecovery ? incidentEvidence?.incident === true :
+    deployedNativeRuntimeMatches(runtime, current)) &&
     current.artifacts.every(item => equalHash(digest(boundedPath(root, item.path)), item.sha256));
   const diff = sourceDiff(build.source_root, lease.native_deploy_git_sha, manifest.native_git_sha);
   need(JSON.stringify(diff) === JSON.stringify(manifest.diff_audit), 'NATIVE_AMENDMENT_DIFF_CHANGED');
@@ -189,6 +205,7 @@ export function planNextNativeAmendment({ root, owner, leaseId, manifestFile, ma
     candidateManifestSha256: manifestSha, sourceDiff: diff,
     githubReachable: inspected.eligible === true,
     descendant: true, regressionPassed, rollbackReady, runtimeMatchesDeployed,
+    incidentRecovery, incidentEvidence,
     previousReceiptSha256: digest(currentFile),
     tests: { m1_suite: m1Suite?.receipt, native_groups: regression.groups?.length,
       shutdown_contract: regression.shutdown_source_contract?.result } };
@@ -211,6 +228,9 @@ async function main() {
     args.owner && args.lease, 'ARGUMENTS_REQUIRED');
   need(['prepare', 'plan'].includes(args.action) || args.execute === 'true', 'EXPLICIT_EXECUTE_REQUIRED');
   selectNativeAmendmentReason(args.reason);
+  const incidentRecovery = args['incident-recovery'] === 'true';
+  need(!incidentRecovery || args.reason === INCIDENT.reason,
+    'INCIDENT_RECOVERY_REASON_REQUIRED');
   need(git(governanceRoot, 'status', '--porcelain=v1', '--untracked-files=all') === '', 'GOVERNANCE_SOURCE_DIRTY');
   const governanceSha = git(governanceRoot, 'rev-parse', 'HEAD');
   const mainTip = git(governanceRoot, 'ls-remote', '--exit-code', 'origin', 'refs/heads/main').split(/\s/)[0];
@@ -232,10 +252,11 @@ async function main() {
     const runtime = await adapter('snapshot');
     const plan = planNextNativeAmendment({ root, owner: args.owner, leaseId: args.lease,
       manifestFile: path.resolve(args['candidate-manifest']), manifestSha: args['manifest-sha256'],
-      authority, runtime });
+      authority, runtime, incidentRecovery });
     const result = args.action === 'plan'
       ? { eligible: true, dry_run: true, previous: plan.input.previousSha, candidate: plan.input.newSha,
-        source_diff: plan.input.sourceDiff }
+        source_diff: plan.input.sourceDiff, incident_recovery: incidentRecovery,
+        incident_evidence: plan.input.incidentEvidence }
       : applyNextNativeAmendment(root, plan);
     console.log(JSON.stringify({ ...result, governance_sha: governanceSha }, null, 2));
     return;
@@ -243,9 +264,12 @@ async function main() {
   const latest = lease.native_candidate_amendments.at(-1);
   need(latest.reason === approved.reason && latest.new_native_git_sha === lease.active_native_candidate.native_git_sha,
     'LATEST_NATIVE_AMENDMENT_SCOPE_INVALID');
+  need(lease.active_native_candidate.incident_recovery === incidentRecovery,
+    'INCIDENT_RECOVERY_MODE_MISMATCH');
   const policy = v2Policy(latest.old_native_git_sha, latest.new_native_git_sha);
   const result = args.action === 'deploy'
-    ? await deployAmendedNative({ root, owner: args.owner, leaseId: args.lease, adapter, policy })
+    ? await deployAmendedNative({ root, owner: args.owner, leaseId: args.lease, adapter, policy,
+      incidentRecovery })
     : await gracefulShutdownCycle({ root, owner: args.owner, leaseId: args.lease, adapter, policy });
   console.log(JSON.stringify({ ...result, governance_sha: governanceSha }, null, 2));
 }

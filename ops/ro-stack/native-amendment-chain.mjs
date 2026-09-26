@@ -219,6 +219,19 @@ export const ORIGINAL_HUNTING_LABEL_NATIVE_ADMISSION_AMENDMENT = Object.freeze({
     'tools/pa-command-contract/Test-M1CanonicalSource.ps1',
   ]),
 });
+// Same-lease incident recovery after the 668bb9d map crash. The candidate
+// closes only the session lifetime and death-return context defects.
+export const M1_DEATH_RETURN_SESSION_LIFETIME_RECOVERY_AMENDMENT = Object.freeze({
+  reason: 'M1_DEATH_RETURN_SESSION_LIFETIME_RECOVERY_V1',
+  scope: 'M1_DEATH_RETURN_SESSION_LIFETIME_RECOVERY_V1',
+  sourcePaths: Object.freeze([
+    'src/map/chrif.cpp',
+    'src/map/persistent_agent.cpp',
+    'src/map/persistent_agent.hpp',
+    'tools/pa-command-contract/Test-M1DeathMaintenanceSource.ps1',
+    'tools/pa-command-contract/test-reconnect-live-status.ps1',
+  ]),
+});
 export const APPROVED_NATIVE_AMENDMENTS = Object.freeze([
   M1_SECOND_NATIVE_AMENDMENT, M1_INVENTORY_MAINTENANCE_NATIVE_AMENDMENT,
   M1_INVENTORY_PROJECTION_CORRECTION, M1_FARM_WORLD_TELEPORT_SPAWN_CORRECTION,
@@ -232,6 +245,7 @@ export const APPROVED_NATIVE_AMENDMENTS = Object.freeze([
   M1_ECONOMY_STORAGE_MENU_STATE_AMENDMENT,
   KAFRA_SAVE_NATIVE_TOWN_TRAVEL_AMENDMENT,
   ORIGINAL_HUNTING_LABEL_NATIVE_ADMISSION_AMENDMENT,
+  M1_DEATH_RETURN_SESSION_LIFETIME_RECOVERY_AMENDMENT,
 ]);
 export const approvedNativeAmendment = reason =>
   APPROVED_NATIVE_AMENDMENTS.find(item => item.reason === reason) ?? null;
@@ -428,6 +442,8 @@ export function applyNextNativeAmendment(root, plan, now = new Date()) {
     lease_owner: input.owner, promotion_id: input.promotionId,
     old_native_git_sha: input.previousSha, new_native_git_sha: input.newSha,
     reason: input.reason, approved_scope: input.scope, source_diff: input.sourceDiff,
+    incident_recovery: input.incidentRecovery === true,
+    incident_evidence: input.incidentEvidence ?? null,
     tests: input.tests, rollback_target: input.previousSha,
     old_native_receipt: preceding, new_candidate_manifest: {
       path: candidateManifestPath, sha256: input.candidateManifestSha256 },
@@ -442,7 +458,8 @@ export function applyNextNativeAmendment(root, plan, now = new Date()) {
   const active = { native_git_sha: input.newSha, candidate_manifest: candidateManifestPath,
     candidate_manifest_sha256: input.candidateManifestSha256,
     binary_sha256: input.candidateManifest.binary_sha256,
-    deployed: false, graceful_shutdown_live: 'REQUIRED' };
+    deployed: false, graceful_shutdown_live: 'REQUIRED',
+    incident_recovery: input.incidentRecovery === true };
   const nextHistory = [...history, entry];
   atomic(pendingFile, { ...input.pending, native_candidate_amendments: nextHistory,
     active_native_candidate: active, native_graceful_shutdown_live: null });

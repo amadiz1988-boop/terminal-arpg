@@ -11,6 +11,7 @@ import { fileURLToPath } from 'node:url';
 import { boundedPath, digest, readJson, legacyIdentity, pendingPath, consumedPath, FIRST_PROMOTION, windowsPowerShellEnv } from './legacy-production-baseline.mjs';
 import { nativeReceiptValid, activeNativeReceiptPath, equalHash, git, pinned, verifyNativeStage, inspectNativeCandidate,
   verifyNativeRemote, shutdownContract, sourceBody, groups } from './native-promotion-contract.mjs';
+import { validateIncidentRecovery } from './native-incident-recovery-gate.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const governanceRoot = path.resolve(here, '../..');
@@ -399,7 +400,8 @@ export async function restoreIntermediateNative({ root, buildRoot, leaseId, refe
 
 // Owner deploy of the amended candidate. First retirement of the pre-fix map
 // tries the existing graceful stop and falls back only under retirementDecision.
-export async function deployAmendedNative({ root, owner, leaseId, adapter, now = () => Date.now(), timing = {}, policy = AMENDMENT }) {
+export async function deployAmendedNative({ root, owner, leaseId, adapter, now = () => Date.now(), timing = {},
+  policy = AMENDMENT, incidentRecovery = false }) {
   const f = productionFiles(root), lease = readJson(f.lease), pending = readJson(f.pending), state = readJson(f.state);
   check(lease.lease_id === leaseId && lease.owner_task_id === owner && lease.status === 'ACTIVE' && lease.promotion_mode === FIRST_PROMOTION &&
     pending.lease_id === leaseId && pending.owner_task_id === owner, 'ACTIVE_LEASE_IDENTITY_MISMATCH');
@@ -427,10 +429,19 @@ export async function deployAmendedNative({ root, owner, leaseId, adapter, now =
   // Evidence is referenced by its post-success archive location.
   const archived = file => rel(root, path.join(archive, path.basename(file)));
   const before = await adapter('snapshot');
-  check(before?.pass === true && before.procdump_receipt?.mapPid === before.pids?.map && before.procdump_account === 'NT AUTHORITY\\SYSTEM', 'PRESTOP_RUNTIME_INVALID');
+  const incidentEvidence = incidentRecovery ? validateIncidentRecovery({ root, runtime: before,
+    receipt: current.receipt, leaseId, previousSha: policy.old_sha,
+    candidateSha: policy.new_sha, reason: a.incident_recovery_reason || m.amendment_of?.reason,
+    expectedConfigSha: b.config_artifacts?.[0]?.sha256,
+    candidateConfigFile: path.join(b.source_root, 'conf/persistent_agent_commands.json') }) : null;
+  if (!incidentRecovery)
+    check(before?.pass === true && before.procdump_receipt?.mapPid === before.pids?.map &&
+      before.procdump_account === 'NT AUTHORITY\\SYSTEM', 'PRESTOP_RUNTIME_INVALID');
+  check((a.incident_recovery === true) === incidentRecovery, 'INCIDENT_RECOVERY_MODE_MISMATCH');
   const tracked = readJson(path.join(f.dir, 'state.json'));
   const trackedMap = (tracked.processes || []).find(x => x.name === 'map');
-  check(trackedMap?.id === before.pids.map, 'TRACKED_IDENTITY_CHANGED');
+  check(trackedMap?.id === (incidentRecovery ? incidentEvidence.old_map_pid : before.pids.map),
+    'TRACKED_IDENTITY_CHANGED');
   fs.mkdirSync(lock);
   const journal = path.join(lock, 'operation.json'), phase = p => atomic(journal, { ...readJson(journal), phase: p });
   writeNew(journal, { schema_version: 'native-amendment-deploy-v1', lease_id: leaseId, owner_task_id: owner, old_native_git_sha: policy.old_sha,
@@ -442,8 +453,14 @@ export async function deployAmendedNative({ root, owner, leaseId, adapter, now =
   try {
     phase('RETIRE_OLD_RUNTIME');
     const t0 = now();
-    try { await adapter('stop'); retirement = { method: 'GRACEFUL', forced: false }; }
+    try {
+      await adapter(incidentRecovery ? 'stop-remaining' : 'stop');
+      retirement = incidentRecovery ? { method: 'CRASHED_MAP_ALREADY_EXITED', forced: false,
+        incident_dump_sha256: incidentEvidence.incident_dump_sha256 } :
+        { method: 'GRACEFUL', forced: false };
+    }
     catch (stopError) {
+      if (incidentRecovery) throw stopError;
       let s = await adapter('snapshot');
       for (let waited = 0; s?.counts?.map === 1 && waited < (timing.extraWaitMs ?? policy.retire_extra_wait_ms); waited += (timing.pollMs ?? 1000)) {
         await new Promise(resolve => setTimeout(resolve, timing.pollMs ?? 1000)); s = await adapter('snapshot');
@@ -488,8 +505,11 @@ export async function deployAmendedNative({ root, owner, leaseId, adapter, now =
     const receipt = { schema_version: 'native-deploy-v1', deploy_id: 'native-amended-' + randomUUID(), lease_id: leaseId, owner_task_id: owner,
       native_git_sha: m.native_git_sha, native_build_sha256: m.binary_sha256, build_receipt_sha256: m.build_receipt.sha256,
       candidate_manifest_sha256: String(a.candidate_manifest_sha256).toUpperCase(), previous_binary_sha256: String(oldMap.sha256).toUpperCase(),
-      new_binary_sha256: m.binary_sha256, previous_binaries: current.receipt.artifacts, artifacts, old_map_pid: before.pids.map,
-      new_map_pid: after.pids.map, old_pids: before.pids, new_pids: after.pids, procdump_receipt: after.procdump_receipt,
+      new_binary_sha256: m.binary_sha256, previous_binaries: current.receipt.artifacts, artifacts,
+      old_map_pid: incidentRecovery ? incidentEvidence.old_map_pid : before.pids.map,
+      new_map_pid: after.pids.map,
+      old_pids: incidentRecovery ? { ...before.pids, map: incidentEvidence.old_map_pid } : before.pids,
+      new_pids: after.pids, procdump_receipt: after.procdump_receipt,
       procdump_process_identity: after.procdump_process_identity, runtime_health: after, openkore_runtime_count: 0,
       rollback_reference: m.rollback_reference, acceptance_status: 'NATIVE_CANDIDATE_ACTIVE', deployed_at: new Date(now()).toISOString(),
       amendment_of: { native_git_sha: policy.old_sha, native_receipt: current.receiptPath, native_receipt_sha256: current.sha256 },
@@ -507,10 +527,11 @@ export async function deployAmendedNative({ root, owner, leaseId, adapter, now =
     fs.renameSync(lock, archive);
     return { deployed: true, receipt_path: receiptRel, retirement, new_pids: after.pids, NEW_NATIVE_GRACEFUL_SHUTDOWN_LIVE: 'PENDING' };
   } catch (error) {
-    // A failed health gate precedes receipt/lease advancement. Restore exact
-    // predecessor bytes and health before reporting failure; retain the journal.
+    // A failed health gate precedes receipt/lease advancement. Normal amendments
+    // restore the predecessor. Incident recovery retains evidence and halts after
+    // one start attempt; it never restarts the previously crashed binary.
     let restored = null, rollbackError = null;
-    if (replacementStarted && !receiptWritten) {
+    if (replacementStarted && !receiptWritten && !incidentRecovery) {
       try {
         restored = await restoreIntermediateNative({ root, buildRoot: base, leaseId,
           reference: rollback, oldArtifacts: current.receipt.artifacts,
