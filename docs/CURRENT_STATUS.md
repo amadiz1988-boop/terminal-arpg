@@ -1,5 +1,10 @@
 # 目前狀態
 
+## 2026-09-26 F V15 3678 Production 死亡返回仍阻擋
+
+- 同一 lease 已受控部署 Native `3678ed86`，map binary 與 config 分別符合核准位元組雜湊 `1FF0338C…`、`4A7392E0…`。單一 runtime、ProcDump、回滾與 Dashboard health 通過；Web 仍為 `1346bd05`，首次推廣未完成。
+- 一般 TEST_PLAYER 150105 在 `moc_fild12` 取得權威 HIT，真實死亡並於 Morocc Saved Town 重生。Store／Sell／Supply 三個 NO_OP 均已出現，隨後 Native 再次記錄 `DEATH_RETURN_INVALID_CONTEXT`。正常玩家 `stop_farm` 已把角色收斂到 `PERSISTENT_IDLE`。五圖、Lv170、Settings、Heimdall 與最終收據依明定停止條件暫停。斷點與來源證據見 [3678 Production 死亡返回阻擋](project-control/m1-v15-3678-production-death-return-blocker-2026-09-26.md)。
+
 ## 2026-09-26 F V15 3678 部署來源對帳
 
 - Project Control 已核准以 Git blob 和候選部署位元組作為 `3678ed86` config 來源權威。來源治理加入建置收據、map binary、config blob、候選位元組及 Production preimage 的封閉檢查；同一 lease 的歷史 command-contract 收據由完整 Native 修訂鏈驗證。準備候選時保留配置原檔，受控部署時逐位元組替換，健康檢查失敗時連同執行檔回滾。
