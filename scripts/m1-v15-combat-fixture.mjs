@@ -297,7 +297,7 @@ async function completeOnlinePreparation(player, adapter, beforeRuntime, canonic
 }
 
 async function main() {
-  need(['preflight', 'prepare', 'resume', 'equip-offline', 'restore'].includes(action),
+  need(['preflight', 'prepare', 'resume', 'equip-offline', 'confirm-offline', 'restore'].includes(action),
     'INVALID_FIXTURE_ACTION');
   const sourceSha = governance();
   const canonical = sourceData();
@@ -346,6 +346,52 @@ async function main() {
         offline.character.char_id === CHAR && idleEligible(offline),
       'COMBAT_FIXTURE_RESUME_STATE_DRIFT');
       await completeOnlinePreparation(player, adapter, beforeRuntime, canonical, sourceSha);
+      return;
+    }
+    if (action === 'confirm-offline') {
+      need(fs.existsSync(path.join(EVIDENCE, 'equipped-offline.json')) &&
+        !fs.existsSync(path.join(EVIDENCE, 'prepared.json')) &&
+        !fs.existsSync(path.join(EVIDENCE, 'restored.json')),
+      'COMBAT_FIXTURE_OFFLINE_CONFIRM_RECORD_INVALID');
+      const staged = readJson(path.join(EVIDENCE, 'staged.json'));
+      const offline = readJson(path.join(EVIDENCE, 'offline-preimage.json'));
+      const receipt = readJson(path.join(EVIDENCE, 'equipped-offline.json'));
+      need(same(snapshot(current.character), snapshot({ ...PROFILE,
+        status_point: canonical.budget.remaining })) &&
+        staged.ids.length === 2 && staged.ids.every((entry, i) =>
+          current.inventory.some(row => row.id === entry.id && row.nameid === entry.nameid &&
+            row.equip === (i === 0 ? 2 : 16) && row.amount === 1 && row.refine === 0 &&
+            row.identify === 1)) &&
+        offline.inventory.filter(row => row.equip !== 0).every(original =>
+          current.inventory.some(row => row.id === original.id && row.nameid === original.nameid &&
+            row.equip === 0)) &&
+        receipt.staged.length === 2 &&
+        receipt.staged.every((row, i) => row.id === staged.ids[i].id &&
+          row.nameid === staged.ids[i].nameid && row.equip === (i === 0 ? 2 : 16)),
+      'COMBAT_FIXTURE_OFFLINE_CONFIRM_STATE_DRIFT');
+      const inventoryEquipped = state => state.character?.liveFresh === true &&
+        ITEMS.every((item, i) => state.inventory?.some(row =>
+          Number(row.itemId) === item.id && row.equipped === true &&
+          row.equipMask === (i === 0 ? 2 : 16) && row.refine === 0));
+      need(inventoryEquipped(live), 'COMBAT_FIXTURE_OFFLINE_CONFIRM_NATIVE_MASK_MISSING');
+      const health = await prepareHealthyRuntime(args.credentials);
+      const ready = await player.state();
+      need(inventoryEquipped(ready) &&
+        ready.character.hp === ready.character.maxHp &&
+        ready.character.sp === ready.character.maxSp &&
+        ready.questJournal?.ownership?.agentMode === 'PERSISTENT_IDLE',
+      'COMBAT_FIXTURE_OFFLINE_CONFIRM_HEALTH_FAILED');
+      fs.writeFileSync(path.join(EVIDENCE, 'prepared.json'), JSON.stringify({
+        method: 'TEST_ONLY_OFFLINE_EQUIP', profile: PROFILE, budget: canonical.budget,
+        equipment: canonical.equipment, health, sourceSha, nativeSha: NATIVE_SHA,
+        runtime: beforeRuntime.pids, maxHpAfter: ready.character.maxHp,
+        maxSpAfter: ready.character.maxSp,
+        webEquipmentProjectionGap: ready.equipment?.length === 0,
+        preparedAt: new Date().toISOString() }, null, 2) + '\n', { flag: 'wx' });
+      console.log(JSON.stringify({ prepared: true, method: 'TEST_ONLY_OFFLINE_EQUIP',
+        evidenceDir: EVIDENCE, hp: ready.character.hp, maxHp: ready.character.maxHp,
+        sp: ready.character.sp, maxSp: ready.character.maxSp,
+        webEquipmentProjectionGap: ready.equipment?.length === 0 }));
       return;
     }
     if (action === 'equip-offline') {
@@ -407,13 +453,15 @@ async function main() {
       let loaded;
       for (let i = 0; i < 20; i++) {
         loaded = await player.state();
-        if (ITEMS.every(item => loaded.equipment?.some(row =>
-          Number(row.itemId) === item.id && row.slot === item.slot && row.refine === 0)) &&
+        if (ITEMS.every((item, i) => loaded.inventory?.some(row =>
+          Number(row.itemId) === item.id && row.equipped === true &&
+          row.equipMask === (i === 0 ? 2 : 16) && row.refine === 0)) &&
           loaded.character?.maxHp > live.character.maxHp) break;
         await delay(500);
       }
-      need(ITEMS.every(item => loaded.equipment?.some(row =>
-        Number(row.itemId) === item.id && row.slot === item.slot && row.refine === 0)) &&
+      need(ITEMS.every((item, i) => loaded.inventory?.some(row =>
+        Number(row.itemId) === item.id && row.equipped === true &&
+        row.equipMask === (i === 0 ? 2 : 16) && row.refine === 0)) &&
         loaded.character?.maxHp > live.character.maxHp,
       'COMBAT_FIXTURE_OFFLINE_EQUIP_AUTHORITY_FAILED');
       const health = await prepareHealthyRuntime(args.credentials);
