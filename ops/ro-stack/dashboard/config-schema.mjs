@@ -271,6 +271,18 @@ export function migrateLegacyConfig({supplyCycle={},configText='',skillAutomatio
     if(supplyCycle.redPotionMax!==undefined) row.maxAmount=Number(supplyCycle.redPotionMax);
     add('supply-cycle.json.redPotionMin/redPotionMax','supply.services.buy.rules[item=501].minAmount/maxAmount','ADAPT');
   }
+  for(const row of config.supply.services.buy.rules) {
+    if(Number.isInteger(row.minAmount) && Number.isInteger(row.maxAmount) &&
+       row.maxAmount>0 && row.minAmount>row.maxAmount) {
+      const legacyMin=row.minAmount;
+      // OpenKore triggers at amount <= minAmount && amount < maxAmount.
+      // Clamping the higher minimum to maxAmount keeps that predicate exact.
+      row.minAmount=row.maxAmount;
+      add(`legacy buyAuto ${row.item}.minAmount=${legacyMin}`,
+        `supply.services.buy.rules[item=${row.item}].minAmount`,'ADAPT',
+        '保留低於 maxAmount 才補給的既有觸發語意；原始值保留於 migration.retained');
+    }
+  }
   const policyRows=new Map();
   const baselineItems=new Set(LEGACY_ITEM_RULE_BASELINE);
   const projection={itemsControlRows:0,pickupRows:0,projected:0,retainedOutsideM1:0,duplicates:0,invalid:0};

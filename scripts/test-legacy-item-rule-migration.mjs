@@ -42,6 +42,22 @@ check('2 small HP/SP rules stay valid', () => {
   assert.deepEqual(validateCanonicalConfig(config), []);
   assert.deepEqual(nativeSupplyPolicy(config).buyRules.map((row) => row.itemId).sort(), [501, 505]);
 });
+check('legacy buy minimum above target preserves the effective trigger', () => {
+  const { config, migration } = migrateLegacyConfig({
+    configText: 'buyAuto 501 {\nminAmount 200\nmaxAmount 3\n}',
+  });
+  const [row] = config.supply.services.buy.rules;
+  assert.deepEqual([row.minAmount, row.maxAmount], [3, 3]);
+  for (let amount = 0; amount <= 300; amount++)
+    assert.equal(amount <= 200 && amount < 3,
+      amount <= row.minAmount && amount < row.maxAmount);
+  assert.deepEqual(validateCanonicalConfig(config), []);
+  assert.ok(migration.retained.blocks.some((block) =>
+    block.kind === 'buyAuto' && block.values.minAmount === '200'));
+  assert.ok(migration.mappings.some((mapping) =>
+    mapping.canonical === 'supply.services.buy.rules[item=501].minAmount' &&
+    mapping.disposition === 'ADAPT'));
+});
 const first = migrateLegacyConfig(legacy);
 const second = migrateLegacyConfig(legacy);
 check('3 1666-row legacy template migrates deterministically', () => {
