@@ -927,7 +927,7 @@ async function loadOfficialDamageAssets() {
   }
 }
 function setupFoldableWindows() {
-  document.querySelectorAll('#game .window > .titlebar').forEach((titlebar) => {
+  document.querySelectorAll('#game .window:not(.world-map-confirm-card) > .titlebar').forEach((titlebar) => {
     const windowElement = titlebar.parentElement;
     if (!windowElement || titlebar.querySelector('.window-fold-button')) return;
     const title = titlebar.querySelector('span')?.textContent?.trim() || '視窗';
@@ -8336,6 +8336,29 @@ function syncAdminSurfaceLink(adminSurface) {
   else headerRow.append(link);
 }
 
+// Short town names for the World Map cell label: at most four characters,
+// drawn two per line so the label fits inside the town's own cell.
+const WORLD_MAP_TOWN_SHORT_NAMES = Object.freeze({
+  prontera: '普隆德拉', izlude: '依斯魯得', geffen: '吉芬', payon: '斐揚',
+  pay_arche: '弓手村', morocc: '夢羅克', moc_ruins: '夢羅克', alberta: '艾爾貝塔',
+  aldebaran: '艾爾帕蘭', comodo: '克魔島', yuno: '朱諾', einbroch: '艾音布羅',
+  einbech: '艾音貝赫', lighthalzen: '里希塔樂', hugel: '毀葛', rachel: '拉赫',
+  veins: '菲音斯', umbala: '汶巴拉', amatsu: '天津町', gonryun: '崑崙',
+  louyang: '龍之城', ayothaya: '哎喲泰雅', niflheim: '尼芙菲姆', moscovia: '莫斯科',
+  brasilis: '巴西', dewata: '德瓦他', malangdo: '綿綿島', malaya: '馬來港',
+  eclage: '埃克拉珠', mora: '穆拉村', dicastes01: '艾爾迪卡', lasagna: '羅札納',
+  xmas: '薑餅城', manuk: '魔怒克', splendide: '史波浪',
+});
+function worldMapTownShortName(town) {
+  const known = WORLD_MAP_TOWN_SHORT_NAMES[town.map];
+  if (known) return known;
+  const words = String(town.name ?? town.map).trim().split(/\s+/);
+  return [...words[words.length - 1]].slice(-4).join('');
+}
+function worldMapTownLabelLines(shortName) {
+  const chars = [...shortName];
+  return chars.length <= 2 ? [shortName] : [chars.slice(0, 2).join(''), chars.slice(2, 4).join('')];
+}
 function renderWorldMapTowns() {
   const towns = farmMapAvailabilityData?.towns ?? [];
   const area = $('#worldMapTowns');
@@ -8352,7 +8375,13 @@ function renderWorldMapTowns() {
     button.type = 'button';
     button.className = 'world-map-town-label';
     button.dataset.mapId = town.map;
-    button.textContent = town.name ?? town.map;
+    button.title = town.name ?? town.map;
+    button.setAttribute('aria-label', town.name ?? town.map);
+    button.replaceChildren(...worldMapTownLabelLines(worldMapTownShortName(town)).map((line) => {
+      const span = document.createElement('span');
+      span.textContent = line;
+      return span;
+    }));
     button.onclick = (event) => {
       event.stopPropagation();
       selectTownWorldMap(town.map);
@@ -8365,12 +8394,16 @@ function renderWorldMapTowns() {
     const position = farmMapAvailabilityData?.worldMap?.regions?.find((region) =>
       region.mapIds?.includes(town.map))?.position;
     if (position) {
-      button.style.left = `${((position.x1 + position.x2) / 2 / farmMapAvailabilityData.worldMap.width) * 100}%`;
-      button.style.top = `${((position.y1 + position.y2) / 2 / farmMapAvailabilityData.worldMap.height) * 100}%`;
+      const { width, height } = farmMapAvailabilityData.worldMap;
+      button.style.left = `${(position.x1 / width) * 100}%`;
+      button.style.top = `${(position.y1 / height) * 100}%`;
+      button.style.width = `${((position.x2 - position.x1) / width) * 100}%`;
+      button.style.height = `${((position.y2 - position.y1) / height) * 100}%`;
       overlayButtons.push(button);
       positioned.add(town.map);
     } else {
       button.className = '';
+      button.textContent = town.name ?? town.map;
       other.append(button);
     }
   }

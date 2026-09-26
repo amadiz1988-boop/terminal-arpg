@@ -1980,17 +1980,29 @@ button {
 .world-map-town-label {
   position: absolute;
   z-index: 1001;
-  transform: translate(-50%, -50%);
-  min-width: 48px;
-  min-height: 28px;
-  padding: 2px 5px;
+  box-sizing: border-box;
+  display: grid;
+  place-content: center;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  container-type: size;
   border: 1px solid #f5dda3;
-  border-radius: 4px;
-  background: #233c2ce6;
+  border-radius: 0;
+  background: #233c2cd9;
   color: #fff5d0;
-  font-size: 11px;
+  font-weight: bold;
+  line-height: 1;
+  text-shadow: 0 1px 1px #000;
   pointer-events: auto;
   cursor: pointer;
+}
+/* Two characters per line, at most two lines, sized to the town's own cell. */
+.world-map-town-label > span {
+  display: block;
+  font-size: min(44cqw, 42cqh);
+  white-space: nowrap;
+  text-align: center;
 }
 .world-map-town-label:focus-visible { outline: 2px solid #fff; }
 .world-map-confirm {
@@ -2004,11 +2016,22 @@ button {
 }
 .world-map-confirm.hidden { display: none; }
 .world-map-confirm-card {
-  width: min(100%, 360px);
-  padding: 18px;
-  background: #213329;
-  color: #fff;
-  border: 1px solid #c9b780;
+  width: min(100%, 320px);
+  color: #1d2a3a;
+}
+.world-map-confirm-body {
+  padding: 12px 12px 4px;
+  font-size: 13px;
+}
+.world-map-confirm-body p { margin: 0 0 8px; }
+.world-map-confirm-question { font-weight: bold; }
+.world-map-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+  padding: 6px 8px;
+  border-top: 1px solid #c3cad3;
+  background: #eef1f4;
 }
 .world-map-arrival-toast {
   position: fixed;
