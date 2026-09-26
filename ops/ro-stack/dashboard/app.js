@@ -7046,17 +7046,21 @@ function renderWorldMapDestinationList() {
         button.type = 'button';
         button.className = 'world-map-destination';
         button.dataset.mapId = row.map;
+        button.dataset.category = selectedWorldMapCategory;
         const name = document.createElement('span');
         name.textContent = row.name;
-        const level = document.createElement('small');
-        const value = Number.isFinite(row.averageLevel)
-          ? (Math.round(row.averageLevel * 10) / 10).toFixed(1) : null;
-        const hint = selectedWorldMapCategory === 'towns' &&
-          row.locationClass !== 'ACTUAL_TOWN' ? '儲存據點 · ' : '';
-        level.textContent = selectedWorldMapCategory === 'towns'
-          ? `${hint}周邊 ${value === null ? 'Lv. —' : `平均 Lv. ${value}`}`
-          : `平均 Lv. ${value}`;
-        button.append(name, level);
+        button.append(name);
+        if (selectedWorldMapCategory === 'towns') {
+          if (row.locationClass !== 'ACTUAL_TOWN') {
+            const hint = document.createElement('small');
+            hint.textContent = '儲存據點';
+            button.append(hint);
+          }
+        } else {
+          const level = document.createElement('small');
+          level.textContent = `平均 Lv. ${(Math.round(row.averageLevel * 10) / 10).toFixed(1)}`;
+          button.append(level);
+        }
         button.onclick = () => {
           if (selectedWorldMapCategory === 'towns') selectTownWorldMap(row.map);
           else void selectWorldMap(row.map);

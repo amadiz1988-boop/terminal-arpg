@@ -2165,12 +2165,22 @@ button {
   padding: 5px 8px;
   text-align: left;
 }
+.world-map-destination[data-category="towns"] {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+}
 .world-map-destination span {
   min-width: 0;
   overflow-wrap: anywhere;
 }
 .world-map-destination small {
   color: #496174;
+}
+.world-map-destination[data-category="towns"] small {
+  flex: none;
+  margin-left: auto;
 }
 .world-map-detail {
   grid-column: 2;
