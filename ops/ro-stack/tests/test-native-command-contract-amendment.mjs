@@ -118,6 +118,29 @@ test('post-deploy verifier pins image, preimage, executables and receipt', () =>
       candidate_manifest_sha256:m.active_candidate_manifest_sha256,
       artifacts:rows.map(x=>({path:x.production_path,sha256:x.sha256}))};
     assert.equal(verifyCommandContractAmendment(root,lease,{native_command_contract_amendment:ref},nativeReceipt),true);
+    const successorSha='b'.repeat(40);
+    const priorPath='.local/ro-stack/native-prior.json';
+    const prior={...nativeReceipt,config_artifacts:[{sha256:m.config_artifacts[0].sha256}]};
+    write(priorPath,prior);
+    const priorRef={path:priorPath,sha256:digest(path.join(root,priorPath))};
+    const auditPath='.local/ro-stack/native-audit.json';
+    write(auditPath,{lease_id:policy.leaseId,lease_owner:policy.owner,
+      old_native_git_sha:policy.nativeSha,new_native_git_sha:successorSha,
+      reason:'TEST_UNCHANGED_CONFIG'});
+    const history=[{old_native_git_sha:policy.nativeSha,new_native_git_sha:successorSha,
+      reason:'TEST_UNCHANGED_CONFIG',audit_receipt:auditPath,
+      audit_sha256:digest(path.join(root,auditPath)),previous_native_receipt:priorRef}];
+    const successorLease={...lease,native_deploy_git_sha:successorSha,
+      active_native_candidate:{native_git_sha:successorSha,deployed:true},
+      native_candidate_amendments:history};
+    const successorPending={native_command_contract_amendment:ref,native_candidate_amendments:history};
+    const successorReceipt={native_git_sha:successorSha,artifacts:nativeReceipt.artifacts,
+      rollback_reference:{intermediate_rollback:{native_git_sha:policy.nativeSha}},
+      amendment_of:{native_git_sha:policy.nativeSha,native_receipt:priorPath,
+        native_receipt_sha256:priorRef.sha256}};
+    assert.equal(verifyCommandContractAmendment(root,successorLease,successorPending,successorReceipt),true);
+    write(priorPath,'tampered');
+    assert.equal(verifyCommandContractAmendment(root,successorLease,successorPending,successorReceipt),false);
     write(target,'tampered');
     assert.equal(verifyCommandContractAmendment(root,lease,{native_command_contract_amendment:ref},nativeReceipt),false);
     write(target,newBytes);write(backup,'tampered');

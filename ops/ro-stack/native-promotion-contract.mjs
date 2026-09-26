@@ -331,6 +331,23 @@ export function nativeReceiptValid(r, { nativeSha, binaryHash, leaseId, manifest
 // The active Native candidate's command-contract amendment is additive: old
 // candidate/receipt bytes stay immutable, while both lease and pending pin its
 // exact config image, prior image, and unchanged three-executable set.
+function activeNativeContractHash(root, nativeReceipt, contractNativeSha, contractHash) {
+  let current = nativeReceipt;
+  const seen = new Set();
+  for (let depth = 0; depth < 64; depth++) {
+    if (current.config_artifacts?.length === 1) return current.config_artifacts[0].sha256;
+    if (current.native_git_sha === contractNativeSha) return contractHash;
+    const previous = current.amendment_of;
+    check(previous?.native_receipt && previous.native_receipt_sha256 &&
+      previous.native_git_sha === current.rollback_reference?.intermediate_rollback?.native_git_sha &&
+      !seen.has(previous.native_receipt), 'CONTRACT_CONFIG_LINEAGE_INVALID');
+    seen.add(previous.native_receipt);
+    current = readJson(pinned(root, { path: previous.native_receipt,
+      sha256: previous.native_receipt_sha256 }));
+    check(current.native_git_sha === previous.native_git_sha, 'CONTRACT_CONFIG_LINEAGE_INVALID');
+  }
+  throw Error('CONTRACT_CONFIG_LINEAGE_TOO_DEEP');
+}
 export function verifyCommandContractAmendment(root, lease, pending, nativeReceipt) {
   const ref = lease.native_command_contract_amendment;
   if (!ref) return !pending.native_command_contract_amendment;
@@ -346,7 +363,8 @@ export function verifyCommandContractAmendment(root, lease, pending, nativeRecei
       check(entry?.previous_native_receipt, 'CONTRACT_HISTORICAL_RECEIPT_MISSING');
       return readJson(pinned(root, entry.previous_native_receipt));
     })();
-    const activeConfigHash = nativeReceipt.config_artifacts?.[0]?.sha256 || item?.sha256;
+    const activeConfigHash = activeNativeContractHash(root, nativeReceipt,
+      receipt.native_git_sha, item?.sha256);
     check(receipt.schema_version === 'native-command-contract-deploy-v1' &&
       manifest.schema_version === 'native-command-contract-amendment-v1' &&
       /^[a-f0-9]{40}$/i.test(receipt.governance_git_sha || '') &&
