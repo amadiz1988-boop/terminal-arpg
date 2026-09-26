@@ -5,6 +5,35 @@ export const ECONOMY_TEST_CHAR_ID = 150105;
 export const ECONOMY_STORE_ITEM_ID = 502;
 export const ECONOMY_SELL_ITEM_ID = 503;
 
+export async function stopEconomyFarm({ mode, dispatch, commandStatus, remaining,
+  sleep, now = Date.now, onAttempt = () => {} }) {
+  let commandId = null;
+  let retryAt = 0;
+  while (remaining() > 0) {
+    if (await mode() === 'PERSISTENT_IDLE') return;
+    if (commandId) {
+      const state = await commandStatus(commandId);
+      if (state?.status === 'REJECTED' || state?.status === 'FAILED') {
+        if (state.reasonCode !== 'SUPPLY_IN_PROGRESS')
+          throw new Error(`STOP_FARM_REJECTED:${state.reasonCode ?? state.status}`);
+        commandId = null;
+        retryAt = now() + 1500;
+      } else if (state?.status === 'CONFIRMED') {
+        commandId = null;
+        retryAt = now() + 1500;
+      }
+    }
+    if (!commandId && now() >= retryAt) {
+      const response = await dispatch();
+      commandId = response?.command?.commandId;
+      if (!commandId) throw new Error('STOP_FARM_COMMAND_MISSING');
+      onAttempt(commandId);
+    }
+    await sleep(Math.min(1500, remaining()));
+  }
+  throw new Error('STOP_FARM_TIMEOUT');
+}
+
 export function parseEconomyCli(args) {
   const options = { execute: false, json: false, charId: ECONOMY_TEST_CHAR_ID, timeoutMs: 300000 };
   for (let index = 0; index < args.length; index++) {

@@ -3,6 +3,7 @@ import { defaultCanonicalConfig } from '../ops/ro-stack/dashboard/config-schema.
 import { configWriteAdmission } from '../ops/ro-stack/dashboard/config-capabilities.mjs';
 import {
   parseEconomyCli, economyPrecondition, economyTestConfig, economyDeltas,
+  stopEconomyFarm,
 } from './lib/economy-test-player.mjs';
 
 assert.equal(parseEconomyCli([]).execute, false);
@@ -31,4 +32,25 @@ assert.deepEqual(economyDeltas({ inventory: { 502: 1, 503: 1 }, storage: { 502: 
   { inventory: { 502: 0, 503: 0 }, storage: { 502: 1 }, zeny: 9002 }),
   { store: true, sell: true, storeQuantity: 1, storageQuantity: 1, sellQuantity: 1, zenyGain: 2 });
 assert.equal(economyDeltas(before, before).store, false);
+let clock = 0;
+let attempts = 0;
+await stopEconomyFarm({
+  mode: async () => attempts === 2 && clock >= 4500 ? 'PERSISTENT_IDLE' : 'AUTO_FARM',
+  dispatch: async () => ({ command: { commandId: `stop-${++attempts}` } }),
+  commandStatus: async id => id === 'stop-1'
+    ? { status: 'REJECTED', reasonCode: 'SUPPLY_IN_PROGRESS' }
+    : { status: 'CONFIRMED' },
+  remaining: () => 12000 - clock,
+  sleep: async ms => { clock += ms; },
+  now: () => clock,
+});
+assert.equal(attempts, 2);
+await assert.rejects(() => stopEconomyFarm({
+  mode: async () => 'AUTO_FARM',
+  dispatch: async () => ({ command: { commandId: 'stop-fatal' } }),
+  commandStatus: async () => ({ status: 'REJECTED', reasonCode: 'OWNER_MISMATCH' }),
+  remaining: () => 12000 - clock,
+  sleep: async ms => { clock += ms; },
+  now: () => clock,
+}), /STOP_FARM_REJECTED:OWNER_MISMATCH/);
 console.log('ECONOMY_TEST_PLAYER_TEST_PASS');

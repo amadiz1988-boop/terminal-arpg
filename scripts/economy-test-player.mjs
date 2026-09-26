@@ -6,7 +6,7 @@ import { fixedDbRead } from '../ops/ro-stack/dev-console/providers.mjs';
 import { ECONOMY_TEST_CONFIG_FIXTURE } from '../ops/ro-stack/support-session.mjs';
 import {
   ECONOMY_TEST_CHAR_ID, parseEconomyCli, economyPrecondition,
-  economyTestConfig, economyDeltas,
+  economyTestConfig, economyDeltas, stopEconomyFarm,
 } from './lib/economy-test-player.mjs';
 
 const sleep = ms => new Promise(resolveSleep => setTimeout(resolveSleep, ms));
@@ -145,14 +145,16 @@ export async function runEconomyTestPlayer(args, io = {}) {
     if (options.execute && (farmStarted || fixturePrepared || appliedConfig)) {
       // A timed-out observation must never consume the time reserved for
       // stopping the player and restoring its exact fixture preimage.
-      deadline = Date.now() + 90000;
+      deadline = Date.now() + 120000;
       result.cleanup = { result: 'PENDING' };
       try {
-        if (farmStarted && await mode() !== 'PERSISTENT_IDLE') {
-          const stopped = await request('/api/automation', { method: 'POST', body: { action: 'stop' } });
-          mark('STOP_FARM_DISPATCHED', { commandId: stopped?.command?.commandId });
-          await bounded(async () => await mode() === 'PERSISTENT_IDLE', 'STOP_FARM');
-        }
+        if (farmStarted) await stopEconomyFarm({ mode,
+          dispatch: () => request('/api/automation', { method: 'POST', body: { action: 'stop' } }),
+          commandStatus: async commandId => fixedDbRead('commands', ECONOMY_TEST_CHAR_ID)
+            .records.find(row => row.commandId === commandId),
+          remaining, sleep,
+          onAttempt: commandId => mark('STOP_FARM_DISPATCHED', { commandId }),
+        });
         if (appliedConfig && savedConfig) {
           const current = await configNow();
           if (!same(withoutRevision(current), withoutRevision(appliedConfig)))
