@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import {
   SUPPORT_SESSION_MODE,
+  ECONOMY_TEST_CONFIG_FIXTURE,
   classifySupportMutation,
   normalizeSupportActor,
   normalizeSupportSessionInput,
@@ -55,6 +56,16 @@ for (const path of ['/api/characters', '/api/job-target', '/api/social', '/api/s
   assert.equal(classifySupportMutation(observe, { method: 'POST', path, body: {} }).allowed, false);
 
 const player = { supportSessionId: 's', mode: SUPPORT_SESSION_MODE.PLAYER_ACTIONS };
+const economyPlayer = { ...player, accountId: 2000163, characterId: 150105, createdFrom: 'ADMIN_SUPPORT_UI' };
+const economyConfig = { method: 'PUT', path: '/api/config', body: { economyTestFixture: ECONOMY_TEST_CONFIG_FIXTURE } };
+assert.equal(classifySupportMutation(economyPlayer, economyConfig).actionKey, 'economy_test_config');
+assert.equal(classifySupportMutation(economyPlayer, economyConfig).allowed, true);
+assert.equal(classifySupportMutation({ ...economyPlayer, accountId: 2000164 }, economyConfig).allowed, false);
+assert.equal(classifySupportMutation({ ...economyPlayer, characterId: 150106 }, economyConfig).allowed, false);
+assert.equal(classifySupportMutation({ ...economyPlayer, createdFrom: 'OTHER' }, economyConfig).allowed, false);
+assert.equal(classifySupportMutation({ ...economyPlayer, mode: SUPPORT_SESSION_MODE.OBSERVE_ONLY }, economyConfig).allowed, false);
+assert.equal(classifySupportMutation(economyPlayer, { ...economyConfig, body: {} }).allowed, false);
+assert.equal(classifySupportMutation(player, economyConfig).allowed, false);
 assert.equal(classifySupportMutation(player, { method: 'POST', path: '/api/character-reset', body: { type: 'stat' } }).actionKey, 'character_reset');
 assert.equal(classifySupportMutation(player, { method: 'POST', path: '/api/status-reset', body: {} }).allowed, false);
 assert.equal(classifySupportMutation(player, { method: 'POST', path: '/api/automation', body: { action: 'start' } }).actionKey, 'start_farm');

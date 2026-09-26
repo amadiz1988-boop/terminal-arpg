@@ -4,6 +4,7 @@ export const SUPPORT_SESSION_MODE = Object.freeze({
 });
 
 export const SUPPORT_SESSION_CREATED_FROM = 'ADMIN_SUPPORT_UI';
+export const ECONOMY_TEST_CONFIG_FIXTURE = 'M1_ECONOMY_TEST_PLAYER_V1';
 export const SUPPORT_SESSION_CONTEXT = 'SUPPORT_IMPERSONATION';
 export const SUPPORT_SESSION_DEFAULT_TTL_MS = 15 * 60 * 1000;
 export const SUPPORT_SESSION_MAX_TTL_MS = 60 * 60 * 1000;
@@ -74,6 +75,15 @@ export function classifySupportMutation(context, input = {}) {
     return { allowed: true, actionKey: 'support_session_revoke', resource: path, errorCode: null };
   if ((context.mode ?? context.supportMode) !== SUPPORT_SESSION_MODE.PLAYER_ACTIONS)
     return { allowed: false, actionKey: 'mutation', resource: path, errorCode: 'support_observe_only' };
+  if (path === '/api/config' && method === 'PUT') {
+    const fixtureAllowed = Number(context.accountId) === 2000163 &&
+      Number(context.characterId) === 150105 &&
+      context.createdFrom === SUPPORT_SESSION_CREATED_FROM &&
+      body.economyTestFixture === ECONOMY_TEST_CONFIG_FIXTURE;
+    return fixtureAllowed
+      ? { allowed: true, actionKey: 'economy_test_config', resource: path, errorCode: null }
+      : { allowed: false, actionKey: 'economy_test_config', resource: path, errorCode: 'support_mutation_denied' };
+  }
   if (path === '/api/automation' && method === 'POST') {
     if (body.action === 'start')
       return { allowed: true, actionKey: 'start_farm', resource: path, errorCode: null };

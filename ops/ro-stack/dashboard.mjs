@@ -4733,8 +4733,10 @@ function publicErrorMessage(error) {
     ? message
     : '伺服器操作失敗';
 }
+const requestBodyCache = new WeakMap();
 function requestBody(request, maximum = 8192) {
-  return new Promise((resolve, reject) => {
+  if (requestBodyCache.has(request)) return requestBodyCache.get(request);
+  const parsed = new Promise((resolve, reject) => {
     const declared = Number(request.headers['content-length'] ?? 0);
     if (declared > maximum) {
       reject(new HttpError(413, '請求內容過大'));
@@ -4765,6 +4767,8 @@ function requestBody(request, maximum = 8192) {
     });
     request.on('error', reject);
   });
+  requestBodyCache.set(request, parsed);
+  return parsed;
 }
 
 function requestBinary(request, maxBytes) {
@@ -10407,8 +10411,10 @@ async function handleDashboardRequest(request, response) {
       return json(response, 403, { error: 'support_admin_boundary' });
     let supportMutationDecision = null;
     if (supportRequestContext && mutationMethods.has(request.method ?? 'GET')) {
-      const needsBody = url.pathname === '/api/automation' || url.pathname === '/api/item-action';
-      const body = needsBody ? await requestBody(request) : {};
+      const needsBody = url.pathname === '/api/automation' || url.pathname === '/api/item-action' ||
+        (url.pathname === '/api/config' && request.method === 'PUT');
+      const body = needsBody ? await requestBody(request,
+        url.pathname === '/api/config' ? 262144 : 8192) : {};
       supportMutationDecision = classifySupportMutation(supportRequestContext, {
         method: request.method,
         path: url.pathname,
