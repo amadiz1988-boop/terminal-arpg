@@ -15,6 +15,7 @@ import { HISTORICAL_NATIVE_AMENDMENT as old, M1_SECOND_NATIVE_AMENDMENT as polic
   M1_SUPPLY_COMMAND_ADMISSION_CORRECTION as supplyCommands,
   M1_START_FARM_SERVICE_FIELDS_CORRECTION as farmServiceFields,
   M1_ECONOMY_TEST_PLAYER_AMENDMENT as economyTestPlayer,
+  M1_ECONOMY_STORAGE_FIXTURE_AMENDMENT as economyStorageFixture,
   validateNativeAmendmentHistory, validateHistoricalNativeAnchor, validateNextNativeAmendment,
   applyNextNativeAmendment, deployedNativeRuntimeMatches } from '../native-amendment-chain.mjs';
 import { retirementDecision } from '../native-candidate-amendment.mjs';
@@ -321,6 +322,16 @@ test('economy test player amendment admits only personal economy gates and tests
   ]);
   assert.equal(economyTestPlayer.sourcePaths.includes('src/map/trade.cpp'), false);
   assert.equal(economyTestPlayer.sourcePaths.includes('src/map/vending.cpp'), false);
+});
+test('economy storage skill fixture has a unique reason and exact three-file scope', () => {
+  assert.equal(economyStorageFixture.reason, 'M1_ECONOMY_STORAGE_SKILL_FIXTURE_V1');
+  assert.equal(economyStorageFixture.scope, economyTestPlayer.scope);
+  assert.deepEqual(economyStorageFixture.sourcePaths, [
+    'src/map/m1_acceptance_fixture.hpp',
+    'src/map/persistent_agent.cpp',
+    'tools/pa-command-contract/test_pa_contract.cpp',
+  ]);
+  assert.equal(economyStorageFixture.sourcePaths.includes('src/map/pc.cpp'), false);
 });
 {
   const mapHash = 'A'.repeat(64);

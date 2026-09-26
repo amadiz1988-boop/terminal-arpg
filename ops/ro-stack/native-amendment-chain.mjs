@@ -165,6 +165,15 @@ export const M1_ECONOMY_TEST_PLAYER_AMENDMENT = Object.freeze({
     'tools/pa-command-contract/test_pa_contract.cpp',
   ]),
 });
+export const M1_ECONOMY_STORAGE_FIXTURE_AMENDMENT = Object.freeze({
+  reason: 'M1_ECONOMY_STORAGE_SKILL_FIXTURE_V1',
+  scope: 'M1_ECONOMY_TEST_PLAYER_V1',
+  sourcePaths: Object.freeze([
+    'src/map/m1_acceptance_fixture.hpp',
+    'src/map/persistent_agent.cpp',
+    'tools/pa-command-contract/test_pa_contract.cpp',
+  ]),
+});
 export const APPROVED_NATIVE_AMENDMENTS = Object.freeze([
   M1_SECOND_NATIVE_AMENDMENT, M1_INVENTORY_MAINTENANCE_NATIVE_AMENDMENT,
   M1_INVENTORY_PROJECTION_CORRECTION, M1_FARM_WORLD_TELEPORT_SPAWN_CORRECTION,
@@ -173,7 +182,7 @@ export const APPROVED_NATIVE_AMENDMENTS = Object.freeze([
   M1_PLAYER_FLY_WING_EFFECT_CORRECTION,
   M1_SUPPLY_COMMAND_ADMISSION_CORRECTION,
   M1_START_FARM_SERVICE_FIELDS_CORRECTION,
-  M1_ECONOMY_TEST_PLAYER_AMENDMENT,
+  M1_ECONOMY_TEST_PLAYER_AMENDMENT, M1_ECONOMY_STORAGE_FIXTURE_AMENDMENT,
 ]);
 export const approvedNativeAmendment = reason =>
   APPROVED_NATIVE_AMENDMENTS.find(item => item.reason === reason) ?? null;

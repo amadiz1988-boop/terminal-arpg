@@ -123,7 +123,7 @@
       "disposition": "DEPLOYED_NATIVE_PREDECESSOR",
       "lease_id": "869f1725-dbd0-452d-b9dd-37ee79cc3f9a",
       "candidate_successor": "b64f6b2f93e3c709ca0453e6f4add2be834ee7e4",
-      "reason": "M1_ECONOMY_TEST_PLAYER_V1",
+      "reason": "M1_ECONOMY_STORAGE_SKILL_FIXTURE_V1",
       "status": "SOURCE_APPROVED_DEPLOY_PENDING"
     }
     ]
