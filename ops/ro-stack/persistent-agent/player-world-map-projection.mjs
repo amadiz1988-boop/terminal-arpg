@@ -1,20 +1,47 @@
 import { inflateSync } from 'node:zlib';
+import { KAFRA_CONTENT } from './kafra-content.mjs';
 
 const mapIdPattern = /^[a-z0-9_]{1,31}$/;
+const fieldSaveHubs = new Set(['cmd_fild07', 'prt_fild05']);
+const nonFlagTowns = new Set(['morocc', 'moscovia']);
 
+// Match the loaded-script extraction rules in Native's Kafra catalog generator.
 export function parseKafraSavedPoints(sources) {
   const byMap = new Map();
   for (const { path, text } of sources) {
-    for (const line of String(text).split(/\r?\n/)) {
-      const match = line.match(/^\s*savepoint\s+"([a-z0-9_]+)"\s*,\s*(\d+)\s*,\s*(\d+)\s*,/);
-      if (!match || !mapIdPattern.test(match[1])) continue;
-      const map = match[1], x = Number(match[2]), y = Number(match[3]);
-      const candidates = byMap.get(map) ?? [];
-      if (!candidates.some((point) => point.x === x && point.y === y))
-        candidates.push({ map, x, y, source: path });
-      byMap.set(map, candidates);
+    const lines = String(text).split(/\r?\n/);
+    for (let index = 0; index < lines.length; index += 1) {
+      const declaration = lines[index].match(/^([a-z0-9_]+),\d+,\d+,\d+\s+script\s+(.+?)\t[^\t]+,\{\s*$/i);
+      if (!declaration) continue;
+      const start = index, body = [];
+      while (++index < lines.length && !/^}\s*$/.test(lines[index])) body.push(lines[index]);
+      if (index === lines.length) throw new Error(`Unclosed Kafra script: ${path}:${start + 1}`);
+      const script = body.join('\n');
+      const kafra = script.match(/callfunc\s+"F_Kafra"\s*,\s*(\d+)\s*,\s*(\d+)/);
+      const directSave = /select\("Save(?::|"\))/.test(script);
+      if (!kafra && !directSave) continue;
+      if (kafra) {
+        const welcome = Number(kafra[1]), menu = Number(kafra[2]);
+        if (welcome === 2 || [2, 5, 6, 9].includes(menu)) continue;
+        if (![0, 1, 3, 4, 7, 8, 10].includes(menu))
+          throw new Error(`Unclassified Kafra menu: ${path}:${start + 1} (${menu})`);
+      }
+      for (const match of script.matchAll(/savepoint\s+"([a-z0-9_]+)"\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*1\s*,\s*1\s*;/g)) {
+        const [, map, xText, yText] = match;
+        if (!mapIdPattern.test(map) || map !== declaration[1])
+          throw new Error(`Kafra save map differs from service map: ${path}:${start + 1}`);
+        const point = { map, x: Number(xText), y: Number(yText),
+          npc: declaration[2].split('::').at(-1), source: path,
+          line: start + 1 + script.slice(0, match.index).split('\n').length };
+        const candidates = byMap.get(map) ?? [];
+        if (!candidates.some((row) => row.x === point.x && row.y === point.y))
+          candidates.push(point);
+        byMap.set(map, candidates);
+      }
     }
   }
+  for (const candidates of byMap.values())
+    candidates.sort((a, b) => a.x - b.x || a.y - b.y);
   return byMap;
 }
 
@@ -40,44 +67,59 @@ function playerSummary(summary, kind) {
   };
 }
 
-// The complete catalog remains available to internal diagnostics. This view
-// contains only destinations admitted for the normal Player World Map.
 export function buildPlayerWorldMapProjection({ mapInfo, catalog, mapCache,
-  townFlagMaps, sourceIndex, savedPointSources }) {
+  townFlagMaps, sourceIndex, savedPointSources, mapNames = {} }) {
   const savedPoints = parseKafraSavedPoints(savedPointSources);
   const normalSpawns = new Set(sourceIndex.maps.filter((row) =>
     row.monsters?.length > 0 && !(row.blockedFlags?.length > 0))
     .map((row) => row.map));
   const positioned = new Set(mapInfo.worldMap.regions.flatMap((region) => region.mapIds));
-  const rows = new Map(), unresolvedTowns = [];
+  const rows = new Map(), farmRows = new Map(), townRows = new Map();
+  const unresolvedTowns = [];
   for (const map of positioned) {
     const summary = mapInfo.maps[map], row = catalog.get(map);
     if (!summary || !row) continue;
-    if (townFlagMaps.has(map)) {
-      if (row.kind !== 'town' || row.townTeleportAvailable !== true) {
-        unresolvedTowns.push({ map, reason: 'TOWN_TRAVEL_UNAVAILABLE' });
-        continue;
-      }
-      const legal = (savedPoints.get(map) ?? []).filter((point) =>
-        passableTownCell(mapCache, map, point.x, point.y));
-      const savedPoint = map === 'prontera'
-        ? legal.find((point) => point.x === 116 && point.y === 73)
-        : legal.length === 1 ? legal[0] : null;
-      if (!savedPoint) {
-        unresolvedTowns.push({ map, reason: legal.length > 1
-          ? 'NAVIGATION_PATH_COST_UNAVAILABLE' : 'CANONICAL_SAVED_POINT_UNAVAILABLE' });
-        continue;
-      }
-      rows.set(map, { ...row, kind: 'town', farmable: false,
-        farmSelectionAvailable: false, townTeleportAvailable: true,
-        landing: { x: savedPoint.x, y: savedPoint.y, source: savedPoint.source },
-        savedPoint: { map, x: savedPoint.x, y: savedPoint.y } });
-    } else if (row.kind === 'farm' && row.farmable === true &&
+    if (row.kind === 'farm' && row.farmable === true &&
         row.farmSelectionAvailable === true && row.normalMonsterCount > 0 &&
         row.landing && summary.unlocked === true && normalSpawns.has(map)) {
+      farmRows.set(map, row);
       rows.set(map, row);
     }
   }
+  for (const [map, candidates] of savedPoints) {
+    const legal = candidates.filter((point) => passableTownCell(mapCache, map, point.x, point.y));
+    if (!legal.length) continue;
+    const savedPoint = map === 'prontera'
+      ? legal.find((point) => point.x === 116 && point.y === 73)
+      : legal[0];
+    if (!savedPoint) continue;
+    const summary = mapInfo.maps[map] ?? { id: map, name: mapNames[map] ?? map };
+    const locationClass = fieldSaveHubs.has(map) ? 'FIELD_SAVE_HUB'
+      : townFlagMaps.has(map) || nonFlagTowns.has(map) ? 'ACTUAL_TOWN' : 'SERVICE_HUB';
+    const row = { map, name: summary.name, kind: 'town', locationClass,
+      kafraSaveService: true, farmable: false, farmSelectionAvailable: false,
+      townTeleportAvailable: true, minLevel: null,
+      landing: { x: savedPoint.x, y: savedPoint.y, source: savedPoint.source },
+      savedPoint: { map, x: savedPoint.x, y: savedPoint.y },
+      saveDestinations: legal.map(({ x, y }) => ({ x, y })) };
+    townRows.set(map, row);
+    if (!rows.has(map)) rows.set(map, row);
+  }
+  // Izlude's rAthena save command uses a conditional map expression, so it is
+  // not part of Native's static Kafra catalog. Its existing MF_TOWN path stays.
+  const izlude = KAFRA_CONTENT.izlude;
+  const izludeCatalog = catalog.get('izlude');
+  if (!townRows.has('izlude') && izludeCatalog?.townTeleportAvailable &&
+      passableTownCell(mapCache, 'izlude', izlude.saveX, izlude.saveY)) {
+    const row = { ...izludeCatalog, locationClass: 'ACTUAL_TOWN',
+      landing: { x: izlude.saveX, y: izlude.saveY, source: 'rathena-kafra-save:izlude' },
+      savedPoint: { map: 'izlude', x: izlude.saveX, y: izlude.saveY } };
+    townRows.set('izlude', row);
+    if (!rows.has('izlude')) rows.set('izlude', row);
+  }
+  for (const map of positioned)
+    if (townFlagMaps.has(map) && !townRows.has(map))
+      unresolvedTowns.push({ map, reason: 'NO_PERMANENT_KAFRA_SAVE_SERVICE' });
   const regions = mapInfo.worldMap.regions.flatMap((region) => {
     const mapIds = region.mapIds.filter((map) => rows.has(map));
     if (!mapIds.length) return [];
@@ -90,10 +132,10 @@ export function buildPlayerWorldMapProjection({ mapInfo, catalog, mapCache,
         ? mapInfo.maps[mapId].levelRange : null }];
   });
   const maps = Object.fromEntries([...rows].map(([map, row]) =>
-    [map, playerSummary(mapInfo.maps[map], row.kind)]));
+    [map, playerSummary(mapInfo.maps[map] ?? { id: map, name: row.name }, row.kind)]));
   return {
-    rows, unresolvedTowns,
-    hiddenMapCount: positioned.size - rows.size,
+    rows, farmRows, townRows, savedPoints, unresolvedTowns,
+    hiddenMapCount: positioned.size - [...rows.keys()].filter((map) => positioned.has(map)).length,
     worldMap: { image: mapInfo.worldMap.image, width: mapInfo.worldMap.width,
       height: mapInfo.worldMap.height, regions, maps },
   };

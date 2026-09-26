@@ -2005,6 +2005,10 @@ button {
   text-align: center;
 }
 .world-map-town-label:focus-visible { outline: 2px solid #fff; }
+.world-map-town-label[data-location-class="FIELD_SAVE_HUB"] {
+  border-color: #a9d4dc;
+  background: #24464ad9;
+}
 .world-map-confirm {
   position: fixed;
   inset: 0;
@@ -2259,6 +2263,10 @@ body.world-map-open {
 @media (max-width: 700px) {
   .world-map-overlay {
     padding: 0;
+  }
+  .world-map-header > button {
+    flex: 0 0 auto;
+    white-space: nowrap;
   }
   .world-map-layout {
     grid-template-columns: 1fr;

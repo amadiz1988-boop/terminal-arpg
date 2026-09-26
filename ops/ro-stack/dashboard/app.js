@@ -6826,10 +6826,10 @@ function setSelectedWorldMap(mapId) {
     region.dataset.mapSelected = String(selected);
   });
 }
-async function selectWorldMap(mapId) {
+async function selectWorldMap(mapId, { farmView = false } = {}) {
   const summary = farmMapAvailabilityData?.worldMap?.maps?.[mapId];
   if (!summary) return;
-  if (farmMapAvailabilityData.towns.some((town) => town.map === mapId)) {
+  if (!farmView && farmMapAvailabilityData.towns.some((town) => town.map === mapId)) {
     setSelectedWorldMap(mapId);
     selectTownWorldMap(mapId);
     return;
@@ -6892,6 +6892,13 @@ async function selectWorldMap(mapId) {
   }
   const controls = document.createElement('div');
   controls.className = 'controls';
+  if (farmMapAvailabilityData.towns.some((town) => town.map === mapId)) {
+    const townView = document.createElement('button');
+    townView.type = 'button';
+    townView.textContent = '查看儲存據點';
+    townView.onclick = () => selectTownWorldMap(mapId);
+    controls.append(townView);
+  }
   const routeNote = document.createElement('p');
   routeNote.className = 'world-map-route-note';
   routeNote.textContent = '移動方式：伺服器核准後直達地圖安全落點。';
@@ -8348,12 +8355,20 @@ const WORLD_MAP_TOWN_SHORT_NAMES = Object.freeze({
   brasilis: '巴西', dewata: '德瓦他', malangdo: '綿綿島', malaya: '馬來港',
   eclage: '埃克拉珠', mora: '穆拉村', dicastes01: '艾爾迪卡', lasagna: '羅札納',
   xmas: '薑餅城', manuk: '魔怒克', splendide: '史波浪',
+  aldeba_in: '卡普拉本部', glast_01: '古城', harboro1: '洛克理奇',
+  lhz_in02: '里希塔樂', prt_fild05: '普隆原野', cmd_fild07: '燈塔島',
 });
 function worldMapTownShortName(town) {
   const known = WORLD_MAP_TOWN_SHORT_NAMES[town.map];
   if (known) return known;
   const words = String(town.name ?? town.map).trim().split(/\s+/);
   return [...words[words.length - 1]].slice(-4).join('');
+}
+function worldMapLocationType(town) {
+  return {
+    ACTUAL_TOWN: '城鎮', SERVICE_HUB: '服務據點',
+    FIELD_SAVE_HUB: '原野儲存據點',
+  }[town.locationClass] ?? '儲存據點';
 }
 function worldMapTownLabelLines(shortName) {
   const chars = [...shortName];
@@ -8365,7 +8380,7 @@ function renderWorldMapTowns() {
   const labels = $('#worldMapTownLabels');
   const other = document.createElement('div');
   other.className = 'world-map-town-list';
-  $('#worldMapSavedTown').textContent = `儲存主城：${farmMapAvailabilityData?.player?.savedTown?.name ?? '尚未設定'}`;
+  $('#worldMapSavedTown').textContent = `儲存據點：${farmMapAvailabilityData?.player?.savedTown?.name ?? '尚未設定'}`;
   $('#worldMapSavedTownHint').classList.toggle('hidden',
     farmMapAvailabilityData?.player?.savedTownSetupRequired !== true);
   const positioned = new Set();
@@ -8375,8 +8390,9 @@ function renderWorldMapTowns() {
     button.type = 'button';
     button.className = 'world-map-town-label';
     button.dataset.mapId = town.map;
-    button.title = town.name ?? town.map;
-    button.setAttribute('aria-label', town.name ?? town.map);
+    button.dataset.locationClass = town.locationClass ?? '';
+    button.title = `${worldMapLocationType(town)}：${town.name ?? town.map}`;
+    button.setAttribute('aria-label', button.title);
     button.replaceChildren(...worldMapTownLabelLines(worldMapTownShortName(town)).map((line) => {
       const span = document.createElement('span');
       span.textContent = line;
@@ -8403,7 +8419,7 @@ function renderWorldMapTowns() {
       positioned.add(town.map);
     } else {
       button.className = '';
-      button.textContent = town.name ?? town.map;
+      button.textContent = button.title;
       other.append(button);
     }
   }
@@ -8451,7 +8467,7 @@ function selectTownWorldMap(mapId) {
   title.textContent = town.name ?? town.map;
   const info = document.createElement('p');
   info.className = 'world-map-meta';
-  info.textContent = `Map ID：${town.map}\n類型：主城\n儲存點：${town.savedPoint.x},${town.savedPoint.y}\n傳送費：免費\n傳送冷卻：田野回城無、主城互傳 30 秒\n目前儲存主城：${farmMapAvailabilityData?.player?.savedTown?.name ?? '尚未設定'}`;
+  info.textContent = `Map ID：${town.map}\n類型：${worldMapLocationType(town)}\n儲存點：${town.savedPoint.x},${town.savedPoint.y}\n傳送費：免費\n傳送冷卻：原野前往據點無、據點互傳 30 秒\n目前儲存據點：${farmMapAvailabilityData?.player?.savedTown?.name ?? '尚未設定'}`;
   info.style.whiteSpace = 'pre-line';
   const action = document.createElement('button');
   action.type = 'button';
@@ -8503,15 +8519,13 @@ function selectTownWorldMap(mapId) {
     $('#worldMapConfirmSubmit').focus();
   };
   const saved = farmMapAvailabilityData?.player?.savedTown?.map === mapId;
-  const physicallyHere = farmMapAvailabilityData?.player?.currentMap === mapId &&
-    farmMapAvailabilityData.player.currentX === town.savedPoint.x &&
-    farmMapAvailabilityData.player.currentY === town.savedPoint.y;
+  const physicallyHere = farmMapAvailabilityData?.player?.currentMap === mapId;
   const save = document.createElement('button');
   save.type = 'button';
-  save.textContent = saved ? '目前儲存主城' : '設為儲存主城';
+  save.textContent = saved ? '目前儲存據點' : '設為儲存據點';
   save.disabled = saved || !physicallyHere;
   if (!saved && !physicallyHere)
-    save.title = '請先抵達此城鎮儲存點';
+    save.title = '請先抵達此儲存據點';
   save.onclick = async () => {
     save.disabled = true;
     try {
@@ -8526,7 +8540,16 @@ function selectTownWorldMap(mapId) {
       save.disabled = false;
     }
   };
-  detail.replaceChildren(title, info, action, save);
+  const controls = [title, info, action, save];
+  if (farmMapAvailabilityData?.maps?.some((row) =>
+    row.map === mapId && row.farmSelectionAvailable)) {
+    const farmView = document.createElement('button');
+    farmView.type = 'button';
+    farmView.textContent = '查看此地掛機';
+    farmView.onclick = () => void selectWorldMap(mapId, { farmView: true });
+    controls.push(farmView);
+  }
+  detail.replaceChildren(...controls);
 }
 
 function syncDiscordUi(discord, { required = false } = {}) {

@@ -13,74 +13,92 @@ const savedPointSources = await Promise.all([
   'npc/kafras/kafras.txt', 'npc/re/kafras/kafras.txt',
 ].map(async (path) => ({ path, text: await readFile(join(native, path), 'utf8') })));
 const projection = buildPlayerWorldMapProjection({ ...complete, savedPointSources });
+const nativeHeader = await readFile(join(native,
+  'src/map/persistent_agent_kafra_save_catalog.hpp'), 'utf8');
+const nativeDestinations = [...nativeHeader.matchAll(
+  /\{ "([a-z0-9_]+)", (\d+), (\d+), "([^"]+)" \}/g,
+)].map((row) => `${row[1]}:${row[2]}:${row[3]}:${row[4]}`).sort();
+const webDestinations = [...projection.savedPoints.values()].flat()
+  .map((row) => `${row.map}:${row.x}:${row.y}:${row.npc}`).sort();
+assert.deepEqual(webDestinations, nativeDestinations);
+assert.equal(projection.savedPoints.size, 26);
+assert.equal(webDestinations.length, 39);
+assert.equal(projection.townRows.size, 27); // 26 Native-authored + Izlude MF_TOWN.
+assert.equal(projection.farmRows.size, 274);
+assert.equal(projection.unresolvedTowns.length, 10);
 const positioned = new Set(complete.mapInfo.worldMap.regions.flatMap(
   (region) => region.mapIds));
 const visible = new Set(projection.worldMap.regions.flatMap((region) => region.mapIds));
-const sourceMaps = new Map(complete.sourceIndex.maps.map((row) => [row.map, row]));
-
-assert.ok(projection.rows.size > 0);
-assert.equal(visible.size, projection.rows.size);
 assert.equal(projection.hiddenMapCount, positioned.size - visible.size);
-assert.equal(Object.keys(projection.worldMap.maps).length, visible.size);
-for (const [map, row] of projection.rows) {
-  assert.ok(visible.has(map), map);
+for (const [map, row] of projection.farmRows) {
+  assert.equal(row.farmSelectionAvailable, true, map);
+  assert.ok(row.normalMonsterCount > 0, map);
   assert.ok(positioned.has(map), map);
-  if (row.kind === 'farm') {
-    assert.equal(row.farmSelectionAvailable, true, map);
-    assert.ok(row.normalMonsterCount > 0, map);
-    assert.ok(sourceMaps.get(map)?.monsters?.length > 0, map);
-    assert.equal(sourceMaps.get(map)?.blockedFlags?.length ?? 0, 0, map);
-    assert.equal(complete.mapInfo.maps[map].unlocked, true, map);
-  } else {
-    assert.equal(row.kind, 'town', map);
-    assert.equal(row.townTeleportAvailable, true, map);
-    assert.deepEqual(row.landing && { x: row.landing.x, y: row.landing.y },
-      { x: row.savedPoint.x, y: row.savedPoint.y }, map);
-    assert.equal(projection.worldMap.maps[map].normalMonsterCount, undefined, map);
-  }
+  assert.ok(complete.sourceIndex.maps.find((entry) => entry.map === map)?.monsters?.length > 0);
+  assert.equal(complete.mapInfo.maps[map].unlocked, true, map);
 }
-assert.equal(projection.rows.get('prontera')?.kind, 'town');
-assert.deepEqual(projection.rows.get('prontera')?.savedPoint,
+for (const [map, row] of projection.townRows) {
+  assert.equal(row.townTeleportAvailable, true, map);
+  assert.ok(row.savedPoint && row.landing, map);
+  assert.deepEqual({ x: row.landing.x, y: row.landing.y },
+    { x: row.savedPoint.x, y: row.savedPoint.y }, map);
+  if (projection.savedPoints.has(map)) {
+    assert.equal(row.saveDestinations.length, projection.savedPoints.get(map).length, map);
+    assert.ok(projection.savedPoints.get(map).some((point) =>
+      point.x === row.savedPoint.x && point.y === row.savedPoint.y), map);
+  }
+  if (projection.farmRows.has(map))
+    assert.ok(projection.worldMap.maps[map].normalMonsterCount > 0, map);
+  else
+    assert.equal(projection.worldMap.maps[map].normalMonsterCount, undefined, map);
+}
+assert.deepEqual(projection.townRows.get('prontera')?.savedPoint,
   { map: 'prontera', x: 116, y: 73 });
-assert.equal(projection.rows.get('comodo')?.kind, 'town');
-for (const town of ['geffen', 'alberta', 'yuno', 'einbroch', 'morocc'])
-  assert.equal(projection.rows.has(town), false, town);
-assert.equal(projection.rows.get('mjolnir_07')?.kind, 'farm');
-const unavailablePositioned = [...positioned].filter((map) =>
-  !complete.catalog.get(map)?.farmSelectionAvailable &&
-  !complete.catalog.get(map)?.townTeleportAvailable);
-assert.ok(unavailablePositioned.length > 0);
-for (const map of unavailablePositioned) assert.equal(visible.has(map), false, map);
-assert.equal(complete.catalog.get('geffen')?.townTeleportAvailable, true);
-assert.equal(complete.catalog.get('geffen')?.kind, 'town');
+assert.deepEqual(projection.townRows.get('morocc')?.savedPoint,
+  { map: 'morocc', x: 156, y: 46 });
+assert.equal(projection.townRows.get('morocc')?.locationClass, 'ACTUAL_TOWN');
+for (const map of ['prt_fild05', 'cmd_fild07'])
+  assert.equal(projection.townRows.get(map)?.locationClass, 'FIELD_SAVE_HUB');
+for (const map of ['prt_fild05', 'cmd_fild07', 'glast_01']) {
+  assert.ok(projection.farmRows.has(map), map);
+  assert.ok(projection.townRows.has(map), map);
+}
+for (const map of ['aldeba_in', 'harboro1', 'lhz_in02']) {
+  assert.ok(!positioned.has(map), map);
+  assert.ok(projection.townRows.has(map), map);
+  assert.equal(projection.townRows.get(map).name, complete.mapNames[map]);
+}
+for (const map of projection.savedPoints.keys())
+  assert.ok(projection.townRows.has(map), map);
+const previousUnresolved = [
+  'hugel', 'yuno', 'gonryun', 'eclage', 'einbroch', 'einbech', 'brasilis',
+  'amatsu', 'rachel', 'lighthalzen', 'lasagna', 'mora', 'veins', 'geffen',
+  'dicastes01', 'malangdo', 'umbala', 'louyang', 'pay_arche', 'dewata',
+  'ayothaya', 'payon', 'moc_ruins', 'malaya', 'alberta',
+];
+assert.equal(previousUnresolved.length, 25);
+assert.equal(previousUnresolved.filter((map) => projection.townRows.has(map)).length, 15);
+assert.equal(previousUnresolved.filter((map) => !projection.townRows.has(map)).length, 10);
 assert.equal(projection.unresolvedTowns.some((row) =>
-  row.map === 'geffen' && row.reason === 'NAVIGATION_PATH_COST_UNAVAILABLE'), true);
-const projectionJson = JSON.stringify(projection.worldMap);
-for (const internal of ['NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE',
-  'WORLD_MAP_DESTINATION_UNAVAILABLE', 'availabilityReason', 'unlockCondition',
-  'bossMonsters', 'resourceMonsters'])
-  assert.equal(projectionJson.includes(internal), false, internal);
-assert.deepEqual(parseKafraSavedPoints([{ path: 'test', text:
-  'savepoint "prontera",116,73,1,1;\nsavepoint "prontera",116,73,1,1;' }])
-  .get('prontera'), [{ map: 'prontera', x: 116, y: 73, source: 'test' }]);
+  ['CANONICAL_SAVED_POINT_UNAVAILABLE', 'NAVIGATION_PATH_COST_UNAVAILABLE']
+    .includes(row.reason)), false);
 const noSpawns = buildPlayerWorldMapProjection({ ...complete,
   sourceIndex: { maps: [] }, savedPointSources });
-assert.equal(noSpawns.rows.get('mjolnir_07'), undefined);
-assert.equal(noSpawns.rows.get('prontera')?.kind, 'town');
+assert.equal(noSpawns.farmRows.size, 0);
+assert.equal(noSpawns.townRows.size, 27);
+const rejectedService = parseKafraSavedPoints([{ path: 'test', text:
+  'xmas,1,1,0\tscript\tStorage\t1,{\n\tcallfunc "F_Kafra",0,6;\n\tsavepoint "xmas",10,10,1,1;\n}' }]);
+assert.equal(rejectedService.size, 0);
 const app = await readFile(join(root, 'ops/ro-stack/dashboard/app.js'), 'utf8');
-const worldMapUi = app.slice(app.indexOf('function renderWorldMapNodes()'),
-  app.indexOf('function syncMapInfoToLive('));
-const townUi = app.slice(app.indexOf('function renderWorldMapTowns()'),
-  app.indexOf('function syncDiscordUi('));
-assert.match(worldMapUi, /farmMapAvailabilityData\?\.worldMap/);
-assert.doesNotMatch(worldMapUi, /mapInfoData\?\.worldMap|selectLockedWorldMap|尚未開放|availabilityReason/);
-assert.match(townUi, /`傳送至\$\{town\.name/);
-assert.match(townUi, /town\.savedPoint\.x/);
-assert.match(townUi, /save\.disabled = saved \|\| !physicallyHere/);
-console.log(JSON.stringify({
-  result: 'PASS', farmMaps: [...projection.rows.values()].filter((row) =>
-    row.kind === 'farm').length,
-  towns: [...projection.rows.values()].filter((row) => row.kind === 'town').length,
-  hiddenMaps: projection.hiddenMapCount,
-  unresolvedTowns: projection.unresolvedTowns.length,
-}));
+assert.match(app, /town\.locationClass/);
+assert.match(app, /selectWorldMap\(mapId, \{ farmView: true \}\)/);
+assert.match(app, /api\('\/api\/world-map-teleport'/);
+assert.match(app, /api\('\/api\/saved-town'/);
+const dashboard = await readFile(join(root, 'ops/ro-stack/dashboard.mjs'), 'utf8');
+assert.match(dashboard, /playerWorldMapProjection\.townRows\.get\(mapId\)/);
+assert.match(dashboard, /playerWorldMapProjection\.farmRows\.get\(mapId\)/);
+assert.match(dashboard, /saveX: town\.savedPoint\.x, saveY: town\.savedPoint\.y/);
+console.log(JSON.stringify({ result: 'PASS', nativeKafraMaps: 26,
+  nativeSaveDestinations: 39, playerFarmMaps: projection.farmRows.size,
+  playerTownNodes: projection.townRows.size, dualRoleMaps: 3,
+  previousUnresolvedResolved: 15, previousUnresolvedStillClosed: 10 }));

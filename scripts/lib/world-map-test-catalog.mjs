@@ -49,5 +49,6 @@ export async function loadWorldMapTestCatalog(root, native, {
     'ops/ro-stack/persistent-agent/world-map-teleport-source.json'), 'utf8'));
   const catalog = await buildWorldMapTeleportCatalog({ mapInfo, mapCache, graph,
     publicRoot, townFlagMaps, blockedFlagMaps, mapNames, sourceIndex });
-  return { mapInfo, catalog, sourceIndex, mapCache, graph, townFlagMaps, blockedFlagMaps };
+  return { mapInfo, catalog, sourceIndex, mapCache, graph, townFlagMaps,
+    blockedFlagMaps, mapNames };
 }

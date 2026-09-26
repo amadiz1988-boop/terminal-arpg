@@ -493,6 +493,8 @@ worldMapTownFlagMaps = new Set([
 const worldMapSourceIndex = JSON.parse(await readFile(join(root,
   'ops/ro-stack/persistent-agent/world-map-teleport-source.json'), 'utf8'));
 const worldMapMapCache = await loadRathenaMapCache();
+const worldMapNames = JSON.parse(await readFile(join(publicRoot,
+  'ro/data/map-names.json'), 'utf8')).entries;
 worldMapTeleportCatalog = await buildWorldMapTeleportCatalog({
   mapInfo: mapRoutingIndex,
   sourceIndex: worldMapSourceIndex,
@@ -508,13 +510,12 @@ worldMapTeleportCatalog = await buildWorldMapTeleportCatalog({
   ].map(async (path) => [...parseBlockedWorldMapFlags(
     await readFile(join(rAthenaRuntimeRoot, path), 'utf8').catch(() => ''),
   )]))).flat()),
-  mapNames: JSON.parse(await readFile(join(publicRoot,
-    'ro/data/map-names.json'), 'utf8')).entries,
+  mapNames: worldMapNames,
 });
 playerWorldMapProjection = buildPlayerWorldMapProjection({
   mapInfo: mapRoutingIndex, catalog: worldMapTeleportCatalog,
   mapCache: worldMapMapCache, townFlagMaps: worldMapTownFlagMaps,
-  sourceIndex: worldMapSourceIndex,
+  sourceIndex: worldMapSourceIndex, mapNames: worldMapNames,
   savedPointSources: await Promise.all([
     'npc/kafras/kafras.txt', 'npc/re/kafras/kafras.txt',
   ].map(async (path) => ({ path, text: await readFile(join(rAthenaRuntimeRoot,
@@ -556,15 +557,19 @@ async function playerWorldMapAvailability(account) {
   const currentMap = live?.fresh ? String(live.map ?? '') : null;
   const availableAt = Number(availableText) || 0;
   const nowSeconds = Math.floor(Date.now() / 1000);
-  const currentIsTown = worldMapTownFlagMaps.has(currentMap);
-  const savedTownRow = playerWorldMapProjection.rows.get(savedMap);
-  const savedTown = savedTownRow?.kind === 'town' &&
-      Number(savedX) === savedTownRow.savedPoint.x &&
-      Number(savedY) === savedTownRow.savedPoint.y
+  const currentIsTown = worldMapTownFlagMaps.has(currentMap) ||
+    playerWorldMapProjection.townRows.has(currentMap);
+  const savedTownRow = playerWorldMapProjection.townRows.get(savedMap);
+  const savedTown = savedTownRow &&
+      (worldMapTownFlagMaps.has(savedMap) ||
+        savedTownRow.saveDestinations?.some((point) =>
+          Number(savedX) === point.x && Number(savedY) === point.y))
     ? { map: savedMap, name: savedTownRow.name,
       x: Number(savedX), y: Number(savedY) } : null;
-  const rows = [...playerWorldMapProjection.rows.values()].map((row) => {
+  const rows = [...playerWorldMapProjection.farmRows.values(),
+    ...playerWorldMapProjection.townRows.values()].map((row) => {
     const playerRow = { map: row.map, name: row.name, kind: row.kind,
+      locationClass: row.locationClass ?? null,
       farmable: row.kind === 'farm',
       farmSelectionAvailable: row.kind === 'farm',
       minLevel: row.minLevel,
@@ -3436,7 +3441,9 @@ async function queuePlayerWorldMapTeleport(account, controller, requestedMapId,
     throw new HttpError(409, 'farm_relocation_in_progress');
   relocationRequests.add(charId);
   try {
-    const row = playerWorldMapProjection.rows.get(mapId);
+    const row = kind === 'town'
+      ? playerWorldMapProjection.townRows.get(mapId)
+      : playerWorldMapProjection.farmRows.get(mapId);
     if (!row || row.kind !== kind ||
         (kind === 'farm' && !row.farmSelectionAvailable) ||
         (kind === 'town' && !row.townTeleportAvailable))
@@ -12155,7 +12162,7 @@ async function handleDashboardRequest(request, response) {
         return json(response, 409, { error: '請先建立角色' });
       const body = await requestBody(request);
       const mapId = String(body.mapId ?? '');
-      const town = playerWorldMapProjection.rows.get(mapId);
+      const town = playerWorldMapProjection.townRows.get(mapId);
       if (!town || town.kind !== 'town' || !town.townTeleportAvailable)
         throw new HttpError(409, 'TOWN_DESTINATION_REQUIRED');
       const controller = await readCharacterControllerStatus(account,
@@ -12165,12 +12172,10 @@ async function handleDashboardRequest(request, response) {
         throw new HttpError(409, 'SERVER_AGENT_IDLE_REQUIRED');
       if (controller.liveStatus.map !== mapId)
         throw new HttpError(409, 'SAVED_TOWN_REQUIRES_PRESENCE');
-      if (Number(controller.liveStatus.x) !== town.savedPoint.x ||
-          Number(controller.liveStatus.y) !== town.savedPoint.y)
-        throw new HttpError(409, 'SAVED_TOWN_REQUIRES_SAVED_POINT');
       const command = await queueOwnershipCommand(account, Number(account.characterId),
         { action: 'set_saved_town', expectedRevision: Number(controller.revision) },
-        { targetMap: mapId });
+        { targetMap: mapId, ...(town.kafraSaveService
+          ? { saveX: town.savedPoint.x, saveY: town.savedPoint.y } : {}) });
       return json(response, 202, { command, targetMap: mapId });
     }
     if (url.pathname === '/api/job-change' && request.method === 'POST') {

@@ -151,14 +151,29 @@ try {
   assert.ok(ok.body.maps.every((row) => row.kind === 'farm'));
   assert.ok(ok.body.towns.every((row) => row.kind === 'town'));
   const visibleIds = new Set(ok.body.worldMap.regions.flatMap((row) => row.mapIds));
-  assert.equal(visibleIds.size, ok.body.maps.length + ok.body.towns.length);
+  const farmIds = new Set(ok.body.maps.map((row) => row.map));
+  const townIds = new Set(ok.body.towns.map((row) => row.map));
+  assert.equal(ok.body.maps.length, 274);
+  assert.equal(ok.body.towns.length, 27);
+  assert.equal(visibleIds.size, 295);
+  assert.equal(Object.keys(ok.body.worldMap.maps).length, 298);
   assert.ok(ok.body.maps.every((row) => visibleIds.has(row.map)));
-  assert.ok(ok.body.towns.every((row) => visibleIds.has(row.map) &&
+  assert.ok(ok.body.towns.every((row) => ok.body.worldMap.maps[row.map] &&
     row.savedPoint?.x > 0 && row.savedPoint?.y > 0));
+  for (const map of ['cmd_fild07', 'prt_fild05', 'glast_01']) {
+    assert.ok(farmIds.has(map), map);
+    assert.ok(townIds.has(map), map);
+  }
+  for (const map of ['aldeba_in', 'harboro1', 'lhz_in02']) {
+    assert.ok(townIds.has(map), map);
+    assert.equal(visibleIds.has(map), false);
+  }
   assert.deepEqual(ok.body.towns.find((row) => row.map === 'prontera')?.savedPoint,
     { map: 'prontera', x: 116, y: 73 });
-  for (const hidden of ['geffen', 'alberta', 'yuno', 'einbroch', 'morocc'])
-    assert.equal(visibleIds.has(hidden), false, hidden);
+  assert.deepEqual(ok.body.towns.find((row) => row.map === 'morocc')?.savedPoint,
+    { map: 'morocc', x: 156, y: 46 });
+  for (const restored of ['geffen', 'alberta', 'yuno', 'einbroch', 'morocc'])
+    assert.equal(visibleIds.has(restored), true, restored);
   assert.doesNotMatch(JSON.stringify(ok.body),
     /NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE|availabilityReason|unlockCondition|bossMonsters|resourceMonsters/);
   assert.equal(ok.body.player.baseLevel, 50);
