@@ -238,8 +238,54 @@ async function restoreOffline(db, offline, staged) {
   } catch (error) { await db.rollback(); throw error; }
 }
 
+async function completeOnlinePreparation(player, adapter, beforeRuntime, canonical, sourceSha) {
+  let afterRuntime;
+  for (let i = 0; i < 20; i++) {
+    afterRuntime = await adapter('snapshot');
+    if (afterRuntime.pass &&
+      afterRuntime.procdump_process_identity?.PROCESS_IDENTITY_MATCH === 'YES') break;
+    await delay(500);
+  }
+  need(afterRuntime?.pass &&
+    afterRuntime.procdump_process_identity?.PROCESS_IDENTITY_MATCH === 'YES',
+  'COMBAT_FIXTURE_RUNTIME_RELOAD_FAILED');
+  let loaded;
+  for (let i = 0; i < 20; i++) {
+    loaded = await player.state();
+    if (FIELDS.slice(0, 6).every(key => loaded.character?.[key] === PROFILE[key]) &&
+      loaded.character?.statusPoint === canonical.budget.remaining &&
+      ITEMS.every(item => loaded.inventory?.some(row => Number(row.itemId) === item.id))) break;
+    await delay(500);
+  }
+  need(FIELDS.slice(0, 6).every(key => loaded.character?.[key] === PROFILE[key]) &&
+    loaded.character.statusPoint === canonical.budget.remaining &&
+    ITEMS.every(item => loaded.inventory?.some(row => Number(row.itemId) === item.id)),
+  'COMBAT_FIXTURE_AUTHORITATIVE_LOAD_FAILED');
+  const equipped = [];
+  for (const item of ITEMS) equipped.push({ id: item.id,
+    ...await player.equip(item.id, 'equip', true) });
+  const health = await prepareHealthyRuntime(args.credentials);
+  const ready = await player.state();
+  need(ITEMS.every(item => ready.equipment?.some(row =>
+    Number(row.itemId) === item.id && row.slot === item.slot && row.refine === 0)) &&
+    ready.character.hp === ready.character.maxHp &&
+    ready.character.sp === ready.character.maxSp &&
+    ready.questJournal?.ownership?.agentMode === 'PERSISTENT_IDLE',
+  'COMBAT_FIXTURE_AUTHORITATIVE_EQUIP_FAILED');
+  const receipt = { profile: PROFILE, budget: canonical.budget,
+    equipment: canonical.equipment, equipped, health,
+    groupId: 0, isTest: 1, sourceSha, nativeSha: NATIVE_SHA,
+    runtimeBefore: beforeRuntime.pids, runtimeAfter: afterRuntime.pids,
+    preparedAt: new Date().toISOString() };
+  fs.writeFileSync(path.join(EVIDENCE, 'prepared.json'),
+    JSON.stringify(receipt, null, 2) + '\n', { flag: 'wx' });
+  console.log(JSON.stringify({ prepared: true, evidenceDir: EVIDENCE,
+    profile: PROFILE, budget: canonical.budget, equipment: canonical.equipment,
+    hp: health.hp, maxHp: health.maxHp, sp: health.sp, maxSp: health.maxSp }));
+}
+
 async function main() {
-  need(['preflight', 'prepare', 'restore'].includes(action), 'INVALID_FIXTURE_ACTION');
+  need(['preflight', 'prepare', 'resume', 'restore'].includes(action), 'INVALID_FIXTURE_ACTION');
   const sourceSha = governance();
   const canonical = sourceData();
   const adapter = runtimeAdapter(ROOT, OWNER, LEASE);
@@ -267,6 +313,28 @@ async function main() {
       return;
     }
     need(args.execute === 'true', 'EXPLICIT_EXECUTE_REQUIRED');
+    if (action === 'resume') {
+      need(fs.existsSync(path.join(EVIDENCE, 'staged.json')) &&
+        fs.existsSync(path.join(EVIDENCE, 'failure.json')) &&
+        !fs.existsSync(path.join(EVIDENCE, 'prepared.json')) &&
+        !fs.existsSync(path.join(EVIDENCE, 'restored.json')), 'COMBAT_FIXTURE_RESUME_RECORD_INVALID');
+      const staged = readJson(path.join(EVIDENCE, 'staged.json'));
+      const offline = readJson(path.join(EVIDENCE, 'offline-preimage.json'));
+      const failure = readJson(path.join(EVIDENCE, 'failure.json'));
+      need(failure.reason === 'COMBAT_FIXTURE_RUNTIME_RELOAD_FAILED' &&
+        staged.sourceSha === readJson(path.join(EVIDENCE, 'preimage.json')).sourceSha,
+      'COMBAT_FIXTURE_RESUME_PROVENANCE_INVALID');
+      const expected = { ...PROFILE, status_point: canonical.budget.remaining };
+      need(same(snapshot(current.character), snapshot(expected)) &&
+        staged.ids.length === ITEMS.length && staged.ids.every((entry, i) =>
+          entry.nameid === ITEMS[i].id && current.inventory.some(row =>
+            row.id === entry.id && row.nameid === entry.nameid && row.equip === 0 &&
+            row.amount === 1 && row.refine === 0 && row.identify === 1)) &&
+        offline.character.char_id === CHAR && idleEligible(offline),
+      'COMBAT_FIXTURE_RESUME_STATE_DRIFT');
+      await completeOnlinePreparation(player, adapter, beforeRuntime, canonical, sourceSha);
+      return;
+    }
     if (action === 'prepare') {
       need(FIELDS.slice(0, 6).every(key => current.character[key] === 1) &&
         current.character.status_point === 68 &&
@@ -290,43 +358,7 @@ async function main() {
           ids, profile: PROFILE, budget: canonical.budget, sourceSha,
           stagedAt: new Date().toISOString() }, null, 2) + '\n', { flag: 'wx' });
         await adapter('start'); stopped = false;
-        const afterRuntime = await adapter('snapshot');
-        need(afterRuntime.pass && afterRuntime.procdump_process_identity?.PROCESS_IDENTITY_MATCH === 'YES',
-          'COMBAT_FIXTURE_RUNTIME_RELOAD_FAILED');
-        let loaded;
-        for (let i = 0; i < 20; i++) {
-          loaded = await player.state();
-          if (FIELDS.slice(0, 6).every(key => loaded.character?.[key] === PROFILE[key]) &&
-            loaded.character?.statusPoint === canonical.budget.remaining &&
-            ITEMS.every(item => loaded.inventory?.some(row => Number(row.itemId) === item.id)))
-            break;
-          await delay(500);
-        }
-        need(FIELDS.slice(0, 6).every(key => loaded.character?.[key] === PROFILE[key]) &&
-          loaded.character.statusPoint === canonical.budget.remaining &&
-          ITEMS.every(item => loaded.inventory?.some(row => Number(row.itemId) === item.id)),
-        'COMBAT_FIXTURE_AUTHORITATIVE_LOAD_FAILED');
-        const equipped = [];
-        for (const item of ITEMS) equipped.push({ id: item.id,
-          ...await player.equip(item.id, 'equip', true) });
-        const health = await prepareHealthyRuntime(args.credentials);
-        const ready = await player.state();
-        need(ITEMS.every(item => ready.equipment?.some(row =>
-          Number(row.itemId) === item.id && row.slot === item.slot && row.refine === 0)) &&
-          ready.character.hp === ready.character.maxHp &&
-          ready.character.sp === ready.character.maxSp &&
-          ready.questJournal?.ownership?.agentMode === 'PERSISTENT_IDLE',
-        'COMBAT_FIXTURE_AUTHORITATIVE_EQUIP_FAILED');
-        const receipt = { profile: PROFILE, budget: canonical.budget,
-          equipment: canonical.equipment, equipped, health,
-          groupId: 0, isTest: 1, sourceSha, nativeSha: NATIVE_SHA,
-          runtimeBefore: beforeRuntime.pids, runtimeAfter: afterRuntime.pids,
-          preparedAt: new Date().toISOString() };
-        fs.writeFileSync(path.join(EVIDENCE, 'prepared.json'),
-          JSON.stringify(receipt, null, 2) + '\n', { flag: 'wx' });
-        console.log(JSON.stringify({ prepared: true, evidenceDir: EVIDENCE,
-          profile: PROFILE, budget: canonical.budget, equipment: canonical.equipment,
-          hp: health.hp, maxHp: health.maxHp, sp: health.sp, maxSp: health.maxSp }));
+        await completeOnlinePreparation(player, adapter, beforeRuntime, canonical, sourceSha);
       } catch (error) {
         if (stopped) await adapter('start');
         fs.writeFileSync(path.join(EVIDENCE, 'failure.json'), JSON.stringify({
