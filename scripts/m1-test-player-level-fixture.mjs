@@ -62,6 +62,49 @@ export function rollbackLevelFixture(current, before) {
   return { expected: levelSnapshot(current), values: levelSnapshot(before) };
 }
 
+export function fullHealthConfirmed(character) {
+  return character?.charId === CHAR && character.liveFresh === true &&
+    Number.isInteger(character.hp) && Number.isInteger(character.maxHp) &&
+    Number.isInteger(character.sp) && Number.isInteger(character.maxSp) &&
+    character.maxHp > 0 && character.maxSp > 0 &&
+    character.hp === character.maxHp && character.sp === character.maxSp;
+}
+
+async function prepareHealthyRuntime(credentialsPath) {
+  ensure(process.env.RO_LOCAL_ADMIN_TOKEN, 'LOCAL_ADMIN_TOKEN_REQUIRED');
+  const base = 'http://127.0.0.1:8788';
+  const headers = { 'x-ro-local-admin-token': process.env.RO_LOCAL_ADMIN_TOKEN,
+    accept: 'application/json' };
+  const submitted = await fetch(base + '/api/admin/test-fixture/m1-acceptance', {
+    method: 'POST', headers: { ...headers, 'content-type': 'application/json' },
+    body: JSON.stringify({ profile: 'M1_FLY_SUPPLY_V1' }),
+    signal: AbortSignal.timeout(10000),
+  });
+  const queued = await submitted.json();
+  ensure(submitted.status === 202 && queued.state === 'QUEUED' && queued.requestId,
+    `HEALTH_FIXTURE_ADMISSION_FAILED_${submitted.status}`);
+  let result = null;
+  for (let i = 0; i < 20; i++) {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    const response = await fetch(`${base}/api/admin/test-fixture/m1-acceptance/${queued.requestId}`,
+      { headers, signal: AbortSignal.timeout(10000) });
+    ensure(response.status === 200, `HEALTH_FIXTURE_RESULT_HTTP_${response.status}`);
+    result = await response.json();
+    if (result.state !== 'QUEUED') break;
+  }
+  ensure(result?.state === 'CONFIRMED' && result.nativeEvent === 'PREREQUISITES_READY',
+    `HEALTH_FIXTURE_NATIVE_${result?.reason ?? result?.state ?? 'TIMEOUT'}`);
+  let live = null;
+  for (let i = 0; i < 10; i++) {
+    live = await playerState(credentialsPath);
+    if (fullHealthConfirmed(live)) break;
+    await new Promise(resolve => setTimeout(resolve, 300));
+  }
+  ensure(fullHealthConfirmed(live), 'HEALTH_FIXTURE_AUTHORITATIVE_READBACK_FAILED');
+  return { requestId: queued.requestId, nativeEvent: result.nativeEvent,
+    hp: live.hp, maxHp: live.maxHp, sp: live.sp, maxSp: live.maxSp };
+}
+
 async function database() {
   const secret = readJson(path.join(ROOT, '.local/ro-stack/secrets.json'));
   ensure(typeof secret.databasePassword === 'string' && secret.databasePassword.length > 0,
@@ -135,7 +178,7 @@ function governance() {
 }
 
 async function main() {
-  ensure(['preflight', 'prepare', 'restore'].includes(action), 'INVALID_FIXTURE_ACTION');
+  ensure(['preflight', 'prepare', 'health', 'restore'].includes(action), 'INVALID_FIXTURE_ACTION');
   const preimage = readJson(PREIMAGE), preimageSha256 = digest(PREIMAGE);
   const { governanceSha } = governance();
   const adapter = runtimeAdapter(ROOT, OWNER, LEASE);
@@ -164,6 +207,25 @@ async function main() {
       `m1-level-${CHAR}-${LEASE}`);
     const evidenceDir = path.join(ROOT, '.local/ro-stack/fixture-evidence',
       `m1-level-${CHAR}-${LEASE}-${EXPECTED_NATIVE.slice(0, 12)}`);
+    if (action === 'health') {
+      ensure(fs.existsSync(path.join(evidenceDir, 'prepared.json')) &&
+        !fs.existsSync(path.join(evidenceDir, 'restored.json')),
+      'HEALTH_FIXTURE_LEVEL_PRECONDITION_INVALID');
+      ensure(current.login.group_id === 0 && current.flag.is_test === 1 &&
+        current.agent.agent_mode === 'PERSISTENT_IDLE' && !current.agent.target_map &&
+        !current.agent.task_type && !current.agent.task_phase &&
+        current.character.class === CLASS && current.character.base_level === LEVEL,
+      'HEALTH_FIXTURE_IDLE_PRECONDITION_INVALID');
+      const before = await playerState(args.credentials);
+      ensure(before?.charId === CHAR && before.liveFresh === true &&
+        before.baseLevel === LEVEL && before.classId === CLASS,
+      'HEALTH_FIXTURE_LIVE_PRECONDITION_INVALID');
+      const healthy = await prepareHealthyRuntime(args.credentials);
+      console.log(JSON.stringify({ testAcceleration: true, charId: CHAR,
+        groupId: 0, isTest: 1, before: { hp: before.hp, maxHp: before.maxHp,
+          sp: before.sp, maxSp: before.maxSp }, after: healthy }));
+      return;
+    }
     if (action === 'prepare') {
       ensure(!fs.existsSync(path.join(priorEvidenceDir, 'prepared.json')) ||
         fs.existsSync(path.join(priorEvidenceDir, 'restored.json')),
@@ -206,10 +268,12 @@ async function main() {
           post.character.base_level === LEVEL && post.character.class === CLASS &&
           after.dashboard_pid === runtime.dashboard_pid && after.database_pid === runtime.database_pid,
         'FIXTURE_AUTHORITATIVE_LEVEL_UNCONFIRMED');
+        const healthy = await prepareHealthyRuntime(args.credentials);
         const receipt = { schemaVersion: 'm1-test-player-level-fixture-v1', accountId: ACCOUNT, charId: CHAR,
           testAcceleration: true, before: { level: offlinePreimage.character.base_level, class: offlinePreimage.character.class },
           after: { level: live.baseLevel, class: live.classId, source: live.liveSource },
           groupId: post.login.group_id, isTest: post.flag.is_test, preimageSha256,
+          healthyPrecondition: healthy,
           runtimeBefore: runtime.pids, runtimeAfter: after.pids,
           governanceSha, preparedAt: new Date().toISOString() };
         fs.writeFileSync(path.join(evidenceDir, 'prepared.json'), JSON.stringify(receipt, null, 2) + '\n', { flag: 'wx' });
