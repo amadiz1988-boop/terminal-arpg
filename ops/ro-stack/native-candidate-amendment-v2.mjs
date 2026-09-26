@@ -37,6 +37,27 @@ const sourceDiff = (src, previous, next) => {
   need(names.length > 0 && names.every(name => approved.sourcePaths.includes(name)), 'NATIVE_AMENDMENT_DIFF_OUT_OF_SCOPE');
   return { scope: approved.scope, files: names };
 };
+const configDeployment = (buildRoot, prod, authority, build) => {
+  if (approved.reason !== 'M1_MOROCC_NOOP_DEATH_MAINTENANCE_V1') return null;
+  const pin = authority.deployment_provenance, item = build.config_artifacts?.[0];
+  const receipt = path.join(buildRoot, 'build-receipt.json');
+  need(pin?.model === 'GIT_BLOB_PLUS_DEPLOYMENT_BYTES' && pin.text_transform === 'NONE' &&
+    pin.native_git_sha === build.native_git_sha && equalHash(digest(receipt), pin.build_receipt_sha256) &&
+    equalHash(build.binary_sha256, pin.map_binary_sha256) &&
+    item?.source_path === pin.config_source_path && item.source_git_sha === build.native_git_sha &&
+    item.source_blob_oid === pin.config_source_blob_oid &&
+    git(build.source_root, 'rev-parse', `HEAD:${item.source_path}`) === item.source_blob_oid &&
+    equalHash(item.sha256, pin.config_candidate_sha256) &&
+    equalHash(digest(boundedPath(build.source_root, item.source_path)), item.sha256) &&
+    pin.config_production_path === '.local/ro-stack/rathena/conf/persistent_agent_commands.json' &&
+    equalHash(digest(boundedPath(prod, pin.config_production_path)), pin.config_production_preimage_sha256),
+  'NATIVE_CONFIG_DEPLOYMENT_PROVENANCE_INVALID');
+  return { source_path: item.source_path, source_git_sha: item.source_git_sha,
+    source_blob_oid: item.source_blob_oid, package_path: 'candidate-config.json',
+    production_path: pin.config_production_path, sha256: item.sha256,
+    preimage_sha256: pin.config_production_preimage_sha256,
+    rollback_path: 'intermediate-rollback/persistent_agent_commands.json', text_transform: 'NONE' };
+};
 
 // Preparation runs only against a clean GitHub-sourced Native build directory.
 // The build source, authoritative runtime, and immutable receipts stay separate.
@@ -59,6 +80,7 @@ export function prepareNextNativeCandidate({ buildRoot, prod, authority,
     b.artifacts?.length === 3 &&
     b.artifacts.every(item => equalHash(digest(boundedPath(src, item.path)), item.sha256)),
   'NATIVE_BUILD_INVALID');
+  const config = configDeployment(buildRoot, prod, authority, b);
   if (approved.reason === INCIDENT.reason) need(b.config_artifacts?.length === 1 &&
     b.config_artifacts[0].source_path === 'conf/persistent_agent_commands.json' &&
     b.config_artifacts[0].source_git_sha === b.native_git_sha &&
@@ -111,6 +133,12 @@ export function prepareNextNativeCandidate({ buildRoot, prod, authority,
     return { path: 'intermediate-rollback/' + path.basename(item.path),
       production_path: item.path, sha256: item.sha256 };
   });
+  if (config) {
+    fs.copyFileSync(boundedPath(prod, config.production_path), boundedPath(buildRoot, config.rollback_path), fs.constants.COPYFILE_EXCL);
+    fs.copyFileSync(boundedPath(src, config.source_path), boundedPath(buildRoot, config.package_path), fs.constants.COPYFILE_EXCL);
+    need(equalHash(digest(boundedPath(buildRoot, config.rollback_path)), config.preimage_sha256) &&
+      equalHash(digest(boundedPath(buildRoot, config.package_path)), config.sha256), 'NATIVE_CONFIG_PACKAGE_COPY_CHANGED');
+  }
   const accepted = readJson(boundedPath(prod, state.accepted_capability_manifest));
   const registry = readJson(path.join(governanceRoot, 'docs/project-control/production-capabilities.json')).capabilities;
   need(accepted.capabilities?.length === 18, 'LEGACY_CAPABILITY_COUNT_CHANGED');
@@ -153,7 +181,7 @@ export function prepareNextNativeCandidate({ buildRoot, prod, authority,
     amendment_of: { native_git_sha: previous,
       candidate_manifest_sha256: lease.native_candidate_manifest_sha256,
       native_receipt_sha256: digest(currentFile), reason: approved.reason },
-    diff_audit: diff, config_artifacts: b.config_artifacts, lifecycle_files: lifecycle };
+    diff_audit: diff, config_artifacts: b.config_artifacts, config_deployment: config, lifecycle_files: lifecycle };
   write('candidate-manifest.json', manifest);
   const manifestFile = path.join(buildRoot, 'candidate-manifest.json');
   return { manifest: manifestFile, sha256: digest(manifestFile), previous,
@@ -183,7 +211,16 @@ export function planNextNativeAmendment({ root, owner, leaseId, manifestFile, ma
     (approved.reason !== 'M1_ECONOMY_TEST_PLAYER_V1' ||
       output.includes('M1_ECONOMY_TEST_PLAYER_SOURCE_PASS'));
   const ir = manifest.rollback_reference?.intermediate_rollback;
+  const config = manifest.config_deployment;
+  const configReady = approved.reason !== 'M1_MOROCC_NOOP_DEATH_MAINTENANCE_V1' ||
+    (config?.text_transform === 'NONE' && config.source_git_sha === build.native_git_sha &&
+      config.source_blob_oid === build.config_artifacts?.[0]?.source_blob_oid &&
+      equalHash(config.sha256, build.config_artifacts?.[0]?.sha256) &&
+      equalHash(digest(boundedPath(buildRoot, config.package_path)), config.sha256) &&
+      equalHash(digest(boundedPath(buildRoot, config.rollback_path)), config.preimage_sha256) &&
+      equalHash(digest(boundedPath(root, config.production_path)), config.preimage_sha256));
   const rollbackReady = verifyNativeStage(root, state, lease, lease.admission_manifest_sha256).rollbackReady === true &&
+    configReady &&
     ir?.native_git_sha === lease.native_deploy_git_sha &&
     equalHash(ir.native_receipt_sha256, digest(currentFile)) &&
     ir.artifacts?.length === 3 && ir.artifacts.every(item =>
@@ -214,7 +251,7 @@ export function planNextNativeAmendment({ root, owner, leaseId, manifestFile, ma
     currentHashes: Object.fromEntries(Object.entries(f).map(([key, value]) => [key, digest(value)])) };
 }
 
-const v2Policy = (oldSha, newSha) => ({ old_sha: oldSha, new_sha: newSha,
+const v2Policy = (oldSha, newSha) => ({ old_sha: oldSha, new_sha: newSha, reason: approved.reason,
   no_force_retirement: true, retire_extra_wait_ms: 20000,
   retire_timeout_ms: 40000, graceful_timeout_ms: 60000 });
 

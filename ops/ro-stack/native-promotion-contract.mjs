@@ -340,27 +340,34 @@ export function verifyCommandContractAmendment(root, lease, pending, nativeRecei
     const receipt = readJson(pinned(root, {path:ref.receipt,sha256:ref.sha256}));
     const manifest = readJson(pinned(root, {path:ref.candidate_manifest,sha256:ref.candidate_manifest_sha256}));
     const item = manifest.config_artifacts?.[0], prior = receipt.previous_contract;
+    const historical = receipt.native_git_sha === lease.native_deploy_git_sha ? nativeReceipt : (() => {
+      check(runtimeConfigNativeLineageValid(root, lease, pending, receipt.native_git_sha), 'CONTRACT_NATIVE_LINEAGE_INVALID');
+      const entry = lease.native_candidate_amendments.find(row => row.old_native_git_sha === receipt.native_git_sha);
+      check(entry?.previous_native_receipt, 'CONTRACT_HISTORICAL_RECEIPT_MISSING');
+      return readJson(pinned(root, entry.previous_native_receipt));
+    })();
+    const activeConfigHash = nativeReceipt.config_artifacts?.[0]?.sha256 || item?.sha256;
     check(receipt.schema_version === 'native-command-contract-deploy-v1' &&
       manifest.schema_version === 'native-command-contract-amendment-v1' &&
       /^[a-f0-9]{40}$/i.test(receipt.governance_git_sha || '') &&
       receipt.lease_id === lease.lease_id && receipt.owner_task_id === lease.owner_task_id &&
       manifest.lease_id === lease.lease_id && manifest.owner_task_id === lease.owner_task_id &&
-      receipt.native_git_sha === lease.native_deploy_git_sha &&
-      manifest.native_git_sha === lease.native_deploy_git_sha &&
+      receipt.native_git_sha === historical.native_git_sha &&
+      manifest.native_git_sha === historical.native_git_sha &&
       receipt.web_git_sha === lease.web_deploy_git_sha &&
       manifest.web_git_sha === lease.web_deploy_git_sha &&
       equalHash(receipt.candidate_manifest_sha256,ref.candidate_manifest_sha256) &&
-      equalHash(manifest.active_candidate_manifest_sha256,lease.native_candidate_manifest_sha256) &&
+      equalHash(manifest.active_candidate_manifest_sha256,historical.candidate_manifest_sha256) &&
       Array.isArray(manifest.executables) && manifest.executables.length === 3 &&
       Array.isArray(manifest.config_artifacts) && manifest.config_artifacts.length === 1 &&
       item.source_path === 'conf/persistent_agent_commands.json' &&
       item.production_path === '.local/ro-stack/rathena/conf/persistent_agent_commands.json' &&
       item.candidate_package_path === 'contract-image.json' &&
-      item.source_git_sha === lease.native_deploy_git_sha &&
+      item.source_git_sha === historical.native_git_sha &&
       receipt.current_contract?.path === item.production_path &&
       receipt.current_contract.package_path === path.posix.join(path.posix.dirname(ref.receipt),'contract-image.json') &&
       equalHash(item.sha256,receipt.current_contract?.sha256) &&
-      equalHash(digest(boundedPath(root,item.production_path)),item.sha256) &&
+      equalHash(digest(boundedPath(root,item.production_path)),activeConfigHash) &&
       equalHash(digest(boundedPath(root,receipt.current_contract.package_path)),item.sha256) &&
       prior?.path === item.production_path &&
       prior.rollback_path === path.posix.join(path.posix.dirname(ref.receipt),'preimage.json') &&
@@ -369,8 +376,8 @@ export function verifyCommandContractAmendment(root, lease, pending, nativeRecei
       equalHash(manifest.rollback.previous_contract_sha256,prior.sha256) &&
       equalHash(digest(boundedPath(root,prior.rollback_path)),prior.sha256) &&
       JSON.stringify(manifest.executables) === JSON.stringify(receipt.executables) &&
-      manifest.executables.every(row => nativeReceipt.artifacts.some(a => a.path === row.production_path &&
-        equalHash(a.sha256,row.sha256)) && equalHash(digest(boundedPath(root,row.production_path)),row.sha256)) &&
+      manifest.executables.every(row => historical.artifacts.some(a => a.path === row.production_path &&
+        equalHash(a.sha256,row.sha256))) &&
       receipt.rollback_ready === true && receipt.runtime_health?.pass === true &&
       receipt.openkore_runtime_count === 0,
     'CONTRACT_AMENDMENT_INVALID');

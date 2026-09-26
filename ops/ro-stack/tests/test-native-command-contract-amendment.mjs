@@ -114,7 +114,9 @@ test('post-deploy verifier pins image, preimage, executables and receipt', () =>
     const lease={lease_id:policy.leaseId,owner_task_id:policy.owner,native_deploy_git_sha:policy.nativeSha,
       web_deploy_git_sha:policy.webSha,native_candidate_manifest_sha256:m.active_candidate_manifest_sha256,
       native_command_contract_amendment:ref};
-    const nativeReceipt={artifacts:rows.map(x=>({path:x.production_path,sha256:x.sha256}))};
+    const nativeReceipt={native_git_sha:policy.nativeSha,
+      candidate_manifest_sha256:m.active_candidate_manifest_sha256,
+      artifacts:rows.map(x=>({path:x.production_path,sha256:x.sha256}))};
     assert.equal(verifyCommandContractAmendment(root,lease,{native_command_contract_amendment:ref},nativeReceipt),true);
     write(target,'tampered');
     assert.equal(verifyCommandContractAmendment(root,lease,{native_command_contract_amendment:ref},nativeReceipt),false);

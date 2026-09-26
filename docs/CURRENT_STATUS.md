@@ -1,5 +1,10 @@
 # 目前狀態
 
+## 2026-09-26 F V15 3678 部署來源對帳
+
+- Project Control 已核准以 Git blob 和候選部署位元組作為 `3678ed86` config 來源權威。來源治理加入建置收據、map binary、config blob、候選位元組及 Production preimage 的封閉檢查；同一 lease 的歷史 command-contract 收據由完整 Native 修訂鏈驗證。準備候選時保留配置原檔，受控部署時逐位元組替換，健康檢查失敗時連同執行檔回滾。
+- 隔離測試涵蓋候選 config 逐位元組部署、收據、失敗回滾與篡改阻擋。Production 仍為 `f77df625`，`3678ed86` 受控部署及 Death Return、五圖、Settings 驗收尚待執行；Web 未部署，最終推廣收據尚未簽發。
+
 ## 2026-09-26 F V15 f77 Production 死亡返回阻擋
 
 - 同一 F lease 已受控套用 013 `runtime_phase` 擴容並部署 Native `f77df625`；新 map-server 健康且 ProcDump 綁定，原事故 dump 完整，沒有新 dump 或欄位長度寫入錯誤。Production Web 仍為 `1346bd05`。

@@ -12,6 +12,7 @@ import { boundedPath, digest, readJson, legacyIdentity, pendingPath, consumedPat
 import { nativeReceiptValid, activeNativeReceiptPath, equalHash, git, pinned, verifyNativeStage, inspectNativeCandidate,
   verifyNativeRemote, shutdownContract, sourceBody, groups } from './native-promotion-contract.mjs';
 import { validateIncidentRecovery } from './native-incident-recovery-gate.mjs';
+import { replaceContractImage, restoreContractPreimage } from './native-runtime-contract-artifact.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const governanceRoot = path.resolve(here, '../..');
@@ -363,7 +364,7 @@ function nativeGone(s) { return ['login', 'char', 'map'].every(n => !s?.counts?.
 // Restore the exact deployed predecessor after a post-replacement health
 // failure. The receipt and lease still name that predecessor at this point.
 export async function restoreIntermediateNative({ root, buildRoot, leaseId, reference,
-  oldArtifacts, candidateArtifacts, adapter, before, timing = {} }) {
+  oldArtifacts, candidateArtifacts, config, adapter, before, timing = {} }) {
   check(reference?.artifacts?.length === 3 && oldArtifacts?.length === 3 &&
     candidateArtifacts?.length === 3, 'INTERMEDIATE_ROLLBACK_INCOMPLETE');
   const rows = oldArtifacts.map(old => {
@@ -389,6 +390,13 @@ export async function restoreIntermediateNative({ root, buildRoot, leaseId, refe
     fs.copyFileSync(row.source, temporary, fs.constants.COPYFILE_EXCL);
     check(equalHash(digest(temporary), row.old.sha256), 'ROLLBACK_COPY_CHANGED');
     fs.renameSync(temporary, row.target);
+  }
+  if (config) {
+    const target = boundedPath(root, config.production_path);
+    check(equalHash(digest(target), config.sha256) || equalHash(digest(target), config.preimage_sha256),
+      'ROLLBACK_CONFIG_PREIMAGE_CHANGED');
+    restoreContractPreimage({ target, backup: boundedPath(buildRoot, config.rollback_path),
+      oldHash: config.preimage_sha256 });
   }
   check(rows.every(row => equalHash(digest(row.target), row.old.sha256)), 'ROLLBACK_BINARY_CHANGED');
   await adapter('start');
@@ -422,6 +430,19 @@ export async function deployAmendedNative({ root, owner, leaseId, adapter, now =
       saved.production_path === item.path && equalHash(saved.sha256, item.sha256) &&
       equalHash(digest(boundedPath(base, saved.path)), item.sha256))),
   'INTERMEDIATE_ROLLBACK_NOT_READY');
+  const config = m.config_deployment;
+  check(policy.reason !== 'M1_MOROCC_NOOP_DEATH_MAINTENANCE_V1' || config,
+    'NATIVE_CONFIG_DEPLOYMENT_REQUIRED');
+  if (config) check(config.text_transform === 'NONE' &&
+    config.source_path === 'conf/persistent_agent_commands.json' &&
+    config.source_git_sha === m.native_git_sha &&
+    config.source_blob_oid === b.config_artifacts?.[0]?.source_blob_oid &&
+    config.production_path === '.local/ro-stack/rathena/conf/persistent_agent_commands.json' &&
+    equalHash(config.sha256, b.config_artifacts?.[0]?.sha256) &&
+    equalHash(digest(boundedPath(base, config.package_path)), config.sha256) &&
+    equalHash(digest(boundedPath(base, config.rollback_path)), config.preimage_sha256) &&
+    equalHash(digest(boundedPath(root, config.production_path)), config.preimage_sha256),
+  'NATIVE_CONFIG_DEPLOYMENT_INVALID');
   const oldMap = current.receipt.artifacts.find(x => x.path.endsWith('/map-server.exe'));
   const lock = path.join(f.dir, 'native-amendment-deploy.lock');
   const archive = path.join(f.dir, `native-amendment-deployed-${leaseId}-${short(policy.new_sha)}`);
@@ -449,6 +470,12 @@ export async function deployAmendedNative({ root, owner, leaseId, adapter, now =
   const stage = path.join(lock, 'stage'); fs.mkdirSync(stage);
   for (const x of b.artifacts) { const d = path.join(stage, x.path); fs.copyFileSync(boundedPath(b.source_root, x.path), d, fs.constants.COPYFILE_EXCL);
     check(equalHash(digest(d), x.sha256), 'STAGED_BINARY_CHANGED'); }
+  if (config) {
+    fs.copyFileSync(boundedPath(base, config.package_path), path.join(stage, 'contract-image.json'), fs.constants.COPYFILE_EXCL);
+    fs.copyFileSync(boundedPath(base, config.rollback_path), path.join(stage, 'contract-preimage.json'), fs.constants.COPYFILE_EXCL);
+    check(equalHash(digest(path.join(stage, 'contract-image.json')), config.sha256) &&
+      equalHash(digest(path.join(stage, 'contract-preimage.json')), config.preimage_sha256), 'STAGED_CONFIG_CHANGED');
+  }
   let retirement, replacementStarted = false, receiptWritten = false;
   try {
     phase('RETIRE_OLD_RUNTIME');
@@ -495,6 +522,13 @@ export async function deployAmendedNative({ root, owner, leaseId, adapter, now =
       fs.copyFileSync(path.join(stage, x.path), temporary, fs.constants.COPYFILE_EXCL);
       check(equalHash(digest(temporary), x.sha256), 'NATIVE_COPY_CHANGED'); fs.renameSync(temporary, target);
     }
+    if (config) {
+      phase('REPLACE_CONFIG');
+      replaceContractImage({ target: boundedPath(root, config.production_path),
+        staged: path.join(stage, 'contract-image.json'), displaced: path.join(stage, 'contract-displaced.json'),
+        backup: path.join(stage, 'contract-preimage.json'),
+        oldHash: config.preimage_sha256, newHash: config.sha256 });
+    }
     phase('START');
     await adapter('start');
     const after = await pollStarted(adapter, before, m.binary_sha256, timing);
@@ -506,6 +540,9 @@ export async function deployAmendedNative({ root, owner, leaseId, adapter, now =
       native_git_sha: m.native_git_sha, native_build_sha256: m.binary_sha256, build_receipt_sha256: m.build_receipt.sha256,
       candidate_manifest_sha256: String(a.candidate_manifest_sha256).toUpperCase(), previous_binary_sha256: String(oldMap.sha256).toUpperCase(),
       new_binary_sha256: m.binary_sha256, previous_binaries: current.receipt.artifacts, artifacts,
+      ...(config ? { config_artifacts: [{ source_path: config.source_path, path: config.production_path,
+        sha256: config.sha256, preimage_sha256: config.preimage_sha256,
+        rollback_path: rel(root, path.join(archive, 'stage', 'contract-preimage.json')) }] } : {}),
       old_map_pid: incidentRecovery ? incidentEvidence.old_map_pid : before.pids.map,
       new_map_pid: after.pids.map,
       old_pids: incidentRecovery ? { ...before.pids, map: incidentEvidence.old_map_pid } : before.pids,
@@ -535,7 +572,7 @@ export async function deployAmendedNative({ root, owner, leaseId, adapter, now =
       try {
         restored = await restoreIntermediateNative({ root, buildRoot: base, leaseId,
           reference: rollback, oldArtifacts: current.receipt.artifacts,
-          candidateArtifacts: b.artifacts, adapter, before, timing });
+          candidateArtifacts: b.artifacts, config, adapter, before, timing });
       } catch (failure) { rollbackError = failure.message; }
     }
     writeNew(path.join(lock, 'failure-' + Date.now() + '.json'), { error: error.message, retirement: retirement || null,

@@ -57,6 +57,27 @@ function fixture() {
     cleanup: () => fs.rmSync(root, { recursive: true, force: true }) };
 }
 
+function withConfigDeployment(x) {
+  const productionPath = '.local/ro-stack/rathena/conf/persistent_agent_commands.json';
+  const old = Buffer.from('{"command":"old"}\r\n');
+  const next = Buffer.from('{"command":"new"}\n');
+  x.put(productionPath, old);
+  x.put('build/intermediate-rollback/persistent_agent_commands.json', old);
+  x.put('build/candidate-config.json', next);
+  const receiptFile = path.join(x.root, 'build/build-receipt.json');
+  const build = JSON.parse(fs.readFileSync(receiptFile));
+  build.config_artifacts = [{ source_path: 'conf/persistent_agent_commands.json', source_git_sha: NEW,
+    source_blob_oid: 'a'.repeat(40), sha256: h(next) }];
+  fs.writeFileSync(receiptFile, JSON.stringify(build));
+  x.manifest.build_receipt.sha256 = h(fs.readFileSync(receiptFile));
+  x.manifest.config_deployment = { source_path: 'conf/persistent_agent_commands.json',
+    source_git_sha: NEW, source_blob_oid: 'a'.repeat(40), package_path: 'candidate-config.json',
+    production_path: productionPath, sha256: h(next), preimage_sha256: h(old),
+    rollback_path: 'intermediate-rollback/persistent_agent_commands.json', text_transform: 'NONE' };
+  fs.writeFileSync(x.manifestFile, JSON.stringify(x.manifest));
+  return { productionPath, old, next, policy: { ...AMENDMENT, reason: 'M1_MOROCC_NOOP_DEATH_MAINTENANCE_V1' } };
+}
+
 function plan(x) {
   const lease = x.read('lease'), pending = x.read('pending'), state = x.read('state'), receipt = JSON.parse(fs.readFileSync(x.receiptFile));
   return { f: { dir: x.dir, lease: x.files.lease, state: x.files.state, pending: x.files.pending, consumed: path.join(x.dir, 'github-first-bootstrap-consumed.json') },
@@ -231,5 +252,45 @@ assert.ok(deployed);
     pass('22 failed postdeploy health automatically restores exact predecessor and keeps lease');
   } finally { x.cleanup(); }
 }
-assert.equal(count, 22);
+{
+  const x = fixture();
+  try {
+    const cfg = withConfigDeployment(x);
+    applyNativeAmendment(plan(x));
+    const rt = runtime(x);
+    await deployAmendedNative({ root: x.root, owner: OWNER, leaseId: LEASE,
+      adapter: rt.adapter, now: rt.now, timing: rt.timing, policy: cfg.policy });
+    assert.deepEqual(fs.readFileSync(path.join(x.root, cfg.productionPath)), cfg.next);
+    const receipt = JSON.parse(fs.readFileSync(path.join(x.root, x.read('pending').native_receipt_path)));
+    assert.equal(receipt.config_artifacts[0].sha256, h(cfg.next));
+    assert.deepEqual(fs.readFileSync(path.join(x.root, receipt.config_artifacts[0].rollback_path)), cfg.old);
+    pass('23 config deploy preserves candidate bytes and pins prior image in receipt');
+  } finally { x.cleanup(); }
+}
+{
+  const x = fixture();
+  try {
+    const cfg = withConfigDeployment(x);
+    applyNativeAmendment(plan(x));
+    const rt = runtime(x, { deployHealthFail: true });
+    await assert.rejects(deployAmendedNative({ root: x.root, owner: OWNER, leaseId: LEASE,
+      adapter: rt.adapter, now: rt.now, timing: rt.timing, policy: cfg.policy }), /POSTDEPLOY_HEALTH_FAILED:ROLLBACK_F7_PASS/);
+    assert.deepEqual(fs.readFileSync(path.join(x.root, cfg.productionPath)), cfg.old);
+    pass('24 failed health restores exact config preimage');
+  } finally { x.cleanup(); }
+}
+{
+  const x = fixture();
+  try {
+    const cfg = withConfigDeployment(x);
+    applyNativeAmendment(plan(x));
+    fs.writeFileSync(path.join(x.root, 'build/candidate-config.json'), 'tampered');
+    const rt = runtime(x);
+    await assert.rejects(deployAmendedNative({ root: x.root, owner: OWNER, leaseId: LEASE,
+      adapter: rt.adapter, now: rt.now, timing: rt.timing, policy: cfg.policy }), /NATIVE_CONFIG_DEPLOYMENT_INVALID/);
+    assert.deepEqual(fs.readFileSync(path.join(x.root, cfg.productionPath)), cfg.old);
+    pass('25 altered candidate config blocks before runtime stop');
+  } finally { x.cleanup(); }
+}
+assert.equal(count, 25);
 console.log(`NATIVE_CANDIDATE_AMENDMENT_TESTS=PASS COUNT=${count}`);

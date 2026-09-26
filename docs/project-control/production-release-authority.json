@@ -12,6 +12,18 @@
     "github_repository": "https://github.com/amadiz1988-boop/ghost-island-rathena.git",
     "release_ref": "refs/heads/main",
     "accepted_source_sha": "3678ed862a6562ed17d24557ff0a55b297b57740",
+    "deployment_provenance": {
+      "model": "GIT_BLOB_PLUS_DEPLOYMENT_BYTES",
+      "native_git_sha": "3678ed862a6562ed17d24557ff0a55b297b57740",
+      "build_receipt_sha256": "5DD3648AAEF31B67196D980DB3E5297868E67C3AEA0E7A442384F292C4CFFB1A",
+      "map_binary_sha256": "1FF0338C5F05736ADA465B4672176A6263809B71463B6F9FC67CA71AA6B4739F",
+      "config_source_path": "conf/persistent_agent_commands.json",
+      "config_source_blob_oid": "bf8064430a213d3e6caa03fb1868021d27d9dd5b",
+      "config_candidate_sha256": "4A7392E038F4394E5B5CE7F5EB6F3CFD4C1E835D46EEC582DC9EFA608AE6FCF2",
+      "config_production_preimage_sha256": "4DA600DCF955D3510EE1289C0F28D257D1D5C1BAB03D90B9E28DCEC3789E73A0",
+      "config_production_path": ".local/ro-stack/rathena/conf/persistent_agent_commands.json",
+      "text_transform": "NONE"
+    },
     "private_required": true,
     "candidate_history": [
       {
