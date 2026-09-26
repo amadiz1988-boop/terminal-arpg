@@ -133,7 +133,7 @@ try {
   assert.equal(second.title, '斐揚洞穴 1樓');
   assert.equal(second.total, '7 種／125 隻');
   assert.equal(second.monsters, 7);
-  assert.match(second.source, /rAthena Renewal/);
+  assert.equal(second.source, '怪物、重生與掉落資料以目前遊戲世界的設定為準');
   assert.ok(second.width <= 390);
   assert.ok(requests.some((url) => url.endsWith('/moc_fild11.json')));
   assert.ok(requests.some((url) => url.endsWith('/pay_dun00.json')));

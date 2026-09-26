@@ -504,7 +504,6 @@ worldMapTeleportCatalog = await buildWorldMapTeleportCatalog({
   townFlagMaps: worldMapTownFlagMaps,
   blockedFlagMaps: new Set((await Promise.all([
     'npc/mapflag/nowarpto.txt', 'npc/re/mapflag/nowarpto.txt',
-    'npc/mapflag/restricted.txt', 'npc/re/mapflag/restricted.txt',
     'npc/mapflag/gvg.txt', 'npc/re/mapflag/gvg.txt',
     'npc/mapflag/battleground.txt',
   ].map(async (path) => [...parseBlockedWorldMapFlags(
@@ -3213,7 +3212,7 @@ async function reconcileRelocations() {
         const queued = await queueOwnershipCommand(account, charId,
           { action: 'world_map_teleport', expectedRevision: revision },
           { targetMap: pending.targetMap, kind: pending.kind,
-            anchorX: pending.landing.x, anchorY: pending.landing.y,
+            anchorX: pending.landing?.x ?? 0, anchorY: pending.landing?.y ?? 0,
             ...(nativeSupplyPolicyCommandEnabled && pending.kind === 'farm'
               ? { supplyPolicy: await loadNativeSupplyPolicy(account) } : {}) });
         pending.commandId = queued.commandId;
@@ -3492,6 +3491,10 @@ async function queuePlayerWorldMapTeleport(account, controller, requestedMapId,
     if (nativeSupplyPolicyCommandEnabled && kind === 'farm') {
       const preflight = await readFarmMapSupplyPreflight(account, controller);
       if (!preflight.allowed) {
+        // prepare_farm_switch still requires an authored anchor. Keep this
+        // supply branch fail-closed; ordinary travel uses Native's 0,0 mode.
+        if (!row.landing)
+          throw new HttpError(409, 'WORLD_MAP_SUPPLY_LANDING_UNAVAILABLE');
         if (!recovering)
           await writePersistedRelocation(account, mapId, 'world-map-farm',
             { parentFarmMap: controller.targetMap ?? null });
@@ -3506,7 +3509,7 @@ async function queuePlayerWorldMapTeleport(account, controller, requestedMapId,
               deathRecoveryEnabled: true }) : null;
         const command = await queueOwnershipCommand(account, charId,
           { action: 'prepare_farm_switch', expectedRevision: Number(controller.revision) },
-          { targetMap: mapId, anchorX: row.landing.x, anchorY: row.landing.y,
+          { targetMap: mapId, anchorX: row.landing?.x ?? 0, anchorY: row.landing?.y ?? 0,
             kind: 'farm', supplyPolicy, ...services,
             ...(farmRules ? { farmRules } : {}) });
         pendingRelocations.set(charId, {
@@ -3545,7 +3548,7 @@ async function queuePlayerWorldMapTeleport(account, controller, requestedMapId,
             ? { nextFarmMap: mapId } : null)
         : await queueOwnershipCommand(account, charId,
           { action: 'world_map_teleport', expectedRevision: Number(controller.revision) },
-          { targetMap: mapId, kind, anchorX: row.landing.x, anchorY: row.landing.y,
+          { targetMap: mapId, kind, anchorX: row.landing?.x ?? 0, anchorY: row.landing?.y ?? 0,
             ...(nativeSupplyPolicyCommandEnabled && kind === 'farm'
               ? { supplyPolicy: await loadNativeSupplyPolicy(account) } : {}) });
     } catch (error) {

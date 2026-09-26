@@ -14,6 +14,11 @@ const inventory = JSON.parse(await readFile(join(root,
   'docs/openkore-reference/world-map-inventory.json'), 'utf8'));
 const mapNames = JSON.parse(await readFile(join(root,
   'public/ro/data/map-names.json'), 'utf8')).entries;
+const mapInfo = JSON.parse(await readFile(join(root,
+  'public/ro/data/map-info.json'), 'utf8'));
+const redMapIds = new Set((mapInfo.worldMap?.regions ?? [])
+  .filter((region) => region.labelKind === 'red')
+  .flatMap((region) => region.mapIds));
 const mobDb = new Map(parseYamlRecords(await readFile(join(native,
   'db/re/mob_db.yml'), 'utf8')).map((mob) => [mob.Id, mob]));
 // Spawn, flag, transfer and role evidence come from the active canonical
@@ -37,11 +42,14 @@ const maps = [];
 for (const row of inventory.records) {
   if (!row.mapExists || !row.configuredForLoad || !row.cacheSource) continue;
   const e = evidence.get(row.id);
-  const normalSpawns = e.spawns.filter((spawn) =>
-    ['NORMAL_FIELD', 'NORMAL_DUNGEON'].includes(spawn.habitat) && spawn.count > 0);
+  // Loaded, static monster declarations are spawn evidence regardless of the
+  // script's directory. Native decides final eligibility from the live moblist.
+  const normalSpawns = e.spawns.filter((spawn) => spawn.count > 0 &&
+    spawn.declaration === 'monster' &&
+    spawn.source.split(':')[0] !== 'npc/re/mobs/championmobs.txt');
   if (normalSpawns.length === 0) continue;
   const habitats = [...new Set(normalSpawns.map((spawn) => spawn.habitat))];
-  if (habitats.length !== 1)
+  if (habitats.filter(Boolean).length > 1)
     throw new Error(`Mixed permanent spawn habitats: ${row.id}`);
   const byMob = new Map();
   for (const spawn of normalSpawns) {
@@ -60,7 +68,9 @@ for (const row of inventory.records) {
     map: row.id,
     name: mapNames[row.id] ?? row.id,
     category: classifyEvidence(e, instances.get(row.id), row.configuredForLoad).category,
-    habitat: habitats[0],
+    // Habitat is a UI grouping hint. It never admits or rejects a farm map.
+    habitat: habitats.find(Boolean) ?? (redMapIds.has(row.id)
+      ? 'NORMAL_DUNGEON' : 'NORMAL_FIELD'),
     blockedFlags: e.flags
       .map((flag) => flag.value)
       .filter((flag) => ['nowarpto', 'restricted', 'gvg', 'battleground'].includes(flag))

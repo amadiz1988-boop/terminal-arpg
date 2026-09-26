@@ -13,7 +13,7 @@ export function parseTownMapFlags(text) {
 
 export function parseBlockedWorldMapFlags(text) {
   return new Set(String(text).split(/\r?\n/).map((line) =>
-    line.trim().match(/^([a-z0-9_]+)\s+mapflag\s+(?:nowarpto|restricted|gvg|battleground)(?:\s|$)/)?.[1])
+    line.trim().match(/^([a-z0-9_]+)\s+mapflag\s+(?:nowarpto|gvg|battleground)(?:\s|$)/)?.[1])
     .filter(Boolean));
 }
 
@@ -122,7 +122,7 @@ export async function buildWorldMapTeleportCatalog({
       inventory: { mapExists: true, configuredForLoad: Boolean(cached),
         cacheSource: cached ? 'rathena-map-cache' : null,
         category: source?.category ?? summary.category,
-        evidence: { flags: blockedFlagMaps.has(mapId) ? [{ value: 'restricted' }] : [] } },
+        evidence: { flags: blockedFlagMaps.has(mapId) ? [{ value: 'nowarpto' }] : [] } },
       detail, landing, eligibleMonsters: source?.monsters,
     });
     rows.set(mapId, { map: mapId, kind: 'farm', name: summary.name,

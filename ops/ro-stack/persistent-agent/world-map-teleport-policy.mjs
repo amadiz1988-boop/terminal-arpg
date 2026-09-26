@@ -4,24 +4,20 @@ export const WORLD_MAP_FIELD_COOLDOWN_SECONDS = 60;
 export const WORLD_MAP_TOWN_COOLDOWN_SECONDS = 30;
 export const WORLD_MAP_FREE_FARM_LEVEL_MAX = 66;
 
-const NORMAL_HABITATS = new Set(['NORMAL_FIELD', 'NORMAL_DUNGEON']);
 const BLOCKED_CATEGORIES = new Set([
   'INSTANCE', 'EVENT', 'TEST', 'UNUSED',
 ]);
-const BLOCKED_FLAGS = new Set(['nowarpto', 'restricted', 'gvg', 'battleground']);
+const BLOCKED_FLAGS = new Set(['nowarpto', 'gvg', 'battleground']);
 
 export function eligibleNormalFarmMonsters(detail, inventory) {
-  const hasActiveSpawnEvidence = Array.isArray(inventory?.evidence?.spawns);
   const active = new Set((inventory?.evidence?.spawns ?? [])
-    .filter((spawn) => NORMAL_HABITATS.has(spawn.habitat) && spawn.count > 0)
+    .filter((spawn) => spawn.declaration === 'monster' && spawn.count > 0)
     .map((spawn) => Number(spawn.mobId)));
   return (detail?.monsters ?? []).filter((monster) =>
-    (!hasActiveSpawnEvidence || active.has(Number(monster.id))) && Number(monster.count) > 0 &&
+    active.has(Number(monster.id)) && Number(monster.count) > 0 &&
     Number.isSafeInteger(Number(monster.level)) && Number(monster.level) > 0 &&
     monster.isBoss !== true && monster.isMvp !== true &&
-    monster.isResource !== true &&
-    (monster.sourceFiles ?? []).some((file) =>
-      /^npc\/re\/mobs\/(?:fields|dungeons)\//.test(String(file))));
+    monster.isResource !== true);
 }
 
 export function classifyFarmTeleport({ inventory, detail, landing, eligibleMonsters }) {
@@ -35,8 +31,8 @@ export function classifyFarmTeleport({ inventory, detail, landing, eligibleMonst
   const monsters = eligibleMonsters ?? eligibleNormalFarmMonsters(detail, inventory);
   if (monsters.length === 0)
     return { available: false, reason: 'NO_ELIGIBLE_NORMAL_FARM_MONSTER' };
-  if (!landing || !Number.isSafeInteger(landing.x) || !Number.isSafeInteger(landing.y))
-    return { available: false, reason: 'NO_SAFE_LANDING' };
+  if (landing && (!Number.isSafeInteger(landing.x) || !Number.isSafeInteger(landing.y)))
+    return { available: false, reason: 'INVALID_LANDING_HINT' };
   return {
     available: true,
     reason: 'SUPPORTED',

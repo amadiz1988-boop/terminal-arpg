@@ -38,7 +38,6 @@ export async function loadWorldMapTestCatalog(root, native, {
   ]);
   const blockedFlagMaps = new Set((await Promise.all([
     'npc/mapflag/nowarpto.txt', 'npc/re/mapflag/nowarpto.txt',
-    'npc/mapflag/restricted.txt', 'npc/re/mapflag/restricted.txt',
     'npc/mapflag/gvg.txt', 'npc/re/mapflag/gvg.txt',
     'npc/mapflag/battleground.txt',
   ].map(async (path) => [...parseBlockedWorldMapFlags(

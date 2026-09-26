@@ -26,10 +26,14 @@ assert.deepEqual(webDestinations, nativeDestinations);
 assert.equal(projection.savedPoints.size, 26);
 assert.equal(webDestinations.length, 39);
 assert.equal(projection.townRows.size, 27); // 26 Native-authored + Izlude MF_TOWN.
-assert.equal(projection.farmRows.size, 274);
+assert.equal(projection.farmRows.size, 281);
 assert.equal(projection.destinationList.towns.length, 27);
-assert.equal(projection.destinationList.wild.length, 125);
-assert.equal(projection.destinationList.caves.length, 149);
+assert.equal(projection.destinationList.wild.length, 128);
+assert.equal(projection.destinationList.caves.length, 153);
+for (const map of ['ver_eju', 'ver_tunn', 'verus03', 'niflheim', 'tur_dun05'])
+  assert.ok(projection.farmRows.has(map), map);
+for (const map of ['mag_dun03', 'lhz_dun03', 'ein_dun03', 'thor_v03'])
+  assert.ok(!projection.farmRows.has(map), map);
 assert.deepEqual(projection.destinationList.towns.filter((row) =>
   row.averageLevel === null).map((row) => row.map), ['harboro1', 'moscovia']);
 for (const rows of Object.values(projection.destinationList))
@@ -141,6 +145,8 @@ assert.match(dashboard, /playerWorldMapProjection\.farmRows\.get\(mapId\)/);
 assert.match(dashboard, /saveX: town\.savedPoint\.x, saveY: town\.savedPoint\.y/);
 console.log(JSON.stringify({ result: 'PASS', nativeKafraMaps: 26,
   nativeSaveDestinations: 39, playerFarmMaps: projection.farmRows.size,
-  playerTownNodes: projection.townRows.size, wildMaps: 125, caveMaps: 149,
+  playerTownNodes: projection.townRows.size,
+  wildMaps: projection.destinationList.wild.length,
+  caveMaps: projection.destinationList.caves.length,
   dualRoleMaps: 3,
   previousUnresolvedResolved: 15, previousUnresolvedStillClosed: 10 }));

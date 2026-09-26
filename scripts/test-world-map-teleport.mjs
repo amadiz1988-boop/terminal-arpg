@@ -7,6 +7,8 @@ import {
   farmTeleportCost,
   worldMapTeleportDecision,
 } from '../ops/ro-stack/persistent-agent/world-map-teleport-policy.mjs';
+import { parseBlockedWorldMapFlags } from
+  '../ops/ro-stack/persistent-agent/world-map-teleport-catalog.mjs';
 import { loadWorldMapTestCatalog } from './lib/world-map-test-catalog.mjs';
 
 const root = resolve(import.meta.dirname, '..');
@@ -16,7 +18,10 @@ const normal = { id: 1, count: 2, level: 95, isBoss: false, isResource: false,
 const resource = { ...normal, id: 2, level: 1, isResource: true };
 const event = { ...normal, id: 3, level: 2, sourceFiles: ['npc/re/mobs/events/test.txt'] };
 const loaded = { mapExists: true, configuredForLoad: true, cacheSource: 'rathena',
-  category: 'NORMAL_FIELD' };
+  category: 'NORMAL_FIELD', evidence: { spawns: [
+    { mobId: 1, count: 2, declaration: 'monster', source: 'npc/re/mobs/verus.txt:1' },
+    { mobId: 2, count: 1, declaration: 'monster', source: 'npc/re/mobs/verus.txt:2' },
+  ] } };
 const landing = { x: 10, y: 10 };
 const decide = (overrides = {}) => worldMapTeleportDecision({ kind: 'farm',
   currentMap: 'prontera', targetMap: 'test', baseLevel: 95, minLevel: 95,
@@ -56,9 +61,27 @@ assert.equal(classifyFarmTeleport({ inventory: { ...loaded, category: 'INSTANCE'
 assert.equal(classifyFarmTeleport({ inventory: { ...loaded, category: 'TOWN' },
   detail: { monsters: [normal] }, landing }).reason, 'TOWN_NOT_FARMABLE');
 assert.equal(classifyFarmTeleport({ inventory: loaded,
-  detail: { monsters: [normal] }, landing: null }).reason, 'NO_SAFE_LANDING');
+  detail: { monsters: [normal] }, landing: null }).reason, 'SUPPORTED');
+assert.equal(classifyFarmTeleport({ inventory: { ...loaded, evidence: { flags: [{ value: 'restricted' }],
+  spawns: loaded.evidence.spawns } }, detail: { monsters: [normal] }, landing: null }).reason,
+  'SUPPORTED');
+assert.equal(classifyFarmTeleport({ inventory: { ...loaded, evidence: { flags: [{ value: 'nowarpto' }],
+  spawns: loaded.evidence.spawns } }, detail: { monsters: [normal] }, landing }).reason,
+  'MAP_ACCESS_RESTRICTED');
+assert.deepEqual([...parseBlockedWorldMapFlags('niflheim mapflag restricted 7\nmag_dun03 mapflag nowarpto')],
+  ['mag_dun03']);
+assert.deepEqual(eligibleNormalFarmMonsters({ monsters: [normal, event] },
+  { ...loaded, evidence: { spawns: [] } }), []);
 
 const { mapInfo, catalog } = await loadWorldMapTestCatalog(root, native);
+for (const mapId of ['ver_eju', 'ver_tunn', 'verus03', 'niflheim', 'tur_dun05'])
+  assert.equal(catalog.get(mapId)?.farmSelectionAvailable, true, mapId);
+for (const mapId of ['mag_dun03', 'lhz_dun03', 'ein_dun03']) {
+  assert.equal(catalog.get(mapId)?.farmSelectionAvailable, false, mapId);
+  assert.equal(catalog.get(mapId)?.availabilityReason, 'MAP_ACCESS_RESTRICTED', mapId);
+}
+assert.equal(catalog.get('tur_dun05')?.landing, null,
+  'Native owns the server-selected cell for a map-level farm intent');
 for (const mapId of ['mjolnir_07', 'pay_fild04', 'moc_pryd01']) {
   assert.equal(catalog.get(mapId)?.farmSelectionAvailable, true, mapId);
   assert.ok(catalog.get(mapId)?.landing?.x > 0, mapId);
@@ -80,6 +103,9 @@ const after = [...catalog.values()].filter((row) => row.farmSelectionAvailable).
 const positionedMapIds = new Set(mapInfo.worldMap.regions.flatMap((region) => region.mapIds));
 const positioned = [...catalog.values()].filter((row) =>
   row.farmSelectionAvailable && positionedMapIds.has(row.map)).length;
+assert.equal(after, 281);
+for (const mapId of ['lasa_fild01', 'lasa_fild02'])
+  assert.equal(catalog.get(mapId)?.farmSelectionAvailable, true, mapId);
 const towns = [...catalog.values()].filter((row) => row.townTeleportAvailable);
 const added = [...catalog.values()].filter((row) => row.farmSelectionAvailable &&
   !beforeIds.has(row.map)).map((row) => row.map);

@@ -4,7 +4,8 @@ import { classifyEvidence, collectScriptEvidence }
 import { chooseLandingAnchor, chooseScriptArrivalAnchor }
   from '../ops/ro-stack/persistent-agent/world-map-teleport-policy.mjs';
 
-const maps = new Set(['bra_dun01', 'pay_dun04', 'jupe_core', 'jupe_ele', 'gw_fild01']);
+const maps = new Set(['bra_dun01', 'pay_dun04', 'jupe_core', 'jupe_ele',
+  'gw_fild01', 'ver_eju']);
 const e = collectScriptEvidence([
   { path: 'npc/re/mobs/dungeons/bra_dun.txt', text: [
     'bra_dun01\tmonster\tPiranha\t2070,80,5000',
@@ -19,6 +20,8 @@ const e = collectScriptEvidence([
   ].join('\n') },
   { path: 'npc/re/instances/MazeofOz.txt', text: 'gw_fild01,275,337,3\tscript\tEntry\t4_M_MERCHANT,{' },
   { path: 'npc/re/mobs/fields/gw_fild.txt', text: 'gw_fild01\tmonster\tWolf\t1013,50,5000' },
+  { path: 'npc/re/mobs/verus.txt', text: 'ver_eju,0,0,0,0\tmonster\tRobot\t3154,50,5000' },
+  { path: 'npc/re/quests/example.txt', text: 'monster "ver_eju",0,0,"Temporary",3154,1;' },
 ], maps);
 
 // Map-only and area spawn heads are both permanent spawns; other map-only
@@ -26,6 +29,10 @@ const e = collectScriptEvidence([
 assert.deepEqual(e.get('bra_dun01').spawns.map((s) => [s.mobId, s.count, s.habitat]),
   [[2070, 80, 'NORMAL_DUNGEON'], [2069, 30, 'NORMAL_DUNGEON']]);
 assert.equal(e.get('bra_dun01').references.some((r) => r.kind === 'script'), false);
+assert.equal(e.get('ver_eju').spawns.length, 1);
+assert.equal(e.get('ver_eju').spawns[0].declaration, 'monster');
+assert.equal(e.get('ver_eju').spawns[0].habitat, null,
+  'source directory is not a farmability gate');
 // Literal arrivals only; 0,0 and expressions keep no coordinates.
 assert.deepEqual(e.get('pay_dun04').transfers.map((t) => [t.x, t.y]),
   [[201, 204], [undefined, undefined]]);

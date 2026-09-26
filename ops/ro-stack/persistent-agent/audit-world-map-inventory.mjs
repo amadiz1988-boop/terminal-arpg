@@ -89,6 +89,7 @@ export function collectScriptEvidence(files, universe) {
       if (cols[1] === 'monster' || cols[1] === 'boss_monster') {
         const numbers = cols[3]?.split(',').map(Number);
         if (numbers?.[0] > 0 && numbers[1] > 0) add(head[1], 'spawns', { mobId: numbers[0], count: numbers[1], source,
+          declaration: cols[1],
           habitat: path.includes('/mobs/dungeons/') ? 'NORMAL_DUNGEON' : path.includes('/mobs/fields/') ? 'NORMAL_FIELD' : null });
       }
     }

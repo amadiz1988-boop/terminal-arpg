@@ -72,8 +72,7 @@ export function buildPlayerWorldMapProjection({ mapInfo, catalog, mapCache,
   townFlagMaps, sourceIndex, savedPointSources, mapNames = {}, graph = new Map() }) {
   const savedPoints = parseKafraSavedPoints(savedPointSources);
   const normalSpawns = new Set(sourceIndex.maps.filter((row) =>
-    row.monsters?.length > 0 && !(row.blockedFlags?.length > 0))
-    .map((row) => row.map));
+    row.monsters?.length > 0).map((row) => row.map));
   const positioned = new Set(mapInfo.worldMap.regions.flatMap((region) => region.mapIds));
   const rows = new Map(), farmRows = new Map(), townRows = new Map();
   const unresolvedTowns = [];
@@ -82,7 +81,7 @@ export function buildPlayerWorldMapProjection({ mapInfo, catalog, mapCache,
     if (!summary || !row) continue;
     if (row.kind === 'farm' && row.farmable === true &&
         row.farmSelectionAvailable === true && row.normalMonsterCount > 0 &&
-        row.landing && summary.unlocked === true && normalSpawns.has(map)) {
+        summary.unlocked === true && normalSpawns.has(map)) {
       farmRows.set(map, row);
       rows.set(map, row);
     }

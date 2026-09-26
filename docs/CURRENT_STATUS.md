@@ -808,3 +808,10 @@
 - 目前 Production Player World Map 只提供 7 個 town rows，Morocc 與指定 field hub 缺席。f7 Native 的 Kafra Player live acceptance 需等待已整合 27 town nodes 的最終 Web 來源在 Settings 與原始 hunting-label Native 阻擋點關閉後受控部署。未把 Admin/原始 Native 指令算作 Player PASS。
 - Settings source contract 共 46 欄、9 節；17 欄有來源執行映射可編輯，20 欄待支援及 5 欄未開放均停用，3 欄固定唯讀，1 欄隱藏。`SETTINGS_SOURCE_CONTRACT_GATE=PASS`；Production Browser 儲存／重載及 Supply/Store/Sell 設定效果仍未驗收。詳見 `docs/project-control/m1-v15-settings-and-capability-recalculation.md`。
 - 40 項當前 M1 必要能力逐項重算為 4 PASS、36 PARTIAL、0 MISSING、0 UNCLASSIFIED；每個 PARTIAL 的第一個缺少驗收點見 `docs/project-control/m1-v15-capability-reconciliation-2026-09-26.md`。原始 hunting-label 盤點尚有 5 個 Native-owned 不可接受阻擋點。`CAPABILITY_FINAL_GATE` 與最終 Web/Browser/音效個人聆聽/Promotion receipt 仍為 BLOCKED 或 NOT_MEASURED。
+
+## 2026-09-26 M1 V15 五張地圖 Web 准入來源候選
+
+- 目前 Native 正式版本為 `668bb9db`，Web 正式版本仍為 `055d3427`。先前正常 TEST_PLAYER 切至 `ver_eju` 在 Web 目的地准入取得 HTTP 409，沒有建立 Native 命令。
+- 來源候選已移除一般怪出生檔案的 `fields/dungeons` 路徑白名單、`restricted 7` 的通用傳送否決及 Web 固定掛機落點要求。Web 對無著陸提示的掛機地圖，以既有 `world_map_teleport` 命令送 `anchorX=0, anchorY=0`，由 Native 挑選與核定安全格。
+- 五張目標 `ver_eju`、`ver_tunn`、`verus03`、`niflheim`、`tur_dun05` 均通過來源 catalog 與 Player 投影。可見掛機圖由 274 重算為 281；額外兩張 `lasa_fild01`、`lasa_fild02` 由相同常駐出生規則取得准入。`mag_dun03`、`lhz_dun03`、`ein_dun03` 仍因 `nowarpto` 關閉；`thor_v03` 仍無有效一般掛機怪。
+- 既有 `prepare_farm_switch` 補給前置命令要求正座標。無固定落點且權威補給預檢失敗時，Web 回覆 `WORLD_MAP_SUPPLY_LANDING_UNAVAILABLE`，不送虛構座標。一般五圖 Player live、Settings、World Map、Kafra Browser、音效聆聽及 final receipt 均尚未取得新版 Production 證據。

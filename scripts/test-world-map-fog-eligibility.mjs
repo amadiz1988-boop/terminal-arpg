@@ -11,7 +11,7 @@ const registry = JSON.parse(
   ),
 );
 
-assert.match(app, /farmMapSelectionAvailable\(mapId, mapSummaries\[mapId\]\)/);
+assert.match(app, /const farmSelectionAvailable = farmMapSelectionAvailable\(mapId, summary\)/);
 assert.match(app, /hitArea\.className = `world-map-region selectable \$\{selectable \? 'farmable' : 'inspection-only'\}`/);
 assert.match(app, /hitArea\.dataset\.mapSelectable = 'true'/);
 assert.match(app, /\$\('#worldMapCanvas'\)\.onclick = \(event\) =>/);

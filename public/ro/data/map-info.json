@@ -208,7 +208,10 @@
         "availableMapIds": [
           "jupe_core",
           "juperos_01",
-          "juperos_02"
+          "juperos_02",
+          "ver_eju",
+          "ver_tunn",
+          "verus03"
         ],
         "name": "優配擂斯廢墟外部",
         "position": {
@@ -2579,7 +2582,9 @@
         "mapIds": [
           "lasa_fild02"
         ],
-        "availableMapIds": [],
+        "availableMapIds": [
+          "lasa_fild02"
+        ],
         "name": "羅比奧森林",
         "position": {
           "x1": 1027,
@@ -2591,10 +2596,10 @@
           "min": 11,
           "max": 17
         },
-        "availableForAfk": false,
-        "unlocked": false,
-        "selectable": false,
-        "unlockCondition": "目前不符合掛機地圖條件"
+        "availableForAfk": true,
+        "unlocked": true,
+        "selectable": true,
+        "unlockCondition": null
       },
       {
         "regionId": "region-101",
@@ -4208,7 +4213,8 @@
         ],
         "availableMapIds": [
           "nif_fild01",
-          "nif_fild02"
+          "nif_fild02",
+          "niflheim"
         ],
         "name": "亡者國都 尼芙菲姆",
         "position": {
@@ -4585,7 +4591,9 @@
         "mapIds": [
           "lasa_fild01"
         ],
-        "availableMapIds": [],
+        "availableMapIds": [
+          "lasa_fild01"
+        ],
         "name": "羅比奧平原崗亭",
         "position": {
           "x1": 404,
@@ -4597,10 +4605,10 @@
           "min": 1,
           "max": 7
         },
-        "availableForAfk": false,
-        "unlocked": false,
-        "selectable": false,
-        "unlockCondition": "目前不符合掛機地圖條件"
+        "availableForAfk": true,
+        "unlocked": true,
+        "selectable": true,
+        "unlockCondition": null
       },
       {
         "regionId": "region-181",
@@ -6352,7 +6360,8 @@
         "availableMapIds": [
           "tur_dun02",
           "tur_dun03",
-          "tur_dun04"
+          "tur_dun04",
+          "tur_dun05"
         ],
         "name": "烏龜島 密穴",
         "position": {
@@ -16477,7 +16486,7 @@
       "dungeon": null,
       "category": "SERVICE_ONLY",
       "farmSelectionAvailable": false,
-      "availabilityReason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
+      "availabilityReason": "MAP_ACCESS_RESTRICTED",
       "routeClass": null,
       "availableForAfk": false,
       "unlocked": false,
@@ -16533,7 +16542,7 @@
       "dungeon": null,
       "category": "SERVICE_ONLY",
       "farmSelectionAvailable": false,
-      "availabilityReason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
+      "availabilityReason": "MAP_ACCESS_RESTRICTED",
       "routeClass": null,
       "availableForAfk": false,
       "unlocked": false,
@@ -16589,7 +16598,7 @@
       "dungeon": null,
       "category": "SERVICE_ONLY",
       "farmSelectionAvailable": false,
-      "availabilityReason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
+      "availabilityReason": "MAP_ACCESS_RESTRICTED",
       "routeClass": null,
       "availableForAfk": false,
       "unlocked": false,
@@ -16650,13 +16659,13 @@
       "hasMvp": false,
       "dungeon": null,
       "category": "SERVICE_ONLY",
-      "farmSelectionAvailable": false,
-      "availabilityReason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
+      "farmSelectionAvailable": true,
+      "availabilityReason": null,
       "routeClass": null,
-      "availableForAfk": false,
-      "unlocked": false,
-      "selectable": false,
-      "grindable": false,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
       "worldPosition": {
         "mapId": "lasa_fild01",
         "x1": 404,
@@ -16712,13 +16721,13 @@
       "hasMvp": false,
       "dungeon": null,
       "category": "SERVICE_ONLY",
-      "farmSelectionAvailable": false,
-      "availabilityReason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
+      "farmSelectionAvailable": true,
+      "availabilityReason": null,
       "routeClass": null,
-      "availableForAfk": false,
-      "unlocked": false,
-      "selectable": false,
-      "grindable": false,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
       "worldPosition": {
         "mapId": "lasa_fild02",
         "x1": 1027,
@@ -21184,13 +21193,13 @@
       "hasMvp": false,
       "dungeon": null,
       "category": "SERVICE_ONLY",
-      "farmSelectionAvailable": false,
-      "availabilityReason": "MAP_ACCESS_RESTRICTED",
+      "farmSelectionAvailable": true,
+      "availabilityReason": null,
       "routeClass": null,
-      "availableForAfk": false,
-      "unlocked": false,
-      "selectable": false,
-      "grindable": false,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
       "worldPosition": {
         "mapId": "niflheim",
         "x1": 190,
@@ -26478,13 +26487,13 @@
       "hasMvp": false,
       "dungeon": null,
       "category": "SERVICE_ONLY",
-      "farmSelectionAvailable": false,
-      "availabilityReason": "NO_SAFE_LANDING",
+      "farmSelectionAvailable": true,
+      "availabilityReason": null,
       "routeClass": null,
-      "availableForAfk": false,
-      "unlocked": false,
-      "selectable": false,
-      "grindable": false,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
       "worldPosition": {
         "mapId": "tur_dun05",
         "x1": 1080,
@@ -27191,13 +27200,13 @@
       "hasMvp": false,
       "dungeon": null,
       "category": "SERVICE_ONLY",
-      "farmSelectionAvailable": false,
-      "availabilityReason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
+      "farmSelectionAvailable": true,
+      "availabilityReason": null,
       "routeClass": null,
-      "availableForAfk": false,
-      "unlocked": false,
-      "selectable": false,
-      "grindable": false,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
       "worldPosition": {
         "mapId": "ver_eju",
         "x1": 984,
@@ -27241,13 +27250,13 @@
       "hasMvp": false,
       "dungeon": null,
       "category": "SERVICE_ONLY",
-      "farmSelectionAvailable": false,
-      "availabilityReason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
+      "farmSelectionAvailable": true,
+      "availabilityReason": null,
       "routeClass": null,
-      "availableForAfk": false,
-      "unlocked": false,
-      "selectable": false,
-      "grindable": false,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
       "worldPosition": {
         "mapId": "ver_tunn",
         "x1": 984,
@@ -27297,13 +27306,13 @@
       "hasMvp": false,
       "dungeon": null,
       "category": "SERVICE_ONLY",
-      "farmSelectionAvailable": false,
-      "availabilityReason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
+      "farmSelectionAvailable": true,
+      "availabilityReason": null,
       "routeClass": null,
-      "availableForAfk": false,
-      "unlocked": false,
-      "selectable": false,
-      "grindable": false,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
       "worldPosition": {
         "mapId": "verus03",
         "x1": 984,

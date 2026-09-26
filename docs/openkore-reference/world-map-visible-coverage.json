@@ -14,23 +14,30 @@
     "redDungeonGroups": 25,
     "redDungeonFloors": 122,
     "visibleUniqueFloors": 360,
-    "farmEnabledFloors": 274,
-    "teleportEnabledFloors": 281,
+    "farmEnabledFloors": 281,
+    "teleportEnabledFloors": 288,
     "visibleRootDescendants": 360,
     "nonPersistentChildrenBlocked": 2,
-    "nonVisibleMapsDeferred": 100,
+    "nonVisibleMapsDeferred": 135,
     "questAccessReviewRequired": 0,
     "visibleLabelUnclassified": 0,
     "visibleFloorUnclassified": 0
   },
   "blockedByReason": {
     "TOWN_NOT_SUPPORTED_FOR_WORLD_TELEPORT": 22,
-    "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE": 43,
-    "MAP_ACCESS_RESTRICTED": 12,
-    "NO_ELIGIBLE_NORMAL_FARM_MONSTER": 1,
-    "NO_SAFE_LANDING": 1
+    "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE": 35,
+    "MAP_ACCESS_RESTRICTED": 14,
+    "NO_ELIGIBLE_NORMAL_FARM_MONSTER": 1
   },
   "deferredMaps": [
+    {
+      "mapId": "1@md_gef",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
+      "mapId": "alb_ship",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
     {
       "mapId": "amicitia1",
       "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
@@ -296,7 +303,31 @@
       "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
     },
     {
+      "mapId": "jawaii",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
+      "mapId": "jawaii_in",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
+      "mapId": "job_monk",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
+      "mapId": "job3_gen01",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
+      "mapId": "jupe_core2",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
       "mapId": "kh_kiehl01",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
+      "mapId": "lasa_dun_q",
       "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
     },
     {
@@ -305,6 +336,10 @@
     },
     {
       "mapId": "lhz_dun04",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
+      "mapId": "lhz_in01",
       "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
     },
     {
@@ -336,6 +371,10 @@
       "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
     },
     {
+      "mapId": "mosk_que",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
       "mapId": "new_1-3",
       "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
     },
@@ -356,6 +395,10 @@
       "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
     },
     {
+      "mapId": "prt_cas",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
       "mapId": "prt_church",
       "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
     },
@@ -365,6 +408,70 @@
     },
     {
       "mapId": "prt_q",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
+      "mapId": "pvp_n_8-1",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
+      "mapId": "pvp_n_8-2",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
+      "mapId": "pvp_n_8-3",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
+      "mapId": "pvp_n_8-4",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
+      "mapId": "pvp_n_8-5",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
+      "mapId": "que_qaru01",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
+      "mapId": "que_qaru02",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
+      "mapId": "que_qaru03",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
+      "mapId": "que_qaru04",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
+      "mapId": "que_qaru05",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
+      "mapId": "que_qsch01",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
+      "mapId": "que_qsch02",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
+      "mapId": "que_qsch03",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
+      "mapId": "que_qsch04",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
+      "mapId": "que_qsch05",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
+      "mapId": "que_sign02",
       "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
     },
     {
@@ -388,7 +495,15 @@
       "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
     },
     {
+      "mapId": "sec_in02",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
       "mapId": "slabw01",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
+      "mapId": "sp_os",
       "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
     },
     {
@@ -412,6 +527,18 @@
       "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
     },
     {
+      "mapId": "tra_fild01",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
+      "mapId": "tra_fild02",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
+      "mapId": "tra_fild03",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
       "mapId": "treasure_n1",
       "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
     },
@@ -425,6 +552,18 @@
     },
     {
       "mapId": "tur_d04_i",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
+      "mapId": "un_bunker",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
+      "mapId": "verus01",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
+      "mapId": "verus02",
       "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
     },
     {
@@ -1232,13 +1371,13 @@
           "floorDisplayName": "優配擂斯東邊廢墟",
           "worldMapSelectable": true,
           "childClassification": "PERSISTENT_NORMAL_CHILD",
-          "farmMapAvailable": false,
-          "teleportAvailable": false,
-          "reason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
-          "minFarmLevel": null,
-          "eligibleMonsterCount": 0,
+          "farmMapAvailable": true,
+          "teleportAvailable": true,
+          "reason": "SUPPORTED",
+          "minFarmLevel": 163,
+          "eligibleMonsterCount": 60,
           "teleportSafeLanding": null,
-          "paidCostZenyFromBaseLevel67": null,
+          "paidCostZenyFromBaseLevel67": 1630,
           "mapDetail": "/ro/data/map-info/ver_eju.json"
         },
         {
@@ -1247,13 +1386,13 @@
           "floorDisplayName": "貝魯茲外圍隧道",
           "worldMapSelectable": true,
           "childClassification": "PERSISTENT_NORMAL_CHILD",
-          "farmMapAvailable": false,
-          "teleportAvailable": false,
-          "reason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
-          "minFarmLevel": null,
-          "eligibleMonsterCount": 0,
+          "farmMapAvailable": true,
+          "teleportAvailable": true,
+          "reason": "SUPPORTED",
+          "minFarmLevel": 165,
+          "eligibleMonsterCount": 5,
           "teleportSafeLanding": null,
-          "paidCostZenyFromBaseLevel67": null,
+          "paidCostZenyFromBaseLevel67": 1650,
           "mapDetail": "/ro/data/map-info/ver_tunn.json"
         },
         {
@@ -1262,13 +1401,13 @@
           "floorDisplayName": "貝魯茲 中央廣場",
           "worldMapSelectable": true,
           "childClassification": "PERSISTENT_NORMAL_CHILD",
-          "farmMapAvailable": false,
-          "teleportAvailable": false,
-          "reason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
-          "minFarmLevel": null,
-          "eligibleMonsterCount": 0,
+          "farmMapAvailable": true,
+          "teleportAvailable": true,
+          "reason": "SUPPORTED",
+          "minFarmLevel": 100,
+          "eligibleMonsterCount": 110,
           "teleportSafeLanding": null,
-          "paidCostZenyFromBaseLevel67": null,
+          "paidCostZenyFromBaseLevel67": 1000,
           "mapDetail": "/ro/data/map-info/verus03.json"
         },
         {
@@ -2240,7 +2379,7 @@
           "teleportAvailable": true,
           "reason": "SUPPORTED",
           "minFarmLevel": 98,
-          "eligibleMonsterCount": 141,
+          "eligibleMonsterCount": 142,
           "teleportSafeLanding": {
             "x": 150,
             "y": 280,
@@ -6272,8 +6411,8 @@
         "y2": 609
       },
       "worldMapSelectable": true,
-      "farmMapAvailable": false,
-      "teleportAvailable": false,
+      "farmMapAvailable": true,
+      "teleportAvailable": true,
       "floorCount": 1,
       "floors": [
         {
@@ -6282,13 +6421,17 @@
           "floorDisplayName": "羅比奧森林",
           "worldMapSelectable": true,
           "childClassification": "PERSISTENT_NORMAL_CHILD",
-          "farmMapAvailable": false,
-          "teleportAvailable": false,
-          "reason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
-          "minFarmLevel": null,
-          "eligibleMonsterCount": 0,
-          "teleportSafeLanding": null,
-          "paidCostZenyFromBaseLevel67": null,
+          "farmMapAvailable": true,
+          "teleportAvailable": true,
+          "reason": "SUPPORTED",
+          "minFarmLevel": 11,
+          "eligibleMonsterCount": 300,
+          "teleportSafeLanding": {
+            "x": 20,
+            "y": 98,
+            "source": "rathena-warp:lasagna:lasagna_in03"
+          },
+          "paidCostZenyFromBaseLevel67": 110,
           "mapDetail": "/ro/data/map-info/lasa_fild02.json"
         }
       ]
@@ -9930,13 +10073,17 @@
           "floorDisplayName": "亡者國都 尼芙菲姆",
           "worldMapSelectable": true,
           "childClassification": "PERSISTENT_NORMAL_CHILD",
-          "farmMapAvailable": false,
-          "teleportAvailable": false,
-          "reason": "MAP_ACCESS_RESTRICTED",
-          "minFarmLevel": null,
-          "eligibleMonsterCount": 0,
-          "teleportSafeLanding": null,
-          "paidCostZenyFromBaseLevel67": null,
+          "farmMapAvailable": true,
+          "teleportAvailable": true,
+          "reason": "SUPPORTED",
+          "minFarmLevel": 100,
+          "eligibleMonsterCount": 113,
+          "teleportSafeLanding": {
+            "x": 20,
+            "y": 153,
+            "source": "rathena-warp:nif_fild02:nwarp9"
+          },
+          "paidCostZenyFromBaseLevel67": 1000,
           "mapDetail": "/ro/data/map-info/niflheim.json"
         },
         {
@@ -10744,8 +10891,8 @@
         "y2": 875
       },
       "worldMapSelectable": true,
-      "farmMapAvailable": false,
-      "teleportAvailable": false,
+      "farmMapAvailable": true,
+      "teleportAvailable": true,
       "floorCount": 1,
       "floors": [
         {
@@ -10754,13 +10901,17 @@
           "floorDisplayName": "羅比奧平原崗亭",
           "worldMapSelectable": true,
           "childClassification": "PERSISTENT_NORMAL_CHILD",
-          "farmMapAvailable": false,
-          "teleportAvailable": false,
-          "reason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
-          "minFarmLevel": null,
-          "eligibleMonsterCount": 0,
-          "teleportSafeLanding": null,
-          "paidCostZenyFromBaseLevel67": null,
+          "farmMapAvailable": true,
+          "teleportAvailable": true,
+          "reason": "SUPPORTED",
+          "minFarmLevel": 1,
+          "eligibleMonsterCount": 240,
+          "teleportSafeLanding": {
+            "x": 131,
+            "y": 378,
+            "source": "rathena-warp:lasagna:lasagna_out01"
+          },
+          "paidCostZenyFromBaseLevel67": 10,
           "mapDetail": "/ro/data/map-info/lasa_fild01.json"
         }
       ]
@@ -11163,7 +11314,7 @@
           "childClassification": "PERSISTENT_NORMAL_CHILD",
           "farmMapAvailable": false,
           "teleportAvailable": false,
-          "reason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
+          "reason": "MAP_ACCESS_RESTRICTED",
           "minFarmLevel": null,
           "eligibleMonsterCount": 0,
           "teleportSafeLanding": null,
@@ -11178,7 +11329,7 @@
           "childClassification": "PERSISTENT_NORMAL_CHILD",
           "farmMapAvailable": false,
           "teleportAvailable": false,
-          "reason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
+          "reason": "MAP_ACCESS_RESTRICTED",
           "minFarmLevel": null,
           "eligibleMonsterCount": 0,
           "teleportSafeLanding": null,
@@ -11193,7 +11344,7 @@
           "childClassification": "PERSISTENT_NORMAL_CHILD",
           "farmMapAvailable": false,
           "teleportAvailable": false,
-          "reason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
+          "reason": "MAP_ACCESS_RESTRICTED",
           "minFarmLevel": null,
           "eligibleMonsterCount": 0,
           "teleportSafeLanding": null,
@@ -14587,7 +14738,7 @@
           "teleportAvailable": true,
           "reason": "SUPPORTED",
           "minFarmLevel": 90,
-          "eligibleMonsterCount": 100,
+          "eligibleMonsterCount": 101,
           "teleportSafeLanding": {
             "x": 132,
             "y": 189,
@@ -14621,13 +14772,13 @@
           "floorDisplayName": "地下 沼澤地帶",
           "worldMapSelectable": true,
           "childClassification": "PERSISTENT_NORMAL_CHILD",
-          "farmMapAvailable": false,
-          "teleportAvailable": false,
-          "reason": "NO_SAFE_LANDING",
-          "minFarmLevel": null,
-          "eligibleMonsterCount": 0,
+          "farmMapAvailable": true,
+          "teleportAvailable": true,
+          "reason": "SUPPORTED",
+          "minFarmLevel": 90,
+          "eligibleMonsterCount": 12,
           "teleportSafeLanding": null,
-          "paidCostZenyFromBaseLevel67": null,
+          "paidCostZenyFromBaseLevel67": 900,
           "mapDetail": "/ro/data/map-info/tur_dun05.json"
         }
       ]
