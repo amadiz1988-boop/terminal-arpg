@@ -1,5 +1,10 @@
 # 目前狀態
 
+## 2026-09-26 F V15 f77 Production 死亡返回阻擋
+
+- 同一 F lease 已受控套用 013 `runtime_phase` 擴容並部署 Native `f77df625`；新 map-server 健康且 ProcDump 綁定，原事故 dump 完整，沒有新 dump 或欄位長度寫入錯誤。Production Web 仍為 `1346bd05`。
+- 一般 TEST_PLAYER 150105、Lv6、group 0 在 `moc_fild12` 取得真實 `AUTO_FARM_HIT`，死亡後由 rAthena 回到 Morocc；死亡維護在 `DEATH_RETURN_INVALID_CONTEXT` 中止，未返圖。Native 來源的 Morocc town-service 缺口是首個斷點。正常 Player `stop_farm` 已確認並清除 death-return 包；最終 Morocc `PERSISTENT_IDLE`。五圖、Settings、Supply／Store／Sell 與最終推廣均停止在此關。證據見 [f77 Production 死亡返回阻擋](project-control/m1-v15-f77-production-death-return-blocker-2026-09-26.md)。
+
 ## 2026-09-26 F V15 Native 指令契約交付修正
 
 - Production Native 執行檔為 `668bb9db` 候選，Web `1346bd05` 為同 lease 的 `CANDIDATE_ACTIVE`。Morocc 一般玩家城鎮移動已確認；修正前 `set_saved_town` 因 Production 契約 SHA-256 `C983A78B...` 拒絕 Web 傳入的 `saveX/saveY`。
