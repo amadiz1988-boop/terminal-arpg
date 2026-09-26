@@ -34,7 +34,7 @@ try {
   assert.equal(index.worldMap.regions.length, 249);
   assert.equal(visible.size, 360);
   assert.equal(files.length, Object.keys(index.maps).length + 1);
-  assert.equal(Object.values(index.maps).filter((map) => map.farmSelectionAvailable).length, 251);
+  assert.equal(Object.values(index.maps).filter((map) => map.farmSelectionAvailable).length, 274);
   for (const [mapId, map] of Object.entries(index.maps)) {
     const farm = map.farmSelectionAvailable === true;
     assert.equal(map.availableForAfk, farm, mapId);

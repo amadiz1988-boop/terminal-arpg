@@ -110,6 +110,7 @@ import {
   evaluateFarmMapSelection,
   indexFarmMapAvailability,
 } from './persistent-agent/standard-farm-map-availability.mjs';
+import { buildPlayerWorldMapProjection } from './persistent-agent/player-world-map-projection.mjs';
 import {
   SUPPORT_SESSION_CREATED_FROM,
   SUPPORT_SESSION_MODE,
@@ -459,6 +460,7 @@ const standardFarmMapAvailability = indexFarmMapAvailability(
 assertSpecialTransportHoldSet(standardFarmMapRegistry);
 let worldMapTeleportCatalog = null;
 let worldMapTownFlagMaps = null;
+let playerWorldMapProjection = null;
 
 // W4: physical warp topology of the LIVE rAthena map server, used only to
 // resolve a Web-selected SERVER_AGENT destination into an explicit route. The
@@ -488,11 +490,15 @@ worldMapTownFlagMaps = new Set([
   ...parseTownMapFlags(await readFile(join(rAthenaRuntimeRoot,
     'npc/re/mapflag/town.txt'), 'utf8').catch(() => '')),
 ]);
+const worldMapSourceIndex = JSON.parse(await readFile(join(root,
+  'ops/ro-stack/persistent-agent/world-map-teleport-source.json'), 'utf8'));
+const worldMapMapCache = await loadRathenaMapCache();
+const worldMapNames = JSON.parse(await readFile(join(publicRoot,
+  'ro/data/map-names.json'), 'utf8')).entries;
 worldMapTeleportCatalog = await buildWorldMapTeleportCatalog({
   mapInfo: mapRoutingIndex,
-  sourceIndex: JSON.parse(await readFile(join(root,
-    'ops/ro-stack/persistent-agent/world-map-teleport-source.json'), 'utf8')),
-  mapCache: await loadRathenaMapCache(),
+  sourceIndex: worldMapSourceIndex,
+  mapCache: worldMapMapCache,
   graph: await serverAgentWarpGraph(),
   publicRoot,
   townFlagMaps: worldMapTownFlagMaps,
@@ -504,8 +510,17 @@ worldMapTeleportCatalog = await buildWorldMapTeleportCatalog({
   ].map(async (path) => [...parseBlockedWorldMapFlags(
     await readFile(join(rAthenaRuntimeRoot, path), 'utf8').catch(() => ''),
   )]))).flat()),
-  mapNames: JSON.parse(await readFile(join(publicRoot,
-    'ro/data/map-names.json'), 'utf8')).entries,
+  mapNames: worldMapNames,
+});
+playerWorldMapProjection = buildPlayerWorldMapProjection({
+  mapInfo: mapRoutingIndex, catalog: worldMapTeleportCatalog,
+  mapCache: worldMapMapCache, townFlagMaps: worldMapTownFlagMaps,
+  sourceIndex: worldMapSourceIndex, mapNames: worldMapNames,
+  graph: await serverAgentWarpGraph(),
+  savedPointSources: await Promise.all([
+    'npc/kafras/kafras.txt', 'npc/re/kafras/kafras.txt',
+  ].map(async (path) => ({ path, text: await readFile(join(rAthenaRuntimeRoot,
+    path), 'utf8').catch(() => '') }))),
 });
 
 // Supply uses the rAthena save point for world movement and keeps the existing
@@ -531,7 +546,9 @@ function farmMapEligibility(mapId) {
 async function playerWorldMapAvailability(account) {
   const charId = Number(account.characterId);
   if (!Number.isSafeInteger(charId) || charId <= 0)
-    return { maps: [], towns: [], player: null, cooldownSeconds: 60 };
+    return { maps: [], towns: [], worldMap: playerWorldMapProjection.worldMap,
+      destinationList: playerWorldMapProjection.destinationList,
+      player: null, cooldownSeconds: 60 };
   const [character, live] = await Promise.all([
     sql(`SELECT c.base_level,c.zeny,COALESCE(r.value,0),c.save_map,c.save_x,c.save_y FROM \`char\` c LEFT JOIN char_reg_num r ON r.char_id=c.char_id AND r.\`key\`='world_teleport_available_at' AND r.\`index\`=0 WHERE c.char_id=${charId} AND c.account_id=${Number(account.accountId)} LIMIT 1;`),
     readPersistentAgentLiveStatusView(charId),
@@ -542,22 +559,32 @@ async function playerWorldMapAvailability(account) {
   const currentMap = live?.fresh ? String(live.map ?? '') : null;
   const availableAt = Number(availableText) || 0;
   const nowSeconds = Math.floor(Date.now() / 1000);
-  const currentIsTown = worldMapTownFlagMaps.has(currentMap);
-  const savedTown = worldMapTeleportCatalog.get(savedMap)?.kind === 'town'
-    ? { map: savedMap, name: worldMapTeleportCatalog.get(savedMap).name,
+  const currentIsTown = worldMapTownFlagMaps.has(currentMap) ||
+    playerWorldMapProjection.townRows.has(currentMap);
+  const savedTownRow = playerWorldMapProjection.townRows.get(savedMap);
+  const savedTown = savedTownRow &&
+      (worldMapTownFlagMaps.has(savedMap) ||
+        savedTownRow.saveDestinations?.some((point) =>
+          Number(savedX) === point.x && Number(savedY) === point.y))
+    ? { map: savedMap, name: savedTownRow.name,
       x: Number(savedX), y: Number(savedY) } : null;
-  const rows = [...worldMapTeleportCatalog.values()].map((row) => {
-    if (row.kind === 'farm' && !row.farmSelectionAvailable)
-      return { ...row, buttonState: 'UNAVAILABLE_MAP', cost: null };
+  const rows = [...playerWorldMapProjection.farmRows.values(),
+    ...playerWorldMapProjection.townRows.values()].map((row) => {
+    const playerRow = { map: row.map, name: row.name, kind: row.kind,
+      locationClass: row.locationClass ?? null,
+      farmable: row.kind === 'farm',
+      farmSelectionAvailable: row.kind === 'farm',
+      minLevel: row.minLevel,
+      ...(row.kind === 'town' ? { savedPoint: row.savedPoint } : {}) };
     if (!currentMap || !Number.isSafeInteger(baseLevel) || !Number.isSafeInteger(zeny))
-      return { ...row, buttonState: 'PLAYER_STATE_UNAVAILABLE', cost: null };
+      return { ...playerRow, buttonState: 'PLAYER_STATE_UNAVAILABLE', cost: null };
     const decision = worldMapTeleportDecision({ kind: row.kind,
       currentMap, targetMap: row.map, baseLevel, minLevel: row.minLevel,
       zeny, currentIsTown, availableAt, nowSeconds });
     const sameMapIdleFarmStart = row.kind === 'farm' &&
       decision.reason === 'ALREADY_ON_TARGET_MAP' &&
       live?.agentMode === 'PERSISTENT_IDLE';
-    return { ...row, buttonState: sameMapIdleFarmStart ? 'AVAILABLE' : decision.reason,
+    return { ...playerRow, buttonState: sameMapIdleFarmStart ? 'AVAILABLE' : decision.reason,
       cost: decision.cost ?? (row.kind === 'town' ? 0 : baseLevel <= 66 ? 0 : row.minLevel * 10),
       cooldownRemaining: decision.cooldownRemaining ?? 0,
       cooldownSeconds: decision.cooldownSeconds ?? 0,
@@ -566,7 +593,12 @@ async function playerWorldMapAvailability(account) {
   return { maps: rows.filter((row) => row.kind === 'farm'),
     towns: rows.filter((row) => row.kind === 'town'),
     player: { baseLevel, zeny, currentMap, phase: live?.fresh ? live.phase : null,
-      availableAt, savedTown, savedTownSetupRequired: !savedTown }, cooldownSeconds: 60 };
+      currentX: live?.fresh ? Number(live.x) : null,
+      currentY: live?.fresh ? Number(live.y) : null,
+      availableAt, savedTown, savedTownSetupRequired: !savedTown },
+    worldMap: playerWorldMapProjection.worldMap,
+    destinationList: playerWorldMapProjection.destinationList,
+    cooldownSeconds: 60 };
 }
 const webExperienceRegistry = JSON.parse(
   await readFile(webExperienceRegistryPath, 'utf8'),
@@ -3413,7 +3445,9 @@ async function queuePlayerWorldMapTeleport(account, controller, requestedMapId,
     throw new HttpError(409, 'farm_relocation_in_progress');
   relocationRequests.add(charId);
   try {
-    const row = worldMapTeleportCatalog.get(mapId);
+    const row = kind === 'town'
+      ? playerWorldMapProjection.townRows.get(mapId)
+      : playerWorldMapProjection.farmRows.get(mapId);
     if (!row || row.kind !== kind ||
         (kind === 'farm' && !row.farmSelectionAvailable) ||
         (kind === 'town' && !row.townTeleportAvailable))
@@ -9728,9 +9762,9 @@ async function loadRathenaMapCache() {
     rathenaMapCachePromise = (async () => {
       const maps = new Map();
       for (const path of [
-        join(runtime, 'rathena', 'db', 'import', 'map_cache.dat'),
-        join(runtime, 'rathena', 'db', 're', 'map_cache.dat'),
-        join(runtime, 'rathena', 'db', 'map_cache.dat'),
+        join(rAthenaRuntimeRoot, 'db', 'import', 'map_cache.dat'),
+        join(rAthenaRuntimeRoot, 'db', 're', 'map_cache.dat'),
+        join(rAthenaRuntimeRoot, 'db', 'map_cache.dat'),
       ]) {
         try {
           for (const [name, map] of parseRathenaMapCache(
@@ -12139,7 +12173,7 @@ async function handleDashboardRequest(request, response) {
         return json(response, 409, { error: '請先建立角色' });
       const body = await requestBody(request);
       const mapId = String(body.mapId ?? '');
-      const town = worldMapTeleportCatalog.get(mapId);
+      const town = playerWorldMapProjection.townRows.get(mapId);
       if (!town || town.kind !== 'town' || !town.townTeleportAvailable)
         throw new HttpError(409, 'TOWN_DESTINATION_REQUIRED');
       const controller = await readCharacterControllerStatus(account,
@@ -12151,7 +12185,8 @@ async function handleDashboardRequest(request, response) {
         throw new HttpError(409, 'SAVED_TOWN_REQUIRES_PRESENCE');
       const command = await queueOwnershipCommand(account, Number(account.characterId),
         { action: 'set_saved_town', expectedRevision: Number(controller.revision) },
-        { targetMap: mapId });
+        { targetMap: mapId, ...(town.kafraSaveService
+          ? { saveX: town.savedPoint.x, saveY: town.savedPoint.y } : {}) });
       return json(response, 202, { command, targetMap: mapId });
     }
     if (url.pathname === '/api/job-change' && request.method === 'POST') {

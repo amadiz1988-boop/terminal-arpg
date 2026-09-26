@@ -55,10 +55,12 @@ assert.match(nativeSource, /if \(runtime\.supply_home_required\)\s*return "SUPPL
 const html = await readFile(join(root, 'ops/ro-stack/dashboard/index.html'), 'utf8');
 const app = await readFile(join(root, 'ops/ro-stack/dashboard/app.js'), 'utf8');
 const dashboard = await readFile(join(root, 'ops/ro-stack/dashboard.mjs'), 'utf8');
-for (const id of ['worldMapTownLabels', 'worldMapSavedTown', 'worldMapSavedTownHint', 'worldMapConfirm',
+for (const id of ['worldMapCategoryTabs', 'worldMapRegionIndex',
+  'worldMapSavedTown', 'worldMapSavedTownHint', 'worldMapConfirm',
   'worldMapConfirmCancel', 'worldMapConfirmSubmit', 'worldMapArrivalToast'])
   assert.ok(html.includes(`id="${id}"`), id);
-assert.match(app, /button\.onclick = \(event\) => \{[\s\S]*?selectTownWorldMap\(town\.map\)/);
+assert.doesNotMatch(html, /worldMapTownLabels|world-map-town-labels/);
+assert.match(app, /selectedWorldMapCategory === 'towns'\) selectTownWorldMap\(row\.map\)/);
 assert.match(app, /await waitForWorldMapAuthority\(\(state\) =>\s*state\.player\?\.currentMap === mapId\)/);
 assert.match(app, /worldMapTravelPresentation\.preflightAccepted\(/);
 assert.match(app, /playCue: playTravelCue/);

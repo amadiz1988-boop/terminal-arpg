@@ -3,13 +3,279 @@
   "name": "龍巢穴3樓",
   "category": "SERVICE_ONLY",
   "dungeon": null,
-  "totalMonsters": 0,
-  "normalMonsterCount": 0,
-  "levelRange": null,
-  "fullLevelRange": null,
+  "totalMonsters": 170,
+  "normalMonsterCount": 170,
+  "levelRange": {
+    "min": 148,
+    "max": 150
+  },
+  "fullLevelRange": {
+    "min": 148,
+    "max": 150
+  },
   "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
-  "primaryMonsters": [],
+  "primaryMonsters": [
+    {
+      "id": 3504,
+      "name": "特種巴西利斯克",
+      "level": 148,
+      "count": 110
+    },
+    {
+      "id": 3507,
+      "name": "果實食人蜘蛛",
+      "level": 150,
+      "count": 60
+    }
+  ],
   "resourceMonsters": [],
   "bossMonsters": [],
-  "monsters": []
+  "monsters": [
+    {
+      "id": 3504,
+      "aegisName": "DR_BASILISK3",
+      "name": "特種巴西利斯克",
+      "count": 110,
+      "respawnMinMs": 0,
+      "respawnMaxMs": 0,
+      "level": 148,
+      "hp": 216036,
+      "baseExp": 12815,
+      "jobExp": 16217,
+      "attackMin": 1654,
+      "attackMax": 1804,
+      "defense": 126,
+      "magicDefense": 80,
+      "size": "中型",
+      "race": "動物",
+      "element": "地 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/custom/lasagna/lasa_dun.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 607,
+          "aegisName": "Yggdrasilberry",
+          "name": "天地樹果實",
+          "ratePerTenThousand": 80,
+          "type": "恢復道具",
+          "weight": 30,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "天地樹的果實, 據說食用後精神會為之一振, 感覺活力滿滿。可將使用者的HP和SP全數恢復。\n再使用等候時間:  5秒\n重量: 30"
+        },
+        {
+          "itemId": 603,
+          "aegisName": "Old_Blue_Box",
+          "name": "神秘箱子",
+          "ratePerTenThousand": 80,
+          "type": "消耗品",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "會散發出神秘藍色光芒的舊箱子,打開的話好像有什麼東西會跑出來似的。\n\n重量: 20"
+        },
+        {
+          "itemId": 984,
+          "aegisName": "Oridecon",
+          "name": "神之金屬",
+          "ratePerTenThousand": 100,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "被稱為神之金屬的神秘金屬,比什麼東西都堅硬,用它來製造武器可以得到相當強大的破壞力,可以強化等級三和等級四的武器。\n\n重量: 20"
+        },
+        {
+          "itemId": 6224,
+          "aegisName": "Bradium",
+          "name": "鈽鐳礦石",
+          "ratePerTenThousand": 100,
+          "type": "其他",
+          "weight": 15,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在灰暗的塵世所發現的堅硬金屬之一, 雖硬度過高不易精練, 但經過不斷的研究後最近可用於武器強化上。\n精煉失敗時, 精煉度降低或是裝備損壞。\n重量: 15"
+        },
+        {
+          "itemId": 22985,
+          "aegisName": "Dr_Life_Potion_02",
+          "name": "羅勒",
+          "ratePerTenThousand": 500,
+          "type": "恢復道具",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在巴西利斯克頭上生長的神奇草。\n對巴西利斯克之毒具有解毒效果, 有一點辣味也可入菜。\n3分內每10秒MSP恢復5\n重量: 1"
+        },
+        {
+          "itemId": 1697,
+          "aegisName": "Ex_Y_Model_Foxtail",
+          "name": "精工黃色狐尾草模型",
+          "ratePerTenThousand": 1,
+          "type": "武器",
+          "weight": 30,
+          "attack": 270,
+          "defense": 0,
+          "slots": 1,
+          "description": "製作非常精巧的黃色狐尾草模型。\n遠程物理 攻擊力+9%, MHP+7%。\n精煉值每+2時, 遠程物理 攻擊力+1%, MSP+20。\n[小雞啄擊]技能使用後有機率對自己自動念咒[活蝦] 1級, [活蝦]技能習得時以習得之等級觸發\n- 喵族武器專屬能力值 -\n精煉+7時, 武器的基本屬性ATK&MATK+40%。\n自精煉+7起精煉每+1時, 武器的基本屬性ATK&MATK再+20%。\n(最多精煉+10)\n系列: 單手杖 攻擊: 270\n重量: 30\n武器等級: 4\n要求等級: 175\n裝備: 喵族"
+        },
+        {
+          "itemId": 22085,
+          "aegisName": "Doram_Ele_Shoes",
+          "name": "喵族優雅鞋子",
+          "ratePerTenThousand": 10,
+          "type": "防具",
+          "weight": 70,
+          "attack": 0,
+          "defense": 35,
+          "slots": 1,
+          "description": "依喵族的小腳而訂做的專屬鞋子。\nMHP+10%, MSP+5%。\n精煉值每+2時, MHP+100, MSP+20\n精煉值+9以上時, \n[跳躍]技能使用後 SP 消耗5。\n系列: 鞋類 防禦: 35\n重量: 70\n要求等級: 175\n裝備: 喵族"
+        },
+        {
+          "itemId": 4661,
+          "aegisName": "Basilisk2_Card",
+          "name": "突擊巴西利斯克卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "遭受中型、大型怪的物理, 魔法傷害-20%。\n遭受小型怪的物理, 魔法傷害+15%。\n系列: 卡片\n裝備: 盾牌\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 3507,
+      "aegisName": "DR_POM_SPIDER",
+      "name": "果實食人蜘蛛",
+      "count": 60,
+      "respawnMinMs": 0,
+      "respawnMaxMs": 0,
+      "level": 150,
+      "hp": 156532,
+      "baseExp": 8809,
+      "jobExp": 8954,
+      "attackMin": 1137,
+      "attackMax": 258,
+      "defense": 240,
+      "magicDefense": 115,
+      "size": "中型",
+      "race": "昆蟲",
+      "element": "地 3",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/custom/lasagna/lasa_dun.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 12573,
+          "aegisName": "Fruit_Basket",
+          "name": "水果禮盒",
+          "ratePerTenThousand": 250,
+          "type": "消耗品",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "裝著各式好吃的水果禮盒, 也許還有彩虹橋的特殊水果。\n重量: 5"
+        },
+        {
+          "itemId": 25728,
+          "aegisName": "Shadowdecon_Ore",
+          "name": "影子神秘原石",
+          "ratePerTenThousand": 30,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以打造影子神秘金屬的原石, 可以提煉用於製作特殊裝備的影子神祕金屬。\n\n重量 : 1"
+        },
+        {
+          "itemId": 1654,
+          "aegisName": "Mental_Stick",
+          "name": "心靈智慧魔杖",
+          "ratePerTenThousand": 1,
+          "type": "武器",
+          "weight": 50,
+          "attack": 40,
+          "defense": 0,
+          "slots": 1,
+          "description": "將元素的力量轉換為超自然能源的魔仗。\n超自然波的變動詠唱-3秒, 超自然波的SP消耗量增加60。\n6精煉開始, 每增加精煉時該技能的攻擊力+2, MHP -2%。\n解除裝備時SP -100.\nMATK+170\n系列: 單手杖 攻擊: 40\n重量: 50\n武器等級: 3\n要求等級: 102\n裝備: 妖術師"
+        },
+        {
+          "itemId": 607,
+          "aegisName": "Yggdrasilberry",
+          "name": "天地樹果實",
+          "ratePerTenThousand": 80,
+          "type": "恢復道具",
+          "weight": 30,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "天地樹的果實, 據說食用後精神會為之一振, 感覺活力滿滿。可將使用者的HP和SP全數恢復。\n再使用等候時間:  5秒\n重量: 30"
+        },
+        {
+          "itemId": 617,
+          "aegisName": "Old_Violet_Box",
+          "name": "神秘紫箱",
+          "ratePerTenThousand": 80,
+          "type": "消耗品",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "透著神秘的紫色光芒且年代久遠的老舊箱子。打開來看的話好像有什麼東西會跑出來的樣子。\n\n重量: 20"
+        },
+        {
+          "itemId": 15156,
+          "aegisName": "Doram_Ele_Suit",
+          "name": "喵族優雅外套",
+          "ratePerTenThousand": 10,
+          "type": "防具",
+          "weight": 90,
+          "attack": 0,
+          "defense": 120,
+          "slots": 1,
+          "description": "愛乾淨的喵族所喜愛的優雅輕裝。\nMHP+15%, MSP+15%。\n依精煉值而 DEX+1, INT+1。\n精煉+9以上時SP 消耗量 -5%。\n搭配喵族優雅外套, 喵族優雅鞋子, 喵族優雅斗篷時, \nMHP+4000, 詠唱不會中斷。\n固定詠唱 -25%。(依外套, 鞋子, 斗篷的精煉值總和固定詠唱會再減少)\n系列: 鎧甲 防禦: 120\n重量: 90\n要求等級: 175\n裝備: 喵族"
+        },
+        {
+          "itemId": 1693,
+          "aegisName": "Magical_Y_Foxtail",
+          "name": "魔力黃色狐尾草手杖",
+          "ratePerTenThousand": 1,
+          "type": "武器",
+          "weight": 70,
+          "attack": 140,
+          "defense": 0,
+          "slots": 1,
+          "description": "坐著蜻蜓變黃成熟的狐尾草。\nMATK+280, 精煉值每2 MATK+3%。\n[活蝦]技能使用後有機率對自己觸發自動念咒[捲甲蟲暴衝] 1級, [捲甲蟲暴衝]技能習得時以習得之等級觸發。\n[獼猴桃梗槍]技能使用後有機率對自己觸發自動念咒[活蝦] 1級, [活蝦]技能習得時以習得之等級觸發。\n- 喵族武器專屬能力值 -\n精煉+7時, 武器的基本屬性ATK&MATK+40%。\n自精煉+7起精煉每+1時, 武器的基本屬性ATK&MATK再+20%。\n(最多精煉+10)\n系列: 單手杖 攻擊: 140\n重量: 70\n武器等級: 4\n要求等級: 175\n裝備: 喵族"
+        },
+        {
+          "itemId": 4670,
+          "aegisName": "Fru_Pom_Spider_Card",
+          "name": "果實食人蜘蛛卡片",
+          "ratePerTenThousand": 10,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "給予火屬性怪物的魔法攻擊力+3%。\n精煉+7以上時,\n給予火屬性怪物的魔法攻擊力+5%。\n精煉+9以上時,\n給予火屬性怪物的魔法攻擊力+7%。\n系列 : 卡片\n裝備 : 武器\n重量 : 1"
+        }
+      ]
+    }
+  ]
 }

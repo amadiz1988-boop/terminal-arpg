@@ -3,13 +3,279 @@
   "name": "龍巢穴2樓",
   "category": "SERVICE_ONLY",
   "dungeon": null,
-  "totalMonsters": 0,
-  "normalMonsterCount": 0,
-  "levelRange": null,
-  "fullLevelRange": null,
+  "totalMonsters": 90,
+  "normalMonsterCount": 90,
+  "levelRange": {
+    "min": 140,
+    "max": 144
+  },
+  "fullLevelRange": {
+    "min": 140,
+    "max": 144
+  },
   "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
-  "primaryMonsters": [],
+  "primaryMonsters": [
+    {
+      "id": 3503,
+      "name": "突擊巴西利斯克",
+      "level": 140,
+      "count": 60
+    },
+    {
+      "id": 3506,
+      "name": "叢林曼陀羅魔花",
+      "level": 144,
+      "count": 30
+    }
+  ],
   "resourceMonsters": [],
   "bossMonsters": [],
-  "monsters": []
+  "monsters": [
+    {
+      "id": 3503,
+      "aegisName": "DR_BASILISK2",
+      "name": "突擊巴西利斯克",
+      "count": 60,
+      "respawnMinMs": 0,
+      "respawnMaxMs": 0,
+      "level": 140,
+      "hp": 180030,
+      "baseExp": 10679,
+      "jobExp": 13514,
+      "attackMin": 1379,
+      "attackMax": 1504,
+      "defense": 105,
+      "magicDefense": 80,
+      "size": "中型",
+      "race": "動物",
+      "element": "地 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/custom/lasagna/lasa_dun.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 607,
+          "aegisName": "Yggdrasilberry",
+          "name": "天地樹果實",
+          "ratePerTenThousand": 80,
+          "type": "恢復道具",
+          "weight": 30,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "天地樹的果實, 據說食用後精神會為之一振, 感覺活力滿滿。可將使用者的HP和SP全數恢復。\n再使用等候時間:  5秒\n重量: 30"
+        },
+        {
+          "itemId": 617,
+          "aegisName": "Old_Violet_Box",
+          "name": "神秘紫箱",
+          "ratePerTenThousand": 80,
+          "type": "消耗品",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "透著神秘的紫色光芒且年代久遠的老舊箱子。打開來看的話好像有什麼東西會跑出來的樣子。\n\n重量: 20"
+        },
+        {
+          "itemId": 985,
+          "aegisName": "Elunium",
+          "name": "鋁",
+          "ratePerTenThousand": 100,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "很輕且沒有毒性的金屬。常被拿來作成盔甲,以此製成的所有防具將變成更強。\n\n重量: 20"
+        },
+        {
+          "itemId": 6223,
+          "aegisName": "Carnium",
+          "name": "鈣礦石",
+          "ratePerTenThousand": 100,
+          "type": "其他",
+          "weight": 15,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "米德加爾特大陸上最堅硬的金屬之一, 由於硬度過高不易精練。\n精煉失敗時, 精煉度降低或是裝備損壞。\n重量: 15"
+        },
+        {
+          "itemId": 22985,
+          "aegisName": "Dr_Life_Potion_02",
+          "name": "羅勒",
+          "ratePerTenThousand": 500,
+          "type": "恢復道具",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在巴西利斯克頭上生長的神奇草。\n對巴西利斯克之毒具有解毒效果, 有一點辣味也可入菜。\n3分內每10秒MSP恢復5\n重量: 1"
+        },
+        {
+          "itemId": 1692,
+          "aegisName": "Magical_Foxtail",
+          "name": "魔力狐尾草手杖",
+          "ratePerTenThousand": 1,
+          "type": "武器",
+          "weight": 60,
+          "attack": 120,
+          "defense": 0,
+          "slots": 2,
+          "description": "感受到蜻蜓和狐尾草奇妙魔力的草。\nMATK+260. MSP+100\n精煉值每+2時, MATK+2%, MSP+1%。\n- 喵族武器專屬能力值 -\n精煉+7時, 武器的基本屬性ATK&MATK+40%。\n自精煉+7起精煉每+1時, 武器的基本屬性ATK&MATK再+20%。\n(最多精煉+10)\n系列: 單手杖 攻擊: 120\n重量: 60\n武器等級: 3\n要求等級: 140\n裝備: 喵族"
+        },
+        {
+          "itemId": 1696,
+          "aegisName": "Ex_Model_Foxtail",
+          "name": "精工狐尾草模型",
+          "ratePerTenThousand": 1,
+          "type": "武器",
+          "weight": 30,
+          "attack": 240,
+          "defense": 0,
+          "slots": 2,
+          "description": "製作非常精工的狐尾草模型。\n遠程物理 攻擊力+8%, MHP+5%。\n精煉值每+2時, DEX+3, MSP+15。\n- 喵族武器專屬能力值 -\n精煉+7時, 武器的基本屬性ATK&MATK+40%。\n自精煉+7起精煉每+1時, 武器的基本屬性ATK&MATK再+20%。\n(最多精煉+10)\n系列: 單手杖 攻擊: 240\n重量: 30\n武器等級: 3\n要求等級: 140\n裝備: 喵族"
+        },
+        {
+          "itemId": 4661,
+          "aegisName": "Basilisk2_Card",
+          "name": "突擊巴西利斯克卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "遭受中型、大型怪的物理, 魔法傷害-20%。\n遭受小型怪的物理, 魔法傷害+15%。\n系列: 卡片\n裝備: 盾牌\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 3506,
+      "aegisName": "DR_MANDRAGORA",
+      "name": "叢林曼陀羅魔花",
+      "count": 30,
+      "respawnMinMs": 0,
+      "respawnMaxMs": 0,
+      "level": 144,
+      "hp": 190570,
+      "baseExp": 11100,
+      "jobExp": 14200,
+      "attackMin": 1840,
+      "attackMax": 1477,
+      "defense": 113,
+      "magicDefense": 62,
+      "size": "中型",
+      "race": "植物",
+      "element": "地 3",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/custom/lasagna/lasa_dun.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 993,
+          "aegisName": "Yellow_Live",
+          "name": "地靈礦石",
+          "ratePerTenThousand": 60,
+          "type": "其他",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "綠色的小礦石塊。擁有地屬性,提煉後可以製作出地靈原石。\n\n重量: 5"
+        },
+        {
+          "itemId": 905,
+          "aegisName": "Stem",
+          "name": "植物梗",
+          "ratePerTenThousand": 8000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "植物細長的梗,可以當做藥材,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 617,
+          "aegisName": "Old_Violet_Box",
+          "name": "神秘紫箱",
+          "ratePerTenThousand": 80,
+          "type": "消耗品",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "透著神秘的紫色光芒且年代久遠的老舊箱子。打開來看的話好像有什麼東西會跑出來的樣子。\n\n重量: 20"
+        },
+        {
+          "itemId": 985,
+          "aegisName": "Elunium",
+          "name": "鋁",
+          "ratePerTenThousand": 100,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "很輕且沒有毒性的金屬。常被拿來作成盔甲,以此製成的所有防具將變成更強。\n\n重量: 20"
+        },
+        {
+          "itemId": 984,
+          "aegisName": "Oridecon",
+          "name": "神之金屬",
+          "ratePerTenThousand": 100,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "被稱為神之金屬的神秘金屬,比什麼東西都堅硬,用它來製造武器可以得到相當強大的破壞力,可以強化等級三和等級四的武器。\n\n重量: 20"
+        },
+        {
+          "itemId": 706,
+          "aegisName": "Four_Leaf_Clover",
+          "name": "四葉幸運草",
+          "ratePerTenThousand": 1,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "有著四片葉子的幸運草,傳說它會為人帶來好運。\n\n重量: 1"
+        },
+        {
+          "itemId": 20790,
+          "aegisName": "Doram_Ele_Cape",
+          "name": "喵族優雅斗篷",
+          "ratePerTenThousand": 1,
+          "type": "防具",
+          "weight": 50,
+          "attack": 0,
+          "defense": 30,
+          "slots": 1,
+          "description": "喵族所喜愛高級紋路的斗篷。\nFLEE+10、無屬性抗性5%。\n精煉值每+2時, 完全迴避+1, INT+1, DEX+1, LUK+1。\n系列 : 披肩 防禦 : 30\n重量 : 50\n要求等級 : 175\n裝備 : 喵族"
+        },
+        {
+          "itemId": 4669,
+          "aegisName": "Ju_Mandragora_Card",
+          "name": "叢林曼陀羅魔花卡片",
+          "ratePerTenThousand": 10,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "給予風屬性怪物的魔法攻擊力+3%。\n精煉+7以上時,\n給予風屬性怪物的魔法攻擊力+5%。\n精煉+9以上時,\n給予風屬性怪物的魔法攻擊力+7%。\n系列 : 卡片\n裝備 : 武器\n重量 : 1"
+        }
+      ]
+    }
+  ]
 }

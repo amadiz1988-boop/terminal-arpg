@@ -275,8 +275,9 @@ const spawnsByMap = new Map(publicMaps.map((mapId) => [mapId, new Map()]));
 
 for (const [sourcePath, text] of scriptTexts) {
   for (const line of text.split(/\r?\n/)) {
+    // Permanent spawns may omit the area ("map<TAB>monster" or "map,x,y,...").
     const match = line.match(
-      /^([^,\s]+),[^\t]*\tmonster\t[^\t]+\t(\d+),(\d+)(?:,(\d+))?(?:,(\d+))?/,
+      /^([^,\s]+)(?:,[^\t]*)?\tmonster\t[^\t]+\t(\d+),(\d+)(?:,(\d+))?(?:,(\d+))?/,
     );
     if (!match || !publicMapSet.has(match[1])) continue;
     const mapSpawns = spawnsByMap.get(match[1]);

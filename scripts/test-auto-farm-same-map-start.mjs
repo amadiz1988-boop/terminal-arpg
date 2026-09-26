@@ -14,9 +14,9 @@ function scenario(agentMode) {
   const context = {
     pendingRelocations,
     relocationRequests: new Set(),
-    worldMapTeleportCatalog: new Map([['pay_fild04', {
+    playerWorldMapProjection: { farmRows: new Map([['pay_fild04', {
       kind: 'farm', farmSelectionAvailable: true, name: 'Payon Field',
-    }]]),
+    }]]), townRows: new Map() },
     HttpError: class HttpError extends Error {},
     readGrindTarget: async () => ({ mapId: 'pay_fild04' }),
     FARM_MAP_SOURCE: { PLAYER_OVERRIDE: 'PLAYER_OVERRIDE' },

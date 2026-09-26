@@ -3,13 +3,468 @@
   "name": "gw_fild02",
   "category": "QUEST_GATED",
   "dungeon": null,
-  "totalMonsters": 0,
-  "normalMonsterCount": 0,
-  "levelRange": null,
-  "fullLevelRange": null,
+  "totalMonsters": 170,
+  "normalMonsterCount": 170,
+  "levelRange": {
+    "min": 185,
+    "max": 188
+  },
+  "fullLevelRange": {
+    "min": 185,
+    "max": 188
+  },
   "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
-  "primaryMonsters": [],
+  "primaryMonsters": [
+    {
+      "id": 21305,
+      "name": "風滾草波利",
+      "level": 185,
+      "count": 60
+    },
+    {
+      "id": 21304,
+      "name": "灰狼",
+      "level": 187,
+      "count": 35
+    },
+    {
+      "id": 21306,
+      "name": "風火老鷹",
+      "level": 188,
+      "count": 35
+    },
+    {
+      "id": 21307,
+      "name": "幽靈灰狼",
+      "level": 186,
+      "count": 25
+    }
+  ],
   "resourceMonsters": [],
   "bossMonsters": [],
-  "monsters": []
+  "monsters": [
+    {
+      "id": 21303,
+      "aegisName": "EP18_ASHRING",
+      "name": "灰燼波利",
+      "count": 15,
+      "respawnMinMs": 0,
+      "respawnMaxMs": 0,
+      "level": 185,
+      "hp": 2364513,
+      "baseExp": 168894,
+      "jobExp": 118226,
+      "attackMin": 4509,
+      "attackMax": 2220,
+      "defense": 335,
+      "magicDefense": 115,
+      "size": "小型",
+      "race": "無形",
+      "element": "無 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/gw_fild.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 938,
+          "aegisName": "Sticky_Mucus",
+          "name": "粘稠液體",
+          "ratePerTenThousand": 6000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "不知名的黏稠液體,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 6213,
+          "aegisName": "Explosive_Powder",
+          "name": "炸藥粉",
+          "ratePerTenThousand": 100,
+          "type": "其他",
+          "weight": 0.1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "加溫時會爆炸的黑色粉末!火力比火藥更強!\n重量: 0.1"
+        },
+        {
+          "itemId": 25730,
+          "aegisName": "Zelunium_Ore",
+          "name": "鍺金原石",
+          "ratePerTenThousand": 130,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以打造鍺金石的原石, 可以提煉用於製作各類武器的鍺金石。\n\n重量 : 1"
+        },
+        {
+          "itemId": 25728,
+          "aegisName": "Shadowdecon_Ore",
+          "name": "影子神秘原石",
+          "ratePerTenThousand": 130,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以打造影子神秘金屬的原石, 可以提煉用於製作特殊裝備的影子神祕金屬。\n\n重量 : 1"
+        },
+        {
+          "itemId": 300219,
+          "aegisName": "EP18_Ashring_Card",
+          "name": "灰燼波利卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "若裝備武器為單/雙手杖時，暗屬性魔法傷害+10%。\n武器精煉+10以上時，暗屬性魔法傷害再+10%。\n武器精煉+14以上時，暗屬性魔法傷害再+10%。\n系列 : 卡片\n裝備 : 武器\n重量 : 1"
+        }
+      ]
+    },
+    {
+      "id": 21305,
+      "aegisName": "EP18_TUMBLE_RING",
+      "name": "風滾草波利",
+      "count": 60,
+      "respawnMinMs": 0,
+      "respawnMaxMs": 0,
+      "level": 185,
+      "hp": 2361738,
+      "baseExp": 157449,
+      "jobExp": 110214,
+      "attackMin": 4163,
+      "attackMax": 2467,
+      "defense": 281,
+      "magicDefense": 118,
+      "size": "小型",
+      "race": "植物",
+      "element": "毒 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/gw_fild.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 1033,
+          "aegisName": "Root_Of_Maneater",
+          "name": "噬人樹根",
+          "ratePerTenThousand": 5000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "如筋肉或血管般結實的植物的根。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 576,
+          "aegisName": "Prickly_Fruit",
+          "name": "榴槤",
+          "ratePerTenThousand": 150,
+          "type": "恢復道具",
+          "weight": 6,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "有香味的有尖銳凸出物的果子,可恢復少量的HP和SP\n重量: 6"
+        },
+        {
+          "itemId": 711,
+          "aegisName": "Shoot",
+          "name": "芽苗",
+          "ratePerTenThousand": 200,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "剛剛才從這個世上出生的幼小植物,單純無瑕的樣子非常可愛。\n\n重量: 1"
+        },
+        {
+          "itemId": 25730,
+          "aegisName": "Zelunium_Ore",
+          "name": "鍺金原石",
+          "ratePerTenThousand": 130,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以打造鍺金石的原石, 可以提煉用於製作各類武器的鍺金石。\n\n重量 : 1"
+        },
+        {
+          "itemId": 25728,
+          "aegisName": "Shadowdecon_Ore",
+          "name": "影子神秘原石",
+          "ratePerTenThousand": 130,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以打造影子神秘金屬的原石, 可以提煉用於製作特殊裝備的影子神祕金屬。\n\n重量 : 1"
+        },
+        {
+          "itemId": 300221,
+          "aegisName": "EP18_Tumble_Ring_Card",
+          "name": "風滾草波利卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "無/暗屬性魔法傷害+5%，精煉每+2時，無/暗屬性魔法傷害 再+1%。\n系列 : 卡片\n裝備 : 鞋子\n重量 : 1"
+        }
+      ]
+    },
+    {
+      "id": 21307,
+      "aegisName": "EP18_PHANTOM_WOLF",
+      "name": "幽靈灰狼",
+      "count": 25,
+      "respawnMinMs": 0,
+      "respawnMaxMs": 0,
+      "level": 186,
+      "hp": 2383494,
+      "baseExp": 170250,
+      "jobExp": 119175,
+      "attackMin": 5185,
+      "attackMax": 1525,
+      "defense": 456,
+      "magicDefense": 108,
+      "size": "中型",
+      "race": "動物",
+      "element": "念 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/gw_fild.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 1059,
+          "aegisName": "Transparent_Cloth",
+          "name": "透明之布",
+          "ratePerTenThousand": 1250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "透明而且裡面會發光神奇的布塊。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 25730,
+          "aegisName": "Zelunium_Ore",
+          "name": "鍺金原石",
+          "ratePerTenThousand": 130,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以打造鍺金石的原石, 可以提煉用於製作各類武器的鍺金石。\n\n重量 : 1"
+        },
+        {
+          "itemId": 25728,
+          "aegisName": "Shadowdecon_Ore",
+          "name": "影子神秘原石",
+          "ratePerTenThousand": 130,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以打造影子神秘金屬的原石, 可以提煉用於製作特殊裝備的影子神祕金屬。\n\n重量 : 1"
+        },
+        {
+          "itemId": 300223,
+          "aegisName": "EP18_Phantom_Wolf_Card",
+          "name": "幽靈灰狼卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "近距離物理傷害+6%。\n系列 : 卡片\n裝備 : 飾品(右)\n重量 : 1"
+        }
+      ]
+    },
+    {
+      "id": 21304,
+      "aegisName": "EP18_GREY_WOLF",
+      "name": "灰狼",
+      "count": 35,
+      "respawnMinMs": 0,
+      "respawnMaxMs": 0,
+      "level": 187,
+      "hp": 2399581,
+      "baseExp": 171399,
+      "jobExp": 119979,
+      "attackMin": 5610,
+      "attackMax": 997,
+      "defense": 520,
+      "magicDefense": 104,
+      "size": "中型",
+      "race": "動物",
+      "element": "無 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/gw_fild.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 920,
+          "aegisName": "Claw_Of_Wolves",
+          "name": "狼指甲",
+          "ratePerTenThousand": 4000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從狼的腳上剪下來的腳指甲,可向收集品購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 6213,
+          "aegisName": "Explosive_Powder",
+          "name": "炸藥粉",
+          "ratePerTenThousand": 100,
+          "type": "其他",
+          "weight": 0.1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "加溫時會爆炸的黑色粉末!火力比火藥更強!\n重量: 0.1"
+        },
+        {
+          "itemId": 25730,
+          "aegisName": "Zelunium_Ore",
+          "name": "鍺金原石",
+          "ratePerTenThousand": 130,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以打造鍺金石的原石, 可以提煉用於製作各類武器的鍺金石。\n\n重量 : 1"
+        },
+        {
+          "itemId": 25728,
+          "aegisName": "Shadowdecon_Ore",
+          "name": "影子神秘原石",
+          "ratePerTenThousand": 130,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以打造影子神秘金屬的原石, 可以提煉用於製作特殊裝備的影子神祕金屬。\n\n重量 : 1"
+        },
+        {
+          "itemId": 300220,
+          "aegisName": "EP18_Grey_Wolf_Card",
+          "name": "灰狼卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "近距離物理傷害+6%，搭配幽靈灰狼卡片時，近距離物理傷害再+8%。\n系列 : 卡片\n裝備 : 飾品(左)\n重量 : 1"
+        }
+      ]
+    },
+    {
+      "id": 21306,
+      "aegisName": "EP18_FIREWIND_KITE",
+      "name": "風火老鷹",
+      "count": 35,
+      "respawnMinMs": 0,
+      "respawnMaxMs": 0,
+      "level": 188,
+      "hp": 2407556,
+      "baseExp": 171968,
+      "jobExp": 120378,
+      "attackMin": 5405,
+      "attackMax": 877,
+      "defense": 428,
+      "magicDefense": 103,
+      "size": "中型",
+      "race": "動物",
+      "element": "火 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/gw_fild.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 6691,
+          "aegisName": "BurningFeather",
+          "name": "火焰羽毛",
+          "ratePerTenThousand": 2500,
+          "type": "其他",
+          "weight": 0,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "火焰地獄禿鷹的羽毛。羽毛上的火會蔓延到周圍, 周圍因此損失慘重。\n重量: 0"
+        },
+        {
+          "itemId": 25730,
+          "aegisName": "Zelunium_Ore",
+          "name": "鍺金原石",
+          "ratePerTenThousand": 130,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以打造鍺金石的原石, 可以提煉用於製作各類武器的鍺金石。\n\n重量 : 1"
+        },
+        {
+          "itemId": 25728,
+          "aegisName": "Shadowdecon_Ore",
+          "name": "影子神秘原石",
+          "ratePerTenThousand": 130,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以打造影子神秘金屬的原石, 可以提煉用於製作特殊裝備的影子神祕金屬。\n\n重量 : 1"
+        },
+        {
+          "itemId": 300222,
+          "aegisName": "EP18_Firewind_Kite_Card",
+          "name": "風火老鷹卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "風屬性魔法傷害+35%。\n使用技能時，SP消耗量+10%。\n系列 : 卡片\n裝備 : 飾品(左)\n重量 : 1"
+        }
+      ]
+    }
+  ]
 }

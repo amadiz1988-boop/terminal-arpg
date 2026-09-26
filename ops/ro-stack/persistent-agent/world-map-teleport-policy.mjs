@@ -85,3 +85,11 @@ export function chooseLandingAnchor(graph, targetMap) {
   const first = inbound[0];
   return first ? { x: first.toX, y: first.toY, source: `rathena-warp:${first.map}:${first.name}` } : null;
 }
+
+// Maps entered only through scripted warps (random dungeon portals, quest
+// NPCs) have no inbound portal edge. Their rAthena-authored arrival cells are
+// equally authoritative; Native still validates the final landing cell.
+export function chooseScriptArrivalAnchor(sourceRow) {
+  const first = sourceRow?.scriptArrivals?.[0];
+  return first ? { x: first.x, y: first.y, source: `rathena-script-warp:${first.source}` } : null;
+}
