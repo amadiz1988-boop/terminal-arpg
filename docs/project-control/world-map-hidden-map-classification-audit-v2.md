@@ -4,12 +4,12 @@ Read-only classification of the 105 destinations hidden by the checked-in Player
 
 - Web checkpoint: e8a5e4d9fa908fe11474a1f8e9053c6ac7c3a68a
 - Native HEAD: 18d7e546d26ddd758fb67fb4997b09d042250448
-- Native persistent_agent.cpp SHA256: 744e2975166ad1372c6ccca4803df1d92f19b3ce31075a70b4c6fd94f39bd05b
+- Native persistent_agent.cpp SHA256: bee1506e04826127a13ff4f2dc19ad3128a75a6a30f355f65bf0058fed44be5c
 - Active Renewal scripts inspected: 836
 - Evidence: `db/map_index.txt`, `conf/maps_athena.conf`, `conf/import/map_conf.txt`, all active imports from `npc/re/scripts_main.conf`, `db/re/mob_db.yml`, `db/re/map_cache.dat`, active map flags, `src/map/persistent_agent.cpp:4673` and `:8783`.
 - A normal spawn is a persistent ordinary monster declaration in a loaded script. Boss, MVP, champion, resource, script-created encounter and town spawns are separate. Native currently admits only `npc/re/mobs/fields/` and `npc/re/mobs/dungeons/` in `world_map_farm_min_level`.
 - `DIRECT_TELEPORT_DESTINATION_VALID` is source-level map eligibility: loaded/indexed/cached, admissible Native spawn and flags, plus a map-cache passable landing candidate clear of static NPC/portal positions. It does not assert a live command succeeded for a particular character, level, cooldown, Zeny or dynamic NPC occupancy.
-- `ORIGINAL_WORLDMAP_LEVEL_LABEL` is filled only for labels visually matched to the private original `worldmap_mob.bmp` / `world-map.webp` and a matching dungeon family. A red label describes a dungeon group, not an individual floor. Unmatched labels remain `NOT_VERIFIED_ON_BITMAP`; bitmap is corroboration, not spawn authority.
+- `ORIGINAL_WORLDMAP_LEVEL_LABEL` is filled only for labels visually matched to the private original `worldmap_mob.bmp` / `world-map.webp` and a matching dungeon family. A red label describes a dungeon group, not an individual floor. Eleven hidden rows are confirmed matches. The bitmap has other white monster labels without a proven map-ID mapping, so the exhaustive labelled-hidden total remains unknown. Unmatched rows remain `NOT_VERIFIED_ON_BITMAP`; bitmap is corroboration, not spawn authority.
 - Current navigation capability is diagnostic. It does not change `SHOULD_BE_PLAYER_FARMABLE`.
 
 ## Counts
@@ -28,7 +28,9 @@ Read-only classification of the 105 destinations hidden by the checked-in Player
 - VERSION_CONTENT_MISMATCH_COUNT = 0
 - OTHER_PROVEN_REASON_COUNT = 14
 - CLASSIFICATION_TOTAL_CHECK = PASS
-- ORIGINAL_LABELLED_HIDDEN_COUNT = 11; ORIGINAL_LABELLED_FALSE_NEGATIVE_COUNT = 9
+- ORIGINAL_LABELLED_HIDDEN_COUNT = >=11 CONFIRMED; exhaustive total = UNKNOWN
+- ORIGINAL_LABELLED_FALSE_NEGATIVE_COUNT = >=9 CONFIRMED; exhaustive total = UNKNOWN
+- ORIGINAL_LABELLED_HIDDEN_SUBSET_TRACED = PARTIAL; unambiguous dungeon-group matches only.
 - ROOT_WITH_FARMABLE_CHILD_COUNT = 10; FARMABLE_CHILD_HIDDEN_COUNT = 13; ROOT_CHILD_FALSE_NEGATIVE_COUNT = 13
 - ALLOWLIST_ONLY_HIDDEN_COUNT = 0
 - FALSE_NEGATIVE_TOTAL = 24; CURRENT_NO_SAFE_LANDING_FALSE_NEGATIVES = 16
