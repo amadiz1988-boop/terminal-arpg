@@ -146,6 +146,20 @@ export const M1_START_FARM_SERVICE_FIELDS_CORRECTION = Object.freeze({
     'tools/pa-command-contract/contract-test-matrix.json',
   ]),
 });
+// The isolated TEST_PLAYER keeps group-0 item legality while personal storage
+// and NPC selling are admitted without opening generic item exchange.
+export const M1_ECONOMY_TEST_PLAYER_AMENDMENT = Object.freeze({
+  reason: 'M1_ECONOMY_TEST_PLAYER_V1',
+  scope: 'M1_ECONOMY_TEST_PLAYER_V1',
+  sourcePaths: Object.freeze([
+    'src/map/economy_test_player_policy.hpp',
+    'src/map/pc.cpp',
+    'src/map/storage.cpp',
+    'src/map/test_fixture_economy.hpp',
+    'tools/pa-command-contract/Test-M1V15ExecutorFixture.ps1',
+    'tools/pa-command-contract/test-economy-test-player.cpp',
+  ]),
+});
 export const APPROVED_NATIVE_AMENDMENTS = Object.freeze([
   M1_SECOND_NATIVE_AMENDMENT, M1_INVENTORY_MAINTENANCE_NATIVE_AMENDMENT,
   M1_INVENTORY_PROJECTION_CORRECTION, M1_FARM_WORLD_TELEPORT_SPAWN_CORRECTION,
@@ -154,6 +168,7 @@ export const APPROVED_NATIVE_AMENDMENTS = Object.freeze([
   M1_PLAYER_FLY_WING_EFFECT_CORRECTION,
   M1_SUPPLY_COMMAND_ADMISSION_CORRECTION,
   M1_START_FARM_SERVICE_FIELDS_CORRECTION,
+  M1_ECONOMY_TEST_PLAYER_AMENDMENT,
 ]);
 export const approvedNativeAmendment = reason =>
   APPROVED_NATIVE_AMENDMENTS.find(item => item.reason === reason) ?? null;

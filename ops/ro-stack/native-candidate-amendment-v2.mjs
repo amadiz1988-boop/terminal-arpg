@@ -85,6 +85,8 @@ export function prepareNextNativeCandidate({ buildRoot, prod, authority,
   const output = fs.readFileSync(log, 'utf8');
   need(r.status === 0 && output.includes('M1_SETTINGS_EXECUTOR_TEST_PASS') &&
     output.includes('M1_FIXTURE_SECURITY_TEST_PASS') &&
+    (approved.reason !== 'M1_ECONOMY_TEST_PLAYER_V1' ||
+      output.includes('M1_ECONOMY_TEST_PLAYER_SOURCE_PASS')) &&
     git(src, 'status', '--porcelain=v1', '--untracked-files=all') === '',
   'M1_V15_DIRECT_SUITE_FAILED');
   const m1Suite = { test_suite: SUITE, result: 'PASS', receipt: { path: 'tests/m1-v15-executor-fixture.log', sha256: digest(log) } };
@@ -165,7 +167,9 @@ export function planNextNativeAmendment({ root, owner, leaseId, manifestFile, ma
   const output = m1Suite && fs.readFileSync(pinned(buildRoot, m1Suite.receipt), 'utf8');
   const regressionPassed = inspected.eligible === true && !!output &&
     output.includes('M1_SETTINGS_EXECUTOR_TEST_PASS') &&
-    output.includes('M1_FIXTURE_SECURITY_TEST_PASS');
+    output.includes('M1_FIXTURE_SECURITY_TEST_PASS') &&
+    (approved.reason !== 'M1_ECONOMY_TEST_PLAYER_V1' ||
+      output.includes('M1_ECONOMY_TEST_PLAYER_SOURCE_PASS'));
   const ir = manifest.rollback_reference?.intermediate_rollback;
   const rollbackReady = verifyNativeStage(root, state, lease, lease.admission_manifest_sha256).rollbackReady === true &&
     ir?.native_git_sha === lease.native_deploy_git_sha &&

@@ -1,5 +1,11 @@
 # 目前狀態
 
+## 2026-09-26 M1 V15 Economy Test Player 來源候選
+
+- Project Control 已改用固定 TEST_PLAYER 2000163／150105、`group_id=0`、`is_test=1` 執行 Store／Sell 驗收。先前要求借用一般非測試帳號的預檢結論已被取代。
+- Native `18d7e546` 已在 personal storage 與 NPC sell 的入口加入精確測試身分准入，仍檢查 group-0 交易權限，其他交易、丟棄、擺攤、郵件與公會倉庫維持原封鎖。原生 Release x64 編譯、M1 V15 來源測試與 13 組離線回歸通過。此為來源證據，尚未完成 Store／Sell live mutation 驗收。
+- 01:04 UTC 事故證據已封存，原因仍為 `UNKNOWN`。同一 Production runtime 經一次受控重啟後於 01:38 UTC 健康。Native 新候選尚未部署，首次 GitHub-first 推廣仍未完成。
+
 ## 2026-09-26 M1 V15 經濟驗收資格預檢
 
 - 即時唯讀檢查確認指定角色 150095 的 `is_test=1`，因此不進行正常玩家 Store／Sell 驗收；有界盤點找到 14 名一般非測試角色，但尚無可用的合法 Player 登入與安全物品準備路徑。同輪健康檢查顯示 login、char、map 埠未監聽，事故分類仍為 `UNKNOWN`。驗收停在前置條件，未改動 Production 或玩家狀態，也未重啟服務。證據見 [M1 V15 normal-player economy preflight](project-control/m1-v15-normal-player-economy-preflight-2026-09-26.md)。

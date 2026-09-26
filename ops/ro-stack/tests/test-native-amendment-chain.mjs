@@ -14,6 +14,7 @@ import { HISTORICAL_NATIVE_AMENDMENT as old, M1_SECOND_NATIVE_AMENDMENT as polic
   M1_PLAYER_FLY_WING_EFFECT_CORRECTION as playerFlyWing,
   M1_SUPPLY_COMMAND_ADMISSION_CORRECTION as supplyCommands,
   M1_START_FARM_SERVICE_FIELDS_CORRECTION as farmServiceFields,
+  M1_ECONOMY_TEST_PLAYER_AMENDMENT as economyTestPlayer,
   validateNativeAmendmentHistory, validateHistoricalNativeAnchor, validateNextNativeAmendment,
   applyNextNativeAmendment, deployedNativeRuntimeMatches } from '../native-amendment-chain.mjs';
 import { retirementDecision } from '../native-candidate-amendment.mjs';
@@ -302,6 +303,19 @@ test('start farm service-field correction admits only contract and its tests', (
     'tools/pa-command-contract/contract-test-matrix.json',
   ]);
   assert.equal(farmServiceFields.sourcePaths.includes('src/map/persistent_agent.cpp'), false);
+});
+test('economy test player amendment admits only personal economy gates and tests', () => {
+  assert.equal(economyTestPlayer.reason, 'M1_ECONOMY_TEST_PLAYER_V1');
+  assert.deepEqual(economyTestPlayer.sourcePaths, [
+    'src/map/economy_test_player_policy.hpp',
+    'src/map/pc.cpp',
+    'src/map/storage.cpp',
+    'src/map/test_fixture_economy.hpp',
+    'tools/pa-command-contract/Test-M1V15ExecutorFixture.ps1',
+    'tools/pa-command-contract/test-economy-test-player.cpp',
+  ]);
+  assert.equal(economyTestPlayer.sourcePaths.includes('src/map/trade.cpp'), false);
+  assert.equal(economyTestPlayer.sourcePaths.includes('src/map/vending.cpp'), false);
 });
 {
   const mapHash = 'A'.repeat(64);
