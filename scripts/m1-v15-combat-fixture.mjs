@@ -207,7 +207,7 @@ async function stageOffline(db, offline) {
   } catch (error) { await db.rollback(); throw error; }
 }
 
-async function restoreOffline(db, offline, staged) {
+async function restoreOffline(db, offline, staged, offlineEquipped = false) {
   await db.beginTransaction();
   try {
     const [[current]] = await db.execute(
@@ -219,15 +219,27 @@ async function restoreOffline(db, offline, staged) {
     for (const item of staged.ids) {
       const [[row]] = await db.execute('SELECT * FROM inventory WHERE id=? AND char_id=? FOR UPDATE',
         [item.id, CHAR]);
-      need(row?.nameid === item.nameid && row.amount === 1 && row.equip === 0 &&
+      const expectedMask = offlineEquipped ? (item.nameid === 13438 ? 2 : 16) : 0;
+      need(row?.nameid === item.nameid && row.amount === 1 && row.equip === expectedMask &&
         row.refine === 0 && row.identify === 1 &&
         [row.card0, row.card1, row.card2, row.card3, row.enchantgrade].every(v => v === 0) &&
         ['option_id0', 'option_id1', 'option_id2', 'option_id3', 'option_id4']
           .every(key => row[key] === 0),
       `COMBAT_FIXTURE_ITEM_RESTORE_DRIFT_${item.id}`);
-      const [deleted] = await db.execute('DELETE FROM inventory WHERE id=? AND char_id=? AND nameid=? AND equip=0',
-        [item.id, CHAR, item.nameid]);
+      const [deleted] = await db.execute('DELETE FROM inventory WHERE id=? AND char_id=? AND nameid=? AND equip=?',
+        [item.id, CHAR, item.nameid, expectedMask]);
       need(deleted.affectedRows === 1, `COMBAT_FIXTURE_ITEM_RESTORE_FAILED_${item.id}`);
+    }
+    if (offlineEquipped) {
+      for (const original of offline.inventory.filter(row => row.equip !== 0)) {
+        const [[row]] = await db.execute('SELECT nameid,equip FROM inventory WHERE id=? AND char_id=? FOR UPDATE',
+          [original.id, CHAR]);
+        need(row?.nameid === original.nameid && row.equip === 0,
+          `COMBAT_FIXTURE_ORIGINAL_EQUIP_DRIFT_${original.id}`);
+        const [updated] = await db.execute('UPDATE inventory SET equip=? WHERE id=? AND char_id=? AND equip=0',
+          [original.equip, original.id, CHAR]);
+        need(updated.affectedRows === 1, `COMBAT_FIXTURE_ORIGINAL_EQUIP_RESTORE_FAILED_${original.id}`);
+      }
     }
     const [updated] = await db.execute(
       'UPDATE `char` SET str=?,agi=?,vit=?,`int`=?,dex=?,luk=?,status_point=? WHERE char_id=? AND account_id=? AND `class`=? AND base_level=? AND str=? AND agi=? AND vit=? AND `int`=? AND dex=? AND luk=? AND status_point=?',
@@ -285,7 +297,8 @@ async function completeOnlinePreparation(player, adapter, beforeRuntime, canonic
 }
 
 async function main() {
-  need(['preflight', 'prepare', 'resume', 'restore'].includes(action), 'INVALID_FIXTURE_ACTION');
+  need(['preflight', 'prepare', 'resume', 'equip-offline', 'restore'].includes(action),
+    'INVALID_FIXTURE_ACTION');
   const sourceSha = governance();
   const canonical = sourceData();
   const adapter = runtimeAdapter(ROOT, OWNER, LEASE);
@@ -335,6 +348,91 @@ async function main() {
       await completeOnlinePreparation(player, adapter, beforeRuntime, canonical, sourceSha);
       return;
     }
+    if (action === 'equip-offline') {
+      need(fs.existsSync(path.join(EVIDENCE, 'staged.json')) &&
+        !fs.existsSync(path.join(EVIDENCE, 'prepared.json')) &&
+        !fs.existsSync(path.join(EVIDENCE, 'equipped-offline.json')) &&
+        !fs.existsSync(path.join(EVIDENCE, 'restored.json')),
+      'COMBAT_FIXTURE_OFFLINE_EQUIP_RECORD_INVALID');
+      const staged = readJson(path.join(EVIDENCE, 'staged.json'));
+      const offline = readJson(path.join(EVIDENCE, 'offline-preimage.json'));
+      const original = offline.inventory.filter(row => row.equip !== 0);
+      need(same(snapshot(current.character), snapshot({ ...PROFILE,
+        status_point: canonical.budget.remaining })) &&
+        staged.ids.length === 2 && staged.ids.every((entry, i) =>
+          entry.nameid === ITEMS[i].id && current.inventory.some(row =>
+            row.id === entry.id && row.nameid === entry.nameid && row.equip === 0 &&
+            row.amount === 1 && row.refine === 0 && row.identify === 1)) &&
+        original.length === 2 && original.some(row => row.nameid === 1201 && row.equip === 2) &&
+        original.some(row => row.nameid === 2301 && row.equip === 16) &&
+        original.every(row => current.inventory.some(value =>
+          value.id === row.id && value.nameid === row.nameid && value.equip === row.equip)),
+      'COMBAT_FIXTURE_OFFLINE_EQUIP_PRECONDITION_INVALID');
+      let stopped = false;
+      try {
+        await adapter('stop'); stopped = true;
+        await db.beginTransaction();
+        try {
+          for (const row of original) {
+            const [changed] = await db.execute(
+              'UPDATE inventory SET equip=0 WHERE id=? AND char_id=? AND nameid=? AND equip=?',
+              [row.id, CHAR, row.nameid, row.equip]);
+            need(changed.affectedRows === 1, `COMBAT_FIXTURE_ORIGINAL_UNEQUIP_FAILED_${row.id}`);
+          }
+          for (let i = 0; i < staged.ids.length; i++) {
+            const row = staged.ids[i], mask = i === 0 ? 2 : 16;
+            const [changed] = await db.execute(
+              'UPDATE inventory SET equip=? WHERE id=? AND char_id=? AND nameid=? AND equip=0 AND amount=1 AND refine=0 AND identify=1',
+              [mask, row.id, CHAR, row.nameid]);
+            need(changed.affectedRows === 1, `COMBAT_FIXTURE_TEST_EQUIP_FAILED_${row.id}`);
+          }
+          await db.commit();
+        } catch (error) { await db.rollback(); throw error; }
+        fs.writeFileSync(path.join(EVIDENCE, 'equipped-offline.json'), JSON.stringify({
+          sourceSha, original: original.map(row => ({ id: row.id, nameid: row.nameid, equip: row.equip })),
+          staged: staged.ids.map((row, i) => ({ ...row, equip: i === 0 ? 2 : 16 })),
+          at: new Date().toISOString() }, null, 2) + '\n', { flag: 'wx' });
+        await adapter('start'); stopped = false;
+      } finally { if (stopped) await adapter('start'); }
+      let afterRuntime;
+      for (let i = 0; i < 20; i++) {
+        afterRuntime = await adapter('snapshot');
+        if (afterRuntime.pass &&
+          afterRuntime.procdump_process_identity?.PROCESS_IDENTITY_MATCH === 'YES') break;
+        await delay(500);
+      }
+      need(afterRuntime?.pass &&
+        afterRuntime.procdump_process_identity?.PROCESS_IDENTITY_MATCH === 'YES',
+      'COMBAT_FIXTURE_OFFLINE_EQUIP_RUNTIME_FAILED');
+      let loaded;
+      for (let i = 0; i < 20; i++) {
+        loaded = await player.state();
+        if (ITEMS.every(item => loaded.equipment?.some(row =>
+          Number(row.itemId) === item.id && row.slot === item.slot && row.refine === 0)) &&
+          loaded.character?.maxHp > live.character.maxHp) break;
+        await delay(500);
+      }
+      need(ITEMS.every(item => loaded.equipment?.some(row =>
+        Number(row.itemId) === item.id && row.slot === item.slot && row.refine === 0)) &&
+        loaded.character?.maxHp > live.character.maxHp,
+      'COMBAT_FIXTURE_OFFLINE_EQUIP_AUTHORITY_FAILED');
+      const health = await prepareHealthyRuntime(args.credentials);
+      const ready = await player.state();
+      need(ready.character?.hp === ready.character?.maxHp &&
+        ready.character?.sp === ready.character?.maxSp &&
+        ready.questJournal?.ownership?.agentMode === 'PERSISTENT_IDLE',
+      'COMBAT_FIXTURE_OFFLINE_EQUIP_HEALTH_FAILED');
+      fs.writeFileSync(path.join(EVIDENCE, 'prepared.json'), JSON.stringify({
+        method: 'TEST_ONLY_OFFLINE_EQUIP', profile: PROFILE, budget: canonical.budget,
+        equipment: canonical.equipment, health, sourceSha, nativeSha: NATIVE_SHA,
+        runtimeBefore: beforeRuntime.pids, runtimeAfter: afterRuntime.pids,
+        maxHpBefore: live.character.maxHp, maxHpAfter: ready.character.maxHp,
+        preparedAt: new Date().toISOString() }, null, 2) + '\n', { flag: 'wx' });
+      console.log(JSON.stringify({ prepared: true, method: 'TEST_ONLY_OFFLINE_EQUIP',
+        evidenceDir: EVIDENCE, hp: ready.character.hp, maxHp: ready.character.maxHp,
+        sp: ready.character.sp, maxSp: ready.character.maxSp }));
+      return;
+    }
     if (action === 'prepare') {
       need(FIELDS.slice(0, 6).every(key => current.character[key] === 1) &&
         current.character.status_point === 68 &&
@@ -371,13 +469,16 @@ async function main() {
       !fs.existsSync(path.join(EVIDENCE, 'restored.json')), 'COMBAT_FIXTURE_RESTORE_RECORD_INVALID');
     const staged = readJson(path.join(EVIDENCE, 'staged.json'));
     const offline = readJson(path.join(EVIDENCE, 'offline-preimage.json'));
-    for (const item of ITEMS) await player.equip(item.id, 'unequip', false);
-    for (const row of offline.inventory.filter(entry => entry.equip !== 0))
-      await player.equip(row.nameid, 'equip', true);
+    const offlineEquipped = fs.existsSync(path.join(EVIDENCE, 'equipped-offline.json'));
+    if (!offlineEquipped) {
+      for (const item of ITEMS) await player.equip(item.id, 'unequip', false);
+      for (const row of offline.inventory.filter(entry => entry.equip !== 0))
+        await player.equip(row.nameid, 'equip', true);
+    }
     let stopped = false;
     try {
       await adapter('stop'); stopped = true;
-      await restoreOffline(db, offline, staged);
+      await restoreOffline(db, offline, staged, offlineEquipped);
       await adapter('start'); stopped = false;
     } finally { if (stopped) await adapter('start'); }
     const restored = await readState(db);
