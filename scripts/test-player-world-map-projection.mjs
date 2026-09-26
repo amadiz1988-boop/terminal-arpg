@@ -122,11 +122,16 @@ const rejectedService = parseKafraSavedPoints([{ path: 'test', text:
 assert.equal(rejectedService.size, 0);
 const app = await readFile(join(root, 'ops/ro-stack/dashboard/app.js'), 'utf8');
 const html = await readFile(join(root, 'ops/ro-stack/dashboard/index.html'), 'utf8');
-assert.match(app, /town\.locationClass/);
+assert.match(app, /town\.buttonState !== 'AVAILABLE'/);
+assert.match(app, /selectTownWorldMap\(row\.map\)/);
 assert.match(app, /renderWorldMapDestinationList\(\)/);
 assert.doesNotMatch(app, /world-map-town-label|worldMapTownLabels/);
 assert.doesNotMatch(html, /id="worldMapTownLabels"|id="worldMapTowns"/);
 assert.match(html, /id="worldMapNotice"/);
+assert.match(html, /id="worldMapSaveCurrentTown"/);
+assert.match(html, /id="worldMapDetail"[^>]*role="dialog"/);
+assert.doesNotMatch(app, /儲存點：\$\{town\.savedPoint/);
+assert.doesNotMatch(app, /平均 Lv\. \$\{\(Math\.round\(row\.averageLevel/);
 assert.match(app, /showWorldMapNotice\(farmTargetBlockedMessage\(error\.message\)\)/);
 assert.match(app, /api\('\/api\/world-map-teleport'/);
 assert.match(app, /api\('\/api\/saved-town'/);
