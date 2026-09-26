@@ -70,7 +70,7 @@ export function fullHealthConfirmed(character) {
     character.hp === character.maxHp && character.sp === character.maxSp;
 }
 
-async function prepareHealthyRuntime(credentialsPath) {
+export async function prepareHealthyRuntime(credentialsPath) {
   ensure(process.env.RO_LOCAL_ADMIN_TOKEN, 'LOCAL_ADMIN_TOKEN_REQUIRED');
   const base = 'http://127.0.0.1:8788';
   const headers = { 'x-ro-local-admin-token': process.env.RO_LOCAL_ADMIN_TOKEN,
