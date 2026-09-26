@@ -1,5 +1,9 @@
 # 目前狀態
 
+## 2026-09-26 M1 V15 經濟驗收資格預檢
+
+- 即時唯讀檢查確認指定角色 150095 的 `is_test=1`，因此不進行正常玩家 Store／Sell 驗收；有界盤點找到 14 名一般非測試角色，但尚無可用的合法 Player 登入與安全物品準備路徑。同輪健康檢查顯示 login、char、map 埠未監聽，事故分類仍為 `UNKNOWN`。驗收停在前置條件，未改動 Production 或玩家狀態，也未重啟服務。證據見 [M1 V15 normal-player economy preflight](project-control/m1-v15-normal-player-economy-preflight-2026-09-26.md)。
+
 ## 2026-09-25 M1 legacy launcher GitHub-first 來源重建
 
 - 已在隔離的 V15 Web 候選中以 Production `ro-stack.ps1` 精確 preimage 重建 launcher，保留現行生命週期、PA/Service/Supply 投影與 single-runtime 行為，加入明確的 M1 Supply 啟動環境投影。來源對帳及能力矩陣見 [M1 launcher reconciliation](project-control/m1-legacy-launcher-reconciliation-v1.md)。

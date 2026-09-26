@@ -231,32 +231,66 @@ export function parseLiveInventoryRow(row) {
     supplyReason: row[11] || null };
 }
 
-export function fixedDbRead(kind, id, { root = PRODUCTION_ROOT, env = process.env } = {}) {
-  const charId = safeId(id);
+export function parseEconomyEligibilityRow(row) {
+  const number = value => /^\d+$/.test(value ?? '') ? Number(value) : null;
+  return {
+    charId: number(row[0]), accountId: number(row[1]), groupId: number(row[2]),
+    accountState: number(row[3]), isTest: row[4] === '1' ? true : row[4] === '0' ? false : null,
+    characterOnline: row[5] === '1' ? true : row[5] === '0' ? false : null, agentMode: row[6] || null,
+    ownershipState: row[7] || null, runtimeState: row[8] || null,
+    taskType: row[9] || null, taskPhase: row[10] || null,
+    activeCommandCount: number(row[11]), zeny: number(row[12]),
+  };
+}
+
+export function parseEconomyCandidateRow(row) {
+  return {
+    charId: Number(row[0]), accountId: Number(row[1]), name: row[2],
+    agentMode: row[3] || null, ownershipState: row[4] || null,
+    runtimeState: row[5] || null, taskType: row[6] || null,
+    taskPhase: row[7] || null, zeny: Number(row[8]), activeCommandCount: Number(row[9]),
+  };
+}
+
+function boundedSqlRead(query, { root = PRODUCTION_ROOT, env = process.env } = {}) {
   const secrets = readJson(path.join(runtime(root), 'secrets.json'));
   if (!secrets.databasePassword) fail('AUTHORITY_UNAVAILABLE', 'db_secret_missing');
+  const executable = mariadbClient();
+  const result = spawnSync(executable, ['--ssl=OFF', '--protocol=tcp', '-h', '127.0.0.1', '-P', '3307',
+    '-u', 'rathena_local', '-D', 'ragnarok', '--batch', '--raw', '--skip-column-names', '-e', query],
+  { encoding: 'utf8', timeout: 5000, windowsHide: true, maxBuffer: 262144,
+    env: { ...env, MYSQL_PWD: secrets.databasePassword } });
+  if (result.error || result.status !== 0) fail('AUTHORITY_UNAVAILABLE', 'bounded_read_only_query_failed');
+  return result.stdout.trim().split(/\r?\n/).filter(Boolean).map(line => line.split('\t'));
+}
+
+export function economyCandidateCensus(options = {}) {
+  const query = `SELECT c.char_id,c.account_id,COALESCE(c.name,''),COALESCE(s.agent_mode,''),COALESCE(s.ownership_state,''),COALESCE(s.runtime_state,''),COALESCE(st.task_type,''),COALESCE(st.task_phase,''),c.zeny,(SELECT COUNT(*) FROM persistent_agent_command pc WHERE pc.char_id=c.char_id AND pc.command_status IN ('QUEUED','CLAIMED','RUNNING')) FROM \`char\` c JOIN login l ON l.account_id=c.account_id LEFT JOIN web_account_flags f ON f.account_id=c.account_id LEFT JOIN persistent_agent_live_status s ON s.char_id=c.char_id LEFT JOIN persistent_agent_state st ON st.char_id=c.char_id WHERE l.group_id=0 AND l.state=0 AND COALESCE(f.is_test,0)=0 ORDER BY c.char_id LIMIT 50`;
+  const records = boundedSqlRead(query, options).map(parseEconomyCandidateRow);
+  return { records, limit: 50, complete: records.length < 50,
+    source: 'Login and Native bounded normal-player candidate census' };
+}
+
+export function fixedDbRead(kind, id, { root = PRODUCTION_ROOT, env = process.env } = {}) {
+  const charId = safeId(id);
   const queries = {
     events: `SELECT event_id,UNIX_TIMESTAMP(occurred_at),event_type,COALESCE(map,''),COALESCE(source,'') FROM persistent_life_event WHERE char_id=${charId} ORDER BY occurred_at DESC,event_id DESC LIMIT 20`,
     commands: `SELECT command_id,action,command_status,COALESCE(reason_code,''),UNIX_TIMESTAMP(requested_at) FROM persistent_agent_command WHERE char_id=${charId} ORDER BY requested_at DESC LIMIT 20`,
     liveInventory: `SELECT char_id,account_id,revision,resident,COALESCE(map,''),ROUND(TIMESTAMPDIFF(MICROSECOND,updated_at,CURRENT_TIMESTAMP(3))/1000),inventory_slots,inventory_max_slots,weight,max_weight,supply_required,COALESCE(supply_reason,'') FROM persistent_agent_live_status WHERE char_id=${charId} LIMIT 1`,
+    economyEligibility: `SELECT c.char_id,c.account_id,l.group_id,l.state,COALESCE(f.is_test,0),c.online,COALESCE(s.agent_mode,''),COALESCE(s.ownership_state,''),COALESCE(s.runtime_state,''),COALESCE(st.task_type,''),COALESCE(st.task_phase,''),(SELECT COUNT(*) FROM persistent_agent_command pc WHERE pc.char_id=c.char_id AND pc.command_status IN ('QUEUED','CLAIMED','RUNNING')),c.zeny FROM \`char\` c JOIN login l ON l.account_id=c.account_id LEFT JOIN web_account_flags f ON f.account_id=c.account_id LEFT JOIN persistent_agent_live_status s ON s.char_id=c.char_id LEFT JOIN persistent_agent_state st ON st.char_id=c.char_id WHERE c.char_id=${charId} LIMIT 1`,
   };
   if (!queries[kind]) fail('NOT_ELIGIBLE', 'unsupported_db_read');
-  const executable = mariadbClient();
-  const result = spawnSync(executable, ['--ssl=OFF', '--protocol=tcp', '-h', '127.0.0.1', '-P', '3307',
-    '-u', 'rathena_local', '-D', 'ragnarok', '--batch', '--raw', '--skip-column-names', '-e', queries[kind]],
-  { encoding: 'utf8', timeout: 5000, windowsHide: true, maxBuffer: 262144,
-    env: { ...env, MYSQL_PWD: secrets.databasePassword } });
-  if (result.error || result.status !== 0) fail('AUTHORITY_UNAVAILABLE', 'bounded_read_only_query_failed');
-  const records = result.stdout.trim().split(/\r?\n/).filter(Boolean).map(line => {
-    const row = line.split('\t');
+  const records = boundedSqlRead(queries[kind], { root, env }).map(row => {
     if (kind === 'liveInventory') return parseLiveInventoryRow(row);
+    if (kind === 'economyEligibility') return parseEconomyEligibilityRow(row);
     return kind === 'events'
       ? { eventId: row[0], occurredAtUnix: Number(row[1]), type: row[2], map: row[3], source: row[4] }
       : { commandId: row[0], action: row[1], status: row[2], reasonCode: row[3], requestedAtUnix: Number(row[4]) };
   });
-  return { charId, records, limit: kind === 'liveInventory' ? 1 : 20,
+  return { charId, records, limit: ['liveInventory', 'economyEligibility'].includes(kind) ? 1 : 20,
   source: kind === 'events' ? 'Event Ledger read-only bounded query'
     : kind === 'liveInventory' ? 'Native live-status read-only bounded query'
+      : kind === 'economyEligibility' ? 'Login and Native eligibility read-only bounded query'
       : 'Native command ledger read-only bounded query' };
 }
 

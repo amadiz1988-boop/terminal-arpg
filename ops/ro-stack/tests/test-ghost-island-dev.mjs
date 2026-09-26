@@ -4,7 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { runConsole } from '../ghost-island-dev.mjs';
 import { capabilities } from '../dev-console/registry.mjs';
-import { parseLiveInventoryRow } from '../dev-console/providers.mjs';
+import { parseLiveInventoryRow, parseEconomyEligibilityRow, parseEconomyCandidateRow } from '../dev-console/providers.mjs';
 
 const root = fs.mkdtempSync(path.join(os.tmpdir(), 'ro-dev-console-'));
 const dir = path.join(root, '.local', 'ro-stack');
@@ -59,6 +59,29 @@ try {
     '6', '100', '500', '20300', '1', 'HP_LOW']).supplyRequired, true);
   assert.equal(parseLiveInventoryRow(['17', '19', '21', '1', 'izlude', '24',
     '6', '100', '500', '20300', 'NULL', '']).supplyRequired, null);
+  assert.deepEqual(parseEconomyEligibilityRow(['17', '19', '0', '0', '0', '1',
+    'PERSISTENT_IDLE', 'SERVER_AGENT', 'IDLE', '', '', '0', '9000']), {
+    charId: 17, accountId: 19, groupId: 0, accountState: 0, isTest: false,
+    characterOnline: true, agentMode: 'PERSISTENT_IDLE', ownershipState: 'SERVER_AGENT',
+    runtimeState: 'IDLE', taskType: null, taskPhase: null,
+    activeCommandCount: 0, zeny: 9000,
+  });
+  assert.equal(parseEconomyEligibilityRow(['17', '19', '0', '0', 'UNKNOWN', '1',
+    '', '', '', '', '', '0', '0']).isTest, null);
+  assert.equal(capabilities.find(row => row.id === 'player.economy_eligibility').command,
+    'player economy-eligibility <charId>');
+  assert.deepEqual(parseEconomyCandidateRow(['17', '19', 'player', 'PERSISTENT_IDLE',
+    'SERVER_AGENT', 'ACTIVE', '', '', '9000', '0']), {
+    charId: 17, accountId: 19, name: 'player', agentMode: 'PERSISTENT_IDLE',
+    ownershipState: 'SERVER_AGENT', runtimeState: 'ACTIVE', taskType: null,
+    taskPhase: null, zeny: 9000, activeCommandCount: 0,
+  });
+  assert.equal(capabilities.find(row => row.id === 'player.economy_candidates').command,
+    'player economy-candidates');
+  assert.equal((await runConsole(['player', 'economy-eligibility', '17', '--sql', 'DELETE'])).STATUS,
+    'NOT_ELIGIBLE');
+  assert.equal((await runConsole(['player', 'economy-candidates', '--sql', 'DELETE'])).STATUS,
+    'NOT_ELIGIBLE');
   assert.equal((await runConsole(['player', 'live-inventory', '17', '--sql', 'DELETE'])).STATUS,
     'NOT_ELIGIBLE');
   assert.equal((await runConsole(['player', 'fleet'], { providers: { env: {}, fetchImpl } })).STATUS, 'NOT_AUTHORIZED');
