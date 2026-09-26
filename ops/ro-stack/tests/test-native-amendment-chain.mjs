@@ -19,6 +19,7 @@ import { HISTORICAL_NATIVE_AMENDMENT as old, M1_SECOND_NATIVE_AMENDMENT as polic
   M1_ECONOMY_ZERO_LEVEL_FIXTURE_AMENDMENT as economyZeroLevelFixture,
   M1_ECONOMY_STORAGE_MENU_STATE_AMENDMENT as economyStorageMenuState,
   KAFRA_SAVE_NATIVE_TOWN_TRAVEL_AMENDMENT as kafraSave,
+  ORIGINAL_HUNTING_LABEL_NATIVE_ADMISSION_AMENDMENT as huntingAdmission,
   validateNativeAmendmentHistory, validateHistoricalNativeAnchor, validateNextNativeAmendment,
   applyNextNativeAmendment, deployedNativeRuntimeMatches } from '../native-amendment-chain.mjs';
 import { retirementDecision } from '../native-candidate-amendment.mjs';
@@ -362,6 +363,15 @@ test('Kafra Save amendment admits only its exact eight-file Native diff', () => 
     'tools/pa-kafra-save/test_catalog.cpp',
   ]);
   assert.equal(kafraSave.sourcePaths.includes('src/map/pc.cpp'), false);
+});
+test('original hunting map amendment admits only the reviewed three Native files', () => {
+  assert.equal(huntingAdmission.reason, 'ORIGINAL_HUNTING_LABEL_NATIVE_ADMISSION_CLOSURE_V1');
+  assert.deepEqual(huntingAdmission.sourcePaths, [
+    'src/map/persistent_agent.cpp',
+    'tools/pa-command-contract/Test-WorldMapFarmAdmissionSource.ps1',
+    'tools/pa-command-contract/contract-test-matrix.json',
+  ]);
+  assert.equal(huntingAdmission.sourcePaths.includes('src/map/pc.cpp'), false);
 });
 {
   const mapHash = 'A'.repeat(64);

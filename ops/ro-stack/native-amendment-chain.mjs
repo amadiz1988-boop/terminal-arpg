@@ -207,6 +207,17 @@ export const KAFRA_SAVE_NATIVE_TOWN_TRAVEL_AMENDMENT = Object.freeze({
     'tools/pa-kafra-save/test_catalog.cpp',
   ]),
 });
+// Project Control authorizes the three-file original hunting map admission
+// correction from the deployed f7e4097 candidate under the same F lease.
+export const ORIGINAL_HUNTING_LABEL_NATIVE_ADMISSION_AMENDMENT = Object.freeze({
+  reason: 'ORIGINAL_HUNTING_LABEL_NATIVE_ADMISSION_CLOSURE_V1',
+  scope: 'ORIGINAL_HUNTING_LABEL_NATIVE_ADMISSION_CLOSURE_V1',
+  sourcePaths: Object.freeze([
+    'src/map/persistent_agent.cpp',
+    'tools/pa-command-contract/Test-WorldMapFarmAdmissionSource.ps1',
+    'tools/pa-command-contract/contract-test-matrix.json',
+  ]),
+});
 export const APPROVED_NATIVE_AMENDMENTS = Object.freeze([
   M1_SECOND_NATIVE_AMENDMENT, M1_INVENTORY_MAINTENANCE_NATIVE_AMENDMENT,
   M1_INVENTORY_PROJECTION_CORRECTION, M1_FARM_WORLD_TELEPORT_SPAWN_CORRECTION,
@@ -219,6 +230,7 @@ export const APPROVED_NATIVE_AMENDMENTS = Object.freeze([
   M1_ECONOMY_ZERO_LEVEL_FIXTURE_AMENDMENT,
   M1_ECONOMY_STORAGE_MENU_STATE_AMENDMENT,
   KAFRA_SAVE_NATIVE_TOWN_TRAVEL_AMENDMENT,
+  ORIGINAL_HUNTING_LABEL_NATIVE_ADMISSION_AMENDMENT,
 ]);
 export const approvedNativeAmendment = reason =>
   APPROVED_NATIVE_AMENDMENTS.find(item => item.reason === reason) ?? null;
