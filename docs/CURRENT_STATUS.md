@@ -5,7 +5,7 @@
 - Production Native 執行檔為 `668bb9db` 候選，Web `1346bd05` 為同 lease 的 `CANDIDATE_ACTIVE`。Morocc 一般玩家城鎮移動已確認；修正前 `set_saved_town` 因 Production 契約 SHA-256 `C983A78B...` 拒絕 Web 傳入的 `saveX/saveY`。
 - 來源修正把 `conf/persistent_agent_commands.json` 納入新 Native 候選的配置產物，並為目前已部署的三執行檔提供同 lease、SHA 鎖定的單一契約修訂路徑。指定 canonical source 位元組 SHA-256 為 `4DA600DC...`；原候選與部署收據維持不變。Native gameplay 原始碼與契約內容未改。
 - 治理修正 `50a959ae` 已推至 GitHub main。同一 lease 的受控修訂預檢 PASS，正式工具套用契約並依既有原子 Native 生命週期重啟；Production 契約 SHA-256 為 `4DA600DCF955D3510EE1289C0F28D257D1D5C1BAB03D90B9E28DCEC3789E73A0`，原契約 preimage 與三個未替換的執行檔均有回滾證據。login／char／map 各一，Dashboard 與 DB PID 未變，ProcDump 綁定新 map PID，OpenKore 0，隔離角色 0，Dashboard health HTTP 200。
-- 一般 TEST_PLAYER 150105 以正常登入和 `/api/saved-town` 將 Morocc Kafra `(156,46)` 設為權威 Saved Town，指令 `CONFIRMED` 且讀回一致。`supply.enabled` 實際 Player 設定寫入、Native `CONFIRMED`、讀回和原值還原 PASS。Lv170 group-0 fixture 尚無已確認的合法準備路徑，五圖 live 與剩餘 Settings／40 項能力驗收仍未完成；Heimdall 私有資產未交接，最終推廣收據未簽發。
+- 一般 TEST_PLAYER 150105 以正常登入和 `/api/saved-town` 將 Morocc Kafra `(156,46)` 設為權威 Saved Town，指令 `CONFIRMED` 且讀回一致；`prt_fild05` 野外儲存據點 Town Travel 至 `(274,243)` 與 Saved Town 也確認，之後已返回 Morocc 並有界輪詢確認原存點恢復。`supply.enabled` 實際 Player 設定寫入、Native `CONFIRMED`、讀回和原值還原 PASS。Lv170 group-0 fixture 尚無已確認的合法準備路徑，五圖 live 與剩餘 Settings／40 項能力驗收仍未完成；Heimdall 私有資產未交接，最終推廣收據未簽發。
 
 ## 2026-09-26 F 五張原廠掛機地圖 Native 准入阻擋
 
