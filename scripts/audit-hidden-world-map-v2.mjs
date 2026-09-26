@@ -10,6 +10,7 @@ import { loadWorldMapTestCatalog } from './lib/world-map-test-catalog.mjs';
 import { parseYamlRecords, rathenaFarmMonsterFlags } from './lib/ro-yaml-records.mjs';
 import { collectScriptEvidence, loadActiveScripts, parseInstanceMaps,
   parseMapIndex, stripComments } from '../ops/ro-stack/persistent-agent/audit-world-map-inventory.mjs';
+import { chooseLandingAnchor } from '../ops/ro-stack/persistent-agent/world-map-teleport-policy.mjs';
 
 const root = resolve(import.meta.dirname, '..');
 const native = process.env.RO_RATHENA_ROOT ?? 'C:/Users/Administrator/source/ghost-island-rathena';
@@ -21,7 +22,8 @@ const savedPointSources = await Promise.all([
 const projection = buildPlayerWorldMapProjection({ ...context, savedPointSources });
 const hidden = [...new Set(context.mapInfo.worldMap.regions.flatMap((r) => r.mapIds))]
   .filter((id) => !projection.rows.has(id)).sort();
-assert.equal(hidden.length, 105);
+// Historical run at e8a5e4d9 audited 105 hidden maps; later fixes reduce it.
+assert.ok(hidden.length > 0);
 
 const indexRows = new Map(parseMapIndex(await readNative('db/map_index.txt'))
   .map((entry) => [entry.id, entry]));
@@ -88,34 +90,25 @@ const routeRegistry = new Map(JSON.parse(await readFile(join(root,
 const sources = new Map(context.sourceIndex.maps.map((row) => [row.map, row]));
 const roots = new Map(context.mapInfo.worldMap.regions.flatMap((region) =>
   region.mapIds.map((id) => [id, region])));
-function safeLanding(map, references) {
+// Arrival must be rAthena-authored: an inbound portal or a literal script
+// warp cell, then the same radius-8 passable search the catalog uses.
+function safeLanding(map, transfers) {
   const cached = context.mapCache.get(map);
   if (!cached) return null;
   const cells = inflateSync(cached.compressed);
   if (cells.length !== cached.width * cached.height) return null;
-  const portals = context.graph.get(map) ?? [];
-  const staticNpcs = references.flatMap(({ kind, source }) => {
-    if (kind === 'monster' || kind === 'boss_monster') return [];
-    const [path, line] = source.split(':');
-    const match = activeLines.get(path)?.[Number(line) - 1]
-      ?.match(/^\s*[a-z0-9_]+,(\d+),(\d+),\d+\s+/);
-    return match ? [{ x: Number(match[1]), y: Number(match[2]) }] : [];
-  });
-  const nearPortal = (x, y) => portals.some((p) =>
-    Math.abs(x - p.x) <= Math.max(8, p.xs) &&
-    Math.abs(y - p.y) <= Math.max(8, p.ys));
-  const nearNpc = (x, y) => staticNpcs.some((p) =>
-    Math.abs(x - p.x) <= 8 && Math.abs(y - p.y) <= 8);
-  // Prefer the center and deterministic nearby cells. This proves a source-level
-  // candidate, not successful live pc_setpos or absence of dynamic NPCs.
-  const cx = Math.floor(cached.width / 2), cy = Math.floor(cached.height / 2);
-  for (let radius = 0; radius <= Math.max(cached.width, cached.height); radius++)
-    for (let y = Math.max(1, cy - radius); y <= Math.min(cached.height - 2, cy + radius); y++)
-      for (let x = Math.max(1, cx - radius); x <= Math.min(cached.width - 2, cx + radius); x++)
-        if (Math.max(Math.abs(x - cx), Math.abs(y - cy)) === radius &&
-            [0, 3].includes(cells[y * cached.width + x]) &&
-            !nearPortal(x, y) && !nearNpc(x, y))
-          return { x, y };
+  const scripted = transfers.filter((t) => t.x > 0 && t.y > 0)
+    .sort((a, b) => a.x - b.x || a.y - b.y || a.source.localeCompare(b.source))[0];
+  const anchor = chooseLandingAnchor(context.graph, map) ?? scripted ?? null;
+  if (!anchor) return null;
+  for (let radius = 0; radius <= 8; radius++)
+    for (let dy = -radius; dy <= radius; dy++)
+      for (let dx = -radius; dx <= radius; dx++) {
+        const x = anchor.x + dx, y = anchor.y + dy;
+        if (Math.max(Math.abs(dx), Math.abs(dy)) === radius && x > 0 && y > 0 &&
+            x < cached.width - 1 && y < cached.height - 1 &&
+            [0, 3].includes(cells[y * cached.width + x])) return { x, y };
+      }
   return null;
 }
 
@@ -146,7 +139,7 @@ const rows = hidden.map((id) => {
     .reduce((n, spawn) => n + spawn.count, 0);
   const nativeNormalCount = staticSpawns.filter((s) => s.nativeNormal)
     .reduce((n, spawn) => n + spawn.count, 0);
-  const landing = safeLanding(id, e.references);
+  const landing = safeLanding(id, e.transfers);
   const persistent = mapExists && loaded && cached && !instance;
   const special = Boolean(instance);
   const directStaticValid = persistent && !town && !special && !restricted.length &&
@@ -223,6 +216,8 @@ for (const row of rows) {
     row.primary = 'PROJECTION_FALSE_NEGATIVE';
   else if (row.ordinaryCount > 0 && row.restricted.length)
     row.primary = 'OTHER_PROVEN_REASON';
+  else if (row.ordinaryCount > 0 && !row.landing)
+    row.primary = 'OTHER_PROVEN_REASON';
   else row.primary = 'TRUE_NO_NORMAL_SPAWN';
   row.fixRequired = row.shouldBePlayerFarmable;
   row.rootChildMappingValid = row.regionRoot === row.id ||
@@ -237,12 +232,12 @@ const classes = [
   'MAP_ALIAS_ROOT_CHILD_MAPPING_GAP', 'SPAWN_SOURCE_PARSER_GAP',
   'VERSION_CONTENT_MISMATCH', 'OTHER_PROVEN_REASON',
 ];
-assert.equal(rows.length, 105);
+assert.equal(rows.length, hidden.length);
 assert.equal(rows.filter((r) => !classes.includes(r.primary)).length, 0);
 assert.equal(rows.filter((r) => !r.rootChildMappingValid).length, 0);
 const counts = Object.fromEntries(classes.map((name) =>
   [name, rows.filter((r) => r.primary === name).length]));
-assert.equal(Object.values(counts).reduce((a, b) => a + b, 0), 105);
+assert.equal(Object.values(counts).reduce((a, b) => a + b, 0), hidden.length);
 const originalLabelled = rows.filter((r) => r.originalWorldMapLevelLabel);
 const falseNegatives = rows.filter((r) => r.directStaticValid &&
   r.shouldBePlayerFarmable);
@@ -330,7 +325,7 @@ const nativeCoreHash = createHash('sha256').update(await readFile(join(native,
   'src/map/persistent_agent.cpp'))).digest('hex');
 const lines = [
   '# World Map Hidden Map Classification Audit V2', '',
-  'Read-only classification of the 105 destinations hidden by the checked-in Player projection.',
+  `Read-only classification of the ${hidden.length} destinations hidden by the checked-in Player projection.`,
   '',
   `- Web checkpoint: e8a5e4d9fa908fe11474a1f8e9053c6ac7c3a68a`,
   `- Native HEAD: ${nativeHead}`,

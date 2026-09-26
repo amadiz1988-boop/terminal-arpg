@@ -3,13 +3,504 @@
   "name": "歐茲 峽谷",
   "category": "INSTANCE",
   "dungeon": null,
-  "totalMonsters": 0,
-  "normalMonsterCount": 0,
-  "levelRange": null,
-  "fullLevelRange": null,
+  "totalMonsters": 125,
+  "normalMonsterCount": 125,
+  "levelRange": {
+    "min": 165,
+    "max": 168
+  },
+  "fullLevelRange": {
+    "min": 101,
+    "max": 177
+  },
   "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
-  "primaryMonsters": [],
+  "primaryMonsters": [
+    {
+      "id": 21323,
+      "name": "鐵灰魔羌",
+      "level": 168,
+      "count": 60
+    },
+    {
+      "id": 21324,
+      "name": "幼灰狼",
+      "level": 165,
+      "count": 50
+    }
+  ],
   "resourceMonsters": [],
   "bossMonsters": [],
-  "monsters": []
+  "monsters": [
+    {
+      "id": 1781,
+      "aegisName": "DROSERA",
+      "name": "捕蟲草",
+      "count": 5,
+      "respawnMinMs": 0,
+      "respawnMaxMs": 0,
+      "level": 101,
+      "hp": 11179,
+      "baseExp": 1622,
+      "jobExp": 1467,
+      "attackMin": 518,
+      "attackMax": 54,
+      "defense": 86,
+      "magicDefense": 52,
+      "size": "中型",
+      "race": "植物",
+      "element": "地 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/rachel.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 7565,
+          "aegisName": "Sticky_Poison",
+          "name": "粘稠的毒",
+          "ratePerTenThousand": 1500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從植物那裡可以獲得到的粘稠的毒, 毒性很強會用在很多地方\n\n重量: 1"
+        },
+        {
+          "itemId": 6259,
+          "aegisName": "Drocera_Tentacle",
+          "name": "捕蟲草觸鬚",
+          "ratePerTenThousand": 50,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在阿盧納貝茲大地上到處生長的捕蟲草之粘粘觸鬚, 因不容掉落採集時要注意\n重量: 1"
+        },
+        {
+          "itemId": 1032,
+          "aegisName": "Blossom_Of_Maneater",
+          "name": "噬人樹花",
+          "ratePerTenThousand": 1000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "像人一般擁有各種器官的花。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 1033,
+          "aegisName": "Root_Of_Maneater",
+          "name": "噬人樹根",
+          "ratePerTenThousand": 1000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "如筋肉或血管般結實的植物的根。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 621,
+          "aegisName": "Bitter_Herb",
+          "name": "苦味草",
+          "ratePerTenThousand": 2,
+          "type": "消耗品",
+          "weight": 5,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "非常苦的草,是怪物波波利最喜愛的食物。\n種類: 認養寵物之物品\n重量: 5"
+        },
+        {
+          "itemId": 905,
+          "aegisName": "Stem",
+          "name": "植物梗",
+          "ratePerTenThousand": 500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "植物細長的梗,可以當做藥材,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 6217,
+          "aegisName": "Mandragora_Flowerpot",
+          "name": "曼陀羅魔花盆",
+          "ratePerTenThousand": 100,
+          "type": "其他",
+          "weight": 0.1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "實驗之用的曼陀羅魔花盆, 警告: 絕對不可摘取\n重量: 0.1"
+        },
+        {
+          "itemId": 4421,
+          "aegisName": "Drosera_Card",
+          "name": "捕蟲草卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "遠距離物理攻擊時CRI+15\n系列: 卡片\n裝置: 武器\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 1836,
+      "aegisName": "MAGMARING",
+      "name": "岩漿波利",
+      "count": 5,
+      "respawnMinMs": 0,
+      "respawnMaxMs": 0,
+      "level": 110,
+      "hp": 10919,
+      "baseExp": 1908,
+      "jobExp": 1822,
+      "attackMin": 591,
+      "attackMax": 44,
+      "defense": 190,
+      "magicDefense": 45,
+      "size": "小型",
+      "race": "無形",
+      "element": "火 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/rachel.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 7097,
+          "aegisName": "Burning_Heart",
+          "name": "燃燒的心臟",
+          "ratePerTenThousand": 1500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "以石頭形成的心臟,擁有火燃燒型態的魔力心臟。\n\n重量: 1"
+        },
+        {
+          "itemId": 757,
+          "aegisName": "Elunium_Stone",
+          "name": "鋁原石",
+          "ratePerTenThousand": 17,
+          "type": "其他",
+          "weight": 20,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以拿來煉鋁的礦石,拿來提煉作成盔甲。\n\n重量: 20"
+        },
+        {
+          "itemId": 4432,
+          "aegisName": "Magmaring_Card",
+          "name": "岩漿波利卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "ATK+5,對地屬性怪的物理傷害+10%,\n對喵族、動物型、植物型的CRI+15。\n系列: 卡片\n裝置: 披肩\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 21324,
+      "aegisName": "EP18_GREY_WOLF_BABY",
+      "name": "幼灰狼",
+      "count": 50,
+      "respawnMinMs": 0,
+      "respawnMaxMs": 0,
+      "level": 165,
+      "hp": 944679,
+      "baseExp": 62979,
+      "jobExp": 44085,
+      "attackMin": 1444,
+      "attackMax": 1650,
+      "defense": 393,
+      "magicDefense": 101,
+      "size": "小型",
+      "race": "動物",
+      "element": "無 1",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/rachel.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 919,
+          "aegisName": "Animal's_Skin",
+          "name": "動物外皮",
+          "ratePerTenThousand": 1000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "剝下動物的外皮得來的,可以用來折衣服或棉被等物品。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 582,
+          "aegisName": "Orange",
+          "name": "柳橙",
+          "ratePerTenThousand": 500,
+          "type": "恢復道具",
+          "weight": 2,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "橘色圓形的果實,清爽的香味,可以直接吃或打成果汁、果醬等可以恢復少量的 HP和 SP\n\n重量: 2"
+        },
+        {
+          "itemId": 25730,
+          "aegisName": "Zelunium_Ore",
+          "name": "鍺金原石",
+          "ratePerTenThousand": 90,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以打造鍺金石的原石, 可以提煉用於製作各類武器的鍺金石。\n\n重量 : 1"
+        },
+        {
+          "itemId": 25728,
+          "aegisName": "Shadowdecon_Ore",
+          "name": "影子神秘原石",
+          "ratePerTenThousand": 90,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以打造影子神秘金屬的原石, 可以提煉用於製作特殊裝備的影子神祕金屬。\n\n重量 : 1"
+        },
+        {
+          "itemId": 4023,
+          "aegisName": "Desert_Wolf_Babe_Card",
+          "name": "沙漠幼狼卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "INT+1。\n系列: 卡片\n裝置: 鎧甲\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 21323,
+      "aegisName": "EP18_GREY_GOAT",
+      "name": "鐵灰魔羌",
+      "count": 60,
+      "respawnMinMs": 0,
+      "respawnMaxMs": 0,
+      "level": 168,
+      "hp": 962975,
+      "baseExp": 64198,
+      "jobExp": 44939,
+      "attackMin": 3570,
+      "attackMax": 1792,
+      "defense": 420,
+      "magicDefense": 104,
+      "size": "中型",
+      "race": "動物",
+      "element": "無 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/rachel.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 7106,
+          "aegisName": "Goat's_Horn",
+          "name": "魔羌之角",
+          "ratePerTenThousand": 2280,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "魔羌堅固又雄壯的角,不小心被魔羌踩一腳的話,會住上醫院好幾個月的東西\n\n重量: 1"
+        },
+        {
+          "itemId": 7107,
+          "aegisName": "Gaoat's_Skin",
+          "name": "魔羌之毛皮",
+          "ratePerTenThousand": 1250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "髒兮兮的魔羌皮革,可是看起來很溫暖的皮革, 在這之前一定要洗乾淨的\n\n重量: 1"
+        },
+        {
+          "itemId": 507,
+          "aegisName": "Red_Herb",
+          "name": "紅色藥草",
+          "ratePerTenThousand": 250,
+          "type": "恢復道具",
+          "weight": 3,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "在治療傷處上有一定功效的珍貴藥草,可恢復少量的HP。\n\n重量: 3"
+        },
+        {
+          "itemId": 510,
+          "aegisName": "Blue_Herb",
+          "name": "藍色藥草",
+          "ratePerTenThousand": 500,
+          "type": "恢復道具",
+          "weight": 7,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "擁有特殊香味且能使精神飽滿的珍貴藥草,可恢復少量的SP。\n\n重量: 7"
+        },
+        {
+          "itemId": 25730,
+          "aegisName": "Zelunium_Ore",
+          "name": "鍺金原石",
+          "ratePerTenThousand": 80,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以打造鍺金石的原石, 可以提煉用於製作各類武器的鍺金石。\n\n重量 : 1"
+        },
+        {
+          "itemId": 25728,
+          "aegisName": "Shadowdecon_Ore",
+          "name": "影子神秘原石",
+          "ratePerTenThousand": 80,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以打造影子神秘金屬的原石, 可以提煉用於製作特殊裝備的影子神祕金屬。\n\n重量 : 1"
+        },
+        {
+          "itemId": 4150,
+          "aegisName": "Goat_Card",
+          "name": "魔羌卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "當精練+5以下時,DEF+2,MDEF+5。\n系列: 卡片\n裝備: 鎧甲\n重量: 1"
+        }
+      ]
+    },
+    {
+      "id": 21296,
+      "aegisName": "EP18_RAKEHAND",
+      "name": "幽靈之爪",
+      "count": 5,
+      "respawnMinMs": 0,
+      "respawnMaxMs": 0,
+      "level": 177,
+      "hp": 1514469,
+      "baseExp": 108187,
+      "jobExp": 75731,
+      "attackMin": 3938,
+      "attackMax": 1888,
+      "defense": 408,
+      "magicDefense": 109,
+      "size": "中型",
+      "race": "植物",
+      "element": "地 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/fields/rachel.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 938,
+          "aegisName": "Sticky_Mucus",
+          "name": "粘稠液體",
+          "ratePerTenThousand": 2000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "不知名的黏稠液體,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 6245,
+          "aegisName": "Black_Powder",
+          "name": "黑色粉末",
+          "ratePerTenThousand": 150,
+          "type": "其他",
+          "weight": 0.1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "有著暗黑光的粉末很容易沾在手上, 需小心不要進到眼睛裏。\n重量: 01"
+        },
+        {
+          "itemId": 25730,
+          "aegisName": "Zelunium_Ore",
+          "name": "鍺金原石",
+          "ratePerTenThousand": 100,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以打造鍺金石的原石, 可以提煉用於製作各類武器的鍺金石。\n\n重量 : 1"
+        },
+        {
+          "itemId": 25728,
+          "aegisName": "Shadowdecon_Ore",
+          "name": "影子神秘原石",
+          "ratePerTenThousand": 100,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以打造影子神秘金屬的原石, 可以提煉用於製作特殊裝備的影子神祕金屬。\n\n重量 : 1"
+        },
+        {
+          "itemId": 300212,
+          "aegisName": "EP18_Rakehand_Card",
+          "name": "幽靈之爪卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "DEF+50，受到暗屬性敵人的物理/魔法傷害-10%。\n系列 : 卡片\n裝備 : 鎧甲\n重量 : 1"
+        }
+      ]
+    }
+  ]
 }

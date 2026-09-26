@@ -3,13 +3,306 @@
   "name": "oz_dun01",
   "category": "SCRIPT_GATED",
   "dungeon": null,
-  "totalMonsters": 0,
-  "normalMonsterCount": 0,
-  "levelRange": null,
-  "fullLevelRange": null,
+  "totalMonsters": 145,
+  "normalMonsterCount": 145,
+  "levelRange": {
+    "min": 177,
+    "max": 179
+  },
+  "fullLevelRange": {
+    "min": 177,
+    "max": 181
+  },
   "levelRangeRule": "排除資源型與 Boss/MVP，再採出生數至少占可戰鬥普通怪 10% 的代表怪物",
-  "primaryMonsters": [],
+  "primaryMonsters": [
+    {
+      "id": 21296,
+      "name": "幽靈之爪",
+      "level": 177,
+      "count": 70
+    },
+    {
+      "id": 21295,
+      "name": "灰燼蟾蜍",
+      "level": 179,
+      "count": 65
+    }
+  ],
   "resourceMonsters": [],
   "bossMonsters": [],
-  "monsters": []
+  "monsters": [
+    {
+      "id": 21296,
+      "aegisName": "EP18_RAKEHAND",
+      "name": "幽靈之爪",
+      "count": 70,
+      "respawnMinMs": 0,
+      "respawnMaxMs": 0,
+      "level": 177,
+      "hp": 1514469,
+      "baseExp": 108187,
+      "jobExp": 75731,
+      "attackMin": 3938,
+      "attackMax": 1888,
+      "defense": 408,
+      "magicDefense": 109,
+      "size": "中型",
+      "race": "植物",
+      "element": "地 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/oz_dun.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 938,
+          "aegisName": "Sticky_Mucus",
+          "name": "粘稠液體",
+          "ratePerTenThousand": 2000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "不知名的黏稠液體,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 6245,
+          "aegisName": "Black_Powder",
+          "name": "黑色粉末",
+          "ratePerTenThousand": 150,
+          "type": "其他",
+          "weight": 0.1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "有著暗黑光的粉末很容易沾在手上, 需小心不要進到眼睛裏。\n重量: 01"
+        },
+        {
+          "itemId": 25730,
+          "aegisName": "Zelunium_Ore",
+          "name": "鍺金原石",
+          "ratePerTenThousand": 100,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以打造鍺金石的原石, 可以提煉用於製作各類武器的鍺金石。\n\n重量 : 1"
+        },
+        {
+          "itemId": 25728,
+          "aegisName": "Shadowdecon_Ore",
+          "name": "影子神秘原石",
+          "ratePerTenThousand": 100,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以打造影子神秘金屬的原石, 可以提煉用於製作特殊裝備的影子神祕金屬。\n\n重量 : 1"
+        },
+        {
+          "itemId": 300212,
+          "aegisName": "EP18_Rakehand_Card",
+          "name": "幽靈之爪卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "DEF+50，受到暗屬性敵人的物理/魔法傷害-10%。\n系列 : 卡片\n裝備 : 鎧甲\n重量 : 1"
+        }
+      ]
+    },
+    {
+      "id": 21295,
+      "aegisName": "EP18_ASH_TOAD",
+      "name": "灰燼蟾蜍",
+      "count": 65,
+      "respawnMinMs": 0,
+      "respawnMaxMs": 0,
+      "level": 179,
+      "hp": 1530687,
+      "baseExp": 109122,
+      "jobExp": 76385,
+      "attackMin": 4139,
+      "attackMax": 1885,
+      "defense": 329,
+      "magicDefense": 109,
+      "size": "中型",
+      "race": "動物",
+      "element": "火 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/oz_dun.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 908,
+          "aegisName": "Spawn",
+          "name": "青蛙蛋",
+          "ratePerTenThousand": 1000,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "從怪物羅達蛙取下來的卯,可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 7096,
+          "aegisName": "Cold_Magma",
+          "name": "凝固的岩漿",
+          "ratePerTenThousand": 250,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "擁有豐富礦物質的岩漿之角,把它融化掉好好提煉的話,可以做出好東西的樣子。\n\n重量: 1"
+        },
+        {
+          "itemId": 918,
+          "aegisName": "Sticky_Webfoot",
+          "name": "粘糊的蹼",
+          "ratePerTenThousand": 500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "割下有蹼的怪物的後腳得來的物品。可向收集商購買。\n\n重量: 1"
+        },
+        {
+          "itemId": 25730,
+          "aegisName": "Zelunium_Ore",
+          "name": "鍺金原石",
+          "ratePerTenThousand": 120,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以打造鍺金石的原石, 可以提煉用於製作各類武器的鍺金石。\n\n重量 : 1"
+        },
+        {
+          "itemId": 25728,
+          "aegisName": "Shadowdecon_Ore",
+          "name": "影子神秘原石",
+          "ratePerTenThousand": 120,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以打造影子神秘金屬的原石, 可以提煉用於製作特殊裝備的影子神祕金屬。\n\n重量 : 1"
+        },
+        {
+          "itemId": 300211,
+          "aegisName": "EP18_Ash_Toad_Card",
+          "name": "灰燼蟾蜍卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "地屬性魔法傷害+35%。\n使用技能時，SP消耗量+10%。\n系列 : 卡片\n裝備 : 飾品(左)\n重量 : 1"
+        }
+      ]
+    },
+    {
+      "id": 21297,
+      "aegisName": "EP18_SPARK",
+      "name": "幽靈火花",
+      "count": 10,
+      "respawnMinMs": 0,
+      "respawnMaxMs": 0,
+      "level": 181,
+      "hp": 2313388,
+      "baseExp": 154226,
+      "jobExp": 107958,
+      "attackMin": 4005,
+      "attackMax": 1569,
+      "defense": 331,
+      "magicDefense": 107,
+      "size": "小型",
+      "race": "無形",
+      "element": "火 2",
+      "isBoss": false,
+      "isMvp": false,
+      "isResource": false,
+      "sourceFiles": [
+        "npc/re/mobs/dungeons/oz_dun.txt"
+      ],
+      "drops": [
+        {
+          "itemId": 7097,
+          "aegisName": "Burning_Heart",
+          "name": "燃燒的心臟",
+          "ratePerTenThousand": 1500,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "以石頭形成的心臟,擁有火燃燒型態的魔力心臟。\n\n重量: 1"
+        },
+        {
+          "itemId": 7098,
+          "aegisName": "Live_Coal",
+          "name": "火種",
+          "ratePerTenThousand": 900,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "火苗還沒有完全熄滅,看到紅色的部份,還剩下氧氣在燃燒的型態。\n\n重量: 1"
+        },
+        {
+          "itemId": 25730,
+          "aegisName": "Zelunium_Ore",
+          "name": "鍺金原石",
+          "ratePerTenThousand": 120,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以打造鍺金石的原石, 可以提煉用於製作各類武器的鍺金石。\n\n重量 : 1"
+        },
+        {
+          "itemId": 25728,
+          "aegisName": "Shadowdecon_Ore",
+          "name": "影子神秘原石",
+          "ratePerTenThousand": 120,
+          "type": "其他",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "可以打造影子神秘金屬的原石, 可以提煉用於製作特殊裝備的影子神祕金屬。\n\n重量 : 1"
+        },
+        {
+          "itemId": 300213,
+          "aegisName": "EP18_Spark_Card",
+          "name": "幽靈火花卡片",
+          "ratePerTenThousand": 1,
+          "type": "卡片",
+          "weight": 1,
+          "attack": 0,
+          "defense": 0,
+          "slots": 0,
+          "description": "ATK+5。\n對火屬性敵人的物理傷害+10%，對不死型、惡魔型的暴擊率+15%。\n系列 : 卡片\n裝備 : 披肩\n重量 : 1"
+        }
+      ]
+    }
+  ]
 }

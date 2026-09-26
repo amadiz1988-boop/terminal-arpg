@@ -206,7 +206,9 @@
           "verus04"
         ],
         "availableMapIds": [
-          "juperos_01"
+          "jupe_core",
+          "juperos_01",
+          "juperos_02"
         ],
         "name": "優配擂斯廢墟外部",
         "position": {
@@ -471,7 +473,9 @@
         "mapIds": [
           "mosk_dun02"
         ],
-        "availableMapIds": [],
+        "availableMapIds": [
+          "mosk_dun02"
+        ],
         "name": "莫斯科森林深處",
         "position": {
           "x1": 209,
@@ -483,10 +487,10 @@
           "min": 81,
           "max": 87
         },
-        "availableForAfk": false,
-        "unlocked": false,
-        "selectable": false,
-        "unlockCondition": "目前不符合掛機地圖條件"
+        "availableForAfk": true,
+        "unlocked": true,
+        "selectable": true,
+        "unlockCondition": null
       },
       {
         "regionId": "region-19",
@@ -495,7 +499,9 @@
         "mapIds": [
           "bra_fild01"
         ],
-        "availableMapIds": [],
+        "availableMapIds": [
+          "bra_fild01"
+        ],
         "name": "巴西原野",
         "position": {
           "x1": 1000,
@@ -504,13 +510,13 @@
           "y2": 197
         },
         "levelRange": {
-          "min": 70,
-          "max": 70
+          "min": 68,
+          "max": 80
         },
-        "availableForAfk": false,
-        "unlocked": false,
-        "selectable": false,
-        "unlockCondition": "目前不符合掛機地圖條件"
+        "availableForAfk": true,
+        "unlocked": true,
+        "selectable": true,
+        "unlockCondition": null
       },
       {
         "regionId": "region-20",
@@ -688,7 +694,10 @@
           "kh_dun01",
           "kh_dun02"
         ],
-        "availableMapIds": [],
+        "availableMapIds": [
+          "kh_dun01",
+          "kh_dun02"
+        ],
         "name": "機械娃娃工廠 1樓",
         "position": {
           "x1": 889,
@@ -700,10 +709,10 @@
           "min": 100,
           "max": 112
         },
-        "availableForAfk": false,
-        "unlocked": false,
-        "selectable": false,
-        "unlockCondition": "目前不符合掛機地圖條件"
+        "availableForAfk": true,
+        "unlocked": true,
+        "selectable": true,
+        "unlockCondition": null
       },
       {
         "regionId": "region-27",
@@ -712,7 +721,9 @@
         "mapIds": [
           "mosk_dun03"
         ],
-        "availableMapIds": [],
+        "availableMapIds": [
+          "mosk_dun03"
+        ],
         "name": "莫斯科森林最深處",
         "position": {
           "x1": 307,
@@ -724,10 +735,10 @@
           "min": 84,
           "max": 87
         },
-        "availableForAfk": false,
-        "unlocked": false,
-        "selectable": false,
-        "unlockCondition": "目前不符合掛機地圖條件"
+        "availableForAfk": true,
+        "unlocked": true,
+        "selectable": true,
+        "unlockCondition": null
       },
       {
         "regionId": "region-28",
@@ -1169,7 +1180,9 @@
           "moro_cav",
           "moro_vol"
         ],
-        "availableMapIds": [],
+        "availableMapIds": [
+          "moro_vol"
+        ],
         "name": "火焰洞穴",
         "position": {
           "x1": 549,
@@ -1178,10 +1191,10 @@
           "y2": 231
         },
         "levelRange": null,
-        "availableForAfk": false,
-        "unlocked": false,
-        "selectable": false,
-        "unlockCondition": "目前不符合掛機地圖條件"
+        "availableForAfk": true,
+        "unlocked": true,
+        "selectable": true,
+        "unlockCondition": null
       },
       {
         "regionId": "region-46",
@@ -1272,7 +1285,10 @@
           "x2": 130,
           "y2": 268
         },
-        "levelRange": null,
+        "levelRange": {
+          "min": 177,
+          "max": 179
+        },
         "availableForAfk": false,
         "unlocked": false,
         "selectable": false,
@@ -1579,7 +1595,10 @@
           "bra_dun01",
           "bra_dun02"
         ],
-        "availableMapIds": [],
+        "availableMapIds": [
+          "bra_dun01",
+          "bra_dun02"
+        ],
         "name": "瀑布內的洞窟",
         "position": {
           "x1": 1115,
@@ -1588,13 +1607,13 @@
           "y2": 297
         },
         "levelRange": {
-          "min": 75,
-          "max": 75
+          "min": 42,
+          "max": 79
         },
-        "availableForAfk": false,
-        "unlocked": false,
-        "selectable": false,
-        "unlockCondition": "目前不符合掛機地圖條件"
+        "availableForAfk": true,
+        "unlocked": true,
+        "selectable": true,
+        "unlockCondition": null
       },
       {
         "regionId": "region-63",
@@ -1655,7 +1674,9 @@
         "mapIds": [
           "gw_fild01"
         ],
-        "availableMapIds": [],
+        "availableMapIds": [
+          "gw_fild01"
+        ],
         "name": "gw_fild01",
         "position": {
           "x1": 50,
@@ -1663,11 +1684,14 @@
           "x2": 106,
           "y2": 351
         },
-        "levelRange": null,
-        "availableForAfk": false,
-        "unlocked": false,
-        "selectable": false,
-        "unlockCondition": "目前不符合掛機地圖條件"
+        "levelRange": {
+          "min": 185,
+          "max": 187
+        },
+        "availableForAfk": true,
+        "unlocked": true,
+        "selectable": true,
+        "unlockCondition": null
       },
       {
         "regionId": "region-66",
@@ -1676,7 +1700,9 @@
         "mapIds": [
           "ra_fild10"
         ],
-        "availableMapIds": [],
+        "availableMapIds": [
+          "ra_fild10"
+        ],
         "name": "歐茲 峽谷",
         "position": {
           "x1": 107,
@@ -1684,11 +1710,14 @@
           "x2": 163,
           "y2": 351
         },
-        "levelRange": null,
-        "availableForAfk": false,
-        "unlocked": false,
-        "selectable": false,
-        "unlockCondition": "目前不符合掛機地圖條件"
+        "levelRange": {
+          "min": 165,
+          "max": 168
+        },
+        "availableForAfk": true,
+        "unlocked": true,
+        "selectable": true,
+        "unlockCondition": null
       },
       {
         "regionId": "region-67",
@@ -1697,7 +1726,9 @@
         "mapIds": [
           "ra_fild11"
         ],
-        "availableMapIds": [],
+        "availableMapIds": [
+          "ra_fild11"
+        ],
         "name": "伊達 平原",
         "position": {
           "x1": 164,
@@ -1705,11 +1736,14 @@
           "x2": 223,
           "y2": 351
         },
-        "levelRange": null,
-        "availableForAfk": false,
-        "unlocked": false,
-        "selectable": false,
-        "unlockCondition": "目前不符合掛機地圖條件"
+        "levelRange": {
+          "min": 165,
+          "max": 168
+        },
+        "availableForAfk": true,
+        "unlocked": true,
+        "selectable": true,
+        "unlockCondition": null
       },
       {
         "regionId": "region-68",
@@ -1983,7 +2017,9 @@
         "mapIds": [
           "gw_fild02"
         ],
-        "availableMapIds": [],
+        "availableMapIds": [
+          "gw_fild02"
+        ],
         "name": "gw_fild02",
         "position": {
           "x1": 50,
@@ -1991,11 +2027,14 @@
           "x2": 106,
           "y2": 409
         },
-        "levelRange": null,
-        "availableForAfk": false,
-        "unlocked": false,
-        "selectable": false,
-        "unlockCondition": "目前不符合掛機地圖條件"
+        "levelRange": {
+          "min": 185,
+          "max": 188
+        },
+        "availableForAfk": true,
+        "unlocked": true,
+        "selectable": true,
+        "unlockCondition": null
       },
       {
         "regionId": "region-80",
@@ -2123,9 +2162,11 @@
           "alde_dun01",
           "alde_dun02",
           "alde_dun03",
+          "alde_dun04",
           "c_tower1",
           "c_tower2",
-          "c_tower3"
+          "c_tower3",
+          "c_tower4"
         ],
         "name": "艾爾帕蘭鐘塔 地下1樓",
         "position": {
@@ -3912,7 +3953,8 @@
           "iz_dun01",
           "iz_dun02",
           "iz_dun03",
-          "iz_dun04"
+          "iz_dun04",
+          "iz_dun05"
         ],
         "name": "海底洞穴 1樓",
         "position": {
@@ -4314,7 +4356,8 @@
           "pay_dun00",
           "pay_dun01",
           "pay_dun02",
-          "pay_dun03"
+          "pay_dun03",
+          "pay_dun04"
         ],
         "name": "斐揚洞穴 1樓",
         "position": {
@@ -4728,7 +4771,10 @@
           "x2": 1076,
           "y2": 762
         },
-        "levelRange": null,
+        "levelRange": {
+          "min": 18,
+          "max": 20
+        },
         "availableForAfk": false,
         "unlocked": false,
         "selectable": false,
@@ -4869,7 +4915,9 @@
           "dic_dun03"
         ],
         "availableMapIds": [
-          "dic_dun01"
+          "dic_dun01",
+          "dic_dun02",
+          "dic_dun03"
         ],
         "name": "卡米達隧道",
         "position": {
@@ -5211,7 +5259,8 @@
           "ayo_dun02"
         ],
         "availableMapIds": [
-          "ayo_dun01"
+          "ayo_dun01",
+          "ayo_dun02"
         ],
         "name": "哎喲泰雅 古神殿迷宮",
         "position": {
@@ -5520,7 +5569,9 @@
         "mapIds": [
           "dew_dun01"
         ],
-        "availableMapIds": [],
+        "availableMapIds": [
+          "dew_dun01"
+        ],
         "name": "喀拉喀托火山島",
         "position": {
           "x1": 339,
@@ -5532,10 +5583,10 @@
           "min": 81,
           "max": 81
         },
-        "availableForAfk": false,
-        "unlocked": false,
-        "selectable": false,
-        "unlockCondition": "目前不符合掛機地圖條件"
+        "availableForAfk": true,
+        "unlocked": true,
+        "selectable": true,
+        "unlockCondition": null
       },
       {
         "regionId": "region-219",
@@ -5871,7 +5922,9 @@
         "mapIds": [
           "ma_dun01"
         ],
-        "availableMapIds": [],
+        "availableMapIds": [
+          "ma_dun01"
+        ],
         "name": "噩夢醫院 1樓",
         "position": {
           "x1": 680,
@@ -5883,10 +5936,10 @@
           "min": 105,
           "max": 111
         },
-        "availableForAfk": false,
-        "unlocked": false,
-        "selectable": false,
-        "unlockCondition": "目前不符合掛機地圖條件"
+        "availableForAfk": true,
+        "unlocked": true,
+        "selectable": true,
+        "unlockCondition": null
       },
       {
         "regionId": "region-233",
@@ -7008,13 +7061,13 @@
       "hasMvp": false,
       "dungeon": null,
       "category": "SERVICE_ONLY",
-      "farmSelectionAvailable": false,
-      "availabilityReason": "NO_SAFE_LANDING",
+      "farmSelectionAvailable": true,
+      "availabilityReason": null,
       "routeClass": null,
-      "availableForAfk": false,
-      "unlocked": false,
-      "selectable": false,
-      "grindable": false,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
       "worldPosition": {
         "mapId": "alde_dun04",
         "x1": 912,
@@ -7652,13 +7705,13 @@
       "hasMvp": false,
       "dungeon": null,
       "category": "SERVICE_ONLY",
-      "farmSelectionAvailable": false,
-      "availabilityReason": "NO_SAFE_LANDING",
+      "farmSelectionAvailable": true,
+      "availabilityReason": null,
       "routeClass": null,
-      "availableForAfk": false,
-      "unlocked": false,
-      "selectable": false,
-      "grindable": false,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
       "worldPosition": {
         "mapId": "ayo_dun02",
         "x1": 1048,
@@ -8095,27 +8148,39 @@
     "bra_dun01": {
       "id": "bra_dun01",
       "name": "瀑布內的洞窟",
-      "totalMonsters": 2,
-      "monsterTypes": 1,
-      "normalMonsterCount": 2,
-      "normalMonsterTypes": 1,
-      "combatMonsterCount": 2,
-      "combatMonsterTypes": 1,
-      "resourceMonsterCount": 0,
+      "totalMonsters": 172,
+      "monsterTypes": 8,
+      "normalMonsterCount": 172,
+      "normalMonsterTypes": 8,
+      "combatMonsterCount": 167,
+      "combatMonsterTypes": 7,
+      "resourceMonsterCount": 5,
       "levelRange": {
-        "min": 75,
-        "max": 75
+        "min": 42,
+        "max": 79
       },
       "fullLevelRange": {
-        "min": 75,
-        "max": 75
+        "min": 34,
+        "max": 79
       },
       "primaryMonsters": [
         {
-          "id": 2709,
-          "name": "迅捷食人魚",
+          "id": 2070,
+          "name": "食人魚",
           "level": 75,
-          "count": 2
+          "count": 80
+        },
+        {
+          "id": 2069,
+          "name": "亞拉",
+          "level": 79,
+          "count": 30
+        },
+        {
+          "id": 1141,
+          "name": "水母",
+          "level": 42,
+          "count": 20
         }
       ],
       "bossCount": 0,
@@ -8123,13 +8188,13 @@
       "hasMvp": false,
       "dungeon": null,
       "category": "SERVICE_ONLY",
-      "farmSelectionAvailable": false,
-      "availabilityReason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
+      "farmSelectionAvailable": true,
+      "availabilityReason": null,
       "routeClass": null,
-      "availableForAfk": false,
-      "unlocked": false,
-      "selectable": false,
-      "grindable": false,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
       "worldPosition": {
         "mapId": "bra_dun01",
         "x1": 1115,
@@ -8145,27 +8210,33 @@
     "bra_dun02": {
       "id": "bra_dun02",
       "name": "瀑布內的洞窟",
-      "totalMonsters": 3,
-      "monsterTypes": 1,
-      "normalMonsterCount": 3,
-      "normalMonsterTypes": 1,
-      "combatMonsterCount": 3,
-      "combatMonsterTypes": 1,
-      "resourceMonsterCount": 0,
+      "totalMonsters": 225,
+      "monsterTypes": 9,
+      "normalMonsterCount": 225,
+      "normalMonsterTypes": 9,
+      "combatMonsterCount": 218,
+      "combatMonsterTypes": 7,
+      "resourceMonsterCount": 7,
       "levelRange": {
-        "min": 79,
+        "min": 75,
         "max": 79
       },
       "fullLevelRange": {
-        "min": 79,
+        "min": 34,
         "max": 79
       },
       "primaryMonsters": [
         {
-          "id": 2795,
-          "name": "雄壯亞拉",
+          "id": 2069,
+          "name": "亞拉",
           "level": 79,
-          "count": 3
+          "count": 110
+        },
+        {
+          "id": 2070,
+          "name": "食人魚",
+          "level": 75,
+          "count": 60
         }
       ],
       "bossCount": 0,
@@ -8173,13 +8244,13 @@
       "hasMvp": false,
       "dungeon": null,
       "category": "SERVICE_ONLY",
-      "farmSelectionAvailable": false,
-      "availabilityReason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
+      "farmSelectionAvailable": true,
+      "availabilityReason": null,
       "routeClass": null,
-      "availableForAfk": false,
-      "unlocked": false,
-      "selectable": false,
-      "grindable": false,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
       "worldPosition": {
         "mapId": "bra_dun02",
         "x1": 1115,
@@ -8195,27 +8266,45 @@
     "bra_fild01": {
       "id": "bra_fild01",
       "name": "巴西原野",
-      "totalMonsters": 3,
-      "monsterTypes": 1,
-      "normalMonsterCount": 3,
-      "normalMonsterTypes": 1,
-      "combatMonsterCount": 3,
-      "combatMonsterTypes": 1,
-      "resourceMonsterCount": 0,
+      "totalMonsters": 228,
+      "monsterTypes": 8,
+      "normalMonsterCount": 228,
+      "normalMonsterTypes": 8,
+      "combatMonsterCount": 223,
+      "combatMonsterTypes": 7,
+      "resourceMonsterCount": 5,
       "levelRange": {
-        "min": 70,
-        "max": 70
+        "min": 68,
+        "max": 80
       },
       "fullLevelRange": {
-        "min": 70,
-        "max": 70
+        "min": 59,
+        "max": 80
       },
       "primaryMonsters": [
         {
-          "id": 2630,
-          "name": "憤怒巨嘴鳥",
+          "id": 2073,
+          "name": "巨嘴鳥",
           "level": 70,
-          "count": 3
+          "count": 60
+        },
+        {
+          "id": 2072,
+          "name": "美洲虎",
+          "level": 71,
+          "count": 55
+        },
+        {
+          "id": 2074,
+          "name": "小綠人",
+          "level": 68,
+          "count": 50
+        },
+        {
+          "id": 2071,
+          "name": "無頭騾",
+          "level": 80,
+          "count": 40
         }
       ],
       "bossCount": 0,
@@ -8223,13 +8312,13 @@
       "hasMvp": false,
       "dungeon": null,
       "category": "SERVICE_ONLY",
-      "farmSelectionAvailable": false,
-      "availabilityReason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
+      "farmSelectionAvailable": true,
+      "availabilityReason": null,
       "routeClass": null,
-      "availableForAfk": false,
-      "unlocked": false,
-      "selectable": false,
-      "grindable": false,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
       "worldPosition": {
         "mapId": "bra_fild01",
         "x1": 1000,
@@ -8509,13 +8598,13 @@
       "hasMvp": false,
       "dungeon": null,
       "category": "SERVICE_ONLY",
-      "farmSelectionAvailable": false,
-      "availabilityReason": "NO_SAFE_LANDING",
+      "farmSelectionAvailable": true,
+      "availabilityReason": null,
       "routeClass": null,
-      "availableForAfk": false,
-      "unlocked": false,
-      "selectable": false,
-      "grindable": false,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
       "worldPosition": {
         "mapId": "c_tower4",
         "x1": 912,
@@ -9136,13 +9225,13 @@
       "hasMvp": false,
       "dungeon": null,
       "category": "SERVICE_ONLY",
-      "farmSelectionAvailable": false,
-      "availabilityReason": "NO_SAFE_LANDING",
+      "farmSelectionAvailable": true,
+      "availabilityReason": null,
       "routeClass": null,
-      "availableForAfk": false,
-      "unlocked": false,
-      "selectable": false,
-      "grindable": false,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
       "worldPosition": {
         "mapId": "dew_dun01",
         "x1": 339,
@@ -9421,13 +9510,13 @@
       "hasMvp": false,
       "dungeon": null,
       "category": "SERVICE_ONLY",
-      "farmSelectionAvailable": false,
-      "availabilityReason": "NO_SAFE_LANDING",
+      "farmSelectionAvailable": true,
+      "availabilityReason": null,
       "routeClass": null,
-      "availableForAfk": false,
-      "unlocked": false,
-      "selectable": false,
-      "grindable": false,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
       "worldPosition": {
         "mapId": "dic_dun02",
         "x1": 821,
@@ -9489,13 +9578,13 @@
       "hasMvp": false,
       "dungeon": null,
       "category": "SERVICE_ONLY",
-      "farmSelectionAvailable": false,
-      "availabilityReason": "NO_SAFE_LANDING",
+      "farmSelectionAvailable": true,
+      "availabilityReason": null,
       "routeClass": null,
-      "availableForAfk": false,
-      "unlocked": false,
-      "selectable": false,
-      "grindable": false,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
       "worldPosition": {
         "mapId": "dic_dun03",
         "x1": 821,
@@ -10142,23 +10231,60 @@
     "ein_dun03": {
       "id": "ein_dun03",
       "name": "艾音貝赫礦山3樓",
-      "totalMonsters": 0,
-      "monsterTypes": 0,
-      "normalMonsterCount": 0,
-      "normalMonsterTypes": 0,
-      "combatMonsterCount": 0,
-      "combatMonsterTypes": 0,
-      "resourceMonsterCount": 0,
-      "levelRange": null,
-      "fullLevelRange": null,
-      "primaryMonsters": [],
+      "totalMonsters": 295,
+      "monsterTypes": 10,
+      "normalMonsterCount": 295,
+      "normalMonsterTypes": 10,
+      "combatMonsterCount": 292,
+      "combatMonsterTypes": 9,
+      "resourceMonsterCount": 3,
+      "levelRange": {
+        "min": 188,
+        "max": 190
+      },
+      "fullLevelRange": {
+        "min": 188,
+        "max": 191
+      },
+      "primaryMonsters": [
+        {
+          "id": 20594,
+          "name": "綠色礦石魔",
+          "level": 190,
+          "count": 40
+        },
+        {
+          "id": 20595,
+          "name": "紅色礦石魔",
+          "level": 190,
+          "count": 40
+        },
+        {
+          "id": 20596,
+          "name": "白色礦石魔",
+          "level": 190,
+          "count": 40
+        },
+        {
+          "id": 20597,
+          "name": "紫色礦石魔",
+          "level": 190,
+          "count": 40
+        },
+        {
+          "id": 20592,
+          "name": "奪命毒霧",
+          "level": 188,
+          "count": 35
+        }
+      ],
       "bossCount": 0,
       "bossTypes": 0,
       "hasMvp": false,
       "dungeon": null,
       "category": "SCRIPT_GATED",
       "farmSelectionAvailable": false,
-      "availabilityReason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
+      "availabilityReason": "MAP_ACCESS_RESTRICTED",
       "routeClass": null,
       "availableForAfk": false,
       "unlocked": false,
@@ -13299,28 +13425,53 @@
     "gw_fild01": {
       "id": "gw_fild01",
       "name": "gw_fild01",
-      "totalMonsters": 0,
-      "monsterTypes": 0,
-      "normalMonsterCount": 0,
-      "normalMonsterTypes": 0,
-      "combatMonsterCount": 0,
-      "combatMonsterTypes": 0,
+      "totalMonsters": 155,
+      "monsterTypes": 3,
+      "normalMonsterCount": 155,
+      "normalMonsterTypes": 3,
+      "combatMonsterCount": 155,
+      "combatMonsterTypes": 3,
       "resourceMonsterCount": 0,
-      "levelRange": null,
-      "fullLevelRange": null,
-      "primaryMonsters": [],
+      "levelRange": {
+        "min": 185,
+        "max": 187
+      },
+      "fullLevelRange": {
+        "min": 185,
+        "max": 187
+      },
+      "primaryMonsters": [
+        {
+          "id": 21303,
+          "name": "灰燼波利",
+          "level": 185,
+          "count": 70
+        },
+        {
+          "id": 21302,
+          "name": "灰燼蝗蟲",
+          "level": 185,
+          "count": 50
+        },
+        {
+          "id": 21304,
+          "name": "灰狼",
+          "level": 187,
+          "count": 35
+        }
+      ],
       "bossCount": 0,
       "bossTypes": 0,
       "hasMvp": false,
       "dungeon": null,
       "category": "INSTANCE",
-      "farmSelectionAvailable": false,
-      "availabilityReason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
+      "farmSelectionAvailable": true,
+      "availabilityReason": null,
       "routeClass": null,
-      "availableForAfk": false,
-      "unlocked": false,
-      "selectable": false,
-      "grindable": false,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
       "worldPosition": {
         "mapId": "gw_fild01",
         "x1": 50,
@@ -13336,28 +13487,59 @@
     "gw_fild02": {
       "id": "gw_fild02",
       "name": "gw_fild02",
-      "totalMonsters": 0,
-      "monsterTypes": 0,
-      "normalMonsterCount": 0,
-      "normalMonsterTypes": 0,
-      "combatMonsterCount": 0,
-      "combatMonsterTypes": 0,
+      "totalMonsters": 170,
+      "monsterTypes": 5,
+      "normalMonsterCount": 170,
+      "normalMonsterTypes": 5,
+      "combatMonsterCount": 170,
+      "combatMonsterTypes": 5,
       "resourceMonsterCount": 0,
-      "levelRange": null,
-      "fullLevelRange": null,
-      "primaryMonsters": [],
+      "levelRange": {
+        "min": 185,
+        "max": 188
+      },
+      "fullLevelRange": {
+        "min": 185,
+        "max": 188
+      },
+      "primaryMonsters": [
+        {
+          "id": 21305,
+          "name": "風滾草波利",
+          "level": 185,
+          "count": 60
+        },
+        {
+          "id": 21304,
+          "name": "灰狼",
+          "level": 187,
+          "count": 35
+        },
+        {
+          "id": 21306,
+          "name": "風火老鷹",
+          "level": 188,
+          "count": 35
+        },
+        {
+          "id": 21307,
+          "name": "幽靈灰狼",
+          "level": 186,
+          "count": 25
+        }
+      ],
       "bossCount": 0,
       "bossTypes": 0,
       "hasMvp": false,
       "dungeon": null,
       "category": "QUEST_GATED",
-      "farmSelectionAvailable": false,
-      "availabilityReason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
+      "farmSelectionAvailable": true,
+      "availabilityReason": null,
       "routeClass": null,
-      "availableForAfk": false,
-      "unlocked": false,
-      "selectable": false,
-      "grindable": false,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
       "worldPosition": {
         "mapId": "gw_fild02",
         "x1": 50,
@@ -15181,13 +15363,13 @@
         "order": 6
       },
       "category": "SERVICE_ONLY",
-      "farmSelectionAvailable": false,
-      "availabilityReason": "NO_SAFE_LANDING",
+      "farmSelectionAvailable": true,
+      "availabilityReason": null,
       "routeClass": null,
-      "availableForAfk": false,
-      "unlocked": false,
-      "selectable": false,
-      "grindable": false,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
       "worldPosition": {
         "mapId": "iz_dun05",
         "x1": 976,
@@ -15972,13 +16154,13 @@
       "hasMvp": false,
       "dungeon": null,
       "category": "SERVICE_ONLY",
-      "farmSelectionAvailable": false,
-      "availabilityReason": "NO_SAFE_LANDING",
+      "farmSelectionAvailable": true,
+      "availabilityReason": null,
       "routeClass": null,
-      "availableForAfk": false,
-      "unlocked": false,
-      "selectable": false,
-      "grindable": false,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
       "worldPosition": {
         "mapId": "jupe_core",
         "x1": 984,
@@ -16114,13 +16296,13 @@
       "hasMvp": false,
       "dungeon": null,
       "category": "SERVICE_ONLY",
-      "farmSelectionAvailable": false,
-      "availabilityReason": "NO_SAFE_LANDING",
+      "farmSelectionAvailable": true,
+      "availabilityReason": null,
       "routeClass": null,
-      "availableForAfk": false,
-      "unlocked": false,
-      "selectable": false,
-      "grindable": false,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
       "worldPosition": {
         "mapId": "juperos_02",
         "x1": 984,
@@ -16170,13 +16352,13 @@
       "hasMvp": false,
       "dungeon": null,
       "category": "SERVICE_ONLY",
-      "farmSelectionAvailable": false,
-      "availabilityReason": "NO_SAFE_LANDING",
+      "farmSelectionAvailable": true,
+      "availabilityReason": null,
       "routeClass": null,
-      "availableForAfk": false,
-      "unlocked": false,
-      "selectable": false,
-      "grindable": false,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
       "worldPosition": {
         "mapId": "kh_dun01",
         "x1": 889,
@@ -16238,13 +16420,13 @@
       "hasMvp": false,
       "dungeon": null,
       "category": "SERVICE_ONLY",
-      "farmSelectionAvailable": false,
-      "availabilityReason": "NO_SAFE_LANDING",
+      "farmSelectionAvailable": true,
+      "availabilityReason": null,
       "routeClass": null,
-      "availableForAfk": false,
-      "unlocked": false,
-      "selectable": false,
-      "grindable": false,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
       "worldPosition": {
         "mapId": "kh_dun02",
         "x1": 889,
@@ -16260,16 +16442,35 @@
     "lasa_dun01": {
       "id": "lasa_dun01",
       "name": "龍巢穴1樓",
-      "totalMonsters": 0,
-      "monsterTypes": 0,
-      "normalMonsterCount": 0,
-      "normalMonsterTypes": 0,
-      "combatMonsterCount": 0,
-      "combatMonsterTypes": 0,
+      "totalMonsters": 90,
+      "monsterTypes": 2,
+      "normalMonsterCount": 90,
+      "normalMonsterTypes": 2,
+      "combatMonsterCount": 90,
+      "combatMonsterTypes": 2,
       "resourceMonsterCount": 0,
-      "levelRange": null,
-      "fullLevelRange": null,
-      "primaryMonsters": [],
+      "levelRange": {
+        "min": 18,
+        "max": 20
+      },
+      "fullLevelRange": {
+        "min": 18,
+        "max": 20
+      },
+      "primaryMonsters": [
+        {
+          "id": 3502,
+          "name": "偵查巴西利斯克",
+          "level": 20,
+          "count": 60
+        },
+        {
+          "id": 3501,
+          "name": "變形魔菇",
+          "level": 18,
+          "count": 30
+        }
+      ],
       "bossCount": 0,
       "bossTypes": 0,
       "hasMvp": false,
@@ -16297,16 +16498,35 @@
     "lasa_dun02": {
       "id": "lasa_dun02",
       "name": "龍巢穴2樓",
-      "totalMonsters": 0,
-      "monsterTypes": 0,
-      "normalMonsterCount": 0,
-      "normalMonsterTypes": 0,
-      "combatMonsterCount": 0,
-      "combatMonsterTypes": 0,
+      "totalMonsters": 90,
+      "monsterTypes": 2,
+      "normalMonsterCount": 90,
+      "normalMonsterTypes": 2,
+      "combatMonsterCount": 90,
+      "combatMonsterTypes": 2,
       "resourceMonsterCount": 0,
-      "levelRange": null,
-      "fullLevelRange": null,
-      "primaryMonsters": [],
+      "levelRange": {
+        "min": 140,
+        "max": 144
+      },
+      "fullLevelRange": {
+        "min": 140,
+        "max": 144
+      },
+      "primaryMonsters": [
+        {
+          "id": 3503,
+          "name": "突擊巴西利斯克",
+          "level": 140,
+          "count": 60
+        },
+        {
+          "id": 3506,
+          "name": "叢林曼陀羅魔花",
+          "level": 144,
+          "count": 30
+        }
+      ],
       "bossCount": 0,
       "bossTypes": 0,
       "hasMvp": false,
@@ -16334,16 +16554,35 @@
     "lasa_dun03": {
       "id": "lasa_dun03",
       "name": "龍巢穴3樓",
-      "totalMonsters": 0,
-      "monsterTypes": 0,
-      "normalMonsterCount": 0,
-      "normalMonsterTypes": 0,
-      "combatMonsterCount": 0,
-      "combatMonsterTypes": 0,
+      "totalMonsters": 170,
+      "monsterTypes": 2,
+      "normalMonsterCount": 170,
+      "normalMonsterTypes": 2,
+      "combatMonsterCount": 170,
+      "combatMonsterTypes": 2,
       "resourceMonsterCount": 0,
-      "levelRange": null,
-      "fullLevelRange": null,
-      "primaryMonsters": [],
+      "levelRange": {
+        "min": 148,
+        "max": 150
+      },
+      "fullLevelRange": {
+        "min": 148,
+        "max": 150
+      },
+      "primaryMonsters": [
+        {
+          "id": 3504,
+          "name": "特種巴西利斯克",
+          "level": 148,
+          "count": 110
+        },
+        {
+          "id": 3507,
+          "name": "果實食人蜘蛛",
+          "level": 150,
+          "count": 60
+        }
+      ],
       "bossCount": 0,
       "bossTypes": 0,
       "hasMvp": false,
@@ -17290,13 +17529,13 @@
       "hasMvp": false,
       "dungeon": null,
       "category": "SERVICE_ONLY",
-      "farmSelectionAvailable": false,
-      "availabilityReason": "NO_SAFE_LANDING",
+      "farmSelectionAvailable": true,
+      "availabilityReason": null,
       "routeClass": null,
-      "availableForAfk": false,
-      "unlocked": false,
-      "selectable": false,
-      "grindable": false,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
       "worldPosition": {
         "mapId": "ma_dun01",
         "x1": 680,
@@ -17621,23 +17860,60 @@
     "mag_dun03": {
       "id": "mag_dun03",
       "name": "朱諾 諾可羅德 3樓",
-      "totalMonsters": 0,
-      "monsterTypes": 0,
-      "normalMonsterCount": 0,
-      "normalMonsterTypes": 0,
-      "combatMonsterCount": 0,
-      "combatMonsterTypes": 0,
+      "totalMonsters": 167,
+      "monsterTypes": 7,
+      "normalMonsterCount": 167,
+      "normalMonsterTypes": 7,
+      "combatMonsterCount": 167,
+      "combatMonsterTypes": 7,
       "resourceMonsterCount": 0,
-      "levelRange": null,
-      "fullLevelRange": null,
-      "primaryMonsters": [],
+      "levelRange": {
+        "min": 171,
+        "max": 179
+      },
+      "fullLevelRange": {
+        "min": 171,
+        "max": 179
+      },
+      "primaryMonsters": [
+        {
+          "id": 20375,
+          "name": "堅硬七彩地龍",
+          "level": 173,
+          "count": 32
+        },
+        {
+          "id": 20374,
+          "name": "堅硬七彩飛龍",
+          "level": 174,
+          "count": 32
+        },
+        {
+          "id": 20373,
+          "name": "堅硬七彩夢魘",
+          "level": 179,
+          "count": 27
+        },
+        {
+          "id": 20376,
+          "name": "堅硬爆炎蝙蝠",
+          "level": 171,
+          "count": 20
+        },
+        {
+          "id": 20377,
+          "name": "堅硬卡浩",
+          "level": 173,
+          "count": 20
+        }
+      ],
       "bossCount": 0,
       "bossTypes": 0,
       "hasMvp": false,
       "dungeon": null,
       "category": "SCRIPT_GATED",
       "farmSelectionAvailable": false,
-      "availabilityReason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
+      "availabilityReason": "MAP_ACCESS_RESTRICTED",
       "routeClass": null,
       "availableForAfk": false,
       "unlocked": false,
@@ -20218,28 +20494,59 @@
     "moro_vol": {
       "id": "moro_vol",
       "name": "火焰盆地",
-      "totalMonsters": 0,
-      "monsterTypes": 0,
-      "normalMonsterCount": 0,
-      "normalMonsterTypes": 0,
-      "combatMonsterCount": 0,
-      "combatMonsterTypes": 0,
-      "resourceMonsterCount": 0,
-      "levelRange": null,
-      "fullLevelRange": null,
-      "primaryMonsters": [],
-      "bossCount": 0,
-      "bossTypes": 0,
+      "totalMonsters": 235,
+      "monsterTypes": 12,
+      "normalMonsterCount": 175,
+      "normalMonsterTypes": 8,
+      "combatMonsterCount": 130,
+      "combatMonsterTypes": 5,
+      "resourceMonsterCount": 45,
+      "levelRange": {
+        "min": 141,
+        "max": 148
+      },
+      "fullLevelRange": {
+        "min": 141,
+        "max": 150
+      },
+      "primaryMonsters": [
+        {
+          "id": 3020,
+          "name": "火焰禿鷹",
+          "level": 141,
+          "count": 30
+        },
+        {
+          "id": 3021,
+          "name": "火焰泥人",
+          "level": 143,
+          "count": 30
+        },
+        {
+          "id": 3022,
+          "name": "火焰傘蜥",
+          "level": 147,
+          "count": 30
+        },
+        {
+          "id": 3023,
+          "name": "火焰巨石怪",
+          "level": 148,
+          "count": 30
+        }
+      ],
+      "bossCount": 60,
+      "bossTypes": 4,
       "hasMvp": false,
       "dungeon": null,
       "category": "SERVICE_ONLY",
-      "farmSelectionAvailable": false,
-      "availabilityReason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
+      "farmSelectionAvailable": true,
+      "availabilityReason": null,
       "routeClass": null,
-      "availableForAfk": false,
-      "unlocked": false,
-      "selectable": false,
-      "grindable": false,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
       "worldPosition": {
         "mapId": "moro_vol",
         "x1": 549,
@@ -20431,13 +20738,13 @@
       "hasMvp": false,
       "dungeon": null,
       "category": "SERVICE_ONLY",
-      "farmSelectionAvailable": false,
-      "availabilityReason": "NO_SAFE_LANDING",
+      "farmSelectionAvailable": true,
+      "availabilityReason": null,
       "routeClass": null,
-      "availableForAfk": false,
-      "unlocked": false,
-      "selectable": false,
-      "grindable": false,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
       "worldPosition": {
         "mapId": "mosk_dun02",
         "x1": 209,
@@ -20493,13 +20800,13 @@
       "hasMvp": false,
       "dungeon": null,
       "category": "SERVICE_ONLY",
-      "farmSelectionAvailable": false,
-      "availabilityReason": "NO_SAFE_LANDING",
+      "farmSelectionAvailable": true,
+      "availabilityReason": null,
       "routeClass": null,
-      "availableForAfk": false,
-      "unlocked": false,
-      "selectable": false,
-      "grindable": false,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
       "worldPosition": {
         "mapId": "mosk_dun03",
         "x1": 307,
@@ -21252,23 +21559,42 @@
     "oz_dun01": {
       "id": "oz_dun01",
       "name": "oz_dun01",
-      "totalMonsters": 0,
-      "monsterTypes": 0,
-      "normalMonsterCount": 0,
-      "normalMonsterTypes": 0,
-      "combatMonsterCount": 0,
-      "combatMonsterTypes": 0,
+      "totalMonsters": 145,
+      "monsterTypes": 3,
+      "normalMonsterCount": 145,
+      "normalMonsterTypes": 3,
+      "combatMonsterCount": 145,
+      "combatMonsterTypes": 3,
       "resourceMonsterCount": 0,
-      "levelRange": null,
-      "fullLevelRange": null,
-      "primaryMonsters": [],
+      "levelRange": {
+        "min": 177,
+        "max": 179
+      },
+      "fullLevelRange": {
+        "min": 177,
+        "max": 181
+      },
+      "primaryMonsters": [
+        {
+          "id": 21296,
+          "name": "幽靈之爪",
+          "level": 177,
+          "count": 70
+        },
+        {
+          "id": 21295,
+          "name": "灰燼蟾蜍",
+          "level": 179,
+          "count": 65
+        }
+      ],
       "bossCount": 0,
       "bossTypes": 0,
       "hasMvp": false,
       "dungeon": null,
       "category": "SCRIPT_GATED",
       "farmSelectionAvailable": false,
-      "availabilityReason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
+      "availabilityReason": "MAP_ACCESS_RESTRICTED",
       "routeClass": null,
       "availableForAfk": false,
       "unlocked": false,
@@ -21289,23 +21615,54 @@
     "oz_dun02": {
       "id": "oz_dun02",
       "name": "oz_dun02",
-      "totalMonsters": 0,
-      "monsterTypes": 0,
-      "normalMonsterCount": 0,
-      "normalMonsterTypes": 0,
-      "combatMonsterCount": 0,
-      "combatMonsterTypes": 0,
+      "totalMonsters": 145,
+      "monsterTypes": 4,
+      "normalMonsterCount": 145,
+      "normalMonsterTypes": 4,
+      "combatMonsterCount": 145,
+      "combatMonsterTypes": 4,
       "resourceMonsterCount": 0,
-      "levelRange": null,
-      "fullLevelRange": null,
-      "primaryMonsters": [],
+      "levelRange": {
+        "min": 181,
+        "max": 212
+      },
+      "fullLevelRange": {
+        "min": 181,
+        "max": 212
+      },
+      "primaryMonsters": [
+        {
+          "id": 21298,
+          "name": "火爪狼牙",
+          "level": 212,
+          "count": 60
+        },
+        {
+          "id": 21299,
+          "name": "熔岩波利",
+          "level": 185,
+          "count": 35
+        },
+        {
+          "id": 21297,
+          "name": "幽靈火花",
+          "level": 181,
+          "count": 25
+        },
+        {
+          "id": 21300,
+          "name": "熔岩蟾蜍",
+          "level": 211,
+          "count": 25
+        }
+      ],
       "bossCount": 0,
       "bossTypes": 0,
       "hasMvp": false,
       "dungeon": null,
       "category": "SCRIPT_GATED",
       "farmSelectionAvailable": false,
-      "availabilityReason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
+      "availabilityReason": "MAP_ACCESS_RESTRICTED",
       "routeClass": null,
       "availableForAfk": false,
       "unlocked": false,
@@ -21705,13 +22062,13 @@
         "order": 5
       },
       "category": "SERVICE_ONLY",
-      "farmSelectionAvailable": false,
-      "availabilityReason": "NO_SAFE_LANDING",
+      "farmSelectionAvailable": true,
+      "availabilityReason": null,
       "routeClass": null,
-      "availableForAfk": false,
-      "unlocked": false,
-      "selectable": false,
-      "grindable": false,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
       "worldPosition": {
         "mapId": "pay_dun04",
         "x1": 1065,
@@ -24052,28 +24409,47 @@
     "ra_fild10": {
       "id": "ra_fild10",
       "name": "歐茲 峽谷",
-      "totalMonsters": 0,
-      "monsterTypes": 0,
-      "normalMonsterCount": 0,
-      "normalMonsterTypes": 0,
-      "combatMonsterCount": 0,
-      "combatMonsterTypes": 0,
+      "totalMonsters": 125,
+      "monsterTypes": 5,
+      "normalMonsterCount": 125,
+      "normalMonsterTypes": 5,
+      "combatMonsterCount": 125,
+      "combatMonsterTypes": 5,
       "resourceMonsterCount": 0,
-      "levelRange": null,
-      "fullLevelRange": null,
-      "primaryMonsters": [],
+      "levelRange": {
+        "min": 165,
+        "max": 168
+      },
+      "fullLevelRange": {
+        "min": 101,
+        "max": 177
+      },
+      "primaryMonsters": [
+        {
+          "id": 21323,
+          "name": "鐵灰魔羌",
+          "level": 168,
+          "count": 60
+        },
+        {
+          "id": 21324,
+          "name": "幼灰狼",
+          "level": 165,
+          "count": 50
+        }
+      ],
       "bossCount": 0,
       "bossTypes": 0,
       "hasMvp": false,
       "dungeon": null,
       "category": "INSTANCE",
-      "farmSelectionAvailable": false,
-      "availabilityReason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
+      "farmSelectionAvailable": true,
+      "availabilityReason": null,
       "routeClass": null,
-      "availableForAfk": false,
-      "unlocked": false,
-      "selectable": false,
-      "grindable": false,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
       "worldPosition": {
         "mapId": "ra_fild10",
         "x1": 107,
@@ -24089,28 +24465,47 @@
     "ra_fild11": {
       "id": "ra_fild11",
       "name": "伊達 平原",
-      "totalMonsters": 0,
-      "monsterTypes": 0,
-      "normalMonsterCount": 0,
-      "normalMonsterTypes": 0,
-      "combatMonsterCount": 0,
-      "combatMonsterTypes": 0,
-      "resourceMonsterCount": 0,
-      "levelRange": null,
-      "fullLevelRange": null,
-      "primaryMonsters": [],
+      "totalMonsters": 155,
+      "monsterTypes": 6,
+      "normalMonsterCount": 155,
+      "normalMonsterTypes": 6,
+      "combatMonsterCount": 135,
+      "combatMonsterTypes": 4,
+      "resourceMonsterCount": 20,
+      "levelRange": {
+        "min": 165,
+        "max": 168
+      },
+      "fullLevelRange": {
+        "min": 101,
+        "max": 177
+      },
+      "primaryMonsters": [
+        {
+          "id": 21323,
+          "name": "鐵灰魔羌",
+          "level": 168,
+          "count": 70
+        },
+        {
+          "id": 21324,
+          "name": "幼灰狼",
+          "level": 165,
+          "count": 50
+        }
+      ],
       "bossCount": 0,
       "bossTypes": 0,
       "hasMvp": false,
       "dungeon": null,
       "category": "QUEST_GATED",
-      "farmSelectionAvailable": false,
-      "availabilityReason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
+      "farmSelectionAvailable": true,
+      "availabilityReason": null,
       "routeClass": null,
-      "availableForAfk": false,
-      "unlocked": false,
-      "selectable": false,
-      "grindable": false,
+      "availableForAfk": true,
+      "unlocked": true,
+      "selectable": true,
+      "grindable": true,
       "worldPosition": {
         "mapId": "ra_fild11",
         "x1": 164,

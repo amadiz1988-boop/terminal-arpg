@@ -14,23 +14,35 @@
     "redDungeonGroups": 25,
     "redDungeonFloors": 122,
     "visibleUniqueFloors": 360,
-    "farmEnabledFloors": 251,
-    "teleportEnabledFloors": 258,
+    "farmEnabledFloors": 274,
+    "teleportEnabledFloors": 281,
     "visibleRootDescendants": 360,
     "nonPersistentChildrenBlocked": 2,
-    "nonVisibleMapsDeferred": 86,
+    "nonVisibleMapsDeferred": 100,
     "questAccessReviewRequired": 0,
     "visibleLabelUnclassified": 0,
     "visibleFloorUnclassified": 0
   },
   "blockedByReason": {
     "TOWN_NOT_SUPPORTED_FOR_WORLD_TELEPORT": 22,
-    "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE": 55,
-    "NO_SAFE_LANDING": 16,
-    "MAP_ACCESS_RESTRICTED": 8,
-    "NO_ELIGIBLE_NORMAL_FARM_MONSTER": 1
+    "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE": 43,
+    "MAP_ACCESS_RESTRICTED": 12,
+    "NO_ELIGIBLE_NORMAL_FARM_MONSTER": 1,
+    "NO_SAFE_LANDING": 1
   },
   "deferredMaps": [
+    {
+      "mapId": "amicitia1",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
+      "mapId": "amicitia2",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
+      "mapId": "ant_d02_i",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
     {
       "mapId": "arug_dun01",
       "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
@@ -84,11 +96,31 @@
       "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
     },
     {
+      "mapId": "ein_d02_i",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
+      "mapId": "for_dun01",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
+      "mapId": "for_dun02",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
+      "mapId": "gef_d01_i",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
       "mapId": "gef_dun03",
       "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
     },
     {
       "mapId": "geffen_in",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
+      "mapId": "gl_cas01_",
       "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
     },
     {
@@ -152,6 +184,10 @@
       "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
     },
     {
+      "mapId": "ice_d03_i",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
       "mapId": "int_land",
       "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
     },
@@ -209,6 +245,14 @@
     },
     {
       "mapId": "iz_ac02_d",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
+      "mapId": "iz_d04_i",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
+      "mapId": "iz_d05_i",
       "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
     },
     {
@@ -344,6 +388,10 @@
       "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
     },
     {
+      "mapId": "slabw01",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
       "mapId": "sp_rudus",
       "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
     },
@@ -369,6 +417,14 @@
     },
     {
       "mapId": "treasure_n2",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
+      "mapId": "tur_d03_i",
+      "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
+    },
+    {
+      "mapId": "tur_d04_i",
       "reason": "OUT_OF_CURRENT_WORLD_MAP_SCOPE"
     },
     {
@@ -1041,7 +1097,7 @@
           "childClassification": "PERSISTENT_NORMAL_CHILD",
           "farmMapAvailable": false,
           "teleportAvailable": false,
-          "reason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
+          "reason": "MAP_ACCESS_RESTRICTED",
           "minFarmLevel": null,
           "eligibleMonsterCount": 0,
           "teleportSafeLanding": null,
@@ -1138,13 +1194,17 @@
           "floorDisplayName": "優配擂斯廢墟內部",
           "worldMapSelectable": true,
           "childClassification": "PERSISTENT_NORMAL_CHILD",
-          "farmMapAvailable": false,
-          "teleportAvailable": false,
-          "reason": "NO_SAFE_LANDING",
-          "minFarmLevel": null,
-          "eligibleMonsterCount": 0,
-          "teleportSafeLanding": null,
-          "paidCostZenyFromBaseLevel67": null,
+          "farmMapAvailable": true,
+          "teleportAvailable": true,
+          "reason": "SUPPORTED",
+          "minFarmLevel": 113,
+          "eligibleMonsterCount": 315,
+          "teleportSafeLanding": {
+            "x": 128,
+            "y": 278,
+            "source": "rathena-script-warp:npc/quests/quests_juperos.txt:4960"
+          },
+          "paidCostZenyFromBaseLevel67": 1130,
           "mapDetail": "/ro/data/map-info/juperos_02.json"
         },
         {
@@ -1153,13 +1213,17 @@
           "floorDisplayName": "優配擂斯中心部",
           "worldMapSelectable": true,
           "childClassification": "PERSISTENT_NORMAL_CHILD",
-          "farmMapAvailable": false,
-          "teleportAvailable": false,
-          "reason": "NO_SAFE_LANDING",
-          "minFarmLevel": null,
-          "eligibleMonsterCount": 0,
-          "teleportSafeLanding": null,
-          "paidCostZenyFromBaseLevel67": null,
+          "farmMapAvailable": true,
+          "teleportAvailable": true,
+          "reason": "SUPPORTED",
+          "minFarmLevel": 113,
+          "eligibleMonsterCount": 275,
+          "teleportSafeLanding": {
+            "x": 150,
+            "y": 286,
+            "source": "rathena-script-warp:npc/quests/quests_juperos.txt:4904"
+          },
+          "paidCostZenyFromBaseLevel67": 1130,
           "mapDetail": "/ro/data/map-info/jupe_core.json"
         },
         {
@@ -1700,8 +1764,8 @@
         "y2": 197
       },
       "worldMapSelectable": true,
-      "farmMapAvailable": false,
-      "teleportAvailable": false,
+      "farmMapAvailable": true,
+      "teleportAvailable": true,
       "floorCount": 1,
       "floors": [
         {
@@ -1710,13 +1774,17 @@
           "floorDisplayName": "莫斯科森林深處",
           "worldMapSelectable": true,
           "childClassification": "PERSISTENT_NORMAL_CHILD",
-          "farmMapAvailable": false,
-          "teleportAvailable": false,
-          "reason": "NO_SAFE_LANDING",
-          "minFarmLevel": null,
-          "eligibleMonsterCount": 0,
-          "teleportSafeLanding": null,
-          "paidCostZenyFromBaseLevel67": null,
+          "farmMapAvailable": true,
+          "teleportAvailable": true,
+          "reason": "SUPPORTED",
+          "minFarmLevel": 81,
+          "eligibleMonsterCount": 110,
+          "teleportSafeLanding": {
+            "x": 53,
+            "y": 217,
+            "source": "rathena-script-warp:npc/quests/quests_moscovia.txt:4937"
+          },
+          "paidCostZenyFromBaseLevel67": 810,
           "mapDetail": "/ro/data/map-info/mosk_dun02.json"
         }
       ]
@@ -1743,8 +1811,8 @@
         "y2": 197
       },
       "worldMapSelectable": true,
-      "farmMapAvailable": false,
-      "teleportAvailable": false,
+      "farmMapAvailable": true,
+      "teleportAvailable": true,
       "floorCount": 1,
       "floors": [
         {
@@ -1753,13 +1821,17 @@
           "floorDisplayName": "巴西原野",
           "worldMapSelectable": true,
           "childClassification": "PERSISTENT_NORMAL_CHILD",
-          "farmMapAvailable": false,
-          "teleportAvailable": false,
-          "reason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
-          "minFarmLevel": null,
-          "eligibleMonsterCount": 0,
-          "teleportSafeLanding": null,
-          "paidCostZenyFromBaseLevel67": null,
+          "farmMapAvailable": true,
+          "teleportAvailable": true,
+          "reason": "SUPPORTED",
+          "minFarmLevel": 59,
+          "eligibleMonsterCount": 220,
+          "teleportSafeLanding": {
+            "x": 74,
+            "y": 34,
+            "source": "rathena-warp:brasilis:brasilis_bra_fild01"
+          },
+          "paidCostZenyFromBaseLevel67": 590,
           "mapDetail": "/ro/data/map-info/bra_fild01.json"
         }
       ]
@@ -2227,8 +2299,8 @@
         "y2": 160
       },
       "worldMapSelectable": true,
-      "farmMapAvailable": false,
-      "teleportAvailable": false,
+      "farmMapAvailable": true,
+      "teleportAvailable": true,
       "floorCount": 2,
       "floors": [
         {
@@ -2237,13 +2309,17 @@
           "floorDisplayName": "機械娃娃工廠 1樓",
           "worldMapSelectable": true,
           "childClassification": "PERSISTENT_NORMAL_CHILD",
-          "farmMapAvailable": false,
-          "teleportAvailable": false,
-          "reason": "NO_SAFE_LANDING",
-          "minFarmLevel": null,
-          "eligibleMonsterCount": 0,
-          "teleportSafeLanding": null,
-          "paidCostZenyFromBaseLevel67": null,
+          "farmMapAvailable": true,
+          "teleportAvailable": true,
+          "reason": "SUPPORTED",
+          "minFarmLevel": 100,
+          "eligibleMonsterCount": 106,
+          "teleportSafeLanding": {
+            "x": 3,
+            "y": 230,
+            "source": "rathena-script-warp:npc/quests/kiel_hyre_quest.txt:1943"
+          },
+          "paidCostZenyFromBaseLevel67": 1000,
           "mapDetail": "/ro/data/map-info/kh_dun01.json"
         },
         {
@@ -2252,13 +2328,17 @@
           "floorDisplayName": "機械娃娃工廠 2樓",
           "worldMapSelectable": true,
           "childClassification": "PERSISTENT_NORMAL_CHILD",
-          "farmMapAvailable": false,
-          "teleportAvailable": false,
-          "reason": "NO_SAFE_LANDING",
-          "minFarmLevel": null,
-          "eligibleMonsterCount": 0,
-          "teleportSafeLanding": null,
-          "paidCostZenyFromBaseLevel67": null,
+          "farmMapAvailable": true,
+          "teleportAvailable": true,
+          "reason": "SUPPORTED",
+          "minFarmLevel": 108,
+          "eligibleMonsterCount": 114,
+          "teleportSafeLanding": {
+            "x": 41,
+            "y": 198,
+            "source": "rathena-script-warp:npc/quests/kiel_hyre_quest.txt:3782"
+          },
+          "paidCostZenyFromBaseLevel67": 1080,
           "mapDetail": "/ro/data/map-info/kh_dun02.json"
         }
       ]
@@ -2285,8 +2365,8 @@
         "y2": 212
       },
       "worldMapSelectable": true,
-      "farmMapAvailable": false,
-      "teleportAvailable": false,
+      "farmMapAvailable": true,
+      "teleportAvailable": true,
       "floorCount": 1,
       "floors": [
         {
@@ -2295,13 +2375,17 @@
           "floorDisplayName": "莫斯科森林最深處",
           "worldMapSelectable": true,
           "childClassification": "PERSISTENT_NORMAL_CHILD",
-          "farmMapAvailable": false,
-          "teleportAvailable": false,
-          "reason": "NO_SAFE_LANDING",
-          "minFarmLevel": null,
-          "eligibleMonsterCount": 0,
-          "teleportSafeLanding": null,
-          "paidCostZenyFromBaseLevel67": null,
+          "farmMapAvailable": true,
+          "teleportAvailable": true,
+          "reason": "SUPPORTED",
+          "minFarmLevel": 84,
+          "eligibleMonsterCount": 124,
+          "teleportSafeLanding": {
+            "x": 32,
+            "y": 135,
+            "source": "rathena-script-warp:npc/warps/dungeons/mosk_dun.txt:168"
+          },
+          "paidCostZenyFromBaseLevel67": 840,
           "mapDetail": "/ro/data/map-info/mosk_dun03.json"
         }
       ]
@@ -3126,8 +3210,8 @@
         "y2": 231
       },
       "worldMapSelectable": true,
-      "farmMapAvailable": false,
-      "teleportAvailable": false,
+      "farmMapAvailable": true,
+      "teleportAvailable": true,
       "floorCount": 2,
       "floors": [
         {
@@ -3151,13 +3235,17 @@
           "floorDisplayName": "火焰盆地",
           "worldMapSelectable": true,
           "childClassification": "PERSISTENT_NORMAL_CHILD",
-          "farmMapAvailable": false,
-          "teleportAvailable": false,
-          "reason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
-          "minFarmLevel": null,
-          "eligibleMonsterCount": 0,
-          "teleportSafeLanding": null,
-          "paidCostZenyFromBaseLevel67": null,
+          "farmMapAvailable": true,
+          "teleportAvailable": true,
+          "reason": "SUPPORTED",
+          "minFarmLevel": 141,
+          "eligibleMonsterCount": 130,
+          "teleportSafeLanding": {
+            "x": 91,
+            "y": 87,
+            "source": "rathena-script-warp:npc/re/instances/TempleOfDemonGod.txt:2262"
+          },
+          "paidCostZenyFromBaseLevel67": 1410,
           "mapDetail": "/ro/data/map-info/moro_vol.json"
         }
       ]
@@ -3340,7 +3428,7 @@
           "childClassification": "PERSISTENT_NORMAL_CHILD",
           "farmMapAvailable": false,
           "teleportAvailable": false,
-          "reason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
+          "reason": "MAP_ACCESS_RESTRICTED",
           "minFarmLevel": null,
           "eligibleMonsterCount": 0,
           "teleportSafeLanding": null,
@@ -3355,7 +3443,7 @@
           "childClassification": "PERSISTENT_NORMAL_CHILD",
           "farmMapAvailable": false,
           "teleportAvailable": false,
-          "reason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
+          "reason": "MAP_ACCESS_RESTRICTED",
           "minFarmLevel": null,
           "eligibleMonsterCount": 0,
           "teleportSafeLanding": null,
@@ -3937,8 +4025,8 @@
         "y2": 297
       },
       "worldMapSelectable": true,
-      "farmMapAvailable": false,
-      "teleportAvailable": false,
+      "farmMapAvailable": true,
+      "teleportAvailable": true,
       "floorCount": 2,
       "floors": [
         {
@@ -3947,13 +4035,17 @@
           "floorDisplayName": "瀑布內的洞窟",
           "worldMapSelectable": true,
           "childClassification": "PERSISTENT_NORMAL_CHILD",
-          "farmMapAvailable": false,
-          "teleportAvailable": false,
-          "reason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
-          "minFarmLevel": null,
-          "eligibleMonsterCount": 0,
-          "teleportSafeLanding": null,
-          "paidCostZenyFromBaseLevel67": null,
+          "farmMapAvailable": true,
+          "teleportAvailable": true,
+          "reason": "SUPPORTED",
+          "minFarmLevel": 34,
+          "eligibleMonsterCount": 165,
+          "teleportSafeLanding": {
+            "x": 199,
+            "y": 37,
+            "source": "rathena-warp:bra_dun02:brad2tobrad1"
+          },
+          "paidCostZenyFromBaseLevel67": 340,
           "mapDetail": "/ro/data/map-info/bra_dun01.json"
         },
         {
@@ -3962,13 +4054,17 @@
           "floorDisplayName": "瀑布內的洞窟",
           "worldMapSelectable": true,
           "childClassification": "PERSISTENT_NORMAL_CHILD",
-          "farmMapAvailable": false,
-          "teleportAvailable": false,
-          "reason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
-          "minFarmLevel": null,
-          "eligibleMonsterCount": 0,
-          "teleportSafeLanding": null,
-          "paidCostZenyFromBaseLevel67": null,
+          "farmMapAvailable": true,
+          "teleportAvailable": true,
+          "reason": "SUPPORTED",
+          "minFarmLevel": 34,
+          "eligibleMonsterCount": 215,
+          "teleportSafeLanding": {
+            "x": 261,
+            "y": 263,
+            "source": "rathena-warp:bra_dun01:brad1tobrad2"
+          },
+          "paidCostZenyFromBaseLevel67": 340,
           "mapDetail": "/ro/data/map-info/bra_dun02.json"
         }
       ]
@@ -4089,8 +4185,8 @@
         "y2": 351
       },
       "worldMapSelectable": true,
-      "farmMapAvailable": false,
-      "teleportAvailable": false,
+      "farmMapAvailable": true,
+      "teleportAvailable": true,
       "floorCount": 1,
       "floors": [
         {
@@ -4099,13 +4195,17 @@
           "floorDisplayName": "gw_fild01",
           "worldMapSelectable": false,
           "childClassification": "INSTANCE_ONLY",
-          "farmMapAvailable": false,
-          "teleportAvailable": false,
-          "reason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
-          "minFarmLevel": null,
-          "eligibleMonsterCount": 0,
-          "teleportSafeLanding": null,
-          "paidCostZenyFromBaseLevel67": null,
+          "farmMapAvailable": true,
+          "teleportAvailable": true,
+          "reason": "SUPPORTED",
+          "minFarmLevel": 185,
+          "eligibleMonsterCount": 155,
+          "teleportSafeLanding": {
+            "x": 25,
+            "y": 101,
+            "source": "rathena-warp:wolfvill:wolfvill_to_gw_fild01"
+          },
+          "paidCostZenyFromBaseLevel67": 1850,
           "mapDetail": "/ro/data/map-info/gw_fild01.json"
         }
       ]
@@ -4132,8 +4232,8 @@
         "y2": 351
       },
       "worldMapSelectable": true,
-      "farmMapAvailable": false,
-      "teleportAvailable": false,
+      "farmMapAvailable": true,
+      "teleportAvailable": true,
       "floorCount": 1,
       "floors": [
         {
@@ -4142,13 +4242,17 @@
           "floorDisplayName": "歐茲 峽谷",
           "worldMapSelectable": false,
           "childClassification": "INSTANCE_ONLY",
-          "farmMapAvailable": false,
-          "teleportAvailable": false,
-          "reason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
-          "minFarmLevel": null,
-          "eligibleMonsterCount": 0,
-          "teleportSafeLanding": null,
-          "paidCostZenyFromBaseLevel67": null,
+          "farmMapAvailable": true,
+          "teleportAvailable": true,
+          "reason": "SUPPORTED",
+          "minFarmLevel": 101,
+          "eligibleMonsterCount": 125,
+          "teleportSafeLanding": {
+            "x": 379,
+            "y": 283,
+            "source": "rathena-warp:ra_fild11:ra023"
+          },
+          "paidCostZenyFromBaseLevel67": 1010,
           "mapDetail": "/ro/data/map-info/ra_fild10.json"
         }
       ]
@@ -4175,8 +4279,8 @@
         "y2": 351
       },
       "worldMapSelectable": true,
-      "farmMapAvailable": false,
-      "teleportAvailable": false,
+      "farmMapAvailable": true,
+      "teleportAvailable": true,
       "floorCount": 1,
       "floors": [
         {
@@ -4185,13 +4289,17 @@
           "floorDisplayName": "伊達 平原",
           "worldMapSelectable": true,
           "childClassification": "PERSISTENT_NORMAL_CHILD",
-          "farmMapAvailable": false,
-          "teleportAvailable": false,
-          "reason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
-          "minFarmLevel": null,
-          "eligibleMonsterCount": 0,
-          "teleportSafeLanding": null,
-          "paidCostZenyFromBaseLevel67": null,
+          "farmMapAvailable": true,
+          "teleportAvailable": true,
+          "reason": "SUPPORTED",
+          "minFarmLevel": 101,
+          "eligibleMonsterCount": 135,
+          "teleportSafeLanding": {
+            "x": 28,
+            "y": 290,
+            "source": "rathena-warp:ra_fild10:ra024"
+          },
+          "paidCostZenyFromBaseLevel67": 1010,
           "mapDetail": "/ro/data/map-info/ra_fild11.json"
         }
       ]
@@ -4770,8 +4878,8 @@
         "y2": 409
       },
       "worldMapSelectable": true,
-      "farmMapAvailable": false,
-      "teleportAvailable": false,
+      "farmMapAvailable": true,
+      "teleportAvailable": true,
       "floorCount": 1,
       "floors": [
         {
@@ -4780,13 +4888,17 @@
           "floorDisplayName": "gw_fild02",
           "worldMapSelectable": true,
           "childClassification": "PERSISTENT_NORMAL_CHILD",
-          "farmMapAvailable": false,
-          "teleportAvailable": false,
-          "reason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
-          "minFarmLevel": null,
-          "eligibleMonsterCount": 0,
-          "teleportSafeLanding": null,
-          "paidCostZenyFromBaseLevel67": null,
+          "farmMapAvailable": true,
+          "teleportAvailable": true,
+          "reason": "SUPPORTED",
+          "minFarmLevel": 185,
+          "eligibleMonsterCount": 170,
+          "teleportSafeLanding": {
+            "x": 122,
+            "y": 385,
+            "source": "rathena-warp:gw_fild01:gw_fild01_to_gw_fild02"
+          },
+          "paidCostZenyFromBaseLevel67": 1850,
           "mapDetail": "/ro/data/map-info/gw_fild02.json"
         }
       ]
@@ -5162,13 +5274,17 @@
           "floorDisplayName": "艾爾帕蘭鐘塔 地下 4樓",
           "worldMapSelectable": true,
           "childClassification": "PERSISTENT_NORMAL_CHILD",
-          "farmMapAvailable": false,
-          "teleportAvailable": false,
-          "reason": "NO_SAFE_LANDING",
-          "minFarmLevel": null,
-          "eligibleMonsterCount": 0,
-          "teleportSafeLanding": null,
-          "paidCostZenyFromBaseLevel67": null,
+          "farmMapAvailable": true,
+          "teleportAvailable": true,
+          "reason": "SUPPORTED",
+          "minFarmLevel": 46,
+          "eligibleMonsterCount": 79,
+          "teleportSafeLanding": {
+            "x": 84,
+            "y": 36,
+            "source": "rathena-script-warp:npc/warps/dungeons/alde_dun.txt:72"
+          },
+          "paidCostZenyFromBaseLevel67": 460,
           "mapDetail": "/ro/data/map-info/alde_dun04.json"
         },
         {
@@ -5234,13 +5350,17 @@
           "floorDisplayName": "艾爾帕蘭鐘塔 地上4樓",
           "worldMapSelectable": true,
           "childClassification": "PERSISTENT_NORMAL_CHILD",
-          "farmMapAvailable": false,
-          "teleportAvailable": false,
-          "reason": "NO_SAFE_LANDING",
-          "minFarmLevel": null,
-          "eligibleMonsterCount": 0,
-          "teleportSafeLanding": null,
-          "paidCostZenyFromBaseLevel67": null,
+          "farmMapAvailable": true,
+          "teleportAvailable": true,
+          "reason": "SUPPORTED",
+          "minFarmLevel": 46,
+          "eligibleMonsterCount": 102,
+          "teleportSafeLanding": {
+            "x": 64,
+            "y": 76,
+            "source": "rathena-script-warp:npc/jobs/2-1/assassin.txt:521"
+          },
+          "paidCostZenyFromBaseLevel67": 460,
           "mapDetail": "/ro/data/map-info/c_tower4.json"
         }
       ]
@@ -5330,7 +5450,7 @@
           "childClassification": "PERSISTENT_NORMAL_CHILD",
           "farmMapAvailable": false,
           "teleportAvailable": false,
-          "reason": "NO_AUTHORIZED_NORMAL_SPAWN_EVIDENCE",
+          "reason": "MAP_ACCESS_RESTRICTED",
           "minFarmLevel": null,
           "eligibleMonsterCount": 0,
           "teleportSafeLanding": null,
@@ -9259,13 +9379,17 @@
           "floorDisplayName": "6樓",
           "worldMapSelectable": true,
           "childClassification": "PERSISTENT_NORMAL_CHILD",
-          "farmMapAvailable": false,
-          "teleportAvailable": false,
-          "reason": "NO_SAFE_LANDING",
-          "minFarmLevel": null,
-          "eligibleMonsterCount": 0,
-          "teleportSafeLanding": null,
-          "paidCostZenyFromBaseLevel67": null,
+          "farmMapAvailable": true,
+          "teleportAvailable": true,
+          "reason": "SUPPORTED",
+          "minFarmLevel": 110,
+          "eligibleMonsterCount": 140,
+          "teleportSafeLanding": {
+            "x": 141,
+            "y": 187,
+            "source": "rathena-script-warp:npc/re/warps/dungeons/iz_dun.txt:36"
+          },
+          "paidCostZenyFromBaseLevel67": 1100,
           "mapDetail": "/ro/data/map-info/iz_dun05.json"
         }
       ]
@@ -10211,13 +10335,17 @@
           "floorDisplayName": "5樓",
           "worldMapSelectable": true,
           "childClassification": "PERSISTENT_NORMAL_CHILD",
-          "farmMapAvailable": false,
-          "teleportAvailable": false,
-          "reason": "NO_SAFE_LANDING",
-          "minFarmLevel": null,
-          "eligibleMonsterCount": 0,
-          "teleportSafeLanding": null,
-          "paidCostZenyFromBaseLevel67": null,
+          "farmMapAvailable": true,
+          "teleportAvailable": true,
+          "reason": "SUPPORTED",
+          "minFarmLevel": 50,
+          "eligibleMonsterCount": 132,
+          "teleportSafeLanding": {
+            "x": 34,
+            "y": 202,
+            "source": "rathena-script-warp:npc/warps/dungeons/pay_dun.txt:28"
+          },
+          "paidCostZenyFromBaseLevel67": 500,
           "mapDetail": "/ro/data/map-info/pay_dun04.json"
         }
       ]
@@ -11373,13 +11501,17 @@
           "floorDisplayName": "斯卡勒伯熔岩",
           "worldMapSelectable": true,
           "childClassification": "PERSISTENT_NORMAL_CHILD",
-          "farmMapAvailable": false,
-          "teleportAvailable": false,
-          "reason": "NO_SAFE_LANDING",
-          "minFarmLevel": null,
-          "eligibleMonsterCount": 0,
-          "teleportSafeLanding": null,
-          "paidCostZenyFromBaseLevel67": null,
+          "farmMapAvailable": true,
+          "teleportAvailable": true,
+          "reason": "SUPPORTED",
+          "minFarmLevel": 127,
+          "eligibleMonsterCount": 125,
+          "teleportSafeLanding": {
+            "x": 101,
+            "y": 142,
+            "source": "rathena-script-warp:npc/re/quests/quests_dicastes.txt:243"
+          },
+          "paidCostZenyFromBaseLevel67": 1270,
           "mapDetail": "/ro/data/map-info/dic_dun02.json"
         },
         {
@@ -11388,13 +11520,17 @@
           "floorDisplayName": "斯卡勒伯熔岩",
           "worldMapSelectable": true,
           "childClassification": "PERSISTENT_NORMAL_CHILD",
-          "farmMapAvailable": false,
-          "teleportAvailable": false,
-          "reason": "NO_SAFE_LANDING",
-          "minFarmLevel": null,
-          "eligibleMonsterCount": 0,
-          "teleportSafeLanding": null,
-          "paidCostZenyFromBaseLevel67": null,
+          "farmMapAvailable": true,
+          "teleportAvailable": true,
+          "reason": "SUPPORTED",
+          "minFarmLevel": 125,
+          "eligibleMonsterCount": 40,
+          "teleportSafeLanding": {
+            "x": 101,
+            "y": 142,
+            "source": "rathena-script-warp:npc/re/quests/quests_dicastes.txt:289"
+          },
+          "paidCostZenyFromBaseLevel67": 1250,
           "mapDetail": "/ro/data/map-info/dic_dun03.json"
         }
       ]
@@ -12237,13 +12373,17 @@
           "floorDisplayName": "哎喲泰雅 古神殿內部",
           "worldMapSelectable": true,
           "childClassification": "PERSISTENT_NORMAL_CHILD",
-          "farmMapAvailable": false,
-          "teleportAvailable": false,
-          "reason": "NO_SAFE_LANDING",
-          "minFarmLevel": null,
-          "eligibleMonsterCount": 0,
-          "teleportSafeLanding": null,
-          "paidCostZenyFromBaseLevel67": null,
+          "farmMapAvailable": true,
+          "teleportAvailable": true,
+          "reason": "SUPPORTED",
+          "minFarmLevel": 46,
+          "eligibleMonsterCount": 162,
+          "teleportSafeLanding": {
+            "x": 23,
+            "y": 26,
+            "source": "rathena-script-warp:npc/quests/quests_ayothaya.txt:2069"
+          },
+          "paidCostZenyFromBaseLevel67": 460,
           "mapDetail": "/ro/data/map-info/ayo_dun02.json"
         }
       ]
@@ -12884,8 +13024,8 @@
         "y2": 923
       },
       "worldMapSelectable": true,
-      "farmMapAvailable": false,
-      "teleportAvailable": false,
+      "farmMapAvailable": true,
+      "teleportAvailable": true,
       "floorCount": 1,
       "floors": [
         {
@@ -12894,13 +13034,17 @@
           "floorDisplayName": "喀拉喀托火山島",
           "worldMapSelectable": true,
           "childClassification": "PERSISTENT_NORMAL_CHILD",
-          "farmMapAvailable": false,
-          "teleportAvailable": false,
-          "reason": "NO_SAFE_LANDING",
-          "minFarmLevel": null,
-          "eligibleMonsterCount": 0,
-          "teleportSafeLanding": null,
-          "paidCostZenyFromBaseLevel67": null,
+          "farmMapAvailable": true,
+          "teleportAvailable": true,
+          "reason": "SUPPORTED",
+          "minFarmLevel": 81,
+          "eligibleMonsterCount": 100,
+          "teleportSafeLanding": {
+            "x": 289,
+            "y": 160,
+            "source": "rathena-script-warp:npc/re/quests/quests_dewata.txt:635"
+          },
+          "paidCostZenyFromBaseLevel67": 810,
           "mapDetail": "/ro/data/map-info/dew_dun01.json"
         }
       ]
@@ -13578,8 +13722,8 @@
         "y2": 934
       },
       "worldMapSelectable": true,
-      "farmMapAvailable": false,
-      "teleportAvailable": false,
+      "farmMapAvailable": true,
+      "teleportAvailable": true,
       "floorCount": 1,
       "floors": [
         {
@@ -13588,13 +13732,17 @@
           "floorDisplayName": "噩夢醫院 1樓",
           "worldMapSelectable": true,
           "childClassification": "PERSISTENT_NORMAL_CHILD",
-          "farmMapAvailable": false,
-          "teleportAvailable": false,
-          "reason": "NO_SAFE_LANDING",
-          "minFarmLevel": null,
-          "eligibleMonsterCount": 0,
-          "teleportSafeLanding": null,
-          "paidCostZenyFromBaseLevel67": null,
+          "farmMapAvailable": true,
+          "teleportAvailable": true,
+          "reason": "SUPPORTED",
+          "minFarmLevel": 105,
+          "eligibleMonsterCount": 110,
+          "teleportSafeLanding": {
+            "x": 33,
+            "y": 110,
+            "source": "rathena-script-warp:npc/re/quests/quests_malaya.txt:7552"
+          },
+          "paidCostZenyFromBaseLevel67": 1050,
           "mapDetail": "/ro/data/map-info/ma_dun01.json"
         }
       ]

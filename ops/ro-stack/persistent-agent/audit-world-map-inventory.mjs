@@ -80,7 +80,10 @@ export function collectScriptEvidence(files, universe) {
     const source = `${path}:${i + 1}`, cols = line.trim().split(/\t+/);
     const flag = line.trim().match(/^([\w@-]+)\s+mapflag\s+(\w+)/);
     if (flag) add(flag[1], 'flags', { value: flag[2], source });
-    const head = cols[0]?.match(/^([\w@-]+),\d+,\d+(?:,\d+)*/);
+    // rAthena also accepts a map-only head for permanent spawns
+    // ("bra_dun01<TAB>monster<TAB>Piranha<TAB>2070,80,5000").
+    const head = cols[0]?.match(/^([\w@-]+),\d+,\d+(?:,\d+)*/) ??
+      (['monster', 'boss_monster'].includes(cols[1]) ? cols[0]?.match(/^([\w@-]+)$/) : null);
     if (head) {
       add(head[1], 'references', { kind: cols[1] ?? 'UNKNOWN_DECLARATION', source });
       if (cols[1] === 'monster' || cols[1] === 'boss_monster') {
@@ -90,9 +93,17 @@ export function collectScriptEvidence(files, universe) {
       }
     }
     // Script destinations are evidence of an omitted capability, never executable edges.
-    for (const m of line.matchAll(/\b(warp|warpchar|warpparty|warpguild|mapwarp|areawarp)\s+"([\w@-]+)"/g)) {
-      if (m[1] !== 'mapwarp' && m[1] !== 'areawarp') add(m[2], 'transfers', { kind: /air(ship|plane)/i.test(path) ? 'AIRSHIP' : /kafra/i.test(path) ? 'NPC_TRANSPORT' : 'SCRIPTED_TRANSFER', source });
+    for (const m of line.matchAll(/\b(warp|warpchar|warpparty|warpguild|mapwarp|areawarp)\s+"([\w@-]+)"(?:\s*,\s*(\d+)\s*,\s*(\d+)\b)?/g)) {
+      if (m[1] === 'mapwarp' || m[1] === 'areawarp') continue;
+      const transfer = { kind: /air(ship|plane)/i.test(path) ? 'AIRSHIP' : /kafra/i.test(path) ? 'NPC_TRANSPORT' : 'SCRIPTED_TRANSFER', source };
+      // Literal arrival cells only; 0,0 is rAthena's random-cell form.
+      if (Number(m[3]) > 0 && Number(m[4]) > 0) Object.assign(transfer, { x: Number(m[3]), y: Number(m[4]) });
+      add(m[2], 'transfers', transfer);
     }
+    // mapwarp "from","to",x,y moves every player on "from" into "to".
+    for (const m of line.matchAll(/\bmapwarp\s+"[\w@-]+"\s*,\s*"([\w@-]+)"\s*,\s*(\d+)\s*,\s*(\d+)\b/g))
+      if (Number(m[2]) > 0 && Number(m[3]) > 0)
+        add(m[1], 'transfers', { kind: 'SCRIPTED_TRANSFER', source, x: Number(m[2]), y: Number(m[3]) });
     for (const m of line.matchAll(/"([\w@-]+)"/g)) add(m[1], 'references', { kind: 'STRING_REFERENCE_ONLY', source });
   }
   return evidence;
@@ -110,7 +121,9 @@ export function classifyEvidence(e, instance, loaded) {
   if (flags.has('pvp') && e.spawns.length === 0) return { category: 'INTERIOR', reason: e.flags.find(f => f.value === 'pvp').source, requirement: 'NON_FARMABLE' };
   const rolePaths = e.references.map(r => r.source.replaceAll('\\', '/'));
   if (rolePaths.some(p => /\/(events|battleground)\//.test(p))) return { category: 'EVENT', reason: rolePaths.find(p => /\/(events|battleground)\//.test(p)), requirement: 'EVENT_CONTEXT_REQUIRED' };
-  if (rolePaths.some(p => /\/instances\//.test(p))) return { category: 'INSTANCE', reason: rolePaths.find(p => /\/instances\//.test(p)), requirement: 'INSTANCE_REQUIRED' };
+  // A persistent map that merely hosts an instance entrance NPC is not itself
+  // an instance; instance_db membership is handled above.
+  if (rolePaths.some(p => /\/instances\//.test(p)) && e.spawns.length === 0) return { category: 'INSTANCE', reason: rolePaths.find(p => /\/instances\//.test(p)), requirement: 'INSTANCE_REQUIRED' };
   if (rolePaths.some(p => /\/(quests|jobs)\//.test(p)) && e.spawns.length === 0) return { category: 'QUEST_GATED', reason: rolePaths.find(p => /\/(quests|jobs)\//.test(p)), requirement: 'QUEST_REQUIRED' };
   if (rolePaths.some(p => /\/(kafras|warper|warps\/other)\//.test(p)) && e.spawns.length === 0) return { category: 'SERVICE_ONLY', reason: rolePaths.find(p => /\/(kafras|warper|warps\/other)\//.test(p)), requirement: 'SERVICE_REQUIRED' };
   const habitats = new Set(e.spawns.map(s => s.habitat).filter(Boolean));

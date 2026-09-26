@@ -2,7 +2,8 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { inflateSync } from 'node:zlib';
 import { KAFRA_CONTENT } from './kafra-content.mjs';
-import { chooseLandingAnchor, classifyFarmTeleport } from './world-map-teleport-policy.mjs';
+import { chooseLandingAnchor, chooseScriptArrivalAnchor, classifyFarmTeleport }
+  from './world-map-teleport-policy.mjs';
 
 export function parseTownMapFlags(text) {
   return new Set(String(text).split(/\r?\n/).map((line) =>
@@ -95,7 +96,8 @@ export async function buildWorldMapTeleportCatalog({
           minLevel: null, normalMonsterCount: 0, landing: null });
       continue;
     }
-    const anchor = chooseLandingAnchor(graph, mapId);
+    const anchor = chooseLandingAnchor(graph, mapId) ??
+      chooseScriptArrivalAnchor(sourceRows.get(mapId));
     let landing = null;
     if (anchor && cells)
       for (let radius = 0; radius <= 8 && !landing; radius += 1)
