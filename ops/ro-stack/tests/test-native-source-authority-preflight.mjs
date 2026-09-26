@@ -8,12 +8,14 @@ import { fileURLToPath } from 'node:url';
 let passed = 0;
 const guardUrl = new URL('../native-source-authority-preflight.mjs', import.meta.url);
 const guardScript = fileURLToPath(guardUrl);
+const sharedGuard = 'C:\\Users\\Administrator\\.codex\\.chatgpt-projects\\g-p-6a9bcb57afdc8191966436643af8acdf\\terminal-arpg\\ops\\ro-stack\\native-source-authority-preflight.mjs';
 function requireSharedGuard(selectedPath) {
   assert.equal(fs.existsSync(selectedPath), true,
     'SOURCE_AUTHORITY_GOVERNANCE_REGRESSION: shared Native guard missing');
 }
-assert.throws(() => requireSharedGuard(path.join(guardScript, 'missing')),
+assert.throws(() => requireSharedGuard(path.join(sharedGuard, 'missing')),
   /SOURCE_AUTHORITY_GOVERNANCE_REGRESSION/);
+requireSharedGuard(sharedGuard);
 requireSharedGuard(guardScript);
 const {
   CANONICAL_ROOT, LEGACY_ARCHIVE, assessLocalLineage, classifyOrigin,
