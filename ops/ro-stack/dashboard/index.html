@@ -1281,14 +1281,11 @@
       >
         <div class="world-map-shell">
           <header class="world-map-header">
-            <div>
-              <h2 id="worldMapHeading">RO 世界地圖掛機選擇</h2>
-              <p id="worldMapStatus">正在讀取世界地圖資料</p>
-              <p id="worldMapSavedTown">儲存主城：讀取中</p>
-              <p id="worldMapSavedTownHint" class="hidden">請先前往任一可用主城，再設定儲存主城。</p>
-            </div>
+            <h2 id="worldMapHeading">彩虹橋</h2>
             <button id="closeWorldMap" type="button" aria-label="關閉世界地圖">關閉</button>
           </header>
+          <p id="worldMapStatus" class="sr-only" aria-live="polite"></p>
+          <p id="worldMapNotice" class="world-map-notice hidden" role="alert"></p>
           <div class="world-map-layout">
             <div class="world-map-stage">
               <div id="worldMapCanvas" class="world-map-canvas">
@@ -1302,19 +1299,19 @@
                   draggable="false"
                 />
                 <div id="worldMapNodes" class="world-map-regions"></div>
-                <div id="worldMapTownLabels" class="world-map-town-labels"></div>
               </div>
-              <section id="worldMapTowns" class="world-map-towns" aria-label="主城傳送"></section>
-              <details class="world-map-region-index">
-                <summary>所有地圖區域（含重疊標籤）</summary>
-                <input id="worldMapRegionSearch" type="search" placeholder="搜尋地圖名稱或 Map ID" aria-label="搜尋世界地圖區域" />
-                <div id="worldMapRegionIndex" class="world-map-region-index-list"></div>
-              </details>
             </div>
             <aside id="worldMapDetail" class="world-map-detail">
-              <h3>選擇掛機區域</h3>
-              <p>點選左側已查核地圖查看怪物與等級資訊。</p>
+              <h3>尚未選擇地圖</h3>
             </aside>
+            <section class="world-map-destinations" aria-labelledby="worldMapListHeading">
+              <h3 id="worldMapListHeading">地圖清單</h3>
+              <div id="worldMapCategoryTabs" class="world-map-category-tabs" role="tablist" aria-label="地圖分類"></div>
+              <input id="worldMapRegionSearch" type="search" placeholder="搜尋地圖名稱" aria-label="搜尋地圖清單" />
+              <div id="worldMapRegionIndex" class="world-map-region-index-list" role="tabpanel"></div>
+              <p id="worldMapSavedTown" class="sr-only"></p>
+              <p id="worldMapSavedTownHint" class="sr-only hidden"></p>
+            </section>
           </div>
         </div>
       </section>

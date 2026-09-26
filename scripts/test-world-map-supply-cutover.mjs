@@ -37,7 +37,7 @@ assert.equal(decision('farm', false, 1001).reason, 'WORLD_MAP_TELEPORT_COOLDOWN'
 const nativeSource = await readFile(join(native, 'src/map/persistent_agent.cpp'), 'utf8');
 assert.match(nativeSource, /void process_set_saved_town\(/);
 assert.match(nativeSource, /target_map != mapindex_id2name\(sd->mapindex\)/);
-assert.match(nativeSource, /pc_setsavepoint\(sd, sd->mapindex, sd->x, sd->y\)/);
+assert.match(nativeSource, /pc_setsavepoint\(sd, sd->mapindex, save_x, save_y\)/);
 assert.match(nativeSource, /SUPPLY_RETURN_FUNDS_BLOCKED/);
 assert.match(nativeSource, /supply_shop_purchase_cost\(sd, nd, supply_item_id, quantity\)/);
 assert.match(nativeSource, /SUPPLY_RETURN_TELEPORT_CONFIRMED/);
@@ -55,10 +55,12 @@ assert.match(nativeSource, /if \(runtime\.supply_home_required\)\s*return "SUPPL
 const html = await readFile(join(root, 'ops/ro-stack/dashboard/index.html'), 'utf8');
 const app = await readFile(join(root, 'ops/ro-stack/dashboard/app.js'), 'utf8');
 const dashboard = await readFile(join(root, 'ops/ro-stack/dashboard.mjs'), 'utf8');
-for (const id of ['worldMapTownLabels', 'worldMapSavedTown', 'worldMapSavedTownHint', 'worldMapConfirm',
+for (const id of ['worldMapCategoryTabs', 'worldMapRegionIndex',
+  'worldMapSavedTown', 'worldMapSavedTownHint', 'worldMapConfirm',
   'worldMapConfirmCancel', 'worldMapConfirmSubmit', 'worldMapArrivalToast'])
   assert.ok(html.includes(`id="${id}"`), id);
-assert.match(app, /button\.onclick = \(event\) => \{[\s\S]*?selectTownWorldMap\(town\.map\)/);
+assert.doesNotMatch(html, /worldMapTownLabels|world-map-town-labels/);
+assert.match(app, /selectedWorldMapCategory === 'towns'\) selectTownWorldMap\(row\.map\)/);
 assert.match(app, /await waitForWorldMapAuthority\(\(state\) =>\s*state\.player\?\.currentMap === mapId\)/);
 assert.match(app, /worldMapTravelPresentation\.preflightAccepted\(/);
 assert.match(app, /playCue: playTravelCue/);

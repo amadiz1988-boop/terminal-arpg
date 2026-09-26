@@ -3,6 +3,8 @@ import { readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { buildPlayerWorldMapProjection, parseKafraSavedPoints } from
   '../ops/ro-stack/persistent-agent/player-world-map-projection.mjs';
+import { buildWorldMapDestinationList, surroundingOutdoorLevel, weightedMonsterLevel } from
+  '../ops/ro-stack/persistent-agent/world-map-destination-list.mjs';
 import { loadWorldMapTestCatalog } from './lib/world-map-test-catalog.mjs';
 
 const root = resolve(import.meta.dirname, '..');
@@ -25,6 +27,35 @@ assert.equal(projection.savedPoints.size, 26);
 assert.equal(webDestinations.length, 39);
 assert.equal(projection.townRows.size, 27); // 26 Native-authored + Izlude MF_TOWN.
 assert.equal(projection.farmRows.size, 274);
+assert.equal(projection.destinationList.towns.length, 27);
+assert.equal(projection.destinationList.wild.length, 125);
+assert.equal(projection.destinationList.caves.length, 149);
+assert.deepEqual(projection.destinationList.towns.filter((row) =>
+  row.averageLevel === null).map((row) => row.map), ['harboro1', 'moscovia']);
+for (const rows of Object.values(projection.destinationList))
+  for (let index = 1; index < rows.length; index += 1)
+    assert.ok((rows[index - 1].averageLevel ?? Infinity) <=
+      (rows[index].averageLevel ?? Infinity), rows[index].map);
+assert.equal(weightedMonsterLevel([{ level: 10, count: 1 },
+  { level: 20, count: 3 }]), 17.5);
+const directTownGraph = new Map([
+  ['town', [{ to: 'field_a' }, { to: 'field_b' }]],
+]);
+assert.deepEqual(surroundingOutdoorLevel('town', new Map([['field_a', 10],
+  ['field_b', 20]]), directTownGraph),
+  { level: 15, fallbackDepth: 1 });
+const fallbackTownGraph = new Map([
+  ['town', [{ to: 'interior' }]], ['interior', [{ to: 'field' }]],
+]);
+assert.deepEqual(surroundingOutdoorLevel('town', new Map([['field', 30]]),
+  fallbackTownGraph),
+  { level: 30, fallbackDepth: 2 });
+assert.deepEqual(surroundingOutdoorLevel('town', new Map(), new Map()),
+  { level: null, fallbackDepth: null });
+assert.throws(() => buildWorldMapDestinationList({
+  farmRows: new Map([['unknown', { map: 'unknown', name: 'unknown' }]]),
+  townRows: new Map(), sourceIndex: { maps: [] },
+}), /Unclassified farm destination/);
 assert.equal(projection.unresolvedTowns.length, 10);
 const positioned = new Set(complete.mapInfo.worldMap.regions.flatMap(
   (region) => region.mapIds));
@@ -90,8 +121,13 @@ const rejectedService = parseKafraSavedPoints([{ path: 'test', text:
   'xmas,1,1,0\tscript\tStorage\t1,{\n\tcallfunc "F_Kafra",0,6;\n\tsavepoint "xmas",10,10,1,1;\n}' }]);
 assert.equal(rejectedService.size, 0);
 const app = await readFile(join(root, 'ops/ro-stack/dashboard/app.js'), 'utf8');
+const html = await readFile(join(root, 'ops/ro-stack/dashboard/index.html'), 'utf8');
 assert.match(app, /town\.locationClass/);
-assert.match(app, /selectWorldMap\(mapId, \{ farmView: true \}\)/);
+assert.match(app, /renderWorldMapDestinationList\(\)/);
+assert.doesNotMatch(app, /world-map-town-label|worldMapTownLabels/);
+assert.doesNotMatch(html, /id="worldMapTownLabels"|id="worldMapTowns"/);
+assert.match(html, /id="worldMapNotice"/);
+assert.match(app, /showWorldMapNotice\(farmTargetBlockedMessage\(error\.message\)\)/);
 assert.match(app, /api\('\/api\/world-map-teleport'/);
 assert.match(app, /api\('\/api\/saved-town'/);
 const dashboard = await readFile(join(root, 'ops/ro-stack/dashboard.mjs'), 'utf8');
@@ -100,5 +136,6 @@ assert.match(dashboard, /playerWorldMapProjection\.farmRows\.get\(mapId\)/);
 assert.match(dashboard, /saveX: town\.savedPoint\.x, saveY: town\.savedPoint\.y/);
 console.log(JSON.stringify({ result: 'PASS', nativeKafraMaps: 26,
   nativeSaveDestinations: 39, playerFarmMaps: projection.farmRows.size,
-  playerTownNodes: projection.townRows.size, dualRoleMaps: 3,
+  playerTownNodes: projection.townRows.size, wildMaps: 125, caveMaps: 149,
+  dualRoleMaps: 3,
   previousUnresolvedResolved: 15, previousUnresolvedStillClosed: 10 }));

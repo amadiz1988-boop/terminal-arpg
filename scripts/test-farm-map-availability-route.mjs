@@ -143,7 +143,7 @@ try {
   assert.equal(ok.status, 200, JSON.stringify(ok.body));
   assert.equal(ok.headers.get('cache-control'), 'private, no-store');
   assert.deepEqual(Object.keys(ok.body).sort(),
-    ['cooldownSeconds', 'maps', 'player', 'towns', 'worldMap']);
+    ['cooldownSeconds', 'destinationList', 'maps', 'player', 'towns', 'worldMap']);
   assert.ok(Array.isArray(ok.body.maps) && ok.body.maps.length > 0,
     `farm maps listed: ${JSON.stringify({ player: ok.body.player,
       regions: ok.body.worldMap?.regions?.length, maps: ok.body.maps?.length })}`);
@@ -155,6 +155,9 @@ try {
   const townIds = new Set(ok.body.towns.map((row) => row.map));
   assert.equal(ok.body.maps.length, 274);
   assert.equal(ok.body.towns.length, 27);
+  assert.equal(ok.body.destinationList.towns.length, 27);
+  assert.equal(ok.body.destinationList.wild.length, 125);
+  assert.equal(ok.body.destinationList.caves.length, 149);
   assert.equal(visibleIds.size, 295);
   assert.equal(Object.keys(ok.body.worldMap.maps).length, 298);
   assert.ok(ok.body.maps.every((row) => visibleIds.has(row.map)));

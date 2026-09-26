@@ -516,6 +516,7 @@ playerWorldMapProjection = buildPlayerWorldMapProjection({
   mapInfo: mapRoutingIndex, catalog: worldMapTeleportCatalog,
   mapCache: worldMapMapCache, townFlagMaps: worldMapTownFlagMaps,
   sourceIndex: worldMapSourceIndex, mapNames: worldMapNames,
+  graph: await serverAgentWarpGraph(),
   savedPointSources: await Promise.all([
     'npc/kafras/kafras.txt', 'npc/re/kafras/kafras.txt',
   ].map(async (path) => ({ path, text: await readFile(join(rAthenaRuntimeRoot,
@@ -546,6 +547,7 @@ async function playerWorldMapAvailability(account) {
   const charId = Number(account.characterId);
   if (!Number.isSafeInteger(charId) || charId <= 0)
     return { maps: [], towns: [], worldMap: playerWorldMapProjection.worldMap,
+      destinationList: playerWorldMapProjection.destinationList,
       player: null, cooldownSeconds: 60 };
   const [character, live] = await Promise.all([
     sql(`SELECT c.base_level,c.zeny,COALESCE(r.value,0),c.save_map,c.save_x,c.save_y FROM \`char\` c LEFT JOIN char_reg_num r ON r.char_id=c.char_id AND r.\`key\`='world_teleport_available_at' AND r.\`index\`=0 WHERE c.char_id=${charId} AND c.account_id=${Number(account.accountId)} LIMIT 1;`),
@@ -594,7 +596,9 @@ async function playerWorldMapAvailability(account) {
       currentX: live?.fresh ? Number(live.x) : null,
       currentY: live?.fresh ? Number(live.y) : null,
       availableAt, savedTown, savedTownSetupRequired: !savedTown },
-    worldMap: playerWorldMapProjection.worldMap, cooldownSeconds: 60 };
+    worldMap: playerWorldMapProjection.worldMap,
+    destinationList: playerWorldMapProjection.destinationList,
+    cooldownSeconds: 60 };
 }
 const webExperienceRegistry = JSON.parse(
   await readFile(webExperienceRegistryPath, 'utf8'),

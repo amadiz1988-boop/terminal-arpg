@@ -1,5 +1,10 @@
 # 目前狀態
 
+## 2026-09-26 彩虹橋地圖清單呈現來源候選
+
+- A 的既有世界地圖分支沿用 Kafra 26 地圖、39 儲存點與 274 張掛機圖。原圖只保留掛機圖點擊；城鎮與儲存據點改由下方「地圖清單」進入，按城鎮、野外、洞穴分組。
+- 野外及洞穴以普通永久怪物的出生數加權平均等級排序；城鎮依可達的一跳野外平均等級排序，無一跳時使用最近野外層，無資料仍顯示。桌機 1440×900 與手機 390×844 的隔離 Dashboard 瀏覽器驗證已通過；Production、Native runtime 與玩家狀態均未變更。
+
 ## 2026-09-25 M1 legacy launcher GitHub-first 來源重建
 
 - 已在隔離的 V15 Web 候選中以 Production `ro-stack.ps1` 精確 preimage 重建 launcher，保留現行生命週期、PA/Service/Supply 投影與 single-runtime 行為，加入明確的 M1 Supply 啟動環境投影。來源對帳及能力矩陣見 [M1 launcher reconciliation](project-control/m1-legacy-launcher-reconciliation-v1.md)。

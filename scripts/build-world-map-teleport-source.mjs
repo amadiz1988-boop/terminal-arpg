@@ -40,6 +40,9 @@ for (const row of inventory.records) {
   const normalSpawns = e.spawns.filter((spawn) =>
     ['NORMAL_FIELD', 'NORMAL_DUNGEON'].includes(spawn.habitat) && spawn.count > 0);
   if (normalSpawns.length === 0) continue;
+  const habitats = [...new Set(normalSpawns.map((spawn) => spawn.habitat))];
+  if (habitats.length !== 1)
+    throw new Error(`Mixed permanent spawn habitats: ${row.id}`);
   const byMob = new Map();
   for (const spawn of normalSpawns) {
     const mob = mobDb.get(Number(spawn.mobId));
@@ -57,6 +60,7 @@ for (const row of inventory.records) {
     map: row.id,
     name: mapNames[row.id] ?? row.id,
     category: classifyEvidence(e, instances.get(row.id), row.configuredForLoad).category,
+    habitat: habitats[0],
     blockedFlags: e.flags
       .map((flag) => flag.value)
       .filter((flag) => ['nowarpto', 'restricted', 'gvg', 'battleground'].includes(flag))

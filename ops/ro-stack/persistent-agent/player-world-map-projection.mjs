@@ -1,5 +1,6 @@
 import { inflateSync } from 'node:zlib';
 import { KAFRA_CONTENT } from './kafra-content.mjs';
+import { buildWorldMapDestinationList } from './world-map-destination-list.mjs';
 
 const mapIdPattern = /^[a-z0-9_]{1,31}$/;
 const fieldSaveHubs = new Set(['cmd_fild07', 'prt_fild05']);
@@ -68,7 +69,7 @@ function playerSummary(summary, kind) {
 }
 
 export function buildPlayerWorldMapProjection({ mapInfo, catalog, mapCache,
-  townFlagMaps, sourceIndex, savedPointSources, mapNames = {} }) {
+  townFlagMaps, sourceIndex, savedPointSources, mapNames = {}, graph = new Map() }) {
   const savedPoints = parseKafraSavedPoints(savedPointSources);
   const normalSpawns = new Set(sourceIndex.maps.filter((row) =>
     row.monsters?.length > 0 && !(row.blockedFlags?.length > 0))
@@ -133,8 +134,10 @@ export function buildPlayerWorldMapProjection({ mapInfo, catalog, mapCache,
   });
   const maps = Object.fromEntries([...rows].map(([map, row]) =>
     [map, playerSummary(mapInfo.maps[map] ?? { id: map, name: row.name }, row.kind)]));
+  const destinationList = buildWorldMapDestinationList({ farmRows, townRows,
+    sourceIndex, graph });
   return {
-    rows, farmRows, townRows, savedPoints, unresolvedTowns,
+    rows, farmRows, townRows, savedPoints, unresolvedTowns, destinationList,
     hiddenMapCount: positioned.size - [...rows.keys()].filter((map) => positioned.has(map)).length,
     worldMap: { image: mapInfo.worldMap.image, width: mapInfo.worldMap.width,
       height: mapInfo.worldMap.height, regions, maps },
