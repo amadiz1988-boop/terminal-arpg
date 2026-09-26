@@ -22,6 +22,21 @@ test('valid scoped idle test-player fixture and real EXP prerequisite', () => {
   assert.deepEqual(levelFixtureUpdate(preimage), { class: 4190, base_level: 170, base_exp: 0 });
 });
 
+test('legal gameplay progress uses a fresh exact level preimage', () => {
+  const advanced = current();
+  advanced.character.base_level = 7;
+  advanced.character.base_exp = 12;
+  advanced.character.save_map = 'prt_fild05';
+  assert.equal(validateLevelFixtureIdentity(advanced, preimage,
+    { matchHistoricalCharacter: false }), true);
+  assert.deepEqual(levelFixtureUpdate({ character: advanced.character }),
+    { class: 4190, base_level: 170, base_exp: 0 });
+  assert.throws(() => validateLevelFixtureIdentity(advanced, preimage));
+  advanced.login.group_id = 99;
+  assert.throws(() => validateLevelFixtureIdentity(advanced, preimage,
+    { matchHistoricalCharacter: false }));
+});
+
 for (const [label, mutate] of [
   ['wrong character', value => { value.character.char_id = 150094; }],
   ['privileged group', value => { value.login.group_id = 99; }],

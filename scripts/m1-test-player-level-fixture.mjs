@@ -17,6 +17,7 @@ const CHAR = 150105, ACCOUNT = 2000163, LEVEL = 170;
 // mmo.hpp binds JOB_SUPER_NOVICE_E to 4190. Both remain ordinary group-0 jobs.
 const CLASS = 4190;
 const PREIMAGE = path.join(SOURCE, 'docs/project-control/m1-v15-test-player-level-preimage.json');
+const EXPECTED_NATIVE = '433a3323efb9eca5c4e0963b9528df6261a3cd76';
 const fail = code => { throw Error(code); };
 const ensure = (condition, code) => { if (!condition) fail(code); };
 const args = Object.fromEntries(process.argv.slice(2).flatMap((arg, i, all) =>
@@ -26,7 +27,8 @@ const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const levelFields = ['class', 'base_level', 'base_exp'];
 const levelSnapshot = character => Object.fromEntries(levelFields.map(key => [key, character[key]]));
 
-export function validateLevelFixtureIdentity({ character, login, flag, agent }, preimage) {
+export function validateLevelFixtureIdentity({ character, login, flag, agent }, preimage,
+  { matchHistoricalCharacter = true } = {}) {
   ensure(character?.char_id === CHAR && character.account_id === ACCOUNT &&
     login?.account_id === ACCOUNT && login.group_id === 0 &&
     flag?.account_id === ACCOUNT && flag.is_test === 1 &&
@@ -38,14 +40,19 @@ export function validateLevelFixtureIdentity({ character, login, flag, agent }, 
     preimage.representativeEvidence.baseExpAfter > preimage.representativeEvidence.baseExpBefore &&
     preimage.representativeEvidence.jobExpAfter > preimage.representativeEvidence.jobExpBefore,
   'LEVEL_ACCELERATION_EVIDENCE_INVALID');
-  for (const [key, value] of Object.entries(preimage.character))
-    ensure(character[key] === value, `TEST_PLAYER_PREIMAGE_DRIFT_${key}`);
+  ensure(character.class === 0 && Number.isInteger(character.base_level) &&
+    character.base_level >= 1 && character.base_level <= 99 &&
+    character.job_level >= 10, 'NOVICE_LEVEL_PRECONDITION_INVALID');
+  if (matchHistoricalCharacter)
+    for (const [key, value] of Object.entries(preimage.character))
+      ensure(character[key] === value, `TEST_PLAYER_PREIMAGE_DRIFT_${key}`);
   return true;
 }
 
 export function levelFixtureUpdate(preimage) {
-  ensure(preimage.character.class === 0 && preimage.character.base_level === 6 &&
-    preimage.character.job_level === 10, 'NOVICE_PREIMAGE_REQUIRED');
+  ensure(preimage.character.class === 0 && preimage.character.base_level >= 1 &&
+    preimage.character.base_level <= 99 && preimage.character.job_level >= 10,
+  'NOVICE_PREIMAGE_REQUIRED');
   return { class: CLASS, base_level: LEVEL, base_exp: 0 };
 }
 
@@ -87,16 +94,19 @@ async function changeLevel(db, expected, values) {
   } catch (error) { await db.rollback(); throw error; }
 }
 
+let playerSessionCookie = null;
 async function playerState(credentialsPath) {
   ensure(credentialsPath && fs.existsSync(credentialsPath), 'PLAYER_CREDENTIALS_REQUIRED');
-  const credentials = readJson(credentialsPath);
   const base = 'http://127.0.0.1:8788';
-  const login = await fetch(base + '/api/account', { method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ username: credentials.username, password: credentials.password }) });
-  const cookie = login.headers.get('set-cookie')?.split(';')[0];
-  ensure(login.status === 200 && cookie, 'TEST_PLAYER_AUTH_FAILED');
-  const state = await fetch(base + '/api/state?view=full', { headers: { cookie } });
+  if (!playerSessionCookie) {
+    const credentials = readJson(credentialsPath);
+    const login = await fetch(base + '/api/account', { method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ username: credentials.username, password: credentials.password }) });
+    playerSessionCookie = login.headers.get('set-cookie')?.split(';')[0] ?? null;
+    ensure(login.status === 200 && playerSessionCookie, 'TEST_PLAYER_AUTH_FAILED');
+  }
+  const state = await fetch(base + '/api/state?view=full', { headers: { cookie: playerSessionCookie } });
   ensure(state.status === 200, 'TEST_PLAYER_READBACK_FAILED');
   return (await state.json()).character;
 }
@@ -112,8 +122,10 @@ function governance() {
   const lease = readJson(path.join(dir, 'production-deployment-lease/lease.json'));
   const pending = readJson(path.join(ROOT, pendingPath));
   const state = readJson(path.join(dir, 'production-deployment-state.json'));
+  const authority = readJson(path.join(SOURCE,
+    'docs/project-control/production-release-authority.json')).native;
   ensure(lease.lease_id === LEASE && lease.owner_task_id === OWNER && lease.status === 'ACTIVE' &&
-    lease.native_deploy_git_sha === '668bb9db42dd4bb9cf7651c5c1e40c95531ada35' &&
+    lease.native_deploy_git_sha === EXPECTED_NATIVE && authority.accepted_source_sha === EXPECTED_NATIVE &&
     lease.web_deploy_git_sha === '1346bd0561194da63de5132f9ea11ec820f703e7' &&
     state.production_drift === 'OPEN' && state.first_promotion_phase === 'FIRST_PROMOTION_NATIVE_STAGE_COMPLETE' &&
     verifyNativeStage(ROOT, state, lease, lease.admission_manifest_sha256).pass === true &&
@@ -135,13 +147,14 @@ async function main() {
   try {
     const current = await identity(db);
     if (action === 'preflight') {
-      validateLevelFixtureIdentity(current, preimage);
+      validateLevelFixtureIdentity(current, preimage, { matchHistoricalCharacter: false });
       const live = await playerState(args.credentials);
       ensure(live?.charId === CHAR && live.liveFresh === true &&
-        live.baseLevel === 6 && live.classId === 0, 'FIXTURE_LIVE_PREIMAGE_INVALID');
+        live.baseLevel === current.character.base_level && live.classId === 0,
+      'FIXTURE_LIVE_PREIMAGE_INVALID');
       console.log(JSON.stringify({ eligible: true, testAcceleration: true,
         preimageSha256, charId: CHAR, accountId: ACCOUNT, groupId: 0, isTest: 1,
-        beforeLevel: 6, targetLevel: LEVEL, targetClass: CLASS,
+        beforeLevel: current.character.base_level, targetLevel: LEVEL, targetClass: CLASS,
         representativeBaseExpGain: preimage.representativeEvidence.baseExpAfter - preimage.representativeEvidence.baseExpBefore,
         runtimeHealthy: true, mutation: false }));
       return;
@@ -149,24 +162,28 @@ async function main() {
     ensure(args.execute === 'true', 'EXPLICIT_EXECUTE_REQUIRED');
     const evidenceDir = path.join(ROOT, '.local/ro-stack/fixture-evidence', `m1-level-${CHAR}-${LEASE}`);
     if (action === 'prepare') {
-      validateLevelFixtureIdentity(current, preimage);
+      validateLevelFixtureIdentity(current, preimage, { matchHistoricalCharacter: false });
       const beforeLive = await playerState(args.credentials);
       ensure(beforeLive?.charId === CHAR && beforeLive.liveFresh === true &&
-        beforeLive.baseLevel === 6 && beforeLive.classId === 0,
+        beforeLive.baseLevel === current.character.base_level && beforeLive.classId === 0,
       'FIXTURE_LIVE_PREIMAGE_INVALID');
       ensure(!fs.existsSync(evidenceDir), 'FIXTURE_ALREADY_PREPARED');
       fs.mkdirSync(evidenceDir, { recursive: true });
       fs.writeFileSync(path.join(evidenceDir, 'preimage.json'), JSON.stringify({
-        preimage, preimageSha256, governanceSha, beforeRuntime: runtime,
+        preimage, preimageSha256, currentCharacter: current.character,
+        governanceSha, beforeRuntime: runtime,
         capturedAt: new Date().toISOString() }, null, 2) + '\n', { flag: 'wx' });
       let stopped = false, changed = false, offlinePreimage = null;
       try {
         await adapter('stop'); stopped = true;
         const offline = await identity(db);
-        validateLevelFixtureIdentity(offline, preimage);
+        validateLevelFixtureIdentity(offline, preimage, { matchHistoricalCharacter: false });
+        ensure(same(levelSnapshot(offline.character), levelSnapshot(current.character)),
+          'TEST_PLAYER_LEVEL_PREIMAGE_DRIFT');
         offlinePreimage = offline;
         fs.writeFileSync(path.join(evidenceDir, 'offline-preimage.json'), JSON.stringify(offline, null, 2) + '\n', { flag: 'wx' });
-        await changeLevel(db, offline.character, levelFixtureUpdate(preimage)); changed = true;
+        await changeLevel(db, offline.character,
+          levelFixtureUpdate({ character: offline.character })); changed = true;
         await adapter('start'); stopped = false;
         let after = null, live = null;
         for (let i = 0; i < 30; i++) {
@@ -184,7 +201,7 @@ async function main() {
           after.dashboard_pid === runtime.dashboard_pid && after.database_pid === runtime.database_pid,
         'FIXTURE_AUTHORITATIVE_LEVEL_UNCONFIRMED');
         const receipt = { schemaVersion: 'm1-test-player-level-fixture-v1', accountId: ACCOUNT, charId: CHAR,
-          testAcceleration: true, before: { level: preimage.character.base_level, class: preimage.character.class },
+          testAcceleration: true, before: { level: offlinePreimage.character.base_level, class: offlinePreimage.character.class },
           after: { level: live.baseLevel, class: live.classId, source: live.liveSource },
           groupId: post.login.group_id, isTest: post.flag.is_test, preimageSha256,
           runtimeBefore: runtime.pids, runtimeAfter: after.pids,
