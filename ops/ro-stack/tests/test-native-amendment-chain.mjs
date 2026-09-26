@@ -23,6 +23,7 @@ import { HISTORICAL_NATIVE_AMENDMENT as old, M1_SECOND_NATIVE_AMENDMENT as polic
   M1_DEATH_RETURN_SESSION_LIFETIME_RECOVERY_AMENDMENT as incidentRecovery,
   M1_MOROCC_NOOP_DEATH_MAINTENANCE_AMENDMENT as moroccNoop,
   M1_SAVED_TOWN_NOOP_VALIDATOR_AMENDMENT as savedTownNoop,
+  M1_ATTACK_RESOLUTION_OBSERVABILITY_AMENDMENT as attackObserve,
   validateNativeAmendmentHistory, validateHistoricalNativeAnchor, validateNextNativeAmendment,
   applyNextNativeAmendment, deployedNativeRuntimeMatches } from '../native-amendment-chain.mjs';
 import { retirementDecision } from '../native-candidate-amendment.mjs';
@@ -406,6 +407,16 @@ test('Saved Town no-op validator admits only the reviewed three-file diff', () =
     'tools/pa-kafra-save/build-and-test.ps1',
   ]);
   assert.equal(savedTownNoop.sourcePaths.includes('conf/persistent_agent_commands.json'), false);
+});
+test('attack observer admits only the reviewed four-file diagnostic diff', () => {
+  assert.equal(attackObserve.reason, 'M1_ATTACK_RESOLUTION_OBSERVABILITY_RUNTIME_ACCEPTANCE_V1');
+  assert.deepEqual(attackObserve.sourcePaths, [
+    'src/map/battle.cpp',
+    'src/map/persistent_agent.cpp',
+    'src/map/unit.cpp',
+    'tools/pa-command-contract/Test-M1AttackObserveSource.ps1',
+  ]);
+  assert.equal(attackObserve.sourcePaths.includes('conf/persistent_agent_commands.json'), false);
 });
 {
   const mapHash = 'A'.repeat(64);

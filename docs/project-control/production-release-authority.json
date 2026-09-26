@@ -11,13 +11,13 @@
     "repository": "https://github.com/amadiz1988-boop/ghost-island-rathena.git",
     "github_repository": "https://github.com/amadiz1988-boop/ghost-island-rathena.git",
     "release_ref": "refs/heads/main",
-    "accepted_source_sha": "433a3323efb9eca5c4e0963b9528df6261a3cd76",
+    "accepted_source_sha": "2eae230904970c7368e1d1f8752bf4b1033cb2cd",
     "deployment_provenance": {
       "model": "SOURCE_SHA_LOCKED_REBUILD",
-      "native_git_sha": "433a3323efb9eca5c4e0963b9528df6261a3cd76",
-      "previous_validation_binary_sha256": "235E902D6E9904C8F8380D4DEEA8BB8AA56AE3F053F96EDA6E4C50A9BA91AA68",
-      "build_receipt_sha256": "69A398275CCA8F3C8104E6508DCE272956FCEA415C4B590EA8EEEC3C7BECF1AC",
-      "map_binary_sha256": "AC54B858D7A07515A391ECBC94FBBF7BF69002157CBA371C09A447F03824A740",
+      "native_git_sha": "2eae230904970c7368e1d1f8752bf4b1033cb2cd",
+      "previous_validation_binary_sha256": "6A3EFAADA9F437F404434CFCE108470BCC70C74E2BB43405BDFE2AF9427A2927",
+      "build_receipt_sha256": "042897C3E8BF911FBBF97FCED9A4FB4181F141B95945C19DBDB02652AF71B785",
+      "map_binary_sha256": "2075EAFE4D78459012ACC4D6D15DD9B94B658E0C2159013877B0DA7DBA7CD01B",
       "config_source_path": "conf/persistent_agent_commands.json",
       "config_source_blob_oid": "bf8064430a213d3e6caa03fb1868021d27d9dd5b",
       "config_candidate_sha256": "4A7392E038F4394E5B5CE7F5EB6F3CFD4C1E835D46EEC582DC9EFA608AE6FCF2",
@@ -193,6 +193,14 @@
       "lease_id": "869f1725-dbd0-452d-b9dd-37ee79cc3f9a",
       "candidate_successor": "433a3323efb9eca5c4e0963b9528df6261a3cd76",
       "reason": "M1_SAVED_TOWN_NOOP_VALIDATOR_V1",
+      "status": "DEPLOYED"
+    },
+    {
+      "native_git_sha": "433a3323efb9eca5c4e0963b9528df6261a3cd76",
+      "disposition": "DEPLOYED_NATIVE_PREDECESSOR",
+      "lease_id": "869f1725-dbd0-452d-b9dd-37ee79cc3f9a",
+      "candidate_successor": "2eae230904970c7368e1d1f8752bf4b1033cb2cd",
+      "reason": "M1_ATTACK_RESOLUTION_OBSERVABILITY_RUNTIME_ACCEPTANCE_V1",
       "status": "SOURCE_APPROVED_DEPLOY_PENDING"
     }
     ]

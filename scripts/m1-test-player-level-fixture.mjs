@@ -17,7 +17,7 @@ const CHAR = 150105, ACCOUNT = 2000163, LEVEL = 170;
 // mmo.hpp binds JOB_SUPER_NOVICE_E to 4190. Both remain ordinary group-0 jobs.
 const CLASS = 4190;
 const PREIMAGE = path.join(SOURCE, 'docs/project-control/m1-v15-test-player-level-preimage.json');
-const EXPECTED_NATIVE = '433a3323efb9eca5c4e0963b9528df6261a3cd76';
+const EXPECTED_NATIVE = '2eae230904970c7368e1d1f8752bf4b1033cb2cd';
 const fail = code => { throw Error(code); };
 const ensure = (condition, code) => { if (!condition) fail(code); };
 const args = Object.fromEntries(process.argv.slice(2).flatMap((arg, i, all) =>

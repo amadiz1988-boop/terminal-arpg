@@ -15,7 +15,7 @@ const NATIVE = 'C:\\Users\\Administrator\\source\\ghost-island-rathena';
 const ROOT = 'C:\\Users\\Administrator\\ghost-island-production\\ro-stack';
 const OWNER = 'F｜M1 最終整合';
 const LEASE = '869f1725-dbd0-452d-b9dd-37ee79cc3f9a';
-const NATIVE_SHA = '433a3323efb9eca5c4e0963b9528df6261a3cd76';
+const NATIVE_SHA = '2eae230904970c7368e1d1f8752bf4b1033cb2cd';
 const WEB_SHA = '1346bd0561194da63de5132f9ea11ec820f703e7';
 const CHAR = 150105, ACCOUNT = 2000163, LEVEL = 170, JOB = 4190;
 const PROFILE = Object.freeze({ str: 80, agi: 90, vit: 90, int: 20, dex: 90, luk: 20 });

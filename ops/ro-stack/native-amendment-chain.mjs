@@ -253,6 +253,16 @@ export const M1_SAVED_TOWN_NOOP_VALIDATOR_AMENDMENT = Object.freeze({
     'tools/pa-kafra-save/build-and-test.ps1',
   ]),
 });
+export const M1_ATTACK_RESOLUTION_OBSERVABILITY_AMENDMENT = Object.freeze({
+  reason: 'M1_ATTACK_RESOLUTION_OBSERVABILITY_RUNTIME_ACCEPTANCE_V1',
+  scope: 'M1_ATTACK_RESOLUTION_OBSERVABILITY_RUNTIME_ACCEPTANCE_V1',
+  sourcePaths: Object.freeze([
+    'src/map/battle.cpp',
+    'src/map/persistent_agent.cpp',
+    'src/map/unit.cpp',
+    'tools/pa-command-contract/Test-M1AttackObserveSource.ps1',
+  ]),
+});
 export const APPROVED_NATIVE_AMENDMENTS = Object.freeze([
   M1_SECOND_NATIVE_AMENDMENT, M1_INVENTORY_MAINTENANCE_NATIVE_AMENDMENT,
   M1_INVENTORY_PROJECTION_CORRECTION, M1_FARM_WORLD_TELEPORT_SPAWN_CORRECTION,
@@ -269,6 +279,7 @@ export const APPROVED_NATIVE_AMENDMENTS = Object.freeze([
   M1_DEATH_RETURN_SESSION_LIFETIME_RECOVERY_AMENDMENT,
   M1_MOROCC_NOOP_DEATH_MAINTENANCE_AMENDMENT,
   M1_SAVED_TOWN_NOOP_VALIDATOR_AMENDMENT,
+  M1_ATTACK_RESOLUTION_OBSERVABILITY_AMENDMENT,
 ]);
 export const approvedNativeAmendment = reason =>
   APPROVED_NATIVE_AMENDMENTS.find(item => item.reason === reason) ?? null;
