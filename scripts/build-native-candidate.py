@@ -108,6 +108,12 @@ def execute(args):
     require(run(['git', 'rev-parse', 'HEAD'], src) == args.sha, 'SOURCE_SHA_CHANGED')
     artifacts = [{'path': name + '-server.exe', 'sha256': digest(src / (name + '-server.exe'))}
                  for name in ['login', 'char', 'map']]
+    contract_path = 'conf/persistent_agent_commands.json'
+    config_artifacts = [{'source_path': contract_path,
+                         'candidate_package_path': 'source/' + contract_path,
+                         'source_git_sha': args.sha,
+                         'source_blob_oid': run(['git', 'rev-parse', 'HEAD:' + contract_path], src),
+                         'sha256': digest(src / contract_path)}]
     suites = []
     for item in results:
         log = tests / ('m1-policy.log' if item['test'] == 'C++ M1 supply policy' else Path(item['test']).name + '.log')
@@ -117,7 +123,8 @@ def execute(args):
                'built_at': datetime.now(timezone.utc).isoformat(), 'native_git_sha': args.sha,
                'canonical_repository': URL, 'canonical_branch': 'main', 'build_configuration': 'Release x64',
                'toolchain': {'msbuild': msbuild, 'version': version}, 'binary_path': 'source/map-server.exe',
-               'binary_sha256': artifacts[2]['sha256'], 'artifacts': artifacts, 'source_root': str(src),
+               'binary_sha256': artifacts[2]['sha256'], 'artifacts': artifacts,
+               'config_artifacts': config_artifacts, 'source_root': str(src),
                'source_tree_state': 'CLEAN', 'tests_run': suites, 'tests_result': 'PASS',
                'remote': metadata, 'generated_test_outputs': generated,
                'build_log': {'path': 'build.log', 'sha256': digest(dest / 'build.log')}}

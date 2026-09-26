@@ -193,7 +193,7 @@ export function shutdownContract(root) {
 }
 
 export function evaluateNative({ manifest: m, build: b, authority, reachable, sourceClean,
-  artifactsValid, regressionValid, capabilities, rollbackValid, state, lease, owner, leaseId,
+  artifactsValid, configValid = true, regressionValid, capabilities, rollbackValid, state, lease, owner, leaseId,
   manifestHash, mode = 'precheck', runtime }) {
   const errors = []; const need = (ok, code) => { if (!ok) errors.push(code); };
   need(m?.schema_version === 'native-candidate-v1' && /^[A-Za-z0-9_-]+$/.test(m.candidate_id || ''), 'NATIVE_MANIFEST_INVALID');
@@ -204,6 +204,7 @@ export function evaluateNative({ manifest: m, build: b, authority, reachable, so
     b.canonical_branch === 'main' && b.build_configuration === 'Release x64', 'NATIVE_BUILD_RECEIPT_INVALID');
   need(b?.source_tree_state === 'CLEAN' && sourceClean, 'NATIVE_SOURCE_DIRTY');
   need(artifactsValid && equalHash(b?.binary_sha256, m?.binary_sha256), 'NATIVE_BINARY_MISMATCH');
+  need(configValid, 'NATIVE_COMMAND_CONTRACT_ARTIFACT_INVALID');
   need(b?.tests_result === 'PASS' && regressionValid, 'NATIVE_REGRESSION_REQUIRED');
   need(capabilities?.pass === true, 'NATIVE_CAPABILITY_SUPERSET_FAILED');
   need(rollbackValid, 'NATIVE_ROLLBACK_REQUIRED');
@@ -235,6 +236,16 @@ export function inspectNativeCandidate({ file, sha256, root, state, authority, m
   const artifactsValid = JSON.stringify((build.artifacts || []).map(x => x.path).sort()) === JSON.stringify(['char-server.exe','login-server.exe','map-server.exe']) &&
     build.artifacts.every(x => equalHash(digest(boundedPath(source, x.path)), x.sha256)) &&
     equalHash(digest(boundedPath(buildBase, build.binary_path)), m.binary_sha256);
+  const configs = build.config_artifacts, manifestConfigs = m.config_artifacts;
+  const configValid = !configs && !manifestConfigs ||
+    Array.isArray(configs) && configs.length === 1 &&
+    JSON.stringify(configs) === JSON.stringify(manifestConfigs) &&
+    configs[0].source_path === 'conf/persistent_agent_commands.json' &&
+    configs[0].candidate_package_path === 'source/conf/persistent_agent_commands.json' &&
+    configs[0].source_git_sha === m.native_git_sha &&
+    /^[a-f0-9]{40}$/i.test(configs[0].source_blob_oid || '') &&
+    equalHash(digest(boundedPath(buildBase, configs[0].candidate_package_path)), configs[0].sha256) &&
+    git(source, 'rev-parse', `HEAD:${configs[0].source_path}`) === configs[0].source_blob_oid;
   pinned(buildBase, build.build_log);
   const suites = build.tests_run || [];
   check(suites.length > 0 && new Set(suites.map(x => x.test_suite)).size === suites.length, 'NATIVE_TEST_SUITES_INVALID');
@@ -287,7 +298,7 @@ export function inspectNativeCandidate({ file, sha256, root, state, authority, m
   // After a verified Web stage, the next complete manifest pins current Web
   // preimages. Initial Native admission still uses its original lifecycle pins.
   verifyLifecyclePins(root, m.lifecycle_files, stagedWebManifest, runtimeConfigPin);
-  const result = evaluateNative({ manifest:m,build,authority,reachable,sourceClean,artifactsValid,regressionValid,
+  const result = evaluateNative({ manifest:m,build,authority,reachable,sourceClean,artifactsValid,configValid,regressionValid,
     capabilities:{pass:capsPass},rollbackValid,state,lease,owner,leaseId,manifestHash:sha256,mode,runtime });
   return { ...result, manifest:m, build, source, capability_rows:rows, regression_groups:Object.keys(groups),
     NATIVE_PREDEPLOY_REGRESSION:regressionValid?'PASS':'FAIL',
@@ -307,7 +318,64 @@ export function nativeReceiptValid(r, { nativeSha, binaryHash, leaseId, manifest
     r.runtime_health?.pass === true && r.runtime_health.counts?.map === 1 && r.runtime_health.counts?.login === 1 && r.runtime_health.counts?.char === 1 &&
     r.openkore_runtime_count === 0 && !!r.rollback_reference && r.acceptance_status === 'NATIVE_CANDIDATE_ACTIVE' &&
     r.artifacts?.length === 3 && JSON.stringify(r.artifacts.map(x=>x.path).sort()) === JSON.stringify([...nativeArtifacts].sort()) &&
-    r.artifacts.every(x=>/^[a-f0-9]{64}$/i.test(x.sha256 || ''));
+    r.artifacts.every(x=>/^[a-f0-9]{64}$/i.test(x.sha256 || '')) &&
+    (!r.config_artifacts || r.config_artifacts.length === 0 ||
+      r.config_artifacts.length === 1 &&
+      r.config_artifacts[0].source_path === 'conf/persistent_agent_commands.json' &&
+      r.config_artifacts[0].path === '.local/ro-stack/rathena/conf/persistent_agent_commands.json' &&
+      /^[a-f0-9]{64}$/i.test(r.config_artifacts[0].sha256 || '') &&
+      /^[a-f0-9]{64}$/i.test(r.config_artifacts[0].preimage_sha256 || '') &&
+      typeof r.config_artifacts[0].rollback_path === 'string');
+}
+
+// The active Native candidate's command-contract amendment is additive: old
+// candidate/receipt bytes stay immutable, while both lease and pending pin its
+// exact config image, prior image, and unchanged three-executable set.
+export function verifyCommandContractAmendment(root, lease, pending, nativeReceipt) {
+  const ref = lease.native_command_contract_amendment;
+  if (!ref) return !pending.native_command_contract_amendment;
+  try {
+    check(JSON.stringify(ref) === JSON.stringify(pending.native_command_contract_amendment),
+      'CONTRACT_AMENDMENT_REFERENCE_MISMATCH');
+    const receipt = readJson(pinned(root, {path:ref.receipt,sha256:ref.sha256}));
+    const manifest = readJson(pinned(root, {path:ref.candidate_manifest,sha256:ref.candidate_manifest_sha256}));
+    const item = manifest.config_artifacts?.[0], prior = receipt.previous_contract;
+    check(receipt.schema_version === 'native-command-contract-deploy-v1' &&
+      manifest.schema_version === 'native-command-contract-amendment-v1' &&
+      /^[a-f0-9]{40}$/i.test(receipt.governance_git_sha || '') &&
+      receipt.lease_id === lease.lease_id && receipt.owner_task_id === lease.owner_task_id &&
+      manifest.lease_id === lease.lease_id && manifest.owner_task_id === lease.owner_task_id &&
+      receipt.native_git_sha === lease.native_deploy_git_sha &&
+      manifest.native_git_sha === lease.native_deploy_git_sha &&
+      receipt.web_git_sha === lease.web_deploy_git_sha &&
+      manifest.web_git_sha === lease.web_deploy_git_sha &&
+      equalHash(receipt.candidate_manifest_sha256,ref.candidate_manifest_sha256) &&
+      equalHash(manifest.active_candidate_manifest_sha256,lease.native_candidate_manifest_sha256) &&
+      Array.isArray(manifest.executables) && manifest.executables.length === 3 &&
+      Array.isArray(manifest.config_artifacts) && manifest.config_artifacts.length === 1 &&
+      item.source_path === 'conf/persistent_agent_commands.json' &&
+      item.production_path === '.local/ro-stack/rathena/conf/persistent_agent_commands.json' &&
+      item.candidate_package_path === 'contract-image.json' &&
+      item.source_git_sha === lease.native_deploy_git_sha &&
+      receipt.current_contract?.path === item.production_path &&
+      receipt.current_contract.package_path === path.posix.join(path.posix.dirname(ref.receipt),'contract-image.json') &&
+      equalHash(item.sha256,receipt.current_contract?.sha256) &&
+      equalHash(digest(boundedPath(root,item.production_path)),item.sha256) &&
+      equalHash(digest(boundedPath(root,receipt.current_contract.package_path)),item.sha256) &&
+      prior?.path === item.production_path &&
+      prior.rollback_path === path.posix.join(path.posix.dirname(ref.receipt),'preimage.json') &&
+      equalHash(item.preimage_sha256,prior?.sha256) &&
+      manifest.rollback?.previous_contract_path === item.production_path &&
+      equalHash(manifest.rollback.previous_contract_sha256,prior.sha256) &&
+      equalHash(digest(boundedPath(root,prior.rollback_path)),prior.sha256) &&
+      JSON.stringify(manifest.executables) === JSON.stringify(receipt.executables) &&
+      manifest.executables.every(row => nativeReceipt.artifacts.some(a => a.path === row.production_path &&
+        equalHash(a.sha256,row.sha256)) && equalHash(digest(boundedPath(root,row.production_path)),row.sha256)) &&
+      receipt.rollback_ready === true && receipt.runtime_health?.pass === true &&
+      receipt.openkore_runtime_count === 0,
+    'CONTRACT_AMENDMENT_INVALID');
+    return true;
+  } catch { return false; }
 }
 
 // An amended Web candidate can follow an already deployed intermediate Web
@@ -340,6 +408,11 @@ export function verifyNativeStage(root, state, lease, webManifestHash) {
     const r = readJson(boundedPath(root,receiptPath));
     check(equalHash(pending.native_receipt_sha256,digest(boundedPath(root,receiptPath))) &&
       nativeReceiptValid(r,{nativeSha:lease.native_deploy_git_sha,leaseId:lease.lease_id,manifestHash:lease.native_candidate_manifest_sha256}), 'NATIVE_RECEIPT_INVALID');
+    check(verifyCommandContractAmendment(root,lease,pending,r),'NATIVE_CONTRACT_AMENDMENT_INVALID');
+    check(!r.config_artifacts?.length || r.config_artifacts.every(item =>
+      equalHash(digest(boundedPath(root,item.path)),item.sha256) &&
+      equalHash(digest(boundedPath(root,item.rollback_path)),item.preimage_sha256)),
+    'NATIVE_CONTRACT_ARTIFACT_CHANGED');
     const snapshot = structuredClone(state);
     snapshot.native_binaries = r.artifacts;
     const history=lease.web_candidate_amendments || [];

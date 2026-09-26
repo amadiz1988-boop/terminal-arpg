@@ -1,5 +1,11 @@
 # 目前狀態
 
+## 2026-09-26 F V15 Native 指令契約交付修正
+
+- Production Native 執行檔為 `668bb9db` 候選，Web `1346bd05` 為同 lease 的 `CANDIDATE_ACTIVE`。Morocc 一般玩家城鎮移動已確認；`set_saved_town` 因 Production 契約仍為 SHA-256 `C983A78B...`，拒絕 Web 傳入的 `saveX/saveY`。
+- 來源修正把 `conf/persistent_agent_commands.json` 納入新 Native 候選的配置產物，並為目前已部署的三執行檔提供同 lease、SHA 鎖定的單一契約修訂路徑。指定 canonical source 位元組 SHA-256 為 `4DA600DC...`；原候選與部署收據維持不變。Native gameplay 原始碼與契約內容未改。
+- 目前僅完成來源與唯讀 Production 預檢。受控設定部署、Native 最小必要重啟、Saved Town 與五圖正式玩家驗收仍待執行；最終推廣收據未簽發。
+
 ## 2026-09-26 F 五張原廠掛機地圖 Native 准入阻擋
 
 - 授權的 Native `15d5c35` 已通過來源權威、f7 祖先與精確三檔差異檢查；25 項新來源檢查 PASS，並已推至 Native GitHub main。Fresh Release x64 編譯成功，但既有 canonical 離線測試仍要求舊怪物來源白名單，以 `M1_DYNAMIC_NORMAL_SPAWN_SOURCE_FAILED` 中止。完整證據與下一授權需求見 [五圖 Native 建置阻擋](project-control/m1-v15-five-map-native-build-blocker-2026-09-26.md)。Production 保持 f7，五圖 live 驗收尚未執行。

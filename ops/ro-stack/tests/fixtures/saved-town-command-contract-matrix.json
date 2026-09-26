@@ -1,0 +1,11 @@
+{
+  "cases": [
+    {"id":"saved_town_target_only","action":"set_saved_town","payload":{"targetMap":"morocc"},"expect":{"outcome":"PASS"}},
+    {"id":"saved_town_target_and_authored_pair","action":"set_saved_town","payload":{"targetMap":"morocc","saveX":156,"saveY":46},"expect":{"outcome":"PASS"}},
+    {"id":"saved_town_partial_x_schema","action":"set_saved_town","payload":{"targetMap":"morocc","saveX":156},"expect":{"outcome":"PASS"}},
+    {"id":"saved_town_partial_y_schema","action":"set_saved_town","payload":{"targetMap":"morocc","saveY":46},"expect":{"outcome":"PASS"}},
+    {"id":"saved_town_invalid_coordinate_type","action":"set_saved_town","payload":{"targetMap":"morocc","saveX":"156","saveY":46},"expect":{"outcome":"INVALID","reason":"invalid_payload","class":"invalid_field_type","field":"saveX","expected":"integer"}},
+    {"id":"saved_town_unknown_field","action":"set_saved_town","payload":{"targetMap":"morocc","saveX":156,"saveY":46,"force":true},"expect":{"outcome":"INVALID","reason":"invalid_payload","class":"unknown_field","unknown":["force"]}},
+    {"id":"saved_town_non_authored_destination_schema","action":"set_saved_town","payload":{"targetMap":"morocc","saveX":1,"saveY":1},"expect":{"outcome":"PASS"}}
+  ]
+}

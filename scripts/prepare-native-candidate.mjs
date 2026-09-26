@@ -25,6 +25,12 @@ try {
   need(git(b.source_root,'rev-parse','HEAD')===b.native_git_sha && !git(b.source_root,'status','--porcelain=v1','--untracked-files=all'),'SOURCE_NOT_CLEAN');
   need(b.schema_version==='native-build-v1' && b.source_tree_state==='CLEAN' && b.build_configuration==='Release x64' && b.tests_result==='PASS','BUILD_RECEIPT_INVALID');
   need(b.artifacts.length===3 && b.artifacts.every(x=>equalHash(digest(boundedPath(b.source_root,x.path)),x.sha256)),'BUILD_ARTIFACT_CHANGED');
+  need(b.config_artifacts?.length===1 && b.config_artifacts[0].source_path==='conf/persistent_agent_commands.json' &&
+    b.config_artifacts[0].candidate_package_path==='source/conf/persistent_agent_commands.json' &&
+    b.config_artifacts[0].source_git_sha===b.native_git_sha &&
+    equalHash(digest(boundedPath(buildRoot,b.config_artifacts[0].candidate_package_path)),b.config_artifacts[0].sha256) &&
+    git(b.source_root,'rev-parse',`HEAD:${b.config_artifacts[0].source_path}`)===b.config_artifacts[0].source_blob_oid,
+  'BUILD_COMMAND_CONTRACT_CHANGED');
   for(const s of b.tests_run)pinned(buildRoot,s.receipt);
   const rows=Object.entries(groups).map(([group,test_suite])=>{
     const suite=b.tests_run.find(x=>x.test_suite===test_suite);need(suite?.result==='PASS','REGRESSION_GROUP_MISSING:'+group);
@@ -55,6 +61,7 @@ try {
   });
   const m={schema_version:'native-candidate-v1',candidate_id:'native-'+randomUUID(),native_git_sha:b.native_git_sha,binary_sha256:b.binary_sha256,
     build_receipt:pin('build-receipt.json'),regression:pin('native-regression.json'),canonical_repository:b.canonical_repository,canonical_branch:'main',
+    config_artifacts:b.config_artifacts,
     required_database:'ragnarok',required_runtime_ports:[6901,6122,5122,8788],required_openkore_count:0,
     required_capability_baseline:{path:state.accepted_capability_manifest,sha256:state.accepted_capability_manifest_sha256},
     capability_comparison:pin('capability-comparison.json'),rollback_reference:{root:state.legacy_rollback.root,current_native_binary_sha256:state.current_native_binary_sha256},

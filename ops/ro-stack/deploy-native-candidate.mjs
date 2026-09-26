@@ -6,6 +6,9 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { boundedPath, digest, readJson, verifyLegacyBaseline, pendingPath, consumedPath, legacyIdentity, FIRST_PROMOTION, windowsPowerShellEnv } from './legacy-production-baseline.mjs';
 import { inspectNativeCandidate, equalHash, nativeReceiptPath, nativeReceiptValid, pinned, git } from './native-promotion-contract.mjs';
+import { prepareCommandContractAmendment, preflightCommandContractAmendment,
+  deployCommandContractAmendment } from './native-command-contract-amendment.mjs';
+import { replaceContractImage, restoreContractPreimage } from './native-runtime-contract-artifact.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const sourceRoot = path.resolve(here,'../..');
@@ -55,7 +58,7 @@ export async function executeNative({root,file,sha256,owner,leaseId,authority,ad
   fs.mkdirSync(lock);
   write(operationFile,{schema_version:'native-deploy-operation-v1',owner_task_id:owner,lease_id:leaseId,
     candidate_manifest_sha256:sha256,started_at:new Date().toISOString()});
-  let started=false,complete=false;
+  let started=false,complete=false,configReplaced=false,configBackup=null,configTarget=null;
   try {
     check(equalHash(digest(lease.admission_manifest),lease.admission_manifest_sha256),'WEB_MANIFEST_CHANGED');
     const web=readJson(lease.admission_manifest);
@@ -72,6 +75,18 @@ export async function executeNative({root,file,sha256,owner,leaseId,authority,ad
     for(const item of candidate.build.artifacts){
       const dest=boundedPath(stage,item.path);fs.copyFileSync(boundedPath(candidate.source,item.path),dest,fs.constants.COPYFILE_EXCL);
       check(equalHash(digest(dest),item.sha256),'STAGED_BINARY_CHANGED');
+    }
+    const config=candidate.build.config_artifacts?.[0];
+    if(config){
+      check(candidate.manifest.config_artifacts?.length===1 &&
+        JSON.stringify(candidate.manifest.config_artifacts[0])===JSON.stringify(config),
+      'NATIVE_CONFIG_NOT_MANIFEST_BOUND');
+      configTarget=boundedPath(root,`.local/ro-stack/rathena/${config.source_path}`);
+      configBackup=path.join(stage,'contract-preimage.json');
+      fs.copyFileSync(configTarget,configBackup,fs.constants.COPYFILE_EXCL);
+      const staged=path.join(stage,'contract-image.json');
+      fs.copyFileSync(boundedPath(path.dirname(file),config.candidate_package_path),staged,fs.constants.COPYFILE_EXCL);
+      check(equalHash(digest(staged),config.sha256),'STAGED_COMMAND_CONTRACT_CHANGED');
     }
     // Recheck ownership and all pinned bytes at the mutation boundary.
     check(readJson(leaseFile).lease_id===leaseId && readJson(leaseFile).owner_task_id===owner && readJson(leaseFile).status==='ACTIVE' &&
@@ -92,6 +107,13 @@ export async function executeNative({root,file,sha256,owner,leaseId,authority,ad
       fs.copyFileSync(boundedPath(stage,item.path),temporary,fs.constants.COPYFILE_EXCL);
       check(equalHash(digest(temporary),item.sha256),'NATIVE_COPY_CHANGED');fs.renameSync(temporary,target);
     }
+    if(config){
+      const oldHash=digest(configBackup);
+      replaceContractImage({target:configTarget,staged:path.join(stage,'contract-image.json'),
+        displaced:path.join(stage,'contract-displaced.json'),backup:configBackup,
+        oldHash,newHash:config.sha256});
+      configReplaced=true;
+    }
     await adapter('start');
     let after;
     for(let attempt=0;attempt<60;attempt++){
@@ -102,18 +124,30 @@ export async function executeNative({root,file,sha256,owner,leaseId,authority,ad
     check(after.pass && after.dashboard_pid===before.dashboard_pid && after.database_pid===before.database_pid,'POSTDEPLOY_HEALTH_FAILED');
     const artifacts=candidate.build.artifacts.map(x=>({path:`.local/ro-stack/rathena/${x.path}`,sha256:x.sha256}));
     check(artifacts.every(x=>equalHash(digest(boundedPath(root,x.path)),x.sha256)),'POSTDEPLOY_BINARY_CHANGED');
+    check(!config || equalHash(digest(configTarget),config.sha256),'POSTDEPLOY_COMMAND_CONTRACT_CHANGED');
+    const configArtifacts=config?[{source_path:config.source_path,
+      path:`.local/ro-stack/rathena/${config.source_path}`,sha256:config.sha256,
+      preimage_sha256:digest(configBackup),rollback_path:`.local/ro-stack/native-deploy-completed-${leaseId}/stage/contract-preimage.json`}]:[];
     const receipt={schema_version:'native-deploy-v1',deploy_id:'native-'+randomUUID(),lease_id:leaseId,
       native_git_sha:candidate.manifest.native_git_sha,native_build_sha256:candidate.manifest.binary_sha256,
       candidate_manifest_sha256:sha256,previous_binary_sha256:state.current_native_binary_sha256,
       new_binary_sha256:candidate.manifest.binary_sha256,old_map_pid:before.pids.map,new_map_pid:after.pids.map,
       procdump_receipt:after.procdump_receipt,runtime_health:after,openkore_runtime_count:after.openkore_runtime_count,
       rollback_reference:candidate.manifest.rollback_reference,acceptance_status:'NATIVE_CANDIDATE_ACTIVE',artifacts,
+      config_artifacts:configArtifacts,
       deployed_at:new Date().toISOString(),owner_task_id:owner};
     check(nativeReceiptValid(receipt,{nativeSha:lease.native_deploy_git_sha,leaseId,manifestHash:sha256}),'NATIVE_POSTDEPLOY_RECEIPT_INVALID');
     write(boundedPath(root,nativeReceiptPath),receipt);
     atomic(boundedPath(root,pendingPath),{...readJson(boundedPath(root,pendingPath)),native_receipt_sha256:digest(boundedPath(root,nativeReceiptPath))});
     atomic(stateFile,{...readJson(stateFile),first_promotion_phase:NATIVE_STAGE_PHASE});
     complete=true;return receipt;
+  } catch(error){
+    // A failed initial stage retains its journal. Restore the exact config
+    // preimage on disk; the existing Native operation still owns runtime and
+    // executable recovery and must not be silently marked complete.
+    if(configReplaced && configBackup && fs.existsSync(configBackup))
+      restoreContractPreimage({target:configTarget,backup:configBackup,oldHash:digest(configBackup)});
+    throw error;
   } finally {
     // Never auto-close drift or restart again after a partial mutation. Retain
     // operation journal and exact rollback reference for owner reconciliation.
@@ -300,6 +334,31 @@ async function main(){
   check(url==='https://github.com/amadiz1988-boop/terminal-arpg.git','GOVERNANCE_REMOTE_INVALID');
   const tip=git(sourceRoot,'ls-remote','--exit-code','origin','refs/heads/main').split(/\s/)[0];
   git(sourceRoot,'fetch','--no-tags','--no-write-fetch-head','origin','refs/heads/main');git(sourceRoot,'merge-base','--is-ancestor',sha,tip);
+  if(['prepare-command-contract','preflight-command-contract','deploy-command-contract'].includes(a.action)){
+    check(a.owner==='F｜M1 最終整合' && a.lease==='869f1725-dbd0-452d-b9dd-37ee79cc3f9a',
+      'CONTRACT_AMENDMENT_OWNER_REQUIRED');
+    const nativeRoot='C:\\Users\\Administrator\\source\\ghost-island-rathena';
+    let result;
+    if(a.action==='prepare-command-contract'){
+      check(a['package-root'],'CONTRACT_PACKAGE_ROOT_REQUIRED');
+      result=prepareCommandContractAmendment({root,nativeRoot,packageRoot:path.resolve(a['package-root'])});
+    }else{
+      check(a['candidate-manifest'] && a['manifest-sha256'],'CONTRACT_MANIFEST_REQUIRED');
+      const input={root,nativeRoot,manifestFile:path.resolve(a['candidate-manifest']),manifestSha256:a['manifest-sha256']};
+      if(a.action==='deploy-command-contract'){
+        check(a.execute==='true','EXPLICIT_EXECUTE_REQUIRED');
+        result=await deployCommandContractAmendment({...input,governanceSha:sha,
+          adapter:runtimeAdapter(root,a.owner,a.lease)});
+      }else{
+        result=preflightCommandContractAmendment(input);
+        const runtime=await runtimeAdapter(root,a.owner,a.lease)('snapshot');
+        check(runtime?.pass===true && runtime.openkore_runtime_count===0 &&
+          runtime.procdump_receipt?.mapPid===runtime.pids?.map,'CONTRACT_RUNTIME_PREFLIGHT_FAILED');
+        result={...result,runtime_health:'PASS',procdump_gate:'PASS'};
+      }
+    }
+    console.log(JSON.stringify(result));return;
+  }
   if(a.action==='archive-failed-operation'){
     console.log(JSON.stringify({archived:true,record:archiveFailedNativeOperation({root,owner:a.owner,governanceSha:sha})}));
     return;

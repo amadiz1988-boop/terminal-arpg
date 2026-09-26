@@ -193,6 +193,42 @@ try {
    assert.equal(receiptComplete({...receipt,native_deployment_receipt:null},x.root),false);
    assert.equal(commitAcceptedBaseline(x.root,state,x.lease,receipt).baseline_mode,'GITHUB_FIRST');
  });
+ await test('candidate deploy carries exact command contract and rollback preimage',async()=>{
+   const x=fixture(),contract='conf/persistent_agent_commands.json';
+   const configBytes='{ "contractVersion": 1 }\n',oldBytes='{ "contractVersion": 0 }\n';
+   x.write('build/source/'+contract,configBytes);
+   x.write('.local/ro-stack/rathena/'+contract,oldBytes);
+   const item={source_path:contract,candidate_package_path:'source/'+contract,
+     source_git_sha:x.sha,source_blob_oid:'a'.repeat(40),sha256:digest(path.join(x.source,contract))};
+   x.build.config_artifacts=[item];x.m.config_artifacts=[item];
+   x.write('build/build-receipt.json',x.build);x.m.build_receipt=x.pin('build-receipt.json');x.rewrite();
+   const manifestHash=digest(x.file),web=readJson(x.lease.admission_manifest);
+   web.native_candidate_manifest.sha256=manifestHash;x.write('web.json',web);
+   x.lease.native_candidate_manifest_sha256=manifestHash;
+   x.lease.admission_manifest_sha256=digest(x.lease.admission_manifest);
+   x.write('.local/ro-stack/production-deployment-lease/lease.json',x.lease);
+   let running=true;
+   const adapter=async action=>{
+     if(action==='stop'){running=false;return;}
+     if(action==='start'){
+       assert.equal(running,false);
+       assert.equal(fs.readFileSync(path.join(x.root,'.local/ro-stack/rathena',contract),'utf8'),configBytes);
+       running=true;return;
+     }
+     return running&&fs.readFileSync(path.join(x.root,'.local/ro-stack/rathena',contract),'utf8')===configBytes
+       ? {...x.runtime,pids:{login:21,char:22,map:23},procdump_receipt:{mapPid:23,procdumpAttachStatus:'ATTACHED'}}
+       : x.runtime;
+   };
+   const receipt=await executeNative({root:x.root,file:x.file,sha256:manifestHash,owner:'F',leaseId:x.lease.lease_id,
+     authority:{accepted_source_sha:x.sha},adapter,
+     inspect:()=>({eligible:true,errors:[],build:x.build,manifest:x.m,source:x.source}),
+     webAdmission:async()=>({eligible:true,candidate_capabilities:ids})});
+   assert.equal(receipt.config_artifacts.length,1);
+   assert.equal(receipt.config_artifacts[0].sha256,item.sha256);
+   assert.equal(digest(path.join(x.root,receipt.config_artifacts[0].rollback_path)),digest(x.write('fixture-old-contract.json',oldBytes)));
+   assert.equal(verifyNativeStage(x.root,readJson(path.join(x.root,'.local/ro-stack/production-deployment-state.json')),
+     x.lease,x.lease.admission_manifest_sha256).pass,true);
+ });
  await test('failed controlled stop retains OPEN state and owner without replacement',async()=>{
    const x=fixture(),actions=[];
    await assert.rejects(executeNative({root:x.root,file:x.file,sha256:digest(x.file),owner:'F',leaseId:x.lease.lease_id,authority:{accepted_source_sha:x.sha},
