@@ -382,7 +382,7 @@ test('incident recovery amendment admits only the f77 five-file diff', () => {
     'src/map/persistent_agent.cpp',
     'src/map/persistent_agent.hpp',
     'tools/pa-command-contract/Test-M1DeathMaintenanceSource.ps1',
-    'tools/pa-command-contract/test-reconnect-live-status.ps1',
+    'tools/pa-reconnect-live-status/test-reconnect-live-status.ps1',
   ]);
   assert.equal(incidentRecovery.sourcePaths.includes('src/map/pc.cpp'), false);
 });

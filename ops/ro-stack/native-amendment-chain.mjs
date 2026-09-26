@@ -229,7 +229,7 @@ export const M1_DEATH_RETURN_SESSION_LIFETIME_RECOVERY_AMENDMENT = Object.freeze
     'src/map/persistent_agent.cpp',
     'src/map/persistent_agent.hpp',
     'tools/pa-command-contract/Test-M1DeathMaintenanceSource.ps1',
-    'tools/pa-command-contract/test-reconnect-live-status.ps1',
+    'tools/pa-reconnect-live-status/test-reconnect-live-status.ps1',
   ]),
 });
 export const APPROVED_NATIVE_AMENDMENTS = Object.freeze([
